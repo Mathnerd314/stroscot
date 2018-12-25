@@ -1,0 +1,40 @@
+ints = 1 to 100
+
+reduce f (x:xs) = f x (reduce f xs)
+reduce f [x] = x
+
+sum = reduce (+)
+-- triangular numbers
+sum ints == 100*101/2
+# true
+scan (+) ints
+# [1,3,6,10,15,...]
+x = ints + reverse ints
+# [101,101,101,...]
+x == 100 repetitions of 101
+# true
+product = reduce (*)
+10^10 == product (10 repetitions of 10)
+# true
+factorial n = (scan (*) ints) !! n
+factorial 5
+# 120
+product ints - exp (sum (log ints))
+# 0 or small floating point value
+
+bools = [true,false,true]
+
+# DeMorgan's laws
+not (reduce and (not bools)) == fold or bools
+
+1 ++ 2
+# [1,2]
+
+5 in base of 2
+# [1,0,1]
+
+p f . g q = reduce f (g p q)
+p = 2 1 3
+q = 2 1 2
+p (+) . (*) q
+# 17
