@@ -1,5 +1,5 @@
-Stroscot supports
-* keyword arguments
+Stroscot supports many types of arguments
+# Keyword arguments
 ```
 foo w x y z = z - x / y * w
 
@@ -8,17 +8,18 @@ v = foo (y:2) (x:4) (w:1) (z:0)
 v == foo {x:4,y:2,w:1,z:0}
 # true
 ```
-* positional arguments
+# Positional arguments
 ```
 v == foo 1 4 2 0
 # true
 ```
-* Mixtures of the above
+You can mix positional and keyword arguments freely; positions are assigned to whatever is not a keyword argument.
 ```
 v == foo {z:0} {w:1} 4 2
 # true
 ```
-* implicit (dynamically-scoped) arguments
+# Implicit arguments
+These behave similarly to arguments in languages with dynamical scoping.
 ```
 bar = foo + 2
 baz = bar {x:4,y:2}
@@ -72,3 +73,18 @@ a {(+):(-)} 4 1
 # 4/1-1=3
 ```
 The namespace scoping mechanism protects against accidental use in large projects.
+# Other features
+Default arguments, output arguments, and variadic arguments are supported:
+```
+a {k:1} = k
+a # 2
+
+b = out {a:3}; 2
+b + a
+# 5
+
+c = sum $arguments
+c 1 2 3
+# 6
+```
+Implicit arguments are preferred to default arguments.
