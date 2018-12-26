@@ -1,0 +1,14 @@
+SmaCC = github://ThierryGoubier/SmaCC
+SOUL {
+  Parsers -> external:SmaCC
+  LogicPrimitives -> Parsers
+  Tests -> Kernel LogicPrimitives
+  Core -> Kernel EvalPrintLoop Parsers GrammarClauses GrammarTerms NativeClauses Repositories SmalltalkSymbiosis LogicPrimitives
+}
+LiCoR {
+  Core -> SOUL {Parsers Kernel Repositories}
+  Predicates -> Core
+  Tests -> Core Predicates SOUL:Tests
+}
+LiCoR = Soul:Core LiCoR{Core Predicates}
+development = Soul:Core LiCoR SOUL:Tests LiCoR:tests
