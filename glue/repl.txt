@@ -2,3 +2,10 @@ investigate
 - jupyter
 - ghci
 - Idris
+
+main:
+  print "Welcome"
+  loop
+    input = prompt (">")
+    result = evaluate(parse(input))
+    write(result)
