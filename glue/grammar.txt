@@ -2,7 +2,7 @@ digit = 0..9
 letter = a..z ++ A..Z
 operator = "+-/*<>"
 whitespace = " \t"
-number = digit+
+number = digit+ ('.' digit+ ('e' ('+' | '-')? digit+))?
 text = letter+
 
 chunk = "" | '(' chunk ')' | chunk operator chunk
