@@ -1,0 +1,15 @@
+lexer lexical analysis, tokenization
+parser LALR(1) parser, generating abstract syntax trees (AST)
+elaborator perform type construction and generation of annotated abstract syntax (Absyn)
+translate generate index-passing code
+anf-convert convert into A-normal form
+flatten flatten arguments, eliminating most record and tuple arguments by passing fields separately (i.e., in individual registers)
+uncurry eliminate most curried functions
+anf-optimize constant folding, simple constant and value propagation, elimination of useless bindings, short-circuit selection from known tuples, inline tiny functions, some arithmetic expression simplification; execution of this pass is repeated and interleaved with other phases (e.g., flatten and uncurry)
+closure convert to first-order code by closure conversion
+clusters separate closure-converted blocks into clusters of blocks;each cluster roughly corresponds to a single C function but may have multiple entry points
+treeify re-grow larger expression trees to make tree-tiling instruction selection more useful
+traceschedule arrange basic blocks  to  minimize  unconditional jumps
+cg instruction selection by tree-tiling (maximum-munch algorithm)
+regalloc graph-coloring register allocation
+emit generate assembly code
