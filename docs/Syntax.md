@@ -1,3 +1,5 @@
+# Arithmetic
+
 Stroscot supports your typical arithmetic operations:
 ```
 pi_approx = 3+1/(7+1/(15+1/1))
@@ -23,3 +25,7 @@ stroscot -Funmatched_parentheses pi_approx
 # Log: fixing unmatched parentheses
 ```
 This option is on by default and running a source code formatter is always good practice.
+
+# Data
+
+Stroscot supports strings, records, booleans, and arbitrary atoms as well.
