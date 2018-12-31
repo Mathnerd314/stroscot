@@ -1,0 +1,7 @@
+eval (s=Symbol) env = lookup s env
+eval (x:xs) = combine (eval x env) xs env
+eval x = x
+
+combine combiner operands env
+  | operative combiner = operate combiner operands env
+  | applicative combiner = combine (unwrap combiner) (map-eval operands env) env
