@@ -1,0 +1,32 @@
+    @<Initialize |current_earleme|@>@;
+    @<Return 0 if no alternatives@>@;
+    @<Initialize |current_earley_set|@>@;
+    @<Scan from the alternative stack@>@;
+    @<Pre-populate the completion stack@>@;
+    while ((cause_p = MARPA_DSTACK_POP(r->t_completion_stack, YIM))) {
+      YIM cause = *cause_p;
+        @<Add new Earley items for |cause|@>@;
+    }
+    @<Add predictions to |current_earley_set|@>@;
+    postdot_items_create(r, bv_ok_for_chain, current_earley_set);
+
+    @t}\comment{@>
+      /* If no terminals are expected, and there are no Earley items in
+           uncompleted Earley sets, we can make no further progress.
+           The parse is ``exhausted". */
+    count_of_expected_terminals = bv_count (r->t_bv_nsyid_is_expected);
+    if (count_of_expected_terminals <= 0
+       && MARPA_DSTACK_LENGTH (r->t_alternatives ) <= 0)
+      {
+        @<Set |r| exhausted@>@;
+      }
+    earley_set_update_items(r, current_earley_set);
+    if (r->t_active_event_count > 0) {
+        trigger_events(r);
+    }
+    return_value = G_EVENT_COUNT(g);
+    CLEANUP: ;
+    @<Destroy |marpa_r_earleme_complete| locals@>@;
+  }
+  return return_value;
+}
