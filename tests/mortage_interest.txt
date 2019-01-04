@@ -1,0 +1,14 @@
+monthly = \r Y P.
+  let N = Y * 12 in // number of months
+   if(r == 0) // no interest
+     P / N
+   else
+     let rM = r / (100 * 12) in // monthly interest rate
+     let f = (1 + rM) ^ N in
+       (rM * P * f) / (f - 1);
+
+r = 1.7;     // yearly interest rate (percentage)
+Y = 30;      // number of years
+P = 385,000; // principal
+
+monthly r Y P;
