@@ -1,7 +1,8 @@
 lexer lexical analysis, tokenization
-parser LALR(1) parser, generating abstract syntax trees (AST)
-elaborator perform type construction and generation of annotated abstract syntax (Absyn)
-translate generate index-passing code
+parser LALR(1) parser, generating syntax trees
+elaborator perform type construction and generation of annotated abstract syntax graph (resolves other modules)
+desugar resolve simple abstractions and generate glue code
+  -> pretty-print: exit with refactored code
 anf-convert convert into A-normal form
 flatten flatten arguments, eliminating most record and tuple arguments by passing fields separately (i.e., in individual registers)
 uncurry eliminate most curried functions
@@ -9,7 +10,8 @@ anf-optimize constant folding, simple constant and value propagation, eliminatio
 closure convert to first-order code by closure conversion
 clusters separate closure-converted blocks into clusters of blocks;each cluster roughly corresponds to a single C function but may have multiple entry points
 treeify re-grow larger expression trees to make tree-tiling instruction selection more useful
-traceschedule arrange basic blocks  to  minimize  unconditional jumps
+traceschedule arrange basic blocks to minimize unconditional jumps
 cg instruction selection by tree-tiling (maximum-munch algorithm)
 regalloc graph-coloring register allocation
 emit generate assembly code
+peephole minor assembly optimizations
