@@ -73,7 +73,7 @@ a {(+):(-)} 4 1
 # 4/1-1=3
 ```
 The namespace scoping mechanism protects against accidental use in large projects.
-# Other features
+# Other types of arguments
 Default arguments, output arguments, and variadic arguments are supported:
 ```
 a {k:1} = k
@@ -86,5 +86,31 @@ b + a
 c = sum $arguments
 c 1 2 3
 # 6
+c *([1 2])
+# 3
 ```
-Implicit arguments are preferred to default arguments.
+Implicit arguments are preferred to default arguments:
+```
+a {k:1} = k
+b = a
+c = b {k:2}
+c # 2
+```
+# Concatenative arguments
+Results not assigned to a variable are pushed to a stack:
+```
+1
+2
+3
+
+%stack
+# 1 2 3
+```
+``%`` is the most recent result, with ``%2`` ``%3`` etc. referring to less recent results:
+```
+{a = 1}
+extend % {b=2}
+extend % {c=3}
+shuffle
+```
+These stack arguments are used for positional arguments when not supplied.
