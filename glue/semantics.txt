@@ -5,3 +5,5 @@ eval x = x
 combine combiner operands env
   | operative combiner = operate combiner operands env
   | applicative combiner = combine (unwrap combiner) (map-eval operands env) env
+
+optimal lambda reduction would be nice
