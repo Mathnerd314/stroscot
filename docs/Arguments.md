@@ -18,6 +18,14 @@ You can mix positional and keyword arguments freely; positions are assigned to w
 v == foo {z:0} {w:1} 4 2
 # true
 ```
+Arguments are curried:
+```
+c y = y+10
+b x = c
+
+b 2 1
+# 11
+```
 # Implicit arguments
 These behave similarly to arguments in languages with dynamical scoping.
 ```
