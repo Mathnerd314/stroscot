@@ -1,0 +1,13 @@
+General programming needs to interface with existing libraries. So far the most promising interface is Zig.
+
+Zig's cImport FFI works as follows:
+- build buffer of #include and other preprocessor statements
+- write to hashed location/cInclude.h
+- create ASTUnit with clang::ASTUnit::LoadFromCommandLine
+- walk with visitLocalTopLevelDecls
+- use -detailed-preprocessing-record to obtain macro definitions
+see https://stackoverflow.com/questions/13881506/retrieve-information-about-pre-processor-directives
+- use MX MD MF to get dependencies for invalidating the cache
+- generate Zig AST and write to file
+- import with normal transclusion
+
