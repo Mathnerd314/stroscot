@@ -3,7 +3,7 @@ foo = do
   let    x = 1 -- a comment
   return x
 ======
-<file>:1:1 [EofPos,DP 1,0] HsModule
+<file>:1:1 [EofPos,DP 1,0] Module
     <file>:2,1-4,10 DP 1,0 ValD
      FunBind
       <file>:2:1-3 [Val] foo
@@ -12,23 +12,23 @@ foo = do
            FunRhs <file>:2:1-3 [Val] foo
            GRHSs
               <file>:2,5-4,10 DP 0,-1 GRHS
-                <file>:2,7-4,10 DP 0,1 [Do] HsDo
+                <file>:2,7-4,10 DP 0,1 [Do] Do
                  DoExpr <file>:3,3-4,10
                     <file>:3:3-14 DP 1,2 [Let <file>:3:10-14] LetStmt
-                      <file>:3:10-14 HsValBinds
+                      <file>:3:10-14 ValBinds
                           <file>:3:10-14 DP 0,4 FunBind <file>:3:10 [Val] x
                            MG <file>:3:10-14
                                <file>:3:10-14 [Equal,DP 0,1] Match
                                 FunRhs <file>:3:10 [Val] x
                                 GRHSs [
                                    <file>:3:12-14 DP 0,-1 GRHS
-                                     <file>:3:14 DP 0,1 [Val] HsOverLit
-                                       HsIntegral
+                                     <file>:3:14 DP 0,1 [Val] OverLit
+                                       Integral
                                         IL SourceText "1" False 1
                     <file>:3:16-27 DP 0,1 Comment "-- a comment"
                     <file>:4:3-10 DP 1,0 BodyStmt
-                      <file>:4:3-10 HsApp
-                        <file>:4:3-8 HsVar
+                      <file>:4:3-10 App
+                        <file>:4:3-8 Var
                           <file>:4:3-8 [Val] return
-                        <file>:4:10 DP 0,1 HsVar
+                        <file>:4:10 DP 0,1 Var
                           <file>:4:10 [Val] x
