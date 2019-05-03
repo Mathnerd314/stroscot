@@ -1,7 +1,13 @@
 lexer lexical analysis, tokenization
 parser LALR(1) parser, generating syntax trees
 elaborator perform type construction and generation of annotated abstract syntax graph (resolves other modules)
-desugar resolve simple abstractions and generate glue code
+
+
+desugar/simplification - resolve simple abstractions and generate glue code
+  rename-var
+  remove-implicit-begin
+  remove-unquoted-constant
+  remove-one-armed-if
   -> pretty-print: exit with refactored code
 anf-convert convert into A-normal form
 flatten flatten arguments, eliminating most record and tuple arguments by passing fields separately (i.e., in individual registers)
@@ -15,3 +21,72 @@ cg instruction selection by tree-tiling (maximum-munch algorithm)
 regalloc graph-coloring register allocation
 emit generate assembly code
 peephole minor assembly optimizations
+
+assignment conv.
+  remove-not
+  mark-assigned
+  optimize-letrec2
+  remove-impure-letrec
+  convert-assigned
+closure conversion
+  optimize-direct-call
+  remove-anon-lambda
+  sanitize-binding-forms
+  uncover-free
+  convert-closure
+  optimize-known-call3
+  uncover-well-known2
+  optimize-free2
+  optimize-self-reference2
+  analyze-closure-size1
+  lift-letrec
+canonicalization
+  introduce-closure-prims
+  remove-complex-constant
+  normalize-context
+encoding/allocation
+  specify-immediate-repn
+  specify-nonimmediate-repn
+labels and temps
+  remove-complex-opera*
+  lift-letrec-body
+  introduce-return-point
+virtual registerizing
+  remove-nonunary-let
+  uncover-local
+  the-return-of-set!
+  flatten-set!
+  generate-C-code4
+register alloc. setup
+  uncover-call-live2
+  optimize-save-placement2
+  eliminate-redundant-saves2
+  rewrite-saves/restores2
+  impose-calling-convention
+  reveal-allocation-pointer
+live analysis
+  uncover-live-1
+  uncover-frame-conflict
+  strip-live-1
+  uncover-frame-move
+call frames
+  uncover-call-live-spills
+  assign-frame-1
+  assign-new-frame
+  optimize-fp-assignments2
+spill code
+  finalize-frame-locations
+  eliminate-frame-var
+  introduce-unspillables
+register assignment
+  uncover-live-2
+  uncover-register-conflict
+  verify-unspillables1
+  strip-live-2
+  uncover-register-move
+  assign-registers
+  assign-frame-2
+  finalize-register-locations
+  analyze-frame-traffic1
+  flatten-program
+  generate-Sparc-code
