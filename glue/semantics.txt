@@ -6,4 +6,7 @@ combine combiner operands env
   | operative combiner = operate combiner operands env
   | applicative combiner = combine (unwrap combiner) (map-eval operands env) env
 
-optimal lambda reduction would be nice
+optimal lambda reduction
+-> forces graph reduction as the evaluation technique
+stored as an adjacency list / heap of records since we expect it to be tree-like
+
