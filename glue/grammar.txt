@@ -14,9 +14,17 @@ semantics:
 - parser does <something> by something
 - e.g. character by character
 - but defining new syntax in the middle leads to a question of when to modify the grammar
-we have files and expressions
 
-mixfix parsing - only example of really extensible grammar
+mixfix parsing in Agda - only example of in-line extensible grammar?
+
+true extensibility is achieved by defining a new grammar, passing it to the parser, and parsing it
+
+layout first
+then delimiters
+then de-soupifying with mixfix from outside in using semantics
+
+we have files and expressions and both are useful places to re-define syntax
+e.g. mysyntax { brainfuck code } or import {lang:mysyntax} code.bf
 
 useful grammar definitions:
 - literals like (->)
