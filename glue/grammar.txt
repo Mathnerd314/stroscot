@@ -8,3 +8,29 @@ text = letter+
 chunk = "" | '(' chunk ')' | chunk operator chunk
 -- todo: handle priority
 
+
+question: how to define new syntax? i.e. user-extensible / user-defined syntax?
+semantics:
+- parser does <something> by something
+- e.g. character by character
+- but defining new syntax in the middle leads to a question of when to modify the grammar
+we have files and expressions
+
+mixfix parsing - only example of really extensible grammar
+
+useful grammar definitions:
+- literals like (->)
+- matching delimiters
+- lists:
+repeat_nullable_trim x = ';'* (x ';'+)* x?
+repeat_trailing x = x (';' x)* ';'*
+- English-like: do_while_
+- EBNF if_(else_)? or (-)?[0-9]+
+- big expression or statement type choice
+for this we want it to be an "evaluation environment"
+syntax should be clearable for an environment so e.g. we can defined a small big-integer-arithmetic environment without accidentally using the host facilities
+
+the tricky part is precedence and associativity disambiguation
+e.g. ensuring -1 -x 2-1 and 2-x all get parsed correctly
+
+list definitions [1..] [1..n] [1,step..n] 
