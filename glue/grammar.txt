@@ -15,7 +15,10 @@ semantics:
 - e.g. character by character
 - but defining new syntax in the middle leads to a question of when to modify the grammar
 
-mixfix parsing in Agda - only example of in-line extensible grammar?
+mixfix parsing in Agda / infix in Haskell - only example of in-line extensible grammar?
+1.  Parse the program, treating expressions as flat lists of tokens.
+2.  Compute the precedence graph in effect for every expression.
+3.  Parse the flat token lists into real expressions, using the relevant precedence graphs
 
 true extensibility is achieved by defining a new grammar, passing it to the parser, and parsing it
 
