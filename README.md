@@ -10,7 +10,7 @@ No, it's in the design stage.
 
 ### Where can I ask questions?
 
-Our [reddit community](https://www.reddit.com/r/stroscot)
+Our [reddit community](https://www.reddit.com/r/stroscot) (checked monthly) or in the #stroscot channel on the [/r/ProgrammingLanguages Discord server](https://discord.gg/4Kjt3ZE).
 
 ### How do I contribute?
 
