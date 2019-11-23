@@ -8,4 +8,4 @@ i8 129
 # Error: cannot convert
 ```
 
-vtables such as C++ and Jva seem like a mistake, so we'll skip inheritance.
+vtables such as C++ and Java seem like a mistake, so we'll skip inheritance.
