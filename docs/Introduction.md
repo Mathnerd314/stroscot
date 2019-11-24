@@ -3,7 +3,7 @@ Why another programming language, you may ask? Why does a painter paint? Why doe
 In Stroscot programs are freed from the shackles of languages past and idealized to their purest form.
 
 # Inspiring projects
-https://github.com/cheery/lever/
-https://github.com/ghc/ghc/
-https://github.com/ziglang/zig/
-https://github.com/manuel/wat-js
+* [Lever](https://github.com/cheery/lever/)
+* [GHC](https://github.com/ghc/ghc/)
+* [Zig](https://github.com/ziglang/zig/)
+* [Wat](https://github.com/manuel/wat-js)
