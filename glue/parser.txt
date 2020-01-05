@@ -1,3 +1,102 @@
+syntax {
+    string = (terminal | nonterminal)*
+    α = β = string
+    γ = string
+    X = Y = nonterminal
+    a = terminal
+    A → α•β = {rule: A → αβ, pos: len(α)}
+}
+S[0..words] = EMPTY-ORDERED-SET
+S[0].add((γ → •S, 0))
+    for k ← from 0 to LENGTH(words) do
+        for each state in S[k] do  // S[k] can expand during this loop
+            if not FINISHED(state) then
+                if NEXT-ELEMENT-OF(state) is a nonterminal then
+                    PREDICTOR(state, k, grammar)         // non-terminal
+                else do
+                    SCANNER(state, k, words)             // terminal
+            else do
+                COMPLETER(state, k)
+        end
+    end
+    return chart
+
+procedure PREDICTOR((A → α•Bβ, j), k, grammar)
+    for each (B → γ) in GRAMMAR-RULES-FOR(B, grammar) do
+        ADD-TO-SET((B → •γ, k), S[k])
+    end
+
+procedure SCANNER((A → α•aβ, j), k, words)
+    if a ⊂ PARTS-OF-SPEECH(words[k]) then
+        ADD-TO-SET((A → αa•β, j), S[k+1])
+    end
+
+procedure COMPLETER((B → γ•, x), k)
+    for each (A → α•Bβ, j) in S[x] do
+        ADD-TO-SET((A → αB•β, j), S[k])
+    end
+
+
+Grune and Jacobs [112, Sct. 11.1] and Rekers [232].
+Dc(∅) = ∅
+Dc(ε) = ∅
+Dc(c) = ε
+Dc(c') = ∅ if c is not c'
+Dc(A ○ B) = Dc(A) ○ B if A does not contain the empty string
+Dc(A ○ B) = Dc(A) ○ B ∪ Dc(B) if A contains the empty string
+Dc(A ∪ B) = Dc(A) ∪ Dc(B).
+∂a(¬r) = ¬(∂ar)
+∂a(r & s) = ∂ar & ∂as
+∂a(r + s) = ∂ar + ∂as
+
+deriv EmptySet = EmptySet
+deriv EmptyString = EmptySet
+deriv AnyByte = EmptyString
+deriv Byte = if wanted == expected then EmptyString else EmptySet
+deriv ByteRange = if wanted in range then EmptyString else EmptySet
+deriv KleeneClosure = // ∂a(r∗) = ∂ar · r∗
+  Concatenation(deriv subexpression, KleeneClosure)
+deriv Concatenation = // ∂a(r · s) = ∂ar · s + ν(r) · ∂as
+      if (IsNullable(exp->head())) {
+        return Disjunction(Concatenation(Derivative(exp->head(), byte),
+                                         exp->tail()),
+                           Derivative(exp->tail(), byte));
+      } else {
+        return Concatenation(Derivative(exp->head(), byte),
+                             exp->tail());
+      }
+
+    case kComplement:
+      // 
+      return Complement(Derivative(exp->sub(), byte));
+
+    case kConjunction: {
+      // 
+      std::list<Exp> subs;
+      for (Exp sub : exp->subexpressions()) {
+        sub = Derivative(sub, byte);
+        subs.push_back(sub);
+      }
+      return Conjunction(subs, false);
+    }
+
+    case kDisjunction: {
+      // 
+      std::list<Exp> subs;
+      for (Exp sub : exp->subexpressions()) {
+        sub = Derivative(sub, byte);
+        subs.push_back(sub);
+      }
+      return Disjunction(subs, false);
+    }
+
+    case kCharacterClass:
+    case kQuantifier:
+      break;
+  }
+  abort();
+}
+
     @<Initialize |current_earleme|@>@;
     @<Return 0 if no alternatives@>@;
     @<Initialize |current_earley_set|@>@;
@@ -21,7 +120,8 @@
         @<Set |r| exhausted@>@;
       }
     earley_set_update_items(r, current_earley_set);
-    if (r->t_active_event_count > 0) {
+    if (r->t_active_event_count > 0) {sessions and options.
+
         trigger_events(r);
     }
     return_value = G_EVENT_COUNT(g);
@@ -39,10 +139,3 @@ https://github.com/pachopepe/mfxparser
 https://github.com/Vierkantor/TexMixFix
 https://github.com/phadej/mixfix
 https://github.com/seba--/layout-parsing
-
-papers:
-http://udesou.info/wp-content/uploads/2018/10/layout-pp.pdf
-https://cs.stanford.edu/~pliang/papers/geometric-parsing-icdar2005.pdf
-http://www.mathematik.uni-marburg.de/~seba/publications/layout-parsing.pdf
-https://michaeldadams.org/papers/layout_parsing/layout-parsing.pdf
-http://scg.unibe.ch/archive/projects/Sade13a.pdf
