@@ -15,3 +15,6 @@ Inspiring projects
 -  `GHC <https://github.com/ghc/ghc/>`__
 -  `Zig <https://github.com/ziglang/zig/>`__
 -  `Wat <https://github.com/manuel/wat-js>`__
+-  `Slate <https://github.com/briantrice/slate-language>`__
+-  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
+-  `Pinafore <https://pinafore.info/>`__

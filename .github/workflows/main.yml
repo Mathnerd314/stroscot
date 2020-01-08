@@ -15,20 +15,30 @@ jobs:
       uses: actions/setup-python@v1.1.1
       with:
         python-version: 3.7
+    - name: Cache dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Build and push sphinx documentation
+    - name: Build sphinx documentation
       run: |
         cd docs
         make html
         cd _build/html
         touch .nojekyll
-        export REV=$(git rev-parse --short HEAD)
-        git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +gh-pages:refs/remotes/origin/gh-pages
-        git checkout --detach
-        GIT_WORK_TREE=. git reset --mixed origin/gh-pages
-        GIT_WORK_TREE=. git add .
-        GIT_WORK_TREE=. git -c user.name="Github Action" -c user.email="autogen@github.invalid" commit -m "rebuild docs from $REV"
-        GIT_WORK_TREE=. git push origin HEAD:gh-pages
+    - name: Push to gh-pages
+      env:
+        PERSONAL_TOKEN: ${{ secrets.PAGES_TOKEN }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: docs/_build/html
+        SCRIPT_MODE: true
+        INPUT_EMPTYCOMMITS: false
+      run: |
+        wget https://raw.githubusercontent.com/peaceiris/actions-gh-pages/v2.9.0/entrypoint.sh
+        bash ./entrypoint.sh
