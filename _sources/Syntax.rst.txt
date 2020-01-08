@@ -7,11 +7,6 @@ But there's always more.
 Arithmetic and Parentheses
 ==========================
 
-The default arithmetic type is a 'number' type.
-This is arbitrary-precision magic which can store just about anything.
-You can use 'integer' for a strict integer, 'decimal' for banking, and
-'float' for any IEEE 754 thing.
-
 Stroscot supports your typical arithmetic operations:
 
 ::
