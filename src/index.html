@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Stroscot Playground</title>
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.js"></script>
+  <script src="https://dagrejs.github.io/project/graphlib-dot/latest/graphlib-dot.js"></script>
+  <script src="interaction-nets.js"></script>
+</head>
+<body>
+  <pre id="output">
+
+  </pre>
+
+  <svg width=800 height=600>
+    <g id="graph"/>
+  </svg>
+    <script>
+    x = compile({ tag: "abs", name: "x", body: { tag: "symbol", name: "x" } });
+    document.getElementById("output").textContent = JSON.stringify(readback(x, "out", Stack(0,[])));
+
+    var render = dagreD3.render();
+    var g = graphlibDot.read(getdot(x));
+    var svgG = d3.select("#graph");
+    svgG.call(render, g);
+  </script>
+</body>
+</html>
