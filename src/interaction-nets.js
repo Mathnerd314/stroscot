@@ -1,15 +1,18 @@
-let types =
-  ["wire", "amb", "eqn"
-    , "print", "read", "atom"
-    , "apply", "lambda", "scope", "fan", "erase"
-    // applicator, abstractor, delimiter, duplicator, eraser
-    , "initiator", "multiplexer", "case", "operator"]; // graph-rewriting package
+const assert = function (condition, message) {
+  if (!condition) {
+    debugger;
+    console.log('Assert failed: ' + (message || ''));
+  }
+};
+
 
 initiator = (out) => { return { tag: "initiator", out: out } };
 applicator = (inp, func, arg) => { return { tag: "applicator", inp, func, arg } };
 abstractor = (name, inp, body, bind) => { return { tag: "abstractor", name, inp, body, bind } };
-delimiter = (level, inp, out) => { return { tag: "delimiter", level, inp, out } };
-// out is the parent, inp is the child. so the graph looks like inp-[-out.
+delimiter = (level, inside, outside) => { return { tag: "delimiter", level, inside, outside } };
+// in the initial graph inside is the parent, outside is the child.
+// it faces up. so the graph looks like inside-]-outside.
+// later lambda disintegrates to outside-[-inside and they eventually annihilate (hopefully)
 
 eraser = (inp) => { return { tag: "eraser", inp } };
 duplicator = (level, inp, outs) => { return { tag: "duplicator", level, inp, outs } };
@@ -22,7 +25,9 @@ operator = (inp, arity, lmop, func, name) => {
   return { tag: "operator", inp, arity, lmop, func, name, length: 0 };
 };
 
-edge = (a, a_dir, b, b_dir) => { return { tag: "edge", a, a_dir, b, b_dir } };
+let edge_id = 0;
+
+edge = (a, a_dir, b, b_dir) => { return { tag: "edge", a, a_dir, b, b_dir, active: false, id: edge_id++ } };
 
 function ports(node) {
   let r;
@@ -33,7 +38,7 @@ function ports(node) {
     case "constant": return ["inp", "args"];
     case "eraser": return ["inp"];
     case "duplicator": return ["inp", "outs"];
-    case "delimiter": return ["inp", "out"];
+    case "delimiter": return ["outside", "inside"];
     case "multiplexer": r = ["val"]; break;
     case "case": r = ["inp", "out"]; break;
     case "operator": r = ["inp"]; break;
@@ -42,32 +47,57 @@ function ports(node) {
     r.push(i);
   return r;
 }
+
+let in_dirs = new Set(["inp", "bind", "inside"]);
+let out_dirs = new Set(["func", "arg", "body", "out", "outside", "val"]);
+function check_edge(dir, is_in) {
+  if (is_in) {
+    if (0 <= dir && dir <= 20) return true;
+    assert(in_dirs.has(dir));
+  } else {
+    assert(out_dirs.has(dir));
+  }
+}
+
 function primaryPort(node, leftmost) {
   switch (node.tag) {
-    case "applicator": return node.func;
-    case "case": return node.out;
-    case "operator": return node.lmop == 0 ? node.inp : node.ops[node.lmop - 1];
+    case "initiator": return "";
+    case "applicator": return "func";
+    case "case": return "out";
+    case "operator": return node.lmop == 0 ? "inp" : node.lmop - 1;
     case "constant":
       if (leftmost) return null;
     default:
-      return node[ports(node)[0]];
+      return ports(node)[0];
   }
 }
-function eqNode(n1, n2) {
-  if (n1.tag !== n2.tag) return false;
-  if (n1.tag === "delimiter" && n1.level === n2.level) return true;
-
-  if (n1.tag === "multiplexer" && n1.refs.length === 0) assert(n1.level === n2.level);
-  if (n1.tag === "multiplexer" && n1.level === n2.level) return true;
-
-  if (n1.tag === "eraser") return true;
-  if (n1.tag === "duplicator" && n1.level === n2.level) return true;
-  return false;
-}
+let activePairs = [];
 function link(a, a_dir, b, b_dir) {
+  if (b[b_dir])
+    b[b_dir].active = false;
+  if (a[a_dir])
+    a[a_dir].active = false;
   let e = edge(a, a_dir, b, b_dir);
   b[b_dir] = a[a_dir] = e;
+  if (primaryPort(a) == a_dir && primaryPort(b) == b_dir) {
+    e.active = true;
+    activePairs.push(e);
+  }
+  check_edge(a_dir, a.reverse);
+  check_edge(b_dir, !b.reverse);
 }
+function follow(source, dir) {
+  let edge = source[dir], term, from_dir;
+  if (source == edge.a && dir == edge.a_dir) {
+    term = edge.b;
+    from_dir = edge.b_dir;
+  } else {
+    term = edge.a;
+    from_dir = edge.a_dir;
+  }
+  return [term, from_dir];
+}
+
 function compile(term) {
   let env = new Map();
   let stack = [];
@@ -103,19 +133,19 @@ function compile(term) {
               if (v == stack[i])
                 break;
               let d = delimiter(0);
-              link(parent, parent_dir, d, "out");
+              link(parent, parent_dir, d, "inside");
               parent = d;
-              parent_dir = "inp";
+              parent_dir = "outside";
             }
             let l = v.length++;
             link(parent, parent_dir, v, l);
             return v;
           }
         }
-        let c = constant(name);
+        let c = constant(term.name);
         link(parent, parent_dir, c, "inp");
         return c;
-      case "let":
+      case "let": {
         for (let [name, _rhs] of term.binds) {
           let v = multiplexer(name, 0);
           if (env.has(v.name)) {
@@ -137,6 +167,7 @@ function compile(term) {
           env.get(name).pop();
         }
         return e;
+      }
       case "case":
         let cs = cAse([]);
         link(parent, parent_dir, cs, "inp");
@@ -162,20 +193,48 @@ function compile(term) {
 Block = (index, directors) => { return { index, directors: directors ? directors : [] }; };
 Level = (block) => [block];
 Stack = (bodyindex, levels) => { return { bodyindex, levels }; };
-function readback(source, dir, stack) {
-  let edge = source[dir], term, from_dir;
-  if (source == edge.a && dir == edge.a_dir) {
-    term = edge.b;
-    from_dir = edge.b_dir;
-  } else {
-    term = edge.a;
-    from_dir = edge.a_dir;
+
+function validStack(stack) {
+  assert(stack.bodyindex >= 0);
+  for(let l of stack.levels) {
+    assert(l.length >= 1);
+    for (let b of l) {
+      assert(b.index >= 0);
+      for(let d of b.directors) {
+        assert(d || d == 0);
+      }
+    }
   }
+  if(showStack(stack) == "22(OL)")
+    debugger;
+}
+function showStack(stack) {
+  let s = "";
+  s += stack.bodyindex;
+  for(let l of stack.levels) {
+    if(l.length > 1) s += "[";
+    for (let b of l) {
+      if(b.directors.length) s += "(";
+      s += b.index;
+      for(let d of b.directors) {
+        s += "LRABCD"[d];
+      }
+      if(b.directors.length) s += ")";
+    }
+    if(l.length > 1) s += "]";
+  }
+  return s;
+}
+
+function readback(source, dir, stack) {
+  let [term, from_dir] = follow(source, dir);
+  validStack(stack);
   switch (term.tag) {
     case "applicator":
       if (from_dir == "inp") {
         return { tag: "app", func: readback(term, "func", stack), arg: readback(term, "arg", stack) };
       }
+      assert(false);
     case "abstractor": {
       if (from_dir == "inp") {
         let i = stack.bodyindex;
@@ -185,27 +244,32 @@ function readback(source, dir, stack) {
       if (from_dir == "bind") {
         return { tag: "symbol", name: stack.bodyindex - stack.levels[0][0].index };
       }
+      assert(false);
     }
     case "delimiter": {
-      if (term.level == 0 && from_dir == "inp")
-        return readback(term, "out", Stack(stack.bodyindex, [[Block(0)]].concat(stack.levels)));
-      if (term.level == 0 && from_dir == "out")
-        return readback(term, "inp", Stack(stack.bodyindex, stack.levels.slice(1)));
+      if (term.level == 0 && from_dir == "outside")
+        return readback(term, "inside", Stack(stack.bodyindex, [[Block(0)]].concat(stack.levels)));
+      if (term.level == 0 && from_dir == "inside")
+        return readback(term, "outside", Stack(stack.bodyindex, stack.levels.slice(1)));
       let i = term.level - 1;
-      // inp [ out
+      // outside [ inside
       let levels = Array.from(stack.levels);
-      if (from_dir == "inp") {
+      if (from_dir == "outside") {
         // σ[bκl]_i -> σ[bl,κ]_i
+        // split level into the stack
         let l = levels[i];
-        levels.splice(i, 1, [l[0].concat(l.slice(2)), [l[1]]]);
-        return readback(term, "out", Stack(stack.bodyindex, levels));
-      } else if (from_dir == "out") {
+        let l1 = [l[0]].concat(l.slice(2)), l2 = [l[1]];
+        levels.splice(i, 1, l1, l2);
+        return readback(term, "inside", Stack(stack.bodyindex, levels));
+      } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
-        let l = levels[i];
-        levels.splice(i, 2, [l[0]].concat(levels[i + 1], l.slice(1)));
-        return readback(term, "inp", Stack(stack.bodyindex, levels));
+        // AFAICT this means grouping two levels in the stack together
+        let l1 = levels[i], l2 = levels[i + 1];
+        let l = [l1[0]].concat(l2, l1.slice(1));
+        levels.splice(i, 2, l);
+        return readback(term, "outside", Stack(stack.bodyindex, levels));
       }
-      return assert(false);
+      assert(false);
     }
     case "multiplexer":
       let i = term.level;
@@ -223,7 +287,10 @@ function readback(source, dir, stack) {
         levels[i] = [Block(b.index, [from_dir].concat(b.directors))].concat(l.slice(1));
         return readback(term, "val", Stack(stack.bodyindex, levels));
       }
+    case "constant":
+      return { tag: "symbol", name: term.name };
   }
+  assert(false);
 }
 
 function getdot(root) {
@@ -231,6 +298,11 @@ function getdot(root) {
   let visitedEdges = new Set();
   let visitedNodes = new Set();
   var stack = [root];
+  for (let e of activePairs) {
+    stack.unshift(e.a);
+    stack.unshift(e.b);
+    visitedEdges.add(e);
+  }
   while (stack.length > 0) {
     let node = stack.pop();
     if (!node)
@@ -260,33 +332,34 @@ function getdot(root) {
     m.set(i, c++);
   }
 
-  var output = `digraph {\n  node [style="fill: white"]\n`;
+  var output = `digraph {\n  node [style="fill: white; stroke: black"]\n`;
   for (let c of visitedNodes) {
     let shape = (() => {
       switch (c.tag) {
         case "initiator": return "circle"; //"doublecircle";
         case "applicator": return "circle";
         case "abstractor": return "rect";
-//        case "constant": return "star";
+        //        case "constant": return "star";
         case "eraser": return "circle"; //"doublecircle";
-//        case "duplicator": return "fan";
-//        case "delimiter": return "house";
-//        case "multiplexer": return "fan";
-//        case "case": return "folder";
-//        case "operator": return "star";
+        //        case "duplicator": return "fan";
+        //        case "delimiter": return "house";
+        //        case "multiplexer": return "fan";
+        //        case "case": return "folder";
+        //        case "operator": return "star";
         default: return "rect";
       }
     })();
     let human = (() => {
-      switch(c.tag) {
-        case "initiator": return "I";
+      let level = c.level ? `<sub>${c.level}</sub>` : "";
+      switch (c.tag) {
+        case "initiator": return `<span id=initiator>I</span>`;
         case "applicator": return "@";
-        case "abstractor": return `λ${c.name}`;
+        case "abstractor": return `λ<sub>${c.name}</sub>`;
         case "constant": return c.name;
         case "eraser": return "e";
         case "duplicator": return `/${c.level}\\`;
-        case "delimiter": return `[${c.level}`;
-        case "multiplexer": return `${c.name}<sub>${c.level}</sub>`;
+        case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
+        case "multiplexer": return `${c.name}${level}`;
         case "case": return "case";
         case "operator": return c.name;
         default: assert(false);
@@ -301,10 +374,129 @@ function getdot(root) {
     let a_dir = ports(edge.a).indexOf(edge.a_dir);
     let b = m.get(edge.b);
     let b_dir = ports(edge.b).indexOf(edge.b_dir);
-    if(a_dir > arrows.length) a_dir = 0;
-    if(b_dir > arrows.length) b_dir = 0;
-    output += `"${a}" -> "${b}" [style="stroke: ${arrows[a_dir]}; fill: none",arrowheadStyle="fill: ${arrows[b_dir]}"];\n`;
+    if (a_dir > arrows.length) a_dir = 0;
+    if (b_dir > arrows.length) b_dir = 0;
+    let is_active = edge.active ?
+      "stroke-width: 3; "
+      + (activePairs[activePairs.length - 1] == edge ? "stroke-dasharray: 2; " : "") : "";
+    output += `"${a}" -> "${b}" [label="${edge.id}",`
+      //      + (a_dir == "bind" ? `weight="0",` : "")
+      + `style="${is_active}stroke: ${arrows[a_dir]}; fill: none",`
+      + `arrowheadStyle="fill: ${arrows[b_dir]}"];\n`;
   }
   output += `}\n`;
   return output;
+}
+function eqNode(n1, n2) {
+  if (n1.tag !== n2.tag) return false;
+  if (n1.tag === "delimiter" && n1.level === n2.level) return true;
+
+  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === n2.level);
+  if (n1.tag === "multiplexer" && n1.level === n2.level) {
+    assert(n1.length == n2.length);
+    return true;
+  }
+
+  if (n1.tag === "eraser") return true;
+  if (n1.tag === "duplicator" && n1.level === n2.level) return true;
+  return false;
+}
+stats = { annihilate: 0, commute: 0 };
+function updateLevel(a, b) {
+  if (!a.hasOwnProperty("level")) return;
+  if (b.tag == "abstractor") {
+    a.level++;
+    return;
+  }
+  if (b.tag == "delimiter") {
+    if (a.level >= b.level) {
+      a.level++;
+      return;
+    }
+  }
+}
+function rewriteStep() {
+  let pair = activePairs.pop();
+  assert(pair.active); while (!pair.active) pair = activePairs.pop();
+  pair.active = false;
+  let a = pair.a, b = pair.b;
+  if (eqNode(a, b)) {
+    // annihilate
+    stats.annihilate++;
+    let ppa = primaryPort(a);
+    for (let p of ports(a)) {
+      if (p == ppa) continue;
+      let [ao, ado] = follow(a, p);
+      let [bo, bdo] = follow(b, p);
+      link(ao, ado, bo, bdo);
+    }
+    return;
+  }
+  if (a.tag == "applicator" && b.tag == "abstractor") {
+    // beta reduction
+    let d1 = delimiter(0); d1.reverse = true;
+    let [parent, pdir] = follow(a, "inp");
+    let [body, bdir] = follow(b, "body");
+    link(parent, pdir, d1, "outside");
+    link(d1, "inside", body, bdir);
+
+    let d2 = delimiter(0);
+    let [a1, a1o] = follow(a, "arg");
+    let [b1, b1o] = follow(b, "bind");
+    link(b1, b1o, d2, "inside");
+    link(d2, "outside", a1, a1o);
+    return;
+  }
+  if (b.tag == "multiplexer" && b.length == 1) {
+    // prune identity multiplexer
+    let [bv, bvd] = follow(b, 0);
+    link(a, pair.a_dir, bv, bvd);
+    return;
+  }
+  if (a.tag == "multiplexer" && a.length == 1) {
+    // prune identity multiplexer
+    let [av, avd] = follow(a, 0);
+    link(av, avd, b, pair.b_dir);
+    return;
+  }
+
+  // commute
+  stats.commute++;
+  updateLevel(a, b); updateLevel(b, a);
+  let pa = ports(a), ppa = primaryPort(a);
+  pa.splice(pa.indexOf(ppa), 1);
+  let pb = ports(b), ppb = primaryPort(b);
+  pb.splice(pb.indexOf(ppb), 1);
+  let a_new = {}, b_new = {};
+  for (let p of pb) {
+    a_new[p] = Object.assign({}, a);
+    let [bo, bdo] = follow(b, p);
+    if (b.tag == "abstractor" && p == "bind") {
+      // reverse link direction
+      a_new[p].reverse = !a_new[p].reverse;
+      link(bo, bdo, a_new[p], ppa);
+    } else {
+      link(a_new[p], ppa, bo, bdo);
+    }
+  }
+  for (let p of pa) {
+    b_new[p] = Object.assign({}, b);
+    let [ao, ado] = follow(a, p);
+    if (a.tag == "applicator" && p == "arg") {
+      b_new[p].reverse = !b_new[p].reverse;
+      link(b_new[p], ppb, ao, ado);
+    } else {
+      link(ao, ado, b_new[p], ppb);
+    }
+  }
+  for (let pb1 of pb) {
+    for (let pa1 of pa) {
+      if (b.tag == "abstractor" && pb1 == "bind" || a.tag == "applicator" && pa1 == "arg") {
+        // reverse link direction
+        link(a_new[pb1], pa1, b_new[pa1], pb1);
+      } else {
+        link(b_new[pa1], pb1, a_new[pb1], pa1);
+      }
+    }
+  }
 }
