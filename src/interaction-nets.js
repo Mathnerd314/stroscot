@@ -19,12 +19,17 @@ multiplexer = (name, level, val) => { return { tag: "multiplexer", name, level, 
 
 initiator = (out) => { return { tag: "initiator", out: out } };
 
+// jumbo tuples
 constant = (name, inp) => { return { tag: "constant", name, inp, length: 0 } };
 cAse = (names, inp, out) => { return { tag: "case", names, inp, out, length: 0 } };
 
+// A jumbo lambda-calculus function
 operator = (names, inp) => {
   return { tag: "operator", names, inp, length: 0 };
 };
+// Node for a @ <i, N>
+bigapplicator = (name, inp, func) =>
+  { return { tag: "bigapplicator", name, inp, func, length: 0 } };
 
 let edge_id = 0;
 edge = (a, a_dir, b, b_dir) => { return { tag: "edge", a, a_dir, b, b_dir, active: false, id: edge_id++ } };
@@ -69,9 +74,9 @@ function primaryPort(node) {
 let activePairs = [];
 function link(a, a_dir, b, b_dir) {
   if (b[b_dir])
-    b[b_dir].active = false;
+    b[b_dir].active = undefined;
   if (a[a_dir])
-    a[a_dir].active = false;
+    a[a_dir].active = undefined;
   let e = edge(a, a_dir, b, b_dir);
   b[b_dir] = a[a_dir] = e;
   if (primaryPort(a) == a_dir && primaryPort(b) == b_dir) {
@@ -97,13 +102,14 @@ function compile(term) {
   let stack = [];
   function resolve(term, parent, parent_dir) {
     switch (term.tag) {
-      case "app":
+      case "app": {
         let a = applicator();
         link(parent, parent_dir, a, "inp");
         resolve(term.func, a, "func");
         resolve(term.arg, a, "arg");
         return a;
-      case "abs":
+      }
+      case "abs": {
         let l = abstractor(term.name);
         link(parent, parent_dir, l, "inp");
         let v = multiplexer(term.name, 0);
@@ -118,7 +124,8 @@ function compile(term) {
         stack.pop();
         env.get(v.name).pop();
         return l;
-      case "symbol":
+      }
+      case "symbol": {
         if (env.has(term.name)) {
           let x = env.get(term.name);
           if (x.length) {
@@ -131,15 +138,55 @@ function compile(term) {
               parent = d;
               parent_dir = "outside";
             }
-            let l = v.length++;
-            link(parent, parent_dir, v, l);
+            link(parent, parent_dir, v, v.length++);
             return v;
           }
         }
+        assert(false);
         let c = constant(term.name);
         link(parent, parent_dir, c, "inp");
         return c;
+      }
+      case "tuple": {
+        let c = constant(term.name);
+        link(parent, parent_dir, c, "inp");
+        for (let t in term.terms) {
+          resolve(t, c, c.length++);
+        }
+      }
+      case "case": {
+        // Paul Levy uses pm or "pattern match" as often there is only one pattern
+        // But Haskell uses case consistently. And I think it fits better since
+        // pattern-matching also implies patterns, whereas these are only tuples.
+        let cs = cAse([]);
+        link(parent, parent_dir, cs, "inp");
+        for (let [pat, rhs] of term.cases) {
+          cs.names.push(pat.constr);
+          let e = rhs;
+          for (let v of pat.vars.reverse()) {
+            e = { tag: "abs", name: v, body: e };
+          }
+          resolve(e, cs, cs.length++);
+        }
+        resolve(term.exp, cs, "out") // compile the scrutinee
+        return cs;
+      }
+      case "operator": {
+        // similar to case except the parent is the scrutinee, there is no expression
+        let o = operator([]);
+        link(parent, parent_dir, o, "inp");
+        for (let [pat, rhs] of term.cases) {
+          o.names.push(pat.constr);
+          let e = rhs;
+          for (let v of pat.vars.reverse()) {
+            e = { tag: "abs", name: v, body: e };
+          }
+          resolve(e, o, o.length++);
+        }
+        return o;
+      }
       case "let": {
+        /*
         for (let [name, _rhs] of term.binds) {
           let v = multiplexer(name, 0);
           if (env.has(v.name)) {
@@ -164,28 +211,25 @@ function compile(term) {
           env.get(name).pop();
         }
         return d;
-      }
-      case "case":
-        let cs = cAse([]);
-        link(parent, parent_dir, cs, "inp");
-        for (let [pat, rhs] of term.cases) {
-          cs.names.push(pat.constr);
-          let e = rhs;
-          for (let v of pat.vars) {
-            e = { tag: "abs", name: v, body: e };
-          }
-          let l = cs.length++;
-          resolve(e, cs, l);
+        */
+        // letrec is hard, for now just do simple syntactic lambda translation
+        // let a = b in c -> (\a. c @ b)
+        let body = term.expr;
+        for (let [name, rhs] of term.binds) {
+          body = {
+            tag: "app",
+            func: { tag: "abs", name, body: rhs },
+            arg: body
+          };
         }
-        resolve(term.exp, cs, "out") // compile the scrutinee
-        return cs;
+        resolve(body, parent, parent_dir);
+      }
     }
   }
   let i = initiator();
   resolve(term, i, "out");
   return i;
 }
-
 
 Block = (index, directors) => { return { index, directors: directors ? directors : [] }; };
 Level = (block, rest) => { return { block, rest: rest ? rest : [] }; };
@@ -285,8 +329,27 @@ function readback(source, dir, stack) {
         levels[i] = Level(Block(b.index, [from_dir].concat(b.directors)), l.rest);
         return readback(term, "val", Stack(stack.bodyindex, levels));
       }
-    case "constant":
-      return { tag: "symbol", name: term.name };
+    case "constant": {
+      let t = { tag: "tuple", name: term.name, terms: [] };
+      for (let i = 0; i < term.length; i++) {
+        t.terms.push(readback(term, i, stack));
+      }
+      return t;
+    }
+    case "case": {
+      let c = { tag: "case", cases: [], exp: readback(term, "out", stack) };
+      for (let i = 0; i < term.length; i++) {
+        c.cases.push([term.names[i], readback(term, i, stack)]);
+      }
+      return c;
+    }
+    case "operator": {
+      let o = { tag: "operator", cases: [] };
+      for (let i = 0; i < term.length; i++) {
+        o.cases.push([term.names[i], readback(term, i, stack)]);
+      }
+      return o;
+    }
   }
   assert(false);
 }
@@ -294,16 +357,26 @@ function readback(source, dir, stack) {
 function getdot(root) {
   // traverse
   let visitedEdges = new Set();
-  let visitedNodes = new Set();
+
   var stack = [root];
   for (let e of activePairs) {
     stack.unshift(e.a);
     stack.unshift(e.b);
     visitedEdges.add(e);
   }
+  let redexEdges = new Set();
+  for (let [t, pp] of loStack) {
+    let e = t[pp];
+    stack.unshift(e.a);
+    stack.unshift(e.b);
+    visitedEdges.add(e);
+    redexEdges.add(e);
+  }
+
+  let visitedNodes = new Set();
   while (stack.length > 0) {
     let node = stack.pop();
-    if (!node)
+    if (!node || !node.tag)
       continue;
     if (visitedNodes.has(node))
       continue;
@@ -314,8 +387,10 @@ function getdot(root) {
         let edge = node[n], term;
         if (node == edge.a && n == edge.a_dir) {
           term = edge.b;
+          assert(edge.active === undefined || term[edge.b_dir] == edge);
         } else {
           term = edge.a;
+          assert(edge.active === undefined || term[edge.a_dir] == edge);
         }
         stack.push(term);
         visitedEdges.add(edge);
@@ -347,15 +422,17 @@ function getdot(root) {
     })();
     let human = (() => {
       let level = c.level ? `<sub>${c.level}</sub>` : "";
+      let name = c.name ? `<sub>${c.name}</sub>` : "";
       switch (c.tag) {
         case "initiator": return `<span id=initiator>I</span>`;
         case "applicator": return "@";
-        case "abstractor": return `λ<sub>${c.name}</sub>`;
+        case "bigapplicator": return "@${name}";
+        case "abstractor": return `λ${name}`;
         case "constant": return c.name;
         case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
-        case "operator": return c.name;
+        case "operator": return "λ{${c.names}}";
         default: assert(false);
       }
     })();
@@ -370,12 +447,11 @@ function getdot(root) {
     let b_dir = ports(edge.b).indexOf(edge.b_dir);
     if (a_dir > arrows.length) a_dir = 0;
     if (b_dir > arrows.length) b_dir = 0;
-    let is_active = edge.active ?
-      "stroke-width: 3; "
-      + (activePairs[activePairs.length - 1] == edge ? "stroke-dasharray: 2; " : "") : "";
+    let is_active = edge.active ? "stroke-width: 3; " : "";
+    let is_spine = redexEdges.has(edge) ? "stroke-dasharray: 2; " : "";
     output += `"${a}" -> "${b}" [label="${edge.id}",`
       //      + (a_dir == "bind" ? `weight="0",` : "")
-      + `style="${is_active}stroke: ${arrows[a_dir]}; fill: none",`
+      + `style="${is_active}${is_spine}stroke: ${arrows[a_dir]}; fill: none",`
       + `arrowheadStyle="fill: ${arrows[b_dir]}"];\n`;
   }
   output += `}\n`;
@@ -406,10 +482,49 @@ function updateLevel(a, b) {
     }
   }
 }
+
+// BOHM: f.nform[i].nform[f.nport[i]] == f
+// mine: [a,ad] = follow(f, i); f == follow(a,ad)
+
+loStack = [];
+function lo_redex([t, pp]) {
+  let u, ud, upp, tp;
+  do {
+    assert(t[pp].a == t);
+    tp = t.tag == "initiator";
+    loStack.push([t, pp]);
+    [u, ud] = follow(t, pp);
+    upp = primaryPort(u);
+    [t, pp] = [u, upp];
+  } while (tp || ud != upp);
+}
+
+function rewriteStepLo() {
+  let [t, pp] = loStack.pop();
+  let pair = t[pp];
+  assert(pair.active || t.tag == "initiator");
+  if (pair.active)
+    reducePair(pair);
+  lo_redex(loStack.pop());
+}
+
 function rewriteStep() {
   let pair = activePairs.pop();
   assert(pair.active); while (!pair.active) pair = activePairs.pop();
-  pair.active = false;
+  reducePair(pair);
+}
+
+function relink(a, a_dir, af, b, b_dir, bf) {
+  if (af)
+    [a, a_dir] = follow(a, a_dir);
+  if (bf)
+    [b, b_dir] = follow(b, b_dir);
+
+  link(a, a_dir, b, b_dir);
+}
+
+function reducePair(pair) {
+  assert(pair.active); pair.active = false;
   let a = pair.a, b = pair.b;
   if (eqNode(a, b)) {
     // annihilate
@@ -417,42 +532,33 @@ function rewriteStep() {
     let ppa = primaryPort(a);
     for (let p of ports(a)) {
       if (p == ppa) continue;
-      let [ao, ado] = follow(a, p);
-      let [bo, bdo] = follow(b, p);
-      link(ao, ado, bo, bdo);
+      relink(a, p, true, b, p, true);
     }
     return;
   }
   if (a.tag == "applicator" && b.tag == "abstractor") {
     // beta reduction
     let d1 = delimiter(0); d1.reverse = true;
-    let [parent, pdir] = follow(a, "inp");
-    let [body, bdir] = follow(b, "body");
-    link(parent, pdir, d1, "outside");
-    link(d1, "inside", body, bdir);
+    relink(a, "inp", true, d1, "outside", false);
+    relink(d1, "inside", false, b, "body", true);
 
     let d2 = delimiter(0);
-    let [a1, a1o] = follow(a, "arg");
-    let [b1, b1o] = follow(b, "bind");
-    link(b1, b1o, d2, "inside");
-    link(d2, "outside", a1, a1o);
+    relink(b, "bind", true, d2, "inside", false);
+    relink(d2, "outside", false, a, "arg", true);
     return;
   }
-
-  if (b.tag == "multiplexer" && b.length == 1) {
-    // prune identity multiplexer
-    let [bv, bvd] = follow(b, 0);
-    link(a, pair.a_dir, bv, bvd);
-    return;
-  }
-  if (a.tag == "multiplexer" && a.length == 1) {
-    // prune identity multiplexer
-    let [av, avd] = follow(a, 0);
-    link(av, avd, b, pair.b_dir);
-    return;
-  }
-
-
+  /*
+    if (b.tag == "multiplexer" && b.length == 1) {
+      // prune identity multiplexer
+      relink(a, pair.a_dir, false, b, 0, true);
+      return;
+    }
+    if (a.tag == "multiplexer" && a.length == 1) {
+      // prune identity multiplexer
+      relink(a, 0, true, b, pair.b_dir, false);
+      return;
+    }
+  */
   // commute
   stats.commute++;
   updateLevel(a, b); updateLevel(b, a);
@@ -462,24 +568,22 @@ function rewriteStep() {
   pb.splice(pb.indexOf(ppb), 1);
   let a_new = {}, b_new = {};
   for (let p of pb) {
-    a_new[p] = Object.assign({}, a);
-    let [bo, bdo] = follow(b, p);
+    a_new[p] = pb.length == 1 ? a : Object.assign({}, a); // reuse object if only 1 (for root)
     if (b.tag == "abstractor" && p == "bind") {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
-      link(bo, bdo, a_new[p], ppa);
+      relink(b, p, true, a_new[p], ppa, false);
     } else {
-      link(a_new[p], ppa, bo, bdo);
+      relink(a_new[p], ppa, false, b, p, true);
     }
   }
   for (let p of pa) {
-    b_new[p] = Object.assign({}, b);
-    let [ao, ado] = follow(a, p);
+    b_new[p] = pa.length == 1 ? b : Object.assign({}, b);
     if (a.tag == "applicator" && p == "arg") {
       b_new[p].reverse = !b_new[p].reverse;
-      link(b_new[p], ppb, ao, ado);
+      relink(b_new[p], ppb, false, a, p, true);
     } else {
-      link(ao, ado, b_new[p], ppb);
+      relink(a, p, true, b_new[p], ppb, false);
     }
   }
   for (let pb1 of pb) {

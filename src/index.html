@@ -46,7 +46,10 @@
 </head>
 
 <body>
-  <input id="advance" type="button" value=">>">
+  <div>
+    <input id="advance" type="button" value=">">
+    <input id="ff" type="button" value=">|">
+  </div>
   <pre id="output"></pre>
   <svg id="svg" width="1900" height="2000">
     <g id="graph" transform="translate(0,0)" />
@@ -68,12 +71,14 @@
 
 
     // t = A(L("id", A(S("id"), L("y", L("z", A(S("z"), S("y")))))), L("x", S("x")));
-    let l2; {
+    let net; {
       let x = S("x"), y = S("y");
-      l2 = L("x", L("y", A(x, A(x, y))));
+      let l2 = L("x", L("y", A(x, A(x, y))));
       l2 = A(l2, l2);
-    }; t = l2;
-    x = compile(t);
+      let t = l2;
+      net = compile(t);
+    }
+
     function toSexpr(thing, needParens) {
       if (thing.tag == "symbol") return toSexpr(thing.name, needParens);
       if (thing.tag == "abs") return `λ${toSexpr(thing.body, needParens)}`;
@@ -117,14 +122,28 @@
       grph.transform.baseVal[0].setMatrix(tr);
 
       document.getElementById("output").textContent =
-        // toSexpr(readback(x, "out", Stack(0, []))) +
-        " -- " + activePairs.length;
-      if(!activePairs.length) document.getElementById("advance").disabled = true;
+        toSexpr(readback(x, "out", Stack(0, []))) +
+        ` -- active: ${activePairs.length} annihilations: ${stats.annihilate} commutes: ${stats.commute}`;
+      if (!activePairs.length) document.getElementById("advance").disabled = true;
     }
-    showNet(x);
-    document.getElementById("advance").onclick = () => {
-      rewriteStep();
-      showNet(x);
+
+
+    {
+//      lo_redex([net, "out"]);
+      showNet(net);
+      document.getElementById("advance").onclick = () => {
+        rewriteStep();
+//        rewriteStepLo();
+        showNet(net);
+      }
+    }
+    document.getElementById("ff").onclick = () => {
+      while (activePairs.length) {
+        rewriteStep();
+        getdot(net);
+        readback(net, "out", Stack(0, []));
+      }
+      showNet(net);
     }
   </script>
 </body>
