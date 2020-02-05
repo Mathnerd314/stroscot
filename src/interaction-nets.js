@@ -106,24 +106,15 @@ function compile(term) {
       case "abs":
         let l = abstractor(term.name);
         link(parent, parent_dir, l, "inp");
-
-        let d2 = delimiter(0);
-        link(d2, "outside", l, "bind");
         let v = multiplexer(term.name, 0);
-        link(v, "val", d2, "inside");
-
-        let d1 = delimiter(0); d1.reverse = true;
-        link(l, "body", d1, "outside");
-
+        link(v, "val", l, "bind");
         if (env.has(v.name)) {
           env.get(v.name).push(v);
         } else {
           env.set(v.name, [v]);
         }
         stack.push(v);
-
-        resolve(term.body, d1, "inside");
-
+        resolve(term.body, l, "body");
         stack.pop();
         env.get(v.name).pop();
         return l;
@@ -434,13 +425,17 @@ function rewriteStep() {
   }
   if (a.tag == "applicator" && b.tag == "abstractor") {
     // beta reduction
+    let d1 = delimiter(0); d1.reverse = true;
     let [parent, pdir] = follow(a, "inp");
     let [body, bdir] = follow(b, "body");
-    link(parent, pdir, body, bdir);
+    link(parent, pdir, d1, "outside");
+    link(d1, "inside", body, bdir);
 
+    let d2 = delimiter(0);
     let [a1, a1o] = follow(a, "arg");
     let [b1, b1o] = follow(b, "bind");
-    link(b1, b1o, a1, a1o);
+    link(b1, b1o, d2, "inside");
+    link(d2, "outside", a1, a1o);
     return;
   }
 
