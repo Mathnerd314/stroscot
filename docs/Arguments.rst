@@ -4,6 +4,13 @@ Argument passing
 Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
 the shorter the code will be.
 
+Modula-3 added keyword arguments and default arguments, to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying.
+
+::
+
+   foo a {x:1}
+
+
 Keyword arguments
 =================
 
@@ -136,7 +143,7 @@ supported:
 
 ::
 
-   a {k:1} = k
+   a {k:1} = k + 1
    a # 2
 
    b = out {a:3}; 2

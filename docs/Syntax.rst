@@ -108,4 +108,20 @@ Concatenation is ``+``. Most operators are textual:
 Structured Data
 ===============
 
-Stroscot supports records, arrays, and arbitrary atoms as well.
+Stroscot supports records, arrays, and arbitrary atoms as well. A record of functions is called a vtable. Structural subtyping of records is supported: you can pass ``{a: 1, b: 2}`` to a function expecting only ``{b: Int}``.
+
+Parsing
+=======
+
+I've got a basic Earley algorithm working for now. But eventually I'm extending it with BSRs and layout and `mix <http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf>`__\ `fix <http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf>`__ and other fun things. There's also `Yakker <https://github.com/attresearch/yakker>`__, which is the most developed parser I've seen feature-wise. It's only missing incremental parsing.
+
+  A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.
+
+Operator precedence will be a DAG, rather than levels.::
+
+  precedence _*_ higher than _+_
+  precedence _/_ equals _*_
+
+I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
+
+Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.

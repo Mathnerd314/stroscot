@@ -7,14 +7,11 @@ Stroscot supports typical pattern matching and predicate dispatch:
 
    f x y = 1
    f 1 y = 2
-   f x 2 | x == 1 = 3
+   f x 2 with x == 1 = 3
 
-The cases are not ordered, instead they are matched most-specific to
-least-specific. Specificity is defined by an SMT solver, i.e. SAT(a &
-not b) and UNSAT (not a & b) means that a is less specific than b.
+The cases are not ordered, instead they are matched most-specific to least-specific. Specificity is defined by an SMT solver, i.e. SAT(a & not b) and UNSAT (not a & b) means that a is less specific than b.
 
-If there is a tie regarding specificity, e.g. we were to modify the last
-case:
+If there is a tie regarding specificity, e.g. we were to modify the last case:
 
 ::
 
@@ -26,6 +23,20 @@ case:
    # Error: rule conflict
 
 Then it is an error.
+
+However, cases that overlap but produce the same result are allowed.
+It could be useful for tests:
+
+::
+
+   fib (-1) = 0
+   fib 0 = 1
+   fib n = fib (n-1) + fib (n-2)
+
+   # test
+   fib 5 = 5
+
+The implementation is similar to that used for checking equality of dependent types, i.e. it does some normalization but isn't omniscient. The optimizer decides which case is dead code and can be dropped.
 
 Sequential matches
 ==================
@@ -39,7 +50,7 @@ The pipe syntax matches cases from top to bottom:
    | 1 y = 2
    | x 2 = 3
 
-You can also use match within a function:
+Maybe you will also be able to use match within a function, if the syntax works out:
 
 ::
 

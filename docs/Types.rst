@@ -2,7 +2,14 @@ Types
 #####
 
 Types are hard. Academics have spent decades in search of the perfect
-type system, often not even paying attention to the work of others.
+type system, often not even paying attention to the work of others. As far as doing something type-related I think the only solution is to hack until it works. I’ve read a bunch of type papers and they all end up leaving it up to you to make it work. If they do present an algorithm it’s very simple and then all the rest of the paper is mostly about proving the algorithm correct and complete rather than on the implementation.
+
+The academic approach to types can be summed up in this quote (from `here <https://www.irif.fr/~gc/papers/covcon-again.pdf>`__):
+
+  You should fit programming languages to types and not the other way round, insofar as a type theory should be developed pretty much independently of the language (but, of course, not of the problem) it is to be applied to. It is a language design problem to ensure that whenever we have a function of that type, then the code executed for each combination of the types of the arguments is not only unambiguously defined, but also easily predictable by the programmer. In order to solve type-related problems, you must first conceive the types and only after you can think of how to design a language that best fits these types.
+
+
+The alternative is model checking, which is the opposite approach: take an existing program and try to prove properties about it with some kind of model. Although types can encapsulate properties, for the most part they don't have a lot of expressive power. Defining ``newtype Even = Integer`` does not give an error on ``Even 1``, while ``assert(e % 2 == 0)`` will throw an error regardless, and the model checker proves that error won't happen. The only issue is that properties can become verbose and the model checker is a black box that cannot be helped along, as opposed to the expressive tactic notations found in proof assistants.
 
 Roles
 =====
@@ -11,11 +18,11 @@ There's really two kinds of types (three if you include erased phantom types, bu
 
 The other kind of types are nominal types, which are what you often see when people talk about static typing. So these types prevent you from using them in place of their underlying representation unless you've added the name to the type using a type constructor or cast. Usually they express some restriction about the data, for example with SQL statements you might have types for escaped expressions and unescaped expressions. All you're saying is that there aren't any unescaped commands in this data, but because programming languages don't memoize functions it's more efficient to say ``typeof stmt == EscapedStmt`` than it is to say ``isEverythingEscaped stmt == True``. And often the type is correct by construction, because all the methods you're using only construct values of the type, so it provides a handy way to assert an invariant without having to prove it like you would with a dependently typed environment.
 
-Type inference
+Type synthesis
 ==============
 
-If types are hard, type inference is harder. There's the `sub <https://github.com/stedolan/fyp>`__\ `typing <https://github.com/stedolan/mlsub>`__ stuff which actually has some pretty powerful type inference, better than Hindley-Milner. But `dependent <https://github.com/UlfNorell/insane/>`__
-`types <https://github.com/gelisam/circular-sig>`__ will presumably ruin all the fun and require type signatures. However, bidirectional type checking should be able to minimize the amount of signatures required.
+If types are hard, type synthesis is harder. There's the `sub <https://github.com/stedolan/fyp>`__\ `typing <https://github.com/stedolan/mlsub>`__ stuff which actually has some pretty powerful type synthesis, better than Hindley-Milner. But `dependent <https://github.com/UlfNorell/insane/>`__
+`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures. However, `bidirectional type checking <https://www.cl.cam.ac.uk/~nk480/bidir-survey.pdf>`__ should be able to minimize the amount of signatures required.
 
 Condition checking
 ==================

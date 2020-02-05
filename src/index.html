@@ -38,6 +38,10 @@
       stroke-width: 1.5px;
       fill: none;
     }
+
+    .demux {
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -51,17 +55,30 @@
     L = (n, b) => { return { tag: "abs", name: n, body: b }; };
     S = (n) => { return { tag: "symbol", name: n }; };
     A = (f, a) => { return { tag: "app", func: f, arg: a }; };
+    LET = (b, e) => { return { tag: "let", binds: b, expr: e }; };
+    // t = LET([["id", L("x", S("x"))]],
+    //   A(S("id"), L("y", L("z", A(S("z"), S("y"))))));
+    // t = LET([
+    //   ["z", L("g", L("x", S("x")))],
+    //   ["s", L("n", L("f", L("x", A(S("f"), A(A(S("n"), S("f")), S("x"))))))]],
+    //   A(S("s"), A(S("s"), S("z"))));
+    // let y = L("f",
+    //           A(L("y", A(S("y"), S("y"))),
+    //             L("x", A(S("f"), A(S("x"), S("x"))))));
+
+
+    // t = A(L("id", A(S("id"), L("y", L("z", A(S("z"), S("y")))))), L("x", S("x")));
     let l2; {
       let x = S("x"), y = S("y");
       l2 = L("x", L("y", A(x, A(x, y))));
-    }
-    t = A(l2, l2);
+      l2 = A(l2, l2);
+    }; t = l2;
     x = compile(t);
-    function toSexpr(thing,needParens) {
-      if (thing.tag == "symbol") return toSexpr(thing.name,needParens);
-      if (thing.tag == "abs") return `λ${toSexpr(thing.body,needParens)}`;
+    function toSexpr(thing, needParens) {
+      if (thing.tag == "symbol") return toSexpr(thing.name, needParens);
+      if (thing.tag == "abs") return `λ${toSexpr(thing.body, needParens)}`;
       if (thing.tag == "app") {
-        let s = `${toSexpr(thing.func,true)}${toSexpr(thing.arg,true)}`;
+        let s = `${toSexpr(thing.func, true)}${toSexpr(thing.arg, true)}`;
         return needParens ? `(${s})` : s;
       }
       return JSON.stringify(thing);
@@ -100,8 +117,9 @@
       grph.transform.baseVal[0].setMatrix(tr);
 
       document.getElementById("output").textContent =
-        toSexpr(readback(x, "out", Stack(0, [])));
-      //"" + activePairs.length;
+        // toSexpr(readback(x, "out", Stack(0, []))) +
+        " -- " + activePairs.length;
+      if(!activePairs.length) document.getElementById("advance").disabled = true;
     }
     showNet(x);
     document.getElementById("advance").onclick = () => {

@@ -5,28 +5,28 @@ const assert = function (condition, message) {
   }
 };
 
-
-initiator = (out) => { return { tag: "initiator", out: out } };
 applicator = (inp, func, arg) => { return { tag: "applicator", inp, func, arg } };
 abstractor = (name, inp, body, bind) => { return { tag: "abstractor", name, inp, body, bind } };
+
+
 delimiter = (level, inside, outside) => { return { tag: "delimiter", level, inside, outside } };
 // in the initial graph inside is the parent, outside is the child.
 // it faces up. so the graph looks like inside-]-outside.
 // later lambda disintegrates to outside-[-inside and they eventually annihilate (hopefully)
 
-eraser = (inp) => { return { tag: "eraser", inp } };
-duplicator = (level, inp, outs) => { return { tag: "duplicator", level, inp, outs } };
 multiplexer = (name, level, val) => { return { tag: "multiplexer", name, level, val, length: 0 } };
+// eraser = multiplexer of length 0, duplicator = multiplexer of length 2
 
-constant = (name, inp, args) => { return { tag: "constant", name, inp, args } };
+initiator = (out) => { return { tag: "initiator", out: out } };
 
+constant = (name, inp) => { return { tag: "constant", name, inp, length: 0 } };
 cAse = (names, inp, out) => { return { tag: "case", names, inp, out, length: 0 } };
-operator = (inp, arity, lmop, func, name) => {
-  return { tag: "operator", inp, arity, lmop, func, name, length: 0 };
+
+operator = (names, inp) => {
+  return { tag: "operator", names, inp, length: 0 };
 };
 
 let edge_id = 0;
-
 edge = (a, a_dir, b, b_dir) => { return { tag: "edge", a, a_dir, b, b_dir, active: false, id: edge_id++ } };
 
 function ports(node) {
@@ -35,10 +35,8 @@ function ports(node) {
     case "initiator": return ["out"];
     case "applicator": return ["inp", "func", "arg"];
     case "abstractor": return ["inp", "body", "bind"];
-    case "constant": return ["inp", "args"];
-    case "eraser": return ["inp"];
-    case "duplicator": return ["inp", "outs"];
     case "delimiter": return ["outside", "inside"];
+    case "constant": r = ["inp"]; break;
     case "multiplexer": r = ["val"]; break;
     case "case": r = ["inp", "out"]; break;
     case "operator": r = ["inp"]; break;
@@ -59,14 +57,11 @@ function check_edge(dir, is_in) {
   }
 }
 
-function primaryPort(node, leftmost) {
+function primaryPort(node) {
   switch (node.tag) {
-    case "initiator": return "";
+    case "initiator": return undefined;
     case "applicator": return "func";
     case "case": return "out";
-    case "operator": return node.lmop == 0 ? "inp" : node.lmop - 1;
-    case "constant":
-      if (leftmost) return null;
     default:
       return ports(node)[0];
   }
@@ -97,7 +92,6 @@ function follow(source, dir) {
   }
   return [term, from_dir];
 }
-
 function compile(term) {
   let env = new Map();
   let stack = [];
@@ -112,15 +106,24 @@ function compile(term) {
       case "abs":
         let l = abstractor(term.name);
         link(parent, parent_dir, l, "inp");
+
+        let d2 = delimiter(0);
+        link(d2, "outside", l, "bind");
         let v = multiplexer(term.name, 0);
-        link(v, "val", l, "bind");
+        link(v, "val", d2, "inside");
+
+        let d1 = delimiter(0); d1.reverse = true;
+        link(l, "body", d1, "outside");
+
         if (env.has(v.name)) {
           env.get(v.name).push(v);
         } else {
           env.set(v.name, [v]);
         }
         stack.push(v);
-        resolve(term.body, l, "body");
+
+        resolve(term.body, d1, "inside");
+
         stack.pop();
         env.get(v.name).pop();
         return l;
@@ -161,12 +164,15 @@ function compile(term) {
           resolve(rhs, v, "val");
         }
 
-        let e = resolve(term.expr, parent, parent_dir);
+        // open scope for multiplexers
+        let d = delimiter(0); d.reverse = true;
+        link(parent, parent_dir, d, "outside");
+        resolve(term.expr, d, "inside");
 
         for (let [name, _rhs] of term.binds) {
           env.get(name).pop();
         }
-        return e;
+        return d;
       }
       case "case":
         let cs = cAse([]);
@@ -191,37 +197,38 @@ function compile(term) {
 
 
 Block = (index, directors) => { return { index, directors: directors ? directors : [] }; };
-Level = (block) => [block];
+Level = (block, rest) => { return { block, rest: rest ? rest : [] }; };
 Stack = (bodyindex, levels) => { return { bodyindex, levels }; };
 
 function validStack(stack) {
   assert(stack.bodyindex >= 0);
-  for(let l of stack.levels) {
-    assert(l.length >= 1);
-    for (let b of l) {
+  for (let l of stack.levels) {
+    assert(l.block);
+    assert(l.rest);
+    for (let b of [l.block].concat(l.rest)) {
       assert(b.index >= 0);
-      for(let d of b.directors) {
+      for (let d of b.directors) {
         assert(d || d == 0);
       }
     }
   }
-  if(showStack(stack) == "22(OL)")
-    debugger;
+  let s = showStack(stack);
+  return s;
 }
 function showStack(stack) {
   let s = "";
   s += stack.bodyindex;
-  for(let l of stack.levels) {
-    if(l.length > 1) s += "[";
-    for (let b of l) {
-      if(b.directors.length) s += "(";
+  for (let l of stack.levels) {
+    if (l.rest.length > 0) s += "[";
+    for (let b of [l.block].concat(l.rest)) {
+      if (b.directors.length) s += "(";
       s += b.index;
-      for(let d of b.directors) {
+      for (let d of b.directors) {
         s += "LRABCD"[d];
       }
-      if(b.directors.length) s += ")";
+      if (b.directors.length) s += ")";
     }
-    if(l.length > 1) s += "]";
+    if (l.rest.length > 0) s += "]";
   }
   return s;
 }
@@ -238,17 +245,17 @@ function readback(source, dir, stack) {
     case "abstractor": {
       if (from_dir == "inp") {
         let i = stack.bodyindex;
-        let newstack = Stack(i + 1, [[Block(i + 1)]].concat(stack.levels));
+        let newstack = Stack(i + 1, [Level(Block(i + 1))].concat(stack.levels));
         return { tag: "abs", body: readback(term, "body", newstack) };
       }
       if (from_dir == "bind") {
-        return { tag: "symbol", name: stack.bodyindex - stack.levels[0][0].index };
+        return { tag: "symbol", name: stack.bodyindex - stack.levels[0].block.index };
       }
       assert(false);
     }
     case "delimiter": {
       if (term.level == 0 && from_dir == "outside")
-        return readback(term, "inside", Stack(stack.bodyindex, [[Block(0)]].concat(stack.levels)));
+        return readback(term, "inside", Stack(stack.bodyindex, [Level(Block(0))].concat(stack.levels)));
       if (term.level == 0 && from_dir == "inside")
         return readback(term, "outside", Stack(stack.bodyindex, stack.levels.slice(1)));
       let i = term.level - 1;
@@ -258,15 +265,15 @@ function readback(source, dir, stack) {
         // σ[bκl]_i -> σ[bl,κ]_i
         // split level into the stack
         let l = levels[i];
-        let l1 = [l[0]].concat(l.slice(2)), l2 = [l[1]];
-        levels.splice(i, 1, l1, l2);
+        let k = Level(l.rest[0]), lnew = Level(l.block, l.rest.slice(1));
+        levels.splice(i, 1, lnew, k);
         return readback(term, "inside", Stack(stack.bodyindex, levels));
       } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
         // AFAICT this means grouping two levels in the stack together
         let l1 = levels[i], l2 = levels[i + 1];
-        let l = [l1[0]].concat(l2, l1.slice(1));
-        levels.splice(i, 2, l);
+        let l_rest = [l2.block].concat(l2.rest, l1.rest);
+        levels.splice(i, 2, Level(l1.block, l_rest));
         return readback(term, "outside", Stack(stack.bodyindex, levels));
       }
       assert(false);
@@ -277,14 +284,14 @@ function readback(source, dir, stack) {
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
         let l = levels[i];
-        let b = l[0];
-        levels[i] = [Block(b.index, b.directors.slice(1))].concat(l.slice(1));
+        let b = l.block;
+        levels[i] = Level(Block(b.index, b.directors.slice(1)), l.rest);
         return readback(term, b.directors[0], Stack(stack.bodyindex, levels));
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
         let l = levels[i];
-        let b = l[0];
-        levels[i] = [Block(b.index, [from_dir].concat(b.directors))].concat(l.slice(1));
+        let b = l.block;
+        levels[i] = Level(Block(b.index, [from_dir].concat(b.directors)), l.rest);
         return readback(term, "val", Stack(stack.bodyindex, levels));
       }
     case "constant":
@@ -340,8 +347,6 @@ function getdot(root) {
         case "applicator": return "circle";
         case "abstractor": return "rect";
         //        case "constant": return "star";
-        case "eraser": return "circle"; //"doublecircle";
-        //        case "duplicator": return "fan";
         //        case "delimiter": return "house";
         //        case "multiplexer": return "fan";
         //        case "case": return "folder";
@@ -356,10 +361,8 @@ function getdot(root) {
         case "applicator": return "@";
         case "abstractor": return `λ<sub>${c.name}</sub>`;
         case "constant": return c.name;
-        case "eraser": return "e";
-        case "duplicator": return `/${c.level}\\`;
         case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
-        case "multiplexer": return `${c.name}${level}`;
+        case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
         case "operator": return c.name;
         default: assert(false);
@@ -391,14 +394,11 @@ function eqNode(n1, n2) {
   if (n1.tag !== n2.tag) return false;
   if (n1.tag === "delimiter" && n1.level === n2.level) return true;
 
-  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === n2.level);
+  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0);
   if (n1.tag === "multiplexer" && n1.level === n2.level) {
     assert(n1.length == n2.length);
     return true;
   }
-
-  if (n1.tag === "eraser") return true;
-  if (n1.tag === "duplicator" && n1.level === n2.level) return true;
   return false;
 }
 stats = { annihilate: 0, commute: 0 };
@@ -434,19 +434,16 @@ function rewriteStep() {
   }
   if (a.tag == "applicator" && b.tag == "abstractor") {
     // beta reduction
-    let d1 = delimiter(0); d1.reverse = true;
     let [parent, pdir] = follow(a, "inp");
     let [body, bdir] = follow(b, "body");
-    link(parent, pdir, d1, "outside");
-    link(d1, "inside", body, bdir);
+    link(parent, pdir, body, bdir);
 
-    let d2 = delimiter(0);
     let [a1, a1o] = follow(a, "arg");
     let [b1, b1o] = follow(b, "bind");
-    link(b1, b1o, d2, "inside");
-    link(d2, "outside", a1, a1o);
+    link(b1, b1o, a1, a1o);
     return;
   }
+
   if (b.tag == "multiplexer" && b.length == 1) {
     // prune identity multiplexer
     let [bv, bvd] = follow(b, 0);
@@ -459,6 +456,7 @@ function rewriteStep() {
     link(av, avd, b, pair.b_dir);
     return;
   }
+
 
   // commute
   stats.commute++;
