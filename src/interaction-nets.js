@@ -20,16 +20,21 @@ multiplexer = (name, level, val) => { return { tag: "multiplexer", name, level, 
 initiator = (out) => { return { tag: "initiator", out: out } };
 
 // jumbo tuples
+// (i, a, b, c)
 constant = (name, inp) => { return { tag: "constant", name, inp, length: 0 } };
-cAse = (names, inp, out) => { return { tag: "case", names, inp, out, length: 0 } };
+// Paul Levy uses pm or "pattern match" as often there is only one pattern
+// But Haskell uses case consistently. And I think it fits better since
+// pattern-matching also implies patterns, whereas these are only tuples.
+// case M of {i a b. N}
+cAse = (names, arities, inp, out) => { return { tag: "case", names, arities, inp, out, length: 0 } };
 
 // A jumbo lambda-calculus function
-operator = (names, inp) => {
-  return { tag: "operator", names, inp, length: 0 };
+// \{x. a, y. b}
+operator = (names, arities, inp) => {
+  return { tag: "operator", names, arities, inp, length: 0 };
 };
 // Node for a @ <i, N>
-bigapplicator = (name, inp, func) =>
-  { return { tag: "bigapplicator", name, inp, func, length: 0 } };
+bigapplicator = (name, inp, func) => { return { tag: "bigapplicator", name, inp, func, length: 0 } };
 
 let edge_id = 0;
 edge = (a, a_dir, b, b_dir) => { return { tag: "edge", a, a_dir, b, b_dir, active: false, id: edge_id++ } };
@@ -38,12 +43,13 @@ function ports(node) {
   let r;
   switch (node.tag) {
     case "initiator": return ["out"];
-    case "applicator": return ["inp", "func", "arg"];
+    case "applicator": return ["func", "inp", "arg"];
     case "abstractor": return ["inp", "body", "bind"];
     case "delimiter": return ["outside", "inside"];
+    case "bigapplicator": r = ["func", "inp"]; break;
     case "constant": r = ["inp"]; break;
     case "multiplexer": r = ["val"]; break;
-    case "case": r = ["inp", "out"]; break;
+    case "case": r = ["out", "inp"]; break;
     case "operator": r = ["inp"]; break;
   }
   for (let i = 0; i < node.length; i++)
@@ -53,9 +59,24 @@ function ports(node) {
 
 let in_dirs = new Set(["inp", "bind", "inside"]);
 let out_dirs = new Set(["func", "arg", "body", "out", "outside", "val"]);
-function check_edge(dir, is_in) {
+function check_edge(t, dir, is_in) {
+  if (0 <= dir) {
+    if (t.tag == "case" || t.tag == "operator") {
+      assert(is_in == (dir >= t.arities.length));
+      return;
+    }
+    if (t.tag == "bigapplicator" || t.tag == "constant") {
+      assert(!is_in);
+      return;
+    }
+    if (t.tag == "multiplexer") {
+      assert(is_in);
+      return;
+    }
+    assert(false);
+  }
+
   if (is_in) {
-    if (0 <= dir && dir <= 20) return true;
     assert(in_dirs.has(dir));
   } else {
     assert(out_dirs.has(dir));
@@ -65,8 +86,6 @@ function check_edge(dir, is_in) {
 function primaryPort(node) {
   switch (node.tag) {
     case "initiator": return undefined;
-    case "applicator": return "func";
-    case "case": return "out";
     default:
       return ports(node)[0];
   }
@@ -83,8 +102,8 @@ function link(a, a_dir, b, b_dir) {
     e.active = true;
     activePairs.push(e);
   }
-  check_edge(a_dir, a.reverse);
-  check_edge(b_dir, !b.reverse);
+  check_edge(a, a_dir, !!a.reverse);
+  check_edge(b, b_dir, !b.reverse);
 }
 function follow(source, dir) {
   let edge = source[dir], term, from_dir;
@@ -97,153 +116,188 @@ function follow(source, dir) {
   }
   return [term, from_dir];
 }
+
+let n_envs = 0;
+make_env = (parent) => {
+  return {
+    n: n_envs++,
+    bindings: new Map(),
+    parent
+  }
+};
+function bind(env, v) {
+  let name = v.name;
+  assert(!env.bindings.has(name));
+  env.bindings.set(name, v);
+  v.env = env;
+}
+
 function compile(term) {
-  let env = new Map();
-  let stack = [];
-  function resolve(term, parent, parent_dir) {
-    switch (term.tag) {
-      case "app": {
-        let a = applicator();
-        link(parent, parent_dir, a, "inp");
-        resolve(term.func, a, "func");
-        resolve(term.arg, a, "arg");
-        return a;
+  let env = make_env();
+  let i = initiator();
+  resolve(env, term, i, "out");
+  return i;
+}
+function resolve(env, term, parent, parent_dir) {
+  let res = (term, parent, parent_dir) =>
+    resolve(env, term, parent, parent_dir);
+  if (typeof (term) == "string") {
+    term = { tag: "symbol", name: term };
+  }
+  switch (term.tag) {
+    case "app": {
+      let t = {
+        tag: "bigapp",
+        name: "sole",
+        func: term.func,
+        terms: [term.arg]
+      };
+      return res(t, parent, parent_dir);
+    }
+    case "bigapp": {
+      let a = bigapplicator(term.name);
+      link(parent, parent_dir, a, "inp");
+      res(term.func, a, "func");
+      for (let t of term.terms) {
+        res(t, a, a.length++);
       }
-      case "abs": {
-        let l = abstractor(term.name);
-        link(parent, parent_dir, l, "inp");
-        let v = multiplexer(term.name, 0);
-        link(v, "val", l, "bind");
+      return a;
+    }
+    case "tuple": {
+      let c = constant(term.name);
+      link(parent, parent_dir, c, "inp");
+      for (let t of term.terms) {
+        res(t, c, c.length++);
+      }
+    }
+    case "abs": {
+      let t = {
+        tag: "operator",
+        cases: [{ constr: "sole", vars: [term.name], rhs: term.body }]
+      };
+      return res(t, parent, parent_dir);
+    }
+    case "operator": {
+      // semantically a lambda-case
+      let o = operator([], []);
+      o.arities.length = term.cases.length;
+      o.envs = [];
+      link(parent, parent_dir, o, "inp");
+      let muxes = [];
+      for (let { constr, vars, rhs } of term.cases) {
+        let new_env = make_env(env);
+        new_env.binder = o; o.envs.push(new_env);
+        o.names.push(constr);
+        o.arities[o.length] = vars.length;
+        for (let v_ of vars) {
+          let v = multiplexer(v_, 0);
+          muxes.push(v);
+          bind(new_env, v);
+        }
+        resolve(new_env, rhs, o, o.length++);
+      }
+      for (let v of muxes) {
+        link(v, "val", o, o.length++);
+      }
+      return o;
+    }
+    case "case": {
+      let cs = cAse([], []);
+      cs.arities.length = term.cases.length;
+      link(parent, parent_dir, cs, "inp");
+      res(term.exp, cs, "out") // compile the scrutinee
+      let muxes = [];
+      for (let { constr, vars, rhs } of term.cases) {
+        cs.names.push(constr);
+        cs.arities[cs.length] = vars.length;
+        let new_env = make_env(env);
+        // no binder for new_env
+        for (let v_ of vars) {
+          let v = multiplexer(v_, 0);
+          muxes.push(v);
+          bind(new_env, v);
+        }
+        resolve(new_env, rhs, cs, cs.length++);
+      }
+      for (let v of muxes) {
+        link(v, "val", cs, cs.length++);
+      }
+      return cs;
+    }
+    case "symbol": {
+      let e = env, name = term.name;
+      while (e && !(e.bindings.has(name))) {
+        if (e.binder) {
+          let d = delimiter(0);
+          d.env = e;
+          link(parent, parent_dir, d, "inside");
+          parent = d;
+          parent_dir = "outside";
+        }
+        e = e.parent;
+      }
+      assert(e);
+      let v = e.bindings.get(name);
+      link(parent, parent_dir, v, v.length++);
+      return v;
+    }
+    case "let": {
+      /*
+      for (let [name, _rhs] of term.binds) {
+        let v = multiplexer(name, 0);
         if (env.has(v.name)) {
           env.get(v.name).push(v);
         } else {
           env.set(v.name, [v]);
         }
-        stack.push(v);
-        resolve(term.body, l, "body");
-        stack.pop();
-        env.get(v.name).pop();
-        return l;
       }
-      case "symbol": {
-        if (env.has(term.name)) {
-          let x = env.get(term.name);
-          if (x.length) {
-            let v = x[x.length - 1];
-            for (let i = stack.length - 1; i >= 0; i--) {
-              if (v == stack[i])
-                break;
-              let d = delimiter(0);
-              link(parent, parent_dir, d, "inside");
-              parent = d;
-              parent_dir = "outside";
-            }
-            link(parent, parent_dir, v, v.length++);
-            return v;
-          }
-        }
-        assert(false);
-        let c = constant(term.name);
-        link(parent, parent_dir, c, "inp");
-        return c;
-      }
-      case "tuple": {
-        let c = constant(term.name);
-        link(parent, parent_dir, c, "inp");
-        for (let t in term.terms) {
-          resolve(t, c, c.length++);
-        }
-      }
-      case "case": {
-        // Paul Levy uses pm or "pattern match" as often there is only one pattern
-        // But Haskell uses case consistently. And I think it fits better since
-        // pattern-matching also implies patterns, whereas these are only tuples.
-        let cs = cAse([]);
-        link(parent, parent_dir, cs, "inp");
-        for (let [pat, rhs] of term.cases) {
-          cs.names.push(pat.constr);
-          let e = rhs;
-          for (let v of pat.vars.reverse()) {
-            e = { tag: "abs", name: v, body: e };
-          }
-          resolve(e, cs, cs.length++);
-        }
-        resolve(term.exp, cs, "out") // compile the scrutinee
-        return cs;
-      }
-      case "operator": {
-        // similar to case except the parent is the scrutinee, there is no expression
-        let o = operator([]);
-        link(parent, parent_dir, o, "inp");
-        for (let [pat, rhs] of term.cases) {
-          o.names.push(pat.constr);
-          let e = rhs;
-          for (let v of pat.vars.reverse()) {
-            e = { tag: "abs", name: v, body: e };
-          }
-          resolve(e, o, o.length++);
-        }
-        return o;
-      }
-      case "let": {
-        /*
-        for (let [name, _rhs] of term.binds) {
-          let v = multiplexer(name, 0);
-          if (env.has(v.name)) {
-            env.get(v.name).push(v);
-          } else {
-            env.set(v.name, [v]);
-          }
-        }
 
-        for (let [name, rhs] of term.binds) {
-          let x = env.get(name);
-          let v = x[x.length - 1];
-          resolve(rhs, v, "val");
-        }
-
-        // open scope for multiplexers
-        let d = delimiter(0); d.reverse = true;
-        link(parent, parent_dir, d, "outside");
-        resolve(term.expr, d, "inside");
-
-        for (let [name, _rhs] of term.binds) {
-          env.get(name).pop();
-        }
-        return d;
-        */
-        // letrec is hard, for now just do simple syntactic lambda translation
-        // let a = b in c -> (\a. c @ b)
-        let body = term.expr;
-        for (let [name, rhs] of term.binds) {
-          body = {
-            tag: "app",
-            func: { tag: "abs", name, body: rhs },
-            arg: body
-          };
-        }
-        resolve(body, parent, parent_dir);
+      for (let [name, rhs] of term.binds) {
+        let x = env.get(name);
+        let v = x[x.length - 1];
+        resolve(rhs, v, "val");
       }
+
+      // open scope for multiplexers
+      let d = delimiter(0); d.reverse = true;
+      link(parent, parent_dir, d, "outside");
+      resolve(term.expr, d, "inside");
+
+      for (let [name, _rhs] of term.binds) {
+        env.get(name).pop();
+      }
+      return d;
+      */
+      // letrec is hard, for now just do simple syntactic lambda translation
+      // let a = b in c -> (\a. c @ b)
+      let body = term.expr;
+      for (let [name, rhs] of term.binds) {
+        body = {
+          tag: "app",
+          func: { tag: "abs", name, body: rhs },
+          arg: body
+        };
+      }
+      res(body, parent, parent_dir);
     }
   }
-  let i = initiator();
-  resolve(term, i, "out");
-  return i;
 }
 
-Block = (index, directors) => { return { index, directors: directors ? directors : [] }; };
-Level = (block, rest) => { return { block, rest: rest ? rest : [] }; };
-Stack = (bodyindex, levels) => { return { bodyindex, levels }; };
+Director = (e, name, index) => { return { tag: "director", env: e, name, index }; };
+Block = (e, index, directors) => { return { tag: "block", env: e, index, directors: directors ? directors : [] }; };
+Level = (e, block, rest) => { return { tag: "level", env: e, block, rest: rest ? rest : [] }; };
+Stack = (bodyindex, levels) => { return { tag: "stack", bodyindex, levels }; };
 
 function validStack(stack) {
+  assert(stack.tag == "stack");
   assert(stack.bodyindex >= 0);
   for (let l of stack.levels) {
-    assert(l.block);
-    assert(l.rest);
+    assert(l.tag == "level");
     for (let b of [l.block].concat(l.rest)) {
+      assert(b.tag == "block");
       assert(b.index >= 0);
       for (let d of b.directors) {
-        assert(d || d == 0);
+        assert(d.tag == "director");
       }
     }
   }
@@ -259,7 +313,7 @@ function showStack(stack) {
       if (b.directors.length) s += "(";
       s += b.index;
       for (let d of b.directors) {
-        s += "LRABCD"[d];
+        s += "LRABCD"[d.index];
       }
       if (b.directors.length) s += ")";
     }
@@ -268,65 +322,118 @@ function showStack(stack) {
   return s;
 }
 
+function subsetStack(sub, sup) {
+  // transparency from the paper
+  // ???
+  /*
+  let i = sub.bodyindex;
+  sup.bodyindex = 0;
+
+  sub <= sup
+  */
+}
+
 function readback(source, dir, stack) {
   let [term, from_dir] = follow(source, dir);
   validStack(stack);
   switch (term.tag) {
-    case "applicator":
+    case "bigapplicator":
       if (from_dir == "inp") {
-        return { tag: "app", func: readback(term, "func", stack), arg: readback(term, "arg", stack) };
+        let t = { tag: "bigapp", func: readback(term, "func", stack), terms: [] };
+        for (let x = 0; x < term.length; x++) {
+          t.terms.push(readback(term, x, stack));
+        }
+        return t;
       }
       assert(false);
-    case "abstractor": {
+    case "operator": {
+      let es = term.envs;
       if (from_dir == "inp") {
         let i = stack.bodyindex;
-        let newstack = Stack(i + 1, [Level(Block(i + 1))].concat(stack.levels));
-        return { tag: "abs", body: readback(term, "body", newstack) };
+        let t = { tag: "operator", cases: [] };
+        for (let x = 0; x < term.arities.length; x++) {
+          assert(term.names[x]);
+          let e = es[x];
+          let newstack = Stack(i + 1, [Level(e, Block(e, i + 1))].concat(stack.levels));
+          t.cases.push([term.names[x], term.arities[x], readback(term, x, newstack)]);
+        }
+        return t;
       }
-      if (from_dir == "bind") {
-        return { tag: "symbol", name: stack.bodyindex - stack.levels[0].block.index };
+      if (from_dir >= term.arities.length) {
+        let i = from_dir - term.arities.length;
+        let j;
+        for (j = 0; j < term.arities.length; j++) {
+          if (i < term.arities[j]) break;
+          i -= term.arities[j];
+        }
+        let e  = es[j];
+        assert(stack.levels[0].env == e);
+        assert(stack.levels[0].block.env == e);
+        assert(stack.levels[0].block.directors.length > 0); // since we don't elide unit multiplexers
+        assert(stack.levels[0].block.directors[0].env == e);
+        let b = stack.bodyindex - stack.levels[0].block.index;
+        return {
+          tag: "symbol", idx: b,
+          rule: term.names[j], rule_idx: i, name: stack.levels[0].block.directors[0].name
+        };
       }
       assert(false);
     }
     case "delimiter": {
+      let e = term.env;
       if (term.level == 0 && from_dir == "outside")
-        return readback(term, "inside", Stack(stack.bodyindex, [Level(Block(0))].concat(stack.levels)));
-      if (term.level == 0 && from_dir == "inside")
+        return readback(term, "inside", Stack(stack.bodyindex, [Level(e, Block(e, 0))].concat(stack.levels)));
+      if (term.level == 0 && from_dir == "inside") {
+        assert(stack.levels[0].env == e);
+        assert(stack.levels[0].block.env == e);
         return readback(term, "outside", Stack(stack.bodyindex, stack.levels.slice(1)));
+      }
       let i = term.level - 1;
       // outside [ inside
       let levels = Array.from(stack.levels);
       if (from_dir == "outside") {
         // σ[bκl]_i -> σ[bl,κ]_i
-        // split level into the stack
+        // split a level into the stack
         let l = levels[i];
-        let k = Level(l.rest[0]), lnew = Level(l.block, l.rest.slice(1));
+        let k = Level(e, l.rest[0]), lnew = Object.assign({}, l);
+        assert(l.rest[0].env == e);
+        lnew.rest = l.rest.slice(1);
         levels.splice(i, 1, lnew, k);
         return readback(term, "inside", Stack(stack.bodyindex, levels));
       } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
-        // AFAICT this means grouping two levels in the stack together
-        let l1 = levels[i], l2 = levels[i + 1];
-        let l_rest = [l2.block].concat(l2.rest, l1.rest);
-        levels.splice(i, 2, Level(l1.block, l_rest));
+        // AFAICT this means grouping two levels in the stack together (destructing a level)
+        let l1 = Object.assign({}, levels[i]), l2 = levels[i + 1];
+        assert(l2.env == e);
+        l1.rest = [l2.block].concat(l2.rest, l1.rest);
+        levels.splice(i, 2, l1);
         return readback(term, "outside", Stack(stack.bodyindex, levels));
       }
       assert(false);
     }
     case "multiplexer":
-      let i = term.level;
+      let i = term.level, e = term.env;
       let levels = Array.from(stack.levels);
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
-        let l = levels[i];
-        let b = l.block;
-        levels[i] = Level(Block(b.index, b.directors.slice(1)), l.rest);
-        return readback(term, b.directors[0], Stack(stack.bodyindex, levels));
+        let l = Object.assign({}, levels[i]);
+        let b = Object.assign({}, l.block);
+        let d = b.directors[0];
+        assert(d.name == term.name);
+        assert(d.env == e);
+        b.directors = b.directors.slice(1);
+        l.block = b;
+        levels[i] = l;
+        return readback(term, d.index, Stack(stack.bodyindex, levels));
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
-        let l = levels[i];
-        let b = l.block;
-        levels[i] = Level(Block(b.index, [from_dir].concat(b.directors)), l.rest);
+        let l = Object.assign({}, levels[i]);
+        let b = Object.assign({}, l.block);
+        assert(b.env == e);
+        assert(l.env == e);
+        b.directors = [Director(e, term.name, from_dir)].concat(b.directors);
+        l.block = b;
+        levels[i] = l;
         return readback(term, "val", Stack(stack.bodyindex, levels));
       }
     case "constant": {
@@ -337,18 +444,13 @@ function readback(source, dir, stack) {
       return t;
     }
     case "case": {
-      let c = { tag: "case", cases: [], exp: readback(term, "out", stack) };
-      for (let i = 0; i < term.length; i++) {
-        c.cases.push([term.names[i], readback(term, i, stack)]);
+      if (from_dir == "inp") {
+        let c = { tag: "case", cases: [], exp: readback(term, "out", stack) };
+        for (let i = 0; i < term.arities.length; i++) {
+          c.cases.push([term.names[i], readback(term, i, stack)]);
+        }
+        return c;
       }
-      return c;
-    }
-    case "operator": {
-      let o = { tag: "operator", cases: [] };
-      for (let i = 0; i < term.length; i++) {
-        o.cases.push([term.names[i], readback(term, i, stack)]);
-      }
-      return o;
     }
   }
   assert(false);
@@ -425,14 +527,14 @@ function getdot(root) {
       let name = c.name ? `<sub>${c.name}</sub>` : "";
       switch (c.tag) {
         case "initiator": return `<span id=initiator>I</span>`;
-        case "applicator": return "@";
-        case "bigapplicator": return "@${name}";
+        case "applicator": return `@`;
+        case "bigapplicator": return `@${name}`;
         case "abstractor": return `λ${name}`;
         case "constant": return c.name;
         case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
-        case "operator": return "λ{${c.names}}";
+        case "operator": return `λ{${c.names}}`;
         default: assert(false);
       }
     })();
@@ -448,7 +550,7 @@ function getdot(root) {
     if (a_dir > arrows.length) a_dir = 0;
     if (b_dir > arrows.length) b_dir = 0;
     let is_active = edge.active ? "stroke-width: 3; " : "";
-    let is_spine = redexEdges.has(edge) ? "stroke-dasharray: 2; " : "";
+    let is_spine = redexEdges.has(edge) || (activePairs[activePairs.length - 1] == edge) ? "stroke-dasharray: 2; " : "";
     output += `"${a}" -> "${b}" [label="${edge.id}",`
       //      + (a_dir == "bind" ? `weight="0",` : "")
       + `style="${is_active}${is_spine}stroke: ${arrows[a_dir]}; fill: none",`
@@ -461,7 +563,7 @@ function eqNode(n1, n2) {
   if (n1.tag !== n2.tag) return false;
   if (n1.tag === "delimiter" && n1.level === n2.level) return true;
 
-  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0);
+  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0 || isNaN(n1.level));
   if (n1.tag === "multiplexer" && n1.level === n2.level) {
     assert(n1.length == n2.length);
     return true;
@@ -471,7 +573,7 @@ function eqNode(n1, n2) {
 stats = { annihilate: 0, commute: 0 };
 function updateLevel(a, b) {
   if (!a.hasOwnProperty("level")) return;
-  if (b.tag == "abstractor") {
+  if (b.tag == "abstractor" || b.tag == "operator") {
     a.level++;
     return;
   }
@@ -536,15 +638,42 @@ function reducePair(pair) {
     }
     return;
   }
-  if (a.tag == "applicator" && b.tag == "abstractor") {
+  if (a.tag == "bigapplicator" && b.tag == "operator") {
     // beta reduction
-    let d1 = delimiter(0); d1.reverse = true;
-    relink(a, "inp", true, d1, "outside", false);
-    relink(d1, "inside", false, b, "body", true);
-
-    let d2 = delimiter(0);
-    relink(b, "bind", true, d2, "inside", false);
-    relink(d2, "outside", false, a, "arg", true);
+    let idx = undefined, env;
+    // body
+    for (let i = 0; i < b.names.length; i++) {
+      if (b.names[i] == a.name) {
+        idx = i; env = b.envs[i];
+        // link matching body
+        let d1 = delimiter(0); d1.reverse = true; d1.env = env;
+        relink(a, "inp", true, d1, "outside", false);
+        relink(d1, "inside", false, b, i, true);
+      } else {
+        // erase unused bodies
+        let e = multiplexer("erase", NaN);
+        relink(e, "val", false, b, i, true);
+      }
+    }
+    // binding
+    assert(idx >= 0);
+    assert(b.arities[idx] == a.length);
+    let ruleidx = 0, j = 0;
+    for (let i = b.names.length; i < b.length; i++ , j++) {
+      if (j >= b.arities[ruleidx]) {
+        j = 0; ruleidx++;
+      }
+      if (ruleidx == idx) {
+        // link match binders
+        let d2 = delimiter(0); d2.env = env;
+        relink(b, i, true, d2, "inside", false);
+        relink(d2, "outside", false, a, j, true);
+      } else {
+        // erase unused vars
+        let e = multiplexer("erase", NaN); e.reverse = true;
+        relink(b, i, true, e, "val", false);
+      }
+    }
     return;
   }
   /*
@@ -569,7 +698,7 @@ function reducePair(pair) {
   let a_new = {}, b_new = {};
   for (let p of pb) {
     a_new[p] = pb.length == 1 ? a : Object.assign({}, a); // reuse object if only 1 (for root)
-    if (b.tag == "abstractor" && p == "bind") {
+    if (b.tag == "operator" && p >= b.arities.length) {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
       relink(b, p, true, a_new[p], ppa, false);
@@ -579,7 +708,7 @@ function reducePair(pair) {
   }
   for (let p of pa) {
     b_new[p] = pa.length == 1 ? b : Object.assign({}, b);
-    if (a.tag == "applicator" && p == "arg") {
+    if (a.tag == "bigapplicator" && p >= 0) {
       b_new[p].reverse = !b_new[p].reverse;
       relink(b_new[p], ppb, false, a, p, true);
     } else {
@@ -588,7 +717,8 @@ function reducePair(pair) {
   }
   for (let pb1 of pb) {
     for (let pa1 of pa) {
-      if (b.tag == "abstractor" && pb1 == "bind" || a.tag == "applicator" && pa1 == "arg") {
+      if (b.tag == "operator" && pb1 >= b.arities.length
+        || a.tag == "bigapplicator" && pa1 >= 0) {
         // reverse link direction
         link(a_new[pb1], pa1, b_new[pa1], pb1);
       } else {

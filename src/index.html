@@ -73,15 +73,41 @@
     // t = A(L("id", A(S("id"), L("y", L("z", A(S("z"), S("y")))))), L("x", S("x")));
     let net; {
       let x = S("x"), y = S("y");
+      let id = L("x", S("x"));
       let l2 = L("x", L("y", A(x, A(x, y))));
-      l2 = A(l2, l2);
-      let t = l2;
+      // let t = A(l2, l2);
+      let t = {
+        tag: "bigapp",
+        func: {tag: "operator", cases: [{ constr: "blah", vars: ["g", "h"], rhs: A(A(id, "g"), "h")},
+          { constr: "what", vars: ["g", "h"], rhs: A(A("g", l2), "h")}]},
+        name: "blah",
+        terms: [l2, l2]
+      };
       net = compile(t);
     }
 
     function toSexpr(thing, needParens) {
-      if (thing.tag == "symbol") return toSexpr(thing.name, needParens);
+      if (thing.tag == "symbol") {
+        return toSexpr(thing.idx, needParens) + (thing.rule != "sole" ? `_${toSexpr(thing.rule_idx, needParens)}` : "");
+      }
+      if (thing.tag == "operator" && thing.cases.length == 1 && thing.cases[0][0] == "sole") {
+        return `λ${toSexpr(thing.cases[0][2], needParens)}`;
+      }
+      if (thing.tag == "operator") {
+        return `λ{` + thing.cases.map(c=> (
+          toSexpr(c[0], false)
+          + " " + toSexpr(c[1], false)
+          + "." +toSexpr(c[2], false)
+        )).join(",") + `}`;
+      }
       if (thing.tag == "abs") return `λ${toSexpr(thing.body, needParens)}`;
+      if (thing.tag == "bigapp") {
+        let s = toSexpr(thing.func, true);
+        for (let t of thing.terms) {
+          s += toSexpr(t, true);
+        }
+        return needParens ? `(${s})` : s;
+      }
       if (thing.tag == "app") {
         let s = `${toSexpr(thing.func, true)}${toSexpr(thing.arg, true)}`;
         return needParens ? `(${s})` : s;
@@ -123,17 +149,20 @@
 
       document.getElementById("output").textContent =
         toSexpr(readback(x, "out", Stack(0, []))) +
-        ` -- active: ${activePairs.length} annihilations: ${stats.annihilate} commutes: ${stats.commute}`;
-      if (!activePairs.length) document.getElementById("advance").disabled = true;
+        `\nactive: ${activePairs.length} annihilations: ${stats.annihilate} commutes: ${stats.commute}`;
+      if (!activePairs.length) {
+        document.getElementById("advance").disabled = true;
+        document.getElementById("ff").disabled = true;
+      }
     }
 
 
     {
-//      lo_redex([net, "out"]);
+      // lo_redex([net, "out"]);
       showNet(net);
       document.getElementById("advance").onclick = () => {
         rewriteStep();
-//        rewriteStepLo();
+        // rewriteStepLo();
         showNet(net);
       }
     }
