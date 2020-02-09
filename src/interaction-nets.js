@@ -133,9 +133,8 @@ function bind(env, v) {
 }
 
 function compile(term) {
-  let env = make_env();
   let i = initiator();
-  resolve(env, term, i, "out");
+  resolve(undefined, term, i, "out");
   return i;
 }
 function resolve(env, term, parent, parent_dir) {
@@ -204,6 +203,7 @@ function resolve(env, term, parent, parent_dir) {
     case "case": {
       let cs = cAse([], []);
       cs.arities.length = term.cases.length;
+      cs.envs = [];
       link(parent, parent_dir, cs, "inp");
       res(term.exp, cs, "out") // compile the scrutinee
       let muxes = [];
@@ -211,7 +211,7 @@ function resolve(env, term, parent, parent_dir) {
         cs.names.push(constr);
         cs.arities[cs.length] = vars.length;
         let new_env = make_env(env);
-        // no binder for new_env
+        new_env.binder = cs; cs.envs.push(new_env);
         for (let v_ of vars) {
           let v = multiplexer(v_, 0);
           muxes.push(v);
@@ -288,49 +288,87 @@ Block = (e, index, directors) => { return { tag: "block", env: e, index, directo
 Level = (e, block, rest) => { return { tag: "level", env: e, block, rest: rest ? rest : [] }; };
 Stack = (bodyindex, levels) => { return { tag: "stack", bodyindex, levels }; };
 
+function validLevel(l) {
+  assert(l.tag == "level");
+  let b = l.block;
+  assert(b.tag == "block");
+  assert(b.index >= 0);
+  for (let d of b.directors) {
+    assert(d.tag == "director");
+  }
+  for (let lr of l.rest) {
+    validLevel(lr);
+  }
+}
+
 function validStack(stack) {
   assert(stack.tag == "stack");
   assert(stack.bodyindex >= 0);
   for (let l of stack.levels) {
-    assert(l.tag == "level");
-    for (let b of [l.block].concat(l.rest)) {
-      assert(b.tag == "block");
-      assert(b.index >= 0);
-      for (let d of b.directors) {
-        assert(d.tag == "director");
-      }
-    }
+    validLevel(l);
   }
   let s = showStack(stack);
+  return s;
+}
+function showLevel(l) {
+  let s = "";
+  if (l.rest.length > 0) s += "[";
+  let b = l.block;
+  if (b.directors.length) s += "(";
+  s += b.index;
+  for (let d of b.directors) {
+    s += "LRABCD"[d.index];
+  }
+  if (b.directors.length) s += ")";
+  for (let lr of l.rest) {
+    s += showLevel(lr);
+  }
+  if (l.rest.length > 0) s += "]";
   return s;
 }
 function showStack(stack) {
   let s = "";
   s += stack.bodyindex;
   for (let l of stack.levels) {
-    if (l.rest.length > 0) s += "[";
-    for (let b of [l.block].concat(l.rest)) {
-      if (b.directors.length) s += "(";
-      s += b.index;
-      for (let d of b.directors) {
-        s += "LRABCD"[d.index];
-      }
-      if (b.directors.length) s += ")";
-    }
-    if (l.rest.length > 0) s += "]";
+    s += showLevel(l);
   }
   return s;
 }
+function blockExtension(a, b, isFirst) {
+  // if (a.index > i) return true;
+  if (a.index !== b.index) return false;
+  if (isFirst) {
+    if (a.directors.length !== b.directors.length - 1) return false;
+    for (let k = 0; k < a.directors.length; k++) {
+      if (a.directors[k].index !== b.directors[k + 1].index) return false;
+    }
+    return true;
+  }
+  if (a.directors.length !== b.directors.length) return false;
+  for (let k = 0; k < a.directors.length; k++) {
+    if (a.directors[k].index !== b.directors[k].index) return false;
+  }
+  return true;
+}
+function levelExtension(a, b, isFirst) {
+  if (!blockExtension(a.block, b.block, isFirst)) return false;
+  if (a.rest.length !== b.rest.length) return false;
+  for (let m = 0; m < a.rest.length; m++) {
+    if (!levelExtension(a.rest[m], b.rest[m])) return false;
+  }
+  return true;
+}
+function isStackExtension(sub, sup, i) {
+  // vague imitation of transparency from the paper
+  // their explanation of substitution is longer than the explanation of the definition...
 
-function subsetStack(sub, sup) {
-  // transparency from the paper
-  // ???
-  /*
-  let i = sub.bodyindex;
-  sup.bodyindex = 0;
-
-  sub <= sup
-  */
+  // instead of setting bodyindex to 0 we skip comparing it
+  if (sub.levels.length !== sup.levels.length) return false;
+  for (let l = 0; l < sub.levels.length; l++) {
+    if (!levelExtension(sub.levels[l], sup.levels[l], l === 0))
+      return false;
+  }
+  return true;
 }
 
 function readback(source, dir, stack) {
@@ -355,7 +393,10 @@ function readback(source, dir, stack) {
           assert(term.names[x]);
           let e = es[x];
           let newstack = Stack(i + 1, [Level(e, Block(e, i + 1))].concat(stack.levels));
+          if (!term[x].bodyedgestack) term[x].bodyedgestack = [];
+          term[x].bodyedgestack.push(newstack);
           t.cases.push([term.names[x], term.arities[x], readback(term, x, newstack)]);
+          term[x].bodyedgestack.pop();
         }
         return t;
       }
@@ -366,12 +407,21 @@ function readback(source, dir, stack) {
           if (i < term.arities[j]) break;
           i -= term.arities[j];
         }
-        let e  = es[j];
+        let e = es[j];
+        let bindindex = stack.levels[0].block.index;
+        let bodyedgestack = undefined;
+        for (let st of term[j].bodyedgestack) {
+          if (st.bodyindex != bindindex) continue;
+          if (!isStackExtension(st, stack, bindindex)) continue;
+          bodyedgestack = st;
+          break;
+        }
+        assert(bodyedgestack);
         assert(stack.levels[0].env == e);
         assert(stack.levels[0].block.env == e);
-        assert(stack.levels[0].block.directors.length > 0); // since we don't elide unit multiplexers
+        assert(stack.levels[0].block.directors.length == 1); // since we don't elide unit multiplexers
         assert(stack.levels[0].block.directors[0].env == e);
-        let b = stack.bodyindex - stack.levels[0].block.index;
+        let b = stack.bodyindex - bindindex;
         return {
           tag: "symbol", idx: b,
           rule: term.names[j], rule_idx: i, name: stack.levels[0].block.directors[0].name
@@ -381,11 +431,16 @@ function readback(source, dir, stack) {
     }
     case "delimiter": {
       let e = term.env;
-      if (term.level == 0 && from_dir == "outside")
+      if (term.level == 0 && from_dir == "outside") {
+        // return readback(term, "inside", Stack(stack.bodyindex + 1, [Level(e, Block(e, stack.bodyindex + 1))].concat(stack.levels)));
         return readback(term, "inside", Stack(stack.bodyindex, [Level(e, Block(e, 0))].concat(stack.levels)));
+      }
       if (term.level == 0 && from_dir == "inside") {
-        assert(stack.levels[0].env == e);
-        assert(stack.levels[0].block.env == e);
+        let l = stack.levels[0];
+        assert(l.env == e);
+        assert(l.block.env == e);
+        assert(l.block.directors.length <= 1);
+        // return readback(term, "outside", Stack(stack.bodyindex - 1, stack.levels.slice(1)));
         return readback(term, "outside", Stack(stack.bodyindex, stack.levels.slice(1)));
       }
       let i = term.level - 1;
@@ -393,19 +448,18 @@ function readback(source, dir, stack) {
       let levels = Array.from(stack.levels);
       if (from_dir == "outside") {
         // σ[bκl]_i -> σ[bl,κ]_i
-        // split a level into the stack
-        let l = levels[i];
-        let k = Level(e, l.rest[0]), lnew = Object.assign({}, l);
-        assert(l.rest[0].env == e);
-        lnew.rest = l.rest.slice(1);
-        levels.splice(i, 1, lnew, k);
+        // split a level back into the stack
+        let l = Object.assign({}, levels[i]), k = l.rest[0];
+        assert(k.env == e);
+        l.rest = l.rest.slice(1);
+        levels.splice(i, 1, l, k);
         return readback(term, "inside", Stack(stack.bodyindex, levels));
       } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
-        // AFAICT this means grouping two levels in the stack together (destructing a level)
+        // level κ+1 gets stored for safekeeping in level i
         let l1 = Object.assign({}, levels[i]), l2 = levels[i + 1];
         assert(l2.env == e);
-        l1.rest = [l2.block].concat(l2.rest, l1.rest);
+        l1.rest = [l2].concat(l1.rest);
         levels.splice(i, 2, l1);
         return readback(term, "outside", Stack(stack.bodyindex, levels));
       }
@@ -431,6 +485,7 @@ function readback(source, dir, stack) {
         let b = Object.assign({}, l.block);
         assert(b.env == e);
         assert(l.env == e);
+        assert(b.directors.length == 0);
         b.directors = [Director(e, term.name, from_dir)].concat(b.directors);
         l.block = b;
         levels[i] = l;
@@ -456,9 +511,14 @@ function readback(source, dir, stack) {
   assert(false);
 }
 
+let colormap = ['black', '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
+  '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'];
+
+
 function getdot(root) {
   // traverse
   let visitedEdges = new Set();
+  let envs = new Set();
 
   var stack = [root];
   for (let e of activePairs) {
@@ -483,6 +543,13 @@ function getdot(root) {
     if (visitedNodes.has(node))
       continue;
     visitedNodes.add(node);
+
+    if (node.envs)
+      for (let e of node.envs)
+        envs.add(e.n);
+    if (node.env)
+      envs.add(node.env.n);
+
     let names = ports(node);
     for (let n of names) {
       if (n in node && node[n]) {
@@ -506,6 +573,7 @@ function getdot(root) {
   for (let i of visitedNodes) {
     m.set(i, c++);
   }
+  envs = Array.from(envs);
 
   var output = `digraph {\n  node [style="fill: white; stroke: black"]\n`;
   for (let c of visitedNodes) {
@@ -524,7 +592,7 @@ function getdot(root) {
     })();
     let human = (() => {
       let level = c.level ? `<sub>${c.level}</sub>` : "";
-      let name = c.name ? `<sub>${c.name}</sub>` : "";
+      let name = c.name && c.name !== "sole" ? `<sub>${c.name}</sub>` : "";
       switch (c.tag) {
         case "initiator": return `<span id=initiator>I</span>`;
         case "applicator": return `@`;
@@ -534,14 +602,22 @@ function getdot(root) {
         case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
-        case "operator": return `λ{${c.names}}`;
+        case "operator":
+          if (c.names.length == 1 && c.names[0] == "sole") {
+            return `λ`;
+          } else return `λ{${c.names}}`;
         default: assert(false);
       }
     })();
     let i = m.get(c);
-    output += `"${i}" [shape=${shape},labelType="html",label="${human}"];\n`;
+    let env_num = 0;
+    // if (c.env) env_num = envs.indexOf(c.env.n) + 1;
+    // if (c.envs) env_num = envs.indexOf(c.envs[0].n) + 1;
+    if (c.env) env_num = c.env.n + 1;
+    if (c.envs) env_num = c.envs[0].n + 1;
+    output += `"${i}" [shape=${shape},labelType="html",label="${human}",style="stroke: ${colormap[env_num]};"];\n`;
   }
-  let arrows = ["black", "red", "green", "blue", "purple", "yellow", "orange"];
+  let arrows = colormap;
   for (let edge of visitedEdges) {
     let a = m.get(edge.a);
     let a_dir = ports(edge.a).indexOf(edge.a_dir);
@@ -561,7 +637,12 @@ function getdot(root) {
 }
 function eqNode(n1, n2) {
   if (n1.tag !== n2.tag) return false;
-  if (n1.tag === "delimiter" && n1.level === n2.level) return true;
+  if (n1.tag === "delimiter" && n1.level === n2.level) {
+    if(n1.level == 0) {
+      return false;
+    }
+    return true;
+  }
 
   if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0 || isNaN(n1.level));
   if (n1.tag === "multiplexer" && n1.level === n2.level) {
@@ -571,18 +652,46 @@ function eqNode(n1, n2) {
   return false;
 }
 stats = { annihilate: 0, commute: 0 };
-function updateLevel(a, b) {
-  if (!a.hasOwnProperty("level")) return;
-  if (b.tag == "abstractor" || b.tag == "operator") {
-    a.level++;
+function updateLevels(a, b) {
+  let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
+  if (b.tag === "operator") {
+    if (has_level(a))
+      a.level++;
     return;
   }
   if (b.tag == "delimiter") {
-    if (a.level >= b.level) {
+    if (a.tag == "multiplexer") {
+      if (a.level >= b.level)
+        a.level++;
+      return;
+    }
+    if (a.tag == "delimiter") {
+      let i = a.level, j = b.level;
+      if (i < j) {
+        b.level++;
+        return;
+      } else if (i > j) {
+        a.level++;
+        return;
+      }
+      assert(i === 0 && j === 0);
+      // extruding [a][b] -> [[ab]]
+      // it's almost arbitrary which scope is the outer,
+      // but preserving a results in stack underflow, so keep b's [
       a.level++;
       return;
     }
+    assert(!a.hasOwnProperty("level"));
+    return;
   }
+  if (a.tag == "delimiter" && b.tag == "multiplexer") {
+    if (a.level <= b.level)
+      b.level++;
+    return;
+  }
+  assert(a.tag !== "operator" && a.tag !== "delimiter" &&
+    b.tag !== "operator" && b.tag !== "delimiter");
+  return;
 }
 
 // BOHM: f.nform[i].nform[f.nport[i]] == f
@@ -690,7 +799,7 @@ function reducePair(pair) {
   */
   // commute
   stats.commute++;
-  updateLevel(a, b); updateLevel(b, a);
+  updateLevels(a, b);
   let pa = ports(a), ppa = primaryPort(a);
   pa.splice(pa.indexOf(ppa), 1);
   let pb = ports(b), ppb = primaryPort(b);

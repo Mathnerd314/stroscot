@@ -48,10 +48,12 @@
 <body>
   <div>
     <input id="advance" type="button" value=">">
+    <input id="beta" type="button" value="β">
+    <input id="number" type="number" value="970">
     <input id="ff" type="button" value=">|">
   </div>
   <pre id="output"></pre>
-  <svg id="svg" width="1900" height="2000">
+  <svg id="svg" width="1900" height="4000">
     <g id="graph" transform="translate(0,0)" />
   </svg>
   <script>
@@ -72,17 +74,28 @@
 
     // t = A(L("id", A(S("id"), L("y", L("z", A(S("z"), S("y")))))), L("x", S("x")));
     let net; {
-      let x = S("x"), y = S("y");
+      let x = "x", y = "y", f = "f", i = "i", h = "h", u = "u";
       let id = L("x", S("x"));
       let l2 = L("x", L("y", A(x, A(x, y))));
-      // let t = A(l2, l2);
+      let paper_example = A(l2, l2);
       let t = {
         tag: "bigapp",
-        func: {tag: "operator", cases: [{ constr: "blah", vars: ["g", "h"], rhs: A(A(id, "g"), "h")},
-          { constr: "what", vars: ["g", "h"], rhs: A(A("g", l2), "h")}]},
+        func: {
+          tag: "operator", cases: [{ constr: "blah", vars: ["g", "h"], rhs: A(A(id, "g"), "h") },
+          { constr: "what", vars: ["g", "h"], rhs: A(A("g", l2), "h") }]
+        },
         name: "blah",
         terms: [l2, l2]
       };
+
+      // (\f. f (f (\x. x))) (\i. (\f. f (\x. x) (f (\x. x))) (\x. (\h. \u. h (h u)) (\y. x (i y))))
+      // definitely reduces to \u. u
+      let mlc_counterexample =
+        A(L(f, A(f, A(f, L(x, x)))),
+          L(i, A(L(f, A(A(f, L(x, x)), A(f, L(x, x)))),
+            L(x, A(L(h, L(u, A(h, A(h, u)))), L(y, A(x, A(i, y))))))));
+
+
       net = compile(t);
     }
 
@@ -94,10 +107,10 @@
         return `λ${toSexpr(thing.cases[0][2], needParens)}`;
       }
       if (thing.tag == "operator") {
-        return `λ{` + thing.cases.map(c=> (
+        return `λ{` + thing.cases.map(c => (
           toSexpr(c[0], false)
           + " " + toSexpr(c[1], false)
-          + "." +toSexpr(c[2], false)
+          + "." + toSexpr(c[2], false)
         )).join(",") + `}`;
       }
       if (thing.tag == "abs") return `λ${toSexpr(thing.body, needParens)}`;
@@ -147,11 +160,13 @@
       }
       grph.transform.baseVal[0].setMatrix(tr);
 
+      document.getElementById("number").value = edge_id;
       document.getElementById("output").textContent =
         toSexpr(readback(x, "out", Stack(0, []))) +
-        `\nactive: ${activePairs.length} annihilations: ${stats.annihilate} commutes: ${stats.commute}`;
+        `\nedges: ${edge_id} active: ${activePairs.length} annihilations: ${stats.annihilate} commutes: ${stats.commute}`;
       if (!activePairs.length) {
         document.getElementById("advance").disabled = true;
+        document.getElementById("beta").disabled = true;
         document.getElementById("ff").disabled = true;
       }
     }
@@ -166,8 +181,26 @@
         showNet(net);
       }
     }
+    document.getElementById("beta").onclick = () => {
+      let p = activePairs[activePairs.length - 1];
+      if (p.a.tag == "bigapplicator" && p.b.tag == "operator") {
+        rewriteStep();
+        showNet(net);
+      } else {
+        while (activePairs.length > 0) {
+          let p = activePairs[activePairs.length - 1];
+          if (p.a.tag == "bigapplicator" && p.b.tag == "operator") break;
+          rewriteStep();
+          getdot(net);
+          readback(net, "out", Stack(0, []));
+        }
+        showNet(net);
+      }
+    }
     document.getElementById("ff").onclick = () => {
-      while (activePairs.length) {
+      let v = document.getElementById("number").value;
+      while (activePairs.length && edge_id < v) {
+        // document.getElementById("number").value = edge_id;
         rewriteStep();
         getdot(net);
         readback(net, "out", Stack(0, []));
