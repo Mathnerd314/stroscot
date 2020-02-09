@@ -143,7 +143,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/Overloading.rst.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Overloading.rst" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -161,14 +163,11 @@
 <p>Stroscot supports typical pattern matching and predicate dispatch:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="k">with</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
-<p>The cases are not ordered, instead they are matched most-specific to
-least-specific. Specificity is defined by an SMT solver, i.e. SAT(a &amp;
-not b) and UNSAT (not a &amp; b) means that a is less specific than b.</p>
-<p>If there is a tie regarding specificity, e.g. we were to modify the last
-case:</p>
+<p>The cases are not ordered, instead they are matched most-specific to least-specific. Specificity is defined by an SMT solver, i.e. SAT(a &amp; not b) and UNSAT (not a &amp; b) means that a is less specific than b.</p>
+<p>If there is a tie regarding specificity, e.g. we were to modify the last case:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
@@ -178,6 +177,17 @@ case:</p>
 </pre></div>
 </div>
 <p>Then it is an error.</p>
+<p>However, cases that overlap but produce the same result are allowed.
+It could be useful for tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fib</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">fib</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">fib</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># test</span>
+<span class="n">fib</span> <span class="mi">5</span> <span class="o">=</span> <span class="mi">5</span>
+</pre></div>
+</div>
+<p>The implementation is similar to that used for checking equality of dependent types, i.e. it does some normalization but isn’t omniscient. The optimizer decides which case is dead code and can be dropped.</p>
 <div class="section" id="sequential-matches">
 <h2>Sequential matches<a class="headerlink" href="#sequential-matches" title="Permalink to this headline">¶</a></h2>
 <p>The pipe syntax matches cases from top to bottom:</p>
@@ -187,7 +197,7 @@ case:</p>
 <span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
-<p>You can also use match within a function:</p>
+<p>Maybe you will also be able to use match within a function, if the syntax works out:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">match</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
           <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>

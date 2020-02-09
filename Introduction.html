@@ -83,6 +83,12 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inspiring-projects">Inspiring projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#goals">Goals</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-ultimate">The ultimate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roadmap">Roadmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance">Performance</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
@@ -142,7 +148,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/Introduction.rst.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Introduction.rst" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -163,7 +171,7 @@ languages, it is our duty to discover it and spread it far and wide.</p>
 <p>In Stroscot programs are freed from the shackles of languages past and
 idealized to their purest form.</p>
 <div class="section" id="inspiring-projects">
-<h2>Inspiring projects<a class="headerlink" href="#inspiring-projects" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Inspiring projects<a class="headerlink" href="#inspiring-projects" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/cheery/lever/">Lever</a></p></li>
 <li><p><a class="reference external" href="https://github.com/ghc/ghc/">GHC</a></p></li>
@@ -172,7 +180,36 @@ idealized to their purest form.</p>
 <li><p><a class="reference external" href="https://github.com/briantrice/slate-language">Slate</a></p></li>
 <li><p><a class="reference external" href="https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md">Jai</a></p></li>
 <li><p><a class="reference external" href="https://pinafore.info/">Pinafore</a></p></li>
+<li><p><a class="reference external" href="http://github.com/codedot/lambda">Macro Lambda Calculus</a></p></li>
+<li><p><a class="reference external" href="https://github.com/JoshuaGrams/pep">A Pint-sized Earley Parser</a></p></li>
+<li><p><a class="reference external" href="https://github.com/vito/atomo">Atomo</a> / <a class="reference external" href="https://github.com/vito/atomy">Atomy</a></p></li>
 </ul>
+</div>
+<div class="section" id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">run_sql_statement</span> <span class="p">{</span> <span class="n">SELECT</span> <span class="o">...</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The idea extends further, embedding lower-level and incompatible languages like assembly and C++.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">asm</span> <span class="p">{</span> <span class="n">sumsq</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">y</span><span class="p">)</span> <span class="p">}</span>
+<span class="n">my_func</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;foo.cpp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s2">&quot;my_func&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="the-ultimate">
+<h3>The ultimate<a class="headerlink" href="#the-ultimate" title="Permalink to this headline">¶</a></h3>
+<p>Eventually I would like Stroscot to be the ultimate programming language, supporting all known language constructs to some degree and providing a testbench for research into new ones. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL’s COMEFROM as something best left unimplemented, but it’s not hard to implement with continuations. The trickier parts are actually at the low level, interfacing garbage collectors and calling conventions, and the value proposition there should be clear.</p>
+</div>
+<div class="section" id="roadmap">
+<h3>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">¶</a></h3>
+<p>World domination is of course very far off, the roadmap at the moment is basically “cool parser, optimal evaluation, Thorin-like IR, static typing/analysis, x86-64 / LLVM / WASM backend (pick 1), some kind of GC or memory management”. But if you are wondering why a feature seems unduly powerful or complex, it is because I aim for the ultimate rather than something just alright.  A lot of programming features overlap, so I’ll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. I’m not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.</p>
+<p>My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms in the compiler then people will refer to Stroscot just for the algorithms.</p>
+</div>
+<div class="section" id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h3>
+<p>Stroscot aims for C-like performance on C-like programs, and similarly to match or exceed the performance of other styles of programming on their compilers. Beyond that, it is hard to make guarantees about the performance of any of the more expressive features. Since the algorithms used are best-in-class, Stroscot will likely give acceptable performance, but some problems are undecidable and the heuristics used may not be sufficient.</p>
+<p>In the near term, since there is no compiler or interpreter fully implemented, performance is not measurable and hence is not a consideration. Once the interpreter can pass the tower of interpreters test, that will be the main performance criterion for it. For compilation, the main performance-focused feature will be incremental compilation with function-level hashing; additional optimizations may be made if this is insufficient.</p>
+</div>
 </div>
 </div>
 

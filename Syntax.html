@@ -88,6 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#arithmetic-and-parentheses">Arithmetic and Parentheses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#strings">Strings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#structured-data">Structured Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parsing">Parsing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
@@ -144,7 +145,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/Syntax.rst.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Syntax.rst" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -247,7 +250,21 @@ always good practice.</p>
 </div>
 <div class="section" id="structured-data">
 <h2>Structured Data<a class="headerlink" href="#structured-data" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot supports records, arrays, and arbitrary atoms as well.</p>
+<p>Stroscot supports records, arrays, and arbitrary atoms as well. A record of functions is called a vtable. Structural subtyping of records is supported: you can pass <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">1,</span> <span class="pre">b:</span> <span class="pre">2}</span></code> to a function expecting only <code class="docutils literal notranslate"><span class="pre">{b:</span> <span class="pre">Int}</span></code>.</p>
+</div>
+<div class="section" id="parsing">
+<h2>Parsing<a class="headerlink" href="#parsing" title="Permalink to this headline">¶</a></h2>
+<p>I’ve got a basic Earley algorithm working for now. But eventually I’m extending it with BSRs and layout and <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a><a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> and other fun things. There’s also <a class="reference external" href="https://github.com/attresearch/yakker">Yakker</a>, which is the most developed parser I’ve seen feature-wise. It’s only missing incremental parsing.</p>
+<blockquote>
+<div><p>A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.</p>
+</div></blockquote>
+<p>Operator precedence will be a DAG, rather than levels.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">precedence</span> <span class="n">_</span><span class="o">*</span><span class="n">_</span> <span class="n">higher</span> <span class="n">than</span> <span class="n">_</span><span class="o">+</span><span class="n">_</span>
+<span class="n">precedence</span> <span class="n">_</span><span class="o">/</span><span class="n">_</span> <span class="n">equals</span> <span class="n">_</span><span class="o">*</span><span class="n">_</span>
+</pre></div>
+</div>
+<p>I’ve looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There’s just no information on what possible parses are available or what token is expected. Whereas with Earley you can do “Ruby slippers”: scan the sets for what they want next, output “warning: expected ‘;’ at end of statement”, and then add that to the parse forest and continue parsing with almost no overhead.</p>
+<p>Treesitter implements incremental LR parsing with error recovery, but since it doesn’t support ambiguity I don’t think it’s sufficient for a compiler.</p>
 </div>
 </div>
 

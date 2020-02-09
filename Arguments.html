@@ -146,7 +146,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/Arguments.rst.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Arguments.rst" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -163,6 +165,10 @@
 <h1>Argument passing<a class="headerlink" href="#argument-passing" title="Permalink to this headline">¶</a></h1>
 <p>Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
 the shorter the code will be.</p>
+<p>Modula-3 added keyword arguments and default arguments, to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">foo</span> <span class="n">a</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span><span class="mi">1</span><span class="p">}</span>
+</pre></div>
+</div>
 <div class="section" id="keyword-arguments">
 <h2>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">foo</span> <span class="n">w</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span> <span class="o">*</span> <span class="n">w</span>
@@ -270,7 +276,7 @@ projects.</p>
 <h2>Other types of arguments<a class="headerlink" href="#other-types-of-arguments" title="Permalink to this headline">¶</a></h2>
 <p>Default arguments, output arguments, and variadic arguments are
 supported:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>a {k:1} = k
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>a {k:1} = k + 1
 a # 2
 
 b = out {a:3}; 2
