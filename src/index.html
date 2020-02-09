@@ -51,6 +51,7 @@
     <input id="beta" type="button" value="β">
     <input id="number" type="number" value="970">
     <input id="ff" type="button" value=">|">
+    <input id="rotate" type="button" value="↻">
   </div>
   <pre id="output"></pre>
   <svg id="svg" width="1900" height="4000">
@@ -96,7 +97,7 @@
             L(x, A(L(h, L(u, A(h, A(h, u)))), L(y, A(x, A(i, y))))))));
 
 
-      net = compile(t);
+      net = compile(paper_example);
     }
 
     function toSexpr(thing, needParens) {
@@ -187,9 +188,21 @@
         rewriteStep();
         showNet(net);
       } else {
+        reduce:
         while (activePairs.length > 0) {
           let p = activePairs[activePairs.length - 1];
-          if (p.a.tag == "bigapplicator" && p.b.tag == "operator") break;
+          beta:
+          if (p.a.tag == "bigapplicator" && p.b.tag == "operator") {
+            for (let i = 0; i < activePairs.length - 1; i++) {
+              let q = activePairs[i];
+              if (q.a.tag !== "bigapplicator" || q.b.tag !== "operator") {
+                activePairs[i] = p;
+                activePairs[activePairs.length - 1] = q;
+                break beta;
+              }
+            }
+            break reduce;
+          }
           rewriteStep();
           getdot(net);
           readback(net, "out", Stack(0, []));
@@ -207,6 +220,11 @@
       }
       showNet(net);
     }
+
+    document.getElementById("rotate").onclick = () => {
+      activePairs.unshift(activePairs.pop());
+      showNet(net);
+    };
   </script>
 </body>
 
