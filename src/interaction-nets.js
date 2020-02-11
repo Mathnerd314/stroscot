@@ -9,6 +9,10 @@ const assert = function (condition, message) {
   }
 };
 
+function clone(o) {
+  return Object.assign({}, o);
+}
+
 applicator = (inp, func, arg) => { return { tag: "applicator", inp, func, arg } };
 abstractor = (name, inp, body, bind) => { return { tag: "abstractor", name, inp, body, bind } };
 
@@ -304,7 +308,7 @@ function resolve(env, term, parent, parent_dir) {
 Director = (e, name, index) => { return { tag: "director", env: e, name, index }; };
 Block = (e, index, directors) => { return { tag: "block", env: e, index, directors: directors ? directors : [] }; };
 Level = (e, block, rest) => { return { tag: "level", env: e, block, rest: rest ? rest : [] }; };
-Stack = () => { return { tag: "stack", bodyindex: 0, levels: [], scopes: 0, returns: 0 }; };
+Stack = () => { return { tag: "stack", bodyindex: 0, levels: [], scopes: 0, returns: 0, edge_ids: [] }; };
 
 function validLevel(l) {
   assert(l.tag == "level");
@@ -398,6 +402,8 @@ function isStackExtension(sub, sup) {
 }
 
 function readback(source, dir, stack) {
+  stack = clone(stack);
+  stack.edge_ids = stack.edge_ids.concat([source[dir].id]);
   let [term, from_dir] = follow(source, dir);
   validStack(stack);
   switch (term.tag) {
@@ -417,7 +423,7 @@ function readback(source, dir, stack) {
         let t = { tag: "operator", cases: [] };
         for (let x = 0; x < term.arities.length; x++) {
           assert(term.names[x]);
-          let newstack = Object.assign({}, stack);
+          let newstack = clone(stack);
           newstack.bodyindex++;
           if (!explicit_lambda_delimiters) {
             let e = es[x];
@@ -472,7 +478,7 @@ function readback(source, dir, stack) {
     }
     case "delimiter": {
       let e = term.env;
-      let newstack = Object.assign({}, stack);
+      let newstack = clone(stack);
       if (term.level == 0 && from_dir == "outside") {
         newstack.levels = [Level(e, Block(e, newstack.scopes))].concat(stack.levels);
         if (explicit_lambda_delimiters)
@@ -501,7 +507,7 @@ function readback(source, dir, stack) {
       if (from_dir == "outside") {
         // σ[bκl]_i -> σ[bl,κ]_i
         // split a level back into the stack
-        let l = Object.assign({}, levels[i]), k = l.rest[0];
+        let l = clone(levels[i]), k = l.rest[0];
         if (!pop_scopes) {
           assert(k.env == e);
           assert(k.block.env == e);
@@ -513,7 +519,7 @@ function readback(source, dir, stack) {
       } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
         // level κ+1 gets stored for safekeeping in level i
-        let l1 = Object.assign({}, levels[i]), l2 = levels[i + 1];
+        let l1 = clone(levels[i]), l2 = levels[i + 1];
         if (!pop_scopes) {
           assert(l2.env === e);
           assert(l2.block.env === e);
@@ -527,12 +533,12 @@ function readback(source, dir, stack) {
     }
     case "multiplexer": {
       let i = term.level, e = term.env;
-      let newstack = Object.assign({}, stack);
+      let newstack = clone(stack);
       let levels = Array.from(newstack.levels); newstack.levels = levels;
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
-        let l = Object.assign({}, levels[i]);
-        let b = Object.assign({}, l.block);
+        let l = clone(levels[i]);
+        let b = clone(l.block);
         let d = b.directors[0];
         assert(d.name == term.name);
         assert(d.env == e);
@@ -546,8 +552,8 @@ function readback(source, dir, stack) {
         return readback(term, d.index, newstack);
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
-        let l = Object.assign({}, levels[i]);
-        let b = Object.assign({}, l.block);
+        let l = clone(levels[i]);
+        let b = clone(l.block);
         if (!pop_scopes) {
           assert(b.env == e);
           assert(l.env == e);
@@ -586,6 +592,7 @@ function readback(source, dir, stack) {
 let colormap = ['black', '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
   '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928'];
 
+let Graph = graphlibDot.graphlib.Graph;
 
 function getdot(root) {
   // traverse
@@ -640,14 +647,16 @@ function getdot(root) {
   }
 
   // Map of the things
-  var c = 0;
+  var num_nodes = 0;
   let m = new Map();
   for (let i of visitedNodes) {
-    m.set(i, c++);
+    m.set(i, num_nodes++);
   }
   envs = Array.from(envs);
+  envs.sort((a,b) => b-a);
 
-  var output = `digraph {\n  node [style="fill: white; stroke: black"]\n`;
+  let g = new Graph({ multigraph: true });
+  g.setGraph({});
   for (let c of visitedNodes) {
     let shape = (() => {
       switch (c.tag) {
@@ -687,7 +696,7 @@ function getdot(root) {
     // if (c.envs) env_num = envs.indexOf(c.envs[0].n) + 1;
     if (c.env) env_num = c.env.n + 1;
     if (c.envs) env_num = c.envs[0].n + 1;
-    output += `"${i}" [shape=${shape},labelType="html",label="${human}",style="stroke: ${colormap[env_num]};"];\n`;
+    g.setNode(i, { shape, labelType: "html", label: human, style: `fill: white; stroke: ${colormap[env_num]};` });
   }
   let arrows = colormap;
   for (let edge of visitedEdges) {
@@ -699,13 +708,23 @@ function getdot(root) {
     if (b_dir > arrows.length) b_dir = 0;
     let is_active = edge.active ? "stroke-width: 3; " : "";
     let is_spine = redexEdges.has(edge) || (activePairs[activePairs.length - 1] == edge) ? "stroke-dasharray: 2; " : "";
-    output += `"${a}" -> "${b}" [label="${edge.id}",`
-      //      + (a_dir == "bind" ? `weight="0",` : "")
-      + `style="${is_active}${is_spine}stroke: ${arrows[a_dir]}; fill: none",`
-      + `arrowheadStyle="fill: ${arrows[b_dir]}"];\n`;
+    g.setEdge(a, b, {
+      label: edge.id,
+      style: `${is_active}${is_spine}stroke: ${arrows[a_dir]}; fill: none;`,
+      arrowheadStyle: "fill: ${arrows[b_dir]}"
+    }, edge.id);
   }
-  output += `}\n`;
-  return output;
+  envs.forEach((e, idx) => {
+    g.setNode(num_nodes, {
+      shape: "rect",
+      labelType: "html",
+      label: "" + e,
+      style: `fill: ${colormap[e + 1]}; stroke: gray;`
+    });
+    g.setEdge(num_nodes, idx == 0 ? 0 : num_nodes - 1, {});
+    num_nodes++;
+  });
+  return g;
 }
 function eqNode(n1, n2) {
   if (n1.tag !== n2.tag) return false;
@@ -831,7 +850,7 @@ function extrudeDelimiter(d, g, g_dir, moved) {
       assert(!is_opening);
       for (let i = 0; i < g.length; i++) {
         let [f, f_dir] = follow(g, i);
-        let dn = Object.assign({}, d);
+        let dn = clone(d);
         if (i >= g.arities.length)
           dn.reverse = !dn.reverse;
         extrudeDelimiter(dn, f, f_dir, true);
@@ -868,7 +887,7 @@ function extrudeDelimiter(d, g, g_dir, moved) {
       assert(!is_opening);
       for (let i of ["func", ...Array(g.length).keys()]) {
         let [f, f_dir] = follow(g, i);
-        let dn = Object.assign({}, d);
+        let dn = clone(d);
         extrudeDelimiter(dn, f, f_dir, true);
       }
     } else if (g_dir == "func") {
@@ -890,7 +909,7 @@ function extrudeDelimiter(d, g, g_dir, moved) {
         g.level++;
       for (let i = 0; i < g.length; i++) {
         let [f, f_dir] = follow(g, i);
-        let dn = Object.assign({}, d);
+        let dn = clone(d);
         extrudeDelimiter(dn, f, f_dir, true);
       }
     } else {
@@ -1005,14 +1024,14 @@ function reducePair(pair) {
   pb.splice(pb.indexOf(ppb), 1);
   let a_new = {}, b_new = {};
   for (let p of pb) {
-    a_new[p] = pb.length == 1 ? a : Object.assign({}, a); // reuse object if only 1 (for root)
+    a_new[p] = pb.length == 1 ? a : clone(a); // reuse object if only 1 (for root)
     if (b.tag == "operator" && p >= b.arities.length) {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
     }
   }
   for (let p of pa) {
-    b_new[p] = pa.length == 1 ? b : Object.assign({}, b);
+    b_new[p] = pa.length == 1 ? b : clone(b);
     if (a.tag == "bigapplicator" && p !== "inp") {
       b_new[p].reverse = !b_new[p].reverse;
     }

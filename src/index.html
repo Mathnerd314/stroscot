@@ -101,8 +101,10 @@
           L(i, A(L(f, A(A(f, L(x, x)), A(f, L(x, x)))),
             L(x, A(L(h, L(u, A(h, A(h, u)))), L(y, A(x, A(i, y))))))));
 
+      let w = L(x, A(x,x));
+      let ww = A(w,w);
 
-      net = compile(paper_example);
+      net = compile(ww);
     }
 
     function toSexpr(thing, needParens) {
@@ -149,7 +151,7 @@
     }
     var render = dagreD3.render();
     function showNet(x) {
-      var g = graphlibDot.read(getdot(x));
+      var g = getdot(x);
 
       // Render the graph into svg g
       let graph = d3.select("#graph"), grph = graph.node();
