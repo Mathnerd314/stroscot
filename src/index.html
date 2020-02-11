@@ -42,16 +42,21 @@
     .demux {
       text-decoration: underline;
     }
+
+    tspan {
+      z-index: 2;
+    }
   </style>
 </head>
 
 <body>
   <div>
+    <input id="rotate" type="button" value="↻">
     <input id="advance" type="button" value=">">
     <input id="beta" type="button" value="β">
     <input id="number" type="number" value="970">
     <input id="ff" type="button" value=">|">
-    <input id="rotate" type="button" value="↻">
+    <input id="finish" type="button" value=">>">
   </div>
   <pre id="output"></pre>
   <svg id="svg" width="1900" height="4000">
@@ -183,8 +188,18 @@
       }
     }
     document.getElementById("beta").onclick = () => {
+      let alright = (a, b) => {
+        if (a.tag == "delimiter" && b.tag == "delimiter") {
+          if (a.level == b.level) return false;
+          return true;
+        }
+        if (a.tag == "bigapplicator" && b.tag == "operator") {
+          return false;
+        }
+        return true;
+      };
       let p = activePairs[activePairs.length - 1];
-      if (p.a.tag == "bigapplicator" && p.b.tag == "operator") {
+      if (!alright(p.a, p.b)) {
         rewriteStep();
         showNet(net);
       } else {
@@ -192,10 +207,10 @@
         while (activePairs.length > 0) {
           let p = activePairs[activePairs.length - 1];
           beta:
-          if (p.a.tag == "bigapplicator" && p.b.tag == "operator") {
+          if (!alright(p.a, p.b)) {
             for (let i = 0; i < activePairs.length - 1; i++) {
               let q = activePairs[i];
-              if (q.a.tag !== "bigapplicator" || q.b.tag !== "operator") {
+              if (alright(q.a, q.b)) {
                 activePairs[i] = p;
                 activePairs[activePairs.length - 1] = q;
                 break beta;
@@ -220,11 +235,38 @@
       }
       showNet(net);
     }
+    document.getElementById("finish").onclick = () => {
+      while (activePairs.length) {
+        // document.getElementById("number").value = edge_id;
+        rewriteStep();
+        getdot(net);
+        readback(net, "out", Stack(0, []));
+      }
+      showNet(net);
+    }
 
     document.getElementById("rotate").onclick = () => {
       activePairs.unshift(activePairs.pop());
       showNet(net);
     };
+
+    document.getElementById("svg").onclick = (e) => {
+      let elm = e.target, p = elm;
+      while (!p.hasAttribute("class") || p.getAttribute("class") !== "edgeLabels") {
+        p = p.parentNode;
+        if (!p || p == document) return;
+      }
+      let eid = 1 * elm.textContent;
+      let oid = activePairs[activePairs.length - 1].id;
+      if (eid !== oid) {
+        do {
+          activePairs.unshift(activePairs.pop());
+          if (activePairs[activePairs.length - 1].id === oid) return;
+        } while (activePairs[activePairs.length - 1].id !== eid);
+      }
+      rewriteStep();
+      showNet(net);
+    }
   </script>
 </body>
 

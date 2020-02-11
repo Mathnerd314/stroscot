@@ -14,6 +14,7 @@ For more, see:
   Syntax
   Overloading
   Types
+  Memory
   FAQ
 
 Github repository: https://github.com/Mathnerd314/stroscot

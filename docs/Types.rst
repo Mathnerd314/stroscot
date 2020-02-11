@@ -34,8 +34,11 @@ Terminology
 
 At this point you might be getting confused about terminology. I certainly am. So here we are:
 
+memory cell
+   A circuit that can store some fixed number of logical bits, 0 or 1. Since ternary computers might eventually become popular, a cell is probably best modeled as a register containing an integer ``i`` with ``0 <= i < MAX`` with no restriction that ``MAX`` is a power of 2.
+
 value
-   A string of bits, paired with some interpretation as a data type
+   A group of memory cells, paired with some interpretation as a data type
 
 data type
    A representational type, that can generally be narrowed down to a pair of functions doing pickle/unpickle on the value's bits
@@ -44,13 +47,13 @@ reference
    A value providing a way to access another value, usually a memory address. It's distinct from an API because at any given time there's only one unique value that can be accessed using the reference.
 
 variable
-   A name (identifier) in the current scope that's associated to a reference.
+   A name/symbol/identifier representing a function argument or mathematical object
 
 l-value
-   A variable, basically. The difference is some people don't consider ``arr[i]`` to be a variable, while they'll all agree it's an l-value.
+   A variable representing a memory cell. The difference is some people don't consider ``arr[i]`` to be a variable, while they'll all agree it's an l-value.
 
 r-value
-   A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address. Segfaults galore. ¯\\_(ツ)_/¯
+   A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address, to get an x-value. Segfaults galore. ¯\\_(ツ)_/¯
 
 Type declaration syntax
 =======================
@@ -72,19 +75,19 @@ The third choice is to put the type on the right with the expression:
 ::
 
    name = type value;
-   name = value : type; # (:) is just an operator x : y = y x
+   name = value : type; # (:) is an operator x : y = y x
 
-This seems like the most logical place for it. For example, if I'm declaring a new mutable variable, I don't want to say that the name is the mutable part of it, because that's just a reference to it. It's a handle so I can write my program.
+This third option seems like the most logical place. For example, if I'm declaring a new mutable variable, I don't want to say that the name is mutable. The name is just what I use to refer to the variable; it's a handle so I can write my program without resorting to hexadecimal addresses.
 
 What we want is to declare that the mutability as part of the value; it's a mutable value. So putting it in the expression tells the compiler that you can't store this like you would store a normal constant value; you have to create a data structure on the stack or the heap or whatever to access this variable.
 
-By comparison, these other syntaxes don't make sense. If I had ``mut a = 1``, I'm not going to talk about "mut a" for the rest of the program, I'm going to talk about ``a``. And what happens if I write ``mut = 1``? Terrible things. Similarly ``: mut = 1`` makes no sense. Whereas ``a = mut`` actually makes some sense if I decide that 3 characters is too long, or if I'm doing higher-order functional programming that creates references. Similarly ``mut 1`` is quite sensible, as a reference cell.
+By comparison, the other syntaxes don't make sense. If I had ``mut a = 1``, I'm not going to talk about "mut a" for the rest of the program, I'm going to talk about ``a``. And what happens if I write ``mut = 1``? Terrible things. Similarly ``: mut = 1`` makes no sense. Whereas ``a = mut`` actually makes some sense if I decide that 3 characters is too long and want to abbreviate ``mut`` to ``a``, or if I'm doing higher-order functional programming that creates references. Similarly ``mut 1`` is quite sensible, as an anonymous reference cell.
 
 So getting back to our syntax, ``name = type value``. It should be clear that we have two types of assignments. The first, with the type included, creates/allocates the stuff we need to access it, and then ``name`` is bound to a memory address.
 
 When we assign again, it will look like ``name := value``, without a type. This has a completely different semantics: we take the thing on the left, the l-value, and we access the memory that it refers to, and we change the memory. Since the semantics is so different it uses a different syntax.
 
-There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we'll get to later); you can shadow, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
+There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we'll get to later); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
 
 Concrete types
 ==============

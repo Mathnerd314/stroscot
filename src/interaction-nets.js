@@ -1,3 +1,7 @@
+let multiplexer_parent_symbol = "⌧";
+let explicit_lambda_delimiters = false;
+let pop_scopes = true;
+
 const assert = function (condition, message) {
   if (!condition) {
     debugger;
@@ -91,7 +95,10 @@ function primaryPort(node) {
   }
 }
 let activePairs = [];
-function link(a, a_dir, b, b_dir) {
+function link(a, a_dir, b, b_dir, reverse) {
+  if (reverse)
+    return link(b, b_dir, a, a_dir);
+
   if (b[b_dir])
     b[b_dir].active = undefined;
   if (a[a_dir])
@@ -137,6 +144,7 @@ function compile(term) {
   resolve(undefined, term, i, "out");
   return i;
 }
+
 function resolve(env, term, parent, parent_dir) {
   let res = (term, parent, parent_dir) =>
     resolve(env, term, parent, parent_dir);
@@ -193,10 +201,20 @@ function resolve(env, term, parent, parent_dir) {
           muxes.push(v);
           bind(new_env, v);
         }
-        resolve(new_env, rhs, o, o.length++);
+        if (explicit_lambda_delimiters) {
+          let d1 = delimiter(0); d1.reverse = true; d1.env = new_env;
+          link(o, o.length++, d1, "outside");
+          resolve(new_env, rhs, d1, "inside");
+        } else
+          resolve(new_env, rhs, o, o.length++);
       }
       for (let v of muxes) {
-        link(v, "val", o, o.length++);
+        if (explicit_lambda_delimiters) {
+          let d2 = delimiter(0); d2.env = v.env;
+          link(d2, "outside", o, o.length++);
+          link(v, "val", d2, "inside");
+        } else
+          link(v, "val", o, o.length++);
       }
       return o;
     }
@@ -227,13 +245,13 @@ function resolve(env, term, parent, parent_dir) {
     case "symbol": {
       let e = env, name = term.name;
       while (e && !(e.bindings.has(name))) {
-        if (e.binder) {
-          let d = delimiter(0);
-          d.env = e;
-          link(parent, parent_dir, d, "inside");
-          parent = d;
-          parent_dir = "outside";
-        }
+        assert(e.binder);
+        let v = multiplexer(multiplexer_parent_symbol, 0); v.env = e;
+        link(parent, parent_dir, v, v.length++);
+        let d = delimiter(0); d.env = e;
+        link(v, "val", d, "inside");
+        parent = d;
+        parent_dir = "outside";
         e = e.parent;
       }
       assert(e);
@@ -286,7 +304,7 @@ function resolve(env, term, parent, parent_dir) {
 Director = (e, name, index) => { return { tag: "director", env: e, name, index }; };
 Block = (e, index, directors) => { return { tag: "block", env: e, index, directors: directors ? directors : [] }; };
 Level = (e, block, rest) => { return { tag: "level", env: e, block, rest: rest ? rest : [] }; };
-Stack = (bodyindex, levels) => { return { tag: "stack", bodyindex, levels }; };
+Stack = () => { return { tag: "stack", bodyindex: 0, levels: [], scopes: 0, returns: 0 }; };
 
 function validLevel(l) {
   assert(l.tag == "level");
@@ -335,20 +353,26 @@ function showStack(stack) {
   return s;
 }
 function blockExtension(a, b, isFirst) {
-  // if (a.index > i) return true;
   if (a.index !== b.index) return false;
-  if (isFirst) {
+  if (a.directors.length == b.directors.length) {
+    for (let k = 0; k < a.directors.length; k++) {
+      if (a.directors[k].index !== b.directors[k].index) return false;
+    }
+    return true;
+  }
+  if (!isFirst) return false;
+  if (explicit_lambda_delimiters) {
+    assert(a.directors.length == 1);
+    assert(b.directors.length == 0);
+    return true;
+  } else {
     if (a.directors.length !== b.directors.length - 1) return false;
     for (let k = 0; k < a.directors.length; k++) {
       if (a.directors[k].index !== b.directors[k + 1].index) return false;
     }
     return true;
   }
-  if (a.directors.length !== b.directors.length) return false;
-  for (let k = 0; k < a.directors.length; k++) {
-    if (a.directors[k].index !== b.directors[k].index) return false;
-  }
-  return true;
+  assert(false);
 }
 function levelExtension(a, b, isFirst) {
   if (!blockExtension(a.block, b.block, isFirst)) return false;
@@ -358,15 +382,17 @@ function levelExtension(a, b, isFirst) {
   }
   return true;
 }
-function isStackExtension(sub, sup, i) {
+function isStackExtension(sub, sup) {
   // vague imitation of transparency from the paper
   // their explanation of substitution is longer than the explanation of the definition...
 
-  // instead of setting bodyindex to 0 we skip comparing it
+  if (sub.bodyindex !== sup.bodyindex && explicit_lambda_delimiters) return false;
+  if (sub.scopes !== sup.scopes && explicit_lambda_delimiters) return false;
   if (sub.levels.length !== sup.levels.length) return false;
   for (let l = 0; l < sub.levels.length; l++) {
-    if (!levelExtension(sub.levels[l], sup.levels[l], l === 0))
+    if (!levelExtension(sub.levels[l], sup.levels[l], l === 0)) {
       return false;
+    }
   }
   return true;
 }
@@ -391,8 +417,12 @@ function readback(source, dir, stack) {
         let t = { tag: "operator", cases: [] };
         for (let x = 0; x < term.arities.length; x++) {
           assert(term.names[x]);
-          let e = es[x];
-          let newstack = Stack(i + 1, [Level(e, Block(e, i + 1))].concat(stack.levels));
+          let newstack = Object.assign({}, stack);
+          newstack.bodyindex++;
+          if (!explicit_lambda_delimiters) {
+            let e = es[x];
+            newstack.levels = [Level(e, Block(e, newstack.bodyindex))].concat(stack.levels);
+          }
           if (!term[x].bodyedgestack) term[x].bodyedgestack = [];
           term[x].bodyedgestack.push(newstack);
           t.cases.push([term.names[x], term.arities[x], readback(term, x, newstack)]);
@@ -407,67 +437,98 @@ function readback(source, dir, stack) {
           if (i < term.arities[j]) break;
           i -= term.arities[j];
         }
-        let e = es[j];
-        let bindindex = stack.levels[0].block.index;
         let bodyedgestack = undefined;
         for (let st of term[j].bodyedgestack) {
-          if (st.bodyindex != bindindex) continue;
-          if (!isStackExtension(st, stack, bindindex)) continue;
+          // if (st.bodyindex != bindindex) continue;
+          if (!isStackExtension(st, stack)) continue;
           bodyedgestack = st;
           break;
         }
-        assert(bodyedgestack);
-        assert(stack.levels[0].env == e);
-        assert(stack.levels[0].block.env == e);
-        assert(stack.levels[0].block.directors.length == 1); // since we don't elide unit multiplexers
-        assert(stack.levels[0].block.directors[0].env == e);
-        let b = stack.bodyindex - bindindex;
+        if (!bodyedgestack) {
+          assert(false);
+          bodyedgestack = term[j].bodyedgestack[0];
+          isStackExtension(bodyedgestack, stack);
+        }
+        let b;
+        if (explicit_lambda_delimiters) {
+          assert(bodyedgestack); // doesn't check returns
+          assert(stack.returns >= 0);
+          b = stack.returns - bodyedgestack.returns;
+        } else {
+          let e = es[j];
+          let bindindex = stack.levels[0].block.index;
+          assert(bodyedgestack);
+          assert(stack.levels[0].env == e);
+          assert(stack.levels[0].block.env == e);
+          assert(stack.levels[0].block.directors.length == 1); // since we don't elide unit multiplexers
+          assert(stack.levels[0].block.directors[0].env == e);
+          b = stack.bodyindex - bindindex;
+        }
         return {
-          tag: "symbol", idx: b,
-          rule: term.names[j], rule_idx: i, name: stack.levels[0].block.directors[0].name
+          tag: "symbol", idx: b, rule: term.names[j], rule_idx: i
         };
       }
       assert(false);
     }
     case "delimiter": {
       let e = term.env;
+      let newstack = Object.assign({}, stack);
       if (term.level == 0 && from_dir == "outside") {
-        // return readback(term, "inside", Stack(stack.bodyindex + 1, [Level(e, Block(e, stack.bodyindex + 1))].concat(stack.levels)));
-        return readback(term, "inside", Stack(stack.bodyindex, [Level(e, Block(e, 0))].concat(stack.levels)));
+        newstack.levels = [Level(e, Block(e, newstack.scopes))].concat(stack.levels);
+        if (explicit_lambda_delimiters)
+          newstack.scopes++;
+        return readback(term, "inside", newstack);
       }
       if (term.level == 0 && from_dir == "inside") {
         let l = stack.levels[0];
-        assert(l.env == e);
-        assert(l.block.env == e);
-        assert(l.block.directors.length <= 1);
-        // return readback(term, "outside", Stack(stack.bodyindex - 1, stack.levels.slice(1)));
-        return readback(term, "outside", Stack(stack.bodyindex, stack.levels.slice(1)));
+        if (!pop_scopes) {
+          assert(l.env == e);
+          assert(l.block.env == e);
+          assert(l.block.directors.length <= 1);
+          assert(l.block.directors.length == 0 || l.block.directors[0].env == e);
+        }
+        if (explicit_lambda_delimiters) {
+          assert(l.block.directors.length == 1);
+          newstack.scopes--;
+          assert(newstack.scopes == l.block.index);
+        }
+        newstack.levels = stack.levels.slice(1);
+        return readback(term, "outside", newstack);
       }
       let i = term.level - 1;
       // outside [ inside
-      let levels = Array.from(stack.levels);
+      let levels = Array.from(newstack.levels); newstack.levels = levels;
       if (from_dir == "outside") {
         // σ[bκl]_i -> σ[bl,κ]_i
         // split a level back into the stack
         let l = Object.assign({}, levels[i]), k = l.rest[0];
-        assert(k.env == e);
+        if (!pop_scopes) {
+          assert(k.env == e);
+          assert(k.block.env == e);
+          assert(k.block.directors.length === 0 || k.block.directors[0].env == e);
+        }
         l.rest = l.rest.slice(1);
         levels.splice(i, 1, l, k);
-        return readback(term, "inside", Stack(stack.bodyindex, levels));
+        return readback(term, "inside", newstack);
       } else if (from_dir == "inside") {
         // σ[bl,κ]_i -> σ[bκl]_i
         // level κ+1 gets stored for safekeeping in level i
         let l1 = Object.assign({}, levels[i]), l2 = levels[i + 1];
-        assert(l2.env == e);
+        if (!pop_scopes) {
+          assert(l2.env === e);
+          assert(l2.block.env === e);
+          assert(l2.block.directors.length === 0 || l2.block.directors[0].env === e);
+        }
         l1.rest = [l2].concat(l1.rest);
         levels.splice(i, 2, l1);
-        return readback(term, "outside", Stack(stack.bodyindex, levels));
+        return readback(term, "outside", newstack);
       }
       assert(false);
     }
-    case "multiplexer":
+    case "multiplexer": {
       let i = term.level, e = term.env;
-      let levels = Array.from(stack.levels);
+      let newstack = Object.assign({}, stack);
+      let levels = Array.from(newstack.levels); newstack.levels = levels;
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
         let l = Object.assign({}, levels[i]);
@@ -478,19 +539,30 @@ function readback(source, dir, stack) {
         b.directors = b.directors.slice(1);
         l.block = b;
         levels[i] = l;
-        return readback(term, d.index, Stack(stack.bodyindex, levels));
+        if (term.name == multiplexer_parent_symbol && explicit_lambda_delimiters) {
+          newstack.bodyindex++;
+          newstack.returns--;
+        }
+        return readback(term, d.index, newstack);
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
         let l = Object.assign({}, levels[i]);
         let b = Object.assign({}, l.block);
-        assert(b.env == e);
-        assert(l.env == e);
-        assert(b.directors.length == 0);
+        if (!pop_scopes) {
+          assert(b.env == e);
+          assert(l.env == e);
+          assert(b.directors.length == 0);
+        }
         b.directors = [Director(e, term.name, from_dir)].concat(b.directors);
         l.block = b;
         levels[i] = l;
-        return readback(term, "val", Stack(stack.bodyindex, levels));
+        if (term.name == multiplexer_parent_symbol && explicit_lambda_delimiters) {
+          newstack.bodyindex--;
+          newstack.returns++;
+        }
+        return readback(term, "val", newstack);
       }
+    }
     case "constant": {
       let t = { tag: "tuple", name: term.name, terms: [] };
       for (let i = 0; i < term.length; i++) {
@@ -599,7 +671,7 @@ function getdot(root) {
         case "bigapplicator": return `@${name}`;
         case "abstractor": return `λ${name}`;
         case "constant": return c.name;
-        case "delimiter": return `${c.reverse ? "[" : "]"}${level}`;
+        case "delimiter": return `${c.reverse ? "ᙁ" : "ᙀ"}${level}`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
         case "operator":
@@ -638,7 +710,7 @@ function getdot(root) {
 function eqNode(n1, n2) {
   if (n1.tag !== n2.tag) return false;
   if (n1.tag === "delimiter" && n1.level === n2.level) {
-    if(n1.level == 0) {
+    if (n1.level == 0 && !pop_scopes) {
       return false;
     }
     return true;
@@ -647,53 +719,13 @@ function eqNode(n1, n2) {
   if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0 || isNaN(n1.level));
   if (n1.tag === "multiplexer" && n1.level === n2.level) {
     assert(n1.length == n2.length);
+    assert(n1.name === n2.name);
+    assert(n1.env.n === n2.env.n);
     return true;
   }
   return false;
 }
 stats = { annihilate: 0, commute: 0 };
-function updateLevels(a, b) {
-  let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
-  if (b.tag === "operator") {
-    if (has_level(a))
-      a.level++;
-    return;
-  }
-  if (b.tag == "delimiter") {
-    if (a.tag == "multiplexer") {
-      if (a.level >= b.level)
-        a.level++;
-      return;
-    }
-    if (a.tag == "delimiter") {
-      let i = a.level, j = b.level;
-      if (i < j) {
-        b.level++;
-        return;
-      } else if (i > j) {
-        a.level++;
-        return;
-      }
-      assert(i === 0 && j === 0);
-      // extruding [a][b] -> [[ab]]
-      // it's almost arbitrary which scope is the outer,
-      // but preserving a results in stack underflow, so keep b's [
-      a.level++;
-      return;
-    }
-    assert(!a.hasOwnProperty("level"));
-    return;
-  }
-  if (a.tag == "delimiter" && b.tag == "multiplexer") {
-    if (a.level <= b.level)
-      b.level++;
-    return;
-  }
-  assert(a.tag !== "operator" && a.tag !== "delimiter" &&
-    b.tag !== "operator" && b.tag !== "delimiter");
-  return;
-}
-
 // BOHM: f.nform[i].nform[f.nport[i]] == f
 // mine: [a,ad] = follow(f, i); f == follow(a,ad)
 
@@ -725,13 +757,171 @@ function rewriteStep() {
   reducePair(pair);
 }
 
-function relink(a, a_dir, af, b, b_dir, bf) {
+function relink(a, a_dir, af, b, b_dir, bf, reverse) {
   if (af)
     [a, a_dir] = follow(a, a_dir);
   if (bf)
     [b, b_dir] = follow(b, b_dir);
+  if (reverse)
+    [a, a_dir, b, b_dir] = [b, b_dir, a, a_dir];
 
+
+  if (explicit_lambda_delimiters) {
+    if (b.tag == "delimiter" && b_dir == "outside") {
+      extrudeDelimiter(b, a, a_dir);
+      return;
+    } else if (a.tag == "delimiter" && a_dir == "outside") {
+      extrudeDelimiter(a, b, b_dir);
+      return;
+    }
+  }
   link(a, a_dir, b, b_dir);
+}
+
+function updateLevels(a, b) {
+  let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
+  if (b.tag === "operator") {
+    if (!explicit_lambda_delimiters) {
+      if (has_level(a))
+        a.level++;
+    }
+    return;
+  }
+  if (b.tag == "delimiter") {
+    if (a.tag == "multiplexer") {
+      if (a.level >= b.level)
+        a.level++;
+      return;
+    }
+    if (a.tag == "delimiter") {
+      let i = a.level, j = b.level;
+      if (i < j) {
+        b.level++;
+        return;
+      } else if (i > j) {
+        a.level++;
+        return;
+      }
+      assert(i === 0 && j === 0 && !pop_scopes);
+      // extruding [a][b] -> [[ab]]
+      // it's almost arbitrary which scope is the outer,
+      // but preserving a results in stack underflow, so keep b's [
+      a.level++;
+      return;
+    }
+    assert(!a.hasOwnProperty("level"));
+    return;
+  }
+  if (a.tag == "delimiter" && b.tag == "multiplexer") {
+    if (a.level <= b.level)
+      b.level++;
+    return;
+  }
+  assert(a.tag !== "operator" && a.tag !== "delimiter" &&
+    b.tag !== "operator" && b.tag !== "delimiter");
+  return;
+}
+
+function extrudeDelimiter(d, g, g_dir, moved) {
+  assert(explicit_lambda_delimiters);
+  let t = g.tag, is_opening = d.reverse, stable = false;
+  if (t == "operator") {
+    if (g_dir == "inp") {
+      // continue extruding along body
+      assert(!is_opening);
+      for (let i = 0; i < g.length; i++) {
+        let [f, f_dir] = follow(g, i);
+        let dn = Object.assign({}, d);
+        if (i >= g.arities.length)
+          dn.reverse = !dn.reverse;
+        extrudeDelimiter(dn, f, f_dir, true);
+      }
+    } else if (g_dir < g.arities.length) {
+      // opening delimiter stopped at lambda body edge
+      assert(is_opening);
+    } else {
+      // closing delimiter stopped at lambda binding edge
+      assert(!is_opening);
+      // disappear
+    }
+  } else if (t == "delimiter") {
+    if (g_dir == "outside") {
+      // another scope, go inside and continue until we get an endpoint
+      d.level++;
+      let [f, f_dir] = follow(g, "inside");
+      extrudeDelimiter(d, f, f_dir, true);
+    } else if (g_dir == "inside") {
+      if (d.level > 0) {
+        // exit scope
+        d.level--; assert(d.level >= 0);
+        let [f, f_dir] = follow(g, "outside");
+        extrudeDelimiter(d, f, f_dir, true);
+      } else {
+        stable = true;
+      }
+    } else {
+      assert(false);
+    }
+  } else if (t == "bigapplicator") {
+    if (g_dir == "inp") {
+      // split scope down applicator
+      assert(!is_opening);
+      for (let i of ["func", ...Array(g.length).keys()]) {
+        let [f, f_dir] = follow(g, i);
+        let dn = Object.assign({}, d);
+        extrudeDelimiter(dn, f, f_dir, true);
+      }
+    } else if (g_dir == "func") {
+      // continue up
+      assert(is_opening);
+      let [f, f_dir] = follow(g, "inp");
+      extrudeDelimiter(d, f, f_dir, true);
+    } else {
+      // should be alright? IDK
+      // assert(false);
+    }
+  } else if (t == "constant") {
+    // TODO
+    assert(false);
+  } else if (t == "multiplexer") {
+    if (g_dir == "val") {
+      // split
+      if (d.level <= g.level)
+        g.level++;
+      for (let i = 0; i < g.length; i++) {
+        let [f, f_dir] = follow(g, i);
+        let dn = Object.assign({}, d);
+        extrudeDelimiter(dn, f, f_dir, true);
+      }
+    } else {
+      // // continue up
+      // let [f, f_dir] = follow(g, "val");
+      // extrudeDelimiter(d, f, f_dir, true);
+      // blocked
+      stable = true;
+    }
+  } else if (t == "initiator") {
+    assert(is_opening);
+    stable = true;
+  } else {
+    assert(false);
+    stable = true;
+  }
+
+  if (stable) {
+    // scope boundary, insert delimiter
+    if (moved) {
+      relink(d, "inside", false, g, g_dir, true, !is_opening);
+    }
+    link(g, g_dir, d, "outside", !is_opening);
+    return;
+  } else {
+    // disappear original delimiter
+    if (!moved) {
+      relink(g, g_dir, false, d, "inside", true, !is_opening);
+    }
+    return;
+  }
 }
 
 function reducePair(pair) {
@@ -755,9 +945,13 @@ function reducePair(pair) {
       if (b.names[i] == a.name) {
         idx = i; env = b.envs[i];
         // link matching body
-        let d1 = delimiter(0); d1.reverse = true; d1.env = env;
-        relink(a, "inp", true, d1, "outside", false);
-        relink(d1, "inside", false, b, i, true);
+        if (explicit_lambda_delimiters) {
+          relink(a, "inp", true, b, i, true);
+        } else {
+          let d1 = delimiter(0); d1.reverse = true; d1.env = env;
+          relink(a, "inp", true, d1, "outside", false);
+          relink(d1, "inside", false, b, i, true);
+        }
       } else {
         // erase unused bodies
         let e = multiplexer("erase", NaN);
@@ -765,6 +959,7 @@ function reducePair(pair) {
       }
     }
     // binding
+    assert(env);
     assert(idx >= 0);
     assert(b.arities[idx] == a.length);
     let ruleidx = 0, j = 0;
@@ -774,9 +969,13 @@ function reducePair(pair) {
       }
       if (ruleidx == idx) {
         // link match binders
-        let d2 = delimiter(0); d2.env = env;
-        relink(b, i, true, d2, "inside", false);
-        relink(d2, "outside", false, a, j, true);
+        if (explicit_lambda_delimiters) {
+          relink(b, i, true, a, j, true);
+        } else {
+          let d2 = delimiter(0); d2.env = env;
+          relink(b, i, true, d2, "inside", false);
+          relink(d2, "outside", false, a, j, true);
+        }
       } else {
         // erase unused vars
         let e = multiplexer("erase", NaN); e.reverse = true;
@@ -810,29 +1009,25 @@ function reducePair(pair) {
     if (b.tag == "operator" && p >= b.arities.length) {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
-      relink(b, p, true, a_new[p], ppa, false);
-    } else {
-      relink(a_new[p], ppa, false, b, p, true);
     }
   }
   for (let p of pa) {
     b_new[p] = pa.length == 1 ? b : Object.assign({}, b);
-    if (a.tag == "bigapplicator" && p >= 0) {
+    if (a.tag == "bigapplicator" && p !== "inp") {
       b_new[p].reverse = !b_new[p].reverse;
-      relink(b_new[p], ppb, false, a, p, true);
-    } else {
-      relink(a, p, true, b_new[p], ppb, false);
     }
+  }
+  // link outside first to avoid overwriting inside
+  for (let p of pb) {
+    relink(a_new[p], ppa, false, b, p, true, (b.tag == "operator" && p >= b.arities.length));
+  }
+  for (let p of pa) {
+    relink(a, p, true, b_new[p], ppb, false, (a.tag == "bigapplicator" && p !== "inp"));
   }
   for (let pb1 of pb) {
     for (let pa1 of pa) {
-      if (b.tag == "operator" && pb1 >= b.arities.length
-        || a.tag == "bigapplicator" && pa1 >= 0) {
-        // reverse link direction
-        link(a_new[pb1], pa1, b_new[pa1], pb1);
-      } else {
-        link(b_new[pa1], pb1, a_new[pb1], pa1);
-      }
+      link(b_new[pa1], pb1, a_new[pb1], pa1,
+        ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
     }
   }
 }
