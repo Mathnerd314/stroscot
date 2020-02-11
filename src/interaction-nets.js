@@ -10,7 +10,11 @@ const assert = function (condition, message) {
 };
 
 function clone(o) {
-  return Object.assign({}, o);
+  let on = Object.assign({}, o);
+  if(on.tag && (on.env || on.envs)) {
+    setEnv(on, on.env || on.envs[0]);
+  }
+  return on;
 }
 
 applicator = (inp, func, arg) => { return { tag: "applicator", inp, func, arg } };
@@ -128,19 +132,59 @@ function follow(source, dir) {
   return [term, from_dir];
 }
 
-let n_envs = 0;
+let n_envs = 0, all_envs = [];
 make_env = (parent) => {
-  return {
+  let e = {
     n: n_envs++,
     bindings: new Map(),
-    parent
-  }
+    parent,
+    multiplexers: new Set(),
+    delimiters: new Set(),
+    binder: undefined
+  };
+  all_envs.push(e);
+  return e;
 };
 function bind(env, v) {
   let name = v.name;
   assert(!env.bindings.has(name));
   env.bindings.set(name, v);
-  v.env = env;
+  setEnv(v, env);
+}
+function setEnv(t, env) {
+  if(t.tag == "multiplexer") {
+    env.multiplexers.add(t);
+  } else if(t.tag == "delimiter") {
+    env.delimiters.add(t);
+  } else if(t.tag == "operator" || t.tag == "case") {
+    assert(!explicit_lambda_delimiters);
+    env.binder = t;
+    env.delimiters.add(t);
+    t.envs.push(env);
+    return;
+  } else if(t.tag == "level" || t.tag == "block") {
+    return;
+  } else {
+    assert(false);
+    return;
+  }
+  t.env = env;
+}
+function removeFromEnv(t, env) {
+  if(t.tag == "multiplexer") {
+    assert(env.multiplexers.has(t));
+    env.multiplexers.delete(t);
+  } else if(t.tag == "delimiter") {
+    assert(env.delimiters.has(t));
+    env.delimiters.delete(t);
+  } else if(t.tag == "operator" || t.tag == "case") {
+    assert(!explicit_lambda_delimiters);
+    env.binder = undefined;
+    assert(env.delimiters.has(t));
+    env.delimiters.delete(t);
+  } else {
+    assert(false);
+  }
 }
 
 function compile(term) {
@@ -197,7 +241,7 @@ function resolve(env, term, parent, parent_dir) {
       let muxes = [];
       for (let { constr, vars, rhs } of term.cases) {
         let new_env = make_env(env);
-        new_env.binder = o; o.envs.push(new_env);
+        setEnv(o, new_env);
         o.names.push(constr);
         o.arities[o.length] = vars.length;
         for (let v_ of vars) {
@@ -206,7 +250,7 @@ function resolve(env, term, parent, parent_dir) {
           bind(new_env, v);
         }
         if (explicit_lambda_delimiters) {
-          let d1 = delimiter(0); d1.reverse = true; d1.env = new_env;
+          let d1 = delimiter(0); d1.reverse = true; setEnv(d1, new_env);
           link(o, o.length++, d1, "outside");
           resolve(new_env, rhs, d1, "inside");
         } else
@@ -214,7 +258,7 @@ function resolve(env, term, parent, parent_dir) {
       }
       for (let v of muxes) {
         if (explicit_lambda_delimiters) {
-          let d2 = delimiter(0); d2.env = v.env;
+          let d2 = delimiter(0); setEnv(d2, v.env);
           link(d2, "outside", o, o.length++);
           link(v, "val", d2, "inside");
         } else
@@ -233,7 +277,7 @@ function resolve(env, term, parent, parent_dir) {
         cs.names.push(constr);
         cs.arities[cs.length] = vars.length;
         let new_env = make_env(env);
-        new_env.binder = cs; cs.envs.push(new_env);
+        setEnv(cs, new_env);
         for (let v_ of vars) {
           let v = multiplexer(v_, 0);
           muxes.push(v);
@@ -250,9 +294,9 @@ function resolve(env, term, parent, parent_dir) {
       let e = env, name = term.name;
       while (e && !(e.bindings.has(name))) {
         assert(e.binder);
-        let v = multiplexer(multiplexer_parent_symbol, 0); v.env = e;
+        let v = multiplexer(multiplexer_parent_symbol, 0); setEnv(v, e);
         link(parent, parent_dir, v, v.length++);
-        let d = delimiter(0); d.env = e;
+        let d = delimiter(0); setEnv(d, e);
         link(v, "val", d, "inside");
         parent = d;
         parent_dir = "outside";
@@ -954,6 +998,8 @@ function reducePair(pair) {
       if (p == ppa) continue;
       relink(a, p, true, b, p, true);
     }
+    removeFromEnv(a, a.env);
+    removeFromEnv(b, b.env);
     return;
   }
   if (a.tag == "bigapplicator" && b.tag == "operator") {
@@ -967,7 +1013,7 @@ function reducePair(pair) {
         if (explicit_lambda_delimiters) {
           relink(a, "inp", true, b, i, true);
         } else {
-          let d1 = delimiter(0); d1.reverse = true; d1.env = env;
+          let d1 = delimiter(0); d1.reverse = true; setEnv(d1, env);
           relink(a, "inp", true, d1, "outside", false);
           relink(d1, "inside", false, b, i, true);
         }
@@ -977,8 +1023,9 @@ function reducePair(pair) {
         relink(e, "val", false, b, i, true);
       }
     }
-    // binding
     assert(env);
+    removeFromEnv(b, b.envs[0]);
+    // binding
     assert(idx >= 0);
     assert(b.arities[idx] == a.length);
     let ruleidx = 0, j = 0;
@@ -991,7 +1038,7 @@ function reducePair(pair) {
         if (explicit_lambda_delimiters) {
           relink(b, i, true, a, j, true);
         } else {
-          let d2 = delimiter(0); d2.env = env;
+          let d2 = delimiter(0); setEnv(d2, env);
           relink(b, i, true, d2, "inside", false);
           relink(d2, "outside", false, a, j, true);
         }
@@ -1024,18 +1071,23 @@ function reducePair(pair) {
   pb.splice(pb.indexOf(ppb), 1);
   let a_new = {}, b_new = {};
   for (let p of pb) {
-    a_new[p] = pb.length == 1 ? a : clone(a); // reuse object if only 1 (for root)
+    a_new[p] = clone(a);
     if (b.tag == "operator" && p >= b.arities.length) {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
     }
   }
   for (let p of pa) {
-    b_new[p] = pa.length == 1 ? b : clone(b);
+    b_new[p] = clone(b);
     if (a.tag == "bigapplicator" && p !== "inp") {
       b_new[p].reverse = !b_new[p].reverse;
     }
   }
+  if(a.env || a.envs)
+    removeFromEnv(a,a.env || b.envs[0]);
+  if(b.env || b.envs)
+    removeFromEnv(b,b.env || b.envs[0]);
+
   // link outside first to avoid overwriting inside
   for (let p of pb) {
     relink(a_new[p], ppa, false, b, p, true, (b.tag == "operator" && p >= b.arities.length));
