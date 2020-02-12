@@ -1,5 +1,5 @@
 let multiplexer_parent_symbol = "⌧";
-let explicit_lambda_delimiters = false;
+let explicit_lambda_delimiters = true;
 let pop_scopes = true;
 
 const assert = function (condition, message) {
@@ -11,15 +11,11 @@ const assert = function (condition, message) {
 
 function clone(o) {
   let on = Object.assign({}, o);
-  if(on.tag && (on.env || on.envs)) {
+  if (on.tag && (on.env || on.envs)) {
     setEnv(on, on.env || on.envs[0]);
   }
   return on;
 }
-
-applicator = (inp, func, arg) => { return { tag: "applicator", inp, func, arg } };
-abstractor = (name, inp, body, bind) => { return { tag: "abstractor", name, inp, body, bind } };
-
 
 delimiter = (level, inside, outside) => { return { tag: "delimiter", level, inside, outside } };
 // in the initial graph inside is the parent, outside is the child.
@@ -125,9 +121,11 @@ function follow(source, dir) {
   if (source == edge.a && dir == edge.a_dir) {
     term = edge.b;
     from_dir = edge.b_dir;
-  } else {
+  } else if(source == edge.b && dir == edge.b_dir) {
     term = edge.a;
     from_dir = edge.a_dir;
+  } else {
+    assert(false);
   }
   return [term, from_dir];
 }
@@ -152,17 +150,17 @@ function bind(env, v) {
   setEnv(v, env);
 }
 function setEnv(t, env) {
-  if(t.tag == "multiplexer") {
+  if (t.tag == "multiplexer") {
     env.multiplexers.add(t);
-  } else if(t.tag == "delimiter") {
+  } else if (t.tag == "delimiter") {
     env.delimiters.add(t);
-  } else if(t.tag == "operator" || t.tag == "case") {
+  } else if (t.tag == "operator" || t.tag == "case") {
     assert(!explicit_lambda_delimiters);
     env.binder = t;
     env.delimiters.add(t);
     t.envs.push(env);
     return;
-  } else if(t.tag == "level" || t.tag == "block") {
+  } else if (t.tag == "level" || t.tag == "block") {
     return;
   } else {
     assert(false);
@@ -171,13 +169,13 @@ function setEnv(t, env) {
   t.env = env;
 }
 function removeFromEnv(t, env) {
-  if(t.tag == "multiplexer") {
+  if (t.tag == "multiplexer") {
     assert(env.multiplexers.has(t));
     env.multiplexers.delete(t);
-  } else if(t.tag == "delimiter") {
+  } else if (t.tag == "delimiter") {
     assert(env.delimiters.has(t));
     env.delimiters.delete(t);
-  } else if(t.tag == "operator" || t.tag == "case") {
+  } else if (t.tag == "operator" || t.tag == "case") {
     assert(!explicit_lambda_delimiters);
     env.binder = undefined;
     assert(env.delimiters.has(t));
@@ -236,12 +234,14 @@ function resolve(env, term, parent, parent_dir) {
       // semantically a lambda-case
       let o = operator([], []);
       o.arities.length = term.cases.length;
-      o.envs = [];
+      if (!explicit_lambda_delimiters)
+        o.envs = [];
       link(parent, parent_dir, o, "inp");
       let muxes = [];
       for (let { constr, vars, rhs } of term.cases) {
         let new_env = make_env(env);
-        setEnv(o, new_env);
+        if (!explicit_lambda_delimiters)
+          setEnv(o, new_env);
         o.names.push(constr);
         o.arities[o.length] = vars.length;
         for (let v_ of vars) {
@@ -269,7 +269,8 @@ function resolve(env, term, parent, parent_dir) {
     case "case": {
       let cs = cAse([], []);
       cs.arities.length = term.cases.length;
-      cs.envs = [];
+      if (!explicit_lambda_delimiters)
+        cs.envs = [];
       link(parent, parent_dir, cs, "inp");
       res(term.exp, cs, "out") // compile the scrutinee
       let muxes = [];
@@ -277,7 +278,8 @@ function resolve(env, term, parent, parent_dir) {
         cs.names.push(constr);
         cs.arities[cs.length] = vars.length;
         let new_env = make_env(env);
-        setEnv(cs, new_env);
+        if (!explicit_lambda_delimiters)
+          setEnv(cs, new_env);
         for (let v_ of vars) {
           let v = multiplexer(v_, 0);
           muxes.push(v);
@@ -293,7 +295,7 @@ function resolve(env, term, parent, parent_dir) {
     case "symbol": {
       let e = env, name = term.name;
       while (e && !(e.bindings.has(name))) {
-        assert(e.binder);
+        assert(explicit_lambda_delimiters || e.binder);
         let v = multiplexer(multiplexer_parent_symbol, 0); setEnv(v, e);
         link(parent, parent_dir, v, v.length++);
         let d = delimiter(0); setEnv(d, e);
@@ -501,7 +503,6 @@ function readback(source, dir, stack) {
         }
         let b;
         if (explicit_lambda_delimiters) {
-          assert(bodyedgestack); // doesn't check returns
           assert(stack.returns >= 0);
           b = stack.returns - bodyedgestack.returns;
         } else {
@@ -697,7 +698,7 @@ function getdot(root) {
     m.set(i, num_nodes++);
   }
   envs = Array.from(envs);
-  envs.sort((a,b) => b-a);
+  envs.sort((a, b) => b - a);
 
   let g = new Graph({ multigraph: true });
   g.setGraph({});
@@ -829,7 +830,7 @@ function relink(a, a_dir, af, b, b_dir, bf, reverse) {
     [a, a_dir, b, b_dir] = [b, b_dir, a, a_dir];
 
 
-  if (explicit_lambda_delimiters) {
+  if (!pop_scopes) {
     if (b.tag == "delimiter" && b_dir == "outside") {
       extrudeDelimiter(b, a, a_dir);
       return;
@@ -844,10 +845,8 @@ function relink(a, a_dir, af, b, b_dir, bf, reverse) {
 function updateLevels(a, b) {
   let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
   if (b.tag === "operator") {
-    if (!explicit_lambda_delimiters) {
-      if (has_level(a))
-        a.level++;
-    }
+    if (has_level(a))
+      a.level++;
     return;
   }
   if (b.tag == "delimiter") {
@@ -886,7 +885,7 @@ function updateLevels(a, b) {
 }
 
 function extrudeDelimiter(d, g, g_dir, moved) {
-  assert(explicit_lambda_delimiters);
+  assert(!pop_scopes);
   let t = g.tag, is_opening = d.reverse, stable = false;
   if (t == "operator") {
     if (g_dir == "inp") {
@@ -1008,11 +1007,12 @@ function reducePair(pair) {
     // body
     for (let i = 0; i < b.names.length; i++) {
       if (b.names[i] == a.name) {
-        idx = i; env = b.envs[i];
+        idx = i;
         // link matching body
         if (explicit_lambda_delimiters) {
           relink(a, "inp", true, b, i, true);
         } else {
+          env = b.envs[i];
           let d1 = delimiter(0); d1.reverse = true; setEnv(d1, env);
           relink(a, "inp", true, d1, "outside", false);
           relink(d1, "inside", false, b, i, true);
@@ -1023,8 +1023,10 @@ function reducePair(pair) {
         relink(e, "val", false, b, i, true);
       }
     }
-    assert(env);
-    removeFromEnv(b, b.envs[0]);
+    if (!explicit_lambda_delimiters) {
+      assert(env);
+      removeFromEnv(b, b.envs[0]);
+    }
     // binding
     assert(idx >= 0);
     assert(b.arities[idx] == a.length);
@@ -1050,18 +1052,6 @@ function reducePair(pair) {
     }
     return;
   }
-  /*
-    if (b.tag == "multiplexer" && b.length == 1) {
-      // prune identity multiplexer
-      relink(a, pair.a_dir, false, b, 0, true);
-      return;
-    }
-    if (a.tag == "multiplexer" && a.length == 1) {
-      // prune identity multiplexer
-      relink(a, 0, true, b, pair.b_dir, false);
-      return;
-    }
-  */
   // commute
   stats.commute++;
   updateLevels(a, b);
@@ -1079,26 +1069,47 @@ function reducePair(pair) {
   }
   for (let p of pa) {
     b_new[p] = clone(b);
+    if (explicit_lambda_delimiters && b.tag == "operator") {
+      // also clone delimiters
+      let o = b_new[p];
+      for (let i of pb) {
+        let [d, d_dir] = follow(b, i);
+        assert(d_dir == "outside");
+        d = clone(d);
+        link(o, i, d, "outside", (b.tag == "operator" && i >= b.arities.length));
+      }
+    }
     if (a.tag == "bigapplicator" && p !== "inp") {
       b_new[p].reverse = !b_new[p].reverse;
     }
   }
-  if(a.env || a.envs)
-    removeFromEnv(a,a.env || b.envs[0]);
-  if(b.env || b.envs)
-    removeFromEnv(b,b.env || b.envs[0]);
+  if (a.env || a.envs)
+    removeFromEnv(a, a.env || b.envs[0]);
+  if (b.env || b.envs)
+    removeFromEnv(b, b.env || b.envs[0]);
 
   // link outside first to avoid overwriting inside
-  for (let p of pb) {
-    relink(a_new[p], ppa, false, b, p, true, (b.tag == "operator" && p >= b.arities.length));
-  }
   for (let p of pa) {
     relink(a, p, true, b_new[p], ppb, false, (a.tag == "bigapplicator" && p !== "inp"));
   }
+  for (let p of pb) {
+    if (explicit_lambda_delimiters && b.tag == "operator") {
+      let [d, d_dir] = follow(b, p); assert(d_dir == "outside");
+      relink(a_new[p], ppa, false, d, "inside", true, (b.tag == "operator" && p >= b.arities.length));
+    } else
+      relink(a_new[p], ppa, false, b, p, true, (b.tag == "operator" && p >= b.arities.length));
+  }
+  // link inside
   for (let pb1 of pb) {
     for (let pa1 of pa) {
-      link(b_new[pa1], pb1, a_new[pb1], pa1,
-        ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
+      if (explicit_lambda_delimiters && b.tag == "operator") {
+        // push through delimiters
+        let [d, d_dir] = follow(b_new[pa1], pb1); assert(d_dir == "outside");
+        link(d, "inside", a_new[pb1], pa1,
+          ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
+      } else
+        link(b_new[pa1], pb1, a_new[pb1], pa1,
+          ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
     }
   }
 }

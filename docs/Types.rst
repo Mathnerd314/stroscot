@@ -55,6 +55,12 @@ l-value
 r-value
    A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address, to get an x-value. Segfaults galore. ¯\\_(ツ)_/¯
 
+subtyping
+    ``A`` is a subtype of ``B`` if every element of ``A`` is also in ``B``.
+
+inheritance
+    Record subtyping, where for example ``{a,b}`` is considered a subtype of ``{a}``.
+
 Type declaration syntax
 =======================
 
