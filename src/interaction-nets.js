@@ -67,28 +67,30 @@ function ports(node) {
 
 let in_dirs = new Set(["inp", "bind", "inside"]);
 let out_dirs = new Set(["func", "arg", "body", "out", "outside", "val"]);
-function check_edge(t, dir, is_in) {
+function native_edge_dir(t, dir) {
   if (0 <= dir) {
     if (t.tag == "case" || t.tag == "operator") {
-      assert(is_in == (dir >= t.arities.length));
-      return;
+      return (dir >= t.arities.length) ? "in" : "out";
     }
     if (t.tag == "bigapplicator" || t.tag == "constant") {
-      assert(!is_in);
-      return;
+      return "out";
     }
     if (t.tag == "multiplexer") {
-      assert(is_in);
-      return;
+      return "in";
     }
     assert(false);
   }
 
-  if (is_in) {
-    assert(in_dirs.has(dir));
-  } else {
-    assert(out_dirs.has(dir));
+  if (in_dirs.has(dir)) {
+    return "in";
+  } else if(out_dirs.has(dir)) {
+    return "out";
   }
+  assert(false);
+}
+function edge_dir(t, dir) {
+  let d = native_edge_dir(t, dir);
+  return !t.reverse ? d : (d == "in" ? "out" : "in");
 }
 
 function primaryPort(node) {
@@ -103,25 +105,36 @@ function link(a, a_dir, b, b_dir, reverse) {
   if (reverse)
     return link(b, b_dir, a, a_dir);
 
-  if (b[b_dir])
+  if (b[b_dir] && b[b_dir].active) {
     b[b_dir].active = undefined;
-  if (a[a_dir])
+    let i = activePairs.indexOf(b[b_dir]);
+    assert(i >= 0);
+    activePairs.splice(i, 1);
+  }
+  if (a[a_dir] && a[a_dir].active) {
     a[a_dir].active = undefined;
+    let i = activePairs.indexOf(a[a_dir]);
+    assert(i >= 0);
+    activePairs.splice(i, 1);
+  }
   let e = edge(a, a_dir, b, b_dir);
   b[b_dir] = a[a_dir] = e;
-  if (primaryPort(a) == a_dir && primaryPort(b) == b_dir) {
+  if (primaryPort(a) == a_dir && primaryPort(b) == b_dir
+    /*|| (a.tag == "delimiter" && a_dir == "outside" && b.tag == "bigapplicator" && b_dir == "inp")
+    || (a.tag == "delimiter" && a_dir == "outside" && b.tag == "multiplexer" && b.level !== a.level && a.level > 0)
+    || (a.tag == "delimiter" && a_dir == "outside" && b.tag == "delimiter" && b.level < a.level && b.level > 0)*/) {
     e.active = true;
     activePairs.push(e);
   }
-  check_edge(a, a_dir, !!a.reverse);
-  check_edge(b, b_dir, !b.reverse);
+  assert(edge_dir(a, a_dir) == "out");
+  assert(edge_dir(b, b_dir) == "in");
 }
 function follow(source, dir) {
   let edge = source[dir], term, from_dir;
   if (source == edge.a && dir == edge.a_dir) {
     term = edge.b;
     from_dir = edge.b_dir;
-  } else if(source == edge.b && dir == edge.b_dir) {
+  } else if (source == edge.b && dir == edge.b_dir) {
     term = edge.a;
     from_dir = edge.a_dir;
   } else {
@@ -135,12 +148,14 @@ make_env = (parent) => {
   let e = {
     n: n_envs++,
     bindings: new Map(),
-    parent,
+    parent, children: new Set(),
     multiplexers: new Set(),
     delimiters: new Set(),
     binder: undefined
   };
   all_envs.push(e);
+  if (parent)
+    parent.children.add(e);
   return e;
 };
 function bind(env, v) {
@@ -187,7 +202,8 @@ function removeFromEnv(t, env) {
 
 function compile(term) {
   let i = initiator();
-  resolve(undefined, term, i, "out");
+  i.root_env = make_env();
+  resolve(i.root_env, term, i, "out");
   return i;
 }
 
@@ -354,7 +370,17 @@ function resolve(env, term, parent, parent_dir) {
 Director = (e, name, index) => { return { tag: "director", env: e, name, index }; };
 Block = (e, index, directors) => { return { tag: "block", env: e, index, directors: directors ? directors : [] }; };
 Level = (e, block, rest) => { return { tag: "level", env: e, block, rest: rest ? rest : [] }; };
-Stack = () => { return { tag: "stack", bodyindex: 0, levels: [], scopes: 0, returns: 0, edge_ids: [] }; };
+Stack = () => {
+  return {
+    tag: "stack",
+    levels: [],
+    currentScope: all_envs[0],
+    bodyindex: 0,
+    scopes: 0,
+    returns: 0,
+    edge_ids: []
+  };
+};
 
 function validLevel(l) {
   assert(l.tag == "level");
@@ -436,8 +462,8 @@ function isStackExtension(sub, sup) {
   // vague imitation of transparency from the paper
   // their explanation of substitution is longer than the explanation of the definition...
 
-  if (sub.bodyindex !== sup.bodyindex && explicit_lambda_delimiters) return false;
-  if (sub.scopes !== sup.scopes && explicit_lambda_delimiters) return false;
+  //  if (sub.bodyindex !== sup.bodyindex && explicit_lambda_delimiters) return false;
+  //  if (sub.scopes !== sup.scopes && explicit_lambda_delimiters) return false;
   if (sub.levels.length !== sup.levels.length) return false;
   for (let l = 0; l < sub.levels.length; l++) {
     if (!levelExtension(sub.levels[l], sup.levels[l], l === 0)) {
@@ -525,9 +551,10 @@ function readback(source, dir, stack) {
       let e = term.env;
       let newstack = clone(stack);
       if (term.level == 0 && from_dir == "outside") {
-        newstack.levels = [Level(e, Block(e, newstack.scopes))].concat(stack.levels);
-        if (explicit_lambda_delimiters)
-          newstack.scopes++;
+        newstack.scopes++;
+        // assert(newstack.currentScope == e.parent);
+        newstack.currentScope = e;
+        newstack.levels = [Level(e, Block(e, explicit_lambda_delimiters ? newstack.scopes : 0))].concat(stack.levels);
         return readback(term, "inside", newstack);
       }
       if (term.level == 0 && from_dir == "inside") {
@@ -538,11 +565,13 @@ function readback(source, dir, stack) {
           assert(l.block.directors.length <= 1);
           assert(l.block.directors.length == 0 || l.block.directors[0].env == e);
         }
-        if (explicit_lambda_delimiters) {
+        // assert(newstack.currentScope == e);
+        newstack.currentScope = e.parent;
+        if (explicit_lambda_delimiters && !pop_scopes) {
           assert(l.block.directors.length == 1);
-          newstack.scopes--;
-          assert(newstack.scopes == l.block.index);
+          // assert(newstack.scopes == l.block.index);
         }
+        newstack.scopes--;
         newstack.levels = stack.levels.slice(1);
         return readback(term, "outside", newstack);
       }
@@ -670,9 +699,9 @@ function getdot(root) {
 
     if (node.envs)
       for (let e of node.envs)
-        envs.add(e.n);
+        envs.add(e);
     if (node.env)
-      envs.add(node.env.n);
+      envs.add(node.env);
 
     let names = ports(node);
     for (let n of names) {
@@ -697,8 +726,8 @@ function getdot(root) {
   for (let i of visitedNodes) {
     m.set(i, num_nodes++);
   }
-  envs = Array.from(envs);
-  envs.sort((a, b) => b - a);
+  //  envs = Array.from(envs);
+  //  envs.sort((a, b) => b.n - a.n);
 
   let g = new Graph({ multigraph: true });
   g.setGraph({});
@@ -739,8 +768,8 @@ function getdot(root) {
     let env_num = 0;
     // if (c.env) env_num = envs.indexOf(c.env.n) + 1;
     // if (c.envs) env_num = envs.indexOf(c.envs[0].n) + 1;
-    if (c.env) env_num = c.env.n + 1;
-    if (c.envs) env_num = c.envs[0].n + 1;
+    if (c.env) env_num = c.env.n; // indexOf?
+    if (c.envs) env_num = c.envs[0].n;
     g.setNode(i, { shape, labelType: "html", label: human, style: `fill: white; stroke: ${colormap[env_num]};` });
   }
   let arrows = colormap;
@@ -756,18 +785,18 @@ function getdot(root) {
     g.setEdge(a, b, {
       label: edge.id,
       style: `${is_active}${is_spine}stroke: ${arrows[a_dir]}; fill: none;`,
-      arrowheadStyle: "fill: ${arrows[b_dir]}"
+      arrowheadStyle: `fill: ${arrows[b_dir]}`
     }, edge.id);
   }
-  envs.forEach((e, idx) => {
-    g.setNode(num_nodes, {
+  all_envs.forEach((e, idx) => {
+    if (e.n == 0) return;
+    g.setNode("e" + e.n, {
       shape: "rect",
       labelType: "html",
-      label: "" + e,
-      style: `fill: ${colormap[e + 1]}; stroke: gray;`
+      label: "" + e.n,
+      style: envs.has(e) ? `fill: ${colormap[e.n]}; stroke: gray;` : `fill: white; stroke: ${colormap[e.n]};`
     });
-    g.setEdge(num_nodes, idx == 0 ? 0 : num_nodes - 1, {});
-    num_nodes++;
+    g.setEdge("e" + e.n, e.parent.n == 0 ? 0 : "e" + e.parent.n, {});
   });
   return g;
 }
@@ -830,7 +859,7 @@ function relink(a, a_dir, af, b, b_dir, bf, reverse) {
     [a, a_dir, b, b_dir] = [b, b_dir, a, a_dir];
 
 
-  if (!pop_scopes) {
+  if (false) {
     if (b.tag == "delimiter" && b_dir == "outside") {
       extrudeDelimiter(b, a, a_dir);
       return;
@@ -842,7 +871,7 @@ function relink(a, a_dir, af, b, b_dir, bf, reverse) {
   link(a, a_dir, b, b_dir);
 }
 
-function updateLevels(a, b) {
+function updateLevels(a, b, ppa, ppb) {
   let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
   if (b.tag === "operator") {
     if (has_level(a))
@@ -856,20 +885,34 @@ function updateLevels(a, b) {
       return;
     }
     if (a.tag == "delimiter") {
-      let i = a.level, j = b.level;
-      if (i < j) {
-        b.level++;
-        return;
-      } else if (i > j) {
+      if (ppa == "outside" && ppb == "outside") {
+        let i = a.level, j = b.level;
+        if (i < j) {
+          b.level++;
+          return;
+        } else if (i > j) {
+          a.level++;
+          return;
+        }
+        assert(i === 0 && j === 0 && !pop_scopes);
+        // extruding [a][b] -> [[ab]]
+        // it's almost arbitrary which scope is the outer,
+        // but preserving a results in stack underflow, so keep b's [
         a.level++;
         return;
       }
-      assert(i === 0 && j === 0 && !pop_scopes);
-      // extruding [a][b] -> [[ab]]
-      // it's almost arbitrary which scope is the outer,
-      // but preserving a results in stack underflow, so keep b's [
-      a.level++;
-      return;
+      if(ppa == "outside" && ppb == "inside" && false) {
+        let i = a.level, j = b.level;
+        assert(i > j);
+        // ]_1 ]
+        // b=0, a=1 : [x, y, ...rest] -> [[xy], ...rest] -> [...rest]
+        // b=0, a>1 : [x, ...gap , y, z, ...]rest -> [x, ...gap , [yz], ...rest] -> [...gap, [yz], ...rest]
+        // b>0, a=b+1 : [...gap, xprev, x, y, ...rest] -> [...gap, xprev, [xy], ...rest] -> [...gap, xprev, ...rest]
+        // b=0, a>1 : [x, ...gap , y, z, ...]rest -> [x, ...gap , [yz], ...rest] -> [...gap, [yz], ...rest]
+        a.level--;
+        return;
+      }
+      assert(false);
     }
     assert(!a.hasOwnProperty("level"));
     return;
@@ -878,6 +921,9 @@ function updateLevels(a, b) {
     if (a.level <= b.level)
       b.level++;
     return;
+  }
+  if (a.tag == "delimiter" && b.tag == "bigapplicator") {
+    // return;
   }
   assert(a.tag !== "operator" && a.tag !== "delimiter" &&
     b.tag !== "operator" && b.tag !== "delimiter");
@@ -988,11 +1034,10 @@ function extrudeDelimiter(d, g, g_dir, moved) {
 
 function reducePair(pair) {
   assert(pair.active); pair.active = false;
-  let a = pair.a, b = pair.b;
-  if (eqNode(a, b)) {
+  let a = pair.a, b = pair.b, ppa = pair.a_dir, ppb = pair.b_dir;
+  if (eqNode(a, b) && ppa == ppb) {
     // annihilate
     stats.annihilate++;
-    let ppa = primaryPort(a);
     for (let p of ports(a)) {
       if (p == ppa) continue;
       relink(a, p, true, b, p, true);
@@ -1001,7 +1046,7 @@ function reducePair(pair) {
     removeFromEnv(b, b.env);
     return;
   }
-  if (a.tag == "bigapplicator" && b.tag == "operator") {
+  if (a.tag == "bigapplicator" && b.tag == "operator" && ppa == "func" && ppb == "inp") {
     // beta reduction
     let idx = undefined, env;
     // body
@@ -1054,15 +1099,15 @@ function reducePair(pair) {
   }
   // commute
   stats.commute++;
-  updateLevels(a, b);
-  let pa = ports(a), ppa = primaryPort(a);
+  updateLevels(a, b, ppa, ppb);
+  let pa = ports(a);
   pa.splice(pa.indexOf(ppa), 1);
-  let pb = ports(b), ppb = primaryPort(b);
+  let pb = ports(b);
   pb.splice(pb.indexOf(ppb), 1);
   let a_new = {}, b_new = {};
   for (let p of pb) {
     a_new[p] = clone(a);
-    if (b.tag == "operator" && p >= b.arities.length) {
+    if (edge_dir(b,p) == "in") {
       // reverse link direction
       a_new[p].reverse = !a_new[p].reverse;
     }
@@ -1076,10 +1121,10 @@ function reducePair(pair) {
         let [d, d_dir] = follow(b, i);
         assert(d_dir == "outside");
         d = clone(d);
-        link(o, i, d, "outside", (b.tag == "operator" && i >= b.arities.length));
+        link(o, i, d, "outside", edge_dir(o, i) != "out");
       }
     }
-    if (a.tag == "bigapplicator" && p !== "inp") {
+    if (edge_dir(a,p) == "out") {
       b_new[p].reverse = !b_new[p].reverse;
     }
   }
@@ -1090,14 +1135,15 @@ function reducePair(pair) {
 
   // link outside first to avoid overwriting inside
   for (let p of pa) {
-    relink(a, p, true, b_new[p], ppb, false, (a.tag == "bigapplicator" && p !== "inp"));
+    relink(a, p, true, b_new[p], ppb, false, edge_dir(a,p) == "out");
   }
   for (let p of pb) {
     if (explicit_lambda_delimiters && b.tag == "operator") {
       let [d, d_dir] = follow(b, p); assert(d_dir == "outside");
-      relink(a_new[p], ppa, false, d, "inside", true, (b.tag == "operator" && p >= b.arities.length));
+      removeFromEnv(d, d.env);
+      relink(a_new[p], ppa, false, d, "inside", true, edge_dir(b,p) == "in");
     } else
-      relink(a_new[p], ppa, false, b, p, true, (b.tag == "operator" && p >= b.arities.length));
+      relink(a_new[p], ppa, false, b, p, true, edge_dir(b,p) == "in");
   }
   // link inside
   for (let pb1 of pb) {
@@ -1105,11 +1151,9 @@ function reducePair(pair) {
       if (explicit_lambda_delimiters && b.tag == "operator") {
         // push through delimiters
         let [d, d_dir] = follow(b_new[pa1], pb1); assert(d_dir == "outside");
-        link(d, "inside", a_new[pb1], pa1,
-          ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
+        link(a_new[pb1], pa1, d, "inside", edge_dir(a_new[pb1], pa1) != "out");
       } else
-        link(b_new[pa1], pb1, a_new[pb1], pa1,
-          ((b.tag == "operator" && pb1 >= b.arities.length) || (a.tag == "bigapplicator" && pa1 !== "inp")));
+        link(a_new[pb1], pa1, b_new[pa1], pb1, edge_dir(a_new[pb1], pa1) != "out");
     }
   }
 }
