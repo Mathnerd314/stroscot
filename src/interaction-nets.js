@@ -176,6 +176,7 @@ function bind(env, v) {
   let name = v.name;
   assert(!env.bindings.has(name));
   env.bindings.set(name, v);
+  v.originalEnv = env.real_env;
   setEnv(v, env.real_env);
 }
 function addEnvIfPresent(t) {
@@ -183,6 +184,7 @@ function addEnvIfPresent(t) {
   let env = t.env;
   if (t.tag == "multiplexer") {
     env.multiplexers.add(t);
+    t.originalEnv.multiplexers.add(t);
   } else if (t.tag == "delimiter") {
     env.delimiters.add(t);
   } else {
@@ -209,6 +211,7 @@ function removeFromEnv(t) {
   if (t.tag == "multiplexer") {
     assert(env.multiplexers.has(t));
     env.multiplexers.delete(t);
+    t.originalEnv.multiplexers.delete(t);
   } else if (t.tag == "delimiter") {
     assert(env.delimiters.has(t));
     env.delimiters.delete(t);
@@ -536,7 +539,7 @@ function readback(source, dir, stack_orig) {
       assert(false);
     }
     case "multiplexer": {
-      let i = term.level, e = term.env;
+      let i = term.level, e = term.originalEnv;
       let levels = Array.from(stack.levels); stack.levels = levels;
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
@@ -549,54 +552,51 @@ function readback(source, dir, stack_orig) {
           levels[i] = l;
         } else assert(false);
         assert(d.name == term.name);
-        assert(d.env == e);
-        if (i > 0) {
-          let ie = term.insideEnv;
-          // refine each env to its variant
-          let newsublevels = [];
-          for (let qq = 0; qq < i; qq++) {
-            let l = clone(levels[qq]);
-            assert(ie == l.env);
-            l.env = l.env.variant_envs[d.index];
-            newsublevels.push(l);
-            assert(l.hidden_levels.length == l.env.v_diff_stack.length);
-            for (let hq = 0; hq < l.hidden_levels.length; hq++) {
-              let hl = l.hidden_levels[hq];
-              assert(hl.env == l.env.v_diff_stack[hq][0]);
-              assert(hl.directors.length == (l.env.v_diff_stack[hq][1] == "full" ? 1 : 0));
-              newsublevels.push(hl);
-              stack.scopes++;
-            }
-            delete l.hidden_levels;
-            ie = ie.parent;
+        assert(d.env == term.originalEnv);
+        let ie = term.env;
+        // refine each env to its variant
+        let newsublevels = [];
+        for (let qq = 0; qq < i; qq++) {
+          let l = clone(levels[qq]);
+          assert(ie == l.env);
+          l.env = l.env.variant_envs[e.n][d.index];
+          newsublevels.push(l);
+          let len = l.hidden_levels[e.n] ? l.hidden_levels[e.n].length : 0;
+          assert(len == l.env.v_diff_stack.length);
+          for (let hq = 0; hq < len; hq++) {
+            let hl = l.hidden_levels[e.n][hq];
+            assert(hl.env == l.env.v_diff_stack[hq][0]);
+            assert(hl.directors.length == (l.env.v_diff_stack[hq][1] == "full" ? 1 : 0));
+            newsublevels.push(hl);
+            stack.scopes++;
           }
-          levels.splice(0, i, ...newsublevels);
+          delete l.hidden_levels[e.n];
+          ie = ie.parent;
         }
+        levels.splice(0, i, ...newsublevels);
         return readback(term, d.index, stack);
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
-        if (i > 0) {
-          let ie = term.insideEnv;
-          // pack variant stack to match original
-          for (let qq = 0; qq < i; qq++) {
-            let l = clone(levels[qq]); levels[qq] = l;
-            let ll = l.env.is_variant_of;
-            assert(l.env == ll.variant_envs[from_dir]);
-            assert(ie == ll);
-            let vd = l.env.v_diff_stack;
-            ie = ie.parent;
-            for (let hq = 0; hq < vd.length; hq++) {
-              let hl = levels[qq + hq + 1];
-              assert(hl.env == vd[hq][0]);
-              assert(hl.directors.length == (vd[hq][1] == "full" ? 1 : 0));
-              stack.scopes--;
-            }
-            l.env = ll;
-            l.hidden_levels = levels.splice(qq+1, vd.length);
+        let ie = term.env;
+        // pack variant stack to match original
+        for (let qq = 0; qq < i; qq++) {
+          let l = clone(levels[qq]); levels[qq] = l;
+          let ll = l.env.is_variant_of;
+          assert(l.env == ll.variant_envs[e.n][from_dir]);
+          assert(ie == ll);
+          let vd = l.env.v_diff_stack;
+          ie = ie.parent;
+          for (let hq = 0; hq < vd.length; hq++) {
+            let hl = levels[qq + hq + 1];
+            assert(hl.env == vd[hq][0]);
+            assert(hl.directors.length == (vd[hq][1] == "full" ? 1 : 0));
+            stack.scopes--;
           }
+          l.env = ll;
+          l.hidden_levels[e.n] = levels.splice(qq + 1, vd.length);
         }
         let l = clone(levels[i]);
-        assert(l.env == e);
+        assert(l.env == term.originalEnv);
         assert(l.directors.length == 0);
         l.directors = [Director(e, term.name, from_dir)].concat(l.directors);
         levels[i] = l;
@@ -742,7 +742,12 @@ function getdot(root) {
     // if (c.envs) env_num = envs.indexOf(c.envs[0].n) + 1;
     if (c.env) env_num = c.env.n; // indexOf?
     if (c.envs) env_num = c.envs[0].n;
-    g.setNode(i, { shape, labelType: "html", label: human, style: `fill: white; stroke: ${colormap[env_num]};` });
+    let outline = "";
+    if(c.originalEnv) {
+      outline = ` outline: ${colormap[c.env.n]} dashed 2px;`;
+      env_num = c.originalEnv.n;
+    }
+    g.setNode(i, { shape, labelType: "html", label: human, style: `fill: white; stroke: ${colormap[env_num]};${outline}` });
   }
   let arrows = colormap;
   for (let edge of visitedEdges) {
@@ -788,6 +793,7 @@ function eqNode(n1, n2) {
     assert(n1.length == n2.length);
     assert(n1.name === n2.name);
     assert(n1.env === n2.env);
+    assert(n1.originalEnv === n2.originalEnv);
     return true;
   }
   return false;
@@ -891,7 +897,7 @@ function reducePair(pair) {
   if (a.tag == "delimiter" && ppa == "outside" && b.tag == "delimiter" && ppb == "outside") {
     // reparent env and find all delimiters in env
     let freeDelimiters = new Set();
-    let eo = b.env; let es = [eo, ...eo.variant_envs];
+    let eo = b.env; let es = [eo, ...eo.variant_envs.flat()];
     for (let e of es) {
       assert(e.parents.size == 1);
       for (let p of e.parents) {
@@ -936,23 +942,24 @@ function reducePair(pair) {
   }
   if (a.tag == "multiplexer" && b.tag == "delimiter") {
     if (a.level > 0)
-      assert(b.env.parents.has(a.insideEnv));
-    a.insideEnv = b.env;
+      assert(b.env.parents.has(a.env));
+    a.env = b.env;
     a.level++;
-    let e = b.env;
-    if (e.variant_envs.length == 0) {
-      e.variant_envs = new Array(a.length);
+    let e = b.env, o = a.originalEnv;
+    if (!e.variant_envs[o.n]) {
+      let arr = new Array(a.length);
+      e.variant_envs[o.n] = arr;
       for (let p = 0; p < a.length; p++) {
         let en = make_real_env();
         for (let parent of e.parents) {
           if (a.level > 1)
-            parent = parent.variant_envs[p]
+            parent = parent.variant_envs[o.n][p];
           en.parents.add(parent);
           en.parent = parent;
           parent.children.add(en);
         }
         en.is_variant_of = e;
-        e.variant_envs[p] = en;
+        arr[p] = en;
         e.splitter = a;
       }
     }
@@ -965,7 +972,9 @@ function reducePair(pair) {
   for (let p of pb) {
     let x = clone(a);
     if (b.tag == "multiplexer" && b.level > 0 && x.env) {
-      x.env = x.env.variant_envs[p];
+      x.env = x.env.variant_envs[b.originalEnv.n][p];
+      if(a.tag == "multiplexer" && a.level < b.level)
+        x.originalEnv = x.originalEnv.variant_envs[b.originalEnv.n][p];
     }
     addEnvIfPresent(x);
     if (edge_dir(b, p) == edge_dir(b, ppb)) {
@@ -977,7 +986,9 @@ function reducePair(pair) {
   for (let p of pa) {
     let x = clone(b);
     if (a.tag == "multiplexer" && a.level > 0 && x.env) {
-      x.env = x.env.variant_envs[p];
+      x.env = x.env.variant_envs[a.originalEnv.n][p];
+      if(b.tag == "multiplexer" && b.level < a.level)
+        x.originalEnv = x.originalEnv.variant_envs[a.originalEnv.n][p];
     }
     addEnvIfPresent(x);
     if (edge_dir(a, p) == edge_dir(a, ppa)) {
