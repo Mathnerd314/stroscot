@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="next" title="Memory management" href="Memory.html" />
     <link rel="prev" title="Overloading" href="Overloading.html" /> 
 </head>
 
@@ -95,6 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#concrete-types">Concrete types</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 </ul>
 
@@ -189,17 +190,23 @@ type system, often not even paying attention to the work of others. As far as do
 <h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
 <p>At this point you might be getting confused about terminology. I certainly am. So here we are:</p>
 <dl class="simple">
-<dt>value</dt><dd><p>A string of bits, paired with some interpretation as a data type</p>
+<dt>memory cell</dt><dd><p>A circuit that can store some fixed number of logical bits, 0 or 1. Since ternary computers might eventually become popular, a cell is probably best modeled as a register containing an integer <code class="docutils literal notranslate"><span class="pre">i</span></code> with <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">MAX</span></code> with no restriction that <code class="docutils literal notranslate"><span class="pre">MAX</span></code> is a power of 2.</p>
+</dd>
+<dt>value</dt><dd><p>A group of memory cells, paired with some interpretation as a data type</p>
 </dd>
 <dt>data type</dt><dd><p>A representational type, that can generally be narrowed down to a pair of functions doing pickle/unpickle on the value’s bits</p>
 </dd>
 <dt>reference</dt><dd><p>A value providing a way to access another value, usually a memory address. It’s distinct from an API because at any given time there’s only one unique value that can be accessed using the reference.</p>
 </dd>
-<dt>variable</dt><dd><p>A name (identifier) in the current scope that’s associated to a reference.</p>
+<dt>variable</dt><dd><p>A name/symbol/identifier representing a function argument or mathematical object</p>
 </dd>
-<dt>l-value</dt><dd><p>A variable, basically. The difference is some people don’t consider <code class="docutils literal notranslate"><span class="pre">arr[i]</span></code> to be a variable, while they’ll all agree it’s an l-value.</p>
+<dt>l-value</dt><dd><p>A variable representing a memory cell. The difference is some people don’t consider <code class="docutils literal notranslate"><span class="pre">arr[i]</span></code> to be a variable, while they’ll all agree it’s an l-value.</p>
 </dd>
-<dt>r-value</dt><dd><p>A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address. Segfaults galore. ¯\_(ツ)_/¯</p>
+<dt>r-value</dt><dd><p>A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address, to get an x-value. Segfaults galore. ¯\_(ツ)_/¯</p>
+</dd>
+<dt>subtyping</dt><dd><p><code class="docutils literal notranslate"><span class="pre">A</span></code> is a subtype of <code class="docutils literal notranslate"><span class="pre">B</span></code> if every element of <code class="docutils literal notranslate"><span class="pre">A</span></code> is also in <code class="docutils literal notranslate"><span class="pre">B</span></code>.</p>
+</dd>
+<dt>inheritance</dt><dd><p>Record subtyping, where for example <code class="docutils literal notranslate"><span class="pre">{a,b}</span></code> is considered a subtype of <code class="docutils literal notranslate"><span class="pre">{a}</span></code>.</p>
 </dd>
 </dl>
 </div>
@@ -215,15 +222,15 @@ type system, often not even paying attention to the work of others. As far as do
 </div>
 <p>The third choice is to put the type on the right with the expression:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="nb">type</span> <span class="n">value</span><span class="p">;</span>
-<span class="n">name</span> <span class="o">=</span> <span class="n">value</span> <span class="p">:</span> <span class="nb">type</span><span class="p">;</span> <span class="c1"># (:) is just an operator x : y = y x</span>
+<span class="n">name</span> <span class="o">=</span> <span class="n">value</span> <span class="p">:</span> <span class="nb">type</span><span class="p">;</span> <span class="c1"># (:) is an operator x : y = y x</span>
 </pre></div>
 </div>
-<p>This seems like the most logical place for it. For example, if I’m declaring a new mutable variable, I don’t want to say that the name is the mutable part of it, because that’s just a reference to it. It’s a handle so I can write my program.</p>
+<p>This third option seems like the most logical place. For example, if I’m declaring a new mutable variable, I don’t want to say that the name is mutable. The name is just what I use to refer to the variable; it’s a handle so I can write my program without resorting to hexadecimal addresses.</p>
 <p>What we want is to declare that the mutability as part of the value; it’s a mutable value. So putting it in the expression tells the compiler that you can’t store this like you would store a normal constant value; you have to create a data structure on the stack or the heap or whatever to access this variable.</p>
-<p>By comparison, these other syntaxes don’t make sense. If I had <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>, I’m not going to talk about “mut a” for the rest of the program, I’m going to talk about <code class="docutils literal notranslate"><span class="pre">a</span></code>. And what happens if I write <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code>? Terrible things. Similarly <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code> makes no sense. Whereas <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">mut</span></code> actually makes some sense if I decide that 3 characters is too long, or if I’m doing higher-order functional programming that creates references. Similarly <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">1</span></code> is quite sensible, as a reference cell.</p>
+<p>By comparison, the other syntaxes don’t make sense. If I had <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>, I’m not going to talk about “mut a” for the rest of the program, I’m going to talk about <code class="docutils literal notranslate"><span class="pre">a</span></code>. And what happens if I write <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code>? Terrible things. Similarly <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code> makes no sense. Whereas <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">mut</span></code> actually makes some sense if I decide that 3 characters is too long and want to abbreviate <code class="docutils literal notranslate"><span class="pre">mut</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>, or if I’m doing higher-order functional programming that creates references. Similarly <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">1</span></code> is quite sensible, as an anonymous reference cell.</p>
 <p>So getting back to our syntax, <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">=</span> <span class="pre">type</span> <span class="pre">value</span></code>. It should be clear that we have two types of assignments. The first, with the type included, creates/allocates the stuff we need to access it, and then <code class="docutils literal notranslate"><span class="pre">name</span></code> is bound to a memory address.</p>
 <p>When we assign again, it will look like <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">:=</span> <span class="pre">value</span></code>, without a type. This has a completely different semantics: we take the thing on the left, the l-value, and we access the memory that it refers to, and we change the memory. Since the semantics is so different it uses a different syntax.</p>
-<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we’ll get to later); you can shadow, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
+<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we’ll get to later); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
 </div>
 <div class="section" id="concrete-types">
 <h2>Concrete types<a class="headerlink" href="#concrete-types" title="Permalink to this headline">¶</a></h2>
@@ -262,7 +269,7 @@ u8 129
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Overloading.html" class="btn btn-neutral float-left" title="Overloading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
