@@ -11,6 +11,7 @@ For more, see:
   Introduction
   Arguments
   Delimited-Continuations
+  Optimal-Reduction
   Syntax
   Overloading
   Types
