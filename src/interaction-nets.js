@@ -1,8 +1,5 @@
 'use strict';
-let multiplexer_parent_symbol = "⌧";
-let explicit_lambda_delimiters = true;
-let pop_scopes = true;
-var stats = { annihilate: 0, commute: 0, beta: 0 }; window.stats = stats;
+var stats = { reductions: 0, annihilate: 0, commute: 0, beta: 0 }; window.stats = stats;
 
 const assert = function (condition, message) {
   if (!condition) {
@@ -18,14 +15,7 @@ function clone(o) {
   return on;
 }
 
-let delimiter = (insideEnv, outsideEnv, full, reverse, inside, outside) => {
-  return { tag: "delimiter", full, reverse, insideEnv, outsideEnv, inside, outside }
-};
-// in the initial graph inside is the parent, outside is the child.
-// it faces up. so the graph looks like inside-]-outside.
-// later lambda disintegrates to outside-[-inside and they eventually annihilate (hopefully)
-
-let multiplexer = (name, labelEnv, ambientEnv, val) => { return { tag: "multiplexer", name, labelEnv, ambientEnv, val, length: 0 } };
+let multiplexer = (name, labelEnv, val) => { return { tag: "multiplexer", name, labelEnv, val, length: 0 } };
 
 let initiator = (out) => { return { tag: "initiator", out: out } };
 
@@ -53,14 +43,12 @@ function ports(node) {
   let r;
   switch (node.tag) {
     case "initiator": return ["out"];
-    case "applicator": return ["func", "inp", "arg"];
-    case "abstractor": return ["inp", "body", "bind"];
-    case "delimiter": return ["outside", "inside"];
     case "bigapplicator": r = ["func", "inp"]; break;
     case "constant": r = ["inp"]; break;
     case "multiplexer": r = ["val"]; break;
     case "case": r = ["out", "inp"]; break;
     case "operator": r = ["inp"]; break;
+    default: assert(false);
   }
   for (let i = 0; i < node.length; i++)
     r.push(i);
@@ -121,8 +109,7 @@ function link(a, a_dir, b, b_dir, reverse) {
   }
   let e = edge(a, a_dir, b, b_dir);
   b[b_dir] = a[a_dir] = e;
-  if (primaryPort(a) == a_dir && primaryPort(b) == b_dir
-    && !(a.tag == "delimiter" && b.tag == "delimiter" && a.full != "head" && b.full != "head")) {
+  if (primaryPort(a) == a_dir && primaryPort(b) == b_dir) {
     e.active = true;
     activePairs.push(e);
   }
@@ -148,9 +135,9 @@ function make_real_env() {
   let e = {
     id: n_envs++,
     multiplexers: new Set(),
-    delimiters: new Set(),
     variant_envs: [], // id -> [env]
-    is_variant_of: undefined
+    is_variant_of: undefined,
+    splitter: undefined
   };
   all_envs.push(e);
   return e;
@@ -171,16 +158,11 @@ function bind(env, v) {
   assert(!env.bindings.has(name));
   env.bindings.set(name, v);
   v.labelEnv = env.real_env;
-  v.ambientEnv = env.real_env;
   addEnv(v);
 }
 function addEnv(t) {
   if (t.tag == "multiplexer") {
     t.labelEnv.multiplexers.add(t);
-    t.ambientEnv.multiplexers.add(t);
-  } else if (t.tag == "delimiter") {
-    t.insideEnv.delimiters.add(t);
-    t.outsideEnv.delimiters.add(t);
   }
   // clear edges
   for (let p of ports(t)) {
@@ -190,14 +172,7 @@ function addEnv(t) {
 function removeFromEnv(t) {
   if (t.tag == "multiplexer") {
     assert(t.labelEnv.multiplexers.has(t));
-    assert(t.ambientEnv.multiplexers.has(t));
     t.labelEnv.multiplexers.delete(t);
-    t.ambientEnv.multiplexers.delete(t);
-  } else if (t.tag == "delimiter") {
-    assert(t.insideEnv.delimiters.has(t));
-    assert(t.outsideEnv.delimiters.has(t));
-    t.insideEnv.delimiters.delete(t);
-    t.outsideEnv.delimiters.delete(t);
   }
 }
 
@@ -252,7 +227,7 @@ function resolve(env, term, parent, parent_dir) {
       let o = operator([], []);
       o.arities.length = term.cases.length;
       link(parent, parent_dir, o, "inp");
-      let bind_edges = [];
+      let binds = [];
       for (let { constr, vars, rhs } of term.cases) {
         let new_env = make_env(env);
         o.names.push(constr);
@@ -260,54 +235,18 @@ function resolve(env, term, parent, parent_dir) {
         for (let v_ of vars) {
           let v = multiplexer(v_, 0);
           bind(new_env, v);
-          let d2 = delimiter(new_env.real_env, new_env.parent.real_env, "full");
-          addEnv(d2);
-          link(v, "val", d2, "inside");
-          bind_edges.push(d2);
+          binds.push(v);
         }
-        let d1 = delimiter(new_env.real_env, new_env.parent.real_env, "head", true);
-        addEnv(d1);
-        link(o, o.length++, d1, "outside");
-        resolve(new_env, rhs, d1, "inside");
+        resolve(new_env, rhs, o, o.length++);
       }
-      for (let d of bind_edges) {
-        link(d, "outside", o, o.length++);
+      for (let v of binds) {
+        link(v, "val", o, o.length++);
       }
       return o;
     }
-    /*
-    case "case": {
-      let cs = cAse([], []);
-      cs.arities.length = term.cases.length;
-      if (!explicit_lambda_delimiters)
-        cs.envs = [];
-      link(parent, parent_dir, cs, "inp");
-      res(term.exp, cs, "out") // compile the scrutinee
-      let muxes = [];
-      for (let { constr, vars, rhs } of term.cases) {
-        cs.names.push(constr);
-        cs.arities[cs.length] = vars.length;
-        let new_env = make_env(env);
-        for (let v_ of vars) {
-          let v = multiplexer(v_, 0);
-          muxes.push(v);
-          bind(new_env, v);
-        }
-        resolve(new_env, rhs, cs, cs.length++);
-      }
-      for (let v of muxes) {
-        link(v, "val", cs, cs.length++);
-      }
-      return cs;
-    }
-    */
     case "symbol": {
       let e = env, name = term.name;
       while (e && !(e.bindings.has(name))) {
-        let d = delimiter(e.real_env, e.parent.real_env, "exit");
-        link(parent, parent_dir, d, "inside");
-        parent = d;
-        parent_dir = "outside";
         e = e.parent;
       }
       assert(e);
@@ -316,32 +255,6 @@ function resolve(env, term, parent, parent_dir) {
       return v;
     }
     case "let": {
-      /*
-      for (let [name, _rhs] of term.binds) {
-        let v = multiplexer(name, 0);
-        if (env.has(v.name)) {
-          env.get(v.name).push(v);
-        } else {
-          env.set(v.name, [v]);
-        }
-      }
-
-      for (let [name, rhs] of term.binds) {
-        let x = env.get(name);
-        let v = x[x.length - 1];
-        resolve(rhs, v, "val");
-      }
-
-      // open scope for multiplexers
-      let d = delimiter(0); d.reverse = true;
-      link(parent, parent_dir, d, "outside");
-      resolve(term.expr, d, "inside");
-
-      for (let [name, _rhs] of term.binds) {
-        env.get(name).pop();
-      }
-      return d;
-      */
       // letrec is hard, for now just do simple syntactic lambda translation
       // let a = b in c -> (\a. c @ b)
       let body = term.expr;
@@ -391,12 +304,6 @@ function getdot(root) {
       continue;
     visitedNodes.add(node);
 
-    if (node.insideEnv)
-      envs.add(node.insideEnv);
-    if (node.outsideEnv)
-      envs.add(node.outsideEnv);
-    if (node.ambientEnv)
-      envs.add(node.ambientEnv);
     if (node.labelEnv)
       envs.add(node.labelEnv);
 
@@ -435,7 +342,6 @@ function getdot(root) {
         case "applicator": return "circle";
         case "abstractor": return "rect";
         //        case "constant": return "star";
-        //        case "delimiter": return "house";
         //        case "multiplexer": return "fan";
         //        case "case": return "folder";
         //        case "operator": return "star";
@@ -443,28 +349,12 @@ function getdot(root) {
       }
     })();
     let human = (() => {
-      let level = c.level ? `<sub>${c.level}</sub>` : "";
+      let level = c.labelEnv ? `<sub>${c.labelEnv.id}</sub>` : "";
       let name = c.name && c.name !== "sole" ? `<sub>${c.name}</sub>` : "";
       switch (c.tag) {
         case "initiator": return `<span id=initiator>I</span>`;
-        case "applicator": return `@`;
         case "bigapplicator": return `@${name}`;
-        case "abstractor": return `λ${name}`;
         case "constant": return c.name;
-        case "delimiter":
-          let s; // ◜ 	◝ 	◞ 	◟
-          if (c.full === "full") {
-            s = c.reverse ? "ᙉ" : "ᙈ";
-          } else if (c.full == "exit") {
-            s = c.reverse ? "ᙁ" : "ᙀ";
-          } else if (c.full == "head") {
-            assert(c.reverse);
-            s = "ᑍ";
-          } else assert(false);
-          let ss = c.reverse ? ["sub", "sup"] : ["sup", "sub"];
-          let ids = [c.outsideEnv.id, c.insideEnv.id];
-          if (c.reverse) ids = [ids[1], ids[0]];
-          return `<${ss[0]}>${ids[0]}</${ss[0]}>${s}<${ss[1]}>${ids[1]}</${ss[1]}>`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
         case "operator":
@@ -476,16 +366,8 @@ function getdot(root) {
     })();
     let attrs = { shape, labelType: "html", label: human, padding: 0 };
     // if(c.clone_id) human += `<sup>${c.clone_id}</sup>`;
-    if (c.ambientEnv && c.labelEnv) {
-      let lr = [colormap[c.labelEnv.id], colormap[c.labelEnv.id]];
-      let ud = ["transparent", colormap[c.ambientEnv.id]]; if (c.reverse) ud = [ud[1], ud[0]];
-      attrs.labelStyle = "border-style: solid; border-width: 2px;"
-      attrs.labelStyle += `border-top-color: ${ud[0]}; border-bottom-color: ${ud[1]}; border-left-color: ${lr[0]}; border-right-color: ${lr[1]};`;
-    } else if (c.insideEnv && c.outsideEnv) {
-      let lr = [colormap[c.insideEnv.id], colormap[c.outsideEnv.id]];
-      let ud = lr; if (c.reverse) ud = [lr[1], lr[0]];
-      attrs.labelStyle = "border-style: solid; border-width: 2px;"
-      attrs.labelStyle += `border-top-color: ${ud[0]}; border-bottom-color: ${ud[1]}; border-left-color: ${lr[0]}; border-right-color: ${lr[1]};`;
+    if (c.labelEnv) {
+      attrs.labelStyle = `border: solid 2px ${colormap[c.labelEnv.id]}`;
     } else {
       attrs.style = "stroke: none;";
       attrs.padding = 1;
@@ -517,27 +399,17 @@ function getdot(root) {
       label: "" + e.id,
       style: envs.has(e) ? `fill: ${colormap[e.id]}; stroke: gray;` : `fill: white; stroke: ${colormap[e.id]};`
     });
-    for (let p of e.is_variant_of ? [e.is_variant_of] : []) {
+    let p;
+    if (e.is_variant_of) {
+      p = e.is_variant_of;
       g.setEdge("e" + e.id, p.id == 0 ? 0 : "e" + p.id, { style: "stroke-dasharray: 2;" });
+      p = e.splitter;
+      g.setEdge("e" + e.id, p.id == 0 ? 0 : "e" + p.id, {});
+    } else {
+      g.setEdge("e" + e.id, 0, {});
     }
   });
   return g;
-}
-function eqNode(n1, n2) {
-  if (n1.tag !== n2.tag) return false;
-  if (n1.tag === "delimiter" && n1.env === n2.env) {
-    assert(n1.full == n2.full);
-    return true;
-  }
-  if (n1.tag === "multiplexer" && n1.length === 0) assert(n1.level === 0 || isNaN(n1.level));
-  if (n1.tag === "multiplexer" && n1.level === n2.level) {
-    assert(n1.length == n2.length);
-    assert(n1.name === n2.name);
-    assert(n1.env === n2.env);
-    assert(n1.originalEnv === n2.originalEnv);
-    return true;
-  }
-  return false;
 }
 // BOHM: f.nform[i].nform[f.nport[i]] == f
 // mine: [a,ad] = follow(f, i); f == follow(a,ad)
@@ -600,9 +472,53 @@ function reparentEnv(a, b) {
   }
 }
 
+function makeVariantEnvs(e, o, l) {
+  if (!e.variant_envs[o.id]) {
+    let arr = e.variant_envs[o.id] = new Array(l);
+    for (let p = 0; p < l; p++) {
+      let en = arr[p] = make_real_env();
+      en.is_variant_of = e;
+      en.splitter = o;
+    }
+  }
+}
+
+function makenodes(a, b, pb, ppb) {
+  let a_new = {};
+  for (let p of pb) {
+    let x = clone(a);
+    if (a.tag == "multiplexer" && b.tag == "multiplexer" && b.reverse) {
+      x.labelEnv = x.labelEnv.variant_envs[b.labelEnv.id][p];
+    }
+    addEnv(x);
+    if (edge_dir(b, p) == edge_dir(b, ppb)) {
+      // reverse link direction
+      x.reverse = !x.reverse;
+    }
+    a_new[p] = x;
+  }
+  return a_new;
+}
+
+function makeOuterLinks(a, pa, b_new, ppb) {
+  // link outside first to avoid overwriting inside
+  for (let p of pa) {
+    let x = b_new[p];
+    relink(a, p, true, x, ppb, false, edge_dir(a, p) == "out");
+  }
+}
+function eqNode(a, b) {
+  if (a.tag !== b.tag) return false;
+  if (a.tag === "multiplexer") {
+    if (a.labelEnv === b.labelEnv) return true;
+  }
+  return false;
+}
 function reducePair(pair) {
   assert(pair.active); pair.active = false;
   let a = pair.a, b = pair.b, ppa = pair.a_dir, ppb = pair.b_dir;
+  removeFromEnv(a);
+  removeFromEnv(b);
   if (eqNode(a, b) && ppa == ppb) {
     // annihilate
     stats.annihilate++;
@@ -610,8 +526,6 @@ function reducePair(pair) {
       if (p == ppa) continue;
       relink(a, p, true, b, p, true);
     }
-    removeFromEnv(a);
-    removeFromEnv(b);
     return;
   }
   if (a.tag == "bigapplicator" && b.tag == "operator" && ppa == "func" && ppb == "inp") {
@@ -648,75 +562,16 @@ function reducePair(pair) {
     }
     return;
   }
+
   // commute
   stats.commute++;
-  removeFromEnv(a);
-  removeFromEnv(b);
-  let pa = ports(a);
-  pa.splice(pa.indexOf(ppa), 1);
-  let pb = ports(b);
-  pb.splice(pb.indexOf(ppb), 1);
-  function makenodes(a, b, pb) {
-    if (a.tag == "delimiter" && b.tag == "delimiter") {
-      // remove original a delimiter
-      relink(a, "inside", true, a, "outside", true, a.reverse);
-      // keep b
-      addEnv(b);
-      return [b];
-    }
-    if (a.tag == "multiplexer" && b.tag == "delimiter") {
-      a.ambientEnv = b.insideEnv;
-      let e = b.insideEnv, o = a.labelEnv;
-      if (!e.variant_envs[o.id]) {
-        let arr = new Array(a.length);
-        e.variant_envs[o.id] = arr;
-        for (let p = 0; p < a.length; p++) {
-          let en = make_real_env();
-          en.is_variant_of = e;
-          arr[p] = en;
-          e.splitter = a;
-        }
-      }
-    }
-    let a_new = {};
-    for (let p of pb) {
-      let x = clone(a);
-      if (b.tag == "multiplexer" && x.insideEnv)
-        x.insideEnv = x.insideEnv.variant_envs[b.labelEnv.id][p];
-      if (b.tag == "multiplexer" && x.labelEnv)
-        x.labelEnv = x.labelEnv.variant_envs[b.labelEnv.n][p];
-      addEnv(x);
-      if (edge_dir(b, p) == edge_dir(b, ppb)) {
-        // reverse link direction
-        x.reverse = !x.reverse;
-      }
-      if (a.tag == "delimiter" && b.tag == "bigapplicator" && p != "inp" && x.full == "head") {
-        x.full = "exit";
-      }
-      a_new[p] = x;
-    }
-    return a_new;
+  let pa = ports(a); pa.splice(pa.indexOf(ppa), 1);
+  let pb = ports(b); pb.splice(pb.indexOf(ppb), 1);
+  if (a.tag == "multiplexer" && b.tag == "multiplexer") {
+    makeVariantEnvs(a.labelEnv, b.labelEnv, b.length);
   }
-  let a_new = makenodes(a, b, pb);
-  let b_new = makenodes(b, a, pa);
-  function makeOuterLinks(a, pa, b_new, ppb) {
-    // link outside first to avoid overwriting inside
-    for (let p of pa) {
-      let x = b_new[p];
-      if (a.tag == "multiplexer" && x.tag == "delimiter") {
-        // copy off parent envs if a variant got reparented
-        let d = x;
-        for (let [v, v_full] of x.env.v_diff_stack) {
-          let d_outer = delimiter(0); setEnv(d_outer, v); d_outer.full = v_full; d_outer.reverse = d.reverse;
-          link(d_outer, "inside", d, "outside", !d.reverse);
-          d = d_outer;
-        }
-        relink(a, p, true, d, "outside", false, edge_dir(a, p) == "out");
-      } else {
-        relink(a, p, true, x, ppb, false, edge_dir(a, p) == "out");
-      }
-    }
-  }
+  let a_new = makenodes(a, b, pb, ppb);
+  let b_new = makenodes(b, a, pa, ppa);
   makeOuterLinks(a, pa, b_new, ppb);
   makeOuterLinks(b, pb, a_new, ppa);
   // link inside
@@ -727,23 +582,20 @@ function reducePair(pair) {
   }
 }
 
-let Director = (e, name, index) => { return { tag: "director", env: e, name, index }; };
-let Level = (e, index, directors) => { return { tag: "level", env: e, real_env: e, index, directors: directors ? directors : [], hidden_levels: [] }; };
+let Director = (e, name, index) => { return { tag: "director", name, index }; };
+let Level = (e, directors) => { return { tag: "level", env: e, directors: directors ? directors : [] }; };
 let Stack = () => {
   return {
     tag: "stack",
     levels: [],
-    scopes: 0,
-    returns: 0,
-    lambdas: 0,
-    saved: new Map(),
-    edge_ids: []
+    edge_ids: [],
+    lambdas: []
   };
 };
 
 function validLevel(l) {
+  if (!l) return;
   assert(l.tag == "level");
-  assert(l.index >= 0);
   assert(l.directors.length <= 1);
   for (let d of l.directors) {
     assert(d.tag == "director");
@@ -752,10 +604,6 @@ function validLevel(l) {
 
 function validStack(stack) {
   assert(stack.tag == "stack");
-  assert(stack.scopes >= 0);
-  //  assert(stack.returns >= 0);
-  assert(stack.lambdas >= 0);
-  assert(stack.scopes == stack.levels.length);
   for (let l of stack.levels) {
     validLevel(l);
   }
@@ -764,38 +612,37 @@ function validStack(stack) {
 }
 function showLevel(l) {
   let s = "";
-  let b = l;
-  if (b.directors.length) s += "(";
-  s += b.index;
-  for (let d of b.directors) {
-    s += "LRABCD"[d.index];
+  if (l) {
+    if (l.directors.length) s += "(";
+    s += l.env.id;
+    for (let d of l.directors) {
+      s += "LRABCD"[d.index];
+    }
+    if (l.directors.length) s += ")";
   }
-  if (b.directors.length) s += ")";
   return s;
 }
 function showStack(stack) {
   let s = "";
-  s += stack.scopes;
   for (let l of stack.levels) {
     s += showLevel(l);
   }
   return s;
 }
 function levelExtension(a, b) {
-  if (a.index !== b.index) return false;
-  if (a.directors.length == b.directors.length) {
+  if (!a) return true;
+  if (a.env !== b.env) return false;
+  if (a.directors.length <= b.directors.length) {
     for (let k = 0; k < a.directors.length; k++) {
       if (a.directors[k].index !== b.directors[k].index) return false;
+      if (a.directors[k].name !== b.directors[k].name) return false;
     }
     return true;
   }
   return false;
 }
 function isStackExtension(sub, sup) {
-  // vague imitation of "transparency" from the paper
-  // just compare for equality
-  if (sub.scopes !== sup.scopes) return false;
-  if (sub.levels.length !== sup.levels.length) return false;
+  // kind of compare for equality
   for (let l = 0; l < sub.levels.length; l++) {
     if (!levelExtension(sub.levels[l], sup.levels[l])) {
       return false;
@@ -805,10 +652,8 @@ function isStackExtension(sub, sup) {
 }
 
 function readback(source, dir, stack_orig) {
-  return {};
   validStack(stack_orig);
-  let stack = clone(stack_orig); stack.saved = new Map(stack.saved);
-  stack.edge_ids = stack.edge_ids.concat([source[dir].id]);
+  let stack = clone(stack_orig); stack.edge_ids = stack.edge_ids.concat([source[dir].id]);
   let [term, from_dir] = follow(source, dir);
   switch (term.tag) {
     case "bigapplicator":
@@ -822,8 +667,8 @@ function readback(source, dir, stack_orig) {
       assert(false);
     case "operator": {
       if (from_dir == "inp") {
-        stack.lambdas++;
         let t = { tag: "operator", cases: [] };
+        stack.lambdas = [{ term, stack }].concat(stack.lambdas);
         for (let x = 0; x < term.arities.length; x++) {
           assert(term.names[x]);
           t.cases.push([term.names[x], term.arities[x], readback(term, x, stack)]);
@@ -837,115 +682,46 @@ function readback(source, dir, stack_orig) {
           if (i < term.arities[j]) break;
           i -= term.arities[j];
         }
-        let b = stack.returns;
+        let b = 0;
+        while (term !== stack.lambdas[b].term) b++;
+        if(!isStackExtension(stack.lambdas[b].stack, stack)) {
+          assert(false);
+          isStackExtension(stack.lambdas[b].stack, stack)
+        }
         return {
           tag: "symbol", idx: b, rule: term.names[j], rule_idx: i
         };
       }
       assert(false);
     }
-    case "delimiter": {
-      let e = term.env;
-      assert(term.level == 0);
-      if (from_dir == "outside") {
-        if (!e.stack) e.stack = stack_orig;
-        isStackExtension(e.stack, stack);
-
-        if (stack.scopes > 0) {
-          assert(e.parents.has(stack.levels[0].env));
-        } else {
-          assert(e.parents.has(all_envs[0]));
-        }
-        stack.scopes++;
-        stack.levels = [Level(e, stack.scopes)].concat(stack.levels);
-        if (term.full == "full") {
-          assert(stack.saved.has(e));
-          stack.levels[0].directors = [stack.saved.get(e)];
-          stack.saved.delete(e);
-        } else {
-          stack.saved.delete(e);
-        }
-        return readback(term, "inside", stack);
-      }
-      if (from_dir == "inside") {
-        let l = stack.levels[0];
-        assert(l.env == e);
-        assert(l.directors.length == (term.full == "full" ? 1 : 0));
-        if (l.directors.length >= 1) {
-          assert(!stack.saved.has(e));
-          stack.saved.set(e, l.directors[0]);
-        }
-        stack.scopes--;
-        stack.levels = stack.levels.slice(1);
-        if (!e.stack) e.stack = stack_orig;
-        isStackExtension(e.stack, stack);
-
-        // silently pop off hidden levels
-
-        return readback(term, "outside", stack);
-      }
-      assert(false);
-    }
     case "multiplexer": {
-      let i = term.level, e = term.originalEnv;
+      let e = term.labelEnv, i = e.id;
       let levels = Array.from(stack.levels); stack.levels = levels;
       if (from_dir == "val") {
         // σ[(jLδ)l]_i -> σ[jδl]_i
         let d;
-        if (levels[i].directors.length > 0) {
-          assert(levels[i].directors.length == 1);
-          let l = clone(levels[i]);
-          d = l.directors[0];
-          l.directors = l.directors.slice(1);
-          levels[i] = l;
-        } else assert(false);
+        assert(levels[i] && levels[i].directors);
+        assert(levels[i].directors.length == 1);
+        let l = clone(levels[i]);
+        d = l.directors[0];
+        l.directors = l.directors.slice(1);
+        levels[i] = l;
         assert(d.name == term.name);
-        assert(d.env == term.originalEnv);
-        let ie = term.env;
-        // refine each env to its variant
-        let newsublevels = [];
-        for (let qq = 0; qq < i; qq++) {
-          let l = clone(levels[qq]);
-          assert(ie == l.env);
-          l.env = l.env.variant_envs[e.n][d.index];
-          newsublevels.push(l);
-          let len = l.hidden_levels[e.n] ? l.hidden_levels[e.n].length : 0;
-          assert(len == l.env.v_diff_stack.length);
-          for (let hq = 0; hq < len; hq++) {
-            let hl = l.hidden_levels[e.n][hq];
-            assert(hl.env == l.env.v_diff_stack[hq][0]);
-            assert(hl.directors.length == (l.env.v_diff_stack[hq][1] == "full" ? 1 : 0));
-            newsublevels.push(hl);
-            stack.scopes++;
-          }
-          delete l.hidden_levels[e.n];
-          ie = ie.parent;
-        }
-        levels.splice(0, i, ...newsublevels);
         return readback(term, d.index, stack);
       } else {
         // σ[jδl]_i -> σ[(jLδ)l]_i
-        let ie = term.env;
-        // pack variant stack to match original
-        for (let qq = 0; qq < i; qq++) {
-          let l = clone(levels[qq]); levels[qq] = l;
-          let ll = l.env.is_variant_of;
-          assert(l.env == ll.variant_envs[e.n][from_dir]);
-          assert(ie == ll);
-          let vd = l.env.v_diff_stack;
-          ie = ie.parent;
-          for (let hq = 0; hq < vd.length; hq++) {
-            let hl = levels[qq + hq + 1];
-            assert(hl.env == vd[hq][0]);
-            assert(hl.directors.length == (vd[hq][1] == "full" ? 1 : 0));
-            stack.scopes--;
-          }
-          l.env = ll;
-          l.hidden_levels[e.n] = levels.splice(qq + 1, vd.length);
+        let l;
+        if (!levels[i]) {
+          l = Level(e);
+        } else {
+          l = clone(levels[i]);
+          assert(l.env == e);
+          if(l.directors.length == 1) {
+            assert(l.directors[0].index == from_dir);
+            assert(l.directors[0].name == term.name);
+            l.directors = [];
+          } else assert(l.directors.length == 0);
         }
-        let l = clone(levels[i]);
-        assert(l.env == term.originalEnv);
-        assert(l.directors.length == 0);
         l.directors = [Director(e, term.name, from_dir)].concat(l.directors);
         levels[i] = l;
         return readback(term, "val", stack);
