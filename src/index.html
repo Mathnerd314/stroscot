@@ -51,8 +51,9 @@
   <div>
     <select name="example_selector" id="example_selector">
       <option value="22">Lambdascope paper's 2 2</option>
+      <option value="id" selected>Identity function</option>
       <option value="ww">Simple omega omega loop</option>
-      <option value="mlc" selected>Counterexample from MLC issue</option>
+      <option value="mlc">Counterexample from MLC issue</option>
       <option value="jumbo">Jumbo types version of MLC</option>
     </select>
     <input id="rotate" type="button" value="↻">
@@ -86,6 +87,7 @@
     let term_examples; {
       let x = "x", y = "y", f = "f", i = "i", h = "h", u = "u";
       let id = L("x", S("x"));
+      let id2 = A(A(id,id),A(id,id));
       let l2 = L("x", L("y", A(x, A(x, y))));
       let paper_example = A(l2, l2);
       let t = {
@@ -108,7 +110,7 @@
       let w = L(x, A(x, x));
       let ww = A(w, w);
 
-      term_examples = { "22": paper_example, "ww": ww, "mlc": mlc_counterexample, "jumbo": t };
+      term_examples = { "id": id, "22": paper_example, "ww": ww, "mlc": mlc_counterexample, "jumbo": t };
     }
 
     function toSexpr(thing, needParens) {

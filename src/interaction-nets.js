@@ -16,6 +16,9 @@ function clone(o) {
 }
 
 let multiplexer = (name, labelEnv, val) => { return { tag: "multiplexer", name, labelEnv, val, length: 0 } };
+let delimiter = (insideEnv, outsideEnv, inside, outside) => { return { tag: "delimiter", insideEnv, outsideEnv, inside, outside } };
+let axiom = (pos, neg) => { return { tag: "axiom", pos, neg } };
+// cut is reverse of axiom
 
 let initiator = (out) => { return { tag: "initiator", out: out } };
 
@@ -43,6 +46,8 @@ function ports(node) {
   let r;
   switch (node.tag) {
     case "initiator": return ["out"];
+    case "delimiter": return ["outside", "inside"];
+    case "axiom": return ["neg", "pos"];
     case "bigapplicator": r = ["func", "inp"]; break;
     case "constant": r = ["inp"]; break;
     case "multiplexer": r = ["val"]; break;
@@ -55,20 +60,27 @@ function ports(node) {
   return r;
 }
 
-let in_dirs = new Set(["inp", "bind", "inside"]);
+let in_dirs = new Set(["inp", "bind", "inside", "pos", "neg"]);
 let out_dirs = new Set(["func", "arg", "body", "out", "outside", "val"]);
 function native_edge_dir(t, dir) {
   if (0 <= dir) {
-    if (t.tag == "case" || t.tag == "operator") {
-      return (dir >= t.arities.length) ? "in" : "out";
+    if (t.tag == "case" || t.tag == "bigapplicator") {
+      return "out"; // (dir >= t.arities.length) ? "in" : "out";
     }
-    if (t.tag == "bigapplicator" || t.tag == "constant") {
+    if (t.tag == "operator" || t.tag == "constant") {
       return "out";
     }
     if (t.tag == "multiplexer") {
       return "in";
     }
     assert(false);
+  }
+
+  if (t.tag == "bigapplicator" && dir == "inp") {
+    return "out";
+  }
+  if (t.tag == "bigapplicator" && dir == "func") {
+    return "in";
   }
 
   if (in_dirs.has(dir)) {
@@ -201,8 +213,12 @@ function resolve(env, term, parent, parent_dir) {
     }
     case "bigapp": {
       let a = bigapplicator(term.name);
-      link(parent, parent_dir, a, "inp");
-      res(term.func, a, "func");
+      let ax = axiom();
+      link(parent, parent_dir, ax, "neg");
+      link(a, "inp", ax, "pos");
+      let cut = axiom(); cut.reverse = true;
+      link(cut, "pos", a, "func");
+      res(term.func, cut, "neg");
       for (let t of term.terms) {
         res(t, a, a.length++);
       }
@@ -226,7 +242,9 @@ function resolve(env, term, parent, parent_dir) {
       // semantically a lambda-case
       let o = operator([], []);
       o.arities.length = term.cases.length;
-      link(parent, parent_dir, o, "inp");
+      let ax = axiom();
+      link(parent, parent_dir, ax, "neg");
+      link(o, "inp", ax, "pos");
       let binds = [];
       for (let { constr, vars, rhs } of term.cases) {
         let new_env = make_env(env);
@@ -240,7 +258,11 @@ function resolve(env, term, parent, parent_dir) {
         resolve(new_env, rhs, o, o.length++);
       }
       for (let v of binds) {
-        link(v, "val", o, o.length++);
+        let d = delimiter(v.labelEnv, all_envs[0]); addEnv(d);
+        link(v, "val", d, "inside");
+        let ax = axiom();
+        link(d, "outside", ax, "neg");
+        link(o, o.length++, ax, "pos");
       }
       return o;
     }
@@ -320,6 +342,7 @@ function getdot(root) {
         assert(edge.active !== undefined && term[edge.a_dir] == edge);
       }
       stack.push(term);
+      edge.drawReversed = node.tag == "axiom";
       visitedEdges.add(edge);
     }
   }
@@ -355,6 +378,12 @@ function getdot(root) {
         case "initiator": return `<span id=initiator>I</span>`;
         case "bigapplicator": return `@${name}`;
         case "constant": return c.name;
+        case "axiom": return c.reverse ? "cut" : "ax";
+        case "delimiter":
+          let s = c.reverse ? "ᙁ" : "ᙀ";
+          let ss = c.reverse ? ["sub", "sup"] : ["sup", "sub"];
+          let ids = [c.insideEnv.id, c.outsideEnv.id];
+          return `<${ss[0]}>${ids[0]}</${ss[0]}>${s}<${ss[1]}>${ids[1]}</${ss[1]}>`;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
         case "case": return "case";
         case "operator":
@@ -368,6 +397,11 @@ function getdot(root) {
     // if(c.clone_id) human += `<sup>${c.clone_id}</sup>`;
     if (c.labelEnv) {
       attrs.labelStyle = `border: solid 2px ${colormap[c.labelEnv.id]}`;
+    } else if (c.insideEnv && c.outsideEnv) {
+      let lr = [colormap[c.insideEnv.id], colormap[c.outsideEnv.id]];
+      let ud = lr; if (c.reverse) ud = [lr[1], lr[0]];
+      attrs.labelStyle = "border-style: solid; border-width: 2px;"
+      attrs.labelStyle += `border-top-color: ${ud[0]}; border-bottom-color: ${ud[1]}; border-left-color: ${lr[0]}; border-right-color: ${lr[1]};`;
     } else {
       attrs.style = "stroke: none;";
       attrs.padding = 1;
@@ -509,6 +543,7 @@ function makeOuterLinks(a, pa, b_new, ppb) {
 }
 function eqNode(a, b) {
   if (a.tag !== b.tag) return false;
+  if (a.tag == "axiom") return true;
   if (a.tag === "multiplexer") {
     if (a.labelEnv === b.labelEnv) return true;
   }
@@ -524,11 +559,12 @@ function reducePair(pair) {
     stats.annihilate++;
     for (let p of ports(a)) {
       if (p == ppa) continue;
-      relink(a, p, true, b, p, true);
+      relink(a, p, true, b, p, true, edge_dir(a, p) == "out");
     }
     return;
   }
-  if (a.tag == "bigapplicator" && b.tag == "operator" && ppa == "func" && ppb == "inp") {
+  if (b.tag == "bigapplicator" && a.tag == "operator" && ppb == "func" && ppa == "inp") {
+    [a,b] = [b,a];
     // beta reduction
     let idx = undefined;
     // body
@@ -536,7 +572,7 @@ function reducePair(pair) {
       if (b.names[i] == a.name) {
         idx = i;
         // link matching body
-        relink(a, "inp", true, b, i, true);
+        relink(a, "inp", true, b, i, true, edge_dir(a, "inp") == "out");
       } else {
         // erase unused bodies
         let e = multiplexer("erase", NaN);
@@ -553,7 +589,7 @@ function reducePair(pair) {
       }
       if (ruleidx == idx) {
         // link match binders
-        relink(b, i, true, a, j, true);
+        relink(a, j, true, b, i, true, edge_dir(a, j) == "out");
       } else {
         // erase unused vars
         let e = multiplexer("erase", NaN); e.reverse = true;
@@ -630,9 +666,9 @@ function showStack(stack) {
   return s;
 }
 function levelExtension(a, b) {
-  if (!a) return true;
+  if (!a && (!b || b.directors.length == 0)) return true;
   if (a.env !== b.env) return false;
-  if (a.directors.length <= b.directors.length) {
+  if (a.directors.length === b.directors.length) {
     for (let k = 0; k < a.directors.length; k++) {
       if (a.directors[k].index !== b.directors[k].index) return false;
       if (a.directors[k].name !== b.directors[k].name) return false;
@@ -643,7 +679,7 @@ function levelExtension(a, b) {
 }
 function isStackExtension(sub, sup) {
   // kind of compare for equality
-  for (let l = 0; l < sub.levels.length; l++) {
+  for (let l = 0; l < Math.max(sub.levels.length, sup.levels.length); l++) {
     if (!levelExtension(sub.levels[l], sup.levels[l])) {
       return false;
     }
@@ -684,7 +720,7 @@ function readback(source, dir, stack_orig) {
         }
         let b = 0;
         while (term !== stack.lambdas[b].term) b++;
-        if(!isStackExtension(stack.lambdas[b].stack, stack)) {
+        if (!isStackExtension(stack.lambdas[b].stack, stack)) {
           assert(false);
           isStackExtension(stack.lambdas[b].stack, stack)
         }
@@ -693,6 +729,23 @@ function readback(source, dir, stack_orig) {
         };
       }
       assert(false);
+    }
+    case "axiom": {
+      if (from_dir == "neg") return readback(term, "pos", stack);
+      if (from_dir == "pos") return readback(term, "neg", stack);
+    }
+    case "delimiter": {
+      let levels = Array.from(stack.levels); stack.levels = levels;
+      if (from_dir == "inside") {
+        let i = term.insideEnv.id;
+        assert(levels[i] && levels[i].directors);
+        assert(levels[i].directors.length == 1);
+        let l = clone(levels[i]);
+        l.directors = l.directors.slice(1);
+        levels[i] = l;
+        return readback(term, "outside", stack);
+      }
+      break;
     }
     case "multiplexer": {
       let e = term.labelEnv, i = e.id;
@@ -716,7 +769,7 @@ function readback(source, dir, stack_orig) {
         } else {
           l = clone(levels[i]);
           assert(l.env == e);
-          if(l.directors.length == 1) {
+          if (l.directors.length == 1) {
             assert(l.directors[0].index == from_dir);
             assert(l.directors[0].name == term.name);
             l.directors = [];
