@@ -38,6 +38,15 @@ It could be useful for tests:
 
 The implementation is similar to that used for checking equality of dependent types, i.e. it does some normalization but isn't omniscient. The optimizer decides which case is dead code and can be dropped.
 
+Idea: predicate failure as a throwing operation, and have something like
+
+::
+
+   call binds args = do
+    fold lub DispatchError (map ($args) binds)
+
+where lub is from http://conal.net/blog/posts/merging-partial-values and http://conal.net/blog/posts/merging-partial-values, extended to work on continuations (and unamb is implemented in a deterministic manner using a termination checker instead of racing).
+
 Sequential matches
 ==================
 
@@ -50,12 +59,22 @@ The pipe syntax matches cases from top to bottom:
    | 1 y = 2
    | x 2 = 3
 
+It expands to something like:
+
+::
+
+   f | p1 = ...
+   f | p2 and not(p1) = ...
+   f | p3 and not(p1) and not(p2) = ...
+
+   # p1, p2, etc. functions of $args
+
 Maybe you will also be able to use match within a function, if the syntax works out:
 
 ::
 
-   f = match | x y = 2
-             | 1 y = 2
+   f = match (2+2) (5+5) | x y = 2
+                         | 1 y = 2
 
 Patterns
 ========
