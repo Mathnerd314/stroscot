@@ -32,73 +32,82 @@ x ## y = x :# y
 
 data Sharing = Unused | Linear | OnLeft | OnRight | Shared Integer deriving (Show, Eq, Ord)
 
--- variables, and where they are
--- xs !! 0 / head xs = location of Zero
--- these are director strings a la Sinot https://link.springer.com/chapter/10.1007%2F3-540-44881-0_5
--- (with a down arrow (Linear), because I like it)
-sharing :: Deb -> [Sharing]
-sharing (Hask x) = []
-sharing Zero = [Linear]
-sharing (Succ x) = Unused : sharing x
-sharing (Lam d) = case sharing d of
-  [] -> []
-  x:xs -> xs
-sharing (App a b) =
-  join (map (replace OnLeft) $ sharing a)
-      (map (replace OnRight) $ sharing b) where
+-- An intermediate representation for lambda expressions
+-- Generally open code with variables x  y ... z where
+-- z has the highest index and x has index 0
+-- is represented as
+-- D z y ... x where D is closed
+-- If a term does not have a variable with index 0 as
+-- free, we add it, using combinators
+-- Variables are eliminated by eta-reduction
+data Repr
+  = C Com -- closed code
+  | V -- reference to top env variable (Zero)
+  | N Repr -- N e === (s e) z
+  | W Repr -- Weakened K e
+  deriving Show
 
-  replace y Unused = Unused
-  replace y (Shared s) = Shared s
-  replace y _ = y
+toRepr :: Deb -> Repr
+toRepr (Hask h) = C (I h)
+toRepr Zero = V
+toRepr (Succ e) = W (toRepr e)
+toRepr (Lam l) = case toRepr l of
+  V -> C Id
+  C d -> C (Kn 1 ## d)
+  N e -> e -- eta contraction
+  W e -> join (C $ Kn 1) e
+toRepr (App a b) = toRepr a $$ toRepr b
 
-  join [] xs = xs
-  join xs [] = xs
-  join (x:xs) (y:ys) = (: join xs ys) $ case (x,y) of
-    (Unused,y) -> y
-    (x,Unused) -> x
-    (OnLeft,OnRight) -> Shared 1
-    (Shared n,OnRight) -> Shared (n+1)
-    (OnLeft, Shared n) -> Shared (n+1)
-    (Shared m, Shared n) -> Shared (m+n)
+infixl 5 $$
+($$) = join
+join (W e1) (W e2) = W $ e1 $$ e2 -- both weakened
+join (W e) (C d) = W (e $$ C d)
+join (C d) (W e) = W (C d $$ e)
+join (W e) V = N e -- e x
+join V (W e) = N (C (Cn 1 ## Id) $$ e)
+--  (K (e1 xm ... x1) (e2 xn ... x1 x0)
+--  == (e1 xm ... x1) ((e2 xn ... x1) x0)
+--  == B (e1 xm ... x1) (e2 xn ... x1) x0
+join (W e1) (N e2) = N ((C $ Bn 1) $$ e1 $$ e2)
+    -- Mirror image
+join (N e1) (W e2) = N ((C $ Cn 1) $$ e1 $$ e2)
+-- (e1 x0) (e2 x0)
+-- N ((C $ Sn 1) $$ e1 $$ e2)
+    -- == W (\x1 x2. e1 x1 (e2 x2)) x0
+    -- == W (\x1. B (e1 x1) e2)
+    -- == W (B (C e1) e2)
+join (N e1) (N e2) = N (C (Wn 1) $$ (C (Bn 1) $$ (C (Cn 1) $$ e1) $$ e2))
+join (N e) V = N (C (Wn 1) $$ e) -- e x x
+join V (N e) = join (N (C Id)) (N e) -- x (e x) = (I x) (e x)
+join (C d) (N e) = N ((C (Bn 1 ## d)) $$ e)
+join (C d) V = N (C d) -- d x
+join V (C d) = N (C (Cn 1 ## Id ## d)) -- x d
+join V V = N (C (Wn 1 ## Id))
+    -- C C f g x - = C g f x - = g x f
+    -- (N e) (C d) = N ((C $ Cn 1) $$ e $$ C d)  below is better
+join (N e) (C d) = N ((C (Cn 1 ## Cn 1 ## d)) $$ e)
+join (C d1) (C d2) = C (d1 ## d2)
 
-  -- Generally open code with variables x  y ... z where
-  -- z has the highest index and x has index 0
-  -- is represented as
-  -- D z y ... x where D is closed
-  -- If a term does not have a variable with index 0 as
-  -- free, we add it, using combinators
-  -- Variables are eliminated by eta-reduction
 
+--    | N: S.u S.repr * int -> ('g,'a) repr
 
+    -- | (C d1,N (d2,l)) -> N (Bn l ## d1 ## d2) l  -- D1 (D2 x)
+    -- | (N (d1,l),C d2) -> N (Cn l ## d1 ## d2) l  -- (D1 x) D2
+    -- | (N (d1,l),N (d2,l2)) when l == l2 ->
+    --     N (Sn l ## d1 ## d2) l  -- (D1 x) (D2 x)
+    -- | (N (d1,l1),N (d2,l2)) | l1 < l2 ->
+    --     let k = l2 - l1 in
+    --     N (S.(kBn k ## (kSn l1 ## d1) ## d2),l2)
+    -- | (N (d1,l1),N (d2,l2)) | l1 > l2  ->
+    --     let k = l1 - l2 in
+    --     let d1' = S.(kBn k ## kSn l2 ## d1) in
+    --     N (S.(kCn k ## d1' ## d2), l1)
 
--- module LinearConv(S:BulkSKI) (* : Lam *) = struct
---   type ('g,'a) repr =
---     | C: 'a S.repr -> ('g,'a) repr   (* closed code *)
---     | N: S.u S.repr * int -> ('g,'a) repr
-
---   let ($$): type g a b. (g,a->b) repr -> (g,a) repr -> (g,b) repr =
---    fun x y -> match (x,y) with
---     | (C d1,C d2)     -> C (S.(d1 $! d2))
---     | (C d1,N (d2,l)) -> N (S.(kBn l $? uclose d1 $? d2),l)  (* D1 (D2 x) *)
---     | (N (d1,l),C d2) -> N (S.(kCn l $? d1 $? uclose d2),l)  (* (D1 x) D2 *)
---     | (N (d1,l),N (d2,l2)) when l = l2 ->
---         N (S.(kSn l $? d1 $? d2),l)  (* (D1 x) (D2 x) *)
---     | (N (d1,l1),N (d2,l2)) when l1 < l2 ->
---         let k = l2 - l1 in
---         N (S.(kBn k $? (kSn l1 $? d1) $? d2),l2)
---     | (N (d1,l1),N (d2,l2)) (* when l1 > l2 *) ->
---         let k = l1 - l2 in
---         let d1' = S.(kBn k $? kSn l2 $? d1) in
---         N (S.(kCn k $? d1' $? d2), l1)
-
---   let uI = S.(uclose kI)                (* for the sake of polymorphism in z *)
---   let z:   ('a*'g,'a) repr = N (uI, 1)
---   let s:   ('b*'g,'a) repr -> (_*('b*'g),'a) repr = fun e ->
+--   let z = N (Id, 1)
+--   let s fun e ->
 --     let N (d,l) = (C S.kK) $$ e in N (d,l+1)
-
---   let lam: type a g b. (a*g,b) repr -> (g,a->b) repr = function
---     | C k        -> C (S.(kK $! k))
---     | N (d,1)    -> C (S.uopen d)
+--  let lam: type a g b. (a*g,b) repr -> (g,a->b) repr = function
+--     | N (d,1)    -> C d
 --     | N (d,l)    -> N (d,l-1)
 
 -- ski :: Deb -> Com
@@ -119,81 +128,24 @@ sharing (App a b) =
 --            | n < m     ->                Bn (m - n) :# (Wn n :# x) :# y
 --            | otherwise -> Cn (n - m) :# (Bn (n - m) :#  Wn m :# x) :# y
 
--- | This is a translation from lambdas to combinators,
---   similar to Oleg's http://okmij.org/ftp/tagless-final/ski.pdf
---   but using the W combinator instead of S, W = SI
---   AFAICT it's linear in the same restricted way Oleg's is linear, but who knows.
---   NB: Oleg's lambdas use CVNW for the constructors, which is crazy.
-bckw :: Deb -> Com
-bckw (Hask x) = I x
-bckw Zero = Id
-bckw (Succ x) = bckw x
-bckw (Lam d) = case sharing d of
-  [] -> Kn 1 ## bckw d
-  Unused : _ -> Kn 1 ## bckw d
-  -- eta contraction
-  _ : _ -> bckw d
-bckw (App xx yy) = distributeVarsT (sharing xx) (sharing yy) xx yy where
 
-t = Lam . Lam $ App (Succ Zero) (App (Succ Zero) Zero)
--- should convert to WB
-
--- B x y can be reduced to x y if it's the root. Hence this version for the inner
-distributeVarsT x y l r = trace ("\n" ++ show x ++ "/" ++ show y ++ ": " ++ show l ++ " _ " ++ show r) $ distributeVars x y l r
-
-distributeVars :: [Sharing] -> [Sharing] -> Deb -> Deb -> Com
--- f g, closed term application
-distributeVars [] [] x y = bckw x ## bckw y
--- lazy weakening
-distributeVars (Unused:a) [] x y = distributeVarsT a [] x y
-distributeVars [] (Unused:b) x y = distributeVarsT [] b x y
-distributeVars (Unused:a) (Unused:b) x y = distributeVars a b x y
--- eta-optimization for small terms
--- \x. x x
-distributeVars [Linear] [Linear] x y = Wn 1 ## distributeVarsT [] [] x y
--- \y. f y -> f
-distributeVars (Unused:_) [Linear] x y = bckw x
-distributeVars [] [Linear] x y = bckw x
--- \x. x f
-distributeVars [Linear] (Unused:_) x y = distributeVars Cn 1 ## bckw x ## bckw y
-distributeVars [Linear] [] x y = Cn 1 ## bckw x ## bckw y
--- (K (e1 xm ... x1) (e2 xn ... x1 x0)
---    == (e1 xm ... x1) ((e2 xn ... x1) x0)
---    == B (e1 xm ... x1) (e2 xn ... x1) x0
-distributeVars [] (_:_) x y = Bn 1 ## bckw x ## bckw y
-distributeVars (Unused:_) (_:_) x y = Bn 1 ## bckw x ## bckw y
-distributeVars (_:_) (Unused:_) x y = Cn 1 ## bckw x ## bckw y
--- C C f g x --> C g f x --> g x f
--- which is better than
--- distributeVars (_:_) [] x y = Cn 1 ## bckw x ## bckw y
--- because g is closed and f may disappear
-distributeVars (_:_) [] f g = (Cn 1 ## Cn 1 ## bckw g) ## bckw f
-
--- f x (g x) = S f g x = W (\x y. f x (g y)) x
-distributeVars (_:_) (_:_) x y = Wn 1 ## bckw (Lam (Lam (App (Succ x) y)))
-
-    -- (* (e1 x0) (e2 x0) == S e1 e2 x0 *)
-    -- | (N e1, N e2)      -> N ((C S.kS) $$ e1 $$ e2)
-    -- (* x (e x) *)
-    -- | (V, N e)          -> N (C S.(kS $! kI) $$ e)
-
-infixl 5 $$
-($$) = App
+infixl 5 ~~
+(~~) = App
 
 tests =
   [ lam z
   , lam $ lam z
   , lam . lam $ s
-  , lam . lam $ s $$ z
-  , lam . lam $ z $$ s
-  , lam . lam . lam $ z $$ x 2
-  , lam . lam . lam $ (lam z) $$ x 2
-  , lam . lam . lam $ ((x 2) $$ z) $$ (s $$ z)
-  , lam . lam . lam $ z $$ s $$ x 2
-  , lam (lam (lam (lam (z $$ s $$ x 2 $$ x 3))))
-  , lam . lam . lam . lam $ ((x 0 $$ x 2) $$ (x 1 $$ x 3))
+  , lam . lam $ s ~~ z
+  , lam . lam $ z ~~ s
+  , lam . lam . lam $ z ~~ x 2
+  , lam . lam . lam $ (lam z) ~~ x 2
+  , lam . lam . lam $ ((x 2) ~~ z) ~~ (s ~~ z)
+  , lam . lam . lam $ z ~~ s ~~ x 2
+  , lam (lam (lam (lam (z ~~ s ~~ x 2 ~~ x 3))))
+  , lam . lam . lam . lam $ ((x 0 ~~ x 2) ~~ (x 1 ~~ x 3))
   , lam . lam . lam . lam . lam . lam . lam . lam $
-      ((x 0 $$ x 4) $$ (x 2 $$ x 6)) $$ ((x 1 $$ x 5) $$ (x 3 $$ x 7))
+      ((x 0 ~~ x 4) ~~ (x 2 ~~ x 6)) ~~ ((x 1 ~~ x 5) ~~ (x 3 ~~ x 7))
 
   ]
   where
@@ -205,48 +157,6 @@ tests =
 
 -- NB: the choice of ordering (x2 x vs x x2) is what fixes the evaluation order
 -- but we always do LTR for simplicity
-
--- distributeVars v (Shared s : vss) xx yy = Wn s ##
---   distributeVarsT True
---     (genericReplicate s OnRight ++ genericReplicate s OnLeft ++ vss)
---     (shift s 0 0 xx) (shift s s 0 yy)
-
--- distributeVars True [OnLeft] x y = flip ($) (countInitial OnLeft vs) $ \(i,vss) ->
---   Cn i ## distributeVarsT True vss x y
--- -- \x. x f -> C f
--- -- \x. (f x) g -> C f g
--- distributeVars _ vs@(OnLeft : _) x y = flip ($) (countInitial OnLeft vs) $ \(i,vss) ->
---   Cn i ## distributeVarsT True vss x y
-
--- -- \x. f x -> f
--- distributeVars True vs@(OnRight : _) x y = flip ($) (countInitial OnRight vs) $ \(i,vss) ->
---   distributeVarsI vss x y
--- -- \x. f (g x) -> B f g
--- distributeVars False vs@(OnRight : _) x y = flip ($) (countInitial OnRight vs) $ \(i,vss) ->
---   Bn i ## distributeVarsI vss x y
-
-countInitial :: Sharing -> [Sharing] -> (Integer, [Sharing])
-countInitial x (y:xs) | x == y = (\(a,b) -> (1 +a,b)) $ countInitial x xs
-countInitial _ xs = (0,xs)
-
--- | shift terms up by s, preserving terms below height h, while inside l lambdas
--- NB: could use h-l instead, but this is more debuggable
-shift ::Integer -> Integer -> Integer -> Deb -> Deb
-shift s h l Zero = if l > h then nTimes s Succ Zero else Zero
-shift s h l (Hask x) = Hask x
-shift s h l (Succ c) = Succ (shift s (h-1) l c)
-shift s h l (Lam ll) = Lam (shift s h (l+1) ll)
-shift s h l (App x y) = App (shift s h l x) (shift s h l y)
-
-splitVar :: Deb -> Integer -> Integer -> (Integer, Deb)
-splitVar Zero c 0 = (c-1, nTimes c Succ Zero)
-splitVar (Succ x) c l = second Succ $ splitVar x c (l-1)
-splitVar (Lam d) c l = second Lam $ splitVar d c (l+1)
-splitVar (App a b) c l = let
-  (acnt, anew) = splitVar a c l
-  (bcnt, bnew) = splitVar b acnt l
-    in (bcnt, App anew bnew)
-splitVar x c l = (c,x)
 
 nshow 1 = ""
 nshow n = show n
