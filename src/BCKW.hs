@@ -76,6 +76,8 @@ join (N e1) (W e2) = N ((C $ Cn 1) $$ e1 $$ e2)
     -- == W (\x1 x2. e1 x1 (e2 x2)) x0
     -- == W (\x1. B (e1 x1) e2)
     -- == W (B (C e1) e2)
+-- NB: the choice of ordering (x2 x vs x x2) is what fixes the evaluation order
+-- but we always do this order for simplicity
 join (N e1) (N e2) = N (C (Wn 1) $$ (C (Bn 1) $$ (C (Cn 1) $$ e1) $$ e2))
 join (N e) V = N (C (Wn 1) $$ e) -- e x x
 join V (N e) = join (N (C Id)) (N e) -- x (e x) = (I x) (e x)
@@ -87,47 +89,6 @@ join V V = N (C (Wn 1 ## Id))
     -- (N e) (C d) = N ((C $ Cn 1) $$ e $$ C d)  below is better
 join (N e) (C d) = N ((C (Cn 1 ## Cn 1 ## d)) $$ e)
 join (C d1) (C d2) = C (d1 ## d2)
-
-
---    | N: S.u S.repr * int -> ('g,'a) repr
-
-    -- | (C d1,N (d2,l)) -> N (Bn l ## d1 ## d2) l  -- D1 (D2 x)
-    -- | (N (d1,l),C d2) -> N (Cn l ## d1 ## d2) l  -- (D1 x) D2
-    -- | (N (d1,l),N (d2,l2)) when l == l2 ->
-    --     N (Sn l ## d1 ## d2) l  -- (D1 x) (D2 x)
-    -- | (N (d1,l1),N (d2,l2)) | l1 < l2 ->
-    --     let k = l2 - l1 in
-    --     N (S.(kBn k ## (kSn l1 ## d1) ## d2),l2)
-    -- | (N (d1,l1),N (d2,l2)) | l1 > l2  ->
-    --     let k = l1 - l2 in
-    --     let d1' = S.(kBn k ## kSn l2 ## d1) in
-    --     N (S.(kCn k ## d1' ## d2), l1)
-
---   let z = N (Id, 1)
---   let s fun e ->
---     let N (d,l) = (C S.kK) $$ e in N (d,l+1)
---  let lam: type a g b. (a*g,b) repr -> (g,a->b) repr = function
---     | N (d,1)    -> C d
---     | N (d,l)    -> N (d,l-1)
-
--- ski :: Deb -> Com
--- ski deb = case deb of
---   Zero                           -> I
---   Succ d    | x@(n, _) <- ski d  -> f (0, K) x
---   App d1 d2 | x@(a, _) <- ski d1
---             , y@(b, _) <- ski d2 -> f x y
---   Lam d -> case sharing d of
---       [] -> K :# e
---       _ -> e
---   where
---   f x y = case (sharing x, sharing y) of
---     (0, 0)             ->         x :# y
---     (0, n)             -> Bn n :# x :# y
---     (n, 0)             -> Cn n :# x :# y
---     (n, m) | n == m    -> Wn n :# x :# y
---            | n < m     ->                Bn (m - n) :# (Wn n :# x) :# y
---            | otherwise -> Cn (n - m) :# (Bn (n - m) :#  Wn m :# x) :# y
-
 
 infixl 5 ~~
 (~~) = App
@@ -146,7 +107,6 @@ tests =
   , lam . lam . lam . lam $ ((x 0 ~~ x 2) ~~ (x 1 ~~ x 3))
   , lam . lam . lam . lam . lam . lam . lam . lam $
       ((x 0 ~~ x 4) ~~ (x 2 ~~ x 6)) ~~ ((x 1 ~~ x 5) ~~ (x 3 ~~ x 7))
-
   ]
   where
       z = Zero
@@ -155,8 +115,6 @@ tests =
       x n = Succ (x (n-1))
       lam = Lam
 
--- NB: the choice of ordering (x2 x vs x x2) is what fixes the evaluation order
--- but we always do LTR for simplicity
 
 nshow 1 = ""
 nshow n = show n
@@ -172,35 +130,6 @@ instance Show Com where
   show (Bn n) = "B" ++ nshow n
   show (Cn n) = "C" ++ nshow n
 
-{-
-source :: Parsec String [String] Deb
-source = term where
-  term = lam <|> app
-  lam = do
-    orig <- getState
-    vs <- between lam0 lam1 (many1 v)
-    modifyState (reverse vs ++)
-    t <- term
-    putState orig
-    pure $ iterate Lam t !! length vs
-    where lam0 = str "\\" <|> str "\0955"
-          lam1 = str "->" <|> str "."
-  v   = many1 alphaNum <* ws
-  app = foldl1' App <$> many1 ((ind =<< v) <|>
-    between (str "(") (str ")") term)
-  ind s = (iterate Succ Zero !!) .
-    maybe (error $ s ++ " is free") id . elemIndex s <$> getState
-  str = (>> ws) . string
-  ws = many (oneOf " \t") >> optional (try $ string "--" >> many (noneOf "\n"))
-
-amain = prInteger $ logBulk $ Sn 1234
-main = do
-  let
-    s = "\\l.l(\\h t x.t(\\c n.c h(x c n)))(\\a.a)(\\a b.b)"
-    Right out = logBulk <$> snd . ski <$> runParser source [] "" s
-  prInteger out
--}
-
 -- from GHC Utils
 -- | Compose a function with itself n times.  (nth rather than twice)
 nTimes :: Integer -> (a -> a) -> (a -> a)
@@ -212,6 +141,14 @@ bprime d f g x = d f (g x)
 cprime d f g x = d (f x) g
 theBcom f g x = f (g x)
 theCcom f g x = f x g
+
+arity Id = 0
+arity (I _) = 0
+arity (Kn n) = n + 1
+arity (Wn n) = n + 1
+arity (Bn n) = n + 2
+arity (Cn n) = n + 2
+arity (a :# b) = max 0 (arity a - 1)
 
 eval :: Com -> Hask
 eval (I x) = x
@@ -251,3 +188,70 @@ apply (Wn n) a = undefined
 
 reduce :: Com -> Com -> Com -> Hask
 reduce = undefined
+
+
+-----------
+{-
+-- | Do one step of normal order reduction and return the result.
+step :: Deb -> Maybe Deb
+step (App (Lam e) r) = Just (sub 0 r e)  -- found a redex, do beta reduction / substitution
+-- otherwise search for redex
+step (App l r) = case step l of
+  Just l' -> Just (App l' r)
+  Nothing -> fmap (App l) (step r)
+step (Abs e) = fmap Abs (step e)
+step (Succ e) = fmap Succ (step e)
+step _ = Nothing
+
+-- | Evaluate an expression to normal form using normal order evaluation.
+--   Note that this function will not terminate if the reduction never
+--   reaches a normal form!
+eval :: Deb -> Deb
+eval e = case step e of
+           Nothing -> e
+           Just e' -> eval e'
+
+-- | Variable substitution. `sub v e1 e2` substitutes e1 for every v in e2.
+--
+--   Each time we enter a new abstraction in e2, we must:
+--    1. Increment the v that we're looking for.
+--    2. Increment all of the free variables in e1 since now the references
+--       will have to skip over one more lambda to get to the lambda they
+--       refer to.
+--
+--   For each variable reference v' in e2, there are three possibilities:
+--     1. It's the variable v we're looking for, in which case we replace it.
+--     2. It's a variable bound in e2 (v' < v), in which case we do nothing.
+--     3. It's a variable that is free in e2 (v' > v), in which case we
+--        decrement it since now the reference has to skip over one less
+--        lambda (i.e. the lambda that we beta-reduced away) to get to the
+--        lambda it refers to.
+--
+--   >>> sub 0 (Succ Zero) (Lam (Succ Zero))
+--   Lam (Succ $ Succ Zero)
+--
+sub :: Integer -> Deb -> Deb -> Deb
+sub v e (App l r) = App (sub v e l) (sub v e r)
+sub v e (Lam e')  = Lam (sub (v+1) e e') -- increment v
+sub 0 e (Succ e')  = sub (-1) e e' -- not v and free in e2, decrement it to skip over the lambda we're disappearing
+sub v e (Succ e')  = Succ (sub (v-1) e e')
+sub 0 e Zero = e -- found a v, replace it!
+sub _ e Zero = Zero -- not v and bound in e2, leave it alone
+
+-- | Increment the free variables in an expression.
+--
+--   The argument d (for "depth") indicates the number of abstractions we
+--   have recursed into so far. A variable that is smaller than the depth
+--   is not free, and so should not be incremented.
+--
+--   >>> inc 0 (Ref 0)
+--   Ref 1
+--
+--   >>> inc 0 (App (Ref 1) (Abs (Ref 0)))
+--   App (Ref 2) (Abs (Ref 0))
+--
+inc :: Int -> Exp -> Exp
+inc d (App l r) = App (inc d l) (inc d r)
+inc d (Abs e)   = Abs (inc (d+1) e)
+inc d (Ref v)   = Ref (if v < d then v else v+1)
+-}

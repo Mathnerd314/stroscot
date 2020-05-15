@@ -50,9 +50,11 @@
 <body>
   <div>
     <select name="example_selector" id="example_selector">
-      <option value="22" selected>Lambdascope paper's 2 2</option>
+      <option value="22" >Lambdascope paper's 2 2</option>
+      <option value="22c">Lambdascope paper's 2 2 with WB combinators</option>
       <option value="id">Identity function</option>
       <option value="ww">Simple omega omega loop</option>
+      <option value="WK" selected>W and K combinators</option>
       <option value="mlc">Counterexample from MLC issue</option>
       <option value="jumbo">Jumbo types version of MLC</option>
     </select>
@@ -85,11 +87,15 @@
 
     // t = A(L("id", A(S("id"), L("y", L("z", A(S("z"), S("y")))))), L("x", S("x")));
     let term_examples; {
-      let x = "x", y = "y", f = "f", i = "i", h = "h", u = "u";
+      let x = "x", y = "y", z = "z", f = "f", i = "i", h = "h", u = "u";
       let id = L("x", S("x"));
       let id2 = A(A(id,id),A(id,id));
       let l2 = L("x", L("y", A(x, A(x, y))));
       let paper_example = A(l2, l2);
+      let W = L("f", L("x", A(A(f, x), x)));
+      let B = L("x", L("y", L("z", A(x,A(y,z)))));
+      let l2c = A(W,B);
+      let c22 = A(l2c,l2c);
       let t = {
         tag: "bigapp",
         func: {
@@ -110,7 +116,12 @@
       let w = L(x, A(x, x));
       let ww = A(w, w);
 
-      term_examples = { "id": id2, "22": paper_example, "ww": ww, "mlc": mlc_counterexample, "jumbo": t };
+      let K = L(f, L(x, f));
+      let WK = A(W, W);
+
+      let P = A(L(x,A(A(A(x,L(f,f)),x),x)),L(y,A(L(x,A(x,x)),A(y,L(x,x)))));
+
+      term_examples = { "id": id2, "22": paper_example, "22c": c22, "WK": P, "ww": ww, "mlc": mlc_counterexample, "jumbo": t };
     }
 
     function toSexpr(thing, needParens) {

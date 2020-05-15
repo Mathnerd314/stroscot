@@ -15,10 +15,8 @@ function clone(o) {
   return on;
 }
 
-let multiplexer = (name, labelEnv, val) => { return { tag: "multiplexer", name, labelEnv, val, length: 0 } };
-
-let jumpanchor = (inp, out) => { return { tag: "jumpanchor", inp, out, length: 0 } };
-let jumpsource = (inp, out) => { return { tag: "jumpsource", inp, out, length: 0 } };
+let multiplexer = (name, level, val) => { return { tag: "multiplexer", name, level, val, length: 0 } };
+let delimiter = (level, inside, outside) => { return { tag: "delimiter", level, inside, outside } };
 
 let initiator = (out) => { return { tag: "initiator", out: out } };
 
@@ -49,8 +47,7 @@ function ports(node) {
     case "bigapplicator": r = ["func", "inp"]; break;
     case "constant": r = ["inp"]; break;
     case "multiplexer": r = ["val"]; if (node.jump) r.push("jump"); break;
-    case "jumpanchor": r = ["inp", "out"]; break;
-    case "jumpsource": r = ["inp", "out"]; break;
+    case "delimiter": return ["outside", "inside"];
     case "case": r = ["out", "inp"]; break;
     case "operator": r = ["inp"]; break;
     default: assert(false);
@@ -79,11 +76,13 @@ function native_edge_dir(t, dir) {
   }
 
   if ((t.tag == "jumpanchor" || t.tag == "jumpsource" || t.tag == "bigapplicator" || t.tag == "operator") && dir == "inp"
-    || t.tag == "operator" && dir == "bind")
+    || t.tag == "operator" && dir == "bind"
+    || t.tag == "delimiter" && dir == "outside")
     return "in";
   if (t.tag == "operator" && dir == "body"
     || t.tag == "bigapplicator" && dir == "func"
     || (t.tag == "jumpanchor" || t.tag == "jumpsource" || t.tag == "initiator") && dir == "out"
+    || t.tag == "delimiter" && dir == "inside"
     || t.tag == "multiplexer" && dir == "val"
     || t.tag == "multiplexer" && dir == "jump")
     return "out";
@@ -142,26 +141,12 @@ function follow(source, dir) {
   return [term, from_dir];
 }
 
-let n_envs = 0, all_envs = [];
-function make_real_env() {
-  let e = {
-    id: n_envs++,
-    multiplexers: new Set(),
-    variant_envs: [], // id -> [env]
-    is_variant_of: undefined,
-    splitter: undefined
-  };
-  all_envs.push(e);
-  return e;
-}
-
 let n_binding_envs = 0;
 function make_env(parent) {
   let e = {
     n: n_binding_envs++,
     bindings: new Map(),
     parent,
-    real_env: make_real_env()
   };
   return e;
 }
@@ -169,21 +154,15 @@ function bind(env, v) {
   let name = v.name;
   assert(!env.bindings.has(name));
   env.bindings.set(name, v);
-  v.labelEnv = env.real_env;
   addEnv(v);
 }
 function addEnv(t) {
-  if (t.tag == "multiplexer" && t.labelEnv) {
-    t.labelEnv.multiplexers.add(t);
-  }
   // clear edges
   for (let p of ports(t)) {
     t[p] = null;
   }
 }
 function removeFromEnv(t) {
-  if (t.tag == "multiplexer") {
-  }
 }
 
 function compile(term) {
@@ -258,6 +237,10 @@ function resolve(env, term, parent, parent_dir) {
       let e = env, name = term.name;
       while (e && !(e.bindings.has(name))) {
         e = e.parent;
+        let d = delimiter(0); d.reverse = true;
+        link(parent, parent_dir, d, "inside");
+        parent = d;
+        parent_dir = "outside";
       }
       assert(e);
       let v = e.bindings.get(name);
@@ -288,8 +271,6 @@ let Graph = graphlibDot.graphlib.Graph;
 function getdot(root) {
   // traverse
   let visitedEdges = new Set();
-  let jumps = new Set();
-  let envs = new Set();
 
   var stack = [root];
   for (let e of activePairs) {
@@ -315,9 +296,6 @@ function getdot(root) {
       continue;
     visitedNodes.add(node);
 
-    if (node.labelEnv)
-      envs.add(node.labelEnv);
-
     let names = ports(node);
     for (let n of names) {
       assert(n in node);
@@ -341,8 +319,6 @@ function getdot(root) {
   for (let i of visitedNodes) {
     m.set(i, num_nodes++);
   }
-  //  envs = Array.from(envs);
-  //  envs.sort((a, b) => b.n - a.n);
 
   let g = new Graph({ multigraph: true });
   g.setGraph({});
@@ -360,26 +336,25 @@ function getdot(root) {
       }
     })();
     let human = (() => {
-      let level = c.labelEnv ? `<sub>${c.labelEnv.id}</sub>` : "";
+      let level = c.level ? `<sub>${c.level}</sub>` : "";
       let name = c.name && c.name !== "sole" ? `<sub>${c.name}</sub>` : "";
       switch (c.tag) {
         case "initiator": return `<span id=initiator>I</span>`;
         case "bigapplicator": return `@${name}`;
         case "constant": return c.name;
         case "multiplexer": return `<span class=${c.reverse ? "demux" : "mux"}>${c.name}</span>${level}`;
+        case "delimiter": return `${c.reverse ? "]" : "["}${level}`;
         case "case": return "case";
         case "operator":
           if (c.names.length == 1 && c.names[0] == "sole") {
             return `λ`;
           } else return `λ{${c.names}}`;
-        case "jumpanchor": return "ja";
-        case "jumpsource": return "js";
         default: assert(false);
       }
     })();
     let attrs = { shape, labelType: "html", label: human, padding: 0 };
     // if(c.clone_id) human += `<sup>${c.clone_id}</sup>`;
-    if (c.labelEnv) {
+    if (false) {
       attrs.labelStyle = `border: solid 2px ${colormap[c.labelEnv.id]}`;
     } else {
       attrs.style = "stroke: none;";
@@ -404,24 +379,6 @@ function getdot(root) {
       arrowheadStyle: `fill: ${arrows[b_dir]}`
     }, edge.id);
   }
-  all_envs.forEach(e => {
-    if (e.id == 0) return;
-    g.setNode("e" + e.id, {
-      shape: "rect",
-      labelType: "html",
-      label: "" + e.id,
-      style: envs.has(e) ? `fill: ${colormap[e.id]}; stroke: gray;` : `fill: white; stroke: ${colormap[e.id]};`
-    });
-    let p;
-    if (e.is_variant_of) {
-      p = e.is_variant_of;
-      g.setEdge("e" + e.id, p.id == 0 ? 0 : "e" + p.id, { style: "stroke-dasharray: 2;" });
-      p = e.splitter;
-      g.setEdge("e" + e.id, p.id == 0 ? 0 : "e" + p.id, {});
-    } else {
-      g.setEdge("e" + e.id, 0, {});
-    }
-  });
   return g;
 }
 // BOHM: f.nform[i].nform[f.nport[i]] == f
@@ -466,46 +423,62 @@ function relink(a, a_dir, af, b, b_dir, bf, reverse) {
   link(a, a_dir, b, b_dir);
 }
 
-// make a the parent of b
-function reparentEnv(a, b) {
-  let eo = b.env;
-  for (let e of [eo, ...eo.variant_envs.flat()]) {
-    assert(e.parents.size == 1);
-    for (let p of e.parents) {
-      p.children.delete(e);
-      e.parents.delete(p);
-    }
-    assert(e.parents.size == 0);
-    e.parents.add(a.env);
-    e.parent = a.env;
-    a.env.children.add(e);
-  }
-  if (eo.is_variant_of) {
-    eo.v_diff_stack.unshift([a.env, a.full]);
-  }
-}
-
-function makeVariantEnvs(e, o, l) {
-  if (!e.variant_envs[o.id]) {
-    let arr = e.variant_envs[o.id] = new Array(l);
-    for (let p = 0; p < l; p++) {
-      let en = arr[p] = make_real_env();
-      en.is_variant_of = e;
-      en.splitter = o;
-    }
-  }
-}
-
 function getports(a, ppa) {
   let pa = ports(a);
   pa.splice(pa.indexOf(ppa), 1);
   return pa;
 }
 
-function removeJump(a) {
-  let e = multiplexer("erase"); e.reverse = a.reverse;
-  relink(e, "val", false, a, "jump", true, a.reverse);
+
+
+function updateLevels(a, b, ppa, ppb) {
+  let has_level = a => a.tag === "delimiter" || a.tag === "multiplexer";
+  if (b.tag === "operator") {
+    if (has_level(a))
+      a.level++;
+    return;
+  }
+  if (b.tag == "delimiter") {
+    if (a.tag == "multiplexer") {
+      if (a.level >= b.level)
+        a.level++;
+      return;
+    }
+    if (a.tag == "delimiter") {
+      if (ppa == "outside" && ppb == "outside") {
+        let i = a.level, j = b.level;
+        if (i < j) {
+          b.level++;
+          return;
+        } else if (i > j) {
+          a.level++;
+          return;
+        }
+        assert(i === 0 && j === 0 && !pop_scopes);
+        // extruding [a][b] -> [[ab]]
+        // it's almost arbitrary which scope is the outer,
+        // but preserving a results in stack underflow, so keep b's [
+        a.level++;
+        return;
+      }
+      assert(false);
+    }
+    assert(!a.hasOwnProperty("level"));
+    return;
+  }
+  if (a.tag == "delimiter" && b.tag == "multiplexer") {
+    if (a.level <= b.level)
+      b.level++;
+    return;
+  }
+  if (a.tag == "delimiter" && b.tag == "bigapplicator") {
+    return;
+  }
+  assert(a.tag !== "operator" && a.tag !== "delimiter" &&
+    b.tag !== "operator" && b.tag !== "delimiter");
+  return;
 }
+
 function makenodes(a, pa, b, pb, ppb) {
   let a_new = {};
   for (let p of pb) {
@@ -533,19 +506,10 @@ function makeOuterLinks(a, pa, b_new, ppb) {
 function eqNode(a, b) {
   if (a.tag !== b.tag) return false;
   if (a.tag === "multiplexer") {
-    if (!a.jump || !b.jump) return false;
-    let [x, xd] = follow(a, "jump");
-    let [y, yd] = follow(b, "jump");
-    while (x.tag !== "jumpanchor" && !x[xd].active) {
-      [x, xd] = follow(x, primaryPort(x));
-    }
-    while (y.tag !== "jumpanchor" && !y[yd].active) {
-      [y, yd] = follow(y, primaryPort(y));
-    }
-    assert(!x[xd].active && !y[yd].active);
-    if (x === y) return true;
-    if (x.tag == "jumpanchor" || y.tag == "jumpanchor") return false;
-    assert(false);
+    return a.level === b.level && a.length === b.length;
+  }
+  if (a.tag === "delimiter") {
+    return a.level === b.level;
   }
   return false;
 }
@@ -559,33 +523,21 @@ function reducePair(pair) {
     // annihilate
     stats.annihilate++;
     for (let p of getports(a, ppa)) {
-      if (a.tag == "multiplexer" && p == "jump") {
-        removeJump(a);
-        removeJump(b);
-        continue;
-      }
       relink(a, p, true, b, p, true);
     }
     return;
   }
-  if (a.tag == "multiplexer" && b.tag == "jumpsource") {
-    assert(b.length == 1);
-    assert(!a.jump);
-    relink(a, "jump", false, b, 0, true);
-    relink(b, "inp", true, b, "out", true);
-    return;
-  }
   if (a.tag == "bigapplicator" && b.tag == "operator" && ppa == "func" && ppb == "inp") {
     // beta reduction
-    let idx = undefined, janchor;
+    let idx = undefined;
     // body
     for (let i = 0; i < b.names.length; i++) {
       if (b.names[i] == a.name) {
         idx = i;
         // link matching body
-        janchor = jumpanchor();
-        relink(a, "inp", true, janchor, "inp", false);
-        relink(janchor, "out", false, b, i, true);
+        let d = delimiter(0);
+        relink(a, "inp", true, d, "outside", false);
+        relink(d, "inside", false, b, i, true);
       } else {
         // erase unused bodies
         let e = multiplexer("erase", NaN);
@@ -602,10 +554,9 @@ function reducePair(pair) {
       }
       if (ruleidx == idx) {
         // link matching binder
-        let jump = jumpsource();
-        relink(jump, "out", false, a, j, true);
-        relink(b, i, true, jump, "inp", false);
-        link(jump, jump.length++, janchor, janchor.length++);
+        let d = delimiter(0); d.reverse = true;
+        relink(d, "outside", false, a, j, true);
+        relink(b, i, true, d, "inside", false);
       } else {
         // erase unused vars
         let e = multiplexer("erase", NaN); e.reverse = true;
@@ -614,17 +565,11 @@ function reducePair(pair) {
     }
     return;
   }
-  if (a.tag == "bigapplicator" && b.tag == "jumpanchor") {
-    // move anchor up
-    relink(a, "inp", true, b, "inp", false);
-    relink(a, "func", false, b, "out", true);
-    link(b, "out", a, "inp");
-    return;
-  }
 
   // commute
   stats.commute++;
   let pa = getports(a, ppa), pb = getports(b, ppb);
+  updateLevels(a, b, ppa, ppb);
   let a_new = makenodes(a, pa, b, pb, ppb);
   let b_new = makenodes(b, pb, a, pa, ppa);
   makeOuterLinks(a, pa, b_new, ppb);

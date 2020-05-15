@@ -125,3 +125,5 @@ You can use ``integer`` for a strict integer, ``decimal`` for banking, and
    u8 = i8 { sign = unsigned }
    u8 129
    # bits 0b10000001 or bits 0x81
+
+For implementation, `GMP <https://gmplib.org/>`__ is the obvious choice for integers. The rational implementation of GMP is also reasonable, but floating point will use `MFPR <https://www.mpfr.org/>`__ as the GMP webstie recommends. It is not clear at what level the binding may be. It will probably start out as a straightforward C binding like `Haskell's <https://hackage.haskell.org/package/integer-gmp>`__ but it may be more efficient to use a low-level binding to the assembly routines.
