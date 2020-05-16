@@ -190,6 +190,12 @@ It could be useful for tests:</p>
 </pre></div>
 </div>
 <p>The implementation is similar to that used for checking equality of dependent types, i.e. it does some normalization but isn’t omniscient. The optimizer decides which case is dead code and can be dropped.</p>
+<p>Idea: predicate failure as a throwing operation, and have something like</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>call binds args = do
+ fold lub DispatchError (map ($args) binds)
+</pre></div>
+</div>
+<p>where lub is from <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">http://conal.net/blog/posts/merging-partial-values</a> and <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">http://conal.net/blog/posts/merging-partial-values</a>, extended to work on continuations (and unamb is implemented in a deterministic manner using a termination checker instead of racing).</p>
 <div class="section" id="sequential-matches">
 <h2>Sequential matches<a class="headerlink" href="#sequential-matches" title="Permalink to this headline">¶</a></h2>
 <p>The pipe syntax matches cases from top to bottom:</p>
@@ -199,9 +205,17 @@ It could be useful for tests:</p>
 <span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
+<p>It expands to something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">|</span> <span class="n">p1</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">f</span> <span class="o">|</span> <span class="n">p2</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">f</span> <span class="o">|</span> <span class="n">p3</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="n">p2</span><span class="p">)</span> <span class="o">=</span> <span class="o">...</span>
+
+<span class="c1"># p1, p2, etc. functions of $args</span>
+</pre></div>
+</div>
 <p>Maybe you will also be able to use match within a function, if the syntax works out:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">match</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
-          <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">match</span> <span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
+                      <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
 </div>

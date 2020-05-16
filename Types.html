@@ -259,6 +259,7 @@ u8 129
 # bits 0b10000001 or bits 0x81
 </pre></div>
 </div>
+<p>For implementation, <a class="reference external" href="https://gmplib.org/">GMP</a> is the obvious choice for integers. The rational implementation of GMP is also reasonable, but floating point will use <a class="reference external" href="https://www.mpfr.org/">MFPR</a> as the GMP webstie recommends. It is not clear at what level the binding may be. It will probably start out as a straightforward C binding like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s</a> but it may be more efficient to use a low-level binding to the assembly routines.</p>
 </div>
 </div>
 
