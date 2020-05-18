@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveFunctor #-}
+
 delete :: (Eq a) => a -> [a] -> [a]
 delete _ []        = error "delete: element not present"
 delete x (y:ys)    = if x == y then ys else y : delete x ys
@@ -11,17 +13,17 @@ data Atom
     | Constant String
     deriving (Eq,Ord,Show)
 
-data Exp 
+data Form 
     = Atom Atom
-    | Perp Exp
+    | Perp Form
     | Bot
-    | Plus [Exp]
-    | Lolli Exp Exp
-    | Bang Exp
-    | Quest Exp
+    | Plus [Form]
+    | Lolli Form Form
+    | Bang Form
+    | Quest Form
     deriving (Eq,Ord,Show)
 
-dual :: Exp -> Exp
+dual :: Form -> Form
 dual a@(Atom _) = Perp a
 dual (Perp a) = a
 dual (Bang e) = Quest (dual e)
@@ -33,11 +35,14 @@ dual x = Perp x
 async Bot = True
 async (Lolli _ _) = True
 async (Quest _) = True
-async (Perp a) = not (async a)
+async (Perp a) = True
 async _ = False
 
-data Seq = Seq [Exp] [Exp]
+data Seq = Seq [Form] [Form]
    deriving (Eq,Ord,Show)
+
+seqHead (Seq a b) = a
+seqTail (Seq a b) = b
 
 par a b = Lolli (Perp a) b
 tensor a b = Perp (Lolli a (Perp b))
@@ -46,37 +51,35 @@ unit = Perp Bot
 top = Perp (Plus [])
 
 data Rule r
-  = Identity [Exp]
+  = Identity [Form]
   | Axiom Atom
-  | Cut Exp r r
---  | MultiCut [Exp] [Exp] Seq Seq
-  | PerpL Exp r
-  | PerpR Exp r
-  | PlusL [(Exp,r)] Seq
-  | PlusR Exp [Exp] r
+  | Cut Form r r
+  | PerpL Form r
+  | PerpR Form r
+  | PlusL [(Form,r)] Seq
+  | PlusR Int [Form] r
   | BotR r
   | BotL
-  | ImplR Exp Exp r
-  | ImplL Exp Exp r r
-  | WeakenL Exp r
-  | WeakenR Exp r
-  | ContractL Exp r
-  | ContractR Exp r
-  | BangL Exp r
-  | QuestR Exp r
-  | BangR Exp r
-  | QuestL Exp r
-    deriving (Eq,Ord,Show)
+  | ImplR Form Form r
+  | ImplL Form Form r r
+  | WeakenL Form r
+  | WeakenR Form r
+  | ContractL Form r
+  | ContractR Form r
+  | BangL Form r
+  | QuestR Form r
+  | BangR Form r
+  | QuestL Form r
+    deriving (Eq,Ord,Show,Functor)
 
 rule (Identity a) = Seq a a
 rule (Axiom a) = Seq [Atom a] [Atom a]
 rule (Cut a (Seq w x) (Seq y z)) = Seq (w ++ delete a y) (delete a x ++ z)
--- rule (MultiCut as bs (Seq w x) (Seq y z)) = Seq (deleteM bs w ++ deleteM as y) (deleteM as x ++ deleteM bs z)
 rule (PerpL a (Seq x y)) = Seq (x ++ [Perp a]) (delete a y)
 rule (PerpR a (Seq x y)) = Seq (delete a x) ([Perp a] ++ y)
 rule (PlusL as (Seq x y)) = Seq (x ++ [Plus (map fst as)]) y
   -- assert delete a s == x and the other side is y for each rule
-rule (PlusR a cs (Seq x y))= Seq x (delete a y ++ [Plus cs])
+rule (PlusR i cs (Seq x y)) = Seq x (delete (cs !! i) y ++ [Plus cs])
   -- assert a in cs
 rule (BotR (Seq x y)) = Seq x (y ++ [Bot])
 rule BotL = Seq [Bot] []
@@ -99,40 +102,128 @@ rule (QuestR a (Seq x y)) = Seq x ([Quest a] ++ delete a y)
 rule (BangR a (Seq x y)) = Seq x ([Bang a] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
 rule (QuestL a (Seq x y)) = Seq ([Quest a] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
 
+-- C   -- Control
+-- E   -- Environment
+-- (S) -- Store
+-- K   -- Continuation
+
+data RuleExp = RE (Rule RuleExp)
+  deriving (Show,Eq,Ord)
+
+seqify :: RuleExp -> Seq
+seqify (RE r) = rule $ fmap seqify r
+
+var = RE . Axiom . Var
+lam s e = RE $ ImplR (Atom (Var s)) (head . seqTail . seqify $ e) e
+app e f = RE $ ImplL (head . seqTail . seqify $ e) (head . seqTail . seqify $ f) e f
+topret = RE . BotR . RE $ Identity [] -- Identity [Bot] ?
+argeval e f = RE $ Cut (last . seqHead . seqify $ f) e f
+funcall = argeval -- should be Cut as well with different argument polarities
+-- Fun String Exp Env Kont
+
+
+
 {-
 
-Axiom: Term var / Continuation Ret
-command Cut
-Command MultiCut/Let(rec)
-continuation Case
-binding Rec
-term -> R
-continuation -> L
-term forall R
-continuation forall L
-command Jump
-binding Label
-term TRK
-continuation TLK
-binding Name / weaken right
-
-Term act - no-op type conversion
-Continuation Default - no-op type conversion
+data Form 
+    = Atom Atom
+    | Perp Form
+    | Bot
+    | Plus [Form]
+    | Lolli Form Form
+    | Bang Form
+    | Quest Form
+    deriving (Eq,Ord,Show)
 
 
--- | An entire program.
-type Program a  = [Bind a]
 
--- | A binding. Similar to the @Bind@ datatype from GHC. Can be either a single
--- non-recursive binding or a mutually recursive block.
-data Bind b     = NonRec (BindPair b) -- ^ A single non-recursive binding.
-                | Rec [BindPair b]    -- ^ A block of mutually recursive bindings.
+-- small-step semantics step
+step :: State -> State
+step s@(State c e k) = case c of
+  Var v -> case e ! v of
+    Closure v' b e' -> State (Lam v' b) e' k
+  Ap cf cx -> State cf e (Arg cx e k)
+  Lam v b -> case k of
+    Top -> s
+    Arg cx e' k' -> State cx e' (Fun v b e k')
+    Fun v' b' e' k' -> State b' (extend v' (Closure v b e) e') k'
+
+
+
+
+
+data State = State Exp Env Kont
+  deriving Show
+
+data Env = Env [(String,Value)]
+  deriving Show
+
+Env e ! v = case lookup v e of
+    Nothing -> error "No value in env"
+    Just x -> x
+
+extend :: String -> Value -> Env -> Env
+extend i v (Env f) = Env $ (i,v) : f
+
+data Value = Closure Exp | Blackhole
+  deriving Show
+
+final :: State -> Bool
+final (State Lam{} _ Top) = True
+final _ = False
+
+start :: Exp -> State
+start c = State c (Env []) Top
+
+id_ = Lam "x" $ Var "x"
+const_ = Lam "x" $ Lam "y" $ Var "x"
+
+-- until :: (a -> Bool) -> (a -> a) -> a -> a
+
+eval :: State -> State
+eval = until final step 
+
+-- -}
+{-
+
+types - no logical meaning
+
+command Cut - <v || k> a.k.a. Eval v k
+Command MultiCut  - Let binding
+command existsR Jump 'jump j sigma-vec v-vec' - alos handles tuples
+binding cut v3 - rec{} - not necesssary per paper pg4 2.2.3 last 2 paragraphs
+binding existsL - Label - mu-tilde - tuples and existsL
+binding Name / optional-weaken-right (x = v)
+
+Axiom: Term var 'x : t' / Continuation 'ret : t'
+continuation case 'case-of alts'
+continuation ->L = apply-lambda v . k
+continuation forallL apply sigma . k
+continuation TLK - K (b vec, x vec) -> c
+Continuation Default - no-op type conversion 'x -> c'
+term ->R '\x. v'
+term forallR '\\a. v'
+term TRK 'K (sigma vec, v vec)'
+Term act - no-op type conversion 'mu ret. c'
+-}
+
+{-
+-- | A general computation. A command brings together a list of bindings and
+-- either:
+--   * A computation to perform, including a /term/ that produces a value, some
+--     /frames/ that process the value, and an /end/ that may finish the
+--     computation or branch as a case expression.
+--   * A jump to a join point, with a list of arguments and the join id.
+data Command b = Let (Command b) (Command b)
+               | Eval (Term b) [Frame b] (End b)
+               | Jump [Term b] Id
+               | Rec [Command b]
+               | BindTerm b (Term b)
+               | BindJoin b [b] (Command b)
   deriving (Functor, Foldable, Traversable)
 
--- | The binding of one identifier to one term or continuation.
-data BindPair b = BindTerm b (Term b)
-                | BindJoin b (Join b)
-  deriving (Functor, Foldable, Traversable)
+
+type Program a  = [Command a]
 
 -- | An expression producing a value. These include literals, lambdas,
 -- and variables, as well as types and coercions (see GHC's 'GHC.Expr' for the
@@ -153,58 +244,13 @@ data Term b     = Lit Literal       -- ^ A primitive literal value.
                                     -- for the @cast@ operation to a lambda.
   deriving (Functor, Foldable, Traversable)
 
--- | A parameterized continuation, otherwise known as a join point. Where a
--- regular continuation represents the context of a single expression, a
--- join point is a point in the control flow that many different computations
--- might jump to.
-data Join b     = Join [b] (Command b)
+data Cont b = App (Arg b) (Cont b)
+            | Cast Coercion (Cont b)
+            | Tick (Tickish Id) (Cont b)
+            | Return
+            | Case b [(AltCon,[b],Command b)]
   deriving (Functor, Foldable, Traversable)
 
+-}
 
--- | A general computation. A command brings together a list of bindings and
--- either:
---   * A computation to perform, including a /term/ that produces a value, some
---     /frames/ that process the value, and an /end/ that may finish the
---     computation or branch as a case expression.
---   * A jump to a join point, with a list of arguments and the join id.
-data Command b = Let (Bind b) (Command b)
-               | Eval (Term b) [Frame b] (End b)
-               | Jump [Term b] Id
-  deriving (Functor, Foldable, Traversable)
 
--- | A piece of context for a term. So called because we can think of them as
--- as stack frames in an idealized abstract machine. Typically a list of frames
--- is simply a list of arguments, but other bits of context such as casts and
--- ticks are also frames.
---
--- In contrast to an 'End', a 'Frame' takes input and produces output. Thus a
--- 'Command' can be seen as a pipeline starting from a 'Term', passing through
--- some 'Frame's, and ending at an 'End'.
-data Frame b    = App {- expr -} (Arg b)
-                  -- ^ Apply the value to an argument.
-                | Cast {- expr -} Coercion
-                  -- ^ Cast the value using the given coercion.
-                | Tick (Tickish Id) {- expr -}
-                  -- ^ Annotate the enclosed frame. Used by the profiler.
-  deriving (Functor, Foldable, Traversable)
-
--- | The end of a continuation. After arguments and casts are applied, we can
--- do two things to a value: Return it to the calling context or perform a case
--- analysis.
-data End b      = Return
-                  -- ^ Pass to the bound continuation.
-                | Case {- expr -} b [Alt b]
-                  -- ^ Perform case analysis on the value.
-  deriving (Functor, Foldable, Traversable)
-
--- | A case alternative. Given by the head constructor (or literal), a list of
--- bound variables (empty for a literal), and the body as a 'Command'.
-data Alt b      = Alt AltCon [b] (Command b)
-  deriving (Functor, Foldable, Traversable)
-
--- | The frames and end from an Eval, together forming a continuation.
-type Kont b     = ([Frame b], End b)
-                  -- ^ A continuation is expressed as a series of frames
-                  -- (usually arguments to apply), followed by a terminal
-                  -- action (such as a case analysis).
--- -}
