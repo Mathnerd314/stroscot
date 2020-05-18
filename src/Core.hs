@@ -1,12 +1,17 @@
 {-# LANGUAGE DeriveFunctor #-}
 
-delete :: (Eq a) => a -> [a] -> [a]
-delete _ []        = error "delete: element not present"
-delete x (y:ys)    = if x == y then ys else y : delete x ys
+import Control.Exception (assert)
+import GHC.Stack (HasCallStack)
 
-deleteM :: (Eq a) => [a] -> [a] -> [a]
-deleteM [] y = y
-deleteM (x:xs) y = deleteM xs (delete x y)
+delete :: HasCallStack => Int -> [a] -> [a]
+delete _ []     = error "delete: element not present"
+delete 0 (y:ys) = ys
+delete n (y:ys) = y : delete (n-1) ys
+
+insertAt :: HasCallStack => Int -> a -> [a] -> [a]
+insertAt 0 a ls = a : ls
+insertAt n a [] = error "insertAt: list too short"
+insertAt n a (l:ls) = l : insertAt (n-1) a ls
 
 data Atom
     = Var String
@@ -53,54 +58,61 @@ top = Perp (Plus [])
 data Rule r
   = Identity [Form]
   | Axiom Atom
-  | Cut Form r r
-  | PerpL Form r
-  | PerpR Form r
-  | PlusL [(Form,r)] Seq
-  | PlusR Int [Form] r
+  | Cut Int Int r r
+  | PerpL Int r
+  | PerpR Int r
+  | ImplR Int Int r
+  | ImplL Int Int r r
+  | PlusL Int r [(Int,r)]
+  | ZeroL Seq
+  | PlusR Int Int [Form] r
   | BotR r
   | BotL
-  | ImplR Form Form r
-  | ImplL Form Form r r
   | WeakenL Form r
   | WeakenR Form r
-  | ContractL Form r
-  | ContractR Form r
-  | BangL Form r
-  | QuestR Form r
-  | BangR Form r
-  | QuestL Form r
+  | ContractL Int Int r
+  | ContractR Int Int r
+  | BangL Int r
+  | QuestR Int r
+  | BangR Int r
+  | QuestL Int r
     deriving (Eq,Ord,Show,Functor)
 
 rule (Identity a) = Seq a a
 rule (Axiom a) = Seq [Atom a] [Atom a]
-rule (Cut a (Seq w x) (Seq y z)) = Seq (w ++ delete a y) (delete a x ++ z)
-rule (PerpL a (Seq x y)) = Seq (x ++ [Perp a]) (delete a y)
-rule (PerpR a (Seq x y)) = Seq (delete a x) ([Perp a] ++ y)
-rule (PlusL as (Seq x y)) = Seq (x ++ [Plus (map fst as)]) y
+rule (Cut a b (Seq w x) (Seq y z)) = assert (y !! a == x !! b) $ Seq (w ++ delete a y) (delete b x ++ z)
+rule (PerpL a (Seq x y)) = Seq (x ++ [Perp (y !! a)]) (delete a y)
+rule (PerpR a (Seq x y)) = Seq (delete a x) ([Perp (x !! a)] ++ y)
+rule (ImplR a b (Seq x y))
+    = Seq (delete a x) (delete b y ++ [Lolli (x !! a) (y !! b)])
+rule (ImplL a b (Seq w x) (Seq y z))
+    = Seq ([Lolli (x !!a) (y !! b)] ++ w ++ delete b y) (delete a x ++ z)
+
+rule (PlusL a (Seq x y) ys) = assert (and . map ((delete a x == ) . seqHead . snd) $ ys) $
+                              assert (and . map ((y==) . seqTail . snd) $ ys) $
+                                Seq (delete a x ++ [Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)]) y
+rule (ZeroL (Seq x y)) = Seq (x ++ [Plus []]) y
   -- assert delete a s == x and the other side is y for each rule
-rule (PlusR i cs (Seq x y)) = Seq x (delete (cs !! i) y ++ [Plus cs])
+rule (PlusR i j cs (Seq x y)) = Seq x (delete i y ++ [Plus (insertAt j (y !! i) cs)])
   -- assert a in cs
 rule (BotR (Seq x y)) = Seq x (y ++ [Bot])
 rule BotL = Seq [Bot] []
-rule (ImplR a b (Seq x y))
-    = Seq (delete a x) (delete b y ++ [Lolli a b])
-rule (ImplL a b (Seq w x) (Seq y z))
-    = Seq ([Lolli a b] ++ w ++ delete b y) (delete a x ++ z)
 rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
 rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
-rule (ContractL a (Seq x y)) =
-    let aa = Bang a
-        xx = [aa] ++ delete aa (delete aa x)
-        in Seq xx y
-rule (ContractR a (Seq x y)) =
-    let aa = Quest a
-        yy = [aa] ++ delete aa (delete aa y)
-        in Seq x yy
-rule (BangL a (Seq x y)) = Seq ([Bang a] ++ delete a x) y
-rule (QuestR a (Seq x y)) = Seq x ([Quest a] ++ delete a y)
-rule (BangR a (Seq x y)) = Seq x ([Bang a] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
-rule (QuestL a (Seq x y)) = Seq ([Quest a] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
+rule (ContractL a b (Seq x y)) =
+    let af@(Bang _) = x !! a
+        bf@(Bang _) = x !! b
+    in
+        assert (af == bf) $ Seq (delete b x) y
+rule (ContractR a b (Seq x y)) =
+    let af@(Quest _) = y !! a
+        bf@(Quest _) = y !! b
+    in
+        assert (af == bf) $ Seq x (delete b y)
+rule (BangL a (Seq x y)) = Seq ([Bang (x !! a)] ++ delete a x) y
+rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
+rule (BangR a (Seq x y)) = Seq x ([Bang (y !! a)] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
+rule (QuestL a (Seq x y)) = Seq ([Quest (x !! a)] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
 
 -- C   -- Control
 -- E   -- Environment
@@ -112,7 +124,7 @@ data RuleExp = RE (Rule RuleExp)
 
 seqify :: RuleExp -> Seq
 seqify (RE r) = rule $ fmap seqify r
-
+{-
 var = RE . Axiom . Var
 lam s e = RE $ ImplR (Atom (Var s)) (head . seqTail . seqify $ e) e
 app e f = RE $ ImplL (head . seqTail . seqify $ e) (head . seqTail . seqify $ f) e f
@@ -120,7 +132,7 @@ topret = RE . BotR . RE $ Identity [] -- Identity [Bot] ?
 argeval e f = RE $ Cut (last . seqHead . seqify $ f) e f
 funcall = argeval -- should be Cut as well with different argument polarities
 -- Fun String Exp Env Kont
-
+-}
 
 
 {-
