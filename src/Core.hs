@@ -8,6 +8,12 @@ delete _ []     = error "delete: element not present"
 delete 0 (y:ys) = ys
 delete n (y:ys) = y : delete (n-1) ys
 
+
+deleteM :: HasCallStack => [Int] -> [a] -> [a]
+deleteM [] ys = ys
+deleteM [x] ys = delete x ys
+deleteM (x:xs@(xp:_)) ys = assert (x < xp) $ delete x (deleteM xs ys)
+
 insertAt :: HasCallStack => Int -> a -> [a] -> [a]
 insertAt 0 a ls = a : ls
 insertAt n a [] = error "insertAt: list too short"
@@ -20,28 +26,12 @@ data Atom
 
 data Form 
     = Atom Atom
-    | Perp Form
     | Bot
     | Plus [Form]
-    | Lolli Form Form
+    | Lolli [Form] [Form]
     | Bang Form
     | Quest Form
     deriving (Eq,Ord,Show)
-
-dual :: Form -> Form
-dual a@(Atom _) = Perp a
-dual (Perp a) = a
-dual (Bang e) = Quest (dual e)
-dual (Quest e) = Bang (dual e)
-dual (Lolli x Bot) = x
-dual (Lolli x y) = Lolli (dual y) (dual x)
-dual x = Perp x
-
-async Bot = True
-async (Lolli _ _) = True
-async (Quest _) = True
-async (Perp a) = True
-async _ = False
 
 data Seq = Seq [Form] [Form]
    deriving (Eq,Ord,Show)
@@ -49,25 +39,16 @@ data Seq = Seq [Form] [Form]
 seqHead (Seq a b) = a
 seqTail (Seq a b) = b
 
-par a b = Lolli (Perp a) b
-tensor a b = Perp (Lolli a (Perp b))
-with a b = Perp (Plus [Perp a,Perp b])
-unit = Perp Bot
-top = Perp (Plus [])
-
 data Rule r
   = Identity [Form]
   | Axiom Atom
   | Cut Int Int r r
-  | PerpL Int r
-  | PerpR Int r
-  | ImplR Int Int r
-  | ImplL Int Int r r
+  | ImplR [Int] [Int] r -- [Int] must be sorted ascending
+  | ImplL [(Int,r)] [(Int,r)]
   | PlusL Int r [(Int,r)]
   | ZeroL Seq
   | PlusR Int Int [Form] r
-  | BotR r
-  | BotL
+
   | WeakenL Form r
   | WeakenR Form r
   | ContractL Int Int r
@@ -81,22 +62,21 @@ data Rule r
 rule (Identity a) = Seq a a
 rule (Axiom a) = Seq [Atom a] [Atom a]
 rule (Cut a b (Seq w x) (Seq y z)) = assert (y !! a == x !! b) $ Seq (w ++ delete a y) (delete b x ++ z)
-rule (PerpL a (Seq x y)) = Seq (x ++ [Perp (y !! a)]) (delete a y)
-rule (PerpR a (Seq x y)) = Seq (delete a x) ([Perp (x !! a)] ++ y)
 rule (ImplR a b (Seq x y))
-    = Seq (delete a x) (delete b y ++ [Lolli (x !! a) (y !! b)])
-rule (ImplL a b (Seq w x) (Seq y z))
-    = Seq ([Lolli (x !!a) (y !! b)] ++ w ++ delete b y) (delete a x ++ z)
+    = Seq (deleteM a x) (deleteM b y ++ [Lolli (map (x!!) a) (map (y!!) b)])
+rule (ImplL a b) =
+    let
+      ll = Lolli (map (\(i,r) -> seqTail r !! i) a) (map (\(i,r) -> seqHead r !! i) b)
+      x = (a >>= seqHead . snd) ++ (b >>= (\(i,r) -> delete i (seqHead r)))
+      y = (a >>= (\(i,r) -> delete i (seqTail r))) ++ (b >>= seqTail . snd)
+    in
+        Seq ([ll] ++ x) y
 
 rule (PlusL a (Seq x y) ys) = assert (and . map ((delete a x == ) . seqHead . snd) $ ys) $
                               assert (and . map ((y==) . seqTail . snd) $ ys) $
                                 Seq (delete a x ++ [Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)]) y
 rule (ZeroL (Seq x y)) = Seq (x ++ [Plus []]) y
-  -- assert delete a s == x and the other side is y for each rule
 rule (PlusR i j cs (Seq x y)) = Seq x (delete i y ++ [Plus (insertAt j (y !! i) cs)])
-  -- assert a in cs
-rule (BotR (Seq x y)) = Seq x (y ++ [Bot])
-rule BotL = Seq [Bot] []
 rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
 rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
 rule (ContractL a b (Seq x y)) =
@@ -125,6 +105,29 @@ data RuleExp = RE (Rule RuleExp)
 seqify :: RuleExp -> Seq
 seqify (RE r) = rule $ fmap seqify r
 {-
+
+dual :: Form -> Form
+dual a@(Atom _) = Lolli [a] []
+dual (Bang e) = Quest (dual e)
+dual (Quest e) = Bang (dual e)
+dual (Lolli [a] []) = [a]
+dual (Lolli [x] [Bot]) = [x]
+dual (Lolli x y) = Lolli (map dual y) (map dual x)
+dual x = Lolli x []
+
+async Bot = True
+async (Lolli _ _) = True
+async (Quest _) = True
+async _ = False
+
+
+perp a = Lolli a []
+par a b = Lolli (Perp a) b
+tensor a b = Perp (Lolli a (Perp b))
+with a b = Perp (Plus [Perp a,Perp b])
+unit = Perp Bot
+top = Perp (Plus [])
+
 var = RE . Axiom . Var
 lam s e = RE $ ImplR (Atom (Var s)) (head . seqTail . seqify $ e) e
 app e f = RE $ ImplL (head . seqTail . seqify $ e) (head . seqTail . seqify $ f) e f
