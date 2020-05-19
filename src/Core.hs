@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, TupleSections #-}
 
 import Control.Exception (assert)
 import GHC.Stack (HasCallStack)
@@ -8,7 +8,7 @@ delete _ []     = error "delete: element not present"
 delete 0 (y:ys) = ys
 delete n (y:ys) = y : delete (n-1) ys
 
-
+-- [Int] must be sorted ascending
 deleteM :: HasCallStack => [Int] -> [a] -> [a]
 deleteM [] ys = ys
 deleteM [x] ys = delete x ys
@@ -19,14 +19,14 @@ insertAt 0 a ls = a : ls
 insertAt n a [] = error "insertAt: list too short"
 insertAt n a (l:ls) = l : insertAt (n-1) a ls
 
-data Atom
-    = Var String
-    | Constant String
-    deriving (Eq,Ord,Show)
+--data Atom
+--    = Var String
+--    | Constant String
+--    deriving (Eq,Ord,Show)
+type Atom = String
 
 data Form 
     = Atom Atom
-    | Bot
     | Plus [Form]
     | Lolli [Form] [Form]
     | Bang Form
@@ -40,30 +40,31 @@ seqHead (Seq a b) = a
 seqTail (Seq a b) = b
 
 data Rule r
-  = Identity [Form]
+  = Identity Form
   | Axiom Atom
   | Cut Int Int r r
-  | ImplR [Int] [Int] r -- [Int] must be sorted ascending
+  | ImplR [Int] [Int] r 
   | ImplL [(Int,r)] [(Int,r)]
   | PlusL Int r [(Int,r)]
-  | ZeroL Seq
+  | ZeroL Seq -- an extra rule for PlusL so we know which assumptions to explode to.
   | PlusR Int Int [Form] r
-
+{-
   | WeakenL Form r
   | WeakenR Form r
-  | ContractL Int Int r
-  | ContractR Int Int r
+  | ContractL Int [Int] r
+  | ContractR Int [Int] r
   | BangL Int r
   | QuestR Int r
   | BangR Int r
   | QuestL Int r
-    deriving (Eq,Ord,Show,Functor)
+-}
+  deriving (Eq,Ord,Show,Functor)
 
-rule (Identity a) = Seq a a
+rule (Identity a) = Seq [a] [a]
 rule (Axiom a) = Seq [Atom a] [Atom a]
-rule (Cut a b (Seq w x) (Seq y z)) = assert (y !! a == x !! b) $ Seq (w ++ delete a y) (delete b x ++ z)
+rule (Cut a b (Seq w x) (Seq y z)) = assert (y !! b == x !! a) $ Seq (w ++ delete b y) (delete a x ++ z)
 rule (ImplR a b (Seq x y))
-    = Seq (deleteM a x) (deleteM b y ++ [Lolli (map (x!!) a) (map (y!!) b)])
+    = Seq (deleteM a x) ([Lolli (map (x!!) a) (map (y!!) b)] ++ deleteM b y)
 rule (ImplL a b) =
     let
       ll = Lolli (map (\(i,r) -> seqTail r !! i) a) (map (\(i,r) -> seqHead r !! i) b)
@@ -72,11 +73,88 @@ rule (ImplL a b) =
     in
         Seq ([ll] ++ x) y
 
-rule (PlusL a (Seq x y) ys) = assert (and . map ((delete a x == ) . seqHead . snd) $ ys) $
-                              assert (and . map ((y==) . seqTail . snd) $ ys) $
-                                Seq (delete a x ++ [Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)]) y
-rule (ZeroL (Seq x y)) = Seq (x ++ [Plus []]) y
-rule (PlusR i j cs (Seq x y)) = Seq x (delete i y ++ [Plus (insertAt j (y !! i) cs)])
+rule (PlusL a (Seq x y) ys) = assert (all ((delete a x ==) . (\(i,r) -> delete i (seqHead r))) ys) $
+                              assert (all ((y==) . seqTail . snd) ys) $
+                                Seq ([Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)] ++ delete a x) y
+rule (ZeroL (Seq x y)) = Seq ([Plus []] ++ x) y
+rule (PlusR i j cs (Seq x y)) = Seq x ([Plus (insertAt j (y !! i) cs)] ++ delete i y)
+
+idexpand :: Form -> Rule RuleExp
+idexpand (Atom a) = Axiom a
+idexpand (Plus []) = ZeroL (Seq [] [Plus []])
+idexpand (Plus (a:as)) = PlusL 0 (mkPlusR 0 a) (map (0,) js)
+  where
+    mkPlusR j x = RE $ PlusR 0 j (delete j (a:as)) (RE $ idexpand x)
+    js = zipWith mkPlusR [1..] as
+idexpand (Lolli a b) = ImplR is js $ RE $ ImplL as bs
+  where
+    is = map fst $ zip [1..] a
+    js = map fst $ zip [0..] a
+    as = map ((0,) . RE . idexpand) a
+    bs = map ((0,) . RE . idexpand) b
+
+cutelim :: Int -> Int -> Rule RuleExp -> Rule RuleExp -> Rule RuleExp
+cutelim i j (Cut a b (RE x) (RE y)) s = cutelim i j (cutelim a b x y) s
+cutelim i j r (Cut a b (RE x) (RE y)) = cutelim i j r (cutelim a b x y)
+cutelim i j (Identity ident) s = cutelim i j (idexpand ident) s
+cutelim i j s (Identity ident) = cutelim i j s (idexpand ident)
+cutelim 0 _ (Axiom _) s = s -- only one formula, so index must be 0. pattern-match error if not
+cutelim _ 0 s (Axiom _) = s
+cutelim 0 0 (PlusR i2 j cs (RE rr)) (PlusL i (RE r) is) =
+  case j of 
+    0 -> cutelim i 0 r rr
+    j -> let (ip,RE rp) = is !! (j-1) in
+        cutelim ip 0 rp rr
+cutelim 0 0 (ImplR ar br (RE rr)) (ImplL a b) = 
+  let
+    as = zip ar a
+    bs = zip br b
+    f x (k,(i,RE r)) = cutelim i k r x
+    g x (k,(i,RE r)) = cutelim k i x r
+  in
+    foldl g (foldl f rr as) bs
+--- commuting conversions ---
+cutelim n m (ImplL a b) rr | n > 0 = 
+  let
+    rightidxs = (zip [0..] a >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Left k)) $ (seqTail $ seqifyF r)) ++
+                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] . map (const (Right k)) $ seqTail $ seqifyF r) 
+    (downidx, abidx) = rightidxs !! n
+  in
+    case abidx of
+      Left idx -> let
+        (bidx,RE bi) = b !! idx
+        replacement = cutelim downidx m bi rr
+        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
+       in
+        ImplL a bcomb
+      Right idx -> let
+        (aidx,RE ai) = a !! idx
+        replacement = cutelim downidx m ai rr
+        acomb = insertAt idx (aidx,RE replacement) (delete idx a)
+       in
+        ImplL acomb b
+cutelim n m (PlusL a (RE r) rs) s | n > 0 = PlusL a (RE $ cutelim n m r s) $ map f rs
+  where
+    f (i,RE r) = (i,RE $ cutelim n m r s)
+cutelim n m (ZeroL (Seq x y)) r | n > 0 = ZeroL (Seq x (seqTail (seqify r)))
+cutelim n m (ImplR a b (RE r)) s | n > 0 = ImplR a b (RE $ cutelim n' m r s)
+  where n' = ([error "Bad index"] ++ deleteM b [0..]) !! n
+cutelim n m (PlusR i j cs (RE r)) s | n > 0 = PlusR i j cs (RE $ cutelim n' m r s)
+  where n' = ([error "Bad index"] ++ delete i [0..]) !! n
+
+
+{-
+cutelim (PlusR i j cs (Seq x y)) = Seq x (delete i y ++ [Plus (insertAt j (y !! i) cs)])
+-}
+data RuleExp = RE (Rule RuleExp)
+  deriving (Show,Eq,Ord)
+
+seqifyF :: RuleExp -> Seq
+seqifyF (RE r) = rule $ fmap seqifyF r
+
+seqify = seqifyF . RE
+
+{-
 rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
 rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
 rule (ContractL a b (Seq x y)) =
@@ -90,20 +168,14 @@ rule (ContractR a b (Seq x y)) =
     in
         assert (af == bf) $ Seq x (delete b y)
 rule (BangL a (Seq x y)) = Seq ([Bang (x !! a)] ++ delete a x) y
-rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
 rule (BangR a (Seq x y)) = Seq x ([Bang (y !! a)] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
+rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
 rule (QuestL a (Seq x y)) = Seq ([Quest (x !! a)] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
-
+-}
 -- C   -- Control
 -- E   -- Environment
 -- (S) -- Store
 -- K   -- Continuation
-
-data RuleExp = RE (Rule RuleExp)
-  deriving (Show,Eq,Ord)
-
-seqify :: RuleExp -> Seq
-seqify (RE r) = rule $ fmap seqify r
 {-
 
 dual :: Form -> Form
@@ -162,9 +234,6 @@ step s@(State c e k) = case c of
     Top -> s
     Arg cx e' k' -> State cx e' (Fun v b e k')
     Fun v' b' e' k' -> State b' (extend v' (Closure v b e) e') k'
-
-
-
 
 
 data State = State Exp Env Kont
