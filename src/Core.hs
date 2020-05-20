@@ -79,6 +79,14 @@ rule (PlusL a (Seq x y) ys) = assert (all ((delete a x ==) . (\(i,r) -> delete i
 rule (ZeroL (Seq x y)) = Seq ([Plus []] ++ x) y
 rule (PlusR i j cs (Seq x y)) = Seq x ([Plus (insertAt j (y !! i) cs)] ++ delete i y)
 
+data RuleExp = RE (Rule RuleExp)
+  deriving (Show,Eq,Ord)
+
+seqifyF :: RuleExp -> Seq
+seqifyF (RE r) = rule $ fmap seqifyF r
+
+seqify = seqifyF . RE
+
 idexpand :: Form -> Rule RuleExp
 idexpand (Atom a) = Axiom a
 idexpand (Plus []) = ZeroL (Seq [] [Plus []])
@@ -122,37 +130,56 @@ cutelim n m (ImplL a b) rr | n > 0 =
   in
     case abidx of
       Left idx -> let
-        (bidx,RE bi) = b !! idx
-        replacement = cutelim downidx m bi rr
-        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
-       in
-        ImplL a bcomb
-      Right idx -> let
         (aidx,RE ai) = a !! idx
         replacement = cutelim downidx m ai rr
         acomb = insertAt idx (aidx,RE replacement) (delete idx a)
        in
         ImplL acomb b
+      Right idx -> let
+        (bidx,RE bi) = b !! idx
+        replacement = cutelim downidx m bi rr
+        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
+       in
+        ImplL a bcomb
 cutelim n m (PlusL a (RE r) rs) s | n > 0 = PlusL a (RE $ cutelim n m r s) $ map f rs
   where
     f (i,RE r) = (i,RE $ cutelim n m r s)
-cutelim n m (ZeroL (Seq x y)) r | n > 0 = ZeroL (Seq x (seqTail (seqify r)))
+cutelim n m (ZeroL (Seq x y)) r | n > 0 = ZeroL (Seq x (delete n y ++ seqTail (seqify r)))
 cutelim n m (ImplR a b (RE r)) s | n > 0 = ImplR a b (RE $ cutelim n' m r s)
   where n' = ([error "Bad index"] ++ deleteM b [0..]) !! n
 cutelim n m (PlusR i j cs (RE r)) s | n > 0 = PlusR i j cs (RE $ cutelim n' m r s)
   where n' = ([error "Bad index"] ++ delete i [0..]) !! n
-
-
-{-
-cutelim (PlusR i j cs (Seq x y)) = Seq x (delete i y ++ [Plus (insertAt j (y !! i) cs)])
--}
-data RuleExp = RE (Rule RuleExp)
-  deriving (Show,Eq,Ord)
-
-seqifyF :: RuleExp -> Seq
-seqifyF (RE r) = rule $ fmap seqifyF r
-
-seqify = seqifyF . RE
+cutelim n m s (ImplR a b (RE r)) = ImplR a b (RE $ cutelim n m' s r)
+  where m' = deleteM a [0..] !! m
+cutelim n m s (ImplL a b) | m > 0 = 
+  let
+    leftidxs = [error "Bad index"] ++
+                (zip [0..] a >>= \(k,(i,r)) -> zip [0..] . map (const (Left k)) $ (seqHead $ seqifyF r)) ++
+                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Right k)) $ seqHead $ seqifyF r) 
+    (downidx, abidx) = leftidxs !! n
+  in
+    case abidx of
+      Left idx -> let
+        (aidx,RE ai) = a !! idx
+        replacement = cutelim n downidx s ai
+        acomb = insertAt idx (aidx,RE replacement) (delete idx a)
+       in
+        ImplL acomb b
+      Right idx -> let
+        (bidx,RE bi) = b !! idx
+        replacement = cutelim n downidx s bi
+        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
+       in
+        ImplL a bcomb
+cutelim n m s (PlusL a (RE r) rs) | m > 0 = PlusL a (RE $ cutelim n m' s r) $ map f rs
+  where
+    m' = ([error "Bad index"] ++ delete a [0..]) !! m
+    f (i,RE r) = let m' = ([error "Bad index"] ++ delete i [0..]) !! m in
+        (i,RE $ cutelim n m s r)
+      
+cutelim n m s (ZeroL (Seq x y)) | m > 0 = ZeroL (Seq (delete (m-1) x ++ seqHead (seqify s)) y)
+cutelim n m s (PlusR i j cs (RE r)) | m > 0 = PlusR i j cs (RE $ cutelim n m r s)
+cutelim n m a b = error (show (m,n) ++ ":" ++ show (a,b))
 
 {-
 rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
