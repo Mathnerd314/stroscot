@@ -25,7 +25,7 @@ insertAt n a (l:ls) = l : insertAt (n-1) a ls
 --    deriving (Eq,Ord,Show)
 type Atom = String
 
-data Form 
+data Form
     = Atom Atom
     | Plus [Form]
     | Lolli [Form] [Form]
@@ -43,7 +43,7 @@ data Rule r
   = Identity Form
   | Axiom Atom
   | Cut Int Int r r
-  | ImplR [Int] [Int] r 
+  | ImplR [Int] [Int] r
   | ImplL [(Int,r)] [(Int,r)]
   | PlusL Int r [(Int,r)]
   | ZeroL Seq -- an extra rule for PlusL so we know which assumptions to explode to.
@@ -78,6 +78,26 @@ rule (PlusL a (Seq x y) ys) = assert (all ((delete a x ==) . (\(i,r) -> delete i
                                 Seq ([Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)] ++ delete a x) y
 rule (ZeroL (Seq x y)) = Seq ([Plus []] ++ x) y
 rule (PlusR i j cs (Seq x y)) = Seq x ([Plus (insertAt j (y !! i) cs)] ++ delete i y)
+{-
+rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
+rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
+rule (ContractL a b (Seq x y)) =
+    let af@(Bang _) = x !! a
+        bf@(Bang _) = x !! b
+    in
+        assert (af == bf) $ Seq (delete b x) y
+rule (ContractR a b (Seq x y)) =
+    let af@(Quest _) = y !! a
+        bf@(Quest _) = y !! b
+    in
+        assert (af == bf) $ Seq x (delete b y)
+rule (BangL a (Seq x y)) = Seq ([Bang (x !! a)] ++ delete a x) y
+rule (BangR a (Seq x y)) = Seq x ([Bang (y !! a)] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
+rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
+rule (QuestL a (Seq x y)) = Seq ([Quest (x !! a)] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
+-}
+
+
 
 data RuleExp = RE (Rule RuleExp)
   deriving (Show,Eq,Ord)
@@ -109,11 +129,11 @@ cutelim i j s (Identity ident) = cutelim i j s (idexpand ident)
 cutelim 0 _ (Axiom _) s = s -- only one formula, so index must be 0. pattern-match error if not
 cutelim _ 0 s (Axiom _) = s
 cutelim 0 0 (PlusR i2 j cs (RE rr)) (PlusL i (RE r) is) =
-  case j of 
+  case j of
     0 -> cutelim i 0 r rr
     j -> let (ip,RE rp) = is !! (j-1) in
         cutelim ip 0 rp rr
-cutelim 0 0 (ImplR ar br (RE rr)) (ImplL a b) = 
+cutelim 0 0 (ImplR ar br (RE rr)) (ImplL a b) =
   let
     as = zip ar a
     bs = zip br b
@@ -122,10 +142,10 @@ cutelim 0 0 (ImplR ar br (RE rr)) (ImplL a b) =
   in
     foldl g (foldl f rr as) bs
 --- commuting conversions ---
-cutelim n m (ImplL a b) rr | n > 0 = 
+cutelim n m (ImplL a b) rr | n > 0 =
   let
     rightidxs = (zip [0..] a >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Left k)) $ (seqTail $ seqifyF r)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] . map (const (Right k)) $ seqTail $ seqifyF r) 
+                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] . map (const (Right k)) $ seqTail $ seqifyF r)
     (downidx, abidx) = rightidxs !! n
   in
     case abidx of
@@ -151,11 +171,11 @@ cutelim n m (PlusR i j cs (RE r)) s | n > 0 = PlusR i j cs (RE $ cutelim n' m r 
   where n' = ([error "Bad index"] ++ delete i [0..]) !! n
 cutelim n m s (ImplR a b (RE r)) = ImplR a b (RE $ cutelim n m' s r)
   where m' = deleteM a [0..] !! m
-cutelim n m s (ImplL a b) | m > 0 = 
+cutelim n m s (ImplL a b) | m > 0 =
   let
     leftidxs = [error "Bad index"] ++
                 (zip [0..] a >>= \(k,(i,r)) -> zip [0..] . map (const (Left k)) $ (seqHead $ seqifyF r)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Right k)) $ seqHead $ seqifyF r) 
+                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Right k)) $ seqHead $ seqifyF r)
     (downidx, abidx) = leftidxs !! n
   in
     case abidx of
@@ -176,29 +196,112 @@ cutelim n m s (PlusL a (RE r) rs) | m > 0 = PlusL a (RE $ cutelim n m' s r) $ ma
     m' = ([error "Bad index"] ++ delete a [0..]) !! m
     f (i,RE r) = let m' = ([error "Bad index"] ++ delete i [0..]) !! m in
         (i,RE $ cutelim n m s r)
-      
+
 cutelim n m s (ZeroL (Seq x y)) | m > 0 = ZeroL (Seq (delete (m-1) x ++ seqHead (seqify s)) y)
 cutelim n m s (PlusR i j cs (RE r)) | m > 0 = PlusR i j cs (RE $ cutelim n m r s)
 cutelim n m a b = error (show (m,n) ++ ":" ++ show (a,b))
 
-{-
-rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
-rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
-rule (ContractL a b (Seq x y)) =
-    let af@(Bang _) = x !! a
-        bf@(Bang _) = x !! b
-    in
-        assert (af == bf) $ Seq (delete b x) y
-rule (ContractR a b (Seq x y)) =
-    let af@(Quest _) = y !! a
-        bf@(Quest _) = y !! b
-    in
-        assert (af == bf) $ Seq x (delete b y)
-rule (BangL a (Seq x y)) = Seq ([Bang (x !! a)] ++ delete a x) y
-rule (BangR a (Seq x y)) = Seq x ([Bang (y !! a)] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
-rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
-rule (QuestL a (Seq x y)) = Seq ([Quest (x !! a)] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
--}
+data Exp
+  = EId
+-- | EHask Any
+  | ECut Int Int Exp Exp
+  | EImplR [Int] [Int] Exp
+  | EImplL [(Int,Exp)] [(Int,Exp)]
+  | EPlusL Int Exp [(Int,Exp)]
+  | EZeroL (Int,Int) -- an extra rule for PlusL so we know which assumptions to explode to.
+  | EPlusR Int Int Int Exp
+  deriving (Eq,Ord,Show)
+
+size :: Exp -> (Int,Int)
+size EId = (1,1)
+size (ECut _ _ x y) | (a,b) <- size x, (c,d) <- size y = (a+c-1,b+d-1)
+size (EImplR a b r) | (x,y) <- size r = (x - length a, 1 + y - length b)
+size (EImplL a b) = (1+x, y)
+  where
+    x = (sum $ map (fst . size . snd) a) + (sum $ map (fst . size . snd) b) - length b
+    y = (sum $ map (snd . size . snd) a) + (sum $ map (snd . size . snd) b) - length a
+size (EPlusL a r ys) = assert (all ((== size r) . size . snd) ys) $ size r
+size (EZeroL (x,y)) = (1 + x,y)
+size (EPlusR i j cs r) = size r
+
+reduce :: Int -> Int -> Exp -> Exp -> Exp
+reduce i j (ECut a b x y) s = reduce i j (reduce a b x y) s
+reduce i j r (ECut a b x y) = reduce i j r (reduce a b x y)
+reduce 0 _ EId s = s -- only one formula, so index must be 0. pattern-match error if not
+reduce _ 0 s EId = s
+reduce 0 0 (EPlusR i2 j cs rr) (EPlusL i r is) =
+  case j of
+    0 -> reduce i 0 r rr
+    j -> let (ip,rp) = is !! (j-1) in
+        reduce ip 0 rp rr
+reduce 0 0 (EImplR ar br rr) (EImplL a b) =
+  let
+    as = zip ar a
+    bs = zip br b
+    f x (k,(i,r)) = reduce i k r x
+    g x (k,(i,r)) = reduce k i x r
+  in
+    foldl g (foldl f rr as) bs
+--- commuting conversions ---
+reduce n m (EImplL a b) rr | n > 0 =
+  let
+    rightidxs = (zip [0..] a >>= \(k,(i,r)) -> delete i . zip [0..] $ replicate (snd $ size r) (Left k)) ++
+                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] $ replicate (snd $ size r) (Right k))
+    (downidx, abidx) = rightidxs !! n
+  in
+    case abidx of
+      Left idx -> let
+        (aidx,ai) = a !! idx
+        replacement = reduce downidx m ai rr
+        acomb = insertAt idx (aidx,replacement) (delete idx a)
+       in
+        EImplL acomb b
+      Right idx -> let
+        (bidx,bi) = b !! idx
+        replacement = reduce downidx m bi rr
+        bcomb = insertAt idx (bidx,replacement) (delete idx b)
+       in
+        EImplL a bcomb
+reduce n m (EPlusL a r rs) s | n > 0 = EPlusL a (reduce n m r s) $ map f rs
+  where
+    f (i,r) = (i,reduce n m r s)
+reduce n m (EZeroL (x,y)) r | n > 0 = EZeroL (x, y-1 + (snd . size $ r))
+reduce n m (EImplR a b r) s | n > 0 = EImplR a b (reduce n' m r s)
+  where n' = ([error "Bad index"] ++ deleteM b [0..]) !! n
+reduce n m (EPlusR i j cs r) s | n > 0 = EPlusR i j cs (reduce n' m r s)
+  where n' = ([error "Bad index"] ++ delete i [0..]) !! n
+reduce n m s (EImplR a b r) = EImplR a b (reduce n m' s r)
+  where m' = deleteM a [0..] !! m
+reduce n m s (EImplL a b) | m > 0 =
+  let
+    leftidxs = [error "Bad index"] ++
+                (zip [0..] a >>= \(k,(i,r)) -> zip [0..] $ replicate (fst $ size r) (Left k)) ++
+                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] $ replicate (fst $ size r) (Right k))
+    (downidx, abidx) = leftidxs !! n
+  in
+    case abidx of
+      Left idx -> let
+        (aidx,ai) = a !! idx
+        replacement = reduce n downidx s ai
+        acomb = insertAt idx (aidx,replacement) (delete idx a)
+       in
+        EImplL acomb b
+      Right idx -> let
+        (bidx,bi) = b !! idx
+        replacement = reduce n downidx s bi
+        bcomb = insertAt idx (bidx, replacement) (delete idx b)
+       in
+        EImplL a bcomb
+reduce n m s (EPlusL a r rs) | m > 0 = EPlusL a (reduce n m' s r) $ map f rs
+  where
+    m' = ([error "Bad index"] ++ delete a [0..]) !! m
+    f (i,r) = let m' = ([error "Bad index"] ++ delete i [0..]) !! m in
+        (i,reduce n m s r)
+
+reduce n m s (EZeroL (x,y)) | m > 0 = EZeroL (x-1 + (fst $ size s), y)
+reduce n m s (EPlusR i j cs r) | m > 0 = EPlusR i j cs (reduce n m r s)
+reduce n m a b = error (show (m,n) ++ ":" ++ show (a,b))
+
 -- C   -- Control
 -- E   -- Environment
 -- (S) -- Store
@@ -239,7 +342,7 @@ funcall = argeval -- should be Cut as well with different argument polarities
 
 {-
 
-data Form 
+data Form
     = Atom Atom
     | Perp Form
     | Bot
@@ -292,7 +395,7 @@ const_ = Lam "x" $ Lam "y" $ Var "x"
 -- until :: (a -> Bool) -> (a -> a) -> a -> a
 
 eval :: State -> State
-eval = until final step 
+eval = until final step
 
 -- -}
 {-
