@@ -43,21 +43,23 @@ data Rule r
   = Identity Form
   | Axiom Atom
   | Cut Int Int r r
+
   | ImplR [Int] [Int] r
   | ImplL [(Int,r)] [(Int,r)]
+
   | PlusL Int r [(Int,r)]
   | ZeroL Seq -- an extra rule for PlusL so we know which assumptions to explode to.
   | PlusR Int Int [Form] r
-{-
-  | WeakenL Form r
-  | WeakenR Form r
-  | ContractL Int [Int] r
-  | ContractR Int [Int] r
-  | BangL Int r
-  | QuestR Int r
+
   | BangR Int r
+  | BangL Int r -- deriliction
+  | ContractL Int [Int] r
+  | WeakenL Form r
+
   | QuestL Int r
--}
+  | QuestR Int r
+  | ContractR Int [Int] r
+  | WeakenR Form r
   deriving (Eq,Ord,Show,Functor)
 
 rule (Identity a) = Seq [a] [a]
@@ -203,7 +205,7 @@ cutelim n m a b = error (show (m,n) ++ ":" ++ show (a,b))
 
 data Exp
   = EId
--- | EHask Any
+  | EHask Any (Int,Int)
   | ECut Int Int Exp Exp
   | EImplR [Int] [Int] Exp
   | EImplL [(Int,Exp)] [(Int,Exp)]
@@ -214,6 +216,7 @@ data Exp
 
 size :: Exp -> (Int,Int)
 size EId = (1,1)
+size (EHask _ s) = s
 size (ECut _ _ x y) | (a,b) <- size x, (c,d) <- size y = (a+c-1,b+d-1)
 size (EImplR a b r) | (x,y) <- size r = (x - length a, 1 + y - length b)
 size (EImplL a b) = (1+x, y)
