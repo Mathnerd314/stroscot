@@ -8,7 +8,6 @@ The academic approach to types can be summed up in this quote (from `here <https
 
   You should fit programming languages to types and not the other way round, insofar as a type theory should be developed pretty much independently of the language (but, of course, not of the problem) it is to be applied to. It is a language design problem to ensure that whenever we have a function of that type, then the code executed for each combination of the types of the arguments is not only unambiguously defined, but also easily predictable by the programmer. In order to solve type-related problems, you must first conceive the types and only after you can think of how to design a language that best fits these types.
 
-
 The alternative is model checking, which is the opposite approach: take an existing program and try to prove properties about it with some kind of model. Although types can encapsulate properties, for the most part they don't have a lot of expressive power. Defining ``newtype Even = Integer`` does not give an error on ``Even 1``, while ``assert(e % 2 == 0)`` will throw an error regardless, and the model checker proves that error won't happen. The only issue is that properties can become verbose and the model checker is a black box that cannot be helped along, as opposed to the expressive tactic notations found in proof assistants.
 
 Roles
@@ -93,10 +92,13 @@ So getting back to our syntax, ``name = type value``. It should be clear that we
 
 When we assign again, it will look like ``name := value``, without a type. This has a completely different semantics: we take the thing on the left, the l-value, and we access the memory that it refers to, and we change the memory. Since the semantics is so different it uses a different syntax.
 
-There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we'll get to later); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
+Scoping and qualification
+=========================
 
-Concrete types
-==============
+There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
+
+Primitives types
+================
 
 Primitive types include bitstring patterns ``bits`` and pointers ``ptr``. Can't go wrong
 there.
@@ -108,7 +110,7 @@ there.
 
 The default arithmetic type is a ``number`` type.
 This is arbitrary-precision magic which can store just about anything.
-You can use ``integer`` for a strict integer, ``decimal`` for banking, and
+For more specific types you can use ``integer`` for a strict integer, ``decimal`` for banking, and
 ``float`` for any IEEE 754 thing. For ``integer`` the ``size`` argument restricts the size and ``sign`` restricts the sign. Those aren't the full constructors, it'll probably have a range too.
 
 ::

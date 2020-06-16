@@ -27,8 +27,8 @@ type Atom = String
 
 data Form
     = Atom Atom
-    | Plus [Form]
-    | Lolli [Form] [Form]
+    | PlusTimes [[Form]]
+    | With [([Form],[Form])]
     | Bang Form
     | Quest Form
     deriving (Eq,Ord,Show)
@@ -44,7 +44,7 @@ data Rule r
   | Axiom Atom
   | Cut Int Int r r
 
-  | ImplR [Int] [Int] r
+  | ImplR [([Int],[Int],r)]
   | ImplL [(Int,r)] [(Int,r)]
 
   | PlusL Int r [(Int,r)]
@@ -52,7 +52,7 @@ data Rule r
   | PlusR Int Int [Form] r
 
   | BangR Int r
-  | BangL Int r -- deriliction
+  | BangL Int r -- dereliction
   | ContractL Int [Int] r
   | WeakenL Form r
 

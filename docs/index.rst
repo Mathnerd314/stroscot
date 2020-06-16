@@ -10,12 +10,15 @@ For more, see:
 
   Introduction
   Arguments
+  Fexprs
   Delimited-Continuations
   Optimal-Reduction
   Syntax
   Overloading
+  Compiler
   Types
   Memory
   FAQ
+  zzreferences
 
 Github repository: https://github.com/Mathnerd314/stroscot

@@ -1,4 +1,5 @@
-{-# LANGUAGE DataKinds, KindSignatures, UnicodeSyntax, RecordWildCards #-}
+{-# LANGUAGE DataKinds, KindSignatures, UnicodeSyntax, RecordWildCards,
+DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 
 import Data.IORefStable
 import Data.Set (Set)
@@ -6,24 +7,25 @@ import qualified Data.Set as Set
 import Control.Monad
 import Data.List (isPrefixOf)
 
-data Port = Port (IORefStable Edge)
+data Port = Eraser | Port (IORefStable Edge)
   deriving (Eq,Ord)
 instance Show Port where
   show _ = "Port"
 
 data Edge = Edge Node Direction Node Direction -- assert: I then O
    deriving (Eq,Ord,Show)
-data Node
-  = Initiator   {out ∷ Port}
-  | Applicator  {inp :: Port, func, arg ∷ Port}
-  | Abstractor  {inp, bind :: Port, body ∷ Port}
-  | DelimiterO  {level ∷ Int, inp :: Port, out ∷ Port}
-  | DelimiterC  {level ∷ Int, inp :: Port, out ∷ Port}
-  | FanIn       {name :: String, level ∷ Int, out ∷ Port, ins ∷ [Port]}
-  | FanOut      {name :: String, level ∷ Int, inp ∷ Port, outs ∷ [Port]}
-  | Constant    {name ∷ String, inp ∷ Port, out :: Port}
-  | Case        {names ∷ [String], inp ∷ Port, out ∷ Port, alts ∷ [Port]}
-   deriving (Eq,Ord,Show)
+
+data NodeP p
+  = Initiator {out ∷ p}
+  | FanIn  {name :: String, level ∷ Int, out ∷ p, ins ∷ [(p,Int)]} -- (port, level)
+  | FanOut {name :: String, level ∷ Int, inp ∷ p, outs ∷ [(p,Int)]}
+  | Applicator {inp, func, arg ∷ p}
+  | Abstractor {inp, bind, body ∷ p}
+  | Constant {name ∷ String, inp, out :: p}
+  | Case {names ∷ [String], inp, out ∷ p, alts ∷ [p]}
+   deriving (Eq,Ord,Show,Functor,Foldable,Traversable)
+
+type Node = NodeP Port
 
 data Direction
    = Inp | Func | Arg | Body | Bind | Out | Ins Int | Alts Int | Outs Int
@@ -47,8 +49,6 @@ ports node = case node of
   Initiator  {..} → [Out]
   Applicator {..} → [Func,Inp,Arg]
   Abstractor {..} → [Inp,Body,Bind]
-  DelimiterO  {..} → [Inp,Out]
-  DelimiterC  {..} → [Out,Inp]
   Constant   {..} → [Inp,Out]
   FanIn      {ins = is, ..} → [Out]++(map (\(i,_) -> Ins i) $ zip [0..] is)
   FanOut     {outs = os,..} → [Inp]++(map (\(i,_) -> Outs i) $ zip [0..] os)
@@ -63,36 +63,37 @@ port Arg = arg
 port Body = body
 port Bind = bind
 port Out = out
-port (Ins i) = (!! i) . ins
+port (Ins i) = fst . (!! i) . ins
+port (Outs i) = fst . (!! i) . outs
 port (Alts i) = (!! i) . alts
 
 getPort :: Node -> Direction -> IORefStable Edge
 getPort n d | Port p <- port d n = p
 
-link :: Node -> Direction -> Node -> Direction -> Bool -> IO ()
-link a ad b bd True = link b bd a ad False
-link a ad b bd False | getD ad /= I || getD bd /= O = error "bad direction"
-link a ad b bd False = do
+link :: Node -> Direction -> Node -> Direction -> IO ()
+link a ad b bd | getD ad /= I || getD bd /= O = error "bad direction"
+link a ad b bd = do
   let e = Edge a ad b bd
   writeIORefStable (getPort a ad) e
   writeIORefStable (getPort b bd) e
 
+--BOHM: f.nform[i].nform[f.nport[i]] == f
+--mine: (a,ad) = follow(f, i); f == follow a ad
 follow source dir = do
   Edge a ad b bd <- readIORefStable (getPort source dir)
   return $ case getD dir of
     I -> (b,bd)
     O -> (a,ad)
 
-relink :: Node -> Direction -> Bool -> Node -> Direction -> Bool -> Bool -> IO ()
-relink a ad af b bd bf True = relink b bd bf a ad af False
-relink a ad True b bd bf False = do
+relink :: Node -> Direction -> Bool -> Node -> Direction -> Bool -> IO ()
+relink a ad True b bd bf = do
   (a', ad') <- follow a ad
-  relink a' ad' False b bd bf False
-relink a ad af b bd True False = do
+  relink a' ad' False b bd bf
+relink a ad af b bd True = do
   (b', bd') <- follow b bd
-  relink a ad af b' bd' False False
-relink a ad False b bd False False =
-  link a ad b bd False
+  relink a ad af b' bd' False
+relink a ad False b bd False =
+  link a ad b bd
 
 getPorts :: Node -> Direction -> [Direction]
 getPorts a ppa = filter (/= ppa) $ ports a
@@ -111,49 +112,13 @@ getNodes n = process Set.empty Set.empty [n]
 
 -- zip [0..] . toList
 
-{-
-BOHM: f.nform[i].nform[f.nport[i]] == f
-mine: [a,ad] = follow(f, i); f == follow(a,ad)
--}
-clone node = case node of
-    Initiator {} → do
-      o <- newIORefStable undefined
-      return $ node {out = Port o}
-    Applicator  {} → do
-      i <- newIORefStable undefined
-      f <- newIORefStable undefined
-      a <- newIORefStable undefined
-      return $ node {inp = Port i, func = Port f, arg = Port a}
-    Abstractor  {} → do
-      i <- newIORefStable undefined
-      b <- newIORefStable undefined
-      bb <- newIORefStable undefined
-      return $ node {inp = Port i, body = Port b, bind = Port bb}
-    DelimiterO  {} → do
-      i <- newIORefStable undefined
-      o <- newIORefStable undefined
-      return $ node {inp = Port i, out = Port o}
-    DelimiterC {} → do
-      i <- newIORefStable undefined
-      o <- newIORefStable undefined
-      return $ node {inp = Port i, out = Port o}
-    FanIn {} → do
-      o <- newIORefStable undefined
-      is <- mapM (const (newIORefStable undefined)) (ins node)
-      return $ node {out = Port o, ins = map Port is}
-    FanOut {} → do
-      i <- newIORefStable undefined
-      os <- mapM (const (newIORefStable undefined)) (outs node)
-      return $ node {inp = Port i, outs = map Port os}
-    Constant {} → do
-      i <- newIORefStable undefined
-      o <- newIORefStable undefined
-      return $ node {inp = Port i, out = Port o}
-    Case {} → do
-      i <- newIORefStable undefined
-      o <- newIORefStable undefined
-      as <- mapM (const (newIORefStable undefined)) (alts node)
-      return $ node {inp = Port i, out = Port o, alts = map Port as}
+
+clone node = traverse mkRef node
+  where
+    mkRef Eraser = return Eraser
+    mkRef (Port _) = do
+      p <- newIORefStable undefined
+      return $ Port p
 
 data State = State {
   root :: Node,
@@ -181,28 +146,24 @@ rewriteStep (State {..}) = do
   lopair <- lo_redex u
   return $ State { stack = lopair ++ stackrest,..}
 
-updateLevel you me = case me of
+updateLevel you me pb = case me of
     FanIn {} -> maybeLevelUp
     FanOut {} -> maybeLevelUp
-    DelimiterO {} -> maybeLevelUp
-    DelimiterC {} -> maybeLevelUp
     _ → me
   where
     maybeLevelUp =
      case you of
-      DelimiterO {} → if level you <= level me then me {level = level me + 1} else me
-      DelimiterC {} → if level you <= level me then me {level = level me + 1} else me
-      Abstractor {} → me {level = level me + 1}
+      FanIn {} → me {level = level me + 1}
+      FanOut {} → me {level = level me + 1}
       _ → me
 
 makenodes a pa b pb ppb =
   forM pb $ \p -> do
-    x <- clone a
+    x' <- clone a
+    let x = updateLevel b x'
     return $ case getD p == getD ppb of
       False -> x
       True -> case x of
-        DelimiterC {..} -> DelimiterO {..}
-        DelimiterO {..} -> DelimiterC {..}
         FanIn {..} -> FanOut {inp = out, outs=ins, ..}
         FanOut {..} -> FanIn {out = inp, ins=outs, ..}
 
@@ -214,10 +175,8 @@ commute ∷ Node -> Direction -> Node -> Direction -> IO ()
 commute a ppa b ppb = do
   let pa = getPorts a ppa
   let pb = getPorts b ppb
-  let a' = updateLevel a b
-  let b' = updateLevel b a
-  a_new <- makenodes a' pa b' pb ppb
-  b_new <- makenodes b' pb b' pb ppb
+  a_new <- makenodes a pa b pb ppb
+  b_new <- makenodes b pb b pb ppb
   makeOuterLinks a' (zip [0..] pa) b_new ppb
   makeOuterLinks b' (zip [0..] pb) a_new ppa
   forM_ (zip [0..] pb) $ \(pbi,pb1) ->
@@ -225,9 +184,7 @@ commute a ppa b ppb = do
       link (a_new !! pbi) pa1 (b_new !! pai) pb1 (getD pa1 /= O)
 
 eqNode :: Node -> Node -> Bool
-eqNode (FanIn {ins = []}) (FanOut {outs = []}) = True
 eqNode (FanIn {level = a, ins = as}) (FanOut {level = b, outs=bs}) = a == b && length as == length bs
-eqNode (DelimiterC{level=a}) (DelimiterO{level=b}) = a == b
 eqNode _ _ = False
 
 reducePair a ppa b ppb = case () of
@@ -235,13 +192,132 @@ reducePair a ppa b ppb = case () of
     forM_ (getPorts a ppa) $ \p -> do
       relink a p True b p True False -- nothing that annihilates changes directions
   () | Applicator {} <- a, Abstractor {} <- b, ppa == Func, ppb == Inp -> do
-    o <- clone $ DelimiterO {level = 0, inp = undefined, out = undefined}
-    c <- clone $ DelimiterC {level = 0, inp = undefined, out = undefined}
-    relink a Inp True o Out False False
-    relink o Inp False b Body True False
-    relink b Bind True c Inp False False
-    relink c Out False a Arg True False
+    relink a Inp True b Body True False
+    relink b Bind True a Arg True False
   _ -> commute a ppa b ppb
+
+fan  fan-like
+
+
+f1.index < f2.index
+  new1 = clone f2, index = f2->index+f1->nlevel[2];
+  f2->index = f2->index+f1->nlevel[1];
+  new2 = clone f1
+
+{-
+reduce Fan Fan | index==index = do
+  assert nlevels == nlevels
+  relink a p1 True b p1 True False
+  relink a p2 True b p2 True False
+reduce Triangle Triangle | index == index
+app lambda
+app lambdaunb = connect app Inp l Body
+                connect Erase ap Arg
+                clean_garbage
+
+      fan_uns1 = Fan w/ unshared port
+reduce_redex(f1,f2)
+FORM  f1,f2    *new1,  *new2;
+	clean();
+
+     else{ /* f1.index < f2.index */
+	switch (f1->name)
+	{
+	   case FAN:
+	      if (f2->name != TRIANGLE) fan_int++;
+	      if (f2->name == LAMBDA)
+			f1->num_safe=false;
+	      switch (f2->name)
+	      {
+		 case APP:
+		 case LAMBDA:
+		    allocate_form(&new1,f2->name,f2->index+f1->nlevel[2]);
+		    f2->index = f2->index+f1->nlevel[1];
+		    allocate_form(&new2,FAN,f1->index);
+		    new2->num_safe=f1->num_safe;
+		    new2->nlevel[1] = f1->nlevel[1];
+		    new2->nlevel[2] = f1->nlevel[2];
+		    connect1(f2, 0, f1->nform[1], f1->nport[1]);
+		    connect1(new1, 0, f1->nform[2], f1->nport[2]);
+		    connect1(new2, 0, f2->nform[1], f2->nport[1]);
+		    connect1(f1, 0, f2->nform[2], f2->nport[2]);
+		    connect(f1,1,f2,2);
+		    connect(f1,2,new1,2);
+		    connect(f2,1,new2,1);
+		    connect(new1,1,new2,2);
+		    break;
+
+		 case FAN:
+		    allocate_form(&new1,f2->name,f2->index+f1->nlevel[2]);
+		    f2->index = f2->index+f1->nlevel[1];
+		    new1->num_safe=f2->num_safe;
+		    new1->nlevel[1] = f2->nlevel[1];
+		    new1->nlevel[2] = f2->nlevel[2];
+		    allocate_form(&new2,FAN,f1->index);
+		    new2->num_safe=f1->num_safe;
+		    new2->nlevel[1] = f1->nlevel[1];
+		    new2->nlevel[2] = f1->nlevel[2];
+		    connect1(f2, 0, f1->nform[1], f1->nport[1]);
+		    connect1(new1, 0, f1->nform[2], f1->nport[2]);
+		    connect1(new2, 0, f2->nform[1], f2->nport[1]);
+		    connect1(f1, 0, f2->nform[2], f2->nport[2]);
+		    connect(f1,1,f2,2);
+		    connect(f1,2,new1,2);
+		    connect(f2,1,new2,1);
+		    connect(new1,1,new2,2);
+		    break;
+
+		 case TRIANGLE:
+		    allocate_form(&new1,f2->name,f2->index+f1->nlevel[2]);
+		    new1->num_safe=f2->num_safe;
+		    new1->nlevel[1] = f2->nlevel[1];
+		    f2->index = f2->index+f1->nlevel[1];
+		    connect1(f2, 0, f1->nform[1], f1->nport[1]);
+		    connect1(new1 , 0, f1->nform[2], f1->nport[2]);
+		    connect1(f1, 0, f2->nform[1], f2->nport[1]);
+		    connect(f1,1,f2,1);
+		    connect(f1,2,new1,1);
+		    break;
+
+  case TRIANGLE:
+	      if (f2->name == LAMBDA)
+		 f1->num_safe = false;
+	      switch (f2->name)
+		 {
+		    case APP:
+		    case LAMBDA:
+		    case FAN:
+		       allocate_form(&new1,f1->name,f1->index);
+		       new1->nlevel[1] = f1->nlevel[1];
+		       new1->num_safe=f1->num_safe;
+
+		       f2->index = f2->index + f1->nlevel[1];
+
+		       connect1(f2, 0, f1->nform[1], f1->nport[1]);
+		       connect1(new1, 0, f2->nform[1], f2->nport[1]);
+		       connect1(f1, 0, f2->nform[2], f2->nport[2]);
+		       connect(f1,1,f2,2);
+		       connect(new1,1,f2,1);
+		       break;
+
+		    case TRIANGLE:
+		    case LAMBDAUNB:
+		    case UNS_FAN1:
+		    case UNS_FAN2:
+		       f2->index = f2->index + f1->nlevel[1];
+
+		       connect1(f2, 0, f1->nform[1], f1->nport[1]);
+		       connect1(f1, 0, f2->nform[1], f2->nport[1]);
+		       connect(f1,1,f2,1);
+		       break;
+
+		 }
+	   break;
+	}
+     }
+}
+
+-}
 
 type Director = Int
 data Block = Block Int [Director]

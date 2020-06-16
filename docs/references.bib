@@ -1,0 +1,112 @@
+
+@inproceedings{downenMakingFasterCurry2019,
+  title = {Making a Faster {{Curry}} with Extensional Types},
+  booktitle = {Proceedings of the 12th {{ACM SIGPLAN International Symposium}} on {{Haskell}}},
+  author = {Downen, Paul and Sullivan, Zachary and Ariola, Zena M. and Peyton Jones, Simon},
+  year = {2019},
+  month = aug,
+  pages = {58--70},
+  publisher = {{Association for Computing Machinery}},
+  address = {{Berlin, Germany}},
+  doi = {10.1145/3331545.3342594},
+  url = {https://doi.org/10.1145/3331545.3342594},
+  urldate = {2020-06-14},
+  abstract = {Curried functions apparently take one argument at a time, which is slow. So optimizing compilers for higher-order languages invariably have some mechanism for working around currying by passing several arguments at once, as many as the function can handle, which is known as its arity. But such mechanisms are often ad-hoc, and do not work at all in higher-order functions. We show how extensional, call-by-name functions have the correct behavior for directly expressing the arity of curried functions. And these extensional functions can stand side-by-side with functions native to practical programming languages, which do not use call-by-name evaluation. Integrating call-by-name with other evaluation strategies in the same intermediate language expresses the arity of a function in its type and gives a principled and compositional account of multi-argument curried functions. An unexpected, but significant, bonus is that our approach is equally suitable for a call-by-value language and a call-by-need language, and it can be readily integrated into an existing compilation framework.},
+  isbn = {978-1-4503-6813-1},
+  keywords = {arity,extensionality,type systems},
+  series = {Haskell 2019}
+}
+
+@inproceedings{downenSequentCalculusCompiler2016a,
+  ids = {downenSequentCalculusCompiler,downenSequentCalculusCompiler2016},
+  title = {Sequent Calculus as a Compiler Intermediate Language},
+  booktitle = {Proceedings of the 21st {{ACM SIGPLAN International Conference}} on {{Functional Programming}}},
+  author = {Downen, Paul and Maurer, Luke and Ariola, Zena M. and Peyton Jones, Simon},
+  year = {2016},
+  month = sep,
+  pages = {74--88},
+  publisher = {{Association for Computing Machinery}},
+  address = {{Nara, Japan}},
+  doi = {10.1145/2951913.2951931},
+  url = {https://www.microsoft.com/en-us/research/publication/sequent-calculus-as-a-compiler-intermediate-language/},
+  urldate = {2020-06-14},
+  abstract = {The λ-calculus is popular as an intermediate language for practical compilers. But in the world of logic it has a lesser-known twin, born at the same time, called the sequent calculus. Perhaps that would make for a good intermediate language, too? To explore this question we designed Sequent Core, a practically-oriented core calculus based on the sequent calculus, and used it to re-implement a substantial chunk of the Glasgow Haskell Compiler.},
+  isbn = {978-1-4503-4219-3},
+  keywords = {Compiler optimizations,Continuations,Haskell,Intermediate representations,Natural deduction,Sequent calculus},
+  series = {{{ICFP}} 2016}
+}
+
+@inproceedings{erdwegSoundOptimalIncremental2015,
+  title = {A Sound and Optimal Incremental Build System with Dynamic Dependencies},
+  booktitle = {Proceedings of the 2015 {{ACM SIGPLAN International Conference}} on {{Object}}-{{Oriented Programming}}, {{Systems}}, {{Languages}}, and {{Applications}} - {{OOPSLA}} 2015},
+  author = {Erdweg, Sebastian and Lichter, Moritz and Weiel, Manuel},
+  year = {2015},
+  pages = {89--106},
+  publisher = {{ACM Press}},
+  address = {{Pittsburgh, PA, USA}},
+  doi = {10.1145/2814270.2814316},
+  url = {http://dl.acm.org/citation.cfm?doid=2814270.2814316},
+  urldate = {2020-06-15},
+  abstract = {Build systems are used in all but the smallest software projects to invoke the right build tools on the right files in the right order. A build system must be sound (after a build, generated files consistently reflect the latest source files) and efficient (recheck and rebuild as few build units as possible). Contemporary build systems provide limited efficiency because they lack support for expressing finegrained file dependencies. We present a build system called pluto that supports the definition of reusable, parameterized, interconnected builders. When run, a builder notifies the build system about dynamically required and produced files as well as about other builders whose results are needed. To support fine-grained file dependencies, we generalize the traditional notion of time stamps to allow builders to declare their actual requirements on a file’s content. pluto collects the requirements and products of a builder with their stamps in a build summary. This enables pluto to provides provably sound and optimal incremental rebuilding. To support dynamic dependencies, our rebuild algorithm interleaves dependency analysis and builder execution and enforces invariants on the dependency graph through a dynamic analysis. We have developed pluto as a Java API and used it to implement more than 25 builders. We describe our experience with migrating a larger Ant build script to pluto and compare the respective build times.},
+  isbn = {978-1-4503-3689-5},
+  language = {en}
+}
+
+@book{guerriniTheoreticalPracticalIssues1996,
+  title = {Theoretical and Practical Issues of Optimal Implementations of Functional Languages},
+  author = {Guerrini, Stefano},
+  year = {1996},
+  publisher = {{Università di Pisa. Dipartimento di Informatica}},
+  url = {https://www-lipn.univ-paris13.fr/~guerrini/mysite/sites/default/files/biblio/PhDThesis.pdf}
+}
+
+@misc{lafontLinearLogicPages,
+  title = {Linear {{Logic Pages}}},
+  author = {Lafont, Yves},
+  url = {http://iml.univ-mrs.fr/~lafont/pub/llpages.pdf},
+  language = {en}
+}
+% == BibTeX quality report for lafontLinearLogicPages:
+% Missing required field 'howpublished'
+% Missing required field 'year'
+% ? Title looks like it was stored in title-case in Zotero
+
+@inproceedings{levyJumboLCalculus2006,
+  title = {Jumbo λ-{{Calculus}}},
+  booktitle = {Automata, {{Languages}} and {{Programming}}},
+  author = {Levy, Paul Blain},
+  editor = {Bugliesi, Michele and Preneel, Bart and Sassone, Vladimiro and Wegener, Ingo},
+  year = {2006},
+  pages = {444--455},
+  publisher = {{Springer}},
+  address = {{Berlin, Heidelberg}},
+  doi = {10.1007/11787006_38},
+  url = {https://www.cs.bham.ac.uk/~pbl/papers/jumboicalp.pdf},
+  abstract = {We make an argument that, for any study involving computational effects such as divergence or continuations, the traditional syntax of simply typed lambda-calculus cannot be regarded as canonical, because standard arguments for canonicity rely on isomorphisms that may not exist in an effectful setting. To remedy this, we define a “jumbo lambda-calculus” that fuses the traditional connectives together into more general ones, so-called “jumbo connectives”. We provide two pieces of evidence for our thesis that the jumbo formulation is advantageous.Firstly, we show that the jumbo lambda-calculus provides a “complete” range of connectives, in the sense of including every possible connective that, within the beta-eta theory, possesses a reversible rule.Secondly, in the presence of effects, we show that there is no decomposition of jumbo connectives into non-jumbo ones that is valid in both call-by-value and call-by-name.},
+  isbn = {978-3-540-35908-1},
+  language = {en},
+  series = {Lecture {{Notes}} in {{Computer Science}}}
+}
+% == BibTeX quality report for levyJumboLCalculus2006:
+% ? Unsure about the formatting of the booktitle
+% ? Title looks like it was stored in title-case in Zotero
+
+@article{mokhovBuildSystemsCarte2020,
+  title = {Build Systems à La Carte: {{Theory}} and Practice},
+  shorttitle = {Build Systems à La Carte},
+  author = {Mokhov, Andrey and Mitchell, Neil and Peyton Jones, Simon},
+  year = {2020},
+  volume = {30},
+  pages = {e11},
+  issn = {0956-7968, 1469-7653},
+  doi = {10.1017/S0956796820000088},
+  url = {https://www.cambridge.org/core/product/identifier/S0956796820000088/type/journal_article},
+  urldate = {2020-06-11},
+  abstract = {Build systems are awesome, terrifying – and unloved. They are used by every developer around the world, but are rarely the object of study. In this paper, we offer a systematic, and executable, framework for developing and comparing build systems, viewing them as related points in a landscape rather than as isolated phenomena. By teasing apart existing build systems, we can recombine their components, allowing us to prototype new build systems with desired properties.},
+  journal = {Journal of Functional Programming},
+  language = {en}
+}
+% == BibTeX quality report for mokhovBuildSystemsCarte2020:
+% Missing required field 'number'
+
+

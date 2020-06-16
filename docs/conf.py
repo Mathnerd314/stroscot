@@ -12,9 +12,14 @@ author = 'Mathnerd314'
 
 # Add any Sphinx extension module names here, as strings.
 extensions = [
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.graphviz',
+    'sphinxcontrib.bibtex'
     # ,'sphinxcontrib.fulltoc'
 ]
+
+mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

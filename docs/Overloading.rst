@@ -1,13 +1,13 @@
 Overloading
 ###########
 
-Stroscot supports typical pattern matching and predicate dispatch:
+Stroscot supports typical pattern matching as well as predicate dispatch:
 
 ::
 
    f x y = 1
    f 1 y = 2
-   f x 2 with x == 1 = 3
+   f x 2 | x == 1 = 3
 
 The cases are not ordered, instead they are matched most-specific to least-specific. Specificity is defined by an SMT solver, i.e. SAT(a & not b) and UNSAT (not a & b) means that a is less specific than b.
 
@@ -36,16 +36,16 @@ It could be useful for tests:
    # test
    fib 5 = 5
 
-The implementation is similar to that used for checking equality of dependent types, i.e. it does some normalization but isn't omniscient. The optimizer decides which case is dead code and can be dropped.
+The implementation is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn't omniscient. The optimizer decides which case is dead code and will be dropped.
 
-Idea: predicate failure as a throwing operation, and have something like
+Internally, predicate failure is treated like any other error condition. All cases are run in parallel using the `lub operation <http://conal.net/blog/posts/merging-partial-values>`__ (or maybe its less powerful cousin `unamb`). The `lub` operation is implemented as a primitive that desugars in the middle of Core compilation, in a deterministic manner based on termination checking. I'm not sure how to handle continuations interacting with `lub`.
 
 ::
 
    call binds args = do
     fold lub DispatchError (map ($args) binds)
 
-where lub is from http://conal.net/blog/posts/merging-partial-values and http://conal.net/blog/posts/merging-partial-values, extended to work on continuations (and unamb is implemented in a deterministic manner using a termination checker instead of racing).
+
 
 Sequential matches
 ==================
@@ -59,7 +59,7 @@ The pipe syntax matches cases from top to bottom:
    | 1 y = 2
    | x 2 = 3
 
-It expands to something like:
+It expands to an unordered set of matches:
 
 ::
 
