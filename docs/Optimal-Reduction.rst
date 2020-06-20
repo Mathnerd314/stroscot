@@ -1,7 +1,7 @@
 Optimal reduction
 #################
 
-In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although often more efficient than call-by-value, still duplicates work. An example is
+In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is
 
 ::
 
@@ -14,12 +14,12 @@ In call-by-value reduction, work is duplicated quite frequently. And lazy or cal
 
 This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a "hoisting" transformation that makes ``i = (unsafePerformIO (print "i")) `seq` \w -> w``, but more complex cases have higher-level sharing that no code transformation can mimic.
 
-Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph structure used corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
+Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
 
 Boxes do have some performance cost, so how can they be avoided? There are many cases where boxes are not necessary:
 
 1. When the term is linear or affine and does not need to duplicate anything.
-2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per `Filinski <https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.43.8416>`__)
+2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992a`)
 3. Inlining, when the box is opened and emptied.
 4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
 

@@ -15,10 +15,12 @@ For more, see:
   Optimal-Reduction
   Syntax
   Overloading
-  Compiler
   Types
   Memory
+  Compiler
+  BuildSystem
   FAQ
   zzreferences
 
-Github repository: https://github.com/Mathnerd314/stroscot
+* Github repository: https://github.com/Mathnerd314/stroscot
+* Discord: https://discord.gg/rQvE5Yj

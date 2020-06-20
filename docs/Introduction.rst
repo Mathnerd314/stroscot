@@ -1,12 +1,25 @@
 Introduction
 ############
 
-Why another programming language, you may ask? Why does a painter paint?
-Why does an artist draw? When there is beauty to be found in programming
-languages, it is our duty to discover it and spread it far and wide.
+Motivation
+==========
 
-In Stroscot programs are freed from the shackles of languages past and
-idealized to their purest form.
+Why another programming language, you may ask? Why does a painter paint?
+When there is beauty to be found in programming
+languages, it is our duty to discover it and spread it far and wide. To paraphrase `XKCD <https://xkcd.com/927/>`__:
+
+::
+
+  How programming languages proliferate
+  -------------------------------------
+  SITUATION: There are 14 competing programming languages.
+  Geek: 14?! Ridiculous! We need to develop one universal programming language
+    that covers everyone's use cases.
+
+  Soon: There are 15 competing programming languages.
+
+Stroscot aims to be that universal language. The shackles of languages past are no more, and
+programs are freed to be idealized to their purest form.
 
 .. _inspiring-projects:
 
@@ -16,13 +29,13 @@ Inspiring projects
 -  `Lever <https://github.com/cheery/lever/>`__
 -  `GHC <https://github.com/ghc/ghc/>`__
 -  `Zig <https://github.com/ziglang/zig/>`__
--  `Wat <https://github.com/manuel/wat-js>`__
--  `Slate <https://github.com/briantrice/slate-language>`__
 -  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
 -  `Pinafore <https://pinafore.info/>`__
 -  `Macro Lambda Calculus <http://github.com/codedot/lambda>`__
 -  `A Pint-sized Earley Parser <https://github.com/JoshuaGrams/pep>`__
+-  `Wat <https://github.com/manuel/wat-js>`__
 -  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
+-  `Slate <https://github.com/briantrice/slate-language>`__
 
 Goals
 =====

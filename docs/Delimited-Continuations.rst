@@ -17,10 +17,10 @@ The API for delimited continuations is:
    continuation, analogous to how call/cc captures an undelimited
    continuation. k can then be applied like any other function.
 
-This is based on "A Framework for Monadic Delimited Continuations" except
+This is based on :cite:`dyvbigMonadicFrameworkDelimited2007` except
 that there is no **pushSubCont** because applying a continuation is automatic.
 
-An example is the following:
+An example from the paper is the following:
 
 ::
 

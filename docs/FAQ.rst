@@ -17,6 +17,10 @@ A near-term goal is to write Stroscot in itself. However, it has to generate cod
 * LLVM compiles to JS and there are LLVM bindings available for JS
 * TypeScript doesn't add much besides compilation overhead
 
+Since then, development has shifted to Haskell, for other reasons:
+
+* The compiler/type system prevents a lot of common errors (particularly typos, which JS doesn't detect until late)
+* A lot of other type-system-heavy projects are written in Haskell
 
 Where can I ask questions?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
