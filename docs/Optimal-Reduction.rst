@@ -19,14 +19,14 @@ Although GHC will do this with ``-O``, it does it messily; the interaction of ``
 Boxes do have some performance cost, so how can they be avoided? There are many cases where boxes are not necessary:
 
 1. When the term is linear or affine and does not need to duplicate anything.
-2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992a`)
+2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`)
 3. Inlining, when the box is opened and emptied.
 4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
 
 Implementation
 ==============
 
-Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for ``case``\ s, joining some eraser nodes. But what about duplication?
+Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for ``case``, joining some eraser nodes. But what about duplication?
 
 Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of "environments" or "scopes". In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope ``0`` and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter's outer scope.
 
