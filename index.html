@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,14 +31,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Introduction" href="Introduction.html" /> 
@@ -49,7 +52,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> Stroscot
+            <a href="#" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -72,6 +75,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,18 +86,23 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -132,7 +141,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
       <li>The Stroscot Programming Language</li>
     
@@ -162,6 +171,7 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Introduction.html#inspiring-projects">Inspiring projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Introduction.html#goals">Goals</a></li>
 </ul>
@@ -174,6 +184,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Arguments.html#concatenative-arguments">Concatenative arguments</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Optimal-Reduction.html#implementation">Implementation</a></li>
@@ -197,10 +208,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Types.html#condition-checking">Condition checking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#terminology">Terminology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#type-declaration-syntax">Type declaration syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html#concrete-types">Concrete types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#scoping-and-qualification">Scoping and qualification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#primitives-types">Primitives types</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#core">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#pipeline">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html#notes">Notes</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="FAQ.html#does-it-run">Does it run?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="FAQ.html#what-language-is-the-compiler-written-in">What language is the compiler written in?</a></li>
@@ -208,9 +229,13 @@
 <li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-do-i-contribute">How do I contribute?</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 </div>
-<p>Github repository: <a class="reference external" href="https://github.com/Mathnerd314/stroscot">https://github.com/Mathnerd314/stroscot</a></p>
+<ul class="simple">
+<li><p>Github repository: <a class="reference external" href="https://github.com/Mathnerd314/stroscot">https://github.com/Mathnerd314/stroscot</a></p></li>
+<li><p>Discord: <a class="reference external" href="https://discord.gg/rQvE5Yj">https://discord.gg/rQvE5Yj</a></p></li>
+</ul>
 </div>
 
 
@@ -231,11 +256,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -246,7 +279,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

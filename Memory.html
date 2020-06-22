@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,17 +31,14 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="next" title="Compiler design" href="Compiler.html" />
     <link rel="prev" title="Types" href="Types.html" /> 
 </head>
 
@@ -50,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,18 +87,23 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +142,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Memory management</li>
     
@@ -162,11 +171,11 @@
 <ul class="simple">
 <li><p>Malloc/free calls to an allocator</p></li>
 <li><p>Automatic tracing garbage collection</p></li>
-<li><p>Mixtures of the above</p></li>
+<li><p>Mixtures or imitations of the above</p></li>
 </ul>
-<p>Rust has improved the malloc/free model, but it has not significantly reduced the need to think about when memory is allocated or freed. There is still a lot of cloning and owning. Code frequently switches to the Rc type, which besides cycles has the semantics of GC.</p>
-<p>As far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime. Work has focused on static analysis and reducing what the garbage collector has to track.</p>
-<p>For a compiler, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
+<p>Rust has improved the malloc/free model, but it has not significantly reduced the need to think about when memory is allocated or freed. There is still a lot of cloning and owning. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does more intrusive scanning. As far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime.</p>
+<p>The interesting area of research is static analysis, reducing what a garbage collector has to track and automating the tedious aspects of malloc/free. Implementing some form of compile-time reference counting or “automatic memory management” with fallback to runtime stuff, seems like a win. <a class="reference external" href="https://github.com/u2zv1wx/neut">Neut</a> is an interesting start in this direction. The goal for Stroscot is automatic insertion of <code class="docutils literal notranslate"><span class="pre">free()</span></code> where needed.</p>
+<p>For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
 <p>Overall I don’t see much of a challenge, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
 </div>
 
@@ -178,7 +187,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Compiler.html" class="btn btn-neutral float-right" title="Compiler design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -190,11 +199,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -205,7 +222,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

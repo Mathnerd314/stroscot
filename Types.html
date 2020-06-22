@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,14 +31,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Memory management" href="Memory.html" />
@@ -50,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,6 +87,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -93,16 +98,21 @@
 <li class="toctree-l2"><a class="reference internal" href="#condition-checking">Condition checking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#type-declaration-syntax">Type declaration syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#concrete-types">Concrete types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scoping-and-qualification">Scoping and qualification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#primitives-types">Primitives types</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -141,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Types</li>
     
@@ -231,10 +241,13 @@ type system, often not even paying attention to the work of others. As far as do
 <p>By comparison, the other syntaxes don’t make sense. If I had <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>, I’m not going to talk about “mut a” for the rest of the program, I’m going to talk about <code class="docutils literal notranslate"><span class="pre">a</span></code>. And what happens if I write <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code>? Terrible things. Similarly <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code> makes no sense. Whereas <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">mut</span></code> actually makes some sense if I decide that 3 characters is too long and want to abbreviate <code class="docutils literal notranslate"><span class="pre">mut</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>, or if I’m doing higher-order functional programming that creates references. Similarly <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">1</span></code> is quite sensible, as an anonymous reference cell.</p>
 <p>So getting back to our syntax, <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">=</span> <span class="pre">type</span> <span class="pre">value</span></code>. It should be clear that we have two types of assignments. The first, with the type included, creates/allocates the stuff we need to access it, and then <code class="docutils literal notranslate"><span class="pre">name</span></code> is bound to a memory address.</p>
 <p>When we assign again, it will look like <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">:=</span> <span class="pre">value</span></code>, without a type. This has a completely different semantics: we take the thing on the left, the l-value, and we access the memory that it refers to, and we change the memory. Since the semantics is so different it uses a different syntax.</p>
-<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs/macros which we’ll get to later); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
 </div>
-<div class="section" id="concrete-types">
-<h2>Concrete types<a class="headerlink" href="#concrete-types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="scoping-and-qualification">
+<h2>Scoping and qualification<a class="headerlink" href="#scoping-and-qualification" title="Permalink to this headline">¶</a></h2>
+<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
+</div>
+<div class="section" id="primitives-types">
+<h2>Primitives types<a class="headerlink" href="#primitives-types" title="Permalink to this headline">¶</a></h2>
 <p>Primitive types include bitstring patterns <code class="docutils literal notranslate"><span class="pre">bits</span></code> and pointers <code class="docutils literal notranslate"><span class="pre">ptr</span></code>. Can’t go wrong
 there.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bits</span> <span class="mh">0xDEADBEEF</span>
@@ -243,7 +256,7 @@ there.</p>
 </div>
 <p>The default arithmetic type is a <code class="docutils literal notranslate"><span class="pre">number</span></code> type.
 This is arbitrary-precision magic which can store just about anything.
-You can use <code class="docutils literal notranslate"><span class="pre">integer</span></code> for a strict integer, <code class="docutils literal notranslate"><span class="pre">decimal</span></code> for banking, and
+For more specific types you can use <code class="docutils literal notranslate"><span class="pre">integer</span></code> for a strict integer, <code class="docutils literal notranslate"><span class="pre">decimal</span></code> for banking, and
 <code class="docutils literal notranslate"><span class="pre">float</span></code> for any IEEE 754 thing. For <code class="docutils literal notranslate"><span class="pre">integer</span></code> the <code class="docutils literal notranslate"><span class="pre">size</span></code> argument restricts the size and <code class="docutils literal notranslate"><span class="pre">sign</span></code> restricts the sign. Those aren’t the full constructors, it’ll probably have a range too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>number 100!
 integer 123
@@ -283,11 +296,19 @@ u8 129
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -298,7 +319,6 @@ u8 129
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

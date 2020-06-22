@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,18 +31,15 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Optimal reduction" href="Optimal-Reduction.html" />
-    <link rel="prev" title="Argument passing" href="Arguments.html" /> 
+    <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,18 +87,23 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -133,7 +142,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Delimited continuations</li>
     
@@ -174,9 +183,9 @@ up to but not including the prompt. This <em>captures</em> a delimited
 continuation, analogous to how call/cc captures an undelimited
 continuation. k can then be applied like any other function.</p></li>
 </ul>
-<p>This is based on “A Framework for Monadic Delimited Continuations” except
+<p>This is based on <a class="bibtex reference internal" href="zzreferences.html#dyvbigmonadicframeworkdelimited2007" id="id1">[DPJS07]</a> except
 that there is no <strong>pushSubCont</strong> because applying a continuation is automatic.</p>
-<p>An example is the following:</p>
+<p>An example from the paper is the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">newPrompt</span><span class="p">;</span>
 <span class="mi">2</span> <span class="o">+</span> <span class="n">pushPrompt</span> <span class="n">p</span>
       <span class="k">if</span> <span class="n">withSubCont</span> <span class="n">p</span>
@@ -209,7 +218,7 @@ the pushPrompt is thus 7, and we return to the addition of 2, giving us
         <a href="Optimal-Reduction.html" class="btn btn-neutral float-right" title="Optimal reduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Arguments.html" class="btn btn-neutral float-left" title="Argument passing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -218,11 +227,19 @@ the pushPrompt is thus 7, and we return to the addition of 2, giving us
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -233,7 +250,6 @@ the pushPrompt is thus 7, and we return to the addition of 2, giving us
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

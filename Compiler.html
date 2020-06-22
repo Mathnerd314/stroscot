@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Compiler design &mdash; Stroscot  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Build system" href="BuildSystem.html" />
+    <link rel="prev" title="Memory management" href="Memory.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Compiler design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Stroscot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Compiler design</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Compiler.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="compiler-design">
+<h1>Compiler design<a class="headerlink" href="#compiler-design" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="core">
+<h2>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot takes after Haskell in that all of the language is compiled to a small “core” language. Considerations:</p>
+<ul class="simple">
+<li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id1">[DMAPJ16]</a>, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.</p></li>
+<li><p>Based on optimal reduction, mostly <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id2">[Gue96]</a>, we use linear sequents, with operators for contraction (duplication) and weakening (erasing).</p></li>
+<li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#levyjumbolcalculus2006" id="id3">[Lev06]</a>, we combine all of the different linear logic operators into two jumbo operators: plus-of-times <span class="math notranslate nohighlight">\(\Sigma\)</span> and with-of-lollipop <span class="math notranslate nohighlight">\(\Pi\)</span> (the extended lollipop includes par as well).</p></li>
+</ul>
+<p>We start with the generalized <span class="math notranslate nohighlight">\(\Pi\)</span> rule, this is similar to Levy’s rule except it allows multiple conclusions.</p>
+<div class="math notranslate nohighlight">
+\[\newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#2~~ }{\displaystyle ~~#3~~ } &amp; (#1)}
+\begin{array}{clcl}
+\rule{\Pi_R}{
+\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }{
+\Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
+&amp;
+\rule{\Pi_{i} {}_{L}}{
+\overrightarrow{ \Gamma_j \vdash A_{i j}, \Delta_j } \quad \overrightarrow{ \Theta_k, B_{i k} \vdash \Lambda_k } }{
+\overrightarrow{\Gamma}, \vec \Theta, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \overrightarrow{\Delta}, \vec\Lambda}
+\end{array}\]</div>
+<p>Next we have the generalized <span class="math notranslate nohighlight">\(\Sigma\)</span> rule. This is based on the above <span class="math notranslate nohighlight">\(\Pi\)</span> rule and allows premises as well. Following <a class="bibtex reference internal" href="zzreferences.html#wadlercallbyvaluedualcallbyname2003" id="id4">[Wad03]</a> <a class="bibtex reference internal" href="zzreferences.html#crolardformulaeastypesinterpretationsubtractive2004" id="id5">[Cro04]</a> the dual of implication is called “subtraction” or “difference” and is denoted <span class="math notranslate nohighlight">\(-\)</span>. For normal ADTs, the RHS of the difference is empty, i.e. it looks like <span class="math notranslate nohighlight">\(A - []\)</span>. Ideally the difference operator allows creating zippers, or maybe it is useless.</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{clcl}
+\rule{\Sigma_{i} {}_{R}}{
+    \overrightarrow{ \Gamma_k, B_{i k} \vdash \Delta_k } \quad \overrightarrow{ \Theta_j \vdash A_{i j}, \Lambda_j } }{
+\overrightarrow{\Gamma}, \overrightarrow{\Theta} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \overrightarrow{\Delta}, \overrightarrow{\Lambda}}
+&amp;
+\rule{\Sigma_L}{
+\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }{
+\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
+\end{array}\]</div>
+<p>These have all the power of ADTs and normal functional programming, for example some Peano arithmetic:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="n">Nat</span> <span class="o">=</span> <span class="n">Z</span> <span class="o">|</span> <span class="n">S</span> <span class="o">*</span>
+<span class="n">module</span> <span class="p">{</span>
+  <span class="mi">2</span> <span class="o">=</span> <span class="n">S</span> <span class="p">(</span><span class="n">S</span> <span class="n">Z</span><span class="p">)</span>
+  <span class="mi">3</span> <span class="o">=</span> <span class="n">S</span> <span class="mi">2</span>
+  <span class="n">plus</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">cut</span> <span class="n">a</span> <span class="o">|</span> <span class="n">case</span>
+    <span class="n">Z</span> <span class="o">-&gt;</span> <span class="n">ax</span> <span class="n">b</span>
+    <span class="n">S</span> <span class="n">s</span> <span class="o">-&gt;</span> <span class="n">S</span> <span class="p">(</span><span class="n">cut</span> <span class="n">s</span> <span class="n">b</span> <span class="o">|</span> <span class="n">plus</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add token start/end and other debugging information.</p>
+<p>Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.</p>
+<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <a class="bibtex reference internal" href="zzreferences.html#downenmakingfastercurry2019" id="id6">[DSAPJ19]</a>. Initially all user code starts out using one-argument functions.</p>
+<p>Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019-2020 Mathnerd314
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

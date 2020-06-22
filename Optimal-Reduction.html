@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,14 +31,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Syntax" href="Syntax.html" />
@@ -50,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,6 +87,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Optimal reduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a><ul>
@@ -95,12 +100,16 @@
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -139,7 +148,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Optimal reduction</li>
     
@@ -164,7 +173,7 @@
             
   <div class="section" id="optimal-reduction">
 <h1>Optimal reduction<a class="headerlink" href="#optimal-reduction" title="Permalink to this headline">¶</a></h1>
-<p>In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although often more efficient than call-by-value, still duplicates work. An example is</p>
+<p>In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>import System.IO.Unsafe
 i = \w -&gt; (unsafePerformIO (print &quot;i&quot;)) `seq` w
 z = 2 :: Integer
@@ -173,12 +182,12 @@ f = \x -&gt; (x z) + (x t)
 main = print (f (\y -&gt; i y) :: Integer)
 </pre></div>
 </div>
-<p>This produces <code class="docutils literal notranslate"><span class="pre">5</span></code> in Haskell. However, without GHC’s optimizations, <code class="docutils literal notranslate"><span class="pre">&quot;i&quot;</span></code> is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a “hoisting” transformation that makes <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(unsafePerformIO</span> <span class="pre">(print</span> <span class="pre">&quot;i&quot;))</span> <span class="pre">`seq`</span> <span class="pre">\w</span> <span class="pre">-&gt;</span> <span class="pre">w</span></code>.</p>
-<p>Although GHC will do this with <code class="docutils literal notranslate"><span class="pre">-O</span></code>, it does it messily; the interaction of <code class="docutils literal notranslate"><span class="pre">seq</span></code> and inlining is the source of <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/issues/2273">numerous bugs</a>. In contrast, optimal reduction is based on a principled approach to sharing. The graph structure used corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for <code class="docutils literal notranslate"><span class="pre">seq</span></code>; instead there are boxes and duplicators.</p>
+<p>This produces <code class="docutils literal notranslate"><span class="pre">5</span></code> in Haskell. However, without GHC’s optimizations, <code class="docutils literal notranslate"><span class="pre">&quot;i&quot;</span></code> is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a “hoisting” transformation that makes <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(unsafePerformIO</span> <span class="pre">(print</span> <span class="pre">&quot;i&quot;))</span> <span class="pre">`seq`</span> <span class="pre">\w</span> <span class="pre">-&gt;</span> <span class="pre">w</span></code>, but more complex cases have higher-level sharing that no code transformation can mimic.</p>
+<p>Although GHC will do this with <code class="docutils literal notranslate"><span class="pre">-O</span></code>, it does it messily; the interaction of <code class="docutils literal notranslate"><span class="pre">seq</span></code> and inlining is the source of <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/issues/2273">numerous bugs</a>. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for <code class="docutils literal notranslate"><span class="pre">seq</span></code>; instead there are boxes and duplicators.</p>
 <p>Boxes do have some performance cost, so how can they be avoided? There are many cases where boxes are not necessary:</p>
 <ol class="arabic simple">
 <li><p>When the term is linear or affine and does not need to duplicate anything.</p></li>
-<li><p>When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per <a class="reference external" href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.43.8416">Filinski</a>)</p></li>
+<li><p>When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per <span class="bibtex" id="id1">[filinskiLinearContinuations1992a]</span>)</p></li>
 <li><p>Inlining, when the box is opened and emptied.</p></li>
 <li><p>More complex cases enforced by a typing system, such as Elementary Affine Logic.</p></li>
 </ol>
@@ -217,11 +226,19 @@ main = print (f (\y -&gt; i y) :: Integer)
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -232,7 +249,6 @@ main = print (f (\y -&gt; i y) :: Integer)
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

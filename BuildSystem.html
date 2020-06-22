@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Build system &mdash; Stroscot  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="Compiler design" href="Compiler.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Build system</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Stroscot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Build system</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/BuildSystem.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="build-system">
+<h1>Build system<a class="headerlink" href="#build-system" title="Permalink to this headline">¶</a></h1>
+<p>Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as typechecked/optimized functions can be stored efficiently and rebuilt only when needed. Also, it allows the compiler’s include-following mechanism to tightly integrate with the build system, so that generated files can be generated before they are used.</p>
+<div class="graphviz"><img src="_images/graphviz-1a509ab03a6c9026e34ddceebc0e71426e17cdab.png" alt="digraph foo {
+    rankdir=LR;
+    subgraph cluster_0 {
+        style=filled;
+        color=lightgrey;
+        node [style=filled,color=white];
+        a0 -&gt; a1 -&gt; a2;
+        a0, a1, a2 [shape=&quot;circle&quot;];
+        a0 [label=&quot;require&quot;];
+        a1 [label=&quot;cmd&quot;];
+        a2 [label=&quot;provide&quot;];
+        label = &quot;BuildModule C.java&quot;;
+    }
+    &quot;Javac config&quot; -&gt; a0
+    &quot;C.java&quot; -&gt; a0
+    a2 -&gt; &quot;C.class&quot;
+    a2 -&gt; &quot;C$1.class&quot;
+    a2 -&gt; &quot;C$Foo.class&quot;
+}" class="graphviz" /></div>
+<p>The pipeline of a build system is fairly straightforward:</p>
+<ul>
+<li><p>We start with a changelist of “dirty” keys; this is usually a list of local files, but can also include volatile information such as version numbers or FTP server listings or finer keys such as individual AST nodes.</p></li>
+<li><p>Next we propagate dirtiness up the pre-built task/key graph; this allows us to identify tasks as being in one of these states:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Present: built, not dirty</p></li>
+<li><p>Recheck: a subtask / subkey is dirty, might have to rebuild again</p></li>
+<li><p>Missing: never built, needs to be built</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Next we go down from the top-level task. We want a suspending build system <a class="bibtex reference internal" href="zzreferences.html#mokhovbuildsystemscarte2020" id="id1">[MMPJ20]</a>. So there must be some way to suspend the current task when it calls a sub-task, probably just continuations like how Shake does it.</p></li>
+<li><p>When a task is called, we first check its state to determine whether it needs to be re-run. Missing tasks are run immediately. Present tasks can be skipped immediately. Otherwise we run through the serialized dependency list and re-check the keys / subtasks in order (and in parallel if the subtasks are parallel).</p></li>
+<li><p>Before re-running a task, we delete all its generated keys (outputs). After running a task we store its (keyed) outputs with either verifying or constructive traces.</p></li>
+<li><p>To prune the store, we can do as above and also load all the subtasks of present tasks. Then anything not loaded is not needed and can be pruned, although if there are multiple configurations etc. then this is a bad idea.</p></li>
+</ul>
+<div class="section" id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
+<p>Unlike Shake, tasks are not keys; it is a two-level graph like Pluto. Task identifiers are serializable as well, but they are in a different namespace. The store maintains dependency lists of key and task identifiers for each task, but tasks do not store versions the way keys do.</p>
+<p>For the task graph, we have some nontrivial requirements for soundness, similar to <a class="bibtex reference internal" href="zzreferences.html#erdwegsoundoptimalincremental2015" id="id2">[ELW15]</a>:</p>
+<ul class="simple">
+<li><p>The graph is a DAG.</p></li>
+<li><p>There can be at most one task providing a given key.</p></li>
+<li><p>If a task depends on a generated key, the task providing the key must have been run first.</p></li>
+</ul>
+<p>An easy way to ensure these last two is to construct a function mapping from generated files (keys) to tasks, and then have a library function for requiring keys which uses the map to require the task and then the key. Unfortunately in a dynamic build such a map is not always available.</p>
+<p>Giving tasks versions is a good idea; this amounts to adding a special version key as a dependency.</p>
+<p>Without an initial list of changed keys, we will have to walk the whole graph. This can still be done efficiently by batching filesystem reads. A bigger question is whether up-propagation of dirtyiness can be avoided. My intuition is that most dependency graphs are tree-like and so going up is roughly <span class="math notranslate nohighlight">\(\log(n)\)</span>. There are some dependencies (e.g. small common functions) which have a huge reverse dependency list, but changing those requires a full rebuild anyway so the overhead is dwarfed.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Compiler.html" class="btn btn-neutral float-left" title="Compiler design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2019-2020 Mathnerd314
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

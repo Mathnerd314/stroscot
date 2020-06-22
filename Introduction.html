@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,14 +31,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Argument passing" href="Arguments.html" />
@@ -50,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -73,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,6 +86,7 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inspiring-projects">Inspiring projects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#goals">Goals</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-ultimate">The ultimate</a></li>
@@ -92,18 +97,23 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -142,7 +152,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Introduction</li>
     
@@ -167,24 +177,36 @@
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
 <p>Why another programming language, you may ask? Why does a painter paint?
-Why does an artist draw? When there is beauty to be found in programming
-languages, it is our duty to discover it and spread it far and wide.</p>
-<p>In Stroscot programs are freed from the shackles of languages past and
-idealized to their purest form.</p>
+When there is beauty to be found in programming
+languages, it is our duty to discover it and spread it far and wide. To paraphrase <a class="reference external" href="https://xkcd.com/927/">XKCD</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>How programming languages proliferate
+-------------------------------------
+SITUATION: There are 14 competing programming languages.
+Geek: 14?! Ridiculous! We need to develop one universal programming language
+  that covers everyone&#39;s use cases.
+
+Soon: There are 15 competing programming languages.
+</pre></div>
+</div>
+<p>Stroscot aims to be that universal language. The shackles of languages past are no more, and
+programs are freed to be idealized to their purest form.</p>
+</div>
 <div class="section" id="inspiring-projects">
 <span id="id1"></span><h2>Inspiring projects<a class="headerlink" href="#inspiring-projects" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/cheery/lever/">Lever</a></p></li>
 <li><p><a class="reference external" href="https://github.com/ghc/ghc/">GHC</a></p></li>
 <li><p><a class="reference external" href="https://github.com/ziglang/zig/">Zig</a></p></li>
-<li><p><a class="reference external" href="https://github.com/manuel/wat-js">Wat</a></p></li>
-<li><p><a class="reference external" href="https://github.com/briantrice/slate-language">Slate</a></p></li>
 <li><p><a class="reference external" href="https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md">Jai</a></p></li>
 <li><p><a class="reference external" href="https://pinafore.info/">Pinafore</a></p></li>
 <li><p><a class="reference external" href="http://github.com/codedot/lambda">Macro Lambda Calculus</a></p></li>
 <li><p><a class="reference external" href="https://github.com/JoshuaGrams/pep">A Pint-sized Earley Parser</a></p></li>
+<li><p><a class="reference external" href="https://github.com/manuel/wat-js">Wat</a></p></li>
 <li><p><a class="reference external" href="https://github.com/vito/atomo">Atomo</a> / <a class="reference external" href="https://github.com/vito/atomy">Atomy</a></p></li>
+<li><p><a class="reference external" href="https://github.com/briantrice/slate-language">Slate</a></p></li>
 </ul>
 </div>
 <div class="section" id="goals">
@@ -235,11 +257,19 @@ idealized to their purest form.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -250,7 +280,6 @@ idealized to their purest form.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

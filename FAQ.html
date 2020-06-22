@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -25,17 +31,15 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Memory management" href="Memory.html" /> 
+    <link rel="next" title="References" href="zzreferences.html" />
+    <link rel="prev" title="Build system" href="BuildSystem.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> Stroscot
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
           
 
           
@@ -72,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,12 +87,15 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAQ</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#does-it-run">Does it run?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-language-is-the-compiler-written-in">What language is the compiler written in?</a></li>
@@ -95,11 +103,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#how-do-i-contribute">How do I contribute?</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -138,7 +148,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>FAQ</li>
     
@@ -169,17 +179,24 @@
 </div>
 <div class="section" id="what-language-is-the-compiler-written-in">
 <h2>What language is the compiler written in?<a class="headerlink" href="#what-language-is-the-compiler-written-in" title="Permalink to this headline">¶</a></h2>
-<p>A near-term goal is to write Stroscot in itself. However, it has to generate code first. I picked JavaScript to start for a number of reasons:
-* It’s the fastest interpreted language available
-* It has reasonably up-to-date syntax and features thanks to TC39
-* A lot of the <a class="reference internal" href="Introduction.html#inspiring-projects"><span class="std std-ref">inspiring projects</span></a> were written in JS
-* LLVM compiles to JS and there are LLVM bindings available for JS
-* TypeScript doesn’t add much besides compilation overhead</p>
+<p>A near-term goal is to write Stroscot in itself. However, it has to generate code first. I picked JavaScript to start for a number of reasons:</p>
+<ul class="simple">
+<li><p>It’s the fastest interpreted language available</p></li>
+<li><p>It has reasonably up-to-date syntax and features thanks to TC39</p></li>
+<li><p>A lot of the <a class="reference internal" href="Introduction.html#inspiring-projects"><span class="std std-ref">inspiring projects</span></a> were written in JS</p></li>
+<li><p>LLVM compiles to JS and there are LLVM bindings available for JS</p></li>
+<li><p>TypeScript doesn’t add much besides compilation overhead</p></li>
+</ul>
+<p>Since then, development has shifted to Haskell, for other reasons:</p>
+<ul class="simple">
+<li><p>The compiler/type system prevents a lot of common errors (particularly typos, which JS doesn’t detect until late)</p></li>
+<li><p>A lot of other type-system-heavy projects are written in Haskell</p></li>
+</ul>
 </div>
 <div class="section" id="where-can-i-ask-questions">
 <h2>Where can I ask questions?<a class="headerlink" href="#where-can-i-ask-questions" title="Permalink to this headline">¶</a></h2>
 <p>Our <a class="reference external" href="https://www.reddit.com/r/stroscot">reddit community</a> (checked
-monthly) or in the #stroscot channel on the <a class="reference external" href="https://discord.gg/4Kjt3ZE">/r/ProgrammingLanguages
+monthly) or on the <a class="reference external" href="https://discord.gg/rQvE5Yj">Stroscot
 Discord server</a>.</p>
 </div>
 <div class="section" id="how-do-i-contribute">
@@ -197,8 +214,10 @@ available for anyone with 2 or more commits to the project.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="zzreferences.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="BuildSystem.html" class="btn btn-neutral float-left" title="Build system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -207,11 +226,19 @@ available for anyone with 2 or more commits to the project.</p>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2019-2020 Mathnerd314
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -222,7 +249,6 @@ available for anyone with 2 or more commits to the project.</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
