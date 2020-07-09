@@ -319,7 +319,7 @@ for change in observed_changes:
 <p>A simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; this ignores flakiness. What we want is to maximize the information entropy gained from a run <span class="math notranslate nohighlight">\(X\)</span>, i.e.</p>
 <div class="math notranslate nohighlight">
 \[H(X) = - P(x_s) \log(P(x_s)) - P(x_f) \log(P(x_f))\]</div>
-<p>where <cite>x_s = 1 - x_f</cite> is the probability that the run will succeed.</p>
+<p>where <span class="math notranslate nohighlight">\(x_s = 1 - x_f\)</span> is the probability that the run will succeed.</p>
 <p>There is also the issue of spacing out parallel builds to do trisection / general <span class="math notranslate nohighlight">\(n\)</span>-section. Speculative building will end up doing bisection of bisection (i.e. quadrisection and general <span class="math notranslate nohighlight">\(2^n\)</span>-section) in the case of little information, which is probably good enough.</p>
 </div>
 </div>
