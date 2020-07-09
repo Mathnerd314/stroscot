@@ -178,7 +178,7 @@
 <h1>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h1>
 <p>Types are hard. Academics have spent decades in search of the perfect
 type system, often not even paying attention to the work of others. As far as doing something type-related I think the only solution is to hack until it works. I’ve read a bunch of type papers and they all end up leaving it up to you to make it work. If they do present an algorithm it’s very simple and then all the rest of the paper is mostly about proving the algorithm correct and complete rather than on the implementation.</p>
-<p>The academic approach to types can be summed up in this quote (from <a class="reference external" href="https://www.irif.fr/~gc/papers/covcon-again.pdf">here</a>):</p>
+<p>The academic approach to types can be summed up in this quote from <a class="bibtex reference internal" href="zzreferences.html#castagnacovariancecontrovariancefresh2020" id="id1">[Cas20]</a>:</p>
 <blockquote>
 <div><p>You should fit programming languages to types and not the other way round, insofar as a type theory should be developed pretty much independently of the language (but, of course, not of the problem) it is to be applied to. It is a language design problem to ensure that whenever we have a function of that type, then the code executed for each combination of the types of the arguments is not only unambiguously defined, but also easily predictable by the programmer. In order to solve type-related problems, you must first conceive the types and only after you can think of how to design a language that best fits these types.</p>
 </div></blockquote>
@@ -190,12 +190,12 @@ type system, often not even paying attention to the work of others. As far as do
 </div>
 <div class="section" id="type-synthesis">
 <h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this headline">¶</a></h2>
-<p>If types are hard, type synthesis is harder. There’s the <a class="reference external" href="https://github.com/stedolan/fyp">sub</a><a class="reference external" href="https://github.com/stedolan/mlsub">typing</a> stuff which actually has some pretty powerful type synthesis, better than Hindley-Milner. But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
-<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures. However, <a class="reference external" href="https://www.cl.cam.ac.uk/~nk480/bidir-survey.pdf">bidirectional type checking</a> should be able to minimize the amount of signatures required.</p>
+<p>If types are hard, type synthesis is harder. There’s the <a class="reference external" href="https://github.com/stedolan/fyp">sub</a><a class="reference external" href="https://github.com/stedolan/mlsub">typing</a> stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
+<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking <a class="bibtex reference internal" href="zzreferences.html#dunfieldbidirectionaltyping2019" id="id2">[DK19]</a> should be able to minimize the amount of signatures required.</p>
 </div>
 <div class="section" id="condition-checking">
 <h2>Condition checking<a class="headerlink" href="#condition-checking" title="Permalink to this headline">¶</a></h2>
-<p>There’s some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> I found on termination checking by Microsoft, called <a class="reference external" href="https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm">TERMINATOR</a>. There’s an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and <a class="reference external" href="https://arxiv.org/abs/1907.10096">resource use</a> and things of that nature. I’m not sure how to integrate it into a type system but we’ll figure it out.</p>
+<p>There’s some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> I found on termination checking by Microsoft, called <a class="reference external" href="https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm">TERMINATOR</a>. There’s an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and resource use <a class="bibtex reference internal" href="zzreferences.html#albertresourceanalysisdriven2019" id="id3">[ABB+19]</a> and things of that nature. I’m not sure how to integrate it into a type system but we’ll figure it out.</p>
 </div>
 <div class="section" id="terminology">
 <h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
@@ -213,9 +213,9 @@ type system, often not even paying attention to the work of others. As far as do
 </dd>
 <dt>l-value</dt><dd><p>A variable representing a memory cell. The difference is some people don’t consider <code class="docutils literal notranslate"><span class="pre">arr[i]</span></code> to be a variable, while they’ll all agree it’s an l-value.</p>
 </dd>
-<dt>r-value</dt><dd><p>A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address, to get an x-value. Segfaults galore. ¯\_(ツ)_/¯</p>
+<dt>r-value</dt><dd><p>A value without a reference, basically an anonymous temporary value. Except in C++11 (but not Stroscot) you can still bind its memory address, to get an x-value. Segfaults galore. ¯\_(ツ)_/¯</p>
 </dd>
-<dt>subtyping</dt><dd><p><code class="docutils literal notranslate"><span class="pre">A</span></code> is a subtype of <code class="docutils literal notranslate"><span class="pre">B</span></code> if every element of <code class="docutils literal notranslate"><span class="pre">A</span></code> is also in <code class="docutils literal notranslate"><span class="pre">B</span></code>.</p>
+<dt>subtyping</dt><dd><p><code class="docutils literal notranslate"><span class="pre">A</span></code> is a subtype of <code class="docutils literal notranslate"><span class="pre">B</span></code> if every element of <code class="docutils literal notranslate"><span class="pre">A</span></code> is also in <code class="docutils literal notranslate"><span class="pre">B</span></code>. Said another way, there are no elements that are in <code class="docutils literal notranslate"><span class="pre">A</span></code> but not in <code class="docutils literal notranslate"><span class="pre">B</span></code>.</p>
 </dd>
 <dt>inheritance</dt><dd><p>Record subtyping, where for example <code class="docutils literal notranslate"><span class="pre">{a,b}</span></code> is considered a subtype of <code class="docutils literal notranslate"><span class="pre">{a}</span></code>.</p>
 </dd>
@@ -244,7 +244,7 @@ type system, often not even paying attention to the work of others. As far as do
 </div>
 <div class="section" id="scoping-and-qualification">
 <h2>Scoping and qualification<a class="headerlink" href="#scoping-and-qualification" title="Permalink to this headline">¶</a></h2>
-<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
+<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides <a class="reference internal" href="Fexprs.html#fexprs"><span class="std std-ref">fexprs</span></a>); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
 </div>
 <div class="section" id="primitives-types">
 <h2>Primitives types<a class="headerlink" href="#primitives-types" title="Permalink to this headline">¶</a></h2>

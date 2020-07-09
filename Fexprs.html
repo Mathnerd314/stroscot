@@ -166,7 +166,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="metaprogramming">
-<h1>Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permalink to this headline">¶</a></h1>
+<span id="fexprs"></span><h1>Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permalink to this headline">¶</a></h1>
 <p>In Stroscot, as in <a class="reference external" href="http://web.cs.wpi.edu/~jshutt/kernel.html">Kernel</a>, fexprs are functions that take code AST’s and a lexical environment instead of evaluated values. So when you write <cite>f a b</cite>, and <cite>f</cite> is an operative, then <cite>f</cite> has a type like <cite>f : Env -&gt; Ast -&gt; …</cite>, and it receives an opaque env that might or might not have bindings to <cite>a</cite> and <cite>b</cite> and an AST fragment like <cite>App (Sym ‘a’) (Sym ‘b’)</cite>. Then <cite>f</cite> can do arbitrary operations with those, with the full power of the programming language, and in particular <cite>f</cite> can <cite>eval</cite> AST fragments with the env it’s given (or with envs from elsewhere).</p>
 <p>And since I didn’t make it clear, the main power fexprs give over macros is that there’s no phase distinction. A macro is like an fexpr that builds up a single AST and calls eval at the end. But fexprs can call eval multiple times, and these can depend on the results of previous evaluations, so for example you can lookup a variable name stored in an argument and evaluate that name.</p>
 </div>
