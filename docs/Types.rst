@@ -4,7 +4,7 @@ Types
 Types are hard. Academics have spent decades in search of the perfect
 type system, often not even paying attention to the work of others. As far as doing something type-related I think the only solution is to hack until it works. I’ve read a bunch of type papers and they all end up leaving it up to you to make it work. If they do present an algorithm it’s very simple and then all the rest of the paper is mostly about proving the algorithm correct and complete rather than on the implementation.
 
-The academic approach to types can be summed up in this quote (from `here <https://www.irif.fr/~gc/papers/covcon-again.pdf>`__):
+The academic approach to types can be summed up in this quote from :cite:`castagnaCovarianceControvarianceFresh2020`:
 
   You should fit programming languages to types and not the other way round, insofar as a type theory should be developed pretty much independently of the language (but, of course, not of the problem) it is to be applied to. It is a language design problem to ensure that whenever we have a function of that type, then the code executed for each combination of the types of the arguments is not only unambiguously defined, but also easily predictable by the programmer. In order to solve type-related problems, you must first conceive the types and only after you can think of how to design a language that best fits these types.
 
@@ -20,13 +20,13 @@ The other kind of types are nominal types, which are what you often see when peo
 Type synthesis
 ==============
 
-If types are hard, type synthesis is harder. There's the `sub <https://github.com/stedolan/fyp>`__\ `typing <https://github.com/stedolan/mlsub>`__ stuff which actually has some pretty powerful type synthesis, better than Hindley-Milner. But `dependent <https://github.com/UlfNorell/insane/>`__
-`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures. However, `bidirectional type checking <https://www.cl.cam.ac.uk/~nk480/bidir-survey.pdf>`__ should be able to minimize the amount of signatures required.
+If types are hard, type synthesis is harder. There's the `sub <https://github.com/stedolan/fyp>`__\ `typing <https://github.com/stedolan/mlsub>`__ stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But `dependent <https://github.com/UlfNorell/insane/>`__
+`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking :cite:`dunfieldBidirectionalTyping2019` should be able to minimize the amount of signatures required.
 
 Condition checking
 ==================
 
-There's some interesting `work <http://mmjb.github.io/T2/>`__ I found on termination checking by Microsoft, called `TERMINATOR <https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm>`__. There's an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and `resource use <https://arxiv.org/abs/1907.10096>`__ and things of that nature. I'm not sure how to integrate it into a type system but we'll figure it out.
+There's some interesting `work <http://mmjb.github.io/T2/>`__ I found on termination checking by Microsoft, called `TERMINATOR <https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm>`__. There's an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and resource use :cite:`albertResourceAnalysisDriven2019` and things of that nature. I'm not sure how to integrate it into a type system but we'll figure it out.
 
 Terminology
 ===========
@@ -52,10 +52,10 @@ l-value
    A variable representing a memory cell. The difference is some people don't consider ``arr[i]`` to be a variable, while they'll all agree it's an l-value.
 
 r-value
-   A value without a reference, basically an anonymous temporary value. Except in C++11 you can still bind its memory address, to get an x-value. Segfaults galore. ¯\\_(ツ)_/¯
+   A value without a reference, basically an anonymous temporary value. Except in C++11 (but not Stroscot) you can still bind its memory address, to get an x-value. Segfaults galore. ¯\\_(ツ)_/¯
 
 subtyping
-    ``A`` is a subtype of ``B`` if every element of ``A`` is also in ``B``.
+    ``A`` is a subtype of ``B`` if every element of ``A`` is also in ``B``. Said another way, there are no elements that are in ``A`` but not in ``B``.
 
 inheritance
     Record subtyping, where for example ``{a,b}`` is considered a subtype of ``{a}``.
@@ -95,7 +95,7 @@ When we assign again, it will look like ``name := value``, without a type. This 
 Scoping and qualification
 =========================
 
-There is no kind of syntax or semantics for changing or redefining identifiers (besides fexprs); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
+There is no kind of syntax or semantics for changing or redefining identifiers (besides :ref:`fexprs <fexprs>`); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
 
 Primitives types
 ================

@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, KindSignatures, UnicodeSyntax, RecordWildCards,
+{-# LANGUAGE DataKinds, KindSignatures, UnicodeSyntax, RecordWildCards, NamedFieldPuns,
 DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 
 import Data.IORefStable
@@ -7,12 +7,12 @@ import qualified Data.Set as Set
 import Control.Monad
 import Data.List (isPrefixOf)
 
-data Port = Eraser | Port (IORefStable Edge)
+data Port = Port (IORefStable Edge)
   deriving (Eq,Ord)
 instance Show Port where
   show _ = "Port"
 
-data Edge = Edge Node Direction Node Direction -- assert: I then O
+data Edge = Eraser | Edge Node Direction Node Direction -- assert: I then O
    deriving (Eq,Ord,Show)
 
 data NodeP p
@@ -92,8 +92,20 @@ relink a ad True b bd bf = do
 relink a ad af b bd True = do
   (b', bd') <- follow b bd
   relink a ad af b' bd' False
+relink a ad False b bd False | Eraser <- port ad a = erase b bd
+relink a ad False b bd False | Eraser <- port bd a = erase a ad
 relink a ad False b bd False =
   link a ad b bd
+
+erase (f@FanIn {}) (Ins d) -- | safe f = replace f w/ fan w/ f-1 ports (delete d port)
+                    | otherwise = writeIORefStable (getPort f (Ins d)) Eraser
+erase a@(Abstractor {}) Bind = writeIORefStable (getPort a Bind) Eraser
+erase f fd = forM_ (getPorts f fd) $ \p -> do
+  (f',p') <- follow f p
+  erase f' p'
+
+relinkR a ad af b bd bf True = relink b bd bf a ad af
+relinkR a ad af b bd bf False = relink a ad af b bd bf
 
 getPorts :: Node -> Direction -> [Direction]
 getPorts a ppa = filter (/= ppa) $ ports a
@@ -146,21 +158,22 @@ rewriteStep (State {..}) = do
   lopair <- lo_redex u
   return $ State { stack = lopair ++ stackrest,..}
 
-updateLevel you me pb = case me of
-    FanIn {} -> maybeLevelUp
-    FanOut {} -> maybeLevelUp
-    _ → me
+hasLevel (FanIn {}) = True
+hasLevel (FanOut {}) = True
+hasLevel _ = False
+
+updateLevel you pb me
+  | hasLevel you && hasLevel me && level me > level you =
+     me { level = level me + nlevel you pb}
   where
-    maybeLevelUp =
-     case you of
-      FanIn {} → me {level = level me + 1}
-      FanOut {} → me {level = level me + 1}
-      _ → me
+    nlevel (FanIn {ins}) (Ins i) = snd $ ins !! i
+    nlevel (FanOut {outs}) (Outs i) = snd $ outs !! i
+updateLevel _ _ me = me
 
 makenodes a pa b pb ppb =
   forM pb $ \p -> do
     x' <- clone a
-    let x = updateLevel b x'
+    let x = updateLevel b p x'
     return $ case getD p == getD ppb of
       False -> x
       True -> case x of
@@ -169,7 +182,7 @@ makenodes a pa b pb ppb =
 
 makeOuterLinks a pa b_new ppb =
   forM_ pa $ \(pi,p) ->
-    relink a p True (b_new !! pi) ppb False (getD p == O)
+    relinkR a p True (b_new !! pi) ppb False (getD p == O)
 
 commute ∷ Node -> Direction -> Node -> Direction -> IO ()
 commute a ppa b ppb = do
@@ -177,11 +190,11 @@ commute a ppa b ppb = do
   let pb = getPorts b ppb
   a_new <- makenodes a pa b pb ppb
   b_new <- makenodes b pb b pb ppb
-  makeOuterLinks a' (zip [0..] pa) b_new ppb
-  makeOuterLinks b' (zip [0..] pb) a_new ppa
+  makeOuterLinks a (zip [0..] pa) b_new ppb
+  makeOuterLinks b (zip [0..] pb) a_new ppa
   forM_ (zip [0..] pb) $ \(pbi,pb1) ->
     forM_ (zip [0..] pa) $ \(pai,pa1) ->
-      link (a_new !! pbi) pa1 (b_new !! pai) pb1 (getD pa1 /= O)
+      relinkR (a_new !! pbi) pa1 False (b_new !! pai) pb1 False (getD pa1 /= O)
 
 eqNode :: Node -> Node -> Bool
 eqNode (FanIn {level = a, ins = as}) (FanOut {level = b, outs=bs}) = a == b && length as == length bs
@@ -190,26 +203,13 @@ eqNode _ _ = False
 reducePair a ppa b ppb = case () of
   () | eqNode a b && ppa == ppb ->
     forM_ (getPorts a ppa) $ \p -> do
-      relink a p True b p True False -- nothing that annihilates changes directions
+      relink a p True b p True
   () | Applicator {} <- a, Abstractor {} <- b, ppa == Func, ppb == Inp -> do
-    relink a Inp True b Body True False
-    relink b Bind True a Arg True False
+    relink a Inp True b Body True
+    relink b Bind True a Arg True
   _ -> commute a ppa b ppb
 
-fan  fan-like
-
-
-f1.index < f2.index
-  new1 = clone f2, index = f2->index+f1->nlevel[2];
-  f2->index = f2->index+f1->nlevel[1];
-  new2 = clone f1
-
 {-
-reduce Fan Fan | index==index = do
-  assert nlevels == nlevels
-  relink a p1 True b p1 True False
-  relink a p2 True b p2 True False
-reduce Triangle Triangle | index == index
 app lambda
 app lambdaunb = connect app Inp l Body
                 connect Erase ap Arg

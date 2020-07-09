@@ -1,3 +1,5 @@
+.. _fexprs:
+
 Metaprogramming
 ###############
 

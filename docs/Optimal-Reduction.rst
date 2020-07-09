@@ -16,11 +16,11 @@ This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is
 
 Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
 
-Boxes do have some performance cost, so how can they be avoided? There are many cases where boxes are not necessary:
+Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:
 
 1. When the term is linear or affine and does not need to duplicate anything.
-2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`)
-3. Inlining, when the box is opened and emptied.
+2. When the duplication is duplication of a ground type without any lambdas, such as a boolean, integer, list of integers, etc. In such a case the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`) This is changing the evaluation semantics to be stricter.
+3. Inlining, when the duplication is carried out, resulting in two terms.
 4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
 
 Implementation
