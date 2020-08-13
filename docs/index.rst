@@ -9,13 +9,15 @@ For more, see:
   :maxdepth: 2
 
   Introduction
-  Arguments
-  Fexprs
-  Delimited-Continuations
-  Optimal-Reduction
   Syntax
   Overloading
+  Verification
+  Arguments
+  Delimited-Continuations
+  Fexprs
+  Reduction
   Types
+  Modules
   Memory
   Compiler
   BuildSystem

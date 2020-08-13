@@ -1,4 +1,4 @@
 match (Pvar x) v = [(x,v)]
 match (Pcst i) (Vcst j) = if i≡j then [] else error "value mismatch"
 match (Ppair p q) (Vpair v w) = match p v ++ match q w
-match = error"pattern mismatch"
+match = error "pattern mismatch"

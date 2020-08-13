@@ -4,13 +4,6 @@ Argument passing
 Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
 the shorter the code will be.
 
-Modula-3 added keyword arguments and default arguments, to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying.
-
-::
-
-   foo a {x:1}
-
-
 Keyword arguments
 =================
 
@@ -135,6 +128,12 @@ above. But they are implicit keyword arguments:
 The namespace scoping mechanism protects against accidental use in large
 projects.
 
+Symbols
+=======
+
+If a name is not bound anywhere, implicitly or explicitly, it is treated as a symbol. Symbols are essentially records with a distinguished constructor and, in simple cases, zero fields. They evaluate to themselves and can be used freely. If a function is applied to something outside of its domain, this also produces a symbol, but here there would be fields for the arguments.
+
+
 Other types of arguments
 ========================
 
@@ -156,7 +155,9 @@ supported:
    c *([1 2])
    # 3
 
-Implicit arguments are preferred to default arguments:
+Modula-3 added keyword arguments and default arguments to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying. If ``foo`` is a function with two positional arguments, the second of them having a default value, then ``foo a b`` is either passing ``b`` to the result of ``f a`` or overriding the default value of the second argument. So specifying/overriding default arguments always requires the use of keyword syntax.
+
+Implicit arguments use keywords as well, so they override default arguments:
 
 ::
 

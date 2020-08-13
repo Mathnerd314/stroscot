@@ -11,7 +11,6 @@
   journal = {Mathematical Structures in Computer Science}
 }
 % == BibTeX quality report for abramskyGeometryInteractionLinear2002:
-% Missing required field 'number'
 % ? Title looks like it was stored in title-case in Zotero
 
 @article{albertResourceAnalysisDriven2019,
@@ -34,6 +33,85 @@
   number = {5-6}
 }
 
+@article{allenCatalogueOptimizingTransformations1971,
+  title = {A {{Catalogue}} of {{Optimizing Transformations}}},
+  author = {Allen, Frances E and Cocke, John},
+  year = {1971},
+  pages = {30},
+  journal = {IBM Research Center},
+  language = {en}
+}
+% == BibTeX quality report for allenCatalogueOptimizingTransformations1971:
+% ? Title looks like it was stored in title-case in Zotero
+
+@inproceedings{amorimDeclarativeSpecificationIndentation2018,
+  ids = {amorimDeclarativeSpecificationIndentation2018a},
+  title = {Declarative Specification of Indentation Rules: A Tooling Perspective on Parsing and Pretty-Printing Layout-Sensitive Languages},
+  shorttitle = {Declarative Specification of Indentation Rules},
+  booktitle = {Proceedings of the 11th {{ACM SIGPLAN International Conference}} on {{Software Language Engineering}}  - {{SLE}} 2018},
+  author = {Amorim, Luís Eduardo de Souza and Steindorfer, Michael J. and Erdweg, Sebastian and Visser, Eelco},
+  year = {2018},
+  pages = {3--15},
+  publisher = {{ACM Press}},
+  address = {{Boston, MA, USA}},
+  doi = {10.1145/3276604.3276607},
+  url = {http://dl.acm.org/citation.cfm?doid=3276604.3276607},
+  urldate = {2020-06-15},
+  abstract = {In layout-sensitive languages, the indentation of an expression or statement can influence how a program is parsed. While some of these languages (e.g., Haskell and Python) have been widely adopted, there is little support for software language engineers in building tools for layout-sensitive languages. As a result, parsers, pretty-printers, program analyses, and refactoring tools often need to be handwritten, which decreases the maintainability and extensibility of these tools. Even state-of-the-art language workbenches have little support for layout-sensitive languages, restricting the development and prototyping of such languages. In this paper, we introduce a novel approach to declarative specification of layout-sensitive languages using layout declarations. Layout declarations are high-level specifications of indentation rules that abstract from low-level technicalities. We show how to derive an efficient layout-sensitive generalized parser and a corresponding pretty-printer automatically from a language specification with layout declarations. We validate our approach in a case-study using a syntax definition for the Haskell programming language, investigating the performance of the generated parser and the correctness of the generated pretty-printer against 22191 Haskell files.},
+  isbn = {978-1-4503-6029-6},
+  language = {en}
+}
+
+@inproceedings{ananthanarayananKeepingMasterGreen2019,
+  title = {Keeping {{Master Green}} at {{Scale}}},
+  booktitle = {Proceedings of the {{Fourteenth EuroSys Conference}} 2019},
+  author = {Ananthanarayanan, Sundaram and Ardekani, Masoud Saeida and Haenikel, Denis and Varadarajan, Balaji and Soriano, Simon and Patel, Dhaval and {Adl-Tabatabai}, Ali-Reza},
+  year = {2019},
+  month = mar,
+  pages = {1--15},
+  publisher = {{Association for Computing Machinery}},
+  address = {{Dresden, Germany}},
+  doi = {10.1145/3302424.3303970},
+  url = {https://doi.org/10.1145/3302424.3303970},
+  urldate = {2020-07-06},
+  abstract = {Giant monolithic source-code repositories are one of the fundamental pillars of the back end infrastructure in large and fast-paced software companies. The sheer volume of everyday code changes demands a reliable and efficient change management system with three uncompromisable key requirements --- always green master, high throughput, and low commit turnaround time. Green refers to a master branch that always successfully compiles and passes all build steps, the opposite being red. A broken master (red) leads to delayed feature rollouts because a faulty code commit needs to be detected and rolled backed. Additionally, a red master has a cascading effect that hampers developer productivity--- developers might face local test/build failures, or might end up working on a codebase that will eventually be rolled back. This paper presents the design and implementation of SubmitQueue. It guarantees an always green master branch at scale: all build steps (e.g., compilation, unit tests, UI tests) successfully execute for every commit point. SubmitQueue has been in production for over a year, and can scale to thousands of daily commits to giant monolithic repositories.},
+  isbn = {978-1-4503-6281-8},
+  series = {{{EuroSys}} '19}
+}
+% == BibTeX quality report for ananthanarayananKeepingMasterGreen2019:
+% ? Title looks like it was stored in title-case in Zotero
+
+@article{appelGarbageCollectionCan1987,
+  title = {Garbage Collection Can Be Faster than Stack Allocation},
+  author = {Appel, Andrew W.},
+  year = {1987},
+  month = jun,
+  volume = {25},
+  pages = {275--279},
+  issn = {00200190},
+  doi = {10.1016/0020-0190(87)90175-X},
+  url = {https://linkinghub.elsevier.com/retrieve/pii/002001908790175X},
+  urldate = {2020-07-24},
+  abstract = {A very old and simple algorithm for garbage collection gives very good results when the physical memory is much larger than the number of reachable cells. In fact, the overhead associated with allocating and collecting cells from the heap can be reduced to less than one instruction per cell by increasing the size of physical memory. Special hardware, intricate garbage-collection algorithms, and fancy compiler analysis become unnecessary.},
+  journal = {Information Processing Letters},
+  language = {en},
+  number = {4}
+}
+
+@book{aspertiOptimalImplementationFunctional1999,
+  title = {The Optimal Implementation of Functional Programming Languages},
+  author = {Asperti, Andrea and Guerrini, Stefano},
+  year = {1999},
+  month = jan,
+  edition = {1st},
+  publisher = {{Cambridge University Press}},
+  address = {{USA}},
+  abstract = {All traditional implementation techniques for functional languages fail to avoid useless repetition of work. They are not "optimal" in their implementation of sharing, often causing a catastrophic, exponential explosion in reduction time. Optimal reduction is an innovative graph reduction technique for functional expressions, introduced by Lamping in 1990, that solves the sharing problem. This work, the first on the subject, is a comprehensive account by two of its leading exponents. Practical implementation aspects are fully covered as are the mathematical underpinnings of the subject. The relationship to the pioneering work of L\&\#233;vy and to Girard's more recent "Geometry of Interaction" are explored; optimal reduction is thereby revealed as a prime example of how a beautiful mathematical theory can lead to practical benefit. The book is essentially self-contained, requiring no more than basic familiarity with functional languages. It will be welcomed by graduate students and research workers in lambda calculus, functional programming or linear logic.},
+  isbn = {978-0-521-62112-0},
+  number = {45},
+  series = {Cambridge {{Tracts}} in {{Theoretical Computer Science}}}
+}
+
 @article{castagnaCovarianceControvarianceFresh2020,
   title = {Covariance and {{Controvariance}}: A Fresh Look at an Old Issue (a Primer in Advanced Type Systems for Learning Functional Programmers)},
   shorttitle = {Covariance and {{Controvariance}}},
@@ -54,8 +132,16 @@
   primaryClass = {cs}
 }
 % == BibTeX quality report for castagnaCovarianceControvarianceFresh2020:
-% Missing required field 'pages'
 % ? Possibly abbreviated journal title arXiv:1809.01427 [cs]
+
+@phdthesis{corbynPracticalStaticMemory2020,
+  title = {Practical Static Memory Management},
+  author = {Corbyn, N},
+  year = {2020},
+  month = may,
+  language = {en},
+  school = {King’s College}
+}
 
 @article{crolardFormulaeasTypesInterpretationSubtractive2004,
   title = {A {{Formulae}}-as-{{Types Interpretation}} of {{Subtractive Logic}}},
@@ -76,6 +162,23 @@
 }
 % == BibTeX quality report for crolardFormulaeasTypesInterpretationSubtractive2004:
 % ? Title looks like it was stored in title-case in Zotero
+
+@article{delawareNarcissusCorrectbyconstructionDerivation2019,
+  title = {Narcissus: Correct-by-Construction Derivation of Decoders and Encoders from Binary Formats},
+  shorttitle = {Narcissus},
+  author = {Delaware, Benjamin and Suriyakarn, Sorawit and {Pit-Claudel}, Clément and Ye, Qianchuan and Chlipala, Adam},
+  year = {2019},
+  month = jul,
+  volume = {3},
+  pages = {1--29},
+  issn = {2475-1421, 2475-1421},
+  doi = {10.1145/3341686},
+  url = {https://dl.acm.org/doi/10.1145/3341686},
+  urldate = {2020-07-26},
+  journal = {Proceedings of the ACM on Programming Languages},
+  language = {en},
+  number = {ICFP}
+}
 
 @inproceedings{downenMakingFasterCurry2019,
   title = {Making a Faster {{Curry}} with Extensional Types},
@@ -130,9 +233,6 @@
   primaryClass = {cs}
 }
 % == BibTeX quality report for dunfieldBidirectionalTyping2019:
-% Missing required field 'number'
-% Missing required field 'pages'
-% Missing required field 'volume'
 % ? Possibly abbreviated journal title arXiv:1908.05839 [cs]
 % ? Title looks like it was stored in title-case in Zotero
 
@@ -152,6 +252,26 @@
   journal = {Journal of Functional Programming},
   number = {6}
 }
+
+@incollection{erdwegLayoutSensitiveGeneralizedParsing2013,
+  title = {Layout-{{Sensitive Generalized Parsing}}},
+  booktitle = {Software {{Language Engineering}}},
+  author = {Erdweg, Sebastian and Rendel, Tillmann and Kästner, Christian and Ostermann, Klaus},
+  editor = {Hutchison, David and Kanade, Takeo and Kittler, Josef and Kleinberg, Jon M. and Mattern, Friedemann and Mitchell, John C. and Naor, Moni and Nierstrasz, Oscar and Pandu Rangan, C. and Steffen, Bernhard and Sudan, Madhu and Terzopoulos, Demetri and Tygar, Doug and Vardi, Moshe Y. and Weikum, Gerhard and Czarnecki, Krzysztof and Hedin, Görel},
+  year = {2013},
+  volume = {7745},
+  pages = {244--263},
+  publisher = {{Springer Berlin Heidelberg}},
+  address = {{Berlin, Heidelberg}},
+  doi = {10.1007/978-3-642-36089-3_14},
+  url = {http://link.springer.com/10.1007/978-3-642-36089-3_14},
+  urldate = {2020-06-15},
+  abstract = {The theory of context-free languages is well-understood and context-free parsers can be used as off-the-shelf tools in practice. In particular, to use a context-free parser framework, a user does not need to understand its internals but can specify a language declaratively as a grammar. However, many languages in practice are not context-free. One particularly important class of such languages is layout-sensitive languages, in which the structure of code depends on indentation and whitespace. For example, Python, Haskell, F\#, and Markdown use indentation instead of curly braces to determine the block structure of code. Their parsers (and lexers) are not declaratively specified but hand-tuned to account for layout-sensitivity.},
+  isbn = {978-3-642-36088-6 978-3-642-36089-3},
+  language = {en}
+}
+% == BibTeX quality report for erdwegLayoutSensitiveGeneralizedParsing2013:
+% ? Title looks like it was stored in title-case in Zotero
 
 @inproceedings{erdwegSoundOptimalIncremental2015,
   title = {A Sound and Optimal Incremental Build System with Dynamic Dependencies},
@@ -197,6 +317,31 @@
   school = {Università di Pisa. Dipartimento di Informatica}
 }
 
+@book{holmesElementarySetTheory1998,
+  title = {Elementary {{Set Theory}} with a {{Universal Set}}},
+  author = {Holmes, M. Randall},
+  year = {1998},
+  publisher = {{Bruylant-Academia}},
+  url = {https://randall-holmes.github.io/head.pdf},
+  googlebooks = {\_vjuAAAAMAAJ},
+  isbn = {978-2-87209-488-2},
+  language = {en}
+}
+% == BibTeX quality report for holmesElementarySetTheory1998:
+% ? Title looks like it was stored in title-case in Zotero
+
+@misc{kiselyovManyFacesFixedpoint2013,
+  title = {Many Faces of the Fixed-Point Combinator},
+  author = {Kiselyov, Oleg},
+  year = {2013},
+  month = aug,
+  url = {http://okmij.org/ftp/Computation/fixed-point-combinators.html},
+  urldate = {2020-07-31},
+  journal = {okmij.org}
+}
+% == BibTeX quality report for kiselyovManyFacesFixedpoint2013:
+% ? Possibly abbreviated journal title okmij.org
+
 @misc{lafontLinearLogicPages,
   title = {Linear {{Logic Pages}}},
   author = {Lafont, Yves},
@@ -204,8 +349,6 @@
   language = {en}
 }
 % == BibTeX quality report for lafontLinearLogicPages:
-% Missing required field 'howpublished'
-% Missing required field 'year'
 % ? Title looks like it was stored in title-case in Zotero
 
 @inproceedings{levyJumboLCalculus2006,
@@ -228,6 +371,34 @@
 % ? Unsure about the formatting of the booktitle
 % ? Title looks like it was stored in title-case in Zotero
 
+@incollection{martiniFineStructureExponential1995,
+  ids = {martiniFineStructureExponential1995,martiniFineStructureExponential1995a},
+  title = {On the Fine Structure of the Exponential Rule},
+  booktitle = {Advances in {{Linear Logic}}},
+  author = {Martini, S. and Masini, A.},
+  editor = {Girard, Jean-Yves and Lafont, Yves and Regnier, Laurent},
+  year = {1995},
+  pages = {197--210},
+  publisher = {{Cambridge University Press}},
+  address = {{Cambridge}},
+  doi = {10.1017/CBO9780511629150.010},
+  url = {https://www.cambridge.org/core/product/identifier/CBO9780511629150A019/type/book_part},
+  urldate = {2020-08-01},
+  abstract = {We present natural deduction systems for fragments of intuitionistic linear logic obtained by dropping weakening and contractions also on !-pre xed formulas. The systems are based on a twodimensional generalization of the notion of sequent, which accounts for a clean formulation of the introduction/elimination rules of the modality. Moreover, the di erent subsystems are obtained in a modular way, by simple conditions on the elimination rule for !. For the proposed systems we introduce a notion of reduction and we prove a normalization theorem.},
+  isbn = {978-0-511-62915-0},
+  language = {en}
+}
+
+@phdthesis{mauborgneRepresentationSetsTrees1999,
+  title = {Representation of Sets of Trees for Abstract Interpretation},
+  author = {Mauborgne, Laurent},
+  year = {1999},
+  month = nov,
+  url = {http://software.imdea.org/~mauborgn/publi/t.pdf},
+  journal = {PhD Thesis},
+  school = {Ecole Polytechnique}
+}
+
 @article{mokhovBuildSystemsCarte2020,
   title = {Build Systems à La Carte: {{Theory}} and Practice},
   shorttitle = {Build Systems à La Carte},
@@ -243,8 +414,6 @@
   journal = {Journal of Functional Programming},
   language = {en}
 }
-% == BibTeX quality report for mokhovBuildSystemsCarte2020:
-% Missing required field 'number'
 
 @inproceedings{najafiBisectingCommitsModeling2019,
   title = {Bisecting Commits and Modeling Commit Risk during Testing},
@@ -260,6 +429,36 @@
   abstract = {Software testing is one of the costliest stages in the software development life cycle. One approach to reducing the test execution cost is to group changes and test them as a batch (i.e. batch testing). However, when tests fail in a batch, commits in the batch need to be re-tested to identify the cause of the failure, i.e. the culprit commit. The re-testing is typically done through bisection (i.e. a binary search through the commits in a batch). Intuitively, the effectiveness of batch testing highly depends on the size of the batch. Larger batches require fewer initial test runs, but have a higher chance of a test failure that can lead to expensive test re-runs to find the culprit. We are unaware of research that investigates and simulates the impact of batch sizes on the cost of testing in industry. In this work, we first conduct empirical studies on the effectiveness of batch testing in three large-scale industrial software systems at Ericsson. Using 9 months of testing data, we simulate batch sizes from 1 to 20 and find the most cost-effective BatchSize for each project. Our results show that batch testing saves 72\% of test executions compared to testing each commit individually. In a second simulation, we incorporate flaky tests that pass and fail on the same commit as they are a significant source of additional test executions on large projects. We model the degree of flakiness for each project and find that test flakiness reduces the cost savings to 42\%. In a third simulation, we guide bisection to reduce the likelihood of batch-testing failures. We model the riskiness of each commit in a batch using a bug model and a test execution history model. The risky commits are tested individually, while the less risky commits are tested in a single larger batch. Culprit predictions with our approach reduce test executions up to 9\% compared to Ericsson’s current bisection approach.},
   isbn = {978-1-4503-5572-8},
   language = {en}
+}
+
+@article{peytonjonesSecretsGlasgowHaskell2002,
+  ids = {jonesSecretsGlasgowHaskell2002},
+  title = {Secrets of the {{Glasgow Haskell Compiler}} Inliner},
+  author = {Peyton Jones, Simon and Marlow, Simon},
+  year = {2002},
+  month = jul,
+  volume = {12},
+  pages = {393--434},
+  issn = {0956-7968, 1469-7653},
+  doi = {10.1017/S0956796802004331},
+  url = {https://www.cambridge.org/core/product/identifier/S0956796802004331/type/journal_article},
+  urldate = {2020-07-01},
+  abstract = {Higher-order languages, such as Haskell, encourage the programmer to build abstractions by composing functions. A good compiler must inline many of these calls to recover an e ciently executable program.},
+  journal = {Journal of Functional Programming},
+  language = {en},
+  number = {4}
+}
+
+@techreport{proustASAPStaticPossible2017,
+  title = {{{ASAP}}: {{As Static As Possible}} Memory Management},
+  author = {Proust, Raphaël L},
+  year = {2017},
+  month = jul,
+  pages = {145},
+  institution = {{University of Cambridge Computer Laboratory}},
+  url = {https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf},
+  language = {en},
+  number = {UCAM-CL-TR-908}
 }
 
 @inproceedings{wadlerCallbyvalueDualCallbyname2003,
@@ -387,10 +586,6 @@ The term forward–backward algorithm is also used to refer to any algorithm bel
   journal = {Wikipedia},
   language = {en}
 }
-% == BibTeX quality report for wikipediaForwardBackwardAlgorithm2020:
-% Missing required field 'number'
-% Missing required field 'pages'
-% Missing required field 'volume'
 
 @article{wikipediaLogit2020,
   title = {Logit},
@@ -462,9 +657,23 @@ In deep learning, the term logits layer is popularly used for the last neuron la
   journal = {Wikipedia},
   language = {en}
 }
-% == BibTeX quality report for wikipediaLogit2020:
-% Missing required field 'number'
-% Missing required field 'pages'
-% Missing required field 'volume'
+
+@inproceedings{ziftciWhoBrokeBuild2017,
+  title = {Who Broke the Build? {{Automatically}} Identifying Changes That Induce Test Failures in Continuous Integration at {{Google Scale}}},
+  shorttitle = {Who Broke the Build?},
+  booktitle = {2017 {{IEEE}}/{{ACM}} 39th {{International Conference}} on {{Software Engineering}}: {{Software Engineering}} in {{Practice Track}} ({{ICSE}}-{{SEIP}})},
+  author = {Ziftci, Celal and Reardon, Jim},
+  year = {2017},
+  month = may,
+  pages = {113--122},
+  publisher = {{IEEE}},
+  address = {{Buenos Aires}},
+  doi = {10.1109/ICSE-SEIP.2017.13},
+  url = {http://ieeexplore.ieee.org/document/7965435/},
+  urldate = {2020-07-06},
+  abstract = {Quickly identifying and fixing code changes that introduce regressions is critical to keep the momentum on software development, especially in very large scale software repositories with rapid development cycles, such as at Google. Identifying and fixing such regressions is one of the most expensive, tedious, and time consuming tasks in the software development life-cycle. Therefore, there is a high demand for automated techniques that can help developers identify such changes while minimizing manual human intervention. Various techniques have recently been proposed to identify such code changes. However, these techniques have shortcomings that make them unsuitable for rapid development cycles as at Google. In this paper, we propose a novel algorithm to identify code changes that introduce regressions, and discuss case studies performed at Google on 140 projects. Based on our case studies, our algorithm automatically identifies the change that introduced the regression in the top-5 among thousands of candidates 82\% of the time, and provides considerable savings on manual work developers need to perform.},
+  isbn = {978-1-5386-2717-4},
+  language = {en}
+}
 
 

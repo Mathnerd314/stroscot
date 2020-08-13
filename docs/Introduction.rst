@@ -40,18 +40,6 @@ Inspiring projects
 Goals
 =====
 
-Stroscot aims to be a "pluggable" language, where you can write syntax, type checking, etc. for a small DSL like SQL and then use it in a larger program with some embedding syntax.
-
-::
-
-  run_sql_statement { SELECT ... }
-
-The idea extends further, embedding lower-level and incompatible languages like assembly and C++.
-
-::
-
-  result = asm { sumsq (toregister x), (toregister y) }
-  my_func = load("foo.cpp").lookup("my_func")
 
 The ultimate
 ------------

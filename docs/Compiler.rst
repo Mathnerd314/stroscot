@@ -1,57 +1,6 @@
 Compiler design
 ###############
 
-Core
-====
-
-Stroscot takes after Haskell in that all of the language is compiled to a small "core" language. Considerations:
-
-* Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.
-* Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear sequents, with operators for contraction (duplication) and weakening (erasing).
-* Based on :cite:`levyJumboLCalculus2006`, we combine all of the different linear logic operators into two jumbo operators: plus-of-times :math:`\Sigma` and with-of-lollipop :math:`\Pi` (the extended lollipop includes par as well).
-
-We start with the generalized :math:`\Pi` rule, this is similar to Levy's rule except it allows multiple conclusions.
-
-.. math::
-
-    \newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#2~~ }{\displaystyle ~~#3~~ } & (#1)}
-    \begin{array}{clcl}
-    \rule{\Pi_R}{
-    \overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }{
-    \Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
-    &
-    \rule{\Pi_{i} {}_{L}}{
-    \overrightarrow{ \Gamma_j \vdash A_{i j}, \Delta_j } \quad \overrightarrow{ \Theta_k, B_{i k} \vdash \Lambda_k } }{
-    \overrightarrow{\Gamma}, \vec \Theta, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \overrightarrow{\Delta}, \vec\Lambda}
-    \end{array}
-
-Next we have the generalized :math:`\Sigma` rule. This is based on the above :math:`\Pi` rule and allows premises as well. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`A - []`. Ideally the difference operator allows creating zippers, or maybe it is useless.
-
-.. math::
-
-    \begin{array}{clcl}
-    \rule{\Sigma_{i} {}_{R}}{
-        \overrightarrow{ \Gamma_k, B_{i k} \vdash \Delta_k } \quad \overrightarrow{ \Theta_j \vdash A_{i j}, \Lambda_j } }{
-    \overrightarrow{\Gamma}, \overrightarrow{\Theta} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \overrightarrow{\Delta}, \overrightarrow{\Lambda}}
-    &
-    \rule{\Sigma_L}{
-    \overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }{
-    \Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
-    \end{array}
-
-These have all the power of ADTs and normal functional programming, for example some Peano arithmetic:
-
-::
-
-  data Nat = Z | S *
-  module {
-    2 = S (S Z)
-    3 = S 2
-    plus a b = cut a | case
-      Z -> ax b
-      S s -> S (cut s b | plus)
-  }
-
 Pipeline
 ========
 
@@ -62,3 +11,20 @@ Next is the fexpr interpreter loop. This starts with the ADT tree and produces e
 Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to :cite:`downenMakingFasterCurry2019`. Initially all user code starts out using one-argument functions.
 
 Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.
+
+Optimizations
+=============
+
+A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of the performance:
+
+* Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn't increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in :cite:`mauborgneRepresentationSetsTrees1999`.
+* Inlining - Going through :cite:`peytonjonesSecretsGlasgowHaskell2002`, a lot of the cases are handled, because of the graph structure and because partial evaluation / optimal reduction will move cuts down and expose/eliminate case statements. But we also want to do it inside recursive functions etc., which means we probably need a strictness/termination analysis.
+* Loop unrolling, code motion - These are optimizations on mutable variables, probably unnecessary. But unrolling recursive functions could prove useful, as part of inlining.
+* Constant Folding - partial evaluation of the code includes this
+* Dead code elimination - Unused expressions aren't connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.
+* Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.
+
+Flags
+=====
+
+In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.
