@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Memory management" href="Memory.html" />
-    <link rel="prev" title="Overloading" href="Overloading.html" /> 
+    <link rel="next" title="Modules" href="Modules.html" />
+    <link rel="prev" title="Reduction" href="Reduction.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,22 +86,27 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#roles">Roles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#type-synthesis">Type synthesis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#condition-checking">Condition checking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#type-synthesis">Type synthesis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#type-declaration-syntax">Type declaration syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scoping-and-qualification">Scoping and qualification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#primitives-types">Primitives types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#numbers">Numbers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#strings">Strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#records">Records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#roles">Roles</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -176,32 +181,37 @@
             
   <div class="section" id="types">
 <h1>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h1>
-<p>Types are hard. Academics have spent decades in search of the perfect
-type system, often not even paying attention to the work of others. As far as doing something type-related I think the only solution is to hack until it works. I’ve read a bunch of type papers and they all end up leaving it up to you to make it work. If they do present an algorithm it’s very simple and then all the rest of the paper is mostly about proving the algorithm correct and complete rather than on the implementation.</p>
-<p>The academic approach to types can be summed up in this quote from <a class="bibtex reference internal" href="zzreferences.html#castagnacovariancecontrovariancefresh2020" id="id1">[Cas20]</a>:</p>
-<blockquote>
-<div><p>You should fit programming languages to types and not the other way round, insofar as a type theory should be developed pretty much independently of the language (but, of course, not of the problem) it is to be applied to. It is a language design problem to ensure that whenever we have a function of that type, then the code executed for each combination of the types of the arguments is not only unambiguously defined, but also easily predictable by the programmer. In order to solve type-related problems, you must first conceive the types and only after you can think of how to design a language that best fits these types.</p>
-</div></blockquote>
-<p>The alternative is model checking, which is the opposite approach: take an existing program and try to prove properties about it with some kind of model. Although types can encapsulate properties, for the most part they don’t have a lot of expressive power. Defining <code class="docutils literal notranslate"><span class="pre">newtype</span> <span class="pre">Even</span> <span class="pre">=</span> <span class="pre">Integer</span></code> does not give an error on <code class="docutils literal notranslate"><span class="pre">Even</span> <span class="pre">1</span></code>, while <code class="docutils literal notranslate"><span class="pre">assert(e</span> <span class="pre">%</span> <span class="pre">2</span> <span class="pre">==</span> <span class="pre">0)</span></code> will throw an error regardless, and the model checker proves that error won’t happen. The only issue is that properties can become verbose and the model checker is a black box that cannot be helped along, as opposed to the expressive tactic notations found in proof assistants.</p>
-<div class="section" id="roles">
-<h2>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h2>
-<p>There’s really two kinds of types (three if you include erased phantom types, but those are just dead code). First, there’s representation types, which describe how the data type is represented in memory, how to pass it to a function, how many pointers you have to dereference to access it, and lifetime information for the garbage collector or memory deallocator. You have pointers, bits strings, structs, and not much else. Dependent types come in handy, for field lengths/types that depend on the value of other fields. But subtyping and polymorphism get erased as the compiler defaults variables to their generic pointer implementation or specializes the function to a more specific/efficient representation.</p>
-<p>The other kind of types are nominal types, which are what you often see when people talk about static typing. So these types prevent you from using them in place of their underlying representation unless you’ve added the name to the type using a type constructor or cast. Usually they express some restriction about the data, for example with SQL statements you might have types for escaped expressions and unescaped expressions. All you’re saying is that there aren’t any unescaped commands in this data, but because programming languages don’t memoize functions it’s more efficient to say <code class="docutils literal notranslate"><span class="pre">typeof</span> <span class="pre">stmt</span> <span class="pre">==</span> <span class="pre">EscapedStmt</span></code> than it is to say <code class="docutils literal notranslate"><span class="pre">isEverythingEscaped</span> <span class="pre">stmt</span> <span class="pre">==</span> <span class="pre">True</span></code>. And often the type is correct by construction, because all the methods you’re using only construct values of the type, so it provides a handy way to assert an invariant without having to prove it like you would with a dependently typed environment.</p>
+<p>Types are hard. Academics have spent decades in search of the perfect type system. The alternative is model checking, almost the opposite approach: take an existing program and try to prove properties about it. These meet in the middle with assertions. In particular a type signature <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">T</span></code> is just an assertion <code class="docutils literal notranslate"><span class="pre">assert(isElemOfType(a,</span> <span class="pre">T))</span></code>. More specifically,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="n">A</span> <span class="o">=</span> <span class="n">A</span> <span class="p">(</span><span class="n">Int</span> <span class="o">-&gt;</span> <span class="n">Int</span><span class="p">)</span>
+<span class="c1"># translates to</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">gensym</span>
+<span class="n">A</span> <span class="o">=</span> <span class="nb">type</span> <span class="p">{</span> \<span class="n">x</span> <span class="o">-&gt;</span> <span class="n">case</span> <span class="n">x</span> <span class="n">of</span>
+  <span class="n">s</span> <span class="n">f</span> <span class="o">-&gt;</span> <span class="n">ensure</span><span class="p">(</span><span class="n">isElemOfType</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">S</span><span class="p">));</span> <span class="n">isElemOfType</span><span class="p">(</span><span class="n">f</span> <span class="n">i</span><span class="p">,</span><span class="n">Int</span><span class="p">)</span>
+  <span class="n">_</span> <span class="o">-&gt;</span> <span class="n">false</span>
+  <span class="p">}</span>
+</pre></div>
 </div>
-<div class="section" id="type-synthesis">
-<h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this headline">¶</a></h2>
-<p>If types are hard, type synthesis is harder. There’s the <a class="reference external" href="https://github.com/stedolan/fyp">sub</a><a class="reference external" href="https://github.com/stedolan/mlsub">typing</a> stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
-<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking <a class="bibtex reference internal" href="zzreferences.html#dunfieldbidirectionaltyping2019" id="id2">[DK19]</a> should be able to minimize the amount of signatures required.</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>We follow the semantic definition: types are sets. In particular, we have typing is membership <span class="math notranslate nohighlight">\(A : B = A \in B\)</span>. We define the set of sets as <span class="math notranslate nohighlight">\(S =\{ \emptyset \} \cup \left\{ s \mid \exists x. x \in s\right\}\)</span>. Equality on sets is the usual extensional equality <span class="math notranslate nohighlight">\(A \in S \land B \in S \rightarrow \left(\left(x \in A \leftrightarrow x\in B\right) \leftrightarrow A=B \right)\)</span>. Subtyping is set inclusion <span class="math notranslate nohighlight">\(A \subseteq B\)</span> (and forms a distributive lattice).</p>
+<p>The values (things that aren’t types/sets) are as defined in the core: ADT elements (a list of elements with a tag) and lambda expressions and so on. For many types, checking whether an element is a member is as simple as checking the tag.</p>
+<p>We follow New Foundations (specifically NFU) in allowing any type (set) to be specified with a stratified formula. The usual formulation requires <code class="docutils literal notranslate"><span class="pre">lvl(b)=lvl(a)+1</span></code> for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">in</span> <span class="pre">b</span></code>, but this can be relaxed to <code class="docutils literal notranslate"><span class="pre">lvl(b)</span> <span class="pre">&gt;</span> <span class="pre">lvl(a)</span></code>. I can’t find Holmes’s paper with the exact result, but the proof of the Statified Comprehension Theorem on page 45 of <a class="bibtex reference internal" href="zzreferences.html#holmeselementarysettheory1998" id="id1">[Hol98]</a> can easily be changed from <code class="docutils literal notranslate"><span class="pre">n-1</span></code> to <code class="docutils literal notranslate"><span class="pre">n-k,k&gt;0</span></code>. Since the stratification only applies to quantified variables and most types do not use quantification this won’t come up often. Since NFU has universal sets there is no issue of function types being a power set that is “too large” for the universe.</p>
 </div>
 <div class="section" id="condition-checking">
 <h2>Condition checking<a class="headerlink" href="#condition-checking" title="Permalink to this headline">¶</a></h2>
-<p>There’s some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> I found on termination checking by Microsoft, called <a class="reference external" href="https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm">TERMINATOR</a>. There’s an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and resource use <a class="bibtex reference internal" href="zzreferences.html#albertresourceanalysisdriven2019" id="id3">[ABB+19]</a> and things of that nature. I’m not sure how to integrate it into a type system but we’ll figure it out.</p>
+<p>There’s some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> I found on termination checking by Microsoft, called <a class="reference external" href="https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm">TERMINATOR</a>. There’s an interesting representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and resource use <a class="bibtex reference internal" href="zzreferences.html#albertresourceanalysisdriven2019" id="id2">[ABB+19]</a> and things of that nature.</p>
+</div>
+<div class="section" id="type-synthesis">
+<h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this headline">¶</a></h2>
+<p>Type synthesis is tricky, but it’s only tricky because it’s trying to do the work of the termination checker. It’s not actually necessary from a user-level perspective. The only useful case might be pretty-printed type signatures. But with really precise types, they end up looking like <code class="docutils literal notranslate"><span class="pre">(Nil--&gt;0)</span> <span class="pre">&amp;</span> <span class="pre">(Cons</span> <span class="pre">a</span> <span class="pre">b--&gt;1+(length</span> <span class="pre">b))</span></code>, which is just the original program, so having the developer specify type signatures seem like the best option.</p>
+<p>There’s the <a class="reference external" href="https://github.com/stedolan/fyp">sub</a><a class="reference external" href="https://github.com/stedolan/mlsub">typing</a> stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
+<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking <a class="bibtex reference internal" href="zzreferences.html#dunfieldbidirectionaltyping2019" id="id3">[DK19]</a> should be able to minimize the amount of signatures required.</p>
 </div>
 <div class="section" id="terminology">
 <h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
 <p>At this point you might be getting confused about terminology. I certainly am. So here we are:</p>
 <dl class="simple">
-<dt>memory cell</dt><dd><p>A circuit that can store some fixed number of logical bits, 0 or 1. Since ternary computers might eventually become popular, a cell is probably best modeled as a register containing an integer <code class="docutils literal notranslate"><span class="pre">i</span></code> with <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">MAX</span></code> with no restriction that <code class="docutils literal notranslate"><span class="pre">MAX</span></code> is a power of 2.</p>
+<dt>memory cell</dt><dd><p>A circuit that can store some fixed number of logical bits, 0 or 1. Since ternary computers might eventually become popular, a cell is probably best modeled as</p>
 </dd>
 <dt>value</dt><dd><p>A group of memory cells, paired with some interpretation as a data type</p>
 </dd>
@@ -211,7 +221,7 @@ type system, often not even paying attention to the work of others. As far as do
 </dd>
 <dt>variable</dt><dd><p>A name/symbol/identifier representing a function argument or mathematical object</p>
 </dd>
-<dt>l-value</dt><dd><p>A variable representing a memory cell. The difference is some people don’t consider <code class="docutils literal notranslate"><span class="pre">arr[i]</span></code> to be a variable, while they’ll all agree it’s an l-value.</p>
+<dt>l-value</dt><dd><p>A variable representing a memory cell. The difference is some people don’t consider <code class="docutils literal notranslate"><span class="pre">arr[i+foo()]</span></code> to be a variable, while they’ll all agree it’s an l-value.</p>
 </dd>
 <dt>r-value</dt><dd><p>A value without a reference, basically an anonymous temporary value. Except in C++11 (but not Stroscot) you can still bind its memory address, to get an x-value. Segfaults galore. ¯\_(ツ)_/¯</p>
 </dd>
@@ -221,58 +231,28 @@ type system, often not even paying attention to the work of others. As far as do
 </dd>
 </dl>
 </div>
-<div class="section" id="type-declaration-syntax">
-<h2>Type declaration syntax<a class="headerlink" href="#type-declaration-syntax" title="Permalink to this headline">¶</a></h2>
-<p>There are a few options for type declarations. Jai’s syntax for types is pretty simple, it’s just:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>Whereas in C and Rust the syntax is</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The third choice is to put the type on the right with the expression:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="nb">type</span> <span class="n">value</span><span class="p">;</span>
-<span class="n">name</span> <span class="o">=</span> <span class="n">value</span> <span class="p">:</span> <span class="nb">type</span><span class="p">;</span> <span class="c1"># (:) is an operator x : y = y x</span>
-</pre></div>
-</div>
-<p>This third option seems like the most logical place. For example, if I’m declaring a new mutable variable, I don’t want to say that the name is mutable. The name is just what I use to refer to the variable; it’s a handle so I can write my program without resorting to hexadecimal addresses.</p>
-<p>What we want is to declare that the mutability as part of the value; it’s a mutable value. So putting it in the expression tells the compiler that you can’t store this like you would store a normal constant value; you have to create a data structure on the stack or the heap or whatever to access this variable.</p>
-<p>By comparison, the other syntaxes don’t make sense. If I had <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>, I’m not going to talk about “mut a” for the rest of the program, I’m going to talk about <code class="docutils literal notranslate"><span class="pre">a</span></code>. And what happens if I write <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code>? Terrible things. Similarly <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">mut</span> <span class="pre">=</span> <span class="pre">1</span></code> makes no sense. Whereas <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">mut</span></code> actually makes some sense if I decide that 3 characters is too long and want to abbreviate <code class="docutils literal notranslate"><span class="pre">mut</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>, or if I’m doing higher-order functional programming that creates references. Similarly <code class="docutils literal notranslate"><span class="pre">mut</span> <span class="pre">1</span></code> is quite sensible, as an anonymous reference cell.</p>
-<p>So getting back to our syntax, <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">=</span> <span class="pre">type</span> <span class="pre">value</span></code>. It should be clear that we have two types of assignments. The first, with the type included, creates/allocates the stuff we need to access it, and then <code class="docutils literal notranslate"><span class="pre">name</span></code> is bound to a memory address.</p>
-<p>When we assign again, it will look like <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">:=</span> <span class="pre">value</span></code>, without a type. This has a completely different semantics: we take the thing on the left, the l-value, and we access the memory that it refers to, and we change the memory. Since the semantics is so different it uses a different syntax.</p>
-</div>
 <div class="section" id="scoping-and-qualification">
 <h2>Scoping and qualification<a class="headerlink" href="#scoping-and-qualification" title="Permalink to this headline">¶</a></h2>
 <p>There is no kind of syntax or semantics for changing or redefining identifiers (besides <a class="reference internal" href="Fexprs.html#fexprs"><span class="std std-ref">fexprs</span></a>); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
 </div>
-<div class="section" id="primitives-types">
-<h2>Primitives types<a class="headerlink" href="#primitives-types" title="Permalink to this headline">¶</a></h2>
-<p>Primitive types include bitstring patterns <code class="docutils literal notranslate"><span class="pre">bits</span></code> and pointers <code class="docutils literal notranslate"><span class="pre">ptr</span></code>. Can’t go wrong
-there.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bits</span> <span class="mh">0xDEADBEEF</span>
-<span class="n">ptr</span> <span class="mh">0xDEADBEEF</span>
-</pre></div>
+<div class="section" id="numbers">
+<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h2>
+<p>As a review, there are two main formats for numbers: integers and floating-point numbers. Integers are integers in the mathematical sense but limited to a certain range. Floating point numbers are an integer mantissa times an radix raised to an exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range.</p>
+<p>We could try to define generic integer/float types, but only a few have efficient arithmetic operations. So in practice we have only <code class="docutils literal notranslate"><span class="pre">IntN</span></code> / <code class="docutils literal notranslate"><span class="pre">UIntN</span></code> (for <code class="docutils literal notranslate"><span class="pre">N</span></code> restricted to some powers of 2), <code class="docutils literal notranslate"><span class="pre">Float</span></code>, and <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Non-power-of-2 <code class="docutils literal notranslate"><span class="pre">N</span></code>, fixed-point arithmetic, unums, and posits can all be defined in libraries. It would also be good to have arbitrary-precision types, like <a class="reference external" href="https://gmplib.org/">GMP</a>’s integer/rational and <a class="reference external" href="https://www.mpfr.org/">MFPR</a>’s float that uses an Int32/Int64 exponent and an arbitrary precision mantissa. The binding could be at the C level like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s integer-gmp</a> or it could use the assembly routines directly.</p>
+<p>Literals are parsed into records like <code class="docutils literal notranslate"><span class="pre">Number</span> <span class="pre">{</span> <span class="pre">digits</span> <span class="pre">=</span> <span class="pre">&quot;123&quot;,</span> <span class="pre">exponent</span> <span class="pre">=</span> <span class="pre">&quot;24&quot;</span> <span class="pre">}</span></code>. We can define implicit conversions to the various the numeric types. Leadings 0’s restrict the type, so <code class="docutils literal notranslate"><span class="pre">010</span></code> must be stored in a type that can contain 999.</p>
+<p>Subtyping between numeric types should work fine if there are a few type annotations. For example we can have an addition function <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">Int8</span> <span class="pre">-&gt;</span> <span class="pre">Int8</span> <span class="pre">-&gt;</span> <span class="pre">Int8</span></code> and similarly for <code class="docutils literal notranslate"><span class="pre">Int16</span></code>. Then if we have a restriction on the output to <code class="docutils literal notranslate"><span class="pre">Int8</span></code> later it will flow back to ensure all the types are <code class="docutils literal notranslate"><span class="pre">Int8</span></code>, and similarly using an <code class="docutils literal notranslate"><span class="pre">Int16</span></code> will force the output to <code class="docutils literal notranslate"><span class="pre">Int16</span></code>. If there are 3 or more levels of precision then both an output and an input will need a type annotation, but this is 2 annotations for the whole program, which seems fine.</p>
 </div>
-<p>The default arithmetic type is a <code class="docutils literal notranslate"><span class="pre">number</span></code> type.
-This is arbitrary-precision magic which can store just about anything.
-For more specific types you can use <code class="docutils literal notranslate"><span class="pre">integer</span></code> for a strict integer, <code class="docutils literal notranslate"><span class="pre">decimal</span></code> for banking, and
-<code class="docutils literal notranslate"><span class="pre">float</span></code> for any IEEE 754 thing. For <code class="docutils literal notranslate"><span class="pre">integer</span></code> the <code class="docutils literal notranslate"><span class="pre">size</span></code> argument restricts the size and <code class="docutils literal notranslate"><span class="pre">sign</span></code> restricts the sign. Those aren’t the full constructors, it’ll probably have a range too.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>number 100!
-integer 123
-decimal 123.45
-float 1e20
-i8 = integer { size = 2^8 }
-i8 4
-# bits 0b00000100 or bits 0x04
-i8 129
-# Error: out of range, cannot convert
-u8 = i8 { sign = unsigned }
-u8 129
-# bits 0b10000001 or bits 0x81
-</pre></div>
+<div class="section" id="strings">
+<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
+<p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer together with a length. There can be different encodings: 8-bit UTF8, 16-bit UTF16, 32-bit UTF32, or some other encoding like Shift JIS or Big5. There are some optimizations that can be made for non-mutating views (substrings), e.g. storing an offset too to gives zero-copy slices (although ignoring allocators, a pointer is sufficient instead of start+offset). Iterating through strings is an interesting API design problem, particularly seeking for the <span class="math notranslate nohighlight">\(n\)</span> th character, but isn’t too hard overall. Dealing with invalid characters is a little trickier, but an implicit mode parameter should be sufficient. We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
 </div>
-<p>For implementation, <a class="reference external" href="https://gmplib.org/">GMP</a> is the obvious choice for integers. The rational implementation of GMP is also reasonable, but floating point will use <a class="reference external" href="https://www.mpfr.org/">MFPR</a> as the GMP webstie recommends. It is not clear at what level the binding may be. It will probably start out as a straightforward C binding like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s</a> but it may be more efficient to use a low-level binding to the assembly routines.</p>
+<div class="section" id="records">
+<h2>Records<a class="headerlink" href="#records" title="Permalink to this headline">¶</a></h2>
+<p>Structural subtyping of records allows you to pass <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">1,</span> <span class="pre">b:</span> <span class="pre">2}</span></code> to a function expecting <code class="docutils literal notranslate"><span class="pre">{b:</span> <span class="pre">Int}</span></code>.</p>
+</div>
+<div class="section" id="roles">
+<h2>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h2>
+<p>Roles are just an optimization for <code class="docutils literal notranslate"><span class="pre">coerce</span></code>. I don’t know why GHC polluted their type system with them, besides that it was a dirty hack to solve a pressing problem.</p>
 </div>
 </div>
 
@@ -284,10 +264,10 @@ u8 129
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Overloading.html" class="btn btn-neutral float-left" title="Overloading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Reduction.html" class="btn btn-neutral float-left" title="Reduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

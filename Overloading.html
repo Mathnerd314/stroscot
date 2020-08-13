@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Types" href="Types.html" />
+    <link rel="next" title="Verification" href="Verification.html" />
     <link rel="prev" title="Syntax" href="Syntax.html" /> 
 </head>
 
@@ -86,17 +86,25 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overloading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#semantics">Semantics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sequential-matches">Sequential matches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#method-qualifiers">Method qualifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#patterns">Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overrides">Overrides</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implicit-conversion">Implicit conversion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -177,8 +185,7 @@
 <span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
-<p>The cases are not ordered, instead they are matched most-specific to least-specific. Specificity is defined by an SMT solver, i.e. SAT(a &amp; not b) and UNSAT (not a &amp; b) means that a is less specific than b.</p>
-<p>If there is a tie regarding specificity, e.g. we were to modify the last case:</p>
+<p>The cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
@@ -187,9 +194,7 @@
 <span class="c1"># Error: rule conflict</span>
 </pre></div>
 </div>
-<p>Then it is an error.</p>
-<p>However, cases that overlap but produce the same result are allowed.
-It could be useful for tests:</p>
+<p>But <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">2</span></code> would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fib</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">fib</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">fib</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
@@ -198,11 +203,10 @@ It could be useful for tests:</p>
 <span class="n">fib</span> <span class="mi">5</span> <span class="o">=</span> <span class="mi">5</span>
 </pre></div>
 </div>
-<p>The implementation is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn’t omniscient. The optimizer decides which case is dead code and will be dropped.</p>
-<p>Internally, predicate failure is treated like any other error condition. All cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a> (or maybe its less powerful cousin <cite>unamb</cite>). The <cite>lub</cite> operation is implemented as a primitive that desugars in the middle of Core compilation, in a deterministic manner based on termination checking. I’m not sure how to handle continuations interacting with <cite>lub</cite>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>call binds args = do
- fold lub DispatchError (map ($args) binds)
-</pre></div>
+<div class="section" id="semantics">
+<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline">¶</a></h2>
+<p>The exact semantics is that all cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a> (or maybe its less powerful cousin <code class="docutils literal notranslate"><span class="pre">unamb</span></code>). The <code class="docutils literal notranslate"><span class="pre">lub</span></code> operation is implemented as a primitive that desugars in the middle of compilation, in a deterministic manner based on termination checking. Predicate failure, failed assertions, and nontermination are all treated as bottom.</p>
+<p>In fact the semantics is even more complicated, because return values that are not accepted by the surrounding context are also discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
 </div>
 <div class="section" id="sequential-matches">
 <h2>Sequential matches<a class="headerlink" href="#sequential-matches" title="Permalink to this headline">¶</a></h2>
@@ -221,11 +225,40 @@ It could be useful for tests:</p>
 <span class="c1"># p1, p2, etc. functions of $args</span>
 </pre></div>
 </div>
-<p>Maybe you will also be able to use match within a function, if the syntax works out:</p>
+<p>Maybe you will also be able to use <code class="docutils literal notranslate"><span class="pre">match</span></code> within a function, if the syntax details work out:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">match</span> <span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
                       <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="method-qualifiers">
+<h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot also supports Common Lisp’s method qualifiers: <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and``around`` (<a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a>). Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
+<p>Compared to CLOS, it is simplified in that only <code class="docutils literal notranslate"><span class="pre">around</span></code> s can call their next methods; primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is less specific than <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">SAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">UNSAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.</p>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>The implementation is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn’t omniscient. The optimizer decides which case is dead code and will be dropped. The full dispatch mechanism is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>dispatch methods args = do
+  [arounds, befores, afters, primaries] = map topological_sort $ partition methods
+  next-method = DispatchError
+  f arounds
+  f = \x -&gt;
+   case x of
+      a:as -&gt; call a { next-method = f as }
+      [] -&gt; g
+  g = case primaries of
+    [] -&gt; DispatchError
+    _ -&gt;
+      map call befores
+      x = call (concat primaries)
+      map call (reverse afters)
+      return x
+
+call binds args = fold lub DispatchError (map ($ args) binds)
+</pre></div>
+</div>
+<p>The last method qualifier is <code class="docutils literal notranslate"><span class="pre">list</span></code>. This exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).</p>
 </div>
 <div class="section" id="patterns">
 <h2>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline">¶</a></h2>
@@ -235,8 +268,9 @@ It could be useful for tests:</p>
 <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">}]</span> <span class="c1"># literal matching itself</span>
 <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="c1"># matches any list starting with 1</span>
 <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">:</span> <span class="n">rest</span><span class="p">}</span> <span class="c1"># matches a and the rest of the record</span>
-<span class="n">pat</span> <span class="o">=</span> <span class="n">pat</span> <span class="c1"># matches both patterns simultaneously</span>
-<span class="n">pat</span> <span class="ow">or</span> <span class="n">pat</span> <span class="c1"># matches either pattern</span>
+<span class="n">pat</span> <span class="n">AND</span> <span class="n">pat</span> <span class="c1"># matches both patterns simultaneously</span>
+<span class="n">pat</span> <span class="n">OR</span> <span class="n">pat</span> <span class="c1"># matches either pattern</span>
+<span class="o">~</span><span class="n">pat</span> <span class="c1"># desugars to u_ = let pat = u_ in ..., where u_ is a unique name</span>
 </pre></div>
 </div>
 <p>Guards allow arbitrary functions:</p>
@@ -262,6 +296,35 @@ It could be useful for tests:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="overrides">
+<h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this headline">¶</a></h2>
+<p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement prevents creating a new identifier, so that instead a base identifer can be extended.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># module 1</span>
+<span class="n">foo</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># module 2</span>
+<span class="kn">import</span> <span class="mi">1</span>
+<span class="n">override</span> <span class="n">foo</span>
+<span class="n">foo</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1"># module 3</span>
+<span class="kn">import</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">foo</span> <span class="mi">1</span> <span class="c1"># 1</span>
+<span class="n">foo</span> <span class="mi">2</span> <span class="c1"># 3</span>
+</pre></div>
+</div>
+<p>If the override statement was not in module 2, then using <code class="docutils literal notranslate"><span class="pre">foo</span></code> in module 3 would result in an ambiguous name resolution error.</p>
+</div>
+<div class="section" id="implicit-conversion">
+<h2>Implicit conversion<a class="headerlink" href="#implicit-conversion" title="Permalink to this headline">¶</a></h2>
+<p>There is a function <code class="docutils literal notranslate"><span class="pre">convert</span></code> in the core library. It includes as cases / requirements:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span></code> (reflexivity)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">a))</span></code> (transitivity)</p></li>
+</ul>
+<p>A pass early in compilation adds a call to <code class="docutils literal notranslate"><span class="pre">convert</span></code> around every value, e.g. <code class="docutils literal notranslate"><span class="pre">1+2</span></code> becomes <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">(+)</span> <span class="pre">(convert</span> <span class="pre">1)</span> <span class="pre">(convert</span> <span class="pre">2)</span></code>.</p>
+<p>New cases can be added; this is useful in various instances. For example we can create subtyping.</p>
+</div>
 </div>
 
 
@@ -272,7 +335,7 @@ It could be useful for tests:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

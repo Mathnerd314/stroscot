@@ -86,20 +86,29 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Build system</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#package-manager">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ci-cd">CI/CD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#release-monitoring">Release monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automation">Automation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#marking">Marking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backouts">Backouts</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
@@ -173,7 +182,7 @@
             
   <div class="section" id="build-system">
 <h1>Build system<a class="headerlink" href="#build-system" title="Permalink to this headline">¶</a></h1>
-<p>Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as typechecked/optimized functions can be stored efficiently and rebuilt only when needed. Also, it allows the compiler’s include-following mechanism to tightly integrate with the build system, so that generated files can be generated before they are used.</p>
+<p>Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. Also, it allows the compiler’s include-following mechanism to tightly integrate with the build system, so that generated files can be generated before they are used.</p>
 <div class="graphviz"><img src="_images/graphviz-1a509ab03a6c9026e34ddceebc0e71426e17cdab.png" alt="digraph foo {
     rankdir=LR;
     subgraph cluster_0 {
@@ -193,26 +202,31 @@
     a2 -&gt; &quot;C$1.class&quot;
     a2 -&gt; &quot;C$Foo.class&quot;
 }" class="graphviz" /></div>
-<p>The pipeline of a build system is fairly straightforward:</p>
-<ul>
-<li><p>We start with a changelist of “dirty” keys; this is usually a list of local files, but can also include volatile information such as version numbers or FTP server listings or finer keys such as individual AST nodes.</p></li>
-<li><p>Next we propagate dirtiness up the pre-built task/key graph; this allows us to identify tasks as being in one of these states:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Present: built, not dirty</p></li>
-<li><p>Recheck: a subtask / subkey is dirty, might have to rebuild again</p></li>
-<li><p>Missing: never built, needs to be built</p></li>
+<div class="section" id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
+<p>A task’s state evolves as follows:</p>
+<div class="graphviz"><img src="_images/graphviz-083948f501a77c25946a411b7a2c62219fba5c4f.png" alt="digraph foo {
+    rankdir=LR;
+    Recheck -&gt; Dirty
+    Dirty -&gt; Running
+    Running -&gt; Loaded
+    Running -&gt; Error
+    Recheck -&gt; Loaded
+}" class="graphviz" /></div>
+<p>The pipeline of a build system is as follows:</p>
+<ul class="simple">
+<li><p>We start with a changelist of “pending” keys, i.e. keys that might have changed. The prototypical example is a list of changed files from a file-watching daemon, but it can also include volatile information such as external tool version numbers or FTP server listings or finer keys such as individual AST nodes. We could also use the list of all keys from the previous build, skipping the watcher altogether.</p></li>
+<li><p>We go through the list and scan the data for each key. If a key has actually changed, we mark all the tasks that have used it as dirty.</p></li>
+<li><p>We also propagate dirtiness up the pre-built task/key graph; every task that depends on a dirty task is marked as needing a recheck.</p></li>
+<li><p>After scanning all the keys, we go down starting from the top-level task. (We could start the build earlier by doing speculative execution, but scanning is cheap) We want a suspending build system <a class="bibtex reference internal" href="zzreferences.html#mokhovbuildsystemscarte2020" id="id1">[MMPJ20]</a>. So there must be some way to suspend the current task when it calls a sub-task, probably just continuations like how Shake does it.</p></li>
+<li><p>When a task is called, we first check its state to determine whether it needs to be re-run. Dirty tasks are run immediately. Loaded tasks can be skipped immediately, as can tasks stored in the database that have not yet been marked. Otherwise, for rechecks, we run through the serialized dependency list and re-check the keys / subtasks in order (and in parallel if the subtasks are parallel). When the task is finished its state is marked as loaded / error.</p></li>
+<li><p>Before running a task, we clean up old build results, if any, i.e. delete all generated keys (outputs) that are still present. After running a task we store its (keyed) outputs with either verifying or constructive traces.</p></li>
+<li><p>To prune the store (which is a bad idea if there are multiple configurations that build different subsets), we can do as above and also load all the subtasks of present tasks. Then anything not loaded is not needed and its files etc. can be deleted.</p></li>
 </ul>
-</div></blockquote>
-</li>
-<li><p>Next we go down from the top-level task. We want a suspending build system <a class="bibtex reference internal" href="zzreferences.html#mokhovbuildsystemscarte2020" id="id1">[MMPJ20]</a>. So there must be some way to suspend the current task when it calls a sub-task, probably just continuations like how Shake does it.</p></li>
-<li><p>When a task is called, we first check its state to determine whether it needs to be re-run. Missing tasks are run immediately. Present tasks can be skipped immediately. Otherwise we run through the serialized dependency list and re-check the keys / subtasks in order (and in parallel if the subtasks are parallel).</p></li>
-<li><p>Before re-running a task, we delete all its generated keys (outputs). After running a task we store its (keyed) outputs with either verifying or constructive traces.</p></li>
-<li><p>To prune the store, we can do as above and also load all the subtasks of present tasks. Then anything not loaded is not needed and can be pruned, although if there are multiple configurations etc. then this is a bad idea.</p></li>
-</ul>
+</div>
 <div class="section" id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h2>
-<p>Unlike Shake, tasks are not keys; it is a two-level graph like Pluto. Task identifiers are serializable as well, but they are in a different namespace. The store maintains dependency lists of key and task identifiers for each task, but tasks do not store versions the way keys do.</p>
+<p>Unlike Shake, tasks are not keys; it is a two-level graph like Pluto. Task identifiers are serialized to the databased as well as keys, but they are in a different namespace. The store maintains dependency lists of key and task identifiers for each task, but tasks do not store versions the way keys do.</p>
 <p>For the task graph, we have some nontrivial requirements for soundness, similar to <a class="bibtex reference internal" href="zzreferences.html#erdwegsoundoptimalincremental2015" id="id2">[ELW15]</a>:</p>
 <ul class="simple">
 <li><p>The graph is a DAG.</p></li>
@@ -221,40 +235,79 @@
 </ul>
 <p>An easy way to ensure these last two is to construct a function mapping from generated files (keys) to tasks, and then have a library function for requiring keys which uses the map to require the task and then the key. Unfortunately in a dynamic build such a direct map is not always available and so the requirement is relaxed to allow indirect dependencies. For example, we may have a generated file that is picked up in a search path directory listing. To deal with this directly we would need to introduce build logic into the search mechanism, but a phase separation handles it too with minimal changes. And since dependencies can be required after execution, we can speculatively generate files and require only the ones that are actually used.</p>
 <p>Giving tasks versions is a good idea; this amounts to adding a version key as a dependency.</p>
-<p>Without an initial list of changed keys, we will have to walk the whole graph. This can still be done efficiently by batching filesystem reads. A bigger question is whether up-propagation of dirtyiness can be avoided. My intuition is that most dependency graphs are tree-like and so going up is roughly <span class="math notranslate nohighlight">\(\log(n)\)</span>. There are some dependencies (e.g. small common functions) which have a huge reverse dependency list, but changing those requires a full rebuild anyway so the overhead is dwarfed.</p>
+<p>Without an initial list of changed keys, we will have to check all the keys individually. This can still be done efficiently by batching filesystem stat’s using io_uring (<a class="reference external" href="https://twitter.com/axboe/status/1205991776474955777">4x-8x faster</a>). A bigger question is whether up-propagation of dirtyiness can be avoided. The intuition is that most dependency graphs are tree-like and so going up is roughly <span class="math notranslate nohighlight">\(\log(n)\)</span>, which seems acceptable. There are some dependencies (e.g. small common functions) which have a huge reverse dependency list, but changing those requires a full rebuild anyway so the overhead is dwarfed, and the changes might not propagate up the tree.</p>
 </div>
 <div class="section" id="package-manager">
 <h2>Package manager<a class="headerlink" href="#package-manager" title="Permalink to this headline">¶</a></h2>
-<p>A language also needs a package manager. Compared to a build system alone, the main feature is downloading files over the network and verifying cryptographic hashes. In the build graph a new state “Substituted” is added which behaves similarly to “Present”; when a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so the relevant keys are downloaded instead of the task being built. Relevant here means the runtime dependencies needed by other tasks. From a build perspective this is a shortcut, as running the task should recreate everything the task builds to avoid potentially leaving out necessary files, but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes.</p>
-<p>In the implementation details are some filesystem issues, in particular different layouts on different systems and allowing per-user installs, but Conda has worked out a reasonable layout.</p>
+<p>A language also needs a package manager. Compared to a build system alone, the main feature is downloading files over the network (like wget, curl, aria2, etc.) and verifying cryptographic hashes/signatures. When a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so all of the task’s generated keys (files) are downloaded instead of the task being built.</p>
+<p>The list of generated files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn’t exist on the target system.</p>
+<p>There are also some filesystem convention/naming issues, in particular different layouts on different systems and allowing per-user installs, but Conda has worked out reasonable solutions for these, relative pathhs and so on.</p>
+<p>A useful feature not implemented in most package managers is P2P distribution, over Bittorrent or IPFS. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is <a class="reference external" href="https://wiki.debian.org/DebTorrent#line-42">not too great</a>). There are some notes <a class="reference external" href="https://github.com/ipfs-inactive/package-managers">from IPFS</a> and various half-baked package managers like <code class="docutils literal notranslate"><span class="pre">npm-on-ipfs</span></code>.</p>
 </div>
 <div class="section" id="linux-distribution">
 <h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this headline">¶</a></h2>
 <p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways.</p>
 <p>The goal of the Linux distribution, compared to others, is automation: all package updates are automatic, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
+<p>Package pinning is an issue, to handle broken software and stale dependencies. A new release of a tool might just not work; then it needs to pinned to the old version. In contrast, a library update might break only a few packages; the distro should then package multiple versions of the library and build most packages with the new libary while pinning the library to the old version for the specific breakages. On normal distros this would be accomplished using soname separation, <code class="docutils literal notranslate"><span class="pre">libf.so.1</span></code> vs <code class="docutils literal notranslate"><span class="pre">libf.so.2</span></code>, but this is pretty fragile compared to using a full package hash. Detecting ABI changes to generate the versions can be automated but it isn’t pretty.</p>
 </div>
-<div class="section" id="ci-cd">
-<h2>CI/CD<a class="headerlink" href="#ci-cd" title="Permalink to this headline">¶</a></h2>
-<p>Along with a Linux distribution (or any large software collection) comes the need to continuously test and update packages. Besides providing a prebuilt collection of packages, the main purpose is to identify breakages, i.e. when a test or build fails due to an update. Once a breakage is identified, it can be ameliorated by pinning the package to the old version. If the update is in a library and only a few packages are broken by the dependency update, the package can be split into multiple versions and the pin can be restricted to those specific dependencies.</p>
-<p>Unfortunately, detecting breakages is an imperfect science; there are exponentially many combinations of different versions, and tests can be flaky. So we can only identify updates that have a high probability of causing a breakage. But, given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild.</p>
-<p>We can model the test process as follows:</p>
+<div class="section" id="release-monitoring">
+<h2>Release monitoring<a class="headerlink" href="#release-monitoring" title="Permalink to this headline">¶</a></h2>
+<p>Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is <a class="reference external" href="https://fedoraproject.org/wiki/Upstream_release_monitoring">Anitya</a>, which solves some of this, and also <a class="reference external" href="https://github.com/DataDrake/cuppa">cuppa</a>. But both of them work by writing backends/providers for each major hosting site. We can write our own:</p>
+<ul class="simple">
+<li><p>KDE, Debian: There is a <code class="docutils literal notranslate"><span class="pre">ls-lR.bz2</span></code> / <code class="docutils literal notranslate"><span class="pre">ls-lR.gz</span></code> file in the top level with a directory listing with timestamps and filesizes.</p></li>
+<li><p>GNU, <a class="reference external" href="http://www.gnu.org/server/mirror.html">Savannah</a>, GNOME, Kernel.org, X.org: We can get a directory listing from an Rsync mirror with a command like <code class="docutils literal notranslate"><span class="pre">rsync</span> <span class="pre">--no-h</span> <span class="pre">--no-motd</span> <span class="pre">--list-only</span> <span class="pre">-r</span> <span class="pre">--exclude-from=rsync-excludes-gnome</span> <span class="pre">rsync://mirror.umd.edu/gnome/</span></code>.</p></li>
+<li><p>RubyGems: There is a <a class="reference external" href="https://rubygems.org/versions">version index</a> that lists all the gems and their versions. Or there is an API to get versions for each gem individually.</p></li>
+<li><p>Hackage: There is a <a class="reference external" href="https://hackage.haskell.org/api#core">package index</a>. Also an RSS feed (I’m guessing it needs to set the accept header). Or there is a per-project “preferred versions” list in JSON. It is probably more efficient to use the <a class="reference external" href="https://github.com/commercialhaskell/all-cabal-hashes">Git mirror</a> though. For Stackage there are YAML files with version/build info <a class="reference external" href="https://github.com/commercialhaskell/stackage-snapshots/">here</a>.</p></li>
+<li><p>PyPI: There are <a class="reference external" href="https://warehouse.readthedocs.io/api-reference/#available-apis">APIs</a>. The RSS feed works if we can regularly check it every 20 minutes. Otherwise, besides the XML-RPC changelog API that isn’t supposed to be used, the only way is to download the list of projects from the simple API and then go through and fetch the JSON data for each project. Since the requests are cached this is not too much overhead, but it can take a while for lots of projects. There is <a class="reference external" href="https://github.com/pypa/warehouse/issues/347">an issue</a> filed for a bulk API / <a class="reference external" href="https://github.com/pypa/warehouse/issues/1478">dump</a>.</p></li>
+<li><p>CPAN: There is an RSS feed and a per-package API to get the latest version. Probably one to get all versions too.</p></li>
+<li><p>CRAN: There is an RSS feed and a per-package API to get all versions.</p></li>
+<li><p>Crates.io: There is an <a class="reference external" href="https://github.com/rust-lang/crates.io-index">index repository</a>, or we could <a class="reference external" href="https://crates.io/data-access">crawl</a>.</p></li>
+<li><p>SourceForge: There is no useful global list, but we can check each project’s RSS feed to find new releases. If there are not enough files returned we can <a class="reference external" href="https://stackoverflow.com/questions/30885561/programmatically-querying-downloadable-files-from-sourceforge">increase the limit</a>.</p></li>
+<li><p>LaunchPad, JetBrains, Drupal, Maven: There is an API to list versions for each project.</p></li>
+<li><p>GitHub: There is a per-project <a class="reference external" href="https://developer.github.com/v4/object/release/">releases API</a>. The API is ratelimited heavily.</p></li>
+<li><p>GitLab, Bitbucket: There is a tags endpoint.</p></li>
+<li><p>Folder: We can scrape the standard default Apache directory listing</p></li>
+<li><p>Git/Hg/other VCS: We can fetch the tags with git/hg/etc.</p></li>
+<li><p>Projects not using any of the above: If there is a version number in the URL, we can scrape the download page. Otherwise, we can use HTTP caching to poll the URL. Although, for such isolated files, there is the issue of the license changing suddenly, so the download page is worth watching too.</p></li>
+</ul>
+<p>Overall, there are only a few mechanisms:</p>
+<ul class="simple">
+<li><p>Feed: A way to efficiently get a list of package updates (in particular an RSS feed or Git repo)</p></li>
+<li><p>Index: A compressed list of all the packages and their versions (Git repo, <code class="docutils literal notranslate"><span class="pre">ls-lR</span></code>, rsync)</p></li>
+<li><p>Versions: For a package, a list of its available versions</p></li>
+</ul>
+</div>
+<div class="section" id="automation">
+<h2>Automation<a class="headerlink" href="#automation" title="Permalink to this headline">¶</a></h2>
+<p>Along with a Linux distribution (or any large software collection) comes the need to continuously test and update packages. An automation system handles several tasks:
+* Pulling together new changes
+* Testing changes and identifying breakages
+* Generating reports
+* Uploading a nightly release</p>
+<p>Since our goal is automation, we want the detection of breakages to be automated as well. Detecting breakages is an imperfect science: there are exponentially many combinations of different changes, and tests can be flaky. So in general we can only identify updates that have a high probability of causing a breakage. The problem falls under “stochastic scheduling”, in particular determining which subset of changes to schedule a build for, given uncertain information about build successes/failures.</p>
+<p>The general goal is to minimize the time/build resources needed for identifying breakages, i.e. to maximize the information gained from each build. Incremental building means that the most efficient strategy is often building in sequence, but this does not hold for larger projects where changes are almost independent.</p>
+<p>Regarding the ordering of changes, oftentimes they are technically unordered and could be merged in any order. But an optimized order like least likely to fail could lead to arbitrarily long merge times for risky changes. It is simpler to do chronological order. This could be customized to prioritize hotfixes before other changes, but it is easier to set up a dedicated scheduler for those.</p>
+<p>To handle breakages, there are two main strategies: marking and backouts. Both are useful; a test failure may be unimportant or outdated, suggesting the marking strategy, while backouts reject bad changes from the mainline and keep it green. Backouts are harder to compute: for <span class="math notranslate nohighlight">\(n\)</span> commits, there are <span class="math notranslate nohighlight">\(2^n\)</span> possible combinations to test, giving a state space of size <span class="math notranslate nohighlight">\(2^{2^n}\)</span>. Meanwhile marking only has <span class="math notranslate nohighlight">\(2^n\)</span> states. Marking is run over already-committed changes, hence must often deal with the entire commit history, while backouts are for pending changes and only need to consider a subset of commits.</p>
+<div class="section" id="marking">
+<h3>Marking<a class="headerlink" href="#marking" title="Permalink to this headline">¶</a></h3>
+<p>For marking, we can model the test process as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>broken = false
-for change in observed_changes:
+for change in changes:
   change_type &lt;- choice([broken ? FIXING : BREAKING, NONE], broken, change)
   if change_type = BREAKING:
     broken = true
   else if change_type = FIXING:
     broken = false
 
-  for run in observed_runs:
-    flaky &lt;- choice([YES, NO], broken, change)
+  for run in runs:
+    flaky &lt;- choice([YES, NO], broken)
     if flaky = YES:
       report(!broken)
     else:
       report(broken)
 </pre></div>
 </div>
-<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <a class="bibtex reference internal" href="zzreferences.html#najafibisectingcommitsmodeling2019" id="id3">[NRS19]</a> that use the list of files changed / modified components, presence of keywords in commit message, etc. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
+<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <a class="bibtex reference internal" href="zzreferences.html#najafibisectingcommitsmodeling2019" id="id3">[NRS19]</a> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
 <p>For observations, if we assume that the probability of false positive / false success <span class="math notranslate nohighlight">\(P(p_k)\)</span> and false negative / false failure <span class="math notranslate nohighlight">\(P(n_k)\)</span> are fixed per commit, then the probability of observing <span class="math notranslate nohighlight">\(i\)</span> test failures and <span class="math notranslate nohighlight">\(j\)</span> test successes (in a given/fixed order) given that the build is broken / not broken is</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
@@ -308,19 +361,84 @@ for change in observed_changes:
 </tr>
 </tbody>
 </table>
-<p>The table only has one probability, treating the build as a unit; we could also make one table for each test and a UI to aggregate them somehow. From this table, we can make simple decisions, reporting breakages, hiding flaky runs, blacklisting broken builds, etc. once a certainty threshold is reached. But a more important question is determining which build to do next. There are several goals:</p>
-<ul class="simple">
-<li><p>Identifying breakages etc. sufficiently to generate reports</p></li>
-<li><p>Minimizing redundant builds/tests that generate no new information</p></li>
-<li><p>Redoing runs that are affected by flaky tests</p></li>
-<li><p>Doing cheap tests and sensitive tests before others</p></li>
-</ul>
-<p>The general problem falls under “stochastic scheduling”. For the optimal (intractable) solution, as well as the success/failure probability we must also know the cost associated with running the tests (in time/resource usage) and (for parallelisation) the available resources; it is almost a multi-armed bandit problem where getting enough information to generate a report results in a payoff. However, a failing build for one commit changes the calculated probabilities of the other commits failing, so it is not independent.</p>
-<p>A simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; this ignores flakiness. What we want is to maximize the information entropy gained from a run <span class="math notranslate nohighlight">\(X\)</span>, i.e.</p>
+<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <a class="bibtex reference internal" href="zzreferences.html#ziftciwhobrokebuild2017" id="id6">[ZR17]</a>
+The table treats the build as a unit; for added precision we could also make one table for each test and a UI to aggregate them somehow. From this table, we can make simple decisions, reporting breakages, hiding flaky runs, blacklisting broken builds, blessing working revisions, etc. once a certainty threshold is reached.</p>
+<p>A simple heuristic for the next build is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; this ignores flakiness. What we want is to maximize the Kullback-Leibler divergence / <a class="reference external" href="https://en.wikipedia.org/wiki/Information_gain_in_decision_trees">information gain</a> from a run <span class="math notranslate nohighlight">\(X\)</span>, i.e. something like</p>
 <div class="math notranslate nohighlight">
 \[H(X) = - P(x_s) \log(P(x_s)) - P(x_f) \log(P(x_f))\]</div>
-<p>where <span class="math notranslate nohighlight">\(x_s = 1 - x_f\)</span> is the probability that the run will succeed.</p>
-<p>There is also the issue of spacing out parallel builds to do trisection / general <span class="math notranslate nohighlight">\(n\)</span>-section. Speculative building will end up doing bisection of bisection (i.e. quadrisection and general <span class="math notranslate nohighlight">\(2^n\)</span>-section) in the case of little information, which is probably good enough.</p>
+<p>where <span class="math notranslate nohighlight">\(x_s = 1 - x_f\)</span> is the probability that the run will succeed. To accommodate differing build costs we can simply divide by the cost; it works for Bayesian search of boxes so it probably works here.</p>
+<p>Overall, the idea is similar to <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code>’s <code class="docutils literal notranslate"><span class="pre">min(ancestors,N-ancestors)</span></code>, but with more advanced models and using expectation instead of <code class="docutils literal notranslate"><span class="pre">min</span></code>. To implement a full regression tool we also need to mark and handle untestable revisions, where the test is not observable due to the build being broken etc. This is fairly straightforward and amounts to doubling the state space and adding some more probability models.</p>
+</div>
+<div class="section" id="backouts">
+<h3>Backouts<a class="headerlink" href="#backouts" title="Permalink to this headline">¶</a></h3>
+<p>For backouts, we must first decide a backout strategy. We should maximize the number of commits included, but this alone is not enough to decide between <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">A,C</span></code>; we might as well prefer the earlier commit <code class="docutils literal notranslate"><span class="pre">A,B</span></code>. Also, for <code class="docutils literal notranslate"><span class="pre">A</span></code> vs <code class="docutils literal notranslate"><span class="pre">B,C</span></code>, to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely. So we instead have early-biased lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them.</p>
+<p>The paper <a class="bibtex reference internal" href="zzreferences.html#ananthanarayanankeepingmastergreen2019" id="id7">[AAH+19]</a> assumes accurate build results and that there are no fixing commits, i.e. if <code class="docutils literal notranslate"><span class="pre">A</span></code> fails then <code class="docutils literal notranslate"><span class="pre">A,B</span></code> will fail as well. But in general this isn’t true; we need a more complex model accounting for breakages, fixes, dependencies, conflicts, and flakiness. But we’ll assume no higher-order phenomena, e.g. fixes to conflicts.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>breaking = []
+for c in changes:
+  is_breaking &lt;- choice([YES, NO], c)
+  if is_breaking:
+    breaking += c
+
+fixing = {}; fixing.default = []
+for c2 in changes:
+  for c in breaking:
+    if c2 &lt;= c:
+      continue
+    is_fixing &lt;- choice([YES, NO], c, c2)
+    if is_fixing:
+      fixing[c2] += c
+
+dependencies = {}; dependencies.default = []
+for c2 in changes:
+  for c in changes:
+    if c2 &lt;= c:
+      continue
+    is_dependency &lt;- choice([YES, NO], c, c2)
+    if is_dependency:
+      dependencies[c2] += c
+
+conflicts = []
+for c2 in changes:
+  for c in changes:
+    if c2 &lt;= c:
+      continue
+  is_conflict &lt;- choice([YES, NO], c, c2)
+  if is_conflict:
+    conflicts[c2] += c
+
+function query_run(set):
+  fail_type = NONE
+
+  outer:
+  for b in breaking:
+    if !set.contains(b)
+      continue
+    for f in fixing[b]:
+      if set.contains(f)
+        continue outer
+    fail_type = BREAKAGE
+
+  for c in set:
+    for d in dependencies[c]:
+      if !set.contains(d)
+        fail_type = DEPENDENCY
+
+
+  for c2 in conflicts:
+    for c in conflicts[c]:
+      if set.contains(c)
+        fail_type = CONFLICT
+
+  flaky = choice([YES, NO], fail_type)
+  broken = fail_type == NONE
+  if flaky = YES:
+    report(!broken)
+  else:
+    report(broken)
+</pre></div>
+</div>
+<p>The size and complexity presents a challenge, but at the end of the day it’s just a large Bayesian network, and we want to determine the highest-ranking success, based on the (unobserved/hidden) brokenness properties.</p>
+</div>
 </div>
 </div>
 

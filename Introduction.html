@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Argument passing" href="Arguments.html" />
+    <link rel="next" title="Syntax" href="Syntax.html" />
     <link rel="prev" title="The Stroscot Programming Language" href="index.html" /> 
 </head>
 
@@ -96,13 +96,16 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -211,15 +214,6 @@ programs are freed to be idealized to their purest form.</p>
 </div>
 <div class="section" id="goals">
 <h2>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">run_sql_statement</span> <span class="p">{</span> <span class="n">SELECT</span> <span class="o">...</span> <span class="p">}</span>
-</pre></div>
-</div>
-<p>The idea extends further, embedding lower-level and incompatible languages like assembly and C++.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">asm</span> <span class="p">{</span> <span class="n">sumsq</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">y</span><span class="p">)</span> <span class="p">}</span>
-<span class="n">my_func</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;foo.cpp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s2">&quot;my_func&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 <div class="section" id="the-ultimate">
 <h3>The ultimate<a class="headerlink" href="#the-ultimate" title="Permalink to this headline">¶</a></h3>
 <p>Eventually I would like Stroscot to be the ultimate programming language, supporting all known language constructs to some degree and providing a testbench for research into new ones. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL’s COMEFROM as something best left unimplemented, but it’s not hard to implement with continuations. The trickier parts are actually at the low level, interfacing garbage collectors and calling conventions, and the value proposition there should be clear.</p>
@@ -245,7 +239,7 @@ programs are freed to be idealized to their purest form.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Arguments.html" class="btn btn-neutral float-right" title="Argument passing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="The Stroscot Programming Language" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

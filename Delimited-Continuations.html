@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Optimal reduction" href="Optimal-Reduction.html" />
-    <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
+    <link rel="next" title="Metaprogramming" href="Fexprs.html" />
+    <link rel="prev" title="Argument passing" href="Arguments.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,13 +86,19 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Delimited continuations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -182,16 +188,16 @@ representing the delimited continuation from the call to withSubCont
 up to but not including the prompt. This <em>captures</em> a delimited
 continuation, analogous to how call/cc captures an undelimited
 continuation. k can then be applied like any other function.</p></li>
+<li><p><strong>pushSubCont</strong> k v —  evaluates its first subexpression to yield a subcontinuation, then evaluates its second subexpression in a continuation that composes the subcontinuation with the current continuation.</p></li>
 </ul>
-<p>This is based on <a class="bibtex reference internal" href="zzreferences.html#dyvbigmonadicframeworkdelimited2007" id="id1">[DPJS07]</a> except
-that there is no <strong>pushSubCont</strong> because applying a continuation is automatic.</p>
+<p>This is based on <a class="bibtex reference internal" href="zzreferences.html#dyvbigmonadicframeworkdelimited2007" id="id1">[DPJS07]</a>.</p>
 <p>An example from the paper is the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">newPrompt</span><span class="p">;</span>
 <span class="mi">2</span> <span class="o">+</span> <span class="n">pushPrompt</span> <span class="n">p</span>
       <span class="k">if</span> <span class="n">withSubCont</span> <span class="n">p</span>
-           <span class="p">(</span>\<span class="n">k</span><span class="o">.</span> <span class="n">k</span> <span class="kc">False</span> <span class="o">+</span> <span class="n">k</span> <span class="kc">True</span><span class="p">)</span>
+           <span class="p">(</span>\<span class="n">k</span><span class="o">.</span> <span class="n">pushSubCont</span> <span class="n">k</span> <span class="kc">False</span> <span class="o">+</span> <span class="n">pushSubCont</span> <span class="n">k</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">then</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">4</span>
-<span class="c1"># result: 9</span>
+<span class="c1"># result: 2+4+3=9</span>
 </pre></div>
 </div>
 <p>First we call newPrompt to obtain a fresh prompt and give it a name, p,
@@ -205,6 +211,42 @@ which, by the magic of delimited control, is equivalent to the function
 True as argument, and we add the two results, giving us 7. The result of
 the pushPrompt is thus 7, and we return to the addition of 2, giving us
 9 as the final result.</p>
+<p>Since continuations are the mother of all monads, they can easily implement effects, state, I/O, etc.</p>
+<p>For example, State:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">state</span> <span class="o">=</span> <span class="n">newPrompt</span>
+<span class="n">get</span> <span class="o">=</span> <span class="n">withSubCont</span> <span class="n">state</span> <span class="p">(</span>\<span class="n">k</span> <span class="n">s</span> <span class="o">-&gt;</span> <span class="n">pushSubCont</span> <span class="n">k</span> <span class="n">s</span> <span class="n">s</span><span class="p">)</span>
+<span class="n">put</span> <span class="n">s</span> <span class="o">=</span> <span class="n">withSubCont</span> <span class="n">state</span> <span class="p">(</span>\<span class="n">k</span> <span class="n">_</span> <span class="o">-&gt;</span> <span class="n">pushSubCont</span> <span class="n">k</span> <span class="p">()</span> <span class="n">s</span><span class="p">)</span>
+<span class="n">run</span> <span class="n">s</span> <span class="n">e</span> <span class="o">=</span> <span class="n">pushPrompt</span> <span class="n">state</span> <span class="n">e</span> <span class="p">(,)</span> <span class="n">s</span>
+
+<span class="c1"># example</span>
+<span class="n">run</span> <span class="p">{</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">get</span>
+  <span class="n">put</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">x</span>
+<span class="p">}</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>Implementing delimited continuations relies on transforming the program.</p>
+<p>First we define a name supply for prompts:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">newPrompt</span> <span class="o">=</span> <span class="n">n</span><span class="o">++</span>
+</pre></div>
+</div>
+<p>Then withSubCont propagates upwards until is finds a pushPrompt:</p>
+<dl class="simple">
+<dt>::</dt><dd><p>(withSubCont p k) e = withSubCont p (x. k (x e))
+v (withSubCont p k) = withSubCont p (x. k (v x))
+x.(withSubCont p k) – keep evaluating
+pushPrompt q (withSubCont p f) | p /= q = withSubCont p (x. pushPrompt q (f x))
+pushPrompt p (e [withSubCont p f]) = f (y. e y)
+pushPrompt p v = v</p>
+</dd>
+</dl>
+<p>A naked withSubCont results in the “Prompt not found” exception.</p>
+<p>pushSubCont can be safely ignored as a no-op type conversion.</p>
+</div>
 </div>
 
 
@@ -215,10 +257,10 @@ the pushPrompt is thus 7, and we return to the addition of 2, giving us
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Optimal-Reduction.html" class="btn btn-neutral float-right" title="Optimal reduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Metaprogramming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Arguments.html" class="btn btn-neutral float-left" title="Argument passing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

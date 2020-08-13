@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Overloading" href="Overloading.html" />
-    <link rel="prev" title="Optimal reduction" href="Optimal-Reduction.html" /> 
+    <link rel="prev" title="Introduction" href="Introduction.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,19 +86,30 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Syntax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#numbers">Numbers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#arithmetic-and-parentheses">Arithmetic and Parentheses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#strings">Strings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#structured-data">Structured Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#operators">Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#blocks">Blocks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parsing">Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#type-declarations">Type declarations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variables">Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dsl">DSL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namespacing">Namespacing</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -173,37 +184,28 @@
             
   <div class="section" id="syntax">
 <h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h1>
-<p>The basics are numbers, booleans, and character strings of text.
-But there’s always more.</p>
-<div class="section" id="arithmetic-and-parentheses">
-<h2>Arithmetic and Parentheses<a class="headerlink" href="#arithmetic-and-parentheses" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot supports your typical arithmetic operations:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pi_approx</span> <span class="o">=</span> <span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">))</span>
-<span class="c1"># 355/113 = 3.14159292035...</span>
+<p>Almost everything in Stroscot is an expression. The basics are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
+<div class="section" id="numbers">
+<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(0[box])?[0-9a-fA-F_]+(\.[0-9a-fA-F_]+)?([eEpP][+-]?[0-9_]+)?
 </pre></div>
 </div>
-<p>For brevity, leading and trailing parentheses can be omitted:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pi_approx</span> <span class="o">=</span> <span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
-<span class="c1"># 355/113</span>
+<p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, slightly liberalized to allow using floating-point notation for integers and binary exponents for decimals.</p>
+</div>
+<div class="section" id="arithmetic-and-parentheses">
+<h2>Arithmetic and Parentheses<a class="headerlink" href="#arithmetic-and-parentheses" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot supports your typical arithmetic operations and precedence levels:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">))</span>
+<span class="o">--&gt;</span> <span class="mi">355</span><span class="o">/</span><span class="mi">113</span> <span class="o">=</span> <span class="mf">3.14159292035</span><span class="o">...</span>
+</pre></div>
+</div>
+<p>For brevity, trailing parentheses can be omitted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
+<span class="o">--&gt;</span> <span class="mi">355</span><span class="o">/</span><span class="mi">113</span>
 </pre></div>
 </div>
 <p>If you don’t like this, you can set Stroscot to warn or error on
-unmatched parentheses.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stroscot</span> <span class="o">-</span><span class="n">Wunmatched_parentheses</span> <span class="n">pi_approx</span>
-<span class="c1"># Warning: unmatched parentheses</span>
-<span class="c1"># 355/113</span>
-<span class="n">stroscot</span> <span class="o">-</span><span class="n">Eunmatched_parentheses</span> <span class="n">pi_approx</span>
-<span class="c1"># Error: unmatched parentheses</span>
-<span class="c1"># Aborted.</span>
-</pre></div>
-</div>
-<p>A gentler approach is to reformat the code to add parentheses:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stroscot</span> <span class="o">-</span><span class="n">Funmatched_parentheses</span> <span class="n">pi_approx</span>
-<span class="c1"># Log: fixing unmatched parentheses</span>
-</pre></div>
-</div>
-<p>This option is on by default and running a source code formatter is
-always good practice.</p>
+unmatched parentheses, or run the code formatter which will add them.</p>
 </div>
 <div class="section" id="strings">
 <h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
@@ -213,7 +215,27 @@ always good practice.</p>
 &#39;short&#39;
 </pre></div>
 </div>
-<p>Concatenation is <code class="docutils literal notranslate"><span class="pre">+</span></code>. Most operators are textual:</p>
+</div>
+<div class="section" id="structured-data">
+<h2>Structured Data<a class="headerlink" href="#structured-data" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot supports records and arrays.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">}</span>
+<span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Sequences and slices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">..</span><span class="p">]</span>
+<span class="p">[</span><span class="n">minBound</span><span class="o">..</span><span class="p">]</span>
+<span class="p">[</span><span class="n">minBound</span><span class="o">..</span><span class="n">maxBound</span><span class="p">]</span>
+<span class="p">[</span><span class="n">minBound</span><span class="p">,</span><span class="n">minBound</span><span class="o">+</span><span class="mf">1.</span><span class="o">.</span><span class="n">maxBound</span><span class="p">]</span>
+<span class="nb">slice</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nb">slice</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">length</span> <span class="nb">list</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="operators">
+<h2>Operators<a class="headerlink" href="#operators" title="Permalink to this headline">¶</a></h2>
+<p>String concatenation is <code class="docutils literal notranslate"><span class="pre">+</span></code>, but most operators are textual:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">true</span> <span class="ow">and</span> <span class="n">false</span> <span class="o">=</span> <span class="n">false</span>
 <span class="n">true</span> <span class="ow">or</span> <span class="n">false</span> <span class="o">=</span> <span class="n">true</span>
 <span class="n">true</span> <span class="n">xor</span> <span class="n">true</span> <span class="o">=</span> <span class="n">false</span>
@@ -221,6 +243,13 @@ always good practice.</p>
 <span class="k">raise</span> <span class="n">x</span> <span class="n">by</span> <span class="mi">1</span>
 </pre></div>
 </div>
+<p>New operators can be declared with <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a> <a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> semantics, e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">syntax</span> <span class="n">_</span><span class="o">&amp;&amp;</span><span class="n">_</span> <span class="n">associate</span> <span class="n">left</span> <span class="n">above</span> <span class="n">_and_</span> <span class="n">_or_</span> <span class="n">_not_</span> <span class="n">below</span> <span class="n">_</span><span class="o">||</span><span class="n">_</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="blocks">
+<h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">true</span> <span class="n">then</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">repeat</span> <span class="k">while</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span>
 <span class="n">repeat</span> <span class="n">until</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span>
@@ -259,13 +288,9 @@ always good practice.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="structured-data">
-<h2>Structured Data<a class="headerlink" href="#structured-data" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot supports records, arrays, and arbitrary atoms as well. A record of functions is called a vtable. Structural subtyping of records is supported: you can pass <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">1,</span> <span class="pre">b:</span> <span class="pre">2}</span></code> to a function expecting only <code class="docutils literal notranslate"><span class="pre">{b:</span> <span class="pre">Int}</span></code>.</p>
-</div>
 <div class="section" id="parsing">
 <h2>Parsing<a class="headerlink" href="#parsing" title="Permalink to this headline">¶</a></h2>
-<p>I’ve got a basic Earley algorithm working for now. But eventually I’m extending it with BSRs and layout and <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a><a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> and other fun things. There’s also <a class="reference external" href="https://github.com/attresearch/yakker">Yakker</a>, which is the most developed parser I’ve seen feature-wise. It’s only missing incremental parsing.</p>
+<p>I’ve got a basic Earley algorithm working for now. But eventually I’m extending it with BSRs and layout and other fun things. There’s also <a class="reference external" href="https://github.com/attresearch/yakker">Yakker</a>, which is the most developed parser I’ve seen feature-wise. It’s only missing incremental parsing.</p>
 <blockquote>
 <div><p>A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.</p>
 </div></blockquote>
@@ -276,6 +301,72 @@ always good practice.</p>
 </div>
 <p>I’ve looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There’s just no information on what possible parses are available or what token is expected. Whereas with Earley you can do “Ruby slippers”: scan the sets for what they want next, output “warning: expected ‘;’ at end of statement”, and then add that to the parse forest and continue parsing with almost no overhead.</p>
 <p>Treesitter implements incremental LR parsing with error recovery, but since it doesn’t support ambiguity I don’t think it’s sufficient for a compiler.</p>
+</div>
+<div class="section" id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline">¶</a></h2>
+<p>Blocks of sequential statements are a common occurrence in a program. The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span>
+ <span class="n">b</span>
+ <span class="n">c</span>
+<span class="n">d</span>
+
+<span class="c1"># becomes</span>
+<span class="p">{</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span><span class="p">;</span> <span class="n">d</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:</p>
+<ul class="simple">
+<li><p>if it is indented more, a continuation of the previous line, so nothing is inserted (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>)</p></li>
+<li><p>if it is at the same level, another item in the sequence, so a semicolon is inserted</p></li>
+<li><p>if there is a (nonempty) line at lower indentation, the sequence is ended (a close brace is inserted at the start of the line)</p></li>
+</ul>
+<p>This is complicated by the presence of nested layouts and grammar rules without layout that allow free choice of indentation. To use the example above, if <code class="docutils literal notranslate"><span class="pre">a</span></code> started a layout we would have wanted <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">a</span> <span class="pre">{b;c};</span> <span class="pre">d}</span></code> instead. Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skipping whitespace layout when inside an explicit delimiter pair. But of course constructs inside the delimiter pair can start another layout. Finally we also want to parse 1-line things without braces:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="n">a</span> <span class="o">=</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">c</span>
+<span class="c1"># let { a = b } in c</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="type-declarations">
+<h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this headline">¶</a></h2>
+<p>Types in Stroscot act as identity functions restricted to a certain domain. So you use an application, similar to assembly syntax such as <code class="docutils literal notranslate"><span class="pre">dword</span> <span class="pre">0</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">Int8</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>To match Haskell, there is also a standard operator <code class="docutils literal notranslate"><span class="pre">(:)</span></code> defined as <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">y</span> <span class="pre">x</span></code>, with low precedence, so you can write</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">:</span> <span class="n">Int8</span>
+</pre></div>
+</div>
+<p>These two options seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Int8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to read with long types) or <code class="docutils literal notranslate"><span class="pre">Int8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program.</p>
+</div>
+<div class="section" id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">mut</span> <span class="mi">1</span>
+<span class="n">a</span> <span class="o">:=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Mutable variables are completely distinct from name binding, so we have distinct notation for setting them.</p>
+</div>
+<div class="section" id="dsl">
+<h2>DSL<a class="headerlink" href="#dsl" title="Permalink to this headline">¶</a></h2>
+<p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">run_sql_statement</span> <span class="p">{</span> <span class="n">SELECT</span> <span class="o">...</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>The idea extends further, embedding lower-level and incompatible languages like assembly and C++.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">asm</span> <span class="p">{</span> <span class="n">sumsq</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">y</span><span class="p">)</span> <span class="p">}</span>
+<span class="n">my_func</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">&quot;foo.cpp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s2">&quot;my_func&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Another useful one might be TeX / mathematical expressions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tex</span> <span class="p">{</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ax</span><span class="o">^</span><span class="mi">4</span><span class="o">+</span><span class="n">cx</span><span class="o">^</span><span class="mi">2</span> <span class="p">}</span>
+<span class="n">math</span> <span class="p">{</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">phi</span> <span class="k">lambda</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>These are particularly useful with functions that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.</p>
+</div>
+<div class="section" id="namespacing">
+<h2>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this headline">¶</a></h2>
+<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition. <code class="docutils literal notranslate"><span class="pre">.</span></code> is preferred to <code class="docutils literal notranslate"><span class="pre">::</span></code> because it’s shorter and because modules are first-class.</p>
 </div>
 </div>
 
@@ -290,7 +381,7 @@ always good practice.</p>
         <a href="Overloading.html" class="btn btn-neutral float-right" title="Overloading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Optimal-Reduction.html" class="btn btn-neutral float-left" title="Optimal reduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

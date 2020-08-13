@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Compiler design" href="Compiler.html" />
-    <link rel="prev" title="Types" href="Types.html" /> 
+    <link rel="prev" title="Modules" href="Modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,14 +86,25 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optimal-Reduction.html">Optimal reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Memory management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#representation">Representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#non-default-representations">Non-default representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-memory-management">Automatic memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-memory-management">Manual memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
@@ -167,16 +178,109 @@
             
   <div class="section" id="memory-management">
 <h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this headline">¶</a></h1>
-<p>There are roughly 3 styles of memory management:</p>
+<p>Every program has to use memory in order to store temporary values and interact with system calls.</p>
+<div class="section" id="representation">
+<h2>Representation<a class="headerlink" href="#representation" title="Permalink to this headline">¶</a></h2>
+<p>The layout of a type is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly.</p>
+<p>So in Stroscot there is no fixed memory representation. Instead every type has its memory layout defined by writing <code class="docutils literal notranslate"><span class="pre">pack</span></code>/<code class="docutils literal notranslate"><span class="pre">unpack</span></code> functions that write/read a memory buffer, similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a>. The pack/unpack functions will end up getting passed around a lot, but implicit parameters scale pretty well, so it shouldn’t be an issue. Unlike Narcissus <a class="bibtex reference internal" href="zzreferences.html#delawarenarcissuscorrectbyconstructionderivation2019" id="id1">[DSPitClaudel+19]</a> we don’t have a state parameter, also because of implicit parameters.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unpack</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="n">a</span>
+<span class="n">pack</span> <span class="p">:</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+
+<span class="n">read</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="n">Vector</span> <span class="n">Word8</span>
+<span class="n">write</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="n">Vector</span> <span class="n">Word8</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+<span class="n">length</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="n">Int</span>
+
+<span class="n">shift</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReadBuffer</span>
+<span class="n">shift</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+</pre></div>
+</div>
+<p>Write buffers have a length, so to compute the size of the type, we can do <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code>. Read buffers don’t have a length so to figure out the length of something in memory we do <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span> <span class="pre">.</span> <span class="pre">unpack</span></code>. Some simple types:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pack</span> <span class="p">:</span> <span class="n">Either</span> <span class="n">a</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+<span class="n">pack</span> <span class="p">(</span><span class="n">Left</span> <span class="n">a</span><span class="p">)</span> <span class="o">=</span>
+  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="mi">0</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">pack</span> <span class="p">(</span><span class="n">Right</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span>
+  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="mi">1</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">unpack</span> <span class="n">r</span> <span class="o">=</span>
+  <span class="n">case</span> <span class="n">read</span> <span class="n">r</span> <span class="n">of</span>
+    <span class="mi">0</span> <span class="o">-&gt;</span> <span class="n">Left</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="mi">1</span> <span class="o">-&gt;</span> <span class="n">Right</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">pack</span> <span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+<span class="n">pack</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">=</span>
+  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">unpack</span> <span class="n">r</span> <span class="o">=</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="n">unpack</span> <span class="n">r</span>
+  <span class="n">l</span> <span class="o">=</span> <span class="n">length</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="n">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">unpack</span></code> can fail on invalid byte sequences, but <code class="docutils literal notranslate"><span class="pre">pack</span></code> must always return a byte sequence. Also <code class="docutils literal notranslate"><span class="pre">unpack</span></code> can be more lenient and decode sequences that <code class="docutils literal notranslate"><span class="pre">pack</span></code> doesn’t produce, e.g. nonzero padding bytes. So for correctness we only require <code class="docutils literal notranslate"><span class="pre">unpack</span> <span class="pre">.</span> <span class="pre">pack</span> <span class="pre">=</span> <span class="pre">id</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> and not the reverse. Using this constraint we can derive <code class="docutils literal notranslate"><span class="pre">unpack</span></code> from <code class="docutils literal notranslate"><span class="pre">pack</span></code>, or vice-versa, if the format isn’t too complicated.</p>
+<p>One tricky part is that the naive way to specify types interferes with overloading, subtyping and implicit conversions. <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code> can give a byte as expected, but it can also implicitly convert to an <code class="docutils literal notranslate"><span class="pre">Int32</span></code> and give 4 bytes. Since we have dependent types this isn’t a real issue, just make sure the code generated after representation specialization passes the type explicitly: <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">Int32</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code>.</p>
+<p>A few things need to optimize away for reasonable performance.  <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code> should optimize to something like <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">20</span></code> for most values, or at least something that doesn’t allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.</p>
+<p>Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL’s will be the standard / default, it’ll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn’t be hard.</p>
+</div>
+<div class="section" id="non-default-representations">
+<h2>Non-default representations<a class="headerlink" href="#non-default-representations" title="Permalink to this headline">¶</a></h2>
+<p>The translation to use pack/unpack is pretty simple: a pack is inserted around every constructor, and an unpack is inserted into the scrutinee of every match statement and field assignment. So <code class="docutils literal notranslate"><span class="pre">Foo</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">..</span> <span class="pre">}</span></code> translates to <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">(Foo</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">unpack</span> <span class="pre">(..)</span> <span class="pre">}</span> <span class="pre">)</span></code>.</p>
+<p>But this translation uses whatever pack/unpack are in scope; they can be overridden like any other implicit parameters. To prevent mismatches the result of pack actually contains the matching unpack function.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alloc</span> <span class="p">:</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">Ref</span> <span class="n">a</span>
+<span class="n">deref</span> <span class="p">:</span> <span class="n">Ref</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span>
+</pre></div>
+</div>
+<p>A pointer type <code class="docutils literal notranslate"><span class="pre">Ptr</span></code> is a wrapper around the <code class="docutils literal notranslate"><span class="pre">UInt</span></code> type of the machine’s native address size. It deliberately does not support any arithmetic operations, to discourage careless pointer arithmetic. A further refinement is <code class="docutils literal notranslate"><span class="pre">APtr</span> <span class="pre">n</span></code>, an <code class="docutils literal notranslate"><span class="pre">n</span></code>-byte aligned pointer. A reference type <code class="docutils literal notranslate"><span class="pre">Ref</span> <span class="pre">a</span></code> is a pointer that is guaranteed to refer to an value of type <code class="docutils literal notranslate"><span class="pre">a</span></code> when its memory is dereferenced. References offer a lot of flexibility for memory layout. For example, we can encode a linked list in a number of ways:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># flat list, stored like 1a1a0
+List a = Nil | Cons a (List a)
+# intrusive list, stored like 1a* -&gt; 1a* -&gt; 0
+List a = Nil | Cons a (Ref (List a))
+# uniform list, stored like 1** -&gt; {a, 1** -&gt; {a, 0}}
+List a = Nil | Cons (Ref a) (Ref $ List a)
+</pre></div>
+</div>
+<p>Unrestricted, references introduce an entire class of memory errors; in particular, we cannot free the memory the reference refers to unless the reference will not be dereferenced anymore. Violating this condition is a use-after-free. Similarly freeing itself must happen exactly once, so we have double frees and memory leaks.</p>
+<p>On a positive note, since we work with datatypes first and their representations only incidentally, we do not have to handle buffer overflows; pointer arithmetic is implicit in the pack/unpack functions and due to our correctness properties, unpacking fields of the datatype must read within the allocated buffer.</p>
+</div>
+<div class="section" id="automatic-memory-management">
+<h2>Automatic memory management<a class="headerlink" href="#automatic-memory-management" title="Permalink to this headline">¶</a></h2>
+<p>Ownership a la Rust cannot even handle doubly-linked lists. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. Meanwhile, as far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime. The interesting area of research is static analysis. To that end some work <a class="bibtex reference internal" href="zzreferences.html#proustasapstaticpossible2017" id="id2">[Pro17]</a> <a class="bibtex reference internal" href="zzreferences.html#corbynpracticalstaticmemory2020" id="id3">[Cor20]</a> on “as static as possible” (ASAP) memory management is quite relevant.</p>
+<p>To begin with we must model memory. In reality memory is simply a map from addresses to words. But this doesn’t prevent any memory errors. So instead we have memory mapping (opaque) addresses to memory blocks, which are byte arrays of fixed size mapping to a single type. The type’s fields then determine the data / unpacked fields (ignored for memory purposes) and the references. We can name the references by their dereferencing list, e.g. <code class="docutils literal notranslate"><span class="pre">.a.b.c</span></code>. A given type may contain arbitrarily many references. A zone is the set of memory blocks reachable from a given value by following all the references. Function <code class="docutils literal notranslate"><span class="pre">scan</span></code> (figure 4.9) marks or frees the blocks in a zone. This is used in function <code class="docutils literal notranslate"><span class="pre">clean</span></code> which frees blocks from the zones of the antimatter set that aren’t in the zones of the matter set, using <a class="reference external" href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Tri-color_marking">tri-color marking</a>.</p>
+<p>Roughly then, to implement memory management, we call <code class="docutils literal notranslate"><span class="pre">clean</span></code> during each state transition in the program, with the matter set containing all live blocks and the antimatter set containing all allocated blocks. The size of the state transitions is arbitrary, but smaller ones ensure freeing is timely, while larger ones (may) reduce scanning. So ASAP is essentially stop-the-world GC in design.</p>
+<p>The main difference is that, while most GC’s use reachability to approximate liveness, ASAP uses a finer approximation. In particular, the main analysis, <code class="docutils literal notranslate"><span class="pre">Access(s,z)</span></code>, determines if any memory blocks of a zone <code class="docutils literal notranslate"><span class="pre">z</span></code> could be accessed during execution starting from state <code class="docutils literal notranslate"><span class="pre">s</span></code>. With this information we can define the matter and antimatter sets for a state transition <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code>:</p>
 <ul class="simple">
-<li><p>Malloc/free calls to an allocator</p></li>
-<li><p>Automatic tracing garbage collection</p></li>
-<li><p>Mixtures or imitations of the above</p></li>
+<li><p>The matter set is all blocks that will be accessed, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">{z</span> <span class="pre">|</span> <span class="pre">Access(t,z)</span> <span class="pre">=</span> <span class="pre">yes}</span></code></p></li>
+<li><p>The antimatter set is all blocks that are accessed before but not accessed later, <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{z</span> <span class="pre">|</span> <span class="pre">Access(s,z)</span> <span class="pre">=</span> <span class="pre">yes</span> <span class="pre">&amp;&amp;</span> <span class="pre">Access(t,z)</span> <span class="pre">=</span> <span class="pre">no}</span></code></p></li>
 </ul>
-<p>Rust has improved the malloc/free model, but it has not significantly reduced the need to think about when memory is allocated or freed. There is still a lot of cloning and owning. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does more intrusive scanning. As far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime.</p>
-<p>The interesting area of research is static analysis, reducing what a garbage collector has to track and automating the tedious aspects of malloc/free. Implementing some form of compile-time reference counting or “automatic memory management” with fallback to runtime stuff, seems like a win. <a class="reference external" href="https://github.com/u2zv1wx/neut">Neut</a> is an interesting start in this direction. The goal for Stroscot is automatic insertion of <code class="docutils literal notranslate"><span class="pre">free()</span></code> where needed.</p>
+<p>We can prune all zones in A that are subsets of zones in M.</p>
+<p>Using an aliasing analysis, <code class="docutils literal notranslate"><span class="pre">Shape</span></code>, we can further refine the sets into multiple calls to <code class="docutils literal notranslate"><span class="pre">clean</span></code>. <code class="docutils literal notranslate"><span class="pre">Shape</span></code>, given two locations and a state, determines if the zones of those two locations overlap. We use it as follows:
+* We partition the anti-matter zones into overlapping zone-sets <span class="math notranslate nohighlight">\(A_i\)</span>.
+* For each component, we filter the matter set to overlapping zones: <code class="docutils literal notranslate"><span class="pre">M_i</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">z</span> <span class="pre">in</span> <span class="pre">M</span> <span class="pre">|</span> <span class="pre">Shape(z,</span> <span class="pre">A_i)</span> <span class="pre">=</span> <span class="pre">yes</span> <span class="pre">}</span></code></p>
+<p>If the antimatter set is empty then no calls to <code class="docutils literal notranslate"><span class="pre">clean</span></code> are needed at all. Furthermore, calls to <code class="docutils literal notranslate"><span class="pre">clean</span></code> with an empty <span class="math notranslate nohighlight">\(M_i\)</span> are unconditional frees and are quite efficient, although there is some overhead to avoid double frees with cyclic/shared data structures. This overhead can be eliminated if the sharing is statically known. Sometimes aliasing can be disallowed through analyzing the program structure and otherwise there are features that disallow aliasing, e.g. in C the strict aliasing rule and the <code class="docutils literal notranslate"><span class="pre">restrict</span></code> keyword.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Proust’s presentation is a bit more complex and confusing.  It’s a thesis, so it probably didn’t get much proofreading. For <code class="docutils literal notranslate"><span class="pre">clean</span></code> he outlines a basic mark-and-sweep algorithm using a mark array, but this doesn’t handle cycles, so he introduces an algorithm in Figure 6.8 that’s kind of like tricolor marking but more complicated. He has a ‘maybe’ state for <code class="docutils literal notranslate"><span class="pre">Access</span></code> and <code class="docutils literal notranslate"><span class="pre">Shape</span></code> which is uniformly treated as yes. Furthermore he does not use the state-transition formalism so his definition of liveness is split for the constructs of his core language. And by definition the antimatter and matter sets cannot overlap, but he describes a specific pass to remove the matter from the antimatter.</p>
+</div>
+</div>
+<div class="section" id="manual-memory-management">
+<h2>Manual memory management<a class="headerlink" href="#manual-memory-management" title="Permalink to this headline">¶</a></h2>
+<p>There are cases where garbage collection can be faster than memory management <a class="bibtex reference internal" href="zzreferences.html#appelgarbagecollectioncan1987" id="id4">[App87]</a>. In particular, scratch buffers, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a>. These can be filled full of miscellaneous data to compute a result, then the result can be copied out to a different area of memory and the scratch buffer can be freed in one go. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data.</p>
+<p>To do this automatically, we would have to determine the number of regions and their size, which is possible but would most likely require a lot of heuristic decision-making. It is better to allow the programmer to allocate chunks of memory directly, and store/read values within the chunks. The chunks can then be freed by the automatic memory management when they are no longer needed. This requires some modifications to the algorithm to track regions but should be fine.</p>
+</div>
+<div class="section" id="compiler-memory-management">
+<h2>Compiler memory management<a class="headerlink" href="#compiler-memory-management" title="Permalink to this headline">¶</a></h2>
 <p>For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
-<p>Overall I don’t see much of a challenge, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
+<p>Overall I don’t see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
+</div>
 </div>
 
 
@@ -190,7 +294,7 @@
         <a href="Compiler.html" class="btn btn-neutral float-right" title="Compiler design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
