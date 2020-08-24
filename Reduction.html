@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Types" href="Types.html" />
+    <link rel="next" title="Reduction example" href="Reduction-Example.html" />
     <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
 </head>
 
@@ -98,7 +98,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#nets">Nets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cut-elimination">Cut elimination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#normal-order-reduction">Normal Order Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#optimal-reduction">Optimal reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#primitives">Primitives</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#random-old-junk">Random old junk</a><ul>
@@ -109,8 +111,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#readback">Readback</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#junk">Junk</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
@@ -218,18 +222,18 @@
   {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
   {\Sigma_L}
 \end{array}\]</div>
-<p>To allow/restrict contraction and weakening we have two S4 modalities, bang/!/”of course” and whim/whimper/?/”why not”. A call-by-value function type is <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-o</span> <span class="pre">?B</span></code> while call-by-name is <code class="docutils literal notranslate"><span class="pre">!A</span> <span class="pre">-o</span> <span class="pre">B</span></code>. To enforce the S4 rules we add a level index to every term, as in <a class="bibtex reference internal" href="zzreferences.html#martinifinestructureexponential1995" id="id6">[MM95]</a> and <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id7">[Gue96]</a>. The level of a context is the maximum of the levels of its terms (0 if empty). As a notational convention, the indices are omitted when they are all the same, i.e. in all the rules besides promotion and dereliction. Normally promotion has <span class="math notranslate nohighlight">\(j=i+1\)</span> instead of <span class="math notranslate nohighlight">\(j&gt;i\)</span>, shrug.</p>
+<p>To allow/restrict contraction and weakening we have two S4 modalities, bang/!/”of course” and whim/whimper/?/”why not”. A call-by-value function type is <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-o</span> <span class="pre">?B</span></code> while call-by-name is <code class="docutils literal notranslate"><span class="pre">!A</span> <span class="pre">-o</span> <span class="pre">B</span></code>. To enforce the S4 rules we add a level index to every term, as in <a class="bibtex reference internal" href="zzreferences.html#martinifinestructureexponential1995" id="id6">[MM95]</a> and <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id7">[Gue96]</a>. The level of a context is the maximum of the levels of its terms (0 or negative infinity if empty). As a notational convention, the indices are omitted when they are all the same, i.e. in all the rules besides promotion and dereliction. Normally promotion has <span class="math notranslate nohighlight">\(j=i+1\)</span> instead of <span class="math notranslate nohighlight">\(j&gt;i\)</span>, shrug.</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cccc}
-  \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash !A^i, \Delta^i}{!}_{j &gt; i}
-  &amp; \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{i\leq j}
+  \rule{!\Gamma^i \vdash A^j, ?\Delta^i }{!\Gamma^i \vdash !A^i, ?\Delta^i}{!}_{j &gt; i}
+  &amp; \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{j\leq i}
   &amp; \rule{\Gamma, !A, !A \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
   &amp; \rule{\Gamma \vdash \Delta }{\Gamma, !A \vdash \Delta}{!w}
 \end{array}\]</div>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cccc}
-  \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, ?A^i \vdash \Delta^i}{?}_{j &gt; i}
-  &amp; \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{i\leq j}
+  \rule{!\Gamma^i, A^j \vdash ?\Delta^i }{!\Gamma^i, ?A^i \vdash ?\Delta^i}{?}_{j &gt; i}
+  &amp; \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{j \leq i}
   &amp; \rule{\Gamma \vdash ?A, ?A, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
   &amp; \rule{\Gamma \vdash \Delta }{\Gamma \vdash ?A, \Delta}{?w}
 \end{array}\]</div>
@@ -277,28 +281,30 @@
 <li><p>The signature can be reconstructed by finding the free variables of the cedents (antecedent/succedent). We still need to add a type signature to each variable.</p></li>
 <li><p>The level indices can be recovered by a constraint solving (in particular a topological sort)</p></li>
 <li><p>The identified elements can be identified by variable names. Each variable occurs exactly twice. For identifying elements in the hypotheses we simple use the name, <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>. For the conclusion, almost all the formulas have a single identified element in the conclusion, so we can use <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">...</span></code> to identify it. For identity we assign names to both left and right, <code class="docutils literal notranslate"><span class="pre">xl/xr</span> <span class="pre">=</span> <span class="pre">...</span></code>.</p></li>
-<li><p>Gamma, delta, theta, and lambda can be inferred in most cases by taking the subderivations and removing the identified elements. Since they are unchanged we do not need to rename the variables. For PiRight/SigmaLeft we do need to rename and combine gamma/delta from each case (similar to a phi-node).</p></li>
+<li><p>Gamma, delta, theta, and lambda can be inferred in most cases by taking the subderivations and removing the identified elements. Since they are unchanged we do not need to bind/rename the variables at all. For PiRight/SigmaLeft we do need to rename and combine gamma/delta from each case, similar to a phi-node, but this can be skipped if there’s exactly one case. Also we need the context for ! / ?, so that the box is clearly defined and we can duplicate/erase it properly.</p></li>
 <li><p>Weakening and identity need a type argument <code class="docutils literal notranslate"><span class="pre">T</span></code> so we know the type of what’s being introduced. Similarly the absurdity cases of PiRight/SigmaLeft (0 and top) need type annotations on Gamma/Delta. (But these can often be omitted/inferred like any other type signatures)</p></li>
 <li><p>For tags we use <code class="docutils literal notranslate"><span class="pre">^i</span></code>, because Levy’s notation <code class="docutils literal notranslate"><span class="pre">#i</span></code> is interpreted as a comment</p></li>
+<li><p>To handle top-level variables we introduce a Root derivation for the start of the tree</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">PiRight</span>
-  <span class="p">{</span><span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span> <span class="p">}</span>
+  <span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">i</span> <span class="p">[(</span><span class="n">Ai_j</span><span class="p">,</span><span class="n">left_subderivation_j</span><span class="p">)]</span> <span class="p">[(</span><span class="n">Bi_k</span><span class="p">,</span><span class="n">right_subderivation_k</span><span class="p">)]</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="n">i</span> <span class="p">[(</span><span class="n">Bi_k</span><span class="p">,</span><span class="n">left_subderivation_k</span><span class="p">)]</span> <span class="p">[(</span><span class="n">Ai_j</span><span class="p">,</span><span class="n">right_subderivation_k</span><span class="p">)]</span>
 <span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">SigmaLeft</span>
-  <span class="p">{</span><span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span> <span class="p">}</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">A</span> <span class="n">subderivation</span>
+  <span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span>
+<span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">A</span> <span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">A</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">BangW</span> <span class="n">subderivation</span> <span class="p">:</span> <span class="n">T</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">Whim</span> <span class="n">A</span> <span class="n">subderivation</span>
+<span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Whim</span> <span class="n">A</span> <span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">WhimD</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">WhimC</span> <span class="n">A</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">WhimW</span> <span class="n">subderivation</span> <span class="p">:</span> <span class="n">T</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">LiftRight</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">LiftLeft</span> <span class="n">A</span> <span class="n">subderivation</span>
 <span class="n">l</span><span class="o">/</span><span class="n">r</span> <span class="o">=</span> <span class="n">Identity</span> <span class="p">:</span> <span class="n">T</span>
-<span class="n">Cut</span> <span class="n">Al</span> <span class="n">Ar</span> <span class="n">subderivation_left</span> <span class="n">subderivation_right</span>
+<span class="n">Cut</span> <span class="n">Ar</span> <span class="n">subderivation_right</span> <span class="n">Al</span> <span class="n">subderivation_left</span>
+<span class="n">Root</span> <span class="p">[</span><span class="n">a_i</span><span class="p">]</span> <span class="p">[</span><span class="n">b_i</span><span class="p">]</span> <span class="n">subderivation</span>
 </pre></div>
 </div>
 </div>
@@ -311,34 +317,32 @@
 </div>
 <p>We define the types <span class="math notranslate nohighlight">\(\text{B} = \Sigma [(F,[],[]),(T,[],[])]\)</span> and <span class="math notranslate nohighlight">\(a \to b = \Pi [(\text{func}, [a], [b])]\)</span>. <span class="math notranslate nohighlight">\(\to\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).</p>
 <img alt="_images/Stroscot_AND_Proof_Tree.svg" src="_images/Stroscot_AND_Proof_Tree.svg" /><p>Next is Core. We start with the rules, then assign variable names (alphabetically), then fill in the arguments, to obtain:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># free variable pr : Bool</span>
-<span class="n">Cut</span> <span class="n">a</span> <span class="n">n</span>
-  <span class="n">a</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">b</span> <span class="p">(</span><span class="n">b</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">True</span> <span class="p">[]</span> <span class="p">[])</span>
-  <span class="n">Cut</span> <span class="n">lr</span> <span class="n">m</span>
-    <span class="n">Cut</span> <span class="n">c</span> <span class="n">k</span>
-      <span class="n">c</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[]</span>
-      <span class="n">Cut</span> <span class="n">d</span> <span class="n">j</span>
-        <span class="n">d</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="p">{</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-          <span class="n">e</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">SigmaLeft</span> <span class="p">{</span>
-            <span class="o">^</span><span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f1</span><span class="p">]</span> <span class="o">-&gt;</span>
-              <span class="n">f1</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="p">{</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g1</span><span class="p">],</span> <span class="p">[</span><span class="n">h1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                <span class="n">g1</span> <span class="o">=</span> <span class="n">BangW</span> <span class="p">(</span><span class="n">h1</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[])</span>
-              <span class="p">}</span>
-            <span class="o">^</span><span class="kc">True</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">-&gt;</span>
-              <span class="n">f2</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="p">{</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g2</span><span class="p">],</span> <span class="p">[</span><span class="n">h2r</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                <span class="n">g2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">h2</span> <span class="p">(</span><span class="n">h2</span><span class="o">/</span><span class="n">h2r</span> <span class="o">=</span> <span class="n">Identity</span> <span class="n">Bool</span><span class="p">)</span>
-              <span class="p">}</span>
-          <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="n">j</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">kr</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="n">kr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">l</span><span class="p">,</span> <span class="n">l</span><span class="o">/</span><span class="n">lr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">nr</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="n">nr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="o">/</span><span class="n">pr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Root</span> <span class="n">pr</span>
+  <span class="n">Cut</span> <span class="n">a</span> <span class="n">n</span>
+    <span class="n">a</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">b</span> <span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="p">(</span><span class="n">b</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">True</span> <span class="p">[]</span> <span class="p">[])</span>
+    <span class="n">Cut</span> <span class="n">lr</span> <span class="n">m</span>
+      <span class="n">Cut</span> <span class="n">c</span> <span class="n">k</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[]</span>
+        <span class="n">Cut</span> <span class="n">d</span> <span class="n">j</span>
+          <span class="n">d</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+            <span class="n">e</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">SigmaLeft</span>
+              <span class="o">^</span><span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f1</span><span class="p">]</span> <span class="o">-&gt;</span>
+                <span class="n">f1</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g1</span><span class="p">],</span> <span class="p">[</span><span class="n">h1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+                  <span class="n">g1</span> <span class="o">=</span> <span class="n">BangW</span> <span class="p">(</span><span class="n">h1</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[])</span>
+                <span class="p">}</span>
+              <span class="o">^</span><span class="kc">True</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">-&gt;</span>
+                <span class="n">f2</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g2</span><span class="p">],</span> <span class="p">[</span><span class="n">h2r</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+                  <span class="n">g2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">h2</span> <span class="p">(</span><span class="n">h2</span><span class="o">/</span><span class="n">h2r</span> <span class="o">=</span> <span class="n">Identity</span> <span class="n">Bool</span><span class="p">)</span>
+          <span class="n">j</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">kr</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="n">kr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">l</span><span class="p">,</span> <span class="n">l</span><span class="o">/</span><span class="n">lr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+      <span class="n">m</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">nr</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="n">nr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="o">/</span><span class="n">pr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="nets">
 <h2>Nets<a class="headerlink" href="#nets" title="Permalink to this headline">¶</a></h2>
 <p>As a description the syntax is fine, but it suffers from what Girard calls “the bureaucracy of syntax”. For example the cuts <code class="docutils literal notranslate"><span class="pre">Cut</span> <span class="pre">a</span> <span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">Cut</span> <span class="pre">lr</span> <span class="pre">m</span></code> and the associated <code class="docutils literal notranslate"><span class="pre">a</span></code>/<code class="docutils literal notranslate"><span class="pre">m</span></code> can be swapped without changing the meaning. In fact, for computation, we do not need the syntactic subderivation inclusion relationship at all, only the variables. Furthermore, since each variable appears exactly twice, we can replace all the rule instances with nodes and variables with connecting edges. We thus obtain a graph, similar to a proof net / interaction net:</p>
-<div class="graphviz"><img src="_images/graphviz-2b42685f1955f8ffe87a09f0e25f70237e7cb5b1.png" alt="digraph {
+<div class="graphviz"><object data="_images/graphviz-f521b842b6f70fbb06f563400ad974f073bd8c5c.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
 Root -&gt; c1 [style=invis]
 c1 -&gt; c2 [style=invis]
 c2 -&gt; c3 [style=invis]
@@ -377,39 +381,661 @@ f2 -&gt; g2 [color=&quot;blue&quot;]
 f2 -&gt; h2 /* h2r */ [color=&quot;red&quot;]
 g2 [label=&quot;!d&quot;]
 g2 -&gt; h2 [color=&quot;blue&quot;]
-h2 [label=&quot;Id&quot;]
+h2 [label=&quot;I&quot;]
 j [label=&quot;PiL&quot;]
 j -&gt; k /* kr */ [color=&quot;red&quot;]
 j -&gt; l [color=&quot;blue&quot;]
-k [label=&quot;Id&quot;]
-l [label=&quot;Id&quot;]
+k [label=&quot;I&quot;]
+l [label=&quot;I&quot;]
 m [label=&quot;PiL&quot;]
 m -&gt; n /* nr */ [color=&quot;red&quot;]
 m -&gt; p [color=&quot;blue&quot;]
-n [label=&quot;Id&quot;]
-p [label=&quot;Id&quot;]
-}" class="graphviz" /></div>
+n [label=&quot;I&quot;]
+p [label=&quot;I&quot;]
+}</p></object></div>
 <p>Technically, the edges connect ports of nodes. The directionality and left=blue/right=red coloring is enough to identity the ports for the graph above, but disambiguating n-ary graphs in a clear way seems hard.</p>
 <p>If we reverse the directions of the blue edges, then the graph is almost a tree, except for the backedges that can show up in PiRight/SigmaLeft.</p>
 </div>
 <div class="section" id="cut-elimination">
 <h2>Cut elimination<a class="headerlink" href="#cut-elimination" title="Permalink to this headline">¶</a></h2>
+<p>For all reductions:</p>
 <ul class="simple">
-<li><p>To eliminate cut with identity we remove both and link the unbound variables together</p></li>
-<li><p>To eliminate matching left/right Pi/Sigma, we erase all of the non-matching cases, directly link the context variables inside the matching case with the outer variables, and connect the captured variables to the other side with cut nodes.</p></li>
-<li><p>To eliminate !/!d or ?/?d, we remove them and insert a lift rule on one side to fix the levels, retaining the cut.</p></li>
-<li><p>To eliminate !/!c or ?/?c, we duplicate the rule with ! and create two cuts with the variables under the contraction.</p></li>
+<li><p>Move the two nodes of the cut next to the cut with copy-paste</p></li>
+</ul>
+<p>Identity</p>
+<ul class="simple">
+<li><p>Copy the cut’s non-identity edge to the non-cut edge that links to the identity node. If the cut has levels then label with (id edge)-&gt;(non-id edge).</p></li>
+<li><p>Delete cut and identity</p></li>
+</ul>
+<p>Matching left/right Pi/Sigma</p>
+<ul class="simple">
+<li><p>Erase non-matching cases, if any</p></li>
+<li><p>Link context variables of matching case with outside variables, if any</p></li>
+<li><p>Nodes should have same # of edges. Create cut nodes for each edge-pair.</p></li>
+<li><p>Link cut nodes with matching variable on each side.</p></li>
+<li><p>Preserve cut’s level numbers (but not active status) for red-red, swap for red-blue</p></li>
+<li><p>Delete PiR/PiL nodes</p></li>
+</ul>
+<p>Promotion/contraction</p>
+<ul class="simple">
+<li><p>Create duplication nodes for each out-edge of promotion, color=red/blue</p></li>
+<li><p>Link duplication nodes, if multiple</p></li>
+<li><p>Duplicate !p node and point to duplication node, marking one with arrowhead</p></li>
+<li><p>Duplicate cut and point to each side of contraction + !p nodes</p></li>
+<li><p>Create new contraction node for each context variable pointing to the two !p’s</p></li>
+<li><p>Change references to !p to references to context contraction nodes</p></li>
+<li><p>Delete original !c contraction node</p></li>
+</ul>
+<p>Promotion/Dereliction</p>
+<ul class="simple">
+<li><p>Replace cut’s blue edge with edge of dereliction</p></li>
+<li><p>Move level on cut’s red edge to cut’s blue edge, if not set</p></li>
+<li><p>Replace cut’s red edge with red edge of promotion</p></li>
+<li><p>For each context edge going into !p, replace edge with !p’s edge</p></li>
+<li><p>Delete dereliction and promotion</p></li>
+</ul>
+<p>Duplication:</p>
+<ul class="simple">
+<li><p>Duplicate node</p></li>
+<li><p>Create duplication node for each out-edge of node, copying edge from node</p></li>
+<li><p>Point each copy’s edge to duplication node</p></li>
+<li><p>Add arrowheads to one of the copy’s edges (higher number)</p></li>
+<li><p>Change dup node’s references to point to node copies, deleting arrowheads &amp; using to disambiguate</p></li>
+<li><p>Link duplication nodes / fix links</p></li>
+</ul>
+<p>Multi-node Duplication:</p>
+<ul class="simple">
+<li><p>Duplicate nodes &amp; rename</p></li>
+<li><p>Fixup node copies to point within themselves</p></li>
+<li><p>Create duplication node for each non-active out-edge of node, copying edge from node</p></li>
+<li><p>Replace each copy’s non-active edges with edge to duplication node.</p></li>
+<li><p>Remove arrowheads from first copy’s non-active edges. Add arrowheads to second copy set’s non-active edges.</p></li>
+<li><p>Change dup node’s references to point to node copies, deleting arrowheads &amp; using arrowheads to disambiguate</p></li>
+<li><p>Link duplication nodes / fix links</p></li>
+</ul>
+<p>Dup-Id-Dup:</p>
+<ul class="simple">
+<li><p>Duplicate identity node</p></li>
+<li><p>Replace references to dup nodes with identity reference (odot=higher)</p></li>
+<li><p>Delete duplication nodes and links</p></li>
 <li><p>For !w/?w we delete the rule with ! and create no cuts.</p></li>
 <li><p>To eliminate <span class="math notranslate nohighlight">\(\forall\)</span> or <span class="math notranslate nohighlight">\(\exists\)</span>, we extend the variable substitution to the other side.</p></li>
-<li><p>The commuting cases are mostly handled by our graph formalism; cuts on the context are pushed down to where they apply. But for PiRight/SigmaLeft there can be a cut on the context variables. To push it down we need to duplicate the cut and its other side for each case.</p></li>
+<li><p>The commuting cases are mostly handled by our graph formalism; cuts on the context are pushed down to where they apply. But for PiRight/SigmaLeft there can be a cut on the context variables. To push it down we need to duplicate the cut and its other side for each case. Of course, if there are only 0/1 cases, there is no duplication. But in general we need to introduce a phi-duplication node; when the phi-dup node encounters an identity it adds the edge from the other side to the context variables. Overall commuting deletes code or exposes more reduction opportunities. There is also the potential to reverse-commute and deduplicate part of the cases, if they are the same.</p></li>
 <li><p>To expand identities, start with PiRight/SigmaLeft, then use the opposite rule on the opposite side for each case, and terminate with identities. But actually we should prefer to contract identities, searching for expanded identities and replacing them with identities on larger types.</p></li>
 </ul>
 </div>
+<div class="section" id="normal-order-reduction">
+<h2>Normal Order Reduction<a class="headerlink" href="#normal-order-reduction" title="Permalink to this headline">¶</a></h2>
+<p>Looking at the graph for our simple <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">False</span> <span class="pre">True</span></code> example we can see the general pattern for reduction, at least normal-order leftmost-outermost WHNF reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -&gt; I -&gt; PiL -&gt; Cut -&gt; SigmaL -&gt; Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.</p>
+<p>So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node with target covered)</p>
+</div>
 <div class="section" id="optimal-reduction">
 <h2>Optimal reduction<a class="headerlink" href="#optimal-reduction" title="Permalink to this headline">¶</a></h2>
-<p>Optimal reduction ensures the minimal amount of cut elimination (reduction) steps. It’s basically lazy evaluation, leftmost-outermost reduction order, but we have to be careful to avoid duplicating cuts. In particular, we want to avoid commuting under PiRight/SigmaLeft when there are two or more cases, and instead reduce the primary conclusions to identify the matching case. Also, for contraction, we want to avoid duplicating cuts, but also want to avoid doing unneeded reduction, so we create a duplicating node and incrementally push it down, doing reduction when needed instead of duplicating a cut.</p>
-<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">y</span> <span class="pre">z)</span></code> from page 18 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id8">[AG99]</a>.</p>
-<p>&lt;insert reduction here&gt;</p>
+<p>Optimal reduction ensures the minimal amount of cut elimination (reduction) steps. It’s basically normal order, but we have to be careful to avoid duplicating cuts. See the example.</p>
+</div>
+<div class="section" id="primitives">
+<h2>Primitives<a class="headerlink" href="#primitives" title="Permalink to this headline">¶</a></h2>
+<p>Primitives can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR.</p>
+<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id8">[AG99]</a>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}S &amp;= \, \left(!T \to !T \right) \to f\\T &amp;= \, !T \to f\\f &amp;= \, !S \to !S \to a\end{aligned}\end{align} \]</div>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}F2 &amp;: \, !S \to a\\G2 &amp;: \, !T \to S\end{aligned}\end{align} \]</div>
+<img alt="_images/Stroscot_F2G2_Proof_Tree.svg" src="_images/Stroscot_F2G2_Proof_Tree.svg" /><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Root</span> <span class="n">z</span> <span class="n">ret</span>
+  <span class="n">Cut</span> <span class="n">f2r</span> <span class="n">f2l</span>
+    <span class="n">f2r</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_f2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_f2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+      <span class="n">x_f2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_f2</span> <span class="n">x23_f2</span>
+        <span class="n">x23_f2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x2_f2</span> <span class="n">x3_f2</span>
+          <span class="n">Cut</span> <span class="n">id_r</span> <span class="n">id_l</span>
+            <span class="n">id_r</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">al</span><span class="p">],</span> <span class="p">[</span><span class="n">ar</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+              <span class="n">al</span><span class="o">/</span><span class="n">ar</span> <span class="o">=</span> <span class="n">Identity</span>
+            <span class="n">x1_f2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x1i_f2</span>
+              <span class="n">x1i_f2</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">id_r2</span><span class="p">,</span> <span class="n">id_l</span><span class="o">/</span><span class="n">id_r2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ssa</span><span class="p">,</span>
+                <span class="n">ssa</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_f2</span><span class="p">,</span> <span class="n">x2_f2</span><span class="o">/</span><span class="n">x2r_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">sa</span><span class="p">,</span>
+                  <span class="n">sa</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x3r_f2</span><span class="p">,</span> <span class="n">x3_f2</span><span class="o">/</span><span class="n">x3r_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">/</span><span class="n">ret_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)])])]</span>
+    <span class="n">f2l</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">g2</span><span class="p">,</span>
+      <span class="n">g2</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">g2s</span>
+        <span class="n">g2s</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_g2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+          <span class="n">y</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">y_arg</span><span class="p">,</span>
+            <span class="n">Cut</span> <span class="n">o</span> <span class="n">o_app</span>
+              <span class="n">o</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_g2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
+                <span class="n">x_g2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_g2</span> <span class="n">x2_g2</span>
+                  <span class="n">x1_g2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x1i_g2</span>
+                    <span class="n">x1i_g2</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_g2</span><span class="p">,</span> <span class="n">x2_g2</span><span class="o">/</span><span class="n">x2r_g2</span> <span class="o">=</span> <span class="n">Identity</span> <span class="n">Bool</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_o</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+              <span class="n">o_app</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">tr</span><span class="p">,</span> <span class="n">y_arg</span><span class="o">/</span><span class="n">tr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_g2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+          <span class="p">)]</span> <span class="p">[(</span><span class="n">zr</span><span class="p">,</span> <span class="n">z</span><span class="o">/</span><span class="n">zr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+    <span class="p">)]</span> <span class="p">[(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">/</span><span class="n">ret</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+</pre></div>
+</div>
+<div class="graphviz"><object data="_images/graphviz-03c2dfd4675bba32f5fddf317b3d197033b92e98.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; c1 [style=invis]
+y -&gt; c2 [style=invis]
+x23_f2 -&gt; c3 [style=invis]
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; f2r [color=&quot;red&quot;]
+c1 -&gt; f2l [color=&quot;blue&quot;]
+
+f2r [label=&quot;PiR&quot;]
+f2r -&gt; x_f2 [color=&quot;blue&quot;]
+f2r -&gt; ret_f2 [color=&quot;red&quot;]
+
+x_f2 [label=&quot;!c&quot;]
+x_f2 -&gt; x1_f2 [color=&quot;blue&quot;]
+x_f2 -&gt; x23_f2 [color=&quot;blue&quot;]
+
+x23_f2 [label=&quot;!c&quot;]
+x23_f2 -&gt; x2_f2 [color=&quot;blue&quot;]
+x23_f2 -&gt; x3_f2 [color=&quot;blue&quot;]
+
+c2 [label=&quot;Cut&quot;]
+c2 -&gt; id_r [color=&quot;red&quot;]
+c2 -&gt; id_l [color=&quot;blue&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1_f2 [label=&quot;!d&quot;]
+x1_f2 -&gt; x1i_f2 [color=&quot;blue&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_l /* id_r2 */ [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+id_l [label=&quot;I&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; x2_f2 /* x2r_f2 */ [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+x2_f2 [label=&quot;I&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; x3_f2 /* x3r_f2 */ [color=&quot;red&quot;]
+sa -&gt; ret_f2 /* a1 */ [color=&quot;blue&quot;]
+
+x3_f2 [label=&quot;I&quot;]
+ret_f2  [label=&quot;I&quot;]
+
+f2l [label=&quot;PiL&quot;]
+f2l -&gt; g2 [color=&quot;red&quot;]
+f2l -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+ret [label=&quot;I&quot;]
+
+g2 [label=&quot;!&quot;]
+g2 -&gt; g2s [color=&quot;red&quot;]
+
+g2s [label=&quot;PiR&quot;]
+g2s -&gt; y [color=&quot;blue&quot;]
+g2s -&gt; ret_g2 [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; y_arg [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+c3 [label=&quot;Cut&quot;]
+c3 -&gt; o [color=&quot;red&quot;]
+c3 -&gt; o_app [color=&quot;blue&quot;]
+
+o [label=&quot;PiR&quot;]
+o -&gt; x_g2 [color=&quot;blue&quot;]
+o -&gt; ret_o [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_o /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+ret_o [label=&quot;I&quot;]
+
+o_app [label=&quot;PiL&quot;]
+o_app -&gt; y_arg /* tr */ [color=&quot;red&quot;]
+o_app -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+y_arg [label=&quot;I&quot;]
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>We want this to reduce without duplicating a cut. So first we reduce everything except the contraction:</p>
+<div class="graphviz"><object data="_images/graphviz-941e1f9c161ccc59fd470c0a0fc995eedbe9843c.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c2 [label=&quot;Cut&quot;]
+c2 -&gt; x_f2 [color=&quot;blue&quot;]
+c2 -&gt; g2 [color=&quot;red&quot;]
+
+x_f2 [label=&quot;!c&quot;]
+x_f2 -&gt; x1_f2 [color=&quot;blue&quot;]
+x_f2 -&gt; x23_f2 [color=&quot;blue&quot;]
+
+x23_f2 [label=&quot;!c&quot;]
+x23_f2 -&gt; x2_f2 [color=&quot;blue&quot;]
+x23_f2 -&gt; x3_f2 [color=&quot;blue&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1_f2 [label=&quot;!d&quot;]
+x1_f2 -&gt; x1i_f2 [color=&quot;blue&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; x2_f2 /* x2r_f2 */ [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+x2_f2 [label=&quot;I&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; x3_f2 /* x3r_f2 */ [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+x3_f2 [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+g2 [label=&quot;!&quot;]
+g2 -&gt; g2s [color=&quot;red&quot;]
+
+g2s [label=&quot;PiR&quot;]
+g2s -&gt; y [color=&quot;blue&quot;]
+g2s -&gt; ret_g2 [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Next we move the !c over to a duplication node:</p>
+<div class="graphviz"><object data="_images/graphviz-400991898a1ef56adc274925da42d95ab3b457d9.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c2 [label=&quot;Cut&quot;]
+c2 -&gt; x23_f2 [color=&quot;blue&quot;]
+c2 -&gt; d1 [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; x1_f2 [color=&quot;blue&quot;]
+c1 -&gt; d1 [color=&quot;red&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; g2 [color=&quot;red&quot;]
+
+x23_f2 [label=&quot;!c&quot;]
+x23_f2 -&gt; x2_f2 [color=&quot;blue&quot;]
+x23_f2 -&gt; x3_f2 [color=&quot;blue&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1_f2 [label=&quot;!d&quot;]
+x1_f2 -&gt; x1i_f2 [color=&quot;blue&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; x2_f2 /* x2r_f2 */ [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+x2_f2 [label=&quot;I&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; x3_f2 /* x3r_f2 */ [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+x3_f2 [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+g2 [label=&quot;!&quot;]
+g2 -&gt; g2s [color=&quot;red&quot;]
+
+g2s [label=&quot;PiR&quot;]
+g2s -&gt; y [color=&quot;blue&quot;]
+g2s -&gt; ret_g2 [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Then we incrementally move the duplication node down and do cut elimination:</p>
+<div class="graphviz"><object data="_images/graphviz-dcc50b8eac562c0c2b993b71dd265359ee21979e.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c2 [label=&quot;Cut&quot;]
+c2 -&gt; x23_f2 [color=&quot;blue&quot;]
+c2 -&gt; g2b [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; x1i_f2 [color=&quot;blue&quot;]
+c1 -&gt; d1 [color=&quot;red&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; g2s [color=&quot;red&quot;]
+
+x23_f2 [label=&quot;!c&quot;]
+x23_f2 -&gt; x2_f2 [color=&quot;blue&quot;]
+x23_f2 -&gt; x3_f2 [color=&quot;blue&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; x2_f2 /* x2r_f2 */ [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+x2_f2 [label=&quot;I&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; x3_f2 /* x3r_f2 */ [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+x3_f2 [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+g2b [label=&quot;!&quot;]
+g2b -&gt; d1 [color=&quot;red&quot;]
+
+g2s [label=&quot;PiR&quot;]
+g2s -&gt; y [color=&quot;blue&quot;]
+g2s -&gt; ret_g2 [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-31380db576592420005f6de6b294fb7eca1ec6f7.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; x1i_f2 [color=&quot;blue&quot;]
+c1 -&gt; d1 [color=&quot;red&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; g2s [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; d1 [color=&quot;red&quot;]
+
+g2a [label=&quot;!&quot;]
+g2a -&gt; d2 [color=&quot;red&quot;]
+
+g2b [label=&quot;!&quot;]
+g2b -&gt; d2 [color=&quot;red&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; g2a [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; g2b [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+ret [label=&quot;I&quot;]
+
+g2s [label=&quot;PiR&quot;]
+g2s -&gt; y [color=&quot;blue&quot;]
+g2s -&gt; ret_g2 [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-493db4f96be8b3b779559b62da0553e72be30add.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; x1i_f2 [color=&quot;blue&quot;]
+c1 -&gt; g2sb [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; g2sa [color=&quot;red&quot;]
+
+g2a [label=&quot;!&quot;]
+g2a -&gt; d2 [color=&quot;red&quot;]
+
+g2b [label=&quot;!&quot;]
+g2b -&gt; d2 [color=&quot;red&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; g2a [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; g2b [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+ret [label=&quot;I&quot;]
+
+dy [label=&quot;Dup&quot;]
+dy -&gt; y [color=&quot;blue&quot;]
+
+dr [label=&quot;Dup&quot;]
+dr -&gt; ret_g2 [color=&quot;red&quot;]
+
+g2sa [label=&quot;PiR&quot;]
+g2sa -&gt; dy [color=&quot;blue&quot;]
+g2sa -&gt; dr [color=&quot;red&quot;]
+
+g2sb [label=&quot;PiR&quot;]
+g2sb -&gt; dy [color=&quot;blue&quot;]
+g2sb -&gt; dr [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-493db4f96be8b3b779559b62da0553e72be30add.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+
+Root -&gt; ret [color=&quot;red&quot;]
+
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; x1i_f2 [color=&quot;blue&quot;]
+c1 -&gt; g2sb [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; g2sa [color=&quot;red&quot;]
+
+g2a [label=&quot;!&quot;]
+g2a -&gt; d2 [color=&quot;red&quot;]
+
+g2b [label=&quot;!&quot;]
+g2b -&gt; d2 [color=&quot;red&quot;]
+
+id_r [label=&quot;PiR&quot;]
+id_r -&gt; al [color=&quot;blue&quot;]
+id_r -&gt; al /* ar */ [color=&quot;red&quot;]
+
+al [label=&quot;I&quot;]
+
+x1i_f2 [label=&quot;PiL&quot;]
+x1i_f2 -&gt; id_r [color=&quot;red&quot;]
+x1i_f2 -&gt; ssa [color=&quot;blue&quot;]
+
+ssa [label=&quot;PiL&quot;]
+ssa -&gt; g2a [color=&quot;red&quot;]
+ssa -&gt; sa [color=&quot;blue&quot;]
+
+sa [label=&quot;PiL&quot;]
+sa -&gt; g2b [color=&quot;red&quot;]
+sa -&gt; ret /* a2 */ [color=&quot;blue&quot;]
+
+ret [label=&quot;I&quot;]
+
+dy [label=&quot;Dup&quot;]
+dy -&gt; y [color=&quot;blue&quot;]
+
+dr [label=&quot;Dup&quot;]
+dr -&gt; ret_g2 [color=&quot;red&quot;]
+
+g2sa [label=&quot;PiR&quot;]
+g2sa -&gt; dy [color=&quot;blue&quot;]
+g2sa -&gt; dr [color=&quot;red&quot;]
+
+g2sb [label=&quot;PiR&quot;]
+g2sb -&gt; dy [color=&quot;blue&quot;]
+g2sb -&gt; dr [color=&quot;red&quot;]
+
+y [label=&quot;PiL&quot;]
+y -&gt; x_g2 [color=&quot;blue&quot;]
+Root -&gt; y /* z/zr */ [dir=&quot;back&quot;] [color=&quot;red&quot;]
+
+x_g2 [label=&quot;!c&quot;]
+x_g2 -&gt; x1_g2 [color=&quot;blue&quot;]
+x_g2 -&gt; x2_g2 [color=&quot;blue&quot;]
+
+x1_g2 [label=&quot;!d&quot;]
+x1_g2 -&gt; x1i_g2 [color=&quot;blue&quot;]
+
+x1i_g2 [label=&quot;PiL&quot;]
+x1i_g2 -&gt; x2_g2 /* x2r_g2 */ [color=&quot;red&quot;]
+x1i_g2 -&gt; ret_g2 /* f */ [color=&quot;blue&quot;]
+
+x2_g2 [label=&quot;I&quot;]
+
+ret_g2 [label=&quot;I&quot;]
+
+}</p></object></div>
 </div>
 </div>
 <div class="section" id="random-old-junk">
@@ -476,7 +1102,1662 @@ main = print (f (\y -&gt; i y) :: Integer)
 <p>The real hard part is doing “readback”, i.e. proving that all of these transformations are either no-ops on the original lambda term or valid beta reductions. Since there is so much scope popping and pushing and varianting it is definitely a little complex. Also I decided to keep the levels from the original Lambdascope implementation for correctness verification purposes, so there is twice the work. But if you read Ian Mackie’s paper on efficient interaction nets implementation you will see that this “readback” algorithm also provides a way to directly execute the proof net / graph with call-by-value semantics at each reduction step. So it also has a close connection with how to compile the graph to machine code. Since our scopes are unique and the “stack” stores only one director index for a scope at a time, the scopes can correspond directly to machine registers or memory locations.</p>
 <p>Scopes are nested, forming a simple tree hierarchy. When an opening head delimiter of scope A encounters a closing full or empty delimiter of scope B, then A is reparented under B. In particular the one closing delimiter of scope B vanishes, and duplicates of it are propagated to the outside of all other delimiters of A.</p>
 <p>It should be possible to avoid this <code class="docutils literal notranslate"><span class="pre">O(n)</span></code> operation by keeping a depth counter in the scope and each delimiter, with the total number of scopes that the delimiter enters/exit being the sum of the scope’s depth and the delimiter’s depth. Then the interaction would decrement the A scope delimiter’s local depth counter by 1, increment A’s scope-wide depth counter by 1, and vanish B’s delimiter as before. But this hasn’t been implemented yet.</p>
+<p>First we reduce the top cut:</p>
+<div class="graphviz"><object data="_images/graphviz-37b2b771dfe8661acc28a6de615682f1b95f7cec.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+f -&gt; c2
+h_di -&gt; c3
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; ret_o1 [color=&quot;red&quot;]
+c1a -&gt; ret [color=&quot;blue&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fp [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; x_o1 [color=&quot;blue&quot;]
+
+x_o1 [label=&quot;!c&quot;]
+x_o1 -&gt; x1_o1 [color=&quot;blue&quot;]
+x_o1 -&gt; x2_o1 [color=&quot;blue&quot;]
+
+x2_o1 [label=&quot;!d&quot;]
+x2_o1 -&gt; x2i_o1 [color=&quot;blue&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; x1_o1 /* x1_o1r */ [color=&quot;red&quot;]
+x2i_o1 -&gt; ret_o1 /* ret_o1l */ [color=&quot;blue&quot;]
+
+fp [label=&quot;!p&quot;]
+fp -&gt; f [color=&quot;red&quot;,label=&quot;1&quot;]
+
+f [label=&quot;PiR&quot;]
+f -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+f -&gt; f_ret [color=&quot;red&quot;]
+
+c2 [label=&quot;Cut&quot;,shape=doublecircle]
+c2 -&gt; o2 [color=&quot;red&quot;]
+c2 -&gt; o2l [color=&quot;blue&quot;]
+
+o2 [label=&quot;PiR&quot;]
+o2 -&gt; x_o2 [color=&quot;blue&quot;]
+o2 -&gt; ret_o2 [color=&quot;red&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; ret_o2 /* ret_o2l */ [color=&quot;blue&quot;]
+
+o2l [label=&quot;PiL&quot;]
+o2l -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+o2l -&gt; f_ret /* f_retl */ [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+c3 [label=&quot;Cut&quot;]
+c3 -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+c3 -&gt; h_app [color=&quot;blue&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; h_app /* h_appr */ [color=&quot;red&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o1 [label=&quot;I&quot;]
+ret_o1 [label=&quot;I&quot;]
+x1_o2 [label=&quot;I&quot;]
+ret_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+h_app [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Next the other PiR-PiL cut:</p>
+<div class="graphviz"><object data="_images/graphviz-90bd459b7798f53c864949dab97cb16b6a8a54bc.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+f -&gt; c2a
+f -&gt; c2b
+h_di -&gt; c3
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+c1a [label=&quot;Cut&quot;,shape=doublecircle]
+c1a -&gt; ret_o1 [color=&quot;red&quot;]
+c1a -&gt; ret [color=&quot;blue&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fp [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; x_o1 [color=&quot;blue&quot;]
+
+x_o1 [label=&quot;!c&quot;]
+x_o1 -&gt; x1_o1 [color=&quot;blue&quot;]
+x_o1 -&gt; x2_o1 [color=&quot;blue&quot;]
+
+x2_o1 [label=&quot;!d&quot;]
+x2_o1 -&gt; x2i_o1 [color=&quot;blue&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; x1_o1 /* x1_o1r */ [color=&quot;red&quot;]
+x2i_o1 -&gt; ret_o1 /* ret_o1l */ [color=&quot;blue&quot;]
+
+fp [label=&quot;!p&quot;]
+fp -&gt; f [color=&quot;red&quot;,label=&quot;1&quot;]
+
+f [label=&quot;PiR&quot;]
+f -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+f -&gt; f_ret [color=&quot;red&quot;]
+
+c2a [label=&quot;Cut&quot;,shape=doublecircle]
+c2a -&gt; ret_o2 [color=&quot;red&quot;]
+c2a -&gt; f_ret [color=&quot;blue&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; ret_o2 /* ret_o2l */ [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+c3 [label=&quot;Cut&quot;,shape=doublecircle]
+c3 -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+c3 -&gt; h_app [color=&quot;blue&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; h_app /* h_appr */ [color=&quot;red&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o1 [label=&quot;I&quot;]
+ret_o1 [label=&quot;I&quot;]
+x1_o2 [label=&quot;I&quot;]
+ret_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+h_app [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Then, to clean up the graph, the trivial cuts:</p>
+<div class="graphviz"><object data="_images/graphviz-5c398cb7dc70301fe44a9762a400ce91f9018fa8.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+f -&gt; c2b
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+c1b [label=&quot;Cut&quot;,shape=doublecircle]
+c1b -&gt; fp [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; x_o1 [color=&quot;blue&quot;]
+
+x_o1 [label=&quot;!c&quot;]
+x_o1 -&gt; x1_o1 [color=&quot;blue&quot;]
+x_o1 -&gt; x2_o1 [color=&quot;blue&quot;]
+
+x2_o1 [label=&quot;!d&quot;]
+x2_o1 -&gt; x2i_o1 [color=&quot;blue&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; x1_o1 /* x1_o1r */ [color=&quot;red&quot;]
+x2i_o1 -&gt; ret [color=&quot;blue&quot;]
+
+fp [label=&quot;!p&quot;]
+fp -&gt; f [color=&quot;red&quot;,label=&quot;1&quot;]
+
+f [label=&quot;PiR&quot;]
+f -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+f -&gt; f_ret [color=&quot;red&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o1 [label=&quot;I&quot;]
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>To handle the duplication from the contraction we duplicate the cuts/promotion rule and introduce a duplication node Dup to incrementally duplicate the rest of the structure:</p>
+<div class="graphviz"><object data="_images/graphviz-977fd9c156e65b448f3e709baced93e2dcf92505.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+f -&gt; c2b
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f [color=&quot;red&quot;]
+
+c1a [label=&quot;Cut&quot;,shape=doublecircle]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; x1_o1 [color=&quot;blue&quot;]
+
+c1b [label=&quot;Cut&quot;,shape=doublecircle]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; x2_o1 [color=&quot;blue&quot;]
+
+x2_o1 [label=&quot;!d&quot;]
+x2_o1 -&gt; x2i_o1 [color=&quot;blue&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; x1_o1 /* x1_o1r */ [color=&quot;red&quot;]
+x2i_o1 -&gt; ret [color=&quot;blue&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d1 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;,label=&quot;1&quot;]
+
+f [label=&quot;PiR&quot;]
+f -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+f -&gt; f_ret [color=&quot;red&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o1 [label=&quot;I&quot;]
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Then we do cut elimination on what remains. Cut/id is trivial.</p>
+<div class="graphviz"><object data="_images/graphviz-b6a230ef28b5db1a80cad3e9e48fc4f3ef4d1fa7.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+f -&gt; c2b
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+d1 [label=&quot;Dup&quot;,shape=doublecircle]
+d1 -&gt; f [color=&quot;red&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; d1 [color=&quot;red&quot;,label=&quot;1&quot;]
+c1b -&gt; x2i_o1 [color=&quot;blue&quot;,label=&quot;0&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+x2i_o1 -&gt; ret [color=&quot;blue&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;,label=&quot;1&quot;]
+
+f [label=&quot;PiR&quot;]
+f -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+f -&gt; f_ret [color=&quot;red&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-4a577c6f2e6de3e4db1e641087a5b6ea54cf81b4.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+fa -&gt; c2b
+fb -&gt; c2b
+d1 -&gt; d2 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;,shape=doublecircle]
+c1b -&gt; fb [color=&quot;red&quot;,label=&quot;1&quot;]
+c1b -&gt; x2i_o1 [color=&quot;blue&quot;,label=&quot;0&quot;]
+
+x2i_o1 [label=&quot;PiL&quot;]
+x2i_o1 -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+x2i_o1 -&gt; ret [color=&quot;blue&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; d2 [color=&quot;blue&quot;,arrowhead=&quot;odot&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+fb [label=&quot;PiR&quot;]
+fb -&gt; d2 [color=&quot;blue&quot;]
+fb -&gt; d1 [color=&quot;red&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Then the 3rd PiL-PiR cut / beta reduction, corresponding to Fig 2.14 (4) / (5) on page 31 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id13">[AG99]</a>:</p>
+<div class="graphviz"><object data="_images/graphviz-024b0b462abed3277876bc984312d93d0705d1b4.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+fa -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1a [label=&quot;Cut&quot;,shape=doublecircle]
+c1a -&gt; d1 [color=&quot;red&quot;,label=&quot;1&quot;]
+c1a -&gt; ret [color=&quot;blue&quot;,label=&quot;0&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; d2 [color=&quot;blue&quot;,arrowhead=&quot;odot&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-16b403f0463c74bd639caaf9e82286c288925f60.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+fa -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; hi_retp /* h_d */ [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; d2 [color=&quot;blue&quot;,arrowhead=&quot;odot&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;,shape=doublecircle]
+c2b -&gt; hi_retp [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x_o2 [label=&quot;!c&quot;]
+x_o2 -&gt; x1_o2 [color=&quot;blue&quot;]
+x_o2 -&gt; x2_o2 [color=&quot;blue&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retp [label=&quot;!p&quot;]
+hi_retp -&gt; hi_ret [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retp -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>At this stage we can’t duplicate any more because of the !p box. So we do the other cut.</p>
+<div class="graphviz"><object data="_images/graphviz-3da01cf514273fca8fb932beca92f0acf98d58c2.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+fa -&gt; c2b
+c1b -&gt; c2b
+fa -&gt; c2a
+c1b -&gt; c2a
+d1 -&gt; d2 [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;]
+d2 -&gt; hi_retpc [color=&quot;blue&quot;]
+
+hi_retpc [label=&quot;!c&quot;]
+hi_retpc -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+hi_retpc -&gt; hi_retpb [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; d2 [color=&quot;blue&quot;,arrowhead=&quot;odot&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2a [label=&quot;Cut&quot;,shape=doublecircle]
+c2a -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+c2a -&gt; x1_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c2b [label=&quot;Cut&quot;,shape=doublecircle]
+c2b -&gt; hi_retpb [color=&quot;red&quot;,label=&quot;1&quot;]
+c2b -&gt; x2_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2_o2 [label=&quot;!d&quot;]
+x2_o2 -&gt; x2i_o2 [color=&quot;blue&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; x1_o2 /* x1_o2r */ [color=&quot;red&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpb [label=&quot;!p&quot;]
+hi_retpb -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpb -&gt; d4 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; d4 [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4 [label=&quot;Dup&quot;]
+d4 -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+x1_o2 [label=&quot;I&quot;]
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-d8d4d1126f891e9306d633f1d5c02fb392d6a5ae.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+fa -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2 [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2 [label=&quot;Dup&quot;,shape=doublecircle]
+d2 -&gt; hi_retpc [color=&quot;blue&quot;]
+
+hi_retpc [label=&quot;!c&quot;]
+hi_retpc -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+hi_retpc -&gt; d4 [color=&quot;blue&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; d2 [color=&quot;blue&quot;,arrowhead=&quot;odot&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; d4 [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4 [label=&quot;Dup&quot;]
+d4 -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>The !c is exposed so we can create another duplication.</p>
+<div class="graphviz"><object data="_images/graphviz-68fb57cc75b511ad13843eea2268eced4efd80a3.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1b
+fa -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+d2a -&gt; d2b [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; d4 [color=&quot;blue&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+hi_retpc2 [label=&quot;!c&quot;]
+hi_retpc2 -&gt; d2a [color=&quot;blue&quot;]
+hi_retpc2 -&gt; d2b [color=&quot;blue&quot;]
+
+c1b [label=&quot;Cut&quot;,shape=doublecircle]
+c1b -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; hi_retpc2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; fa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; d4 [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4 [label=&quot;Dup&quot;]
+d4 -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-d708f7a5634d03aeaedd4f448f87eda46ad065f6.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+fa -&gt; c2b
+c1a -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; d4 [color=&quot;blue&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; d4 [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4 [label=&quot;Dup&quot;,shape=doublecircle]
+d4 -&gt; h_di [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_di [label=&quot;!d&quot;]
+h_di -&gt; h [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>More duplication</p>
+<div class="graphviz"><object data="_images/graphviz-55ec2d5a18e5128a979794ed120d14a1560e5684.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+fa -&gt; c2b
+c1a -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4 [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; h_dib [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4 [label=&quot;Dup&quot;,shape=doublecircle]
+d4 -&gt; h [color=&quot;blue&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; d4 [color=&quot;blue&quot;,label=&quot;2&quot;,arrowhead=odot]
+
+h_dib [label=&quot;!d&quot;]
+h_dib -&gt; d4 [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+h [label=&quot;PiL&quot;]
+h -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+h -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-7bdc960abfafb91f1f5c2fe217119ea2d88bab71.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+fa -&gt; c2b
+c1a -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+d3 -&gt; d4a [dir=none,style=dashed,constraint=false]
+d4a -&gt; d4b [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; h_dib [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;]
+c2b -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; d3 [color=&quot;red&quot;,label=&quot;2&quot;,arrowhead=&quot;odot&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d3 [label=&quot;Dup&quot;,shape=doublecircle]
+d3 -&gt; hi_ret [color=&quot;red&quot;]
+
+d4a [label=&quot;Dup&quot;]
+d4a -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+
+d4b [label=&quot;Dup&quot;,shape=doublecircle]
+d4b -&gt; hi_ret /* hi_retl */ [color=&quot;blue&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib [label=&quot;!d&quot;]
+h_dib -&gt; hb [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; d4a [color=&quot;red&quot;,arrowhead=odot]
+ha -&gt; d4b [color=&quot;blue&quot;,arrowhead=odot]
+
+hb [label=&quot;PiL&quot;]
+hb -&gt; d4a [color=&quot;red&quot;]
+hb -&gt; d4b [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_ret [label=&quot;I&quot;,shape=doublecircle]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>Up until now we have avoided duplicating identity nodes; this is because duplicating an identity node from only one side would require creating an up-moving duplicator; since cuts reduce downwards this would break the reduction semantics and possibly lead to work duplication. But here we have duplicators on both sides of the identity node, and can duplicate it without reversing directions.</p>
+<div class="graphviz"><object data="_images/graphviz-3a64633b21322d7c60e75d4031dc83859d9cda5e.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+fa -&gt; c2b
+c1a -&gt; c2b
+c1b -&gt; c2b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; h_dib [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+c2b [label=&quot;Cut&quot;,shape=doublecircle]
+c2b -&gt; hi_retb [color=&quot;red&quot;,label=&quot;2&quot;]
+c2b -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; hi_reta [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d4a [label=&quot;Dup&quot;]
+d4a -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib [label=&quot;!d&quot;]
+h_dib -&gt; hb [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; d4a [color=&quot;red&quot;,arrowhead=odot]
+ha -&gt; hi_reta [color=&quot;blue&quot;]
+
+hb [label=&quot;PiL&quot;]
+hb -&gt; d4a [color=&quot;red&quot;]
+hb -&gt; hi_retb [color=&quot;blue&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_reta [label=&quot;I&quot;]
+hi_retb [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-9966491bd9dbfd0d04489f1d528d5af84c6f9e63.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;]
+d2b -&gt; h_dib [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; hi_reta [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+d4a [label=&quot;Dup&quot;,shape=doublecircle]
+d4a -&gt; i [color=&quot;red&quot;,label=&quot;2&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib [label=&quot;!d&quot;]
+h_dib -&gt; hb [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+i [label=&quot;!p&quot;]
+i -&gt; i_i [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i [label=&quot;PiR&quot;]
+i_i -&gt; il [color=&quot;blue&quot;]
+i_i -&gt; i_ret [color=&quot;red&quot;]
+
+il [label=&quot;!d&quot;]
+il -&gt; i_ret /* ild */ [color=&quot;blue&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; d4a [color=&quot;red&quot;,arrowhead=odot]
+ha -&gt; hi_reta [color=&quot;blue&quot;]
+
+hb [label=&quot;PiL&quot;]
+hb -&gt; d4a [color=&quot;red&quot;]
+hb -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+i_ret [label=&quot;I&quot;]
+hi_reta [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+}</p></object></div>
+<p>At this point we finish out the duplication of the identity function, similar to Fig 2.19(8).</p>
+<div class="graphviz"><object data="_images/graphviz-ca06fdaf8cf85eb2d7c7b089492fba81bf7f6e2e.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2b [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+d2b [label=&quot;Dup&quot;,shape=doublecircle]
+d2b -&gt; h_dib [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; d2b [color=&quot;blue&quot;,arrowhead=odot]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; d2b [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+x2i_o2 [label=&quot;PiL&quot;]
+x2i_o2 -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+x2i_o2 -&gt; f_ret [color=&quot;blue&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; hi_reta [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib [label=&quot;!d&quot;]
+h_dib -&gt; hb [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; i1 [color=&quot;red&quot;,label=&quot;2&quot;]
+ha -&gt; hi_reta [color=&quot;blue&quot;]
+
+hb [label=&quot;PiL&quot;]
+hb -&gt; i2 [color=&quot;red&quot;,label=&quot;2&quot;]
+hb -&gt; x2i_o2 [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+hi_reta [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;]
+
+i1 [label=&quot;!p&quot;]
+i1 -&gt; i_i1 [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i1 [label=&quot;PiR&quot;]
+i_i1 -&gt; il1 [color=&quot;blue&quot;]
+i_i1 -&gt; i_ret1 [color=&quot;red&quot;]
+
+il1 [label=&quot;!d&quot;]
+il1 -&gt; i_ret1 [color=&quot;blue&quot;]
+
+i_ret1 [label=&quot;I&quot;]
+
+i2 [label=&quot;!p&quot;]
+i2 -&gt; i_i2 [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i2 [label=&quot;PiR&quot;]
+i_i2 -&gt; il2 [color=&quot;blue&quot;]
+i_i2 -&gt; i_ret2 [color=&quot;red&quot;]
+
+il2 [label=&quot;!d&quot;]
+il2 -&gt; i_ret2 [color=&quot;blue&quot;]
+
+i_ret2 [label=&quot;I&quot;]
+}</p></object></div>
+<p>Now we can do the other duplication. Duplicating the !p requires all inputs to be covered. similar to identity nodes.</p>
+<div class="graphviz"><object data="_images/graphviz-b9aafdcf81113a85800a4b6beb1421476ff50871.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+d1 -&gt; d2a [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2ba [dir=none,style=dashed,constraint=false]
+d1 -&gt; d2bb [dir=none,style=dashed,constraint=false]
+
+Root -&gt; d1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+d1 [label=&quot;Dup&quot;,shape=doublecircle]
+d1 -&gt; f_ret [color=&quot;red&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_dib1 [label=&quot;!d&quot;]
+h_dib1 -&gt; hb1 [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib2 [label=&quot;!d&quot;]
+h_dib2 -&gt; hb2 [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+hb1 [label=&quot;PiL&quot;]
+hb1 -&gt; i2a [color=&quot;red&quot;,label=&quot;2&quot;]
+hb1 -&gt; x2i_o2a [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+hb2 [label=&quot;PiL&quot;]
+hb2 -&gt; i2b [color=&quot;red&quot;,label=&quot;2&quot;]
+hb2 -&gt; x2i_o2b [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+i2a [label=&quot;!p&quot;]
+i2a -&gt; i_i2a [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i2a [label=&quot;PiR&quot;]
+i_i2a -&gt; il2a [color=&quot;blue&quot;]
+i_i2a -&gt; i_ret2a [color=&quot;red&quot;]
+
+il2a [label=&quot;!d&quot;]
+il2a -&gt; i_ret2a [color=&quot;blue&quot;]
+
+i_ret2a [label=&quot;I&quot;]
+
+i2b [label=&quot;!p&quot;]
+i2b -&gt; i_i2b [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i2b [label=&quot;PiR&quot;]
+i_i2b -&gt; il2b [color=&quot;blue&quot;]
+i_i2b -&gt; i_ret2b [color=&quot;red&quot;]
+
+il2b [label=&quot;!d&quot;]
+il2b -&gt; i_ret2b [color=&quot;blue&quot;]
+
+i_ret2b [label=&quot;I&quot;]
+
+d2ba [label=&quot;Dup&quot;]
+d2ba -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d2bb [label=&quot;Dup&quot;,shape=doublecircle]
+d2bb -&gt; f_ret [color=&quot;blue&quot;]
+
+x2i_o2a [label=&quot;PiL&quot;]
+x2i_o2a -&gt; d2ba [color=&quot;red&quot;,arrowhead=odot]
+x2i_o2a -&gt; d2bb [color=&quot;blue&quot;,arrowhead=odot]
+
+x2i_o2b [label=&quot;PiL&quot;]
+x2i_o2b -&gt; d2ba [color=&quot;red&quot;]
+x2i_o2b -&gt; d2bb [color=&quot;blue&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; h_dib1 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; h_dib2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; d1 [color=&quot;red&quot;,arrowhead=&quot;odot&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; hi_reta [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; i1 [color=&quot;red&quot;,label=&quot;2&quot;]
+ha -&gt; hi_reta [color=&quot;blue&quot;]
+
+hi_reta [label=&quot;I&quot;]
+f_ret [label=&quot;I&quot;,shape=doublecircle]
+
+i1 [label=&quot;!p&quot;]
+i1 -&gt; i_i1 [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i1 [label=&quot;PiR&quot;]
+i_i1 -&gt; il1 [color=&quot;blue&quot;]
+i_i1 -&gt; i_ret1 [color=&quot;red&quot;]
+
+il1 [label=&quot;!d&quot;]
+il1 -&gt; i_ret1 [color=&quot;blue&quot;]
+
+i_ret1 [label=&quot;I&quot;]
+
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-17b138f225ec8072e282465a498eea2514dffb92.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+Root -&gt; c1a
+Root -&gt; c1b
+d2a -&gt; d2ba [dir=none,style=dashed,constraint=false]
+
+Root -&gt; f_ret1 [color=&quot;red&quot;,label=&quot;0-&gt;1&quot;]
+
+f_ret1 [label=&quot;I&quot;]
+f_ret2 [label=&quot;I&quot;]
+
+d2a [label=&quot;Dup&quot;]
+d2a -&gt; hi_retpa [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+h_dib1 [label=&quot;!d&quot;]
+h_dib1 -&gt; hb1 [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+h_dib2 [label=&quot;!d&quot;]
+h_dib2 -&gt; hb2 [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+hb1 [label=&quot;PiL&quot;]
+hb1 -&gt; i2a [color=&quot;red&quot;,label=&quot;2&quot;]
+hb1 -&gt; x2i_o2a [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+hb2 [label=&quot;PiL&quot;]
+hb2 -&gt; i2b [color=&quot;red&quot;,label=&quot;2&quot;]
+hb2 -&gt; x2i_o2b [color=&quot;blue&quot;,label=&quot;2-&gt;1&quot;]
+
+i2a [label=&quot;!p&quot;]
+i2a -&gt; i_i2a [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i2a [label=&quot;PiR&quot;]
+i_i2a -&gt; il2a [color=&quot;blue&quot;]
+i_i2a -&gt; i_ret2a [color=&quot;red&quot;]
+
+il2a [label=&quot;!d&quot;]
+il2a -&gt; i_ret2a [color=&quot;blue&quot;]
+
+i_ret2a [label=&quot;I&quot;]
+
+i2b [label=&quot;!p&quot;]
+i2b -&gt; i_i2b [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i2b [label=&quot;PiR&quot;]
+i_i2b -&gt; il2b [color=&quot;blue&quot;]
+i_i2b -&gt; i_ret2b [color=&quot;red&quot;]
+
+il2b [label=&quot;!d&quot;]
+il2b -&gt; i_ret2b [color=&quot;blue&quot;]
+
+i_ret2b [label=&quot;I&quot;]
+
+d2ba [label=&quot;Dup&quot;]
+d2ba -&gt; hi_retpa [color=&quot;red&quot;,label=&quot;1&quot;]
+
+x2i_o2a [label=&quot;PiL&quot;]
+x2i_o2a -&gt; d2ba [color=&quot;red&quot;,arrowhead=odot]
+x2i_o2a -&gt; f_ret2 [color=&quot;blue&quot;]
+
+x2i_o2b [label=&quot;PiL&quot;]
+x2i_o2b -&gt; d2ba [color=&quot;red&quot;]
+x2i_o2b -&gt; f_ret1 [color=&quot;blue&quot;]
+
+hi_retpc1 [label=&quot;!c&quot;]
+hi_retpc1 -&gt; d2a [color=&quot;blue&quot;,arrowhead=odot]
+hi_retpc1 -&gt; h_dib1 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1a [label=&quot;Cut&quot;]
+c1a -&gt; fpa [color=&quot;red&quot;,label=&quot;0&quot;]
+c1a -&gt; d2a [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+c1b [label=&quot;Cut&quot;]
+c1b -&gt; fpb [color=&quot;red&quot;,label=&quot;0&quot;]
+c1b -&gt; h_dib2 [color=&quot;blue&quot;,label=&quot;1&quot;]
+
+fpa [label=&quot;!p&quot;]
+fpa -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+fpb [label=&quot;!p&quot;]
+fpb -&gt; d5 [color=&quot;red&quot;,label=&quot;1&quot;]
+
+d5 [label=&quot;Dup&quot;]
+d5 -&gt; fa [color=&quot;red&quot;]
+
+fa [label=&quot;PiR&quot;]
+fa -&gt; hi_retpc1 [color=&quot;blue&quot;]
+fa -&gt; f_ret2 [color=&quot;red&quot;]
+
+hi_retpa [label=&quot;!p&quot;]
+hi_retpa -&gt; hi_reta [color=&quot;red&quot;,label=&quot;2&quot;]
+hi_retpa -&gt; h_dia [color=&quot;blue&quot;,label=&quot;1&quot;,arrowhead=&quot;odot&quot;]
+
+h_dia [label=&quot;!d&quot;]
+h_dia -&gt; ha [color=&quot;blue&quot;,label=&quot;2&quot;]
+
+ha [label=&quot;PiL&quot;]
+ha -&gt; i1 [color=&quot;red&quot;,label=&quot;2&quot;]
+ha -&gt; hi_reta [color=&quot;blue&quot;]
+
+hi_reta [label=&quot;I&quot;]
+
+i1 [label=&quot;!p&quot;]
+i1 -&gt; i_i1 [color=&quot;red&quot;,label=&quot;3&quot;]
+
+i_i1 [label=&quot;PiR&quot;]
+i_i1 -&gt; il1 [color=&quot;blue&quot;]
+i_i1 -&gt; i_ret1 [color=&quot;red&quot;]
+
+il1 [label=&quot;!d&quot;]
+il1 -&gt; i_ret1 [color=&quot;blue&quot;]
+
+i_ret1 [label=&quot;I&quot;]
+
+}</p></object></div>
 </div>
+</div>
+<div class="section" id="junk">
+<h2>Junk<a class="headerlink" href="#junk" title="Permalink to this headline">¶</a></h2>
+<p>Our 4th beta reduction</p>
+<p>Duplicate more</p>
+<p>Add the last duplication node and reduce, for consistency with figure 2.17 (7)</p>
+<p>2.17(7) has 5 duplicator nodes, 3 app nodes, and 3 lambda nodes. In comparison, our graph has 5 duplicators, 4 cuts, 3 identities, and one each of PiL, PiR, !p, and !d. So there are still the two pairs of fans but the nodes otherwise look completely different.</p>
+<p>Anyway, for the pair on the right, if we scroll up a bit we can see that we were duplicating a single PiR-!d-I loop, the identity function. So the duplication of the I must resolve to another identity function, with the two connecting.</p>
 </div>
 </div>
 
@@ -488,7 +2769,7 @@ main = print (f (\y -&gt; i y) :: Integer)
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Reduction-Example.html" class="btn btn-neutral float-right" title="Reduction example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

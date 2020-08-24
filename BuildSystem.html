@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
@@ -182,8 +183,10 @@
             
   <div class="section" id="build-system">
 <h1>Build system<a class="headerlink" href="#build-system" title="Permalink to this headline">¶</a></h1>
-<p>Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. Also, it allows the compiler’s include-following mechanism to tightly integrate with the build system, so that generated files can be generated before they are used.</p>
-<div class="graphviz"><img src="_images/graphviz-1a509ab03a6c9026e34ddceebc0e71426e17cdab.png" alt="digraph foo {
+<p>Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. What is usually called “separate compilation” is actually incremental compilation. Compilation’s goal is to produce a single executable / DLL, so these “separate” files are in fact all part of the same assembly. Object files are simply one way of storing intermediate results so that compilation work done on the files can be shared; but it does not handle some patterns, e.g. recursive references.</p>
+<p>Also, the compiler’s include-following mechanism can be tightly integrated with the build system, so that generated files can be generated before they are used.</p>
+<div class="graphviz"><object data="_images/graphviz-1a509ab03a6c9026e34ddceebc0e71426e17cdab.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph foo {
     rankdir=LR;
     subgraph cluster_0 {
         style=filled;
@@ -201,18 +204,19 @@
     a2 -&gt; &quot;C.class&quot;
     a2 -&gt; &quot;C$1.class&quot;
     a2 -&gt; &quot;C$Foo.class&quot;
-}" class="graphviz" /></div>
+}</p></object></div>
 <div class="section" id="pipeline">
 <h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
 <p>A task’s state evolves as follows:</p>
-<div class="graphviz"><img src="_images/graphviz-083948f501a77c25946a411b7a2c62219fba5c4f.png" alt="digraph foo {
+<div class="graphviz"><object data="_images/graphviz-083948f501a77c25946a411b7a2c62219fba5c4f.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph foo {
     rankdir=LR;
     Recheck -&gt; Dirty
     Dirty -&gt; Running
     Running -&gt; Loaded
     Running -&gt; Error
     Recheck -&gt; Loaded
-}" class="graphviz" /></div>
+}</p></object></div>
 <p>The pipeline of a build system is as follows:</p>
 <ul class="simple">
 <li><p>We start with a changelist of “pending” keys, i.e. keys that might have changed. The prototypical example is a list of changed files from a file-watching daemon, but it can also include volatile information such as external tool version numbers or FTP server listings or finer keys such as individual AST nodes. We could also use the list of all keys from the previous build, skipping the watcher altogether.</p></li>

@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Modules" href="Modules.html" />
-    <link rel="prev" title="Reduction" href="Reduction.html" /> 
+    <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Types</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#condition-checking">Condition checking</a></li>
@@ -195,7 +196,8 @@
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>We follow the semantic definition: types are sets. In particular, we have typing is membership <span class="math notranslate nohighlight">\(A : B = A \in B\)</span>. We define the set of sets as <span class="math notranslate nohighlight">\(S =\{ \emptyset \} \cup \left\{ s \mid \exists x. x \in s\right\}\)</span>. Equality on sets is the usual extensional equality <span class="math notranslate nohighlight">\(A \in S \land B \in S \rightarrow \left(\left(x \in A \leftrightarrow x\in B\right) \leftrightarrow A=B \right)\)</span>. Subtyping is set inclusion <span class="math notranslate nohighlight">\(A \subseteq B\)</span> (and forms a distributive lattice).</p>
 <p>The values (things that aren’t types/sets) are as defined in the core: ADT elements (a list of elements with a tag) and lambda expressions and so on. For many types, checking whether an element is a member is as simple as checking the tag.</p>
-<p>We follow New Foundations (specifically NFU) in allowing any type (set) to be specified with a stratified formula. The usual formulation requires <code class="docutils literal notranslate"><span class="pre">lvl(b)=lvl(a)+1</span></code> for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">in</span> <span class="pre">b</span></code>, but this can be relaxed to <code class="docutils literal notranslate"><span class="pre">lvl(b)</span> <span class="pre">&gt;</span> <span class="pre">lvl(a)</span></code>. I can’t find Holmes’s paper with the exact result, but the proof of the Statified Comprehension Theorem on page 45 of <a class="bibtex reference internal" href="zzreferences.html#holmeselementarysettheory1998" id="id1">[Hol98]</a> can easily be changed from <code class="docutils literal notranslate"><span class="pre">n-1</span></code> to <code class="docutils literal notranslate"><span class="pre">n-k,k&gt;0</span></code>. Since the stratification only applies to quantified variables and most types do not use quantification this won’t come up often. Since NFU has universal sets there is no issue of function types being a power set that is “too large” for the universe.</p>
+<p>We follow New Foundations (specifically NFU) in allowing any type (set) to be specified with a stratified formula. Our stratification condition is very loose. The usual formulation requires <code class="docutils literal notranslate"><span class="pre">lvl(b)=lvl(a)+1</span></code> for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">in</span> <span class="pre">b</span></code>, but this can be relaxed to <code class="docutils literal notranslate"><span class="pre">lvl(b)</span> <span class="pre">&gt;</span> <span class="pre">lvl(a)</span></code>. Holmes had a paper proving this consistent, but his site has been reorganized; consistency also follows from the proof of the Statified Comprehension Theorem on page 45 of <a class="bibtex reference internal" href="zzreferences.html#holmeselementarysettheory1998" id="id1">[Hol98]</a>, changing <code class="docutils literal notranslate"><span class="pre">n-1</span></code> to <code class="docutils literal notranslate"><span class="pre">n-k,k&gt;0</span></code>. In practice, this means levels must form a poset, or said another way, that there cannot be a cyclic chain of set membership tests (a in b, b in c, c in a, for example). Also note that if the left side is known to be a set, then the membership test can be replaced with a subset inclusion check (expandable to a logical formula) and there is no constraint generated at all. So it is only when we are dealing with mixed sets containing both sets and primitive elements that we can really run into trouble. Overall, since the stratification only applies to quantified variables and most types do not use quantification, this most likely will never come up as an issue in practice.</p>
+<p>NFU has universal sets, so there is no issue of function types being a power set that is “too large” for the universe; the power set of the universe is actually a subset of the universal set.</p>
 </div>
 <div class="section" id="condition-checking">
 <h2>Condition checking<a class="headerlink" href="#condition-checking" title="Permalink to this headline">¶</a></h2>
@@ -267,7 +269,7 @@
         <a href="Modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Reduction.html" class="btn btn-neutral float-left" title="Reduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

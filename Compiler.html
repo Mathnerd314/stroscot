@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
@@ -101,6 +102,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#optimizations">Optimizations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flags">Flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-messages">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output">Output</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -197,6 +200,21 @@
 <div class="section" id="flags">
 <h2>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h2>
 <p>In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.</p>
+</div>
+<div class="section" id="error-messages">
+<h2>Error messages<a class="headerlink" href="#error-messages" title="Permalink to this headline">¶</a></h2>
+<p>Since Stroscot uses model checking, most failures will end up producing a counterexample. The counterexample may not be minimal, but it is much easier to debug a concrete instance than to try to figure one out from contextual information.</p>
+<p>For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. We could just use pointers, but Go’s integers are ordered so comparing within files is faster. But it isn’t clear how to make this incremental.</p>
+</div>
+<div class="section" id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<p>The simplest output is to write out a copy of the interpreter with a comment “This is generated code - see Interpreter.hs for source” at the top. But we want to specialize this.</p>
+<p>versioning of time/date
+identifier minimization/translation
+unit test
+random input testing
+quasiquotation
+typechecking</p>
 </div>
 </div>
 

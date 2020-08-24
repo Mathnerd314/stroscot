@@ -88,6 +88,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inspiring-projects">Inspiring projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tagline">Tagline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#goals">Goals</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-ultimate">The ultimate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roadmap">Roadmap</a></li>
@@ -104,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
@@ -212,6 +214,16 @@ programs are freed to be idealized to their purest form.</p>
 <li><p><a class="reference external" href="https://github.com/briantrice/slate-language">Slate</a></p></li>
 </ul>
 </div>
+<div class="section" id="tagline">
+<h2>Tagline<a class="headerlink" href="#tagline" title="Permalink to this headline">¶</a></h2>
+<p>The tagline for Stroscot is “an imperative programming language for modern processors”. The breakdown:</p>
+<dl class="simple">
+<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <a class="bibtex reference internal" href="zzreferences.html#jonestacklingawkwardsquad2001" id="id2">[Jon01]</a> because “actions are first class values” in Haskell.</p>
+</dd>
+<dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for multiple architectures. The plan for now is to only target 64-bit x86.</p>
+</dd>
+</dl>
+</div>
 <div class="section" id="goals">
 <h2>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="the-ultimate">
@@ -220,7 +232,7 @@ programs are freed to be idealized to their purest form.</p>
 </div>
 <div class="section" id="roadmap">
 <h3>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">¶</a></h3>
-<p>World domination is of course very far off, the roadmap at the moment is basically “cool parser, optimal evaluation, Thorin-like IR, static typing/analysis, x86-64 / LLVM / WASM backend (pick 1), some kind of GC or memory management”. But if you are wondering why a feature seems unduly powerful or complex, it is because I aim for the ultimate rather than something just alright.  A lot of programming features overlap, so I’ll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. I’m not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.</p>
+<p>World domination is of course very far off, the roadmap at the moment is basically “optimal evaluation, Thorin-like IR, static typing/analysis, cool parser, some kind of GC or memory management, x86-64 / LLVM / WASM backend (pick 1)”. But if you are wondering why a feature seems unduly powerful or complex, it is because I aim for the ultimate rather than something just alright.  A lot of programming features overlap, so I’ll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. I’m not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.</p>
 <p>My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms in the compiler then people will refer to Stroscot just for the algorithms.</p>
 </div>
 <div class="section" id="performance">
