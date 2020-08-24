@@ -1,0 +1,54 @@
+\documentclass[preview,border=3pt,varwidth=20in]{standalone}
+\usepackage[paperwidth=20in,paperheight=20in,total={20in, 20in}]{geometry}
+\usepackage{bussproofs}
+\usepackage{amsmath}
+\newcommand{\ia}[1]{\AxiomC{}\UnaryInfC{\(#1\)}}
+\newcommand{\ib}[1]{\UnaryInfC{\(#1\)}}
+\newcommand{\ic}[1]{\BinaryInfC{\(#1\)}}
+\newcommand{\rl}[1]{\RightLabel{\(#1\)}}
+\newcommand{\B}{\text{B}}
+\newcommand{\C}{\text{Cut}}
+\newcommand{\I}{\text{Id}}
+\begin{document}\begin{prooftree}
+
+\rl{\I}\ia{!T \vdash !T}
+\rl{\Pi_R}\ib{\vdash !T \to !T }
+% i
+ \rl{\I}\ia{!T \to !T \vdash !T \to !T}
+  \rl{\I}\ia{!S \vdash !S}
+   \rl{\I}\ia{!S \vdash !S}
+    \rl{\I}\ia{a \vdash a}
+   \rl{\Pi_L}\ic{!S, !S \to a \vdash a}
+  \rl{\Pi_L}\ic{!S, !S, !S \to !S \to a \vdash a}
+ \rl{\Pi_L}\ic{!T \to !T, !S, !S, S \vdash a}
+ \rl{!d}\ib{!T \to !T, !S, !S, !S \vdash a }
+\rl{\C}\ic{!S, !S, !S \vdash a }
+\rl{!c}\ib{!S, !S \vdash a }
+\rl{!c}\ib{!S \vdash a }
+\rl{\Pi_R}\ib{\vdash !S \to a }
+% f2
+
+\rl{\I}\ia{! T \vdash !T}
+  \rl{\I}\ia{f \vdash f}
+ \rl{\Pi_{L}}\ic{! T, T \vdash f}
+ \rl{!d}\ib{! T, ! T \vdash f}
+ \rl{!c}\ib{! T \vdash f}
+ \rl{\Pi_R}\ib{\vdash T }
+% o
+
+ \rl{\I}\ia{!T \vdash !T}
+ \rl{\I}\ia{f \vdash f}
+ \rl{\Pi_{L}}\ic{T, ! T \vdash f}
+
+ \rl{\C}\ic{!T \vdash f }
+ \rl{\I}\ia{!T \vdash !T}
+ \rl{\Pi_L}\ic{!T, !T \to !T \vdash f }
+ \rl{\Pi_R}\ib{!T \vdash S }
+ \rl{!}\ib{!T \vdash !S }
+% g2
+
+ \rl{\I}\ia{a \vdash a}
+\rl{\Pi_L}\ic{!S \to a, !T \vdash a}
+\rl{\C}\ic{!T \vdash a}
+
+\end{prooftree}\end{document}

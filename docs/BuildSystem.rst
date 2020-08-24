@@ -1,7 +1,9 @@
 Build system
 ############
 
-Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. Also, it allows the compiler's include-following mechanism to tightly integrate with the build system, so that generated files can be generated before they are used.
+Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. What is usually called "separate compilation" is actually incremental compilation. Compilation's goal is to produce a single executable / DLL, so these "separate" files are in fact all part of the same assembly. Object files are simply one way of storing intermediate results so that compilation work done on the files can be shared; but it does not handle some patterns, e.g. recursive references.
+
+Also, the compiler's include-following mechanism can be tightly integrated with the build system, so that generated files can be generated before they are used.
 
 .. graphviz::
 

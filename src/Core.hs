@@ -1,7 +1,20 @@
-{-# LANGUAGE DeriveFunctor, TupleSections #-}
+{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable, TupleSections #-}
 
 import Control.Exception (assert)
 import GHC.Stack (HasCallStack)
+import Data.Function (on)
+import Data.List (groupBy,sortBy,find,sort,zipWith4,transpose,findIndex)
+import Data.Maybe(fromJust)
+import Control.Arrow((&&&))
+import Control.Monad (forM_)
+import Control.Monad.State
+import Debug.Trace(trace,traceShow,traceM,traceShowM)
+
+-- | A combination of 'group' and 'sort', using a part of the value to compare on.
+--
+-- > groupSortOn length ["test","of","sized","item"] == [["of"],["test","item"],["sized"]]
+groupSortOn :: Ord b => (a -> b) -> [a] -> [[a]]
+groupSortOn f = map (map snd) . groupBy ((==) `on` fst) . sortBy (compare `on` fst) . map (f &&& id)
 
 delete :: HasCallStack => Int -> [a] -> [a]
 delete _ []     = error "delete: element not present"
@@ -14,460 +27,454 @@ deleteM [] ys = ys
 deleteM [x] ys = delete x ys
 deleteM (x:xs@(xp:_)) ys = assert (x < xp) $ delete x (deleteM xs ys)
 
-insertAt :: HasCallStack => Int -> a -> [a] -> [a]
-insertAt 0 a ls = a : ls
-insertAt n a [] = error "insertAt: list too short"
-insertAt n a (l:ls) = l : insertAt (n-1) a ls
+type Tag = String
 
---data Atom
---    = Var String
---    | Constant String
---    deriving (Eq,Ord,Show)
-type Atom = String
+data Ctx v = Ctx [v] [v]
+   deriving (Eq,Ord,Show,Functor)
 
-data Form
-    = Atom Atom
-    | PlusTimes [[Form]]
-    | With [([Form],[Form])]
-    | Bang Form
-    | Quest Form
-    deriving (Eq,Ord,Show)
+ctx_l (Ctx l _) = l
+ctx_r (Ctx _ r) = r
 
-data Seq = Seq [Form] [Form]
+data RuleX v
+  = PiRight v (Ctx v) [(Tag, Ctx v, Ctx v)]
+  | PiLeft v Tag [v] [v]
+--  | SigmaRight v Tag (Ctx v)
+--  | SigmaLeft v (Ctx v) [(Tag, Ctx v, Ctx v)]
+  | Bang v (Ctx v) v (Ctx v)
+  | BangD v v
+  | BangCW v [v]
+  | Whim v (Ctx v) v (Ctx v)
+  | WhimD v v
+  | WhimCW v [v]
+  | Identity v v
+  | Cut v v
+  | Root v
+  | Dup [(Side,v,[v])]
+   deriving (Eq,Ord,Show,Functor)
+
+data EDir = In | Out
    deriving (Eq,Ord,Show)
 
-seqHead (Seq a b) = a
-seqTail (Seq a b) = b
+data Side = L | R
+   deriving (Eq,Ord,Show)
 
-data Rule r
-  = Identity Form
-  | Axiom Atom
-  | Cut Int Int r r
+data GD = GD
+  { side :: Side
+  , in_port :: Maybe Int
+  , in_num :: Maybe Int
+  , out_num :: Maybe Int
+  }
+   deriving (Eq,Ord,Show)
 
-  | ImplR [([Int],[Int],r)]
-  | ImplL [(Int,r)] [(Int,r)]
-
-  | PlusL Int r [(Int,r)]
-  | ZeroL Seq -- an extra rule for PlusL so we know which assumptions to explode to.
-  | PlusR Int Int [Form] r
-
-  | BangR Int r
-  | BangL Int r -- dereliction
-  | ContractL Int [Int] r
-  | WeakenL Form r
-
-  | QuestL Int r
-  | QuestR Int r
-  | ContractR Int [Int] r
-  | WeakenR Form r
-  deriving (Eq,Ord,Show,Functor)
-
-rule (Identity a) = Seq [a] [a]
-rule (Axiom a) = Seq [Atom a] [Atom a]
-rule (Cut a b (Seq w x) (Seq y z)) = assert (y !! b == x !! a) $ Seq (w ++ delete b y) (delete a x ++ z)
-rule (ImplR a b (Seq x y))
-    = Seq (deleteM a x) ([Lolli (map (x!!) a) (map (y!!) b)] ++ deleteM b y)
-rule (ImplL a b) =
-    let
-      ll = Lolli (map (\(i,r) -> seqTail r !! i) a) (map (\(i,r) -> seqHead r !! i) b)
-      x = (a >>= seqHead . snd) ++ (b >>= (\(i,r) -> delete i (seqHead r)))
-      y = (a >>= (\(i,r) -> delete i (seqTail r))) ++ (b >>= seqTail . snd)
-    in
-        Seq ([ll] ++ x) y
-
-rule (PlusL a (Seq x y) ys) = assert (all ((delete a x ==) . (\(i,r) -> delete i (seqHead r))) ys) $
-                              assert (all ((y==) . seqTail . snd) ys) $
-                                Seq ([Plus ([x !! a] ++ map (\(i,r) -> seqHead r !! i) ys)] ++ delete a x) y
-rule (ZeroL (Seq x y)) = Seq ([Plus []] ++ x) y
-rule (PlusR i j cs (Seq x y)) = Seq x ([Plus (insertAt j (y !! i) cs)] ++ delete i y)
-{-
-rule (WeakenL a (Seq x y)) = Seq (x ++ [Bang a]) y
-rule (WeakenR a (Seq x y)) = Seq x (y ++ [Quest a])
-rule (ContractL a b (Seq x y)) =
-    let af@(Bang _) = x !! a
-        bf@(Bang _) = x !! b
-    in
-        assert (af == bf) $ Seq (delete b x) y
-rule (ContractR a b (Seq x y)) =
-    let af@(Quest _) = y !! a
-        bf@(Quest _) = y !! b
-    in
-        assert (af == bf) $ Seq x (delete b y)
-rule (BangL a (Seq x y)) = Seq ([Bang (x !! a)] ++ delete a x) y
-rule (BangR a (Seq x y)) = Seq x ([Bang (y !! a)] ++ delete a y) -- assert: x is all Bang's, delete a y is all Quest's
-rule (QuestR a (Seq x y)) = Seq x ([Quest (y !! a)] ++ delete a y)
-rule (QuestL a (Seq x y)) = Seq ([Quest (x !! a)] ++ delete a x) y  -- assert: delete a x is all Bang's, y is all Quest's
--}
-
-
-
-data RuleExp = RE (Rule RuleExp)
-  deriving (Show,Eq,Ord)
-
-seqifyF :: RuleExp -> Seq
-seqifyF (RE r) = rule $ fmap seqifyF r
-
-seqify = seqifyF . RE
-
-idexpand :: Form -> Rule RuleExp
-idexpand (Atom a) = Axiom a
-idexpand (Plus []) = ZeroL (Seq [] [Plus []])
-idexpand (Plus (a:as)) = PlusL 0 (mkPlusR 0 a) (map (0,) js)
+combine :: HasCallStack => GD -> GD -> GD
+combine a b = GD
+  { side = assert (side a == side b) $ side a
+  , in_port = j (in_port a) (in_port b)
+  , in_num = j (in_num a) (in_num b)
+  , out_num = j (out_num a) (out_num b)
+  }
   where
-    mkPlusR j x = RE $ PlusR 0 j (delete j (a:as)) (RE $ idexpand x)
-    js = zipWith mkPlusR [1..] as
-idexpand (Lolli a b) = ImplR is js $ RE $ ImplL as bs
-  where
-    is = map fst $ zip [1..] a
-    js = map fst $ zip [0..] a
-    as = map ((0,) . RE . idexpand) a
-    bs = map ((0,) . RE . idexpand) b
+    j = joinMaybes
 
-cutelim :: Int -> Int -> Rule RuleExp -> Rule RuleExp -> Rule RuleExp
-cutelim i j (Cut a b (RE x) (RE y)) s = cutelim i j (cutelim a b x y) s
-cutelim i j r (Cut a b (RE x) (RE y)) = cutelim i j r (cutelim a b x y)
-cutelim i j (Identity ident) s = cutelim i j (idexpand ident) s
-cutelim i j s (Identity ident) = cutelim i j s (idexpand ident)
-cutelim 0 _ (Axiom _) s = s -- only one formula, so index must be 0. pattern-match error if not
-cutelim _ 0 s (Axiom _) = s
-cutelim 0 0 (PlusR i2 j cs (RE rr)) (PlusL i (RE r) is) =
-  case j of
-    0 -> cutelim i 0 r rr
-    j -> let (ip,RE rp) = is !! (j-1) in
-        cutelim ip 0 rp rr
-cutelim 0 0 (ImplR ar br (RE rr)) (ImplL a b) =
-  let
-    as = zip ar a
-    bs = zip br b
-    f x (k,(i,RE r)) = cutelim i k r x
-    g x (k,(i,RE r)) = cutelim k i x r
+joinMaybes (Just a) (Just b) = assert False (Just a)
+joinMaybes (Just a) Nothing = Just a
+joinMaybes Nothing (Just b) = Just b
+joinMaybes Nothing Nothing = Nothing
+
+def_gd = GD L Nothing Nothing Nothing
+ctx_ports :: EDir -> Ctx v -> [(v,EDir,GD)]
+ctx_ports d (Ctx ll rr) = map (,d,l) ll ++ map (,d,r) rr
+
+l = def_gd {side = L}
+r = def_gd {side = R}
+
+ports :: RuleX v -> [(v,EDir,GD)]
+ports (Root o) = [(o,Out,r)]
+ports (Cut rr ll) = [(ll,Out,l),(rr,Out,r)]
+ports (Identity ll rr) = [(ll,In,l),(rr,In,r)]
+ports (Dup xs) = zip [0..] xs >>= \(n, (s,o,is)) ->
+  (o,Out,def_gd {side = s, out_num = Just n}) :
+  zipWith (\m x -> (x,In,def_gd {side = s, in_num = Just n, in_port = Just m})) [0..] is
+ports (BangCW i os) =(i,In,l) : map (,Out,l) os
+ports (BangD i o) = [(i,In,l),(o,Out,l)]
+ports (Bang i ic o oc) = [(i,In,r)] ++ ctx_ports In ic ++ [(o,Out,r)] ++ ctx_ports Out oc
+ports (WhimCW i os) =(i,In,r) : map (,Out,r) os
+ports (WhimD i o) = [(i,In,r),(o,Out,r)]
+ports (Whim i ic o oc) = [(i,In,l)] ++ ctx_ports In ic ++ [(o,Out,l)] ++ ctx_ports Out oc
+ports (PiLeft i _ rr ll) = [(i,In,l)] ++ map (,Out,r) rr ++ map (,Out,l) ll
+ports (PiRight i ic cs) = [(i,In,r)] ++ ctx_ports In ic ++
+  (cs >>= \(_,os,oc) -> ctx_ports Out os ++ ctx_ports Out oc)
+
+type Rule = RuleX String
+type Graph = [Rule]
+
+ec = Ctx [] []
+
+-- delta (\h. delta (h I))
+-- this is the bad version that uses call-by-name evaluation or something like it
+example_m_bad :: Graph
+example_m_bad =
+  [ Root "ret"
+  , Cut "o1" "o1l"
+  , PiRight "o1" ec [("func", Ctx ["x_o1"] ["ret_o1"], ec)]
+  , BangCW "x_o1" ["x1_o1","x2_o1"]
+  , BangD "x2_o1" "x2i_o1"
+  , PiLeft "x2i_o1" "func" ["x1_o1r"] ["ret_o1l"]
+  , Identity "x1_o1" "x1_o1r"
+  , Identity "ret_o1l" "ret_o1"
+  , PiLeft "o1l" "func" ["fp"] ["ret_l"]
+  , Bang "fp" ec "f" ec
+  , PiRight "f" ec [("func", Ctx ["h_d"] ["f_ret"], ec)]
+  , Cut "o2" "o2l"
+  , PiRight "o2" ec [("func", Ctx ["x_o2"] ["ret_o2"], ec)]
+  , BangCW "x_o2" ["x1_o2", "x2_o2"]
+  , BangD "x2_o2" "x2i_o2"
+  , PiLeft "x2i_o2" "func" ["x1_o2r"] ["ret_o2l"]
+  , Identity "x1_o2" "x1_o2r"
+  , Identity "ret_o2l" "ret_o2"
+  , PiLeft "o2l" "func" ["hi_retp"] ["f_retl"]
+  , Bang "hi_retp" (Ctx ["h_d"] []) "hi_ret" (Ctx ["h_di"] [])
+  , BangD "h_di" "h"
+  , Cut "i" "h_app"
+  , Bang "i" ec "i_i" ec
+  , PiRight "i_i" ec [("func", Ctx ["il"] ["i_ret"], ec)]
+  , BangD "il" "ild"
+  , Identity "ild" "i_ret"
+  , PiLeft "h" "func" ["h_appr"] ["hi_retl"]
+  , Identity "h_app" "h_appr"
+  , Identity "hi_retl" "hi_ret"
+  , Identity "f_retl" "f_ret"
+  , Identity "ret_l" "ret"
+  ]
+
+example_m :: Graph
+example_m =
+  [ Root "ret"
+  , Identity "ret_l" "ret"
+  , PiLeft "o1l" "func" ["fp"] ["ret_l"]
+  , Cut "o1" "o1l"
+  , PiRight "o1" ec [("func", Ctx ["x_o1"] ["ret_o1"], ec)]
+  , Identity "ret_o1l" "ret_o1"
+  , PiLeft "x2i_o1" "func" ["x1_o1r"] ["ret_o1l"]
+  , BangD "x2_o1" "x2i_o1"
+  , BangCW "x_o1" ["x1_o1","x2_o1"]
+  , Identity "x1_o1" "x1_o1r"
+
+  , Bang "fp" ec "f" ec
+  , PiRight "f" ec [("func", Ctx ["h_d"] ["f_ret"], ec)]
+  , Cut "o2" "o2l"
+  , PiRight "o2" ec [("func", Ctx ["x_o2"] ["ret_o2"], ec)]
+  , BangCW "x_o2" ["x1_o2", "x2_o2"]
+  , BangD "x2_o2" "x2i_o2"
+  , PiLeft "x2i_o2" "func" ["x1_o2r"] ["ret_o2l"]
+  , Identity "x1_o2" "x1_o2r"
+  , Identity "ret_o2l" "ret_o2"
+  , PiLeft "o2l" "func" ["hi_retp"] ["f_retl"]
+  , Bang "hi_retp" (Ctx ["h_d"] []) "hi_ret" (Ctx ["h_di"] [])
+  , BangD "h_di" "h"
+  , Cut "i" "h_app"
+  , Bang "i" ec "i_i" ec
+  , PiRight "i_i" ec [("func", Ctx ["il"] ["i_ret"], ec)]
+  , BangD "il" "ild"
+  , Identity "ild" "i_ret"
+  , PiLeft "h" "func" ["h_appr"] ["hi_retl"]
+  , Identity "h_app" "h_appr"
+  , Identity "hi_retl" "hi_ret"
+  , Identity "f_retl" "f_ret"
+  ]
+
+delta_graph :: Graph
+delta_graph =
+  [ Root "ret"
+  , Cut "o1" "o1l"
+  , PiRight "o1" ec [("func", Ctx ["x_o1"] ["ret_o1"], ec)]
+  , BangCW "x_o1" ["x1_o1","x2_o1"]
+  , BangD "x2_o1" "x2i_o1"
+  , PiLeft "x2i_o1" "func" ["x1_o1r"] ["ret_o1l"]
+  , Identity "x1_o1" "x1_o1r"
+  , Identity "ret_o1l" "ret_o1"
+  , PiLeft "o1l" "func" ["fp"] ["ret_l"]
+  , Bang "fp" ec "o2" ec
+  , PiRight "o2" ec [("func", Ctx ["x_o2"] ["ret_o2"], ec)]
+  , BangCW "x_o2" ["x1_o2", "x2_o2"]
+  , BangD "x2_o2" "x2i_o2"
+  , PiLeft "x2i_o2" "func" ["x1_o2r"] ["ret_o2l"]
+  , Identity "x1_o2" "x1_o2r"
+  , Identity "ret_o2l" "ret_o2"
+  , Identity "ret_l" "ret"
+  ]
+
+type Edge = (String,Int,Int,GD)
+
+type Edges = [Edge]
+
+edges :: Graph -> Edges
+edges rs = let
+  ps = concat $ zipWith (\x -> map (x,)) [0..] $ map ports rs
+  ess = groupSortOn (\(_,(a,_,_))->a) ps
+  buildEdge es = case es of
+    [(i,(a,Out,sa)),(j,(b,In,sb))] -> assert (a == b) $
+      (a,i,j,combine sa sb)
+    [(j,(b,In,sb)),(i,(a,Out,sa))] -> assert (a == b) $
+      (a,i,j,combine sa sb)
+    _ -> error $ show es
+  in map buildEdge ess
+
+tagName :: RuleX v -> String
+tagName (PiRight _ _ _) = "PiR"
+tagName (PiLeft _ _ _ _) = "PiL"
+tagName (Bang _ _ _ _) = "!p"
+tagName (BangD _ _) = "!d"
+tagName (BangCW _ []) = "!w"
+tagName (BangCW _ _) = "!c"
+tagName (Whim _ _ _ _) = "?p"
+tagName (WhimD _ _) = "?d"
+tagName (WhimCW _ []) = "?w"
+tagName (WhimCW _ _) = "?c"
+tagName (Identity _ _) = "I"
+tagName (Cut _ _) = "Cut"
+tagName (Root _) = "Root"
+tagName (Dup _) = "Dup"
+
+type Names = [(Rule, String)]
+
+nodeNames :: Graph -> Names
+nodeNames rs = let
+  rss = groupSortOn tagName rs
+  in rss >>= zipWith (\n x -> (x,tagName x ++ show n)) [0..]
+
+quote n = "\"" ++ n ++ "\""
+
+nodes :: Names -> (Edge,Rule) -> Rule -> [String]
+nodes names ((e,_,_,_),actN) r =
+  case r of
+    Dup ns -> take (length ns) $ map buildDupNode [0..]
+    _ -> [buildNode n (r == actN)]
+  where
+    n = fromJust (lookup r names)
+    buildNode n b = quote n ++ " [label=" ++ quote (tagName r) ++
+      (if b then ",shape=doublecircle" else "") ++ "]\n"
+    Dup xs = actN
+    idx = fromJust $ flip findIndex xs $ \(_,o,is) -> o == e || e `elem` is
+    buildDupNode i =
+      buildNode (n ++ "_" ++ show i) (r == actN && i == idx)
+
+edgeOut :: Names -> Graph -> [Edge] -> (String,Int,Int,GD) -> String
+edgeOut names graph activeE edge@(e,i,j,gd) = let
+  getN n = fromJust (lookup (graph !! n) names)
+  maybeNum m = case m of { Nothing -> ""; Just m -> "_" ++ show m}
+  ax = getN i ++ maybeNum (out_num gd)
+  bx = getN j ++ maybeNum (in_num gd)
+  (a,b) = case side gd of L -> (bx,ax); R -> (ax,bx)
+  arrowhead p = (case side gd of L -> ",arrowtail="; R -> ",arrowhead=") ++ case p of
+    0 -> "dot"
+    1 -> "odot"
   in
-    foldl g (foldl f rr as) bs
---- commuting conversions ---
-cutelim n m (ImplL a b) rr | n > 0 =
-  let
-    rightidxs = (zip [0..] a >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Left k)) $ (seqTail $ seqifyF r)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] . map (const (Right k)) $ seqTail $ seqifyF r)
-    (downidx, abidx) = rightidxs !! n
+    quote a ++ " -> " ++ quote b
+      ++ "[color=" ++ case side gd of { L -> "blue"; R -> "red" }
+      ++ ",tooltip=" ++ quote e
+      ++ case in_port gd of { Nothing -> ""; Just p -> arrowhead p}
+      ++ (if edge `elem` activeE then ",penwidth=2" else "")
+      ++ case side gd of { L -> ",dir=back"; R -> ""}
+      ++ "]\n"
+
+mkDot graph edgesG active = let
+  names = nodeNames graph
+  activeE = map fst active
+  activeN = last active
+  nodetxt = concat (graph >>= nodes names activeN)
+  edgetxt = edgesG >>= edgeOut names graph activeE
   in
-    case abidx of
-      Left idx -> let
-        (aidx,RE ai) = a !! idx
-        replacement = cutelim downidx m ai rr
-        acomb = insertAt idx (aidx,RE replacement) (delete idx a)
-       in
-        ImplL acomb b
-      Right idx -> let
-        (bidx,RE bi) = b !! idx
-        replacement = cutelim downidx m bi rr
-        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
-       in
-        ImplL a bcomb
-cutelim n m (PlusL a (RE r) rs) s | n > 0 = PlusL a (RE $ cutelim n m r s) $ map f rs
-  where
-    f (i,RE r) = (i,RE $ cutelim n m r s)
-cutelim n m (ZeroL (Seq x y)) r | n > 0 = ZeroL (Seq x (delete n y ++ seqTail (seqify r)))
-cutelim n m (ImplR a b (RE r)) s | n > 0 = ImplR a b (RE $ cutelim n' m r s)
-  where n' = ([error "Bad index"] ++ deleteM b [0..]) !! n
-cutelim n m (PlusR i j cs (RE r)) s | n > 0 = PlusR i j cs (RE $ cutelim n' m r s)
-  where n' = ([error "Bad index"] ++ delete i [0..]) !! n
-cutelim n m s (ImplR a b (RE r)) = ImplR a b (RE $ cutelim n m' s r)
-  where m' = deleteM a [0..] !! m
-cutelim n m s (ImplL a b) | m > 0 =
-  let
-    leftidxs = [error "Bad index"] ++
-                (zip [0..] a >>= \(k,(i,r)) -> zip [0..] . map (const (Left k)) $ (seqHead $ seqifyF r)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] . map (const (Right k)) $ seqHead $ seqifyF r)
-    (downidx, abidx) = leftidxs !! n
-  in
-    case abidx of
-      Left idx -> let
-        (aidx,RE ai) = a !! idx
-        replacement = cutelim n downidx s ai
-        acomb = insertAt idx (aidx,RE replacement) (delete idx a)
-       in
-        ImplL acomb b
-      Right idx -> let
-        (bidx,RE bi) = b !! idx
-        replacement = cutelim n downidx s bi
-        bcomb = insertAt idx (bidx, RE replacement) (delete idx b)
-       in
-        ImplL a bcomb
-cutelim n m s (PlusL a (RE r) rs) | m > 0 = PlusL a (RE $ cutelim n m' s r) $ map f rs
-  where
-    m' = ([error "Bad index"] ++ delete a [0..]) !! m
-    f (i,RE r) = let m' = ([error "Bad index"] ++ delete i [0..]) !! m in
-        (i,RE $ cutelim n m s r)
+    "digraph {\n" ++ nodetxt ++ edgetxt ++ "}\n"
 
-cutelim n m s (ZeroL (Seq x y)) | m > 0 = ZeroL (Seq (delete (m-1) x ++ seqHead (seqify s)) y)
-cutelim n m s (PlusR i j cs (RE r)) | m > 0 = PlusR i j cs (RE $ cutelim n m r s)
-cutelim n m a b = error (show (m,n) ++ ":" ++ show (a,b))
+iterGraph edge_num graph = let
+  names = nodeNames graph
+  edgesG = edges graph
+  (active, next) = reduceG graph edgesG
+  (next_graph, new_edge_num) = runState next edge_num
+  in (graph, (edgesG, active)) : iterGraph new_edge_num next_graph
 
-data Exp
-  = EId
-  | EHask Any (Int,Int)
-  | ECut Int Int Exp Exp
-  | EImplR [Int] [Int] Exp
-  | EImplL [(Int,Exp)] [(Int,Exp)]
-  | EPlusL Int Exp [(Int,Exp)]
-  | EZeroL (Int,Int) -- an extra rule for PlusL so we know which assumptions to explode to.
-  | EPlusR Int Int Int Exp
-  deriving (Eq,Ord,Show)
+toDot edge_num graph = map (\(g,(e,a)) -> mkDot g e a) $ iterGraph edge_num graph
 
-size :: Exp -> (Int,Int)
-size EId = (1,1)
-size (EHask _ s) = s
-size (ECut _ _ x y) | (a,b) <- size x, (c,d) <- size y = (a+c-1,b+d-1)
-size (EImplR a b r) | (x,y) <- size r = (x - length a, 1 + y - length b)
-size (EImplL a b) = (1+x, y)
-  where
-    x = (sum $ map (fst . size . snd) a) + (sum $ map (fst . size . snd) b) - length b
-    y = (sum $ map (snd . size . snd) a) + (sum $ map (snd . size . snd) b) - length a
-size (EPlusL a r ys) = assert (all ((== size r) . size . snd) ys) $ size r
-size (EZeroL (x,y)) = (1 + x,y)
-size (EPlusR i j cs r) = size r
+writeGraphs ex name limit = do
+  let out = zip [0..limit] (toDot 0 ex)
+  forM_ out $ \(i,g) -> do
+    putStrLn (show i)
+    writeFile (name ++ "_" ++ show i ++ ".dot") g
 
-reduce :: Int -> Int -> Exp -> Exp -> Exp
-reduce i j (ECut a b x y) s = reduce i j (reduce a b x y) s
-reduce i j r (ECut a b x y) = reduce i j r (reduce a b x y)
-reduce 0 _ EId s = s -- only one formula, so index must be 0. pattern-match error if not
-reduce _ 0 s EId = s
-reduce 0 0 (EPlusR i2 j cs rr) (EPlusL i r is) =
-  case j of
-    0 -> reduce i 0 r rr
-    j -> let (ip,rp) = is !! (j-1) in
-        reduce ip 0 rp rr
-reduce 0 0 (EImplR ar br rr) (EImplL a b) =
-  let
-    as = zip ar a
-    bs = zip br b
-    f x (k,(i,r)) = reduce i k r x
-    g x (k,(i,r)) = reduce k i x r
-  in
-    foldl g (foldl f rr as) bs
---- commuting conversions ---
-reduce n m (EImplL a b) rr | n > 0 =
-  let
-    rightidxs = (zip [0..] a >>= \(k,(i,r)) -> delete i . zip [0..] $ replicate (snd $ size r) (Left k)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> zip [0..] $ replicate (snd $ size r) (Right k))
-    (downidx, abidx) = rightidxs !! n
-  in
-    case abidx of
-      Left idx -> let
-        (aidx,ai) = a !! idx
-        replacement = reduce downidx m ai rr
-        acomb = insertAt idx (aidx,replacement) (delete idx a)
-       in
-        EImplL acomb b
-      Right idx -> let
-        (bidx,bi) = b !! idx
-        replacement = reduce downidx m bi rr
-        bcomb = insertAt idx (bidx,replacement) (delete idx b)
-       in
-        EImplL a bcomb
-reduce n m (EPlusL a r rs) s | n > 0 = EPlusL a (reduce n m r s) $ map f rs
-  where
-    f (i,r) = (i,reduce n m r s)
-reduce n m (EZeroL (x,y)) r | n > 0 = EZeroL (x, y-1 + (snd . size $ r))
-reduce n m (EImplR a b r) s | n > 0 = EImplR a b (reduce n' m r s)
-  where n' = ([error "Bad index"] ++ deleteM b [0..]) !! n
-reduce n m (EPlusR i j cs r) s | n > 0 = EPlusR i j cs (reduce n' m r s)
-  where n' = ([error "Bad index"] ++ delete i [0..]) !! n
-reduce n m s (EImplR a b r) = EImplR a b (reduce n m' s r)
-  where m' = deleteM a [0..] !! m
-reduce n m s (EImplL a b) | m > 0 =
-  let
-    leftidxs = [error "Bad index"] ++
-                (zip [0..] a >>= \(k,(i,r)) -> zip [0..] $ replicate (fst $ size r) (Left k)) ++
-                (zip [0..] b >>= \(k,(i,r)) -> delete i . zip [0..] $ replicate (fst $ size r) (Right k))
-    (downidx, abidx) = leftidxs !! n
-  in
-    case abidx of
-      Left idx -> let
-        (aidx,ai) = a !! idx
-        replacement = reduce n downidx s ai
-        acomb = insertAt idx (aidx,replacement) (delete idx a)
-       in
-        EImplL acomb b
-      Right idx -> let
-        (bidx,bi) = b !! idx
-        replacement = reduce n downidx s bi
-        bcomb = insertAt idx (bidx, replacement) (delete idx b)
-       in
-        EImplL a bcomb
-reduce n m s (EPlusL a r rs) | m > 0 = EPlusL a (reduce n m' s r) $ map f rs
-  where
-    m' = ([error "Bad index"] ++ delete a [0..]) !! m
-    f (i,r) = let m' = ([error "Bad index"] ++ delete i [0..]) !! m in
-        (i,reduce n m s r)
+main = writeGraphs example_m "example_m" 1000
 
-reduce n m s (EZeroL (x,y)) | m > 0 = EZeroL (x-1 + (fst $ size s), y)
-reduce n m s (EPlusR i j cs r) | m > 0 = EPlusR i j cs (reduce n m r s)
-reduce n m a b = error (show (m,n) ++ ":" ++ show (a,b))
+findEdge edges en = fromJust $ find (\(n,_,_,_) -> en == n) edges
 
--- C   -- Control
--- E   -- Environment
--- (S) -- Store
--- K   -- Continuation
-{-
+data GDir = Down | Up
+   deriving (Eq,Ord,Show)
 
-dual :: Form -> Form
-dual a@(Atom _) = Lolli [a] []
-dual (Bang e) = Quest (dual e)
-dual (Quest e) = Bang (dual e)
-dual (Lolli [a] []) = [a]
-dual (Lolli [x] [Bot]) = [x]
-dual (Lolli x y) = Lolli (map dual y) (map dual x)
-dual x = Lolli x []
+reduceG :: Graph -> Edges -> ([(Edge,Rule)], State Int Graph)
+reduceG graph edgesG = let
+  Root o = fromJust $ find ((=="Root") . tagName) graph
+  root_edge = findEdge edgesG o
+  in reduce graph edgesG root_edge Down
 
-async Bot = True
-async (Lolli _ _) = True
-async (Quest _) = True
-async _ = False
+findNode graph e@(_,from,to,gd) Up = graph !! from
+findNode graph e@(_,from,to,gd) Down = graph !! to
 
+get_from_id (_,from,to,gd) = from
+get_gd (_,_,_,gd) = gd
 
-perp a = Lolli a []
-par a b = Lolli (Perp a) b
-tensor a b = Perp (Lolli a (Perp b))
-with a b = Perp (Plus [Perp a,Perp b])
-unit = Perp Bot
-top = Perp (Plus [])
+mkedge = do
+  n <- get
+  put (n+1)
+  return ("e" ++ show n)
 
-var = RE . Axiom . Var
-lam s e = RE $ ImplR (Atom (Var s)) (head . seqTail . seqify $ e) e
-app e f = RE $ ImplL (head . seqTail . seqify $ e) (head . seqTail . seqify $ f) e f
-topret = RE . BotR . RE $ Identity [] -- Identity [Bot] ?
-argeval e f = RE $ Cut (last . seqHead . seqify $ f) e f
-funcall = argeval -- should be Cut as well with different argument polarities
--- Fun String Exp Env Kont
--}
-
-
-{-
-
-data Form
-    = Atom Atom
-    | Perp Form
-    | Bot
-    | Plus [Form]
-    | Lolli Form Form
-    | Bang Form
-    | Quest Form
-    deriving (Eq,Ord,Show)
-
-
-
--- small-step semantics step
-step :: State -> State
-step s@(State c e k) = case c of
-  Var v -> case e ! v of
-    Closure v' b e' -> State (Lam v' b) e' k
-  Ap cf cx -> State cf e (Arg cx e k)
-  Lam v b -> case k of
-    Top -> s
-    Arg cx e' k' -> State cx e' (Fun v b e k')
-    Fun v' b' e' k' -> State b' (extend v' (Closure v b e) e') k'
-
-
-data State = State Exp Env Kont
-  deriving Show
-
-data Env = Env [(String,Value)]
-  deriving Show
-
-Env e ! v = case lookup v e of
-    Nothing -> error "No value in env"
-    Just x -> x
-
-extend :: String -> Value -> Env -> Env
-extend i v (Env f) = Env $ (i,v) : f
-
-data Value = Closure Exp | Blackhole
-  deriving Show
-
-final :: State -> Bool
-final (State Lam{} _ Top) = True
-final _ = False
-
-start :: Exp -> State
-start c = State c (Env []) Top
-
-id_ = Lam "x" $ Var "x"
-const_ = Lam "x" $ Lam "y" $ Var "x"
-
--- until :: (a -> Bool) -> (a -> a) -> a -> a
-
-eval :: State -> State
-eval = until final step
-
--- -}
-{-
-
-types - no logical meaning
-
-command Cut - <v || k> a.k.a. Eval v k
-Command MultiCut  - Let binding
-command existsR Jump 'jump j sigma-vec v-vec' - alos handles tuples
-binding cut v3 - rec{} - not necesssary per paper pg4 2.2.3 last 2 paragraphs
-binding existsL - Label - mu-tilde - tuples and existsL
-binding Name / optional-weaken-right (x = v)
-
-Axiom: Term var 'x : t' / Continuation 'ret : t'
-continuation case 'case-of alts'
-continuation ->L = apply-lambda v . k
-continuation forallL apply sigma . k
-continuation TLK - K (b vec, x vec) -> c
-Continuation Default - no-op type conversion 'x -> c'
-term ->R '\x. v'
-term forallR '\\a. v'
-term TRK 'K (sigma vec, v vec)'
-Term act - no-op type conversion 'mu ret. c'
--}
-
-{-
--- | A general computation. A command brings together a list of bindings and
--- either:
---   * A computation to perform, including a /term/ that produces a value, some
---     /frames/ that process the value, and an /end/ that may finish the
---     computation or branch as a case expression.
---   * A jump to a join point, with a list of arguments and the join id.
-data Command b = Let (Command b) (Command b)
-               | Eval (Term b) [Frame b] (End b)
-               | Jump [Term b] Id
-               | Rec [Command b]
-               | BindTerm b (Term b)
-               | BindJoin b [b] (Command b)
-  deriving (Functor, Foldable, Traversable)
-
-
-type Program a  = [Command a]
-
--- | An expression producing a value. These include literals, lambdas,
--- and variables, as well as types and coercions (see GHC's 'GHC.Expr' for the
--- reasoning). They also include computed values, which bind the current
--- continuation in the body of a command.
-data Term b     = Lit Literal       -- ^ A primitive literal value.
-                | VarT Id            -- ^ A term variable. Must /not/ be a
-                                    -- nullary constructor; use 'Cons' for this.
-                | Lam b (Term b)    -- ^ A function. Binds some arguments and
-                                    -- a continuation. The body is a command.
-                | Compute Type (Command b)
-                                    -- ^ A value produced by a computation.
-                                    -- Binds a continuation.  The type is the type
-                                    -- of the value returned by the computation
-                | Type Type         -- ^ A type. Used to pass a type as an
-                                    -- argument to a type-level lambda.
-                | Coercion Coercion -- ^ A coercion. Used to pass evidence
-                                    -- for the @cast@ operation to a lambda.
-  deriving (Functor, Foldable, Traversable)
-
-data Cont b = App (Arg b) (Cont b)
-            | Cast Coercion (Cont b)
-            | Tick (Tickish Id) (Cont b)
-            | Return
-            | Case b [(AltCon,[b],Command b)]
-  deriving (Functor, Foldable, Traversable)
-
--}
-
-
+reduce :: Graph -> Edges -> Edge -> GDir -> ([(Edge,Rule)], State Int Graph)
+reduce graph edges e@(_,from_id,to_id,gd) dir = let
+  r = findNode graph e dir
+  s = side gd
+  expand en dn = let (rest, g) = reduce graph edges (findEdge edges en) dn in ((e,r) : rest, g)
+  replaceM :: State Int ([Rule], [Rule]) -> ([(Edge,Rule)], State Int Graph)
+  replaceM s = ([(e,r)], do
+    (del, add) <- s
+    return $ filter (\x -> not (x `elem` del)) graph ++ add
+    )
+  replace :: [Rule] -> [Rule] -> ([(Edge,Rule)], State Int Graph)
+  replace del add = replaceM (return (del,add))
+  follow e = findNode graph (findEdge edges e)
+  join_edges :: [String] -> [String] -> ([Rule],[Rule])
+  join_edges top bottom = let
+    bot_nodes :: [Rule]
+    bot_nodes = map (\e -> follow e Down) bottom
+    change :: String -> String -> String -> String
+    change bn bo b = if b == bo then bn else b
+    change_all :: String -> String -> Rule -> Rule
+    change_all bn bo rr = fmap (change bn bo) rr
+    new_bots = zipWith3 change_all top bottom bot_nodes
+    in (bot_nodes,new_bots)
+  in case (r,s,dir) of
+  (Identity ll _,R,Down) -> expand ll Up
+  (Identity _ rr,L,Down) -> expand rr Up
+  (PiLeft i _ _ _,_,Up) -> expand i Up
+  (PiRight i _ _,_,Up) -> expand i Up
+  (BangCW i _,_,Up) -> expand i Up
+  (BangD i _,_,Up) -> expand i Up
+  (Bang i _ _ _,_,Up) -> expand i Up
+  -- todo: handle auxiliary ports. Although we will never encounter them during reduction?
+  (WhimCW i _,_,Up) -> expand i Up
+  (WhimD i _,_,Up) -> expand i Up
+  (Whim i _ _ _,_,Up) -> expand i Up
+  -- active cases
+  (Dup xs, _, _) -> let
+    didx = fromJust $ (case dir of Down -> in_num; Up -> out_num) gd
+    (side,dup_out,dup_ins) = xs !! didx
+    dup_target = follow dup_out Down
+    repD = replicateM (length dup_ins)
+    in case dup_target of
+      Identity _ _ | dir == Down -> expand dup_out Down
+      Dup _ | dir == Down -> expand dup_out Down
+      Identity ll rr | dir == Up -> let
+        id_edge@(_,_,_,gdi) = findEdge edges (case side of R -> ll; L -> rr)
+        other_node = findNode graph id_edge Up
+        didx2 = assert (other_node == r) $ fromJust (out_num gdi)
+        dup_cleaned = Dup $ deleteM (sort [didx,didx2]) xs
+        (_,_,other_ins) = xs !! didx2
+        (dup_l,dup_r) = case assert (side == s) s of L -> (dup_ins,other_ins); R -> (other_ins, dup_ins)
+        in replace [r,dup_target] (zipWith Identity dup_l dup_r++[dup_cleaned])
+      PiRight i (Ctx [] []) cs | i == dup_out -> replaceM $ do
+        let in_ctxs = trace "d_lam" $ replicate (length dup_ins) (Ctx [] [] :: Ctx String)
+        (cases_rep, newdups) <- fmap unzip . flip mapM cs $ \(t,Ctx vl vr,Ctx [] []) -> do
+          new_l <- repD $ replicateM (length vl) mkedge
+          new_r <- repD $ replicateM (length vr) mkedge
+          let dups = zipWith (L,,) vl (transpose new_l) ++ zipWith (R,,) vr (transpose new_r)
+          let ctxs = zipWith Ctx new_l new_r
+          let cases  = map (t,,Ctx [] []) ctxs
+          return (cases, dups)
+        let pirs = zipWith3 PiRight dup_ins in_ctxs (transpose cases_rep)
+        let dup = Dup $ delete didx xs ++ concat newdups
+        return ([r,dup_target],pirs++[dup])
+      PiLeft _ t rr ll -> replaceM $ do
+        new_l <- trace "d_app" $ repD $ replicateM (length ll) mkedge
+        new_r <- repD $ replicateM (length rr) mkedge
+        let newdups = zipWith (L,,) ll (transpose new_l) ++ zipWith (R,,) rr (transpose new_r)
+        let ts = replicate (length dup_ins) t
+        let pils = zipWith4 PiLeft dup_ins ts new_r new_l
+        let dup = Dup $ delete didx xs ++ newdups
+        return ([r,dup_target],pils++[dup])
+      BangCW _ os -> replaceM $ do
+        new_os <- repD $ replicateM (length os) mkedge
+        let newdups = zipWith (L,,) os (transpose new_os)
+        let newcws = zipWith BangCW dup_ins new_os
+        let dup = Dup $ delete didx xs ++ newdups
+        return ([r,dup_target],newcws++[dup])
+      BangD _ o -> replaceM $ do
+        os <- repD mkedge
+        let newdup = (L,o,os)
+        let bangds = zipWith BangD dup_ins os
+        let dup = Dup $ delete didx xs ++ [newdup]
+        return ([r,dup_target],bangds++[dup])
+      Bang i (Ctx il ir) o (Ctx ol or) -> let
+        this_dup = case dir of Down -> to_id; Up -> from_id
+        check_input_edge i = let
+          up_edge = findEdge edges i
+          didx = fromJust . out_num . get_gd $ up_edge
+          is_dup = get_from_id up_edge == this_dup
+          in if is_dup then Right didx else Left up_edge
+        dup_besides didxs = deleteM (sort didxs) xs
+        get_ins = (\(_,_,i) -> i) . (xs !!)
+        res = do
+          idx <- check_input_edge i
+          ildx <- mapM check_input_edge il
+          irdx <- mapM check_input_edge ir
+          return (get_ins idx, map get_ins ildx, map get_ins irdx, dup_besides ([idx]++ildx++irdx))
+        in case res of
+        Left e_next ->
+            let (rest, g) = reduce graph edges e_next Up
+            in ((e,r) : (e_next,dup_target) : rest, g)
+        Right res@(id,ild,ird,dup_rest) -> replaceM $ do
+          os <- repD mkedge
+          ols <- repD $ replicateM (length ol) mkedge
+          ors <- repD $ replicateM (length or) mkedge
+          let newdups = [(R,o,os)] ++ zipWith (L,,) ol (transpose ols) ++ zipWith (R,,) or (transpose ors)
+          let tr x = case x of [] -> replicate (length dup_ins) []; _ -> transpose x
+          let ic = zipWith Ctx (tr ild) (tr ird)
+          let oc = zipWith Ctx ols ors
+          let bangs = zipWith4 Bang id ic os oc
+          let dup = Dup $ dup_rest ++ newdups
+          return ([r,dup_target],bangs++[dup])
+      _ -> traceShow (r,dup_target) $ replace undefined undefined
+  (Cut rr ll, _, Up)-> let
+    right_node = follow rr Down
+    left_node = follow ll Down
+    in case (right_node,left_node) of
+      (PiRight ir ic cs, PiLeft il t prr pll) | rr == ir && il == ll -> let
+        [(_,Ctx mll mrr,context)] = filter (\(tr,_,_) -> tr == t) cs
+        Ctx ic_l ic_r = ic
+        Ctx context_l context_r = context
+        (del,add) = trace "beta" $ join_edges (ic_l++ic_r) (context_l++context_r)
+        in replace ([r,right_node,left_node]++del) (zipWith Cut prr mll ++ zipWith Cut mrr pll ++ add)
+      (_, Identity _ irr) -> let
+        (del,add) = join_edges [irr] [rr]
+        in replace ([r,left_node]++del) add
+      (Identity ill _, _) -> let
+        (del,add) = join_edges [ill] [ll]
+        in replace ([r,right_node]++del) add
+      (Dup _, _) -> expand rr Down
+      -- (_, Dup _) -> expand ll Down
+      (Bang _ (Ctx il ir) o (Ctx ol or), BangCW _ f) -> replaceM $ do
+        let repF = replicateM (length f)
+        cut_bang <- repF mkedge
+        bang_dup_main <- repF mkedge
+        bang_dup_aux_r <- repF $ replicateM (length or) mkedge
+        bang_dup_aux_l <- repF $ replicateM (length ol) mkedge
+        cw_bang_l <- repF $ replicateM (length il) mkedge
+        cw_bang_r <- repF $ replicateM (length ir) mkedge
+        let tr = transpose
+        let cuts = zipWith Cut cut_bang f
+        let dup = if f == [] then [] else return . Dup $ [(R,o,bang_dup_main)] ++ zipWith (R,,) or (tr bang_dup_aux_r) ++ zipWith (L,,) ol (tr bang_dup_aux_l)
+        let cws_l = zipWith BangCW il (tr cw_bang_l)
+        let cws_r = zipWith WhimCW ir (tr cw_bang_r)
+        let bangs = zipWith4 Bang cut_bang (zipWith Ctx cw_bang_l cw_bang_r) bang_dup_main (zipWith Ctx bang_dup_aux_l bang_dup_aux_r)
+        return ([r,right_node,left_node], dup ++ bangs ++ cuts ++ cws_l ++ cws_r)
+      (Bang _ (Ctx il ir) o (Ctx ol or), BangD _ f) -> let
+        (del,add) = join_edges (il++or) (ol++or)
+        cut = Cut o f
+        in replace ([r,left_node,right_node]++del) ([cut]++add)
+      (_,_) -> traceShow (r,right_node,left_node) $ replace undefined undefined

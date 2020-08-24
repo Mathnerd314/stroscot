@@ -37,9 +37,19 @@ Inspiring projects
 -  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
 -  `Slate <https://github.com/briantrice/slate-language>`__
 
+Tagline
+=======
+
+The tagline for Stroscot is "an imperative programming language for modern processors". The breakdown:
+
+imperative programming language
+  This is a riff of the assertion "Haskell is the world's finest imperative programming language", first said in  the awkward squad paper :cite:`jonesTacklingAwkwardSquad2001` because "actions are first class values" in Haskell.
+
+modern processors
+  This is mostly because I don't want to have to write code generators for multiple architectures. The plan for now is to only target 64-bit x86.
+
 Goals
 =====
-
 
 The ultimate
 ------------
@@ -49,7 +59,7 @@ Eventually I would like Stroscot to be the ultimate programming language, suppor
 Roadmap
 -------
 
-World domination is of course very far off, the roadmap at the moment is basically "cool parser, optimal evaluation, Thorin-like IR, static typing/analysis, x86-64 / LLVM / WASM backend (pick 1), some kind of GC or memory management". But if you are wondering why a feature seems unduly powerful or complex, it is because I aim for the ultimate rather than something just alright.  A lot of programming features overlap, so I'll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
+World domination is of course very far off, the roadmap at the moment is basically "optimal evaluation, Thorin-like IR, static typing/analysis, cool parser, some kind of GC or memory management, x86-64 / LLVM / WASM backend (pick 1)". But if you are wondering why a feature seems unduly powerful or complex, it is because I aim for the ultimate rather than something just alright.  A lot of programming features overlap, so I'll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms in the compiler then people will refer to Stroscot just for the algorithms.
 

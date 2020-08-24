@@ -6,7 +6,7 @@ let
         ]);
 in
 pkgs.stdenv.mkDerivation {
-  name = "my-haskell-env-0";
-  buildInputs = [ ghc ];
+  name = "my-env-0";
+  buildInputs = [ ghc pkgs.pdf2svg ];
   shellHook = "eval $(egrep ^export ${ghc}/bin/ghc)";
 }

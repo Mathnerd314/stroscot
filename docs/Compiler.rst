@@ -28,3 +28,22 @@ Flags
 =====
 
 In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.
+
+Error messages
+==============
+
+Since Stroscot uses model checking, most failures will end up producing a counterexample. The counterexample may not be minimal, but it is much easier to debug a concrete instance than to try to figure one out from contextual information.
+
+For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. We could just use pointers, but Go's integers are ordered so comparing within files is faster. But it isn't clear how to make this incremental.
+
+Output
+======
+
+The simplest output is to write out a copy of the interpreter with a comment "This is generated code - see Interpreter.hs for source" at the top. But we want to specialize this.
+
+versioning of time/date
+identifier minimization/translation
+unit test
+random input testing
+quasiquotation
+typechecking
