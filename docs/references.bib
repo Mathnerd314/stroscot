@@ -240,7 +240,7 @@
 % ? Title looks like it was stored in title-case in Zotero
 
 @article{dyvbigMonadicFrameworkDelimited2007,
-  ids = {dyvbigMonadicFrameworkDelimited2007,dyvbigMonadicFrameworkDelimited2007a},
+  ids = {dyvbigMonadicFrameworkDelimited2007a},
   title = {A Monadic Framework for Delimited Continuations},
   author = {Dyvbig, R. Kent and Peyton Jones, Simon and Sabry, Amr},
   year = {2007},
@@ -293,7 +293,6 @@
 }
 
 @inproceedings{filinskiLinearContinuations1992,
-  ids = {filinskiLinearContinuations1992},
   title = {Linear Continuations},
   booktitle = {Proceedings of the 19th {{ACM SIGPLAN}}-{{SIGACT}} Symposium on {{Principles}} of Programming Languages},
   author = {Filinski, Andrzej},
@@ -389,7 +388,7 @@
 % ? Title looks like it was stored in title-case in Zotero
 
 @incollection{martiniFineStructureExponential1995,
-  ids = {martiniFineStructureExponential1995,martiniFineStructureExponential1995a},
+  ids = {martiniFineStructureExponential1995a},
   title = {On the Fine Structure of the Exponential Rule},
   booktitle = {Advances in {{Linear Logic}}},
   author = {Martini, S. and Masini, A.},
@@ -499,6 +498,25 @@
 % == BibTeX quality report for wadlerCallbyvalueDualCallbyname2003:
 % ? Unsure about the formatting of the booktitle
 
+@article{wheelerFullyCounteringTrusting2010,
+  title = {Fully {{Countering Trusting Trust}} through {{Diverse Double}}-{{Compiling}}},
+  author = {Wheeler, David A.},
+  year = {2010},
+  month = apr,
+  url = {http://arxiv.org/abs/1004.5534},
+  urldate = {2020-09-13},
+  abstract = {An Air Force evaluation of Multics, and Ken Thompson's Turing award lecture ("Reflections on Trusting Trust"), showed that compilers can be subverted to insert malicious Trojan horses into critical software, including themselves. If this "trusting trust" attack goes undetected, even complete analysis of a system's source code will not find the malicious code that is running. Previously-known countermeasures have been grossly inadequate. If this attack cannot be countered, attackers can quietly subvert entire classes of computer systems, gaining complete control over financial, infrastructure, military, and/or business systems worldwide. This dissertation's thesis is that the trusting trust attack can be detected and effectively countered using the "Diverse Double-Compiling" (DDC) technique, as demonstrated by (1) a formal proof that DDC can determine if source code and generated executable code correspond, (2) a demonstration of DDC with four compilers (a small C compiler, a small Lisp compiler, a small maliciously corrupted Lisp compiler, and a large industrial-strength C compiler, GCC), and (3) a description of approaches for applying DDC in various real-world scenarios. In the DDC technique, source code is compiled twice: the source code of the compiler's parent is compiled using a trusted compiler, and then the putative compiler source code is compiled using the result of the first compilation. If the DDC result is bit-for-bit identical with the original compiler-under-test's executable, and certain other assumptions hold, then the compiler-under-test's executable corresponds with its putative source code.},
+  archivePrefix = {arXiv},
+  eprint = {1004.5534},
+  eprinttype = {arxiv},
+  journal = {arXiv:1004.5534 [cs]},
+  keywords = {Computer Science - Cryptography and Security,Computer Science - Programming Languages},
+  primaryClass = {cs}
+}
+% == BibTeX quality report for wheelerFullyCounteringTrusting2010:
+% ? Possibly abbreviated journal title arXiv:1004.5534 [cs]
+% ? Title looks like it was stored in title-case in Zotero
+
 @article{wikipediaForwardBackwardAlgorithm2020,
   title = {Forward–Backward Algorithm},
   author = {{Wikipedia}},
@@ -506,99 +524,8 @@
   month = jul,
   url = {https://en.wikipedia.org/w/index.php?title=Forward\%E2\%80\%93backward_algorithm\&oldid=966683884},
   urldate = {2020-07-08},
-  abstract = {The forward–backward algorithm is an  inference algorithm for hidden Markov models which computes the posterior marginals of all hidden state variables given a sequence of observations/emissions 
-  
-    
-      
-        
-          o
-          
-            1
-            :
-            T
-          
-        
-        :=
-        
-          o
-          
-            1
-          
-        
-        ,
-        …
-        ,
-        
-          o
-          
-            T
-          
-        
-      
-    
-    \{\textbackslash displaystyle o\_\{1:T\}:=o\_\{1\},\textbackslash dots ,o\_\{T\}\}
-  , i.e. it computes, for all hidden state variables 
-  
-    
-      
-        
-          X
-          
-            t
-          
-        
-        ∈
-        \{
-        
-          X
-          
-            1
-          
-        
-        ,
-        …
-        ,
-        
-          X
-          
-            T
-          
-        
-        \}
-      
-    
-    \{\textbackslash displaystyle X\_\{t\}\textbackslash in \textbackslash\{X\_\{1\},\textbackslash dots ,X\_\{T\}\textbackslash\}\}
-  , the distribution 
-  
-    
-      
-        P
-        (
-        
-          X
-          
-            t
-          
-        
-         
-        
-          |
-        
-         
-        
-          o
-          
-            1
-            :
-            T
-          
-        
-        )
-      
-    
-    \{\textbackslash displaystyle P(X\_\{t\}\textbackslash{} |\textbackslash{} o\_\{1:T\})\}
-  . This inference task is usually called smoothing. The algorithm makes use of the principle of dynamic programming to efficiently compute the values that are required to obtain the posterior marginal distributions in two passes. The first pass goes forward in time while the second goes backward in time; hence the name forward–backward algorithm.
-The term forward–backward algorithm is also used to refer to any algorithm belonging to the general class of algorithms that operate on sequence models in a forward–backward manner. In this sense, the descriptions in the remainder of this article refer but to one specific instance of this class.},
+  abstract = {The forward–backward algorithm is an  inference algorithm for hidden Markov models which computes the posterior marginals of all hidden state variables given a sequence of observations/emissions                                    o                        1             :             T                             :=                    o                        1                             ,         …         ,                    o                        T                                     \{\textbackslash displaystyle o\_\{1:T\}:=o\_\{1\},\textbackslash dots ,o\_\{T\}\}   , i.e. it computes, for all hidden state variables                                    X                        t                             ∈         \{                    X                        1                             ,         …         ,                    X                        T                             \}                 \{\textbackslash displaystyle X\_\{t\}\textbackslash in \textbackslash\{X\_\{1\},\textbackslash dots ,X\_\{T\}\textbackslash\}\}   , the distribution                         P         (                    X                        t                                                  |                                       o                        1             :             T                             )                 \{\textbackslash displaystyle P(X\_\{t\}\textbackslash{} |\textbackslash{} o\_\{1:T\})\}   . This inference task is usually called smoothing. The algorithm makes use of the principle of dynamic programming to efficiently compute the values that are required to obtain the posterior marginal distributions in two passes. The first pass goes forward in time while the second goes backward in time; hence the name forward–backward algorithm. The term forward–backward algorithm is also used to refer to any algorithm belonging to the general class of algorithms that operate on sequence models in a forward–backward manner. In this sense, the descriptions in the remainder of this article refer but to one specific instance of this class.},
+  annotation = {Page Version ID: 966683884},
   copyright = {Creative Commons Attribution-ShareAlike License},
   journal = {Wikipedia},
   language = {en}
@@ -611,65 +538,8 @@ The term forward–backward algorithm is also used to refer to any algorithm bel
   month = jun,
   url = {https://en.wikipedia.org/w/index.php?title=Logit\&oldid=964387041},
   urldate = {2020-07-07},
-  abstract = {In statistics, the logit ( LOH-jit) function or the log-odds is the logarithm of the odds 
-  
-    
-      
-        
-          
-            p
-            
-              1
-              −
-              p
-            
-          
-        
-      
-    
-    \{\textbackslash displaystyle \{\textbackslash frac \{p\}\{1-p\}\}\}
-   where p is probability. It is a type of function that creates a map of probability values from 
-  
-    
-      
-        (
-        0
-        ,
-        1
-        )
-      
-    
-    \{\textbackslash displaystyle (0,1)\}
-   to 
-  
-    
-      
-        (
-        −
-        ∞
-        ,
-        +
-        ∞
-        )
-      
-    
-    \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}
-  . It is the inverse of the sigmoidal "logistic" function or logistic transform used in mathematics, especially in statistics.
-In deep learning, the term logits layer is popularly used for the last neuron layer of neural networks used for classification tasks, which produce raw prediction values as real numbers ranging from 
-  
-    
-      
-        (
-        −
-        ∞
-        ,
-        +
-        ∞
-        )
-      
-    
-    \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}
-  .},
+  abstract = {In statistics, the logit ( LOH-jit) function or the log-odds is the logarithm of the odds                                                 p                            1               −               p                                                  \{\textbackslash displaystyle \{\textbackslash frac \{p\}\{1-p\}\}\}    where p is probability. It is a type of function that creates a map of probability values from                         (         0         ,         1         )                 \{\textbackslash displaystyle (0,1)\}    to                         (         −         ∞         ,         +         ∞         )                 \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}   . It is the inverse of the sigmoidal "logistic" function or logistic transform used in mathematics, especially in statistics. In deep learning, the term logits layer is popularly used for the last neuron layer of neural networks used for classification tasks, which produce raw prediction values as real numbers ranging from                         (         −         ∞         ,         +         ∞         )                 \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}   .},
+  annotation = {Page Version ID: 964387041},
   copyright = {Creative Commons Attribution-ShareAlike License},
   journal = {Wikipedia},
   language = {en}

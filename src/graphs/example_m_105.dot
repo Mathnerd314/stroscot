@@ -1,0 +1,14 @@
+digraph {
+"Root0" [label="Root"]
+"PiR0" [label="PiR"]
+"!d0" [label="!d"]
+"I0" [label="I"]
+"I1" [label="I"]
+"Cut0" [label="Cut",shape=doublecircle]
+"Cut0" -> "PiR0"[color=red,tooltip="e111"]
+"!d0" -> "PiR0"[color=blue,tooltip="e117",dir=back]
+"PiR0" -> "I0"[color=red,tooltip="e119"]
+"I0" -> "!d0"[color=blue,tooltip="e123",dir=back]
+"I1" -> "Cut0"[color=blue,tooltip="e133",penwidth=2,dir=back]
+"Root0" -> "I1"[color=red,tooltip="rettop",penwidth=2]
+}

@@ -3,12 +3,14 @@
 import Control.Exception (assert)
 import GHC.Stack (HasCallStack)
 import Data.Function (on)
-import Data.List (groupBy,sortBy,find,sort,zipWith4,transpose,findIndex)
+import Data.List (groupBy,sortBy,find,sort,zipWith4,transpose,findIndex,elemIndex)
 import Data.Maybe(fromJust)
 import Control.Arrow((&&&))
 import Control.Monad (forM_)
 import Control.Monad.State
 import Debug.Trace(trace,traceShow,traceM,traceShowM)
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 -- | A combination of 'group' and 'sort', using a part of the value to compare on.
 --
@@ -147,62 +149,50 @@ example_m_bad =
   , Identity "ret_l" "ret"
   ]
 
+
+
 example_m :: Graph
-example_m =
-  [ Root "ret"
-  , Identity "ret_l" "ret"
-  , PiLeft "o1l" "func" ["fp"] ["ret_l"]
-  , Cut "o1" "o1l"
-  , PiRight "o1" ec [("func", Ctx ["x_o1"] ["ret_o1"], ec)]
-  , Identity "ret_o1l" "ret_o1"
-  , PiLeft "x2i_o1" "func" ["x1_o1r"] ["ret_o1l"]
-  , BangD "x2_o1" "x2i_o1"
-  , BangCW "x_o1" ["x1_o1","x2_o1"]
-  , Identity "x1_o1" "x1_o1r"
+example_m = [ Root "rettop", Identity "ret" "rettop"] ++ translate "ret" m
 
-  , Bang "fp" ec "f" ec
-  , PiRight "f" ec [("func", Ctx ["h_d"] ["f_ret"], ec)]
-  , Cut "o2" "o2l"
-  , PiRight "o2" ec [("func", Ctx ["x_o2"] ["ret_o2"], ec)]
-  , BangCW "x_o2" ["x1_o2", "x2_o2"]
-  , BangD "x2_o2" "x2i_o2"
-  , PiLeft "x2i_o2" "func" ["x1_o2r"] ["ret_o2l"]
-  , Identity "x1_o2" "x1_o2r"
-  , Identity "ret_o2l" "ret_o2"
-  , PiLeft "o2l" "func" ["hi_retp"] ["f_retl"]
-  , Bang "hi_retp" (Ctx ["h_d"] []) "hi_ret" (Ctx ["h_di"] [])
-  , BangD "h_di" "h"
-  , Cut "i" "h_app"
-  , Bang "i" ec "i_i" ec
-  , PiRight "i_i" ec [("func", Ctx ["il"] ["i_ret"], ec)]
-  , BangD "il" "ild"
-  , Identity "ild" "i_ret"
-  , PiLeft "h" "func" ["h_appr"] ["hi_retl"]
-  , Identity "h_app" "h_appr"
-  , Identity "hi_retl" "hi_ret"
-  , Identity "f_retl" "f_ret"
-  ]
 
-delta_graph :: Graph
-delta_graph =
-  [ Root "ret"
-  , Cut "o1" "o1l"
-  , PiRight "o1" ec [("func", Ctx ["x_o1"] ["ret_o1"], ec)]
-  , BangCW "x_o1" ["x1_o1","x2_o1"]
-  , BangD "x2_o1" "x2i_o1"
-  , PiLeft "x2i_o1" "func" ["x1_o1r"] ["ret_o1l"]
-  , Identity "x1_o1" "x1_o1r"
-  , Identity "ret_o1l" "ret_o1"
-  , PiLeft "o1l" "func" ["fp"] ["ret_l"]
-  , Bang "fp" ec "o2" ec
-  , PiRight "o2" ec [("func", Ctx ["x_o2"] ["ret_o2"], ec)]
-  , BangCW "x_o2" ["x1_o2", "x2_o2"]
-  , BangD "x2_o2" "x2i_o2"
-  , PiLeft "x2i_o2" "func" ["x1_o2r"] ["ret_o2l"]
-  , Identity "x1_o2" "x1_o2r"
-  , Identity "ret_o2l" "ret_o2"
-  , Identity "ret_l" "ret"
-  ]
+m = App (delta "x")
+    (Lam "h" (App (delta "y")
+      (App (Var "h") (Lam "i" (Var "i")))))
+
+delta v = Lam v (App (Var v) (Var v))
+
+data Lam = App Lam Lam | Lam String Lam | Var String
+
+freevars (Var v) = Set.singleton v
+freevars (Lam v b) = Set.delete v (freevars b)
+freevars (App a b) = freevars a `Set.union` freevars b
+
+translate :: String -> Lam -> Graph
+translate s (Var v) = [BangD v s]
+translate s (Lam v b) = let
+  sr = s ++ "r"
+  vr = v ++ "r"
+  vl = v ++ "l"
+  in
+    [Cut sr s
+    ,PiRight sr ec [("func",Ctx [v] [vr],ec)]
+    ,Identity vl vr
+    ] ++ translate vl b
+translate s (App a b) = let
+  s1 = s ++ "1"; s2 = s ++ "2"; sp = s ++ "p"; si = s ++ "i"
+  av = freevars a
+  bv = freevars b
+  shared = av `Set.intersection` bv
+  replaceOne shared n v = if v `Set.member` shared then v ++ n else v
+  replace shared n f = fmap (replaceOne shared n) f
+  at = map (replace shared "1") $ translate s1 a
+  bt = map (replace bv "j") $ translate s2 b
+  in
+    [ PiLeft s1 "func" [sp] [s]
+    ] ++ at ++ map (\v -> BangCW v [v ++ "1", v ++ "2"]) (Set.toList shared) ++
+    [ Bang sp (Ctx (replace shared "2" $ Set.toList bv) []) si (Ctx (replace bv "j" $ Set.toList bv) [])
+    , Identity s2 si
+    ] ++ bt
 
 type Edge = (String,Int,Int,GD)
 
@@ -287,17 +277,28 @@ mkDot graph edgesG active = let
   in
     "digraph {\n" ++ nodetxt ++ edgetxt ++ "}\n"
 
-iterGraph edge_num graph = let
+iterGraph edge_num graph ((redex,redex_dir):rs) = let
   names = nodeNames graph
   edgesG = edges graph
-  (active, next) = reduceG graph edgesG
+  redex_edge = findEdge edgesG redex
+  (active, next) = reduce graph edgesG redex_edge redex_dir
   (next_graph, new_edge_num) = runState next edge_num
-  in (graph, (edgesG, active)) : iterGraph new_edge_num next_graph
+  in (graph, (edgesG, active)) : iterGraph new_edge_num next_graph rs
 
-toDot edge_num graph = map (\(g,(e,a)) -> mkDot g e a) $ iterGraph edge_num graph
+toDot edge_num graph rs = map (\(g,(e,a)) -> mkDot g e a) $ iterGraph edge_num graph rs
 
-writeGraphs ex name limit = do
-  let out = zip [0..limit] (toDot 0 ex)
+writeGraphs graph name limit = do
+  -- let Root o = fromJust $ find ((=="Root") . tagName) graph
+  let rs =
+          replicate 5 ("rettop",Down) ++
+          [("hl2i",Down)] ++
+          replicate 2 ("hr",Down) ++
+          [("x2",Up),("xj",Up),("xl2",Up)] ++
+          -- ("y2",Up),("yj",Up),("yl2",Up),
+          replicate 5 ("rettop",Down) ++
+--          [("hl2p",Up),("hl2i",Up),("i",Up),("il",Up)] ++
+          repeat ("rettop",Down)
+  let out = zip [0..limit] (toDot 0 graph rs)
   forM_ out $ \(i,g) -> do
     putStrLn (show i)
     writeFile (name ++ "_" ++ show i ++ ".dot") g
@@ -308,12 +309,6 @@ findEdge edges en = fromJust $ find (\(n,_,_,_) -> en == n) edges
 
 data GDir = Down | Up
    deriving (Eq,Ord,Show)
-
-reduceG :: Graph -> Edges -> ([(Edge,Rule)], State Int Graph)
-reduceG graph edgesG = let
-  Root o = fromJust $ find ((=="Root") . tagName) graph
-  root_edge = findEdge edgesG o
-  in reduce graph edgesG root_edge Down
 
 findNode graph e@(_,from,to,gd) Up = graph !! from
 findNode graph e@(_,from,to,gd) Down = graph !! to
@@ -356,7 +351,7 @@ reduce graph edges e@(_,from_id,to_id,gd) dir = let
   (PiRight i _ _,_,Up) -> expand i Up
   (BangCW i _,_,Up) -> expand i Up
   (BangD i _,_,Up) -> expand i Up
-  (Bang i _ _ _,_,Up) -> expand i Up
+  (Bang i _ _ _,_,_) -> expand i Up
   -- todo: handle auxiliary ports. Although we will never encounter them during reduction?
   (WhimCW i _,_,Up) -> expand i Up
   (WhimD i _,_,Up) -> expand i Up
@@ -444,21 +439,21 @@ reduce graph edges e@(_,from_id,to_id,gd) dir = let
     right_node = follow rr Down
     left_node = follow ll Down
     in case (right_node,left_node) of
+      (_, Identity ill irr) | ill == ll -> let
+        (del,add) = join_edges [irr] [rr]
+        in replace ([r,left_node]++del) add
+      (Identity ill irr, _) | irr == rr -> let
+        (del,add) = join_edges [ill] [ll]
+        in replace ([r,right_node]++del) add
+      (Dup _, _) -> expand rr Down
+      -- (_, Dup _) -> expand ll Down
       (PiRight ir ic cs, PiLeft il t prr pll) | rr == ir && il == ll -> let
         [(_,Ctx mll mrr,context)] = filter (\(tr,_,_) -> tr == t) cs
         Ctx ic_l ic_r = ic
         Ctx context_l context_r = context
         (del,add) = trace "beta" $ join_edges (ic_l++ic_r) (context_l++context_r)
         in replace ([r,right_node,left_node]++del) (zipWith Cut prr mll ++ zipWith Cut mrr pll ++ add)
-      (_, Identity _ irr) -> let
-        (del,add) = join_edges [irr] [rr]
-        in replace ([r,left_node]++del) add
-      (Identity ill _, _) -> let
-        (del,add) = join_edges [ill] [ll]
-        in replace ([r,right_node]++del) add
-      (Dup _, _) -> expand rr Down
-      -- (_, Dup _) -> expand ll Down
-      (Bang _ (Ctx il ir) o (Ctx ol or), BangCW _ f) -> replaceM $ do
+      (Bang irr (Ctx il ir) o (Ctx ol or), BangCW ill f) | rr == irr && ll == ill -> replaceM $ do
         let repF = replicateM (length f)
         cut_bang <- repF mkedge
         bang_dup_main <- repF mkedge
@@ -477,4 +472,9 @@ reduce graph edges e@(_,from_id,to_id,gd) dir = let
         (del,add) = join_edges (il++or) (ol++or)
         cut = Cut o f
         in replace ([r,left_node,right_node]++del) ([cut]++add)
+      (_, Bang i (Ctx il ir) o (Ctx ol or)) | Just idx <- ll `elemIndex` il -> let
+        newll = ol !! idx
+        cut = Cut rr newll
+        bang = Bang i (Ctx (delete idx il) ir) o (Ctx (delete idx ol) or)
+        in replace [r,left_node] [cut,bang]
       (_,_) -> traceShow (r,right_node,left_node) $ replace undefined undefined
