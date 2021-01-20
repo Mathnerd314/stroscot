@@ -1,69 +1,12 @@
 
-{ __ignoreNulls = true; all = [ ... ]; args = [ ... ]; buildInputs = [ ... ]; builder = "/nix/store/2jysm3dfsgby5sw5jgj43qjrb5v79ms9-bash-4.4-p23/bin/bash"; configureFlags = [ ... ]; depsBuildBuild = [ ... ]; depsBuildBuildPropagated = [ ... ]; depsBuildTarget = [ ... ]; depsBuildTargetPropagated = [ ... ]; depsHostHost = [ ... ]; depsHostHostPropagated = [ ... ]; depsTargetTarget = [ ... ]; depsTargetTargetPropagated = [ ... ]; dev = «derivation /nix/store/fkpvvydc54wbvxpyznqwylym7yl0gv7f-bluez-5.54.drv»; doCheck = true; doInstallCheck = false; drvAttrs = { ... }; drvPath = "/nix/store/fkpvvydc54wbvxpyznqwylym7yl0gv7f-bluez-5.54.drv"; enableParallelBuilding = true; enableParallelChecking = true; inputDerivation = «derivation /nix/store/ia8cxvdv4igqknb3panj405zb9c6v5bp-bluez-5.54.drv»; installFlags = [ ... ]; makeFlags = [ ... ]; meta = { ... }; name = "bluez-5.54"; nativeBuildInputs = [ ... ]; out = «derivation /nix/store/fkpvvydc54wbvxpyznqwylym7yl0gv7f-bluez-5.54.drv»; outPath = "/nix/store/ik15233hki3hq4gvib0jykabppzwhiv9-bluez-5.54"; outputName = "out"; outputUnspecified = true; outputs = [ ... ]; override = { ... }; overrideAttrs = «lambda @ /home/aerg/projects/nixpkgs-channels/lib/customisation.nix:85:73»; overrideDerivation = «lambda @ /home/aerg/projects/nixpkgs-channels/lib/customisation.nix:84:32»; passthru = { ... }; patches = [ ... ]; pname = "bluez"; postInstall = "mkdir -p $test/{bin,test}\ncp -a test $test\npushd $test/test\nfor a in \\\n        simple-agent \\\n        test-adapter \\\n        test-device \\\n        test-thermometer \\\n        list-devices \\\n        monitor-bluetooth \\\n        ; do\n  ln -s ../test/$a $test/bin/bluez-$a\ndone\npopd\nwrapPythonProgramsIn $test/test \"$test/test /nix/store/mzkzl2cpqqmz57i2b582hdfi2y98p7zq-python3.8-dbus-python-1.2.16 /nix/store/c9nh0sylvm738vh83pqwpn9i22lwywl1-python3.8-pygobject-3.36.1 /nix/store/rpd6py1n50rdrrg2hmxdnyhscx2c2yj4-python-recursive-pth-loader-1.0\"\n# for bluez4 compatibility for NixOS\nmkdir $out/sbin\nln -s ../libexec/bluetooth/bluetoothd $out/sbin/bluetoothd\nln -s ../libexec/bluetooth/obexd $out/sbin/obexd\n\n# Add extra configuration\nmkdir $out/etc/bluetooth\nln -s /etc/bluetooth/main.conf $out/etc/bluetooth/main.conf\n\n# Add missing tools, ref https://git.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/bluez\nfor files in `find tools/ -type f -perm -755`; do\n  filename=$(basename $files)\n  install -Dm755 tools/$filename $out/bin/$filename\ndone\n"; postPatch = "substituteInPlace tools/hid2hci.rules \\\n  --replace /sbin/udevadm /nix/store/f6r3yar1zx1zrll52wmf300h8k8gibk8-systemd-246/bin/udevadm \\\n  --replace \"hid2hci \" \"$out/lib/udev/hid2hci \"\n"; propagatedBuildInputs = [ ... ]; propagatedNativeBuildInputs = [ ... ]; src = «derivation /nix/store/i8p4dxir14alcfnxg9p2i9bhsmf6kwd5-bluez-5.54.tar.xz.drv»; stdenv = «derivation /nix/store/m15naxf285zafnsnlzfaxy0r10dzlanx-stdenv-linux.drv»; strictDeps = false; system = "x86_64-linux"; test = «derivation /nix/store/fkpvvydc54wbvxpyznqwylym7yl0gv7f-bluez-5.54.drv»; type = "notD"; userHook = null; version = "5.54"; }
-
-all = [ ... ];
-meta = { ... };
-out = «derivation /nix/store/qx2i3r7wbk2znqw1z7p26fqz2dlw8ki1-texlive-memoir-3.7j.drv»;
-outPath = "/nix/store/qp5cz64vlnfgvlr253l6b9gi94fvyq34-texlive-memoir-3.7j";
-
-outputName = "out";
-outputUnspecified = true;
-outputs = [ ... ];
-
-passthru = { ... };
-tlType = "run";
-}
-
-
-
-/// As build commands run they can output extra dependency information
-/// (e.g. header dependencies for C source) dynamically.  DepsLog collects
-/// that information at build time and uses it for subsequent builds.
-///
-/// The on-disk format is based on two primary design constraints:
-/// - it must be written to as a stream (during the build, which may be
-///   interrupted);
-/// - it can be read all at once on startup.  (Alternative designs, where
-///   it contains indexing information, were considered and discarded as
-///   too complicated to implement; if the file is small than reading it
-///   fully on startup is acceptable.)
-/// Here are some stats from the Windows Chrome dependency files, to
-/// help guide the design space.  The total text in the files sums to
-/// 90mb so some compression is warranted to keep load-time fast.
-/// There's about 10k files worth of dependencies that reference about
-/// 40k total paths totalling 2mb of unique strings.
-///
-/// Based on these stats, here's the current design.
-/// The file is structured as version header followed by a sequence of records.
-/// Each record is either a path string or a dependency list.
-/// Numbering the path strings in file order gives them dense integer ids.
-/// A dependency list maps an output id to a list of input ids.
-///
-/// Concretely, a record is:
-///    four bytes record length, high bit indicates record type
-///      (but max record sizes are capped at 512kB)
-///    path records contain the string name of the path, followed by up to 3
-///      padding bytes to align on 4 byte boundaries, followed by the
-///      one's complement of the expected index of the record (to detect
-///      concurrent writes of multiple ninja processes to the log).
-///    dependency records are an array of 4-byte integers
-///      [output path id,
-///       output path mtime (lower 4 bytes), output path mtime (upper 4 bytes),
-///       input path id, input path id...]
-///      (The mtime is compared against the on-disk output path mtime
-///      to verify the stored data is up-to-date.)
-/// If two records reference the same output the latter one in the file
-/// wins, allowing updates to just be appended to the file.  A separate
-/// compaction/repacking step can run occasionally to remove dead records.
-
 
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not
  * be triggered. The function will be called after it stops being called for
  * N milliseconds. If `immediate` is passed, trigger the function on the
- * leading edge, instead of the trailing. The function also has a property 'clear'
- * that is a function which will clear the timer to prevent previously scheduled executions.
+ * leading edge, instead of the trailing. The function also has a property 'clear' 
+ * that is a function which will clear the timer to prevent previously scheduled executions. 
  *
  * @source underscore.js
  * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
@@ -110,12 +53,12 @@ function debounce(func, wait, immediate){
       timeout = null;
     }
   };
-
+  
   debounced.flush = function() {
     if (timeout) {
       result = func.apply(context, args);
       context = args = null;
-
+      
       clearTimeout(timeout);
       timeout = null;
     }
@@ -225,6 +168,185 @@ static int full_scan_dir(struct tent_list_head *head, int dfd, tupid_t dt)
 		}
 	}
 	return 0;
+}
+
+fn main() -> anyhow::Result<()> {
+    let mut ring = IoUring::new(256)?;
+    let (submitter, sq, cq) = ring.split();
+
+    for idx, pathname in watched_files {
+        op = opcode::Statx(
+            int dirfd, const char *pathname, int flags,
+            unsigned int mask, struct statx *statxbuf);
+            .user_data(idx);
+
+        sq.push(self.entry.clone())
+    }
+
+    loop {
+        match submitter.submit_and_wait(1) {
+            Ok(_) => (),
+            Err(ref err) if err.raw_os_error() == Some(libc::EBUSY) => (),
+            Err(err) => return Err(err.into()),
+        }
+
+        let mut sq = sq.available();
+        let mut iter = backlog.drain(..);
+
+        // clean backlog
+        loop {
+            if sq.is_full() {
+                match submitter.submit() {
+                    Ok(_) => (),
+                    Err(ref err) if err.raw_os_error() == Some(libc::EBUSY) => break,
+                    Err(err) => return Err(err.into()),
+                }
+                sq.sync();
+            }
+
+            match iter.next() {
+                Some(sqe) => unsafe {
+                    let _ = sq.push(sqe);
+                },
+                None => break,
+            }
+        }
+
+        drop(iter);
+
+        accept.push(&mut sq);
+
+        for cqe in cq.available() {
+            let ret = cqe.result();
+            let token_index = cqe.user_data() as usize;
+
+            if ret < 0 {
+                eprintln!(
+                    "token {:?} error: {:?}",
+                    token_alloc.get(token_index),
+                    io::Error::from_raw_os_error(-ret)
+                );
+                continue;
+            }
+
+            let token = &mut token_alloc[token_index];
+            match token.clone() {
+                Token::Accept => {
+                    println!("accept");
+
+                    accept.count += 1;
+
+                    let fd = ret;
+                    let poll_token = token_alloc.insert(Token::Poll { fd });
+
+                    let poll_e = opcode::PollAdd::new(types::Fd(fd), libc::POLLIN)
+                        .build()
+                        .user_data(poll_token as _);
+
+                    unsafe {
+                        if let Err(entry) = sq.push(poll_e) {
+                            backlog.push(entry);
+                        }
+                    }
+                }
+                Token::Poll { fd } => {
+                    let (buf_index, buf) = match bufpool.pop() {
+                        Some(buf_index) => (buf_index, &mut buf_alloc[buf_index]),
+                        None => {
+                            let buf = vec![0u8; 2048].into_boxed_slice();
+                            let buf_entry = buf_alloc.vacant_entry();
+                            let buf_index = buf_entry.key();
+                            (buf_index, buf_entry.insert(buf))
+                        }
+                    };
+
+                    let read_token = token_alloc.insert(Token::Read { fd, buf_index });
+
+                    let read_e = opcode::Read::new(types::Fd(fd), buf.as_mut_ptr(), buf.len() as _)
+                        .build()
+                        .user_data(read_token as _);
+
+                    unsafe {
+                        if let Err(entry) = sq.push(read_e) {
+                            backlog.push(entry);
+                        }
+                    }
+                }
+                Token::Read { fd, buf_index } => {
+                    if ret == 0 {
+                        bufpool.push(buf_index);
+                        token_alloc.remove(token_index);
+
+                        println!("shutdown");
+
+                        unsafe {
+                            libc::close(fd);
+                        }
+                    } else {
+                        let len = ret as usize;
+                        let buf = &buf_alloc[buf_index];
+
+                        *token = Token::Write {
+                            fd,
+                            buf_index,
+                            len,
+                            offset: 0,
+                        };
+
+                        let write_e = opcode::Write::new(types::Fd(fd), buf.as_ptr(), len as _)
+                            .build()
+                            .user_data(token_index as _);
+
+                        unsafe {
+                            if let Err(entry) = sq.push(write_e) {
+                                backlog.push(entry);
+                            }
+                        }
+                    }
+                }
+                Token::Write {
+                    fd,
+                    buf_index,
+                    offset,
+                    len,
+                } => {
+                    let write_len = ret as usize;
+
+                    let entry = if offset + write_len >= len {
+                        bufpool.push(buf_index);
+
+                        *token = Token::Poll { fd };
+
+                        opcode::PollAdd::new(types::Fd(fd), libc::POLLIN)
+                            .build()
+                            .user_data(token_index as _)
+                    } else {
+                        let offset = offset + write_len;
+                        let len = len - offset;
+
+                        let buf = &buf_alloc[buf_index][offset..];
+
+                        *token = Token::Write {
+                            fd,
+                            buf_index,
+                            offset,
+                            len,
+                        };
+
+                        opcode::Write::new(types::Fd(fd), buf.as_ptr(), len as _)
+                            .build()
+                            .user_data(token_index as _)
+                    };
+
+                    unsafe {
+                        if let Err(entry) = sq.push(entry) {
+                            backlog.push(entry);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 type Key
@@ -341,4 +463,5 @@ ctRebuilder key value task = Task $ \fetch -> do
 
 -- | A model of Cloud Shake: a monadic build system that uses constructive
 -- traces to check if a key is up to date as well as for caching build results.
+cloudShake :: (Ord k, Hashable v) => Build Monad (CT k v) k v
 cloudShake = suspending ctRebuilder

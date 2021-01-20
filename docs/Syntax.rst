@@ -3,6 +3,8 @@ Syntax
 
 Almost everything in Stroscot is an expression. The basics are numbers, booleans, and character strings of text. But there's also block statements and layout.
 
+The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode) and picking out the nicest examples. Short and terse syntax is good, as is flexibility and generality. But in the end, syntax is decided by usage, so imitation is the best way to make new users of Stroscot feel comfortable.
+
 Numbers
 =======
 
@@ -63,7 +65,26 @@ Sequences and slices:
   slice(list, 0, 2)
   slice(list, a, length list - b)
 
+Atoms
+=====
 
+Any undefined identifier can be used as an atom, i.e. a component of a symbolic expression. For example this will produce ``4`` if ``foo`` is undefined:
+
+::
+
+  f (foo x) = x + 2
+
+  f (foo 2)
+
+Due to the fexpr semantics any expression can be used and pattern-matched, like ``javascript (1 + "abc" { 234 })``.
+
+To export the semantics to other modules a special keyword ``atom`` is used:
+
+::
+
+  atom foo
+
+This ensures that no rules for ``foo`` are defined and adds the symbol to the export list. It is good practice to use this even if the identifier is not exported.
 
 Operators
 =========
@@ -128,6 +149,8 @@ Blocks
    // comment
    /* multiline
    comment */
+   {- nesting {- comment -} -}
+   if(false) { code_comment }
 
 Parsing
 =======
@@ -144,6 +167,8 @@ Operator precedence will be a DAG, rather than levels.::
 I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
 
 Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.
+
+Long-term, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation :cite:`sperberGenerationLRParsers2000`, so with sufficiently powerful compiler optimization handling general CFG grammars by specializing Earley etc. should be possible.
 
 Layout
 ======

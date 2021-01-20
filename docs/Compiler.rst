@@ -51,7 +51,9 @@ typechecking
 Cross compilation
 =================
 
-In cross compilation we have not one system, but two systems. To use the newer `Clang <https://clang.llvm.org/docs/CrossCompilation.html>`__ terminology, there is the **host** system where the program is being built, and the **target** system where the program will run. The older `GNU terminology <https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html>`__ uses a triple, build/host/target; but the "target" here is really a configuration option, namely the supported target(s) of the compiler that will run on the host. Most programs need only build/host specified. Overall host/target seems clearer than build/host so we will stick to Clang terminology host/target/supported targets. When the host and target systems the same, it's a native build; otherwise it's a cross build.
+In cross compilation we have not one system, but two systems. To use the newer `Clang <https://clang.llvm.org/docs/CrossCompilation.html>`__ terminology, there is the **host** system where the program is being built, and the **target** system where the program will run. When the host and target systems are the same, it's a native build; otherwise it's a cross build.
+
+The older `GNU terminology <https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html>`__ uses a triple, build/host/target; but the "target" there is really a configuration option, namely the supported target of the compiler that will run on the host. Programs that aren't compilers need only build/host specified, but remembering whether the build system builds the host or vice-versa is tricky. Overall the Clang terminology host/target/supported targets seems clearer than build/host/target.
 
 Bootstrapping
 =============

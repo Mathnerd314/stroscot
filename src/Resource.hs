@@ -22,19 +22,6 @@ import Development.Shake.Internal.Core.Pool
 import Control.Monad.IO.Class
 import System.Time.Extra
 
-
-
--- | Run an action which uses part of a finite resource. For more details see 'Resource'.
-withResource :: Resource -> Int -> Action a -> Action a
-withResource r i act = do
-    acquireResource r globalPool i
-    when fence -> do
-        (offset, ()) <- actionFenceRequeueBy Right fence
-        Action $ modifyRW $ addDiscount offset
-    act `finally` do
-    liftIO $ releaseResource r globalPool i
-
-
 ---------------------------------------------------------------------
 -- FINITE RESOURCES
 -- * 'Development.Shake.newResource' creates a finite resource, stopping too many actions running
@@ -45,43 +32,80 @@ data Finite = Finite
         -- ^ number of currently available resources
     ,finiteWaiting :: Bilist (Int, Fence IO ())
         -- ^ queue of people with how much they want and the action when it is allocated to them
+    ,rand :: IO Int -- operation to give us the next random Int
+    ,todo :: !(Heap.Heap (Heap.Entry PoolPriority (Int, Fence IO ()))) -- operations waiting a thread
     }
 
-newResourceIO :: String -> Int -> IO Resource
-newResourceIO name mx = newVar $ Finite mx mempty
+type PoolPriority = (Priority, Int) -- priority, random position
 
-acquire :: Var Finite -> Pool -> Int -> IO (Maybe (Fence IO ()))
-acquire var _ want
-    | want < 0 = errorIO $ "You cannot acquire a negative quantity of " ++ shw ++ ", requested " ++ show want
-    | want > mx = errorIO $ "You cannot acquire more than " ++ show mx ++ " of " ++ shw ++ ", requested " ++ show want
-    | otherwise = modifyVar var $ \x@Finite{..} ->
+--   priority levels (highest to lowest):
+--
+-- * 'PrioException' - things that probably result in a build error, so kick them off quickly.
+-- * 'PrioResume' - things that started, blocked, and may have open resources in their closure.
+-- * 'PrioStart' - rules that haven't yet started.
+-- * 'PrioBatch' - rules that might batch if other rules start first.
+data Priority
+    = PrioException
+    | PrioResume
+    | PrioStart
+    | PrioBatch
+    | PrioDeprioritize Double
+      deriving (Eq,Ord)
+
+newResourceIO :: String -> Int -> IO Resource
+newResourceIO name mx = do
+    rand <- if not deterministic then pure randomIO else do
+        ref <- newIORef 0
+        -- no need to be thread-safe - if two threads race they were basically the same time anyway
+        pure $ do i <- readIORef ref; writeIORef' ref (i+1); pure i
+    newVar $ Finite mx rand Heap.empty
+
+
+addAct = do
+    i <- rand s
+    Heap.insert (Heap.Entry (priority, i) $ void act
+remAct = case Heap.uncons $ todo s of Just (Heap.Entry _ now, todo2) -> (now, todo2)
+
+
+-- | Run an action which uses part of a finite resource. For more details see 'Resource'.
+withResource :: Resource -> Int -> Action a -> Action a
+withResource var want act = do
+    fence <- modifyVar var $ \x@Finite{..} ->
         if want <= finiteAvailable then
             pure (x{finiteAvailable = finiteAvailable - want}, Nothing)
         else do
             fence <- newFence
             pure (x{finiteWaiting = finiteWaiting `snoc` (want, fence)}, Just fence)
-
-release :: Var Finite -> Pool -> Int -> IO ()
-release var _ i = join $ modifyVar var $ \x -> pure $ f x{finiteAvailable = finiteAvailable x + i}
-    where
+    when fence $ do
+        (offset, ()) <- actionFenceRequeueBy Right fence
+        Action $ modifyRW $ addDiscount offset
+    act `finally` do
+      let
         f (Finite i (uncons -> Just ((wi,wa),ws)))
             | wi <= i = second (signalFence wa () >>) $ f $ Finite (i-wi) ws
             | otherwise = first (add (wi,wa)) $ f $ Finite i ws
         f (Finite i _) = (Finite i mempty, pure ())
         add a s = s{finiteWaiting = a `cons` finiteWaiting s}
+      join $ modifyVar var $ \x -> pure $ f x{finiteAvailable = finiteAvailable x + want}
 
-
+addPool priority pool act =
+    mask_ $ join $ modifyVar var $ \s ->
+    if not (alive s) then pure (s, pure ())
+    else fmap (, pure ()) $ do
+        t <- newThreadFinally (now >> worker pool) $ \t res -> case res of
+            Left e -> withPool_ pool $ \s -> do
+                signalBarrier done $ Left e
+                pure (remThread t s){alive = False}
+            Right _ ->
+                step pool $ pure . remThread t
+        pure (addThread t s){todo = todo2}
+        where
+            addThread t s = s{threads = Set.insert t $ threads s, threadsCount = threadsCount s + 1
+                            ,threadsSum = threadsSum s + 1, threadsMax = threadsMax s `max` (threadsCount s + 1)}
+            remThread t s = s{threads = Set.delete t $ threads s, threadsCount = threadsCount s - 1}
 
 ---------------------------------------------------------------------
 -- THROTTLE RESOURCES
-
-
--- call a function after a certain delay
-waiter :: Seconds -> IO () -> IO ()
-waiter period act = void $ forkIO $ do
-    sleep period
-    act
-
 
 data Throttle
       -- | Some number of resources are available
@@ -98,31 +122,36 @@ newThrottleIO name count period = do
         errorIO $ "You cannot create a throttle named " ++ name ++ " with a negative quantity, you used " ++ show count
     key <- resourceId
     var <- newVar $ ThrottleAvailable count
-    pure $ Resource key shw (acquire var) (release var)
-    where
-        shw = "Throttle " ++ name
+    pure var
 
-        acquire :: Var Throttle -> Pool -> Int -> IO (Maybe (Fence IO ()))
-        acquire var pool want
-            | want < 0 = errorIO $ "You cannot acquire a negative quantity of " ++ shw ++ ", requested " ++ show want
-            | want > count = errorIO $ "You cannot acquire more than " ++ show count ++ " of " ++ shw ++ ", requested " ++ show want
-            | otherwise = modifyVar var $ \case
-                ThrottleAvailable i
-                    | i >= want -> pure (ThrottleAvailable $ i - want, Nothing)
-                    | otherwise -> do
-                        stop <- keepAlivePool pool
-                        fence <- newFence
-                        pure (ThrottleWaiting stop $ (want - i, fence) `cons` mempty, Just fence)
-                ThrottleWaiting stop xs -> do
-                    fence <- newFence
-                    pure (ThrottleWaiting stop $ xs `snoc` (want, fence), Just fence)
+withResource :: Resource -> Int -> Action a -> Action a
+withResource var i act = do
+    modifyVar var $ \case
+        ThrottleAvailable i
+            | i >= want -> pure (ThrottleAvailable $ i - want, Nothing)
+            | otherwise -> do
+                stop <- keepAlivePool pool
+                fence <- newFence
+                pure (ThrottleWaiting stop $ (want - i, fence) `cons` mempty, Just fence)
+        ThrottleWaiting stop xs -> do
+            fence <- newFence
+            pure (ThrottleWaiting stop $ xs `snoc` (want, fence), Just fence)
+    when fence $ do
+        (offset, ()) <- actionFenceRequeueBy Right fence
+        Action $ modifyRW $ addDiscount offset
+    act `finally` do
+        let
+            -- call a function after a certain delay
+            waiter :: Seconds -> IO () -> IO ()
+            waiter period act = void $ forkIO $ do
+                sleep period
+                act
 
-        release :: Var Throttle -> Pool -> Int -> IO ()
-        release var _ n = waiter period $ join $ modifyVar var $ \x -> pure $ case x of
-                ThrottleAvailable i -> (ThrottleAvailable $ i+n, pure ())
-                ThrottleWaiting stop xs -> f stop n xs
-            where
-                f stop i (uncons -> Just ((wi,wa),ws))
-                    | i >= wi = second (signalFence wa () >>) $ f stop (i-wi) ws
-                    | otherwise = (ThrottleWaiting stop $ (wi-i,wa) `cons` ws, pure ())
-                f stop i _ = (ThrottleAvailable i, stop)
+            f stop i (uncons -> Just ((wi,wa),ws))
+                | i >= wi = second (signalFence wa () >>) $ f stop (i-wi) ws
+                | otherwise = (ThrottleWaiting stop $ (wi-i,wa) `cons` ws, pure ())
+            f stop i _ = (ThrottleAvailable i, stop)
+
+        waiter period $ join $ modifyVar var $ \x -> pure $ case x of
+            ThrottleAvailable i -> (ThrottleAvailable $ i+n, pure ())
+            ThrottleWaiting stop xs -> f stop n xs

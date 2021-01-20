@@ -1,27 +1,27 @@
 Overloading
 ###########
 
-Stroscot supports typical pattern matching as well as predicate dispatch:
+Stroscot supports pattern matching as well as predicate dispatch:
 
 ::
 
-   f x y = 1
-   f 1 y = 2
-   f x 2 | x == 1 = 3
+   f 1 = 1
+   f 2 = 2
+   f y | y != 1 && y != 2 = 3
 
 The cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:
 
 ::
 
-   f x y = 1
-   f 1 y = 2
-   f x 2 = 3
+   f 1 = 1
+   f 2 = 2
+   f y = 2
 
-   f 1 2
+   f 1
    # Error: rule conflict
 
 
-But ``f x 2 = 2`` would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:
+But ``f 2 = 2`` would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:
 
 ::
 
@@ -47,9 +47,9 @@ The pipe syntax matches cases from top to bottom:
 ::
 
    f
-   | x y = 1
-   | 1 y = 2
-   | x 2 = 3
+   | 1 y = 1
+   | x 2 = 2
+   | x y = 3
 
 It expands to an unordered set of matches:
 
@@ -61,6 +61,14 @@ It expands to an unordered set of matches:
 
    # p1, p2, etc. functions of $args
 
+So our previous example would be
+
+::
+
+   f 1 y = 1
+   f x 2 | x != 1 = 2
+   f x y | x != 1 && y != 2 = 3
+
 Maybe you will also be able to use ``match`` within a function, if the syntax details work out:
 
 ::
@@ -71,9 +79,11 @@ Maybe you will also be able to use ``match`` within a function, if the syntax de
 Method qualifiers
 =================
 
-Stroscot also supports Common Lisp's method qualifiers: ``before``, ``after``, and``around`` (`illustration <https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png>`__). Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone's time by avoiding the need to reimplement it.
+Stroscot also supports Common Lisp's method qualifiers ``before``, ``after``, and ``around``, as well as a custom qualifier ``list``. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone's time by avoiding the need to reimplement it.
 
-Compared to CLOS, it is simplified in that only ``around`` s can call their next methods; primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: ``a`` is less specific than ``b`` if ``SAT(a & not b)`` and ``UNSAT (not a & b)``. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.
+The basic idea of method combination can be seen in this `illustration <https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png>`__, except that primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: ``a`` is less specific than ``b`` if ``SAT(a & not b)`` and ``UNSAT (not a & b)``. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.
+
+``list`` exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).
 
 Implementation
 ==============
@@ -85,7 +95,7 @@ The implementation is similar to that used for checking equality of dependent ty
    dispatch methods args = do
      [arounds, befores, afters, primaries] = map topological_sort $ partition methods
      next-method = DispatchError
-     f arounds
+     f arounds where
      f = \x ->
       case x of
          a:as -> call a { next-method = f as }
@@ -100,8 +110,6 @@ The implementation is similar to that used for checking equality of dependent ty
 
    call binds args = fold lub DispatchError (map ($ args) binds)
 
-
-The last method qualifier is ``list``. This exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).
 
 Patterns
 ========
@@ -180,6 +188,6 @@ There is a function ``convert`` in the core library. It includes as cases / requ
 * ``convert a = a`` (reflexivity)
 * ``convert a = convert (convert a))`` (transitivity)
 
-A pass early in compilation adds a call to ``convert`` around every value, e.g. ``1+2`` becomes ``convert (convert (+) (convert 1) (convert 2)``.
+A pass early in compilation adds a call to ``convert`` around every literal, e.g. ``1+2`` becomes ``convert (convert (+) (convert 1) (convert 2)``.
 
 New cases can be added; this is useful in various instances. For example we can create subtyping.

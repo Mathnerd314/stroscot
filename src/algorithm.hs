@@ -1,200 +1,154 @@
 -- a memory location, filename, etc. that can be looked up
 type Key = ByteString
--- the entry point of a thunk, where a computation can be recorded or replayed
+type Value = ByteString
+-- the entry point of a thunk, where a computation can be recorded or replayed.
+-- A specific thunk label is entered at most once per run.
+-- To run a computation multiple times it must be aliased under different labels.
 type Label = ByteString
 
 data ThunkRecord = ThunkRecord
  {
-   readSet :: [Key],
-   writeSet :: [Key],
-   happensBefore :: [Label],
-   happensAfter :: [Label]
+   readSet :: [(Key,Value)],
+   writeSet :: [(Key,Value)],
+   syncPrimitive :: SyncPrimitive
  }
 
-executeThunk :: Label -> M ThunkRecord
+data SyncPrimitive
+  -- | Run the list of actions concurrently.
+  --   If any action throws an exception at any time, then all other actions are 'cancel'led.
+  = Concurrently [Label]
+  -- | like concurrently but resumes execution at the second argument once the first argument's thunks are exhausted
+  --   this is basically the synchronization primitive of Shake's need and apply
+  | ExecAfter [Label] Label
+  -- | like ExecAfter but it doesn't start execution of the actions, it only waits for them (deadlock city)
+  | WaitFor [Label] Label
+  -- | Graceful termination - Stop the thread. We could use Concurrently [] but this is clearer
+  | Die
+  -- | Thunk can also terminate abruptly if they encounter an exception.
+  -- Exception records are always out-of-date.
+  | Exception SomeException
 
--- Shake uses lots of tiny threads, that need ~2kb stack.
--- GHC's thread stacks all start out at 1Kb, then grow in 32Kb chunks (by default).
--- These 32Kb chunks eat up all the space despite being only slightly occupied, almost 400Mb for 10k threads.
--- The solution is probably to rethink Pool, perhaps using a continuation monad to pause tasks without requiring a running thread.
+-- Global operations, these need to be thread-safe
+data Global = Global
+  { state :: HashMap Key ValueRecord
+    -- shake uses HashMap Key Word32 + MutableArray (Maybe ValueRecord), assigning index id's sequentially from 0
+    -- it seems to be to speed up storing stacks/dependency lists.
+    -- Here, we don't have stacks, but compressing the read/write sets might be worth it.
+    -- we need to benchmark: HashTable, HashSet, and combinations with MutableArray.
+    -- also we might want split storage, e.g. version keys stored separately from the rest as
+    -- version keys won't change.
+  , diskState :: HashMap Key Value
+      -- to cache the actual file state so we don't hash it multiple times per run
+  , thunkList :: HashMap Label ThunkState
+  -- auxiliary data structure to aid in implementing the synchronization primitives for running thunks
+  , execThunk :: Label -> IO ()
+    -- the way to execute thunks is fixed throughout the run
+    -- for example in iThreads it is a register-saving/restoring routine + address jump + tracing
+    -- but here we use M () and record actions manually
+    -- the IO () is required to write its ThunkRecord to its thunk state using the next operation (even if it encounters an exception)
+  , recordThunk :: Label -> ThunkRecord -> IO ()
+  }
 
-data M a where
-    Fmap :: (a -> b) -> M a -> M b
+data ValueRecord = ValueRecord
+  { value :: Value
+  , reconstructDamaged :: Maybe Label
+      -- if the value is damaged it can be reconstructed by running this label, otherwise Nothing
+  }
 
-    Pure :: a -> M a
-    LiftIO :: IO a -> M a
+data ThunkState
+  -- | A thunk starts uninitialized; normally there is no entry, but WaitFor will create an uninitialized entry
+  -- todo: is this needed?
+  = Uninitialized { waiters :: [IO ()] }
+  -- | 'Loaded' thunks include thunks that are cleanly restored from a previous run
+  --   as well as damaged thunks where not all writes can be restored (due to missing data etc.)
+  --   The damage is only relevant for giving an error when reading thunks so we store that information in 'reconstructDamaged'
+  | Loaded { waiters :: [IO ()], record :: ThunkRecord }
+  -- | ExecAfter will create thunks in the running state. Running is either a thread in the body of the code,
+  -- or else an IO () inside a child's waitlist
+  | Running { waiters :: [IO ()] }
+  -- | A thunk finishes if it dies and once all children have finished
+  | Finished { record :: ThunkRecord }
 
-    Ap :: M (a -> b) -> M a -> M b
-    Next :: M a -> M b -> M b
-    Bind :: M a -> (a -> M b) -> M b
+recordThunk l trec = do
+  let runFinish = do
+      oldstate <- setMem l (Finished trec)
+      run (waiters oldstate) where
+        run [] = pure ()
+        run (w:ws) = w >> run ws
 
-    Void :: M a -> M ()
+  case syncPrimitive trec of
+    Die -> runFinish
+    Exception _ -> runFinish
+    WaitFor ls l -> waitFor ls $ do
+      addWaiter l runFinish
+      execOrReplayThunk l
+    Concurrently ls -> execAfter ls runFinish
+    ExecAfter ls l -> execAfter ls $ do
+      addWaiter l runFinish
+      execOrReplayThunk l
 
-    Read :: Key -> M ByteString
-    Write :: !Key -> !ByteString -> M ()
+addWaiter :: Label -> IO () -> IO ()
+addWaiter l continue = getThunkState l >>= \case
+    Finished _ -> continue
+    Running w -> setMem k $ Running [w,continue]
+    Uninitialized w -> setMem k $ Running [w,continue]
 
-    HappensBefore :: Label -> M ()
+waitFor :: [Label] -> IO () -> IO ()
+waitFor [] continue = continue
+waitFor (l:ls) continue = addWaiter l (waitFor ls continue)
 
-    -- | Run the list of @IO@ actions concurrently, and return the results.
-    --   If any action throws an exception at any time, then all other actions are
-    --   'cancel'led, and the exception is rethrown.
-    Concurrently :: [M a] -> M [a]
-    -- todo: concurrently from https://hackage.haskell.org/package/async-2.2.2/docs/src/Control.Concurrent.Async.html#local-6989586621679035295
-    -- or parallel from https://hackage.haskell.org/package/parallel-io-0.3.3/docs/src/Control-Concurrent-ParallelIO-Local.html#parallel
+execAfter :: [Label] -> IO () -> IO ()
+execAfter ls continue = do
+  waitFor ls continue
+  mapM_ execOrReplayThunk ls
 
+----------------------------
 
-    -- | Create a finite resource, given a name (for error messages) and a quantity of the resource that exists.
-    --   Shake will ensure that actions using the same finite resource do not execute in parallel.
-    --   The main example is threads, only 
-    NewResource :: String -> Int -> M Resource
-    NewThrottle :: String -> Int -> Double -> M Resource
-    WithResources :: [(Resource, Int)] -> Action a -> Action a
+execOrReplayThunk l = do
+  getThunkState l >>= \case
+    Uninitialized w -> do
+      setMem l (Running w)
+      addPool $ findRecordOrExec l
+    _ -> pure () -- already running
 
-    -- record a message
-    Traced :: String -> M a -> M a
+findRecordOrExec l = do
+  p <- lookupPreviousRuns
+  checkAll p
+    where
+      checkAll [] = reallyExec l -- no valid execution traces
+      checkAll (r:rs) = checkReads rs r (readSet r)
 
-    PutWhen :: Verbosity -> String -> Action ()
-    WithVerbosity :: Verbosity -> Action a -> Action a
+      checkReads rs r [] = do
+        -- check if the thunk is damaged
+        c <- checkDamaged l (writeSet r)
+        case c of
+          DamagedReExec -> checkAll rs
+          Valid -> do
+            -- valid thunk, replay writes and finalize
+            mapM_ (replayWrite l) (writeSet r)
+            recordThunk l r
 
+      checkReads rs r (ri : ris) = do
+        checkRead ri >>= \case
+          Clean -> checkReads rs r ris
+          Dirty -> checkAll rs
 
--- shake has a rules monad with a few operations for defining rules:
--- rule, versioned, priority, alternatives. also action and rulesio to run things at the beginning.
+checkRead (rk,rv) = do
+  -- first check the computed state
+  cv <- lookup rk (state global)
+  case cv of
+    Just cv -> compareValues rk rv cv
+    Nothing -> do
+      -- not computed, so it must be an input
+      dv <- getDiskValue rk
+      compareValues rk rv dv
 
-data ActionADT a where
-    ActionBoom :: Bool -> Action a -> IO b -> Action a
-    RunAfter :: IO () -> Action ()
-    Apply :: Rule key value => [key] -> Action [value]
-    ApplyKeyValue :: [Key] -> Action [Value]
-
-    BlockApply :: String -> Action a -> Action a
-    UnsafeExtraThread :: Action a -> Action a
-    UnsafeIgnoreDependencies :: Action a -> Action a
-
--- our filesystem access tracer needs configurable options,
--- to ignore files (to allow benign impurities), and/or to error on files (to enforce a static policy)
-
-forever (threadDelay maxBound)
-concurrently :: [IO a] -> IO a
-concurrently actions =
-
--- | Memoize an IO action which is recursive
-memoRec :: (Eq a, Hashable a, MonadIO m) => ((a -> m b) -> a -> m b) -> m (a -> m b)
-memoRec f = do
-    var <- liftIO $ newVar Map.empty
-    let go x =
-            join $ liftIO $ modifyVar var $ \mp -> case Map.lookup x mp of
-                Just bar -> pure (mp, liftIO $ waitBarrier bar)
-                Nothing -> do
-                    bar <- newBarrier
-                    pure (Map.insert x bar mp, do v <- f go x; liftIO $ signalBarrier bar v; pure v)
-    pure go
-
-state :: HashMap Key Value
--- shake uses HashMap Key Word32 + MutableArray (Maybe Value), assigning index id's sequentially from 0
--- it seems to be to speed up storing stacks/dependency lists.
--- Here, we don't have stacks, but compressing the key lists might be worth it.
-
-applyKeyValue :: [Key] -> Action [Value]
-applyKeyValue ks = do
-  is <- nubOrd $ ks
-  wait <- forM is $ liftIO $ getKeyValueFromId database i >>= \case
-    Ready r -> Now $ Right r
-    Failed e _ -> Now $ Left e
-    Running (NoShow w) r -> do
-      let w2 v = w v >> continue v
-      setMem database i k $ Running (NoShow w2) r
-    Loaded r -> Later $ \continue -> do
-      addPool (if isLeft x then PoolException else PoolResume) globalPool $
-      setIdKeyStatus global database i k (Running (NoShow continue) r)
-      liftIO $ addPool PoolStart globalPool $
-        res <- builtinRun k (fmap result r) mode
-        globalRuleFinished k
-        producesCheck
-      \case
-            Left e ->
-                continue . Left . toException =<< shakeException global stack e
-            Right (RunResult{..}, Local{..})
-                | runChanged == ChangedNothing || runChanged == ChangedStore, Just r <- r ->
-                    continue $ Right $ RunResult runChanged runStore (r{result = mkResult runValue runStore})
-                | otherwise -> do
-                    dur <- time
-                    let (cr, c) | Just r <- r, runChanged == ChangedRecomputeSame = (ChangedRecomputeSame, changed r)
-                                | otherwise = (ChangedRecomputeDiff, globalStep)
-                    continue $ Right $ RunResult cr runStore Result
-                        {result = mkResult runValue runStore
-                        ,changed = c
-                        ,built = globalStep
-                        ,depends = nubDepends $ reverse localDepends
-                        ,execution = doubleToFloat $ dur - localDiscount
-                        ,traces = reverse localTraces}
-            where
-                mkResult value store = (value, if globalOneShot then BS.empty else store)
-
-                    let val = fmap runValue res
-                    res <- liftIO $ getKeyValueFromId database i
-                    w <- case res of
-                        Just (_, Running (NoShow w) _) -> pure w
-                        -- We used to be able to hit here, but we fixed it by ensuring the thread pool workers are all
-                        -- dead _before_ any exception bubbles up
-                        _ -> throwM $ errorInternal $ "expected Waiting but got " ++ maybe "nothing" (statusType . snd) res ++ ", key " ++ show k
-                    setIdKeyStatus global database i k $ either mkError Ready val
-                    w val
-                case res of
-                    Right RunResult{..} | runChanged /= ChangedNothing -> setDisk database i k $ Loaded runValue{result=runStore}
-                    _ -> pure ()
-    Action $ modifyRW $ \s -> s{localDepends = Depends is : localDepends s}
-
-
-runKey
-    :: Global
-    -> Stack  -- Given the current stack with the key added on
-    -> Key -- The key to build
-    -> Maybe (Result BS.ByteString) -- A previous result, or Nothing if never been built before
-    -> RunMode -- True if any of the children were dirty
-    -> Capture (Either SomeException (RunResult (Result (Value, BS_Store))))
-        -- Either an error, or a (the produced files, the result).
-runKey global@Global{globalOptions=ShakeOptions{..},..} stack k r mode continue = do
-
-
-
-
-
-
-Algorithm 1: Basic algorithm for the incremental run
-dirty-set ← {changed input};
-executeThread(t)
-forall sub-computations in thread t do
-// Check a sub-computation’s validity in happens-before order
-if (read-set ∩ dirty-set) then
-– recompute the sub-computation
-– add the write-set to the dirty-set
-else
-– skip execution of the sub-computation
-– write memoized value of the write-set to address space
-end
-end
-
-Algorithm 2: The initial run algorithm
-/* Let S be the set of synchronization objects and T be the number
-of threads in the system. */
-∀s ∈ S, ∀i ∈ {1, ..., T } : Cs [i] ← 0; // All sync clocks set to zero
-executeThread(t)
-begin
-initThread(t);
-while t has not terminated do
-startThunk(); // Start new thunk
-repeat
-Execute instruction of t;
-if (instruction is load or store) then
-onMemoryAccess();
-end
-until t invokes synchronization primitive;
-endThunk(); // Memoize the end state of thunk
-α ← α + 1; // Increment thunk counter
-// Let s denote invoked synchronization primitive
-onSynchronization(s);
-end
-end
+replayWrite l (wk,wv) = do
+  wv_real <- getDiskValue wk
+  set state wk $ ValueRecord
+    { value = wv
+    , reconstructDamaged = when (wv_real /= wv) l
+    }
 
 Algorithm 3: Subroutines for the initial run algorithm
 initThread(t)
