@@ -3,7 +3,8 @@ The Stroscot Programming Language
 
 Stroscot is an imperative programming language designed for modern processors.
 
-For more, see:
+* Github repository: https://github.com/Mathnerd314/stroscot
+* Discord: https://discord.gg/4BznM5ZYGq
 
 .. toctree::
   :maxdepth: 2
@@ -27,5 +28,3 @@ For more, see:
   FAQ
   zzreferences
 
-* Github repository: https://github.com/Mathnerd314/stroscot
-* Discord: https://discord.gg/rQvE5Yj
