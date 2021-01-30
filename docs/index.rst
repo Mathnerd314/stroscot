@@ -22,6 +22,8 @@ For more, see:
   Memory
   Compiler
   BuildSystem
+  PackageManager
+  Programs
   FAQ
   zzreferences
 

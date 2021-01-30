@@ -1,3 +1,6 @@
+import Control.Concurrent.Lock ( Lock )
+import qualified Control.Concurrent.Lock as Lock
+
 -- a memory location, filename, etc. that can be looked up
 type Key = ByteString
 type Value = ByteString
@@ -5,6 +8,7 @@ type Value = ByteString
 -- A specific thunk label is entered at most once per run.
 -- To run a computation multiple times it must be aliased under different labels.
 type Label = ByteString
+type LockId = ByteString
 
 data ThunkRecord = ThunkRecord
  {
@@ -14,18 +18,23 @@ data ThunkRecord = ThunkRecord
  }
 
 data SyncPrimitive
-  -- | Run the list of actions concurrently.
-  --   If any action throws an exception at any time, then all other actions are 'cancel'led.
-  = Concurrently [Label]
-  -- | like concurrently but resumes execution at the second argument once the first argument's thunks are exhausted
-  --   this is basically the synchronization primitive of Shake's need and apply
-  | ExecAfter [Label] Label
-  -- | like ExecAfter but it doesn't start execution of the actions, it only waits for them (deadlock city)
-  | WaitFor [Label] Label
-  -- | Graceful termination - Stop the thread. We could use Concurrently [] but this is clearer
+  -- | Initiate parallel execution of all thunks in the first list.
+  --   Then once they are finished, execute the second list in parallel.
+  --   Then once that's finished execute the third list, etc.
+  --   If any action throws an exception at any time, then all later actions are cancelled.
+  --   This is an iterated version of the synchronization primitive of Shake's need and apply
+  --   The one-element version Sequence [[a,b,c]] is like pthread_create
+  = Sequence [[Label]]
+  -- | like Sequence but it doesn't start execution of the first set of actions, it only waits for them (pthread_join)
+  | WaitFor [Label] [Label]
+  -- | Graceful termination - Stop the thread. We could use Sequence [] or WaitFor [] [] but this is clearer
   | Die
+  -- | Acquire a lock
+  | Acquire LockId [Label]
+  -- | Release a lock
+  | Release LockId [Label]
   -- | Thunk can also terminate abruptly if they encounter an exception.
-  -- Exception records are always out-of-date.
+  --   Exception records are always out-of-date.
   | Exception SomeException
 
 -- Global operations, these need to be thread-safe
@@ -41,6 +50,7 @@ data Global = Global
       -- to cache the actual file state so we don't hash it multiple times per run
   , thunkList :: HashMap Label ThunkState
   -- auxiliary data structure to aid in implementing the synchronization primitives for running thunks
+  , locks :: HashMap LockId Lock
   , execThunk :: Label -> IO ()
     -- the way to execute thunks is fixed throughout the run
     -- for example in iThreads it is a register-saving/restoring routine + address jump + tracing
@@ -49,10 +59,16 @@ data Global = Global
   , recordThunk :: Label -> ThunkRecord -> IO ()
   }
 
+data Source
+  = Input
+  | GeneratedBy Label
+      -- if the value is damaged it can be reconstructed by running this label
+
 data ValueRecord = ValueRecord
   { value :: Value
-  , reconstructDamaged :: Maybe Label
-      -- if the value is damaged it can be reconstructed by running this label, otherwise Nothing
+  , source :: Source
+  , damaged :: Bool
+    -- cached computation of whether diskState == value
   }
 
 data ThunkState
@@ -63,7 +79,7 @@ data ThunkState
   --   as well as damaged thunks where not all writes can be restored (due to missing data etc.)
   --   The damage is only relevant for giving an error when reading thunks so we store that information in 'reconstructDamaged'
   | Loaded { waiters :: [IO ()], record :: ThunkRecord }
-  -- | ExecAfter will create thunks in the running state. Running is either a thread in the body of the code,
+  -- | Starting execution of a thunk will create thunks in the running state. Running is either a thread in the body of the code,
   -- or else an IO () inside a child's waitlist
   | Running { waiters :: [IO ()] }
   -- | A thunk finishes if it dies and once all children have finished
@@ -71,31 +87,37 @@ data ThunkState
 
 recordThunk l trec = do
   let runFinish = do
-      oldstate <- setMem l (Finished trec)
-      run (waiters oldstate) where
-        run [] = pure ()
-        run (w:ws) = w >> run ws
+        oldstate <- setMem l (Finished trec)
+        run (waiters oldstate) where
+          run [] = pure ()
+          run (w:ws) = w >> run ws
+      runNext l = execAfter l runFinish
 
   case syncPrimitive trec of
     Die -> runFinish
     Exception _ -> runFinish
-    WaitFor ls l -> waitFor ls $ do
-      addWaiter l runFinish
-      execOrReplayThunk l
-    Concurrently ls -> execAfter ls runFinish
-    ExecAfter ls l -> execAfter ls $ do
-      addWaiter l runFinish
-      execOrReplayThunk l
+    WaitFor la lb -> waitFor la (runNext lb)
+    Sequence ls -> run ls where
+        run [] = runFinish
+        run (l:ls) = execAfter l (run ls)
+    Acquire lock_id l -> do
+      lock <- getLock lock_id
+      Lock.acquire lock
+      runNext l
+    Release lock_id l -> do
+      lock <- getLock lock_id
+      Lock.release lock
+      runNext l
 
-addWaiter :: Label -> IO () -> IO ()
-addWaiter l continue = getThunkState l >>= \case
-    Finished _ -> continue
-    Running w -> setMem k $ Running [w,continue]
-    Uninitialized w -> setMem k $ Running [w,continue]
+
 
 waitFor :: [Label] -> IO () -> IO ()
 waitFor [] continue = continue
-waitFor (l:ls) continue = addWaiter l (waitFor ls continue)
+waitFor (l:ls) continue = let c = waitFor ls continue in
+  getThunkState l >>= \case
+    Finished _ -> c
+    Running w -> setMem k $ Running [w,c]
+    Uninitialized w -> setMem k $ Running [w,c]
 
 execAfter :: [Label] -> IO () -> IO ()
 execAfter ls continue = do
@@ -150,45 +172,16 @@ replayWrite l (wk,wv) = do
     , reconstructDamaged = when (wv_real /= wv) l
     }
 
-Algorithm 3: Subroutines for the initial run algorithm
-initThread(t)
-begin
-α ← 0; // Initializes thunk counter (α) to zero
-∀i ∈ {1, ..., T } : Ct [i] ← 0; // t’s clock set to zero
-end
-startThunk()
-begin
-Ct [t] ← α; // Update thread clock
-∀i ∈ {1, ..., T } : Lt [α].C[i] ← Ct [i]; // Update thunk clock
-Lt [α].R/W ← ∅; // Initialize read/write sets to empty set
-end
-onMemoryAccess()
-begin
-if load then
-Lt[α].R ← Lt [α].R ∪ {memory-address}; // Read
-else
-Lt[α].W ← Lt [α].W ∪ {memory-address}; // Write
-end
-end
-endThunk()
-begin
-memo (Lt[α].W ) ← content(Lt [α].W ); // Globals & heap
-memo (Lt[α].Stack) ←content(Stack);
-memo (Lt[α].Reg) ←content(CPU Registers);
-end
-onSynchronization(s)
-begin
-switch Syncronization type do
-case release(s):
-// Update s’s clock to hold max of its and t’s clocks
-∀i ∈ {1, ..., T } : Cs [i] ← max(Cs[i], Ct [i]);
-sync(s); // Perform the synchronization
-case acquire(s):
-sync(s); // Perform the synchronization
-// Update t’s clock to hold max of its and s’s clocks
-∀i ∈ {1, ..., T } : Ct [i] ← max(Cs[i], Ct [i]);
-end
-end
+makeThunkRecord act = do
+  read <- newIORef []
+  write <- newIORef []
+  sync <- act $ F
+   { recordRead = \r -> when (r `not elem` write) $ modifyIORef read (r:)
+   , recordWrite = \r -> modifyIORef read (r:)
+   }
+  ThunkRecord <$> readIORef read <*> readIORef write <*> return sync
+
+
 
 Algorithm 4: The incremental run algorithm
 Data: Shared dirty set M ← { modified pages } and Lt

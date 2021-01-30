@@ -44,15 +44,12 @@ Strings
    [Enclosed text]
    'short'
 
-Structured Data
-===============
-
-Stroscot supports records and arrays.
+Arrays
+======
 
 ::
-
-  {a = 1, b = 2, c = 3}
-  [a, b, c]
+  arr = [a, b, c]
+  arr[0] # a
 
 Sequences and slices:
 
@@ -64,6 +61,20 @@ Sequences and slices:
   [minBound,minBound+1..maxBound]
   slice(list, 0, 2)
   slice(list, a, length list - b)
+
+Records
+=======
+
+::
+
+  rec = {a = 1, b = 2, c = 3}
+  rec.a # 1
+  rec[a] # 1
+  {a = x} = rec # x = 1
+  {a,b} = rec # a = 1, b = 2
+  # record update
+  rec // {b=4, d = 4}
+    # {a = 1, b = 4, c = 3, f = 5}
 
 Atoms
 =====
@@ -214,6 +225,11 @@ To match Haskell, there is also a standard operator ``(:)`` defined as ``x : y =
    a = 2 : Int8
 
 These two options seem more logical compared to other choices such as ``a : Int8 = 2`` (Swift,Jai - hard to read with long types) or ``Int8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program.
+
+Scoping and qualification
+=========================
+
+There is no kind of syntax or semantics for changing or redefining identifiers (besides :ref:`fexprs <fexprs>`); you can shadow, with warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope.
 
 Variables
 =========

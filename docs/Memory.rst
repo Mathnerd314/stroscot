@@ -1,14 +1,31 @@
 Memory management
 #################
 
-Every program has to use memory in order to store temporary values and interact with system calls.
+Every program has to use memory in order to store mutable values and interact with system calls.
+
+Terms
+-----
+
+memory cell
+  A circuit that can store some fixed number of logical bits (0/1). Since ternary computers might eventually become popular, a cell is probably best modeled as a register containing an integer ``i`` with ``0 <= i < MAX``, with no restriction that ``MAX`` is a power of 2.
+
+RAM value
+  an associative array going from memory cell names to memory cell values, together with a distinguished memory cell name.
+
+Core expression
+  Any instance of a Core net
+
+Core value
+  Core expressions that are not reducible (does not contain cut).
+
+The point of the memory system is to ensure every Core value has a corresponding RAM value representation, and to rewrite the program to use RAM values instead of Core values.
 
 Representation
 --------------
 
-The layout of a type is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS's `value type <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__, and the choices often impact performance significantly.
+Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS's `value type <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__, and the choices often impact performance significantly.
 
-So in Stroscot there is no fixed memory representation. Instead every type has its memory layout defined by writing ``pack``/``unpack`` functions that write/read a memory buffer, similar to the `store library <https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs>`__. The pack/unpack functions will end up getting passed around a lot, but implicit parameters scale pretty well, so it shouldn't be an issue. Unlike Narcissus :cite:`delawareNarcissusCorrectbyconstructionDerivation2019` we don't have a state parameter, also because of implicit parameters.
+So in Stroscot there is no fixed memory representation. Instead memory layout is defined by overloaded ``pack``/``unpack`` functions that write/read a memory buffer, similar to the `store library <https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs>`__. The pack/unpack functions will end up getting passed around a lot, but implicit parameters scale pretty well, so it shouldn't be an issue. Unlike Narcissus :cite:`delawareNarcissusCorrectbyconstructionDerivation2019` we don't have a state parameter, also because of implicit parameters.
 
 ::
 
@@ -90,6 +107,8 @@ A pointer type ``Ptr`` is a wrapper around the ``UInt`` type of the machine's na
 Unrestricted, references introduce an entire class of memory errors; in particular, we cannot free the memory the reference refers to unless the reference will not be dereferenced anymore. Violating this condition is a use-after-free. Similarly freeing itself must happen exactly once, so we have double frees and memory leaks.
 
 On a positive note, since we work with datatypes first and their representations only incidentally, we do not have to handle buffer overflows; pointer arithmetic is implicit in the pack/unpack functions and due to our correctness properties, unpacking fields of the datatype must read within the allocated buffer.
+
+Since Stroscot is non-strict we have actually two reference types, evaluated and non-evaluated.
 
 Automatic memory management
 ---------------------------

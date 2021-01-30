@@ -3,9 +3,31 @@ Verification
 
 SMT solvers have become very powerful. but termination checking is still in its infancy. It is a difficult (undecidable) task. The state-of-the-art seems to be the ULTIMATE framework that does abstract interpretation of the program via Buchi automata. CPAChecker has also done well in SV-COMP using an extension of dataflow analysis.
 
-For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems, and one recent paper/PhD on using it for termination checking.
+SAT solving
+===========
 
-Another issue is incremental analysis. Solving the halting problem is slow so we would like to re-use most of the analysis when recompiling a file. Marking the solver's computation steps in the general incremental computation framework is probably sufficient.
+For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems :cite:`brausseCDCLstyleCalculusSolving2019`, and one paper/PhD on using CDCL for termination checking :cite:`dsilvaConflictDrivenConditionalTermination2015`.
+
+TT-Open-WBO-Inc
+
+Open-WBO-Inc-complete
+Loandra
+Open-WBO-Inc-satlike
+
+
+UWrMaxSat	436	148.97
+MaxHS	434	184.69
+RC2-B	417	205.88
+RC2-A	411	185.92
+maxino	393	203.21
+
+Pacose	385	197.83
+QMaxSAT	377	281.47
+
+maxino-pref	375	162.1
+smax_minisat	339	182.94
+smax_mergesat	282	293.93
+
 
 Configurable Program Analysis
 =============================
@@ -121,3 +143,13 @@ We run a CPA analysis with the following algorithm:::
   ENDWHILE
   // wait is empty
   return reached
+
+Incremental program analysis
+----------------------------
+
+Another issue is incremental analysis. Solving the halting problem is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation :cite:`jakobsDifferentialModularSoftware` there doesn't seem to be any major breakthrough. Marking the analyzer's computation steps in the general incremental build framework is probably sufficient.
+
+Condition checking
+------------------
+
+There's some interesting `work <http://mmjb.github.io/T2/>`__ on termination checking by Microsoft, called `TERMINATOR <https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm>`__. There's a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and resource use :cite:`albertResourceAnalysisDriven2019` and things of that nature.
