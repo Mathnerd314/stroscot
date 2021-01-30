@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Syntax &mdash; Stroscot  documentation</title>
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -30,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -53,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+            <a href="index.html" class="icon icon-home"> Stroscot
           
 
           
@@ -90,12 +92,15 @@
 <li class="toctree-l2"><a class="reference internal" href="#numbers">Numbers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#arithmetic-and-parentheses">Arithmetic and Parentheses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#strings">Strings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#structured-data">Structured Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#arrays">Arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#records">Records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atoms">Atoms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#operators">Operators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#blocks">Blocks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parsing">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#type-declarations">Type declarations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scoping-and-qualification">Scoping and qualification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#variables">Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dsl">DSL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#namespacing">Namespacing</a></li>
@@ -114,6 +119,8 @@
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
@@ -156,6 +163,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -167,7 +176,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Syntax.rst" class="fa fa-github"> Edit on GitHub</a>
             
@@ -186,6 +195,7 @@
   <div class="section" id="syntax">
 <h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h1>
 <p>Almost everything in Stroscot is an expression. The basics are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
+<p>The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode) and picking out the nicest examples. Short and terse syntax is good, as is flexibility and generality. But in the end, syntax is decided by usage, so imitation is the best way to make new users of Stroscot feel comfortable.</p>
 <div class="section" id="numbers">
 <h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>(0[box])?[0-9a-fA-F_]+(\.[0-9a-fA-F_]+)?([eEpP][+-]?[0-9_]+)?
@@ -217,13 +227,13 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="structured-data">
-<h2>Structured Data<a class="headerlink" href="#structured-data" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot supports records and arrays.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">}</span>
-<span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
-</pre></div>
-</div>
+<div class="section" id="arrays">
+<h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>::</dt><dd><p>arr = [a, b, c]
+arr[0] # a</p>
+</dd>
+</dl>
 <p>Sequences and slices:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">..</span><span class="p">]</span>
 <span class="p">[</span><span class="n">minBound</span><span class="o">..</span><span class="p">]</span>
@@ -233,6 +243,34 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <span class="nb">slice</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">length</span> <span class="nb">list</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="records">
+<h2>Records<a class="headerlink" href="#records" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rec</span> <span class="o">=</span> <span class="p">{</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">3</span><span class="p">}</span>
+<span class="n">rec</span><span class="o">.</span><span class="n">a</span> <span class="c1"># 1</span>
+<span class="n">rec</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="c1"># 1</span>
+<span class="p">{</span><span class="n">a</span> <span class="o">=</span> <span class="n">x</span><span class="p">}</span> <span class="o">=</span> <span class="n">rec</span> <span class="c1"># x = 1</span>
+<span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">}</span> <span class="o">=</span> <span class="n">rec</span> <span class="c1"># a = 1, b = 2</span>
+<span class="c1"># record update</span>
+<span class="n">rec</span> <span class="o">//</span> <span class="p">{</span><span class="n">b</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">4</span><span class="p">}</span>
+  <span class="c1"># {a = 1, b = 4, c = 3, f = 5}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="atoms">
+<h2>Atoms<a class="headerlink" href="#atoms" title="Permalink to this headline">¶</a></h2>
+<p>Any undefined identifier can be used as an atom, i.e. a component of a symbolic expression. For example this will produce <code class="docutils literal notranslate"><span class="pre">4</span></code> if <code class="docutils literal notranslate"><span class="pre">foo</span></code> is undefined:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="p">(</span><span class="n">foo</span> <span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
+
+<span class="n">f</span> <span class="p">(</span><span class="n">foo</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Due to the fexpr semantics any expression can be used and pattern-matched, like <code class="docutils literal notranslate"><span class="pre">javascript</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">&quot;abc&quot;</span> <span class="pre">{</span> <span class="pre">234</span> <span class="pre">})</span></code>.</p>
+<p>To export the semantics to other modules a special keyword <code class="docutils literal notranslate"><span class="pre">atom</span></code> is used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atom</span> <span class="n">foo</span>
+</pre></div>
+</div>
+<p>This ensures that no rules for <code class="docutils literal notranslate"><span class="pre">foo</span></code> are defined and adds the symbol to the export list. It is good practice to use this even if the identifier is not exported.</p>
 </div>
 <div class="section" id="operators">
 <h2>Operators<a class="headerlink" href="#operators" title="Permalink to this headline">¶</a></h2>
@@ -286,6 +324,8 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">comment</span>
 <span class="o">/*</span> <span class="n">multiline</span>
 <span class="n">comment</span> <span class="o">*/</span>
+<span class="p">{</span><span class="o">-</span> <span class="n">nesting</span> <span class="p">{</span><span class="o">-</span> <span class="n">comment</span> <span class="o">-</span><span class="p">}</span> <span class="o">-</span><span class="p">}</span>
+<span class="k">if</span><span class="p">(</span><span class="n">false</span><span class="p">)</span> <span class="p">{</span> <span class="n">code_comment</span> <span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -302,6 +342,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </div>
 <p>I’ve looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There’s just no information on what possible parses are available or what token is expected. Whereas with Earley you can do “Ruby slippers”: scan the sets for what they want next, output “warning: expected ‘;’ at end of statement”, and then add that to the parse forest and continue parsing with almost no overhead.</p>
 <p>Treesitter implements incremental LR parsing with error recovery, but since it doesn’t support ambiguity I don’t think it’s sufficient for a compiler.</p>
+<p>Long-term, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation <a class="bibtex reference internal" href="zzreferences.html#sperbergenerationlrparsers2000" id="id1">[ST00]</a>, so with sufficiently powerful compiler optimization handling general CFG grammars by specializing Earley etc. should be possible.</p>
 </div>
 <div class="section" id="layout">
 <h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline">¶</a></h2>
@@ -338,6 +379,10 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </pre></div>
 </div>
 <p>These two options seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Int8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to read with long types) or <code class="docutils literal notranslate"><span class="pre">Int8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program.</p>
+</div>
+<div class="section" id="scoping-and-qualification">
+<h2>Scoping and qualification<a class="headerlink" href="#scoping-and-qualification" title="Permalink to this headline">¶</a></h2>
+<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides <a class="reference internal" href="Fexprs.html#fexprs"><span class="std std-ref">fexprs</span></a>); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope.</p>
 </div>
 <div class="section" id="variables">
 <h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
@@ -376,37 +421,29 @@ unmatched parentheses, or run the code formatter which will add them.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Overloading.html" class="btn btn-neutral float-right" title="Overloading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="Overloading.html" class="btn btn-neutral float-right" title="Overloading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020 Mathnerd314
+        &#169; Copyright 2019-2020 Mathnerd314.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

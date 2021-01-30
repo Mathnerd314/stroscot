@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Modules &mdash; Stroscot  documentation</title>
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -30,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -53,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+            <a href="index.html" class="icon icon-home"> Stroscot
           
 
           
@@ -99,12 +101,17 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#access">Access</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#linking">Linking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linking">Linking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#imports">Imports</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
@@ -147,6 +154,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -158,7 +167,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Modules.rst" class="fa fa-github"> Edit on GitHub</a>
             
@@ -217,7 +226,12 @@
 </div>
 <div class="section" id="linking">
 <h2>Linking<a class="headerlink" href="#linking" title="Permalink to this headline">¶</a></h2>
-<p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file or automatically extracted from traversing the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary.</p>
+<p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary.</p>
+<div class="section" id="imports">
+<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h3>
+<p>The primitive underlying the project file is the import; this parses a file path into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>
+<p>Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.</p>
+</div>
 </div>
 </div>
 
@@ -226,37 +240,29 @@
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020 Mathnerd314
+        &#169; Copyright 2019-2020 Mathnerd314.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

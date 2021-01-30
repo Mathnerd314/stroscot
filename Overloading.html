@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Overloading &mdash; Stroscot  documentation</title>
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -30,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -53,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+            <a href="index.html" class="icon icon-home"> Stroscot
           
 
           
@@ -109,6 +111,8 @@
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
@@ -151,6 +155,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -162,7 +168,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Overloading.rst" class="fa fa-github"> Edit on GitHub</a>
             
@@ -180,22 +186,22 @@
             
   <div class="section" id="overloading">
 <h1>Overloading<a class="headerlink" href="#overloading" title="Permalink to this headline">¶</a></h1>
-<p>Stroscot supports typical pattern matching as well as predicate dispatch:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">3</span>
+<p>Stroscot supports pattern matching as well as predicate dispatch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">f</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">f</span> <span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
 <p>The cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">f</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">f</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
 
-<span class="n">f</span> <span class="mi">1</span> <span class="mi">2</span>
+<span class="n">f</span> <span class="mi">1</span>
 <span class="c1"># Error: rule conflict</span>
 </pre></div>
 </div>
-<p>But <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">2</span></code> would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
+<p>But <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">2</span></code> would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fib</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">fib</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">fib</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
@@ -213,9 +219,9 @@
 <h2>Sequential matches<a class="headerlink" href="#sequential-matches" title="Permalink to this headline">¶</a></h2>
 <p>The pipe syntax matches cases from top to bottom:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span>
-<span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">3</span>
 </pre></div>
 </div>
 <p>It expands to an unordered set of matches:</p>
@@ -226,6 +232,12 @@
 <span class="c1"># p1, p2, etc. functions of $args</span>
 </pre></div>
 </div>
+<p>So our previous example would be</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">f</span> <span class="n">x</span> <span class="n">y</span> <span class="o">|</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
 <p>Maybe you will also be able to use <code class="docutils literal notranslate"><span class="pre">match</span></code> within a function, if the syntax details work out:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">match</span> <span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
                       <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span>
@@ -234,8 +246,9 @@
 </div>
 <div class="section" id="method-qualifiers">
 <h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot also supports Common Lisp’s method qualifiers: <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and``around`` (<a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a>). Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
-<p>Compared to CLOS, it is simplified in that only <code class="docutils literal notranslate"><span class="pre">around</span></code> s can call their next methods; primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is less specific than <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">SAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">UNSAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.</p>
+<p>Stroscot also supports Common Lisp’s method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>, as well as a custom qualifier <code class="docutils literal notranslate"><span class="pre">list</span></code>. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
+<p>The basic idea of method combination can be seen in this <a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a>, except that primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is less specific than <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">SAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">UNSAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.</p>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code> exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).</p>
 </div>
 <div class="section" id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
@@ -243,7 +256,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>dispatch methods args = do
   [arounds, befores, afters, primaries] = map topological_sort $ partition methods
   next-method = DispatchError
-  f arounds
+  f arounds where
   f = \x -&gt;
    case x of
       a:as -&gt; call a { next-method = f as }
@@ -259,7 +272,6 @@
 call binds args = fold lub DispatchError (map ($ args) binds)
 </pre></div>
 </div>
-<p>The last method qualifier is <code class="docutils literal notranslate"><span class="pre">list</span></code>. This exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).</p>
 </div>
 <div class="section" id="patterns">
 <h2>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline">¶</a></h2>
@@ -323,7 +335,7 @@ call binds args = fold lub DispatchError (map ($ args) binds)
 <li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span></code> (reflexivity)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">a))</span></code> (transitivity)</p></li>
 </ul>
-<p>A pass early in compilation adds a call to <code class="docutils literal notranslate"><span class="pre">convert</span></code> around every value, e.g. <code class="docutils literal notranslate"><span class="pre">1+2</span></code> becomes <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">(+)</span> <span class="pre">(convert</span> <span class="pre">1)</span> <span class="pre">(convert</span> <span class="pre">2)</span></code>.</p>
+<p>A pass early in compilation adds a call to <code class="docutils literal notranslate"><span class="pre">convert</span></code> around every literal, e.g. <code class="docutils literal notranslate"><span class="pre">1+2</span></code> becomes <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">(+)</span> <span class="pre">(convert</span> <span class="pre">1)</span> <span class="pre">(convert</span> <span class="pre">2)</span></code>.</p>
 <p>New cases can be added; this is useful in various instances. For example we can create subtyping.</p>
 </div>
 </div>
@@ -333,37 +345,29 @@ call binds args = fold lub DispatchError (map ($ args) binds)
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020 Mathnerd314
+        &#169; Copyright 2019-2020 Mathnerd314.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

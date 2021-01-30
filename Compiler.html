@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Compiler design &mdash; Stroscot  documentation</title>
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -30,7 +33,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -53,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Stroscot
+            <a href="index.html" class="icon icon-home"> Stroscot
           
 
           
@@ -121,6 +123,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
@@ -163,6 +167,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -174,7 +180,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Compiler.rst" class="fa fa-github"> Edit on GitHub</a>
             
@@ -232,7 +238,8 @@ typechecking</p>
 </div>
 <div class="section" id="cross-compilation">
 <h2>Cross compilation<a class="headerlink" href="#cross-compilation" title="Permalink to this headline">¶</a></h2>
-<p>In cross compilation we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” here is really a configuration option, namely the supported target(s) of the compiler that will run on the host. Most programs need only build/host specified. Overall host/target seems clearer than build/host so we will stick to Clang terminology host/target/supported targets. When the host and target systems the same, it’s a native build; otherwise it’s a cross build.</p>
+<p>In cross compilation we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. When the host and target systems are the same, it’s a native build; otherwise it’s a cross build.</p>
+<p>The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” there is really a configuration option, namely the supported target of the compiler that will run on the host. Programs that aren’t compilers need only build/host specified, but remembering whether the build system builds the host or vice-versa is tricky. Overall the Clang terminology host/target/supported targets seems clearer than build/host/target.</p>
 </div>
 <div class="section" id="bootstrapping">
 <h2>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this headline">¶</a></h2>
@@ -684,37 +691,29 @@ target datatypes (word size, etc.). It probably won’t happen.</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2019-2020 Mathnerd314
+        &#169; Copyright 2019-2020 Mathnerd314.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
