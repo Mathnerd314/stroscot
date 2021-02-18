@@ -150,3 +150,13 @@ Compiler memory management
 For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.
 
 Overall I don't see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it's clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.
+
+Copy management
+---------------
+
+As well as handling allocation/deallocation, it would also be good to provide copy/move operations. The copy has a copy-on-write semantics where the copy isn't actually done unless/until the original is modified/deallocated. But the memory is managed under the new allocator.
+
+Resource management
+-------------------
+
+There are also non-memory resources like thread-handles, file-handles, locks, and sockets. These can be passed around and stored in data structures. The same usage analysis should work to close these resources.

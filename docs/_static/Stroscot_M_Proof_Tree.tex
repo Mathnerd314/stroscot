@@ -1,0 +1,56 @@
+\documentclass[preview,border=3pt,varwidth=20in]{standalone}
+% pdflatex Stroscot_M_Proof_Tree.tex && pdf2svg Stroscot_M_Proof_Tree.pdf Stroscot_M_Proof_Tree.svg
+\usepackage[paperwidth=20in,paperheight=20in,total={20in, 20in}]{geometry}
+\usepackage{bussproofs}
+\usepackage{amsmath}
+\newcommand{\ia}[1]{\AxiomC{}\UnaryInfC{\(#1\)}}
+\newcommand{\ib}[1]{\UnaryInfC{\(#1\)}}
+\newcommand{\ic}[1]{\BinaryInfC{\(#1\)}}
+\newcommand{\rl}[1]{\RightLabel{\(#1\)}}
+\newcommand{\B}{\text{B}}
+\newcommand{\C}{\text{Cut}}
+\newcommand{\I}{\text{Id}}
+\renewcommand{\o}{\Omega}
+\begin{document}\begin{prooftree}
+
+\rl{\I}\ia{! \o \vdash !\o}
+  \rl{\I}\ia{?\o \vdash ?\o }
+ \rl{\Pi_{L}}\ic{! \o^0, \o^0 \vdash ?\o^0}
+ \rl{!d}\ib{! \o^0, ! \o^0 \vdash ?\o^0 }
+ \rl{!c}\ib{! \o \vdash ?\o}
+ \rl{\Pi_R}\ib{\vdash !\o \to ?\o }
+% o
+
+\rl{\I}\ia{! \o \vdash !\o}
+  \rl{\I}\ia{\o \vdash \o}
+ \rl{\Pi_{L}}\ic{! \o^1, \o^1 \vdash \o^1 }
+ \rl{!d}\ib{! \o^1, ! \o^1 \vdash \o^1 }
+ \rl{!c}\ib{! \o \vdash \o}
+ \rl{\Pi_R}\ib{\vdash !\o \to ?\o }
+% o
+
+\rl{\I}\ia{\o^3 \vdash \o^3 }
+\rl{!d}\ib{!\o^3 \vdash \o^3 }
+\rl{\Pi_R}\ib{\vdash (!\o \to \o)^3 }
+\rl{!}\ib{\vdash !\o^2 }
+% i
+\rl{\I}\ia{!\o \vdash !\o} % apply i
+\rl{\I}\ia{\o \vdash \o}
+\rl{\Pi_L}\ic{!\o, !\o \to \o \vdash \o}
+\rl{\C}\ic{\o^2 \vdash \o^2}
+\rl{!d}\ib{!\o^1 \vdash \o^2}
+\rl{!}\ib{!\o^1 \vdash ! \o^1}
+\rl{\I}\ia{\o \vdash \o}
+\rl{\Pi_L}\ic{! \o \to \o, !\o \vdash \o}
+
+ \rl{\C}\ic{!\o \vdash \o }
+ \rl{\Pi_R}\ib{ \vdash (!\o \to \o)^1 }
+ \rl{!}\ib{ \vdash !\o^0 }
+% f
+
+\rl{\I}\ia{? \o \vdash ? \o}
+\rl{\Pi_L}\ic{! \o \to ? \o \vdash ? \o}
+\rl{\C}\ic{\vdash ? \o }
+% m
+
+\end{prooftree}\end{document}

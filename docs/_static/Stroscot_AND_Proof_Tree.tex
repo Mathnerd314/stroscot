@@ -1,7 +1,9 @@
 \documentclass[preview,border=3pt,varwidth=10in]{standalone}
+% pdflatex Stroscot_AND_Proof_Tree.tex && pdf2svg Stroscot_AND_Proof_Tree.pdf Stroscot_AND_Proof_Tree.svg
 \usepackage[paperwidth=10in,paperheight=10in,total={10in, 10in}]{geometry}
 \usepackage{bussproofs}
 \usepackage{amsmath}
+\newcommand{\ix}[1]{\AxiomC{\(#1\)}}
 \newcommand{\ia}[1]{\AxiomC{}\UnaryInfC{\(#1\)}}
 \newcommand{\ib}[1]{\UnaryInfC{\(#1\)}}
 \newcommand{\ic}[1]{\BinaryInfC{\(#1\)}}
@@ -9,22 +11,31 @@
 \newcommand{\B}{\text{B}}
 \newcommand{\C}{\text{Cut}}
 \newcommand{\I}{\text{Id}}
-\begin{document}\begin{prooftree}
-
-\rl{\Sigma_{TR}}\ia{\vdash \B }
-\rl{!}\ib{\vdash !\B }
-
-\rl{\Sigma_{FR}}\ia{\vdash \B }
+\begin{document}
+\begin{prooftree}
 
     \rl{\Sigma_{FR}}\ia{\vdash \B }
     \rl{!w}\ib{!\B \vdash \B }
     \rl{\Pi_R}\ib{\vdash !\B \to \B }
 
-    \rl{\I}\ia{\B \vdash \B }
-    \rl{!d}\ib{!\B \vdash \B }
+    \rl{\I}\ia{\B^0 \vdash \B^0 }
+    \rl{!d}\ib{!\B^0 \vdash \B^0 }
     \rl{\Pi_R}\ib{\vdash !\B \to \B }
   \rl{\Sigma_L}\ic{\B \vdash !\B \to \B }
 \rl{\Pi_R}\ib{\vdash \B \to !\B \to \B }
+
+
+\rl{\text{Assign}}\ib{\text{and} = }
+\end{prooftree}
+\begin{prooftree}
+
+\rl{\Sigma_{TR}}\ia{\vdash \B^1 }
+\rl{!}\ib{\vdash !\B^0 }
+
+\rl{\Sigma_{FR}}\ia{\vdash \B }
+
+\ix{\text{and}}
+\rl{\text{Use}}\ib{\vdash \B \to !\B \to \B }
 
 \rl{\I}\ia{\B \vdash \B }
 \rl{\I}\ia{!\B \to\B \vdash !\B \to \B }
@@ -39,4 +50,6 @@
 \rl{\C}\ic{!\B \vdash \B }
 
 \rl{\C}\ic{\vdash \B }
-\end{prooftree}\end{document}
+\rl{\text{Assign}}\ib{\text{r} = }
+\end{prooftree}
+\end{document}

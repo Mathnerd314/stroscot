@@ -1,18 +1,24 @@
-Introduction
-############
+About
+#####
+
+Executive summary
+=================
+
+An executive summary is "half a slide using large print" and gets across how people should use the language. Stroscot has no users and is not yet usable so there is no executive summary.
+
 
 Motivation
 ==========
 
 Why another programming language, you may ask? Why does a painter paint?
-When there is beauty to be found in programming
-languages, it is our duty to discover it and spread it far and wide. To paraphrase `XKCD <https://xkcd.com/927/>`__:
+When there is beauty to be found in programming languages, it is our duty to discover it and spread it far and wide. To paraphrase `XKCD <https://xkcd.com/927/>`__:
 
 ::
 
   How programming languages proliferate
   -------------------------------------
   SITUATION: There are 14 competing programming languages.
+
   Geek: 14?! Ridiculous! We need to develop one universal programming language
     that covers everyone's use cases.
 
@@ -54,13 +60,20 @@ imperative programming language
 modern processors
   This is mostly because I don't want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 and then later add a mode to generate LLVM bytecode.
 
+Logo
+----
+
+The logo for Stroscot is inspired by the color scheme of the cover of Accelerando (the red rise of the machines), the `cot icon <https://thenounproject.com/term/cot/154357/>`__ by P Thanga Vignesh from the Noun Project, and a design I made a while back of "the infinite stack". The Paint picture I made is lost in time, but the general idea is you had a (potentially infinite) stack of reusable/composable components (the white/black blocks in the current icon) going left-to-right, and underneath it a processor (white) and various glue bits (red/blue).
+
+The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is basically "programmer art". People can submit alternate designs and once there are a few submissions there will be a vote.
+
 Goals
 =====
 
 The ultimate
 ------------
 
-If you are wondering why a feature seems unduly powerful or complex, it is because I aim for Stroscot to be the ultimate programming language rather than something just alright. A lot of programming features overlap, so I'll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing garbage collectors and calling conventions, and the value proposition there should be clear.
+If you are wondering why a feature seems unduly powerful or complex, it is because I aim for Stroscot to be the ultimate programming language rather than something just alright. A lot of programming features overlap, so I'll pick the best and most expressive version I can find, but generally the idea is things go in rather than stay out. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there should be clear.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms for the compiler then people will refer to Stroscot just for the algorithms. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
 
@@ -71,10 +84,15 @@ Stroscot aims for C-like performance on C-like programs, and similarly to match 
 
 In the near term, since there is no compiler or interpreter fully implemented, performance is not measurable and hence is not a consideration. Once the interpreter can pass the tower of interpreters test, that will be the main performance criterion for it. For compilation, besides optimizing the generated code, the main performance-focused feature will be fine-grained incremental compilation to reduce compile times.
 
+"Slow" is relative - if you can do 100x speedups then slow becomes fast and it's a qualitative difference. Features can't be gated on performance - implement first, speed up later. A lot of the time programs aren't written for speed. Most programmers can’t even measure performance correctly - compiled for debug instead of release, etc. Programmers want a convenient language however slow, and for the better programmers a way to speed up their programs when they're slow (profiling, performance-optimized code). Researchers prefer an inefficient language for which it is easy to devise optimizations and improvements. Similarly programmers don't want reliable code - they prefer convenience and don't want to learn new concepts. They will ship when their management says “ship!”
+
 World domination
 ----------------
 
-Long term, Stroscot aims to replace all the programming languages in use today. Initially this involves improving FFI support and interoperability with other languages. In particular we need to be able to parse files from other languages and use data from them with Stroscot. Next we want to fully compile other languages, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). Once the implementation is stable enough for production use, focus will shift to developing automated conversion tools, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK.
+Long term, Stroscot aims to replace all the programming languages in use today. Initially this involves improving FFI support and interoperability with other languages. In particular we need to be able to parse files from other languages and use data from them with Stroscot. Next we want to fully compile other languages, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). Once the implementation is stable enough for production use, focus will shift to developing automated conversion tools, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK. No language I know of has developed decent two-way linkage - you can export specific C-style constructs back to C, but C can't use any of the more advanced features.
+
+Standardization doesn't seem necessary, a popular language builds its own standard. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new best language every 3-5 years
+
 
 Roadmap
 =======

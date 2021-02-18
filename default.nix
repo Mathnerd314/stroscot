@@ -18,9 +18,12 @@ let
           memory
             # FNV1/1a and siphash. also a dependency of cryptonite providing unpinned byte array methods.
         ]);
+  tex = pkgs.texlive.combine {
+    inherit (pkgs.texlive) scheme-small pgf bussproofs preview varwidth standalone geometry amsmath;
+  };
 in
 pkgs.stdenv.mkDerivation {
   name = "my-env-0";
-  buildInputs = [ ghc pkgs.pdf2svg ];
+  buildInputs = [ ghc pkgs.pdf2svg pkgs.dot2tex tex ];
   shellHook = "eval $(egrep ^export ${ghc}/bin/ghc)";
 }

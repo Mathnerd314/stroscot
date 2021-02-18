@@ -1,14 +1,7 @@
 Types
 #####
 
-Types are hard. Academics have spent decades in search of the perfect type system. The alternative is model checking, almost the opposite approach: take an existing program and try to prove properties about it. These meet in the middle with assertions. In particular a type signature ``a : T`` is just an assertion ``assert(isElemOfType(a, T))``. More specifically, a function type
-
-::
-
-   A = type { \x -> case x of
-     s f -> ensure(isElemOfType(i,S)); isElemOfType(f i,Int)
-     _ -> false
-     }
+Types are hard. Academics have spent decades in search of the perfect type system. The alternative is model checking, almost the opposite approach: take an existing program and try to prove properties about it. These meet in the middle with assertions. In particular a type signature ``a : T`` is just an assertion ``assert(isElemOfType(a, T))``.
 
 Terminology
 ===========
@@ -37,6 +30,23 @@ Stroscot is dependently typed, so you can pass around types (sets). The semantic
 We follow New Foundations (specifically NFU) in allowing any type (set) to be specified with a stratified formula. Our stratification condition is very loose. The usual formulation requires ``lvl(b)=lvl(a)+1`` for ``a in b``, but this can be relaxed to ``lvl(b) > lvl(a)``. Holmes had a paper proving this consistent, but his site has been reorganized; consistency also follows from the proof of the Statified Comprehension Theorem on page 45 of :cite:`holmesElementarySetTheory1998`, changing ``n-1`` to ``n-k,k>0``. In practice, this means levels must form a poset, or said another way, that there cannot be a cyclic chain of set membership tests (a in b, b in c, c in a, for example). Also note that if the left side is known to be a set, then the membership test can be replaced with a subset inclusion check (expandable to a logical formula) and there is no constraint generated at all. So it is only when we are dealing with mixed sets containing both sets and primitive elements that we can really run into trouble. Overall, since the stratification only applies to quantified variables and most types do not use quantification, this most likely will never come up as an issue in practice.
 
 NFU has universal sets, so there is no issue of function types being a power set that is "too large" for the universe; the power set of the universe is actually a subset of the universal set.
+
+Type declarations
+=================
+
+Types in Stroscot act as identity functions restricted to a certain domain. So you use an application, similar to assembly syntax such as ``dword 0``:
+
+::
+
+   a = s8 2
+
+To match Haskell, there is also a standard operator ``(:)`` defined as ``x : y = y x``, with low precedence, so you can write
+
+::
+
+   a = 2 : s8
+
+These two options seem more logical compared to other choices such as ``a : s8 = 2`` (Swift,Jai - hard to read with long types) or ``s8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program.
 
 Type synthesis
 ==============
@@ -70,13 +80,13 @@ We could try to define generic integer/float types, but only a few have efficien
 Operations
 ----------
 
-Literals are parsed into records like ``Number { digits = "123", exponent = "24" }``. We can define implicit conversions to the various the numeric types. Leadings 0's restrict the type, so ``010`` must be stored in a type that can contain 999.
+Literals are parsed into records like ``NumberLiteral { digits = "123", exponent = "24" }``. We can define implicit conversions to the various the numeric types. Leadings 0's restrict the type, so ``010`` must be stored in a type that can contain 999.
 
 For arithmetic we define implicit conversions, ``convert : s8 -> Arb`` and so on to an arbitrary precision type ``Arb`` with the usual arithmetic operations, ``(+) : Arb -> Arb -> Arb`` and so on. Then narrowing the result back into a restrictive format is represented explicitly with an operation, ``narrow s16 (2+30*x)`` and so on. The compiler then figures out how to compute the answer as efficiently as possible. For floating point the narrowing also takes a precision argument, or optimizes for the best precision like Herbie, depending on whether speed or accuracy is preferred.
 
-For compatibility with other languages we can define narrowed arithmetic operations, ``a plus b = assert(a is s16 && b is s16); narrow s16 (a+b)`` and so on. We can also support implicit conversions ``convert : s8 -> s16`` and so on.
+For compatibility with other languages we can define narrowed arithmetic operations, like ``a plus b = assert(a is s16 && b is s16); x = narrow s16 (a+b); assert(x is s16)``. These give an out-of-range / overflow / unrepresentable error if the result doesn't fit. We can also support implicit conversions ``convert : s8 -> s16`` and so on; the compiler has to check that the narrowed arbitrary-precision computation matches the various fixed-width computations, but it should be resolvable.
 
-The above probably introduces ambiguity, but it should be resolvable.
+Floating points numbers don't have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, ``(+) :: f32 -> f32 -> f32`` and so on.
 
 Strings
 =======
@@ -87,6 +97,37 @@ Records
 =======
 
 Structural subtyping of records allows you to pass ``{a: 1, b: 2}`` to a function expecting ``{b: Int}``. This is similar to inheritance in other languages.
+
+Functions
+=========
+
+Function type declarations come in two forms. The first version simply checks compatibility, that the return type is as expected on the given input.
+
+::
+
+   A : S -> Int
+
+   -- expands to
+
+   s = arbElemOfType(S)
+   assert(isElemOfType (A s) Int)
+
+The second version restricts the definition of the function so it is only defined on the type. This is useful for overloading.
+
+::
+
+   restrict A : S -> Int
+   A = ...
+
+   -- expands to
+
+   A$untyped = ...
+   A = {
+      assert (isElemOfType $args S)
+      ret = A$untyped args
+      assert (isElemOfType ret Int)
+      ret
+   }
 
 Roles
 =====

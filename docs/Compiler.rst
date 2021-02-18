@@ -12,18 +12,6 @@ Currying is handled by a pass that creates partially-applied functions using the
 
 Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.
 
-Optimizations
-=============
-
-A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of the performance:
-
-* Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn't increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in :cite:`mauborgneRepresentationSetsTrees1999`.
-* Inlining - Going through :cite:`peytonjonesSecretsGlasgowHaskell2002`, a lot of the cases are handled, because of the graph structure and because partial evaluation / optimal reduction will move cuts down and expose/eliminate case statements. But we also want to do it inside recursive functions etc., which means we probably need a strictness/termination analysis.
-* Loop unrolling, code motion - These are optimizations on mutable variables, probably unnecessary. But unrolling recursive functions could prove useful, as part of inlining.
-* Constant Folding - partial evaluation of the code includes this
-* Dead code elimination - Unused expressions aren't connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.
-* Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.
-
 Flags
 =====
 
@@ -528,7 +516,7 @@ Depending on the selected way, the compiler produces and links appropriate
 objects together. These objects are identified by a suffix: e.g. ``*.p_o`` for an
 object built with profiling enabled; ``*.thr_debug_p.a`` for an archive built with
 multi-threading, debugging, and profiling enabled. See the gory details on the
-`wiki <https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/compiler-ways>`_.
+`wiki <https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/compiler-ways>`__.
 
 Installed packages usually don't provide objects for all the possible ways as it
 would make compilation times and disk space explode for features rarely used.
@@ -542,7 +530,7 @@ with) and for the selected target way. By doing this, it can simulate the
 confined mode by loading objects on the host that are different from the objects
 produced for the target, with the hope that the two ways have no observable
 difference. Quoting the `wiki
-<https://gitlab.haskell.org/ghc/ghc/wikis/remote-GHCi>`_: "The way this is done
+<https://gitlab.haskell.org/ghc/ghc/wikis/remote-GHCi>`__: "The way this is done
 currently is inherently unsafe, because we use the profiled .hi files with the
 unprofiled object files, and hope that the two are in sync."
 

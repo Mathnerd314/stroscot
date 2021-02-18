@@ -163,7 +163,7 @@ Overrides
 
 By default, methods are scoped to their module. Every definition ``foo = a`` binds the identifier ``Module.foo``, and each module creates a new identifier. The ``override`` statement prevents creating a new identifier, so that instead a base identifer can be extended.
 
-::
+.. code-block:: python3
 
   # module 1
   foo 1 = 1
@@ -191,3 +191,8 @@ There is a function ``convert`` in the core library. It includes as cases / requ
 A pass early in compilation adds a call to ``convert`` around every literal, e.g. ``1+2`` becomes ``convert (convert (+) (convert 1) (convert 2)``.
 
 New cases can be added; this is useful in various instances. For example we can create subtyping.
+
+Equality
+========
+
+Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual.

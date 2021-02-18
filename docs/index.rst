@@ -9,7 +9,7 @@ Stroscot is an imperative programming language designed for modern processors.
 .. toctree::
   :maxdepth: 2
 
-  Introduction
+  About
   Syntax
   Overloading
   Verification

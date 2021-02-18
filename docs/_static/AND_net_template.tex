@@ -1,0 +1,62 @@
+<<startpreprocsection>>
+\documentclass{article}
+<<endpreprocsection>>
+<<startoutputsection>>
+\documentclass[preview,border=3pt,varwidth=20in]{standalone}
+<<endoutputsection>>
+\usepackage[paperwidth=10in,paperheight=10in,total={10in, 10in}]{geometry}
+\usepackage[x11names, svgnames, rgb]{xcolor}
+\usepackage[<<textencoding>>]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{bussproofs}
+\usepackage{amsmath}
+\usepackage{varwidth}
+<<startpreprocsection>>%
+\usepackage[active,auctex]{preview}
+<<endpreprocsection>>%
+<<gvcols>>%
+<<startoutputsection>>
+<<cropcode>>%
+<<endoutputsection>>
+<<docpreamble>>%
+\newcommand{\ix}[1]{\AxiomC{\(#1\)}}
+\newcommand{\ia}[1]{\AxiomC{}\UnaryInfC{\(#1\)}}
+\newcommand{\ib}[1]{\UnaryInfC{\(#1\)}}
+\newcommand{\ic}[1]{\BinaryInfC{\(#1\)}}
+\newcommand{\rl}[1]{\RightLabel{\(#1\)}}
+\newcommand{\B}{\text{B}}
+\newcommand{\C}{\text{Cut}}
+\newcommand{\I}{\text{Id}}
+\newcommand{\proof}[1]{\begin{varwidth}{\textwidth}\begin{prooftree}#1\end{prooftree}\end{varwidth}}
+\begin{document}
+\pagestyle{empty}
+%
+<<startpreprocsection>>%
+<<preproccode>>
+<<endpreprocsection>>%
+%
+<<startoutputsection>>
+% Start of code
+\begin{tikzpicture}[>=latex',line join=bevel,<<graphstyle>>]
+<<figpreamble>>%
+<<drawcommands>>
+<<figpostamble>>%
+\end{tikzpicture}
+% End of code
+<<endoutputsection>>
+%
+\end{document}
+%
+<<start_figonlysection>>
+\begin{tikzpicture}[>=latex,line join=bevel,<<graphstyle>>]
+<<figpreamble>>%
+<<drawcommands>>
+<<figpostamble>>%
+\end{tikzpicture}
+<<end_figonlysection>>
+<<startcodeonlysection>>
+<<figpreamble>>%
+<<drawcommands>>
+<<figpostamble>>%
+<<endcodeonlysection>>

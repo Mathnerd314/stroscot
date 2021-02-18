@@ -3,7 +3,86 @@ Syntax
 
 Almost everything in Stroscot is an expression. The basics are numbers, booleans, and character strings of text. But there's also block statements and layout.
 
-The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode) and picking out the nicest examples. Short and terse syntax is good, as is flexibility and generality. But in the end, syntax is decided by usage, so imitation is the best way to make new users of Stroscot feel comfortable.
+Design
+======
+
+The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.
+
+Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
+
+Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is short and terse, as well as flexible and general.
+
+Unicode
+=======
+
+Unicode has various guidelines relevant to writing a programming language parser:
+
+* UTF-8 Decoding. Replace invalid bytes/characters with Unicode's REPLACEMENT CHARACTER U+FFFD.
+* `NFC <http://unicode.org/reports/tr15/#Norm_Forms>`__, normalize the input / ensure the input is normalized  before doing anything with it. There is enough software that automatically normalizes to NFC (e.g. web browsers) that it seems safe to require NFC; bugs can be worked around by changing the input rather than modifying NFC.
+* `line-breaking <https://www.unicode.org/reports/tr14/#BreakingRules>`__ (specifically, to determine hard / mandatory breaks)
+* `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
+* `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters
+* `confusables <http://www.unicode.org/reports/tr39/#Confusable_Detection>`__, which seems useful for writing a similarly-named identifiers warning. There could also be a warning for weird scripts (listed in `TR31 <http://www.unicode.org/reports/tr31/#Table_Candidate_Characters_for_Exclusion_from_Identifiers>`__) or zero-width characters.
+
+Practically, most programs will use ASCII, but the Unicode algorithms provide a robust way to implement a lexical analyser. `Lots of languages <https://rosettacode.org/wiki/Unicode_variable_names>`__ have support for Unicode, although the exact set of allowed characters varies.
+
+Layout
+======
+
+Blocks of sequential statements are a common occurrence in a program. The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't match with explicit braces.
+
+::
+
+  a
+   b
+   c
+  d
+
+  # becomes
+  { a {b; c}; d}
+
+Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:
+
+* if it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
+* if it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
+* if there is a (nonempty) line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`offside rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
+
+Indentation level is taken to be the sequence of whitespace characters, so "space, tab, space" is different from (incomparable to) "tab, space, space" but is less than "space, tab, space, em space" and more than "space, tab".
+
+Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.
+
+::
+
+  a
+    + b
+    + c
+  # equal to
+  a {+ b; + c}
+  # should be equivalent to
+  a + (b + c)
+
+It should be possible to handle these with a fixup phase.
+
+Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skipping whitespace layout when inside an explicit delimiter pair. But of course constructs inside the delimiter pair can start another layout. Finally for constructs that usually use layout we still want to parse 1-line things without braces:
+
+::
+
+  let a = b in c
+  # equivalent to
+  let { a = b } in c
+
+Parsing
+=======
+
+I've got a basic Earley algorithm working for now. But eventually I'm extending it with BSRs and layout and other fun things. There's also `Yakker <https://github.com/attresearch/yakker>`__, which is the most developed parser I've seen feature-wise. It's only missing incremental parsing.
+
+  A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.
+
+I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
+
+Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.
+
+Long-term, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation :cite:`sperberGenerationLRParsers2000` and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.
 
 Numbers
 =======
@@ -14,35 +93,19 @@ Numbers
 
 Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, slightly liberalized to allow using floating-point notation for integers and binary exponents for decimals.
 
-Arithmetic and Parentheses
-==========================
-
-Stroscot supports your typical arithmetic operations and precedence levels:
-
-::
-
-   3+1/(7+1/(15+1/1))
-   --> 355/113 = 3.14159292035...
-
-For brevity, trailing parentheses can be omitted:
-
-::
-
-   3+1/(7+1/(15+1/1
-   --> 355/113
-
-If you don't like this, you can set Stroscot to warn or error on
-unmatched parentheses, or run the code formatter which will add them.
-
 Strings
 =======
 
 ::
 
-   "Hello world!"
-   ``Hello user ${id}``
-   [Enclosed text]
-   'short'
+  "Hello world!"
+  ``Hello user ${id}``
+  [Enclosed text]
+  'string'
+  """ multiline
+  string"""
+
+There is no explicit syntax for characters, instead characters are Unicode strings of length 1.
 
 Arrays
 ======
@@ -79,34 +142,39 @@ Records
 Atoms
 =====
 
-Any undefined identifier can be used as an atom, i.e. a component of a symbolic expression. For example this will produce ``4`` if ``foo`` is undefined:
-
+Atoms are any identifiers that don't have a grammar rule defined.
 ::
 
-  f (foo x) = x + 2
-
-  f (foo 2)
-
-Due to the fexpr semantics any expression can be used and pattern-matched, like ``javascript (1 + "abc" { 234 })``.
-
-To export the semantics to other modules a special keyword ``atom`` is used:
-
-::
-
-  atom foo
-
-This ensures that no rules for ``foo`` are defined and adds the symbol to the export list. It is good practice to use this even if the identifier is not exported.
+  atom
+  underscore_atom
+  unícσdє-αtσm
+  symbol ++++ tree
 
 Operators
 =========
 
-String concatenation is ``+``, but most operators are textual:
+Operator precedence will be a DAG, rather than levels.::
+
+  precedence _*_ higher than _+_
+  precedence _/_ equals _*_
+
+Stroscot supports your typical PEMDAS:
+
+::
+
+  1 + 2 * 3^2
+  --> 19
+  3+1/(7+1/(15+1/1))
+  --> 355/113 = 3.14159292035...
+
+String concatenation is ``+``, but most other operators are textual:
 
 ::
 
    true and false = false
    true or false = true
    true xor true = false
+   5 div 2 = 2
    5 mod 2 = 1
    raise x by 1
 
@@ -116,16 +184,41 @@ New operators can be declared with `mix <http://www.cse.chalmers.se/~nad/publica
 
    syntax _&&_ associate left above _and_ _or_ _not_ below _||_
 
+Umatched Parentheses
+--------------------
+
+For brevity, trailing parentheses can be omitted:
+
+::
+
+   3+1/(7+1/(15+1/1
+   --> 355/113
+
+If you don't like this, you can set Stroscot to warn or error on
+unmatched parentheses, or run the code formatter which will add them.
+
+Chained Comparison
+------------------
+
+::
+
+  1 <= 2 < 3
+  9 > 2 < 3
+
 Blocks
 ======
 
 ::
 
-   if true then 1 else 2 = 1
-   repeat while x > 0 { x -= 1 }
-   repeat until x == 0 { x -= 1 }
-   repeat 10 times { x -= 1 }
-   repeat { x -= 1 } while x > 0
+  if true then 1 else 2 = 1
+  repeat while x > 0 { x -= 1 }
+  repeat until x == 0 { x -= 1 }
+  repeat 10 times { x -= 1 }
+  repeat { x -= 1 } while x > 0
+  repeat
+    x = x * 2
+    if (x % 2 == 0)
+      break
 
 ::
 
@@ -150,6 +243,9 @@ Blocks
      save_logs
    }
 
+Misc
+====
+
 ::
 
    x = input number
@@ -162,69 +258,6 @@ Blocks
    comment */
    {- nesting {- comment -} -}
    if(false) { code_comment }
-
-Parsing
-=======
-
-I've got a basic Earley algorithm working for now. But eventually I'm extending it with BSRs and layout and other fun things. There's also `Yakker <https://github.com/attresearch/yakker>`__, which is the most developed parser I've seen feature-wise. It's only missing incremental parsing.
-
-  A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.
-
-Operator precedence will be a DAG, rather than levels.::
-
-  precedence _*_ higher than _+_
-  precedence _/_ equals _*_
-
-I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on an ambiguous parse tree. The alternatives involve generating extra parser states or using PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
-
-Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.
-
-Long-term, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation :cite:`sperberGenerationLRParsers2000`, so with sufficiently powerful compiler optimization handling general CFG grammars by specializing Earley etc. should be possible.
-
-Layout
-======
-
-Blocks of sequential statements are a common occurrence in a program. The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't match with explicit braces.
-
-::
-
-  a
-   b
-   c
-  d
-
-  # becomes
-  { a b c; d}
-
-Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:
-
-*  if it is indented more, a continuation of the previous line, so nothing is inserted (`offside rule <https://en.wikipedia.org/wiki/Off-side_rule>`__)
-* if it is at the same level, another item in the sequence, so a semicolon is inserted
-* if there is a (nonempty) line at lower indentation, the sequence is ended (a close brace is inserted at the start of the line)
-
-This is complicated by the presence of nested layouts and grammar rules without layout that allow free choice of indentation. To use the example above, if ``a`` started a layout we would have wanted ``{ a {b;c}; d}`` instead. Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skipping whitespace layout when inside an explicit delimiter pair. But of course constructs inside the delimiter pair can start another layout. Finally we also want to parse 1-line things without braces:
-
-::
-
-  let a = b in c
-  # let { a = b } in c
-
-Type declarations
-=================
-
-Types in Stroscot act as identity functions restricted to a certain domain. So you use an application, similar to assembly syntax such as ``dword 0``:
-
-::
-
-   a = Int8 2
-
-To match Haskell, there is also a standard operator ``(:)`` defined as ``x : y = y x``, with low precedence, so you can write
-
-::
-
-   a = 2 : Int8
-
-These two options seem more logical compared to other choices such as ``a : Int8 = 2`` (Swift,Jai - hard to read with long types) or ``Int8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program.
 
 Scoping and qualification
 =========================

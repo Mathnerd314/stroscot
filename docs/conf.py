@@ -30,11 +30,14 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+highlight_language='haskell'
 
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_favicon = '_static/hexagon_favicon.png'
+html_logo = '_static/hexagon_logo.png'
 html_copy_source = False
 html_context = {
     'display_github': True,
@@ -42,5 +45,5 @@ html_context = {
     'github_repo': 'stroscot', # Repo name
     'github_version': 'master', # Version
     'conf_py_path': '/docs/', # Path in the checkout to the docs root
-    'theme_vcs_pageview_mode': 'edit'
+    'theme_vcs_pageview_mode': 'edit',
 }

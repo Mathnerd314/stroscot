@@ -677,7 +677,7 @@ Warning: If you are building via the Nix daemon, it is the Nix daemon user accou
 
 The list of remote machines can be specified on the command line or in the Nix configuration file. The former is convenient for testing. For example, the following command allows you to build a derivation for x86_64-darwin on a Linux machine:
 
-::
+.. code-block:: shell-session
 
   $ uname
   Linux
@@ -1018,7 +1018,7 @@ savings reflect improved resource utilization.
 
     Print debugging information in addition to normal processing. Various levels and types of output can be chosen. With no arguments, print the “basic” level of debugging. Possible arguments are below; only the first character is considered, and values must be comma- or space-separated.
 
-::
+.. code-block:: none
 
     a (all)
         All types of debugging output are enabled. This is equivalent to using ‘-d’.

@@ -1,16 +1,16 @@
 Reduction
 #########
 
-Core
-====
-
 Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Considerations:
 
 * Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.
 * Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).
 * Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. :math:`\Sigma` contains LL's synchronous/positive operators 0, 1, plus ⊕, and times ⊗. :math:`\Pi` contains LL's lollipop implication ⊸ and asynchronous/negative operators top ⊤, bottom ⊥, with &, and par ⅋.
 
-We start with the generalized :math:`\Pi` rule. This is similar to Levy's rule except it allows multiple conclusions. We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`(m_i,n_i)` the jumbo-arity.
+Rules
+=====
+
+We start with the generalized :math:`\Pi` rule. This is similar to Levy's rule except it allows multiple conclusion propositions. We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`[(m_i,n_i)]` the jumbo-arity.
 
 .. math::
 
@@ -25,7 +25,9 @@ We start with the generalized :math:`\Pi` rule. This is similar to Levy's rule e
       {\Pi_{i} {}_{L}}
     \end{array}
 
-Next we have the generalized :math:`\Sigma` rule. This allows premises as well. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`A - []`. Ideally the difference operator allows creating zippers, or maybe it is useless.
+Next we have the generalized :math:`\Sigma` rule. This is the dual of :math:`\Pi`. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`\Pi (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)`. The syntax :math:`\Pi [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]` might be clearer.
+
+When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
 
 .. math::
 
@@ -39,14 +41,16 @@ Next we have the generalized :math:`\Sigma` rule. This allows premises as well. 
       {\Sigma_L}
     \end{array}
 
-To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"of course" and whim/whimper/?/"why not". A call-by-value function type is ``A -o ?B`` while call-by-name is ``!A -o B``. To enforce the S4 rules we add a level index to every term, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. The level of a context is the maximum of the levels of its terms (0 or negative infinity if empty). As a notational convention, the indices are omitted when they are all the same, i.e. in all the rules besides promotion and dereliction. Normally promotion has :math:`j=i+1` instead of :math:`j>i`, shrug.
+To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"of course" and whim/whimper/?/"why not". A call-by-value function type is ``A -o ?B`` while call-by-name is ``!A -o B``. To enforce the S4 rules we add a level index to every term, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because all the indices in a non-promotion/dereliction sequent are the same value and so they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has :math:`j=i+1` instead of :math:`j>i`, shrug.
+
+Instead of binary contraction we allow :math:`n`-ary contraction for :math:`n\geq 2`.
 
 .. math::
 
     \begin{array}{cccc}
       \rule{!\Gamma^i \vdash A^j, ?\Delta^i }{!\Gamma^i \vdash !A^i, ?\Delta^i}{!}_{j > i}
       & \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{j\leq i}
-      & \rule{\Gamma, !A, !A \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
+      & \rule{\Gamma, \overrightarrow{!A_{0\leq i\lt n}} \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
       & \rule{\Gamma \vdash \Delta }{\Gamma, !A \vdash \Delta}{!w}
     \end{array}
 
@@ -55,35 +59,16 @@ To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"o
     \begin{array}{cccc}
       \rule{!\Gamma^i, A^j \vdash ?\Delta^i }{!\Gamma^i, ?A^i \vdash ?\Delta^i}{?}_{j > i}
       & \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{j \leq i}
-      & \rule{\Gamma \vdash ?A, ?A, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
+      & \rule{\Gamma \vdash \overrightarrow{?A_{0\leq i\lt n}}, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
       & \rule{\Gamma \vdash \Delta }{\Gamma \vdash ?A, \Delta}{?w}
     \end{array}
 
-To handle level mismatches we might also need lifting operators. The conditions are unclear.
+So to review, the propositions in the sequent can be:
 
-.. math::
+* Pi / Sigma
+* A bang !A or whim ?A
 
-    \begin{array}{cc}
-      \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash A^i, \Delta^i}{\text{lift}_R}_{j > i}
-      &
-      \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j > i}
-    \end{array}
-
-There are also quantifier rules, probably unnecessary but I'll write them down for reference. For these :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`, while :math:`y` may occur. :math:`A[t/x]` stands for the formula :math:`A` where all free occurrences of the variable :math:`x` have been replaced by the formula/term :math:`t` (and bound variables have been renamed when necessary).
-
-.. math::
-
-    \begin{array}{cccc}
-      \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
-      &
-      \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
-      &
-      \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
-      &
-      \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
-    \end{array}
-
-Finally we have the structural rules. Exchange isn't necessary because we assume multisets of formulas.
+Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above).
 
 .. math::
 
@@ -97,156 +82,182 @@ Finally we have the structural rules. Exchange isn't necessary because we assume
       \rule{\Gamma, A, B, \Delta \vdash \Theta}{\Gamma, B, A, \Delta \vdash \Theta}{\text{x}_L}
     \end{array}
 
-So in the end our propositions can be:
+Following Haskell we also want to support infinite expressions like ``x = 1 : x``. These are constructed as a `terminal coalgebra <https://bartoszmilewski.com/2020/04/22/terminal-coalgebra-as-directed-limit/>`__. We can represent these using variables and assignments as a system of equations. The semantics is that the variable usage is a "hole" that plugs in a copy of the derivation tree from the variable assignment. We disallow the trivial case of a variable being a usage of itself; there must be at least one other rule invocation.
 
-* A variable in the context
-* Pi / Sigma
-* A bang !A or whim ?A
-* A forall or exists type, where the proposition is in the context extended by the variable
+.. math::
+
+    \begin{array}{cc}
+      \rule{X }{ \Gamma \vdash \Delta }{\text{Use}}
+      &
+      \rule{\Gamma \vdash \Delta}{ X = }{\text{Assign}}
+    \end{array}
+
+To handle level indices in infinite trees, we store the difference function ``\a -> a + (j-i)`` and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.
+
+When we compile following GHC's model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there's a "working graph" where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
 
 Syntax
 ======
 
-Since proofs are programs by the Curry-Howard correspondence, we can use the rules as a programming language. But we need a syntax for it, since writing sequents all the time is tedious. The simplest, most explicit syntax enumerates the free variables (context/signature) of each sequent, all propositions, and all subderivations, for example ``Bang context Gamma Delta A subderivation``. But we can slim this down:
-
-* The signature can be reconstructed by finding the free variables of the cedents (antecedent/succedent). We still need to add a type signature to each variable.
-* The level indices can be recovered by a constraint solving (in particular a topological sort)
-* The identified elements can be identified by variable names. Each variable occurs exactly twice. For identifying elements in the hypotheses we simple use the name, ``x``, ``y``, ``z``. For the conclusion, almost all the formulas have a single identified element in the conclusion, so we can use ``x = ...`` to identify it. For identity we assign names to both left and right, ``xl/xr = ...``.
-* Gamma, delta, theta, and lambda can be inferred in most cases by taking the subderivations and removing the identified elements. Since they are unchanged we do not need to bind/rename the variables at all. For PiRight/SigmaLeft we do need to rename and combine gamma/delta from each case, similar to a phi-node, but this can be skipped if there's exactly one case. Also we need the context for ! / ?, so that the box is clearly defined and we can duplicate/erase it properly.
-* Weakening and identity need a type argument ``T`` so we know the type of what's being introduced. Similarly the absurdity cases of PiRight/SigmaLeft (0 and top) need type annotations on Gamma/Delta. (But these can often be omitted/inferred like any other type signatures)
-* For tags we use ``^i``, because Levy's notation ``#i`` is interpreted as a comment
-* To handle top-level variables we introduce a Root derivation for the start of the tree
-
-::
-
-  x/[Gamma_m]/[Delta_n] = PiRight
-    ^i, [A_ij],[B_ik],[Gamma_mi],[Delta_ni] -> subderivation_i
-  x = PiLeft ^i [(Ai_j,left_subderivation_j)] [(Bi_k,right_subderivation_k)]
-  x = SigmaRight ^i [(Bi_k,left_subderivation_k)] [(Ai_j,right_subderivation_k)]
-  x/[Gamma_m]/[Delta_n] = SigmaLeft
-    ^i, [A_ij],[B_ik],[Gamma_mi],[Delta_ni] -> subderivation_i
-  x/[Gamma_m]/[Delta_n] = Bang A [Gamma_m]/[Delta_n] subderivation
-  x = BangD A subderivation
-  x = BangC A A subderivation
-  x = BangW subderivation : T
-  x/[Gamma_m]/[Delta_n] = Whim A [Gamma_m]/[Delta_n] subderivation
-  x = WhimD A subderivation
-  x = WhimC A A subderivation
-  x = WhimW subderivation : T
-  x = LiftRight A subderivation
-  x = LiftLeft A subderivation
-  l/r = Identity : T
-  Cut Ar subderivation_right Al subderivation_left
-  Root [a_i] [b_i] subderivation
+Since proofs are programs by the Curry-Howard correspondence, we can use the rules as a programming language. But we need a syntax for it, since writing sequents all the time is tedious and rule invocations with a sequent like :math:`A, A \vdash B` are ambiguous as to which proposition :math:`A` is used.
 
 Example
-=======
+~~~~~~~
 
 So let's look at a simple program, boolean "and":
 
 ::
 
-
   and = \x -> case x of { False -> \_ -> False; True -> \y -> y }
-  and False True : Bool
+  r = and False True : Bool
 
 We define the types :math:`\text{B} = \Sigma [(F,[],[]),(T,[],[])]` and :math:`a \to b = \Pi [(\text{func}, [a], [b])]`. :math:`\to` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
 
 .. image:: _static/Stroscot_AND_Proof_Tree.svg
-.. LaTeX Source is same path .tex (paste into Overleaf, pdf2svg)
-
-Next is Core. We start with the rules, then assign variable names (alphabetically), then fill in the arguments, to obtain:
-
-::
-
-  Root pr
-    Cut a n
-      a/[]/[] = Bang b []/[] (b = SigmaRight ^True [] [])
-      Cut lr m
-        Cut c k
-          c = SigmaRight ^False [] []
-          Cut d j
-            d/[]/[] = PiRight ^func, [e], [f], [], [] ->
-              e/[]/[f] = SigmaLeft
-                ^False, [], [], [], [f1] ->
-                  f1/[]/[] = PiRight ^func, [g1], [h1], [], [] ->
-                    g1 = BangW (h1 = SigmaRight ^False [] [])
-                  }
-                ^True, [], [], [], [f2] ->
-                  f2/[]/[] = PiRight ^func, [g2], [h2r], [], [] ->
-                    g2 = BangD h2 (h2/h2r = Identity Bool)
-            j = PiLeft ^func [(kr, k/kr = Identity)] [(l, l/lr = Identity)]
-        m = PiLeft ^func [(nr, n/nr = Identity)] [(p, p/pr = Identity)]
 
 Nets
-====
+~~~~
 
-As a description the syntax is fine, but it suffers from what Girard calls "the bureaucracy of syntax". For example the cuts ``Cut a n`` and ``Cut lr m`` and the associated ``a``/``m`` can be swapped without changing the meaning. In fact, for computation, we do not need the syntactic subderivation inclusion relationship at all, only the variables. Furthermore, since each variable appears exactly twice, we can replace all the rule instances with nodes and variables with connecting edges. We thus obtain a graph, similar to a proof net / interaction net:
+We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.
+
+.. image:: _static/AND_net.svg
+
+.. image:: _static/AND_net_r.svg
+
+The derivation tree suffers from what Girard calls "the bureaucracy of syntax". For example the cuts on :math:`\Sigma_{F R}` and "Use and" can be swapped without changing the meaning. The derivation tree is also ambiguous in that we could have multiple B's and the derivation tree would not specify which one is used. Furthermore using the exchange rule all the time is tedious.
+
+To solve these issues there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition's introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.
+
+Most rules do not modify the contexts :math:`\Gamma, \Delta, \Theta, \Lambda` and so the proposition edge skips the node as it is not an introduction/elimination. But there are exceptions that do need the context:
+
+  * :math:`\Pi_R` and :math:`\Sigma_L` rename and combine the context from each case, similar to a phi-node. This can be skipped if there's exactly one case.
+  * ! / ?. These define a box and the box must be clearly defined so we can duplicate/erase it properly.
+  * Use/Assign, so that substitution has something to work with and the free variables are identified
+
+Simplified graph
+~~~~~~~~~~~~~~~~
+
+For computation, we do not need the syntactic subderivation inclusion relationship at all. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)
+
+If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents (=types), then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).
 
 .. graphviz::
 
   digraph {
-  Root -> c1 [style=invis]
-  c1 -> c2 [style=invis]
-  c2 -> c3 [style=invis]
-  c3 -> c4 [style=invis]
+  and [label="and ="]
+  and -> d [color="red"]
 
-  Root -> p /* pr */ [color="red"]
-  c1 [label="Cut"]
-  c1 -> a [color="red"]
-  c1 -> n [color="blue"]
-  a [label="!"]
-  a -> b [color="red"]
-  b [label="True"]
-  c2 [label="Cut"]
-  c2 -> l /* lr */ [color="red"]
-  c2 -> m [color="blue"]
-  c3 [label="Cut"]
-  c3 -> c [color="red"]
-  c3 -> k [color="blue"]
-  c [label="False"]
-  c4 [label="Cut"]
-  c4 -> d [color="red"]
-  c4 -> j [color="blue"]
   d [label="PiR"]
-  d -> e [color="blue"]
+  e -> d [color="blue",dir=back]
   d -> e /* f */ [color="red"]
   e [label="SigmaL"]
   e -> f1 [color="red"]
   e -> f2 [color="red"]
   f1 [label="PiR"]
-  f1 -> g1 [color="blue"]
+  g1 -> f1 [color="blue",dir=back]
   f1 -> h1 [color="red"]
   g1 [label="!w"]
   h1 [label="False"]
   f2 [label="PiR"]
-  f2 -> g2 [color="blue"]
+  g2 -> f2 [color="blue",dir=back]
   f2 -> h2 /* h2r */ [color="red"]
   g2 [label="!d"]
-  g2 -> h2 [color="blue"]
+  h2 -> g2 [color="blue",dir=back]
   h2 [label="I"]
+  }
+
+.. graphviz::
+
+  digraph {
+  r [label="r ="]
+  r -> p /* pr */ [color="red"]
+  c1 [label="Cut"]
+  c1 -> a [color="red"]
+  n -> c1 [color="blue",dir=back]
+  a [label="!"]
+  a -> b [color="red"]
+  b [label="True"]
+  c2 [label="Cut"]
+  c2 -> l /* lr */ [color="red"]
+  m -> c2 [color="blue",dir=back]
+  c3 [label="Cut"]
+  c3 -> c [color="red"]
+  k -> c3 [color="blue",dir=back]
+  c [label="False"]
+  c4 [label="Cut"]
+  c4 -> d2 [color="red"]
+  j -> c4 [color="blue",dir=back]
+  d2 [label="Use and"]
+  d2 -> and [style=dotted]
+
   j [label="PiL"]
   j -> k /* kr */ [color="red"]
-  j -> l [color="blue"]
+  l -> j [color="blue",dir=back]
   k [label="I"]
   l [label="I"]
   m [label="PiL"]
   m -> n /* nr */ [color="red"]
-  m -> p [color="blue"]
+  p -> m [color="blue",dir=back]
   n [label="I"]
   p [label="I"]
   }
 
-Technically, the edges connect ports of nodes. The directionality and left=blue/right=red coloring is enough to identity the ports for the graph above, but disambiguating n-ary graphs in a clear way seems hard.
+The identity nodes function like a thunk constructor; the stuff in between the identity and the cut is a stack manipulation operation.
 
-If we reverse the directions of the blue edges, then the graph is almost a tree, except for the backedges that can show up in PiRight/SigmaLeft.
+Concrete syntax
+~~~~~~~~~~~~~~~
+
+The concrete syntax serializes the non-simplified net into a textual form. Each edge is assigned a unique identifier, then all the nodes are written out. The order of the nodes is not important, but the pretty-printer can choose something for readability.
+
+We should also write out the types of the propositions, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.
+
+Currently the core syntax is just Haskell's datatype syntax. You can see how it looks in ``src/Core.hs``, ``data Syntax``.
+
+An idea of how a real syntax might look:
+
+::
+
+  "and" = Assign d
+    d = PiR
+      ^func \[e],[]. [f],[] ->
+        f = SigmaL e
+          ^False \. f1 ->
+            f1 = PiR
+              ^func \[g1]. h1
+                h1 = False
+                [] = BangW g1
+          ^True \. f2 ->
+            f2 = PiR
+              ^func \g2. h2r
+                h2 = BangD g2
+                  h2r = I h2
+
+  "r" = Assign pr
+    n = Cut a
+      a = Bang b
+        b = True
+      m = Cut lr
+        k = Cut c
+          c = False
+          j = Cut d2
+            d2 = Use "and"
+            [(l,
+              lr = I l
+            )] = PiL ^func j [(kr,
+              kr = I k
+            )]
+        [(p,
+          pr = I p
+        )] = PiL ^func m [(nr,
+          nr = I n
+        )}
 
 Cut elimination
 ===============
 
 For all reductions:
 
-* Move the two nodes of the cut next to the cut with copy-paste
+* Move the two nodes of the cut next to the cut, replacing use with copy-paste
 
 Identity
 
@@ -327,6 +338,112 @@ Primitives
 
 Primitives can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR.
 
+
+
+Linear logic
+============
+
+Linear logic has boxes,  The difference is not observable if we do not use duplication; e.g. ``(\x.print(x+1)) (print("x"); 2)`` can only print ``x3``. But if we change ``x+1`` to ``x+x`` then CBV is ``x4`` while CBN is ``xx4``.
+
+So how do we specify the difference between the two, in linear logic?
+
+::
+
+  s x =
+    (y,z) = dup x
+    print(y+z)
+  s (print("x"); 2)
+
+Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:
+
+1. When the term is linear or affine and does not need to duplicate anything.
+2. When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`) Q: Does this change the evaluation semantics to be stricter?
+3. Inlining, when the duplication is carried out, resulting in two terms.
+4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
+
+Recursion
+=========
+
+Sequent Core :cite:`downenSequentCalculusCompiler2016a` also introduces two more rules "multicut" and "rec" that are illogical but computationally useful:
+
+.. math::
+
+    \begin{array}{cc}
+      \rule
+        {\Gamma, \Theta \vdash \Delta, \Lambda \quad \Gamma', \Lambda \vdash \Theta, \Delta' }
+        {\Gamma, \Gamma' \vdash \Delta, \Delta' }{\text{multicut}}
+      &
+      \rule
+        { \overrightarrow{\Gamma, \vec \Lambda, \Theta_i \vdash \Lambda_i, \vec \Theta, \Delta }}
+        {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
+    \end{array}
+
+These probably aren't needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular :cite:`kiselyovManyFacesFixedpoint2013` outline a polyvariadic combinator:
+
+::
+
+  fix_poly fl = fix (\self -> map ($ self) fl)
+
+To implement ``fix`` we can use the variant of the Y combinator :math:`\lambda f.(\lambda x.x x) (\lambda x.f (x x))`. To type it we need the cyclic/recursive type :math:`Wr = \Pi[(^w, Wr, r)]` (in the sense of an infinite, regular tree). Though, once we have recursive types, we could allow recursive proof trees as well; then implementing recursion directly is probably not too hard. BOHM uses a fan/duplication node combined with a loop.
+
+Optimal reduction
+=================
+
+In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is
+
+::
+
+  import System.IO.Unsafe
+  i = \w -> (unsafePerformIO (print "i")) `seq` w
+  z = 2 :: Integer
+  t = 3 :: Integer
+  f = \x -> (x z) + (x t)
+  main = print (f (\y -> i y) :: Integer)
+
+This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a "hoisting" transformation that makes ``i = (unsafePerformIO (print "i")) `seq` \w -> w``, but more complex cases have higher-level sharing that no code transformation can mimic.
+
+Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
+
+Implementation
+==============
+
+Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for ``case``, joining some eraser nodes. But what about duplication?
+
+Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of "environments" or "scopes". In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope ``0`` and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter's outer scope.
+
+To determine which scope becomes the outer scope, delimiters are also marked as "head", "full", or "empty" depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn't duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter's scope stays on the inside.
+
+For multiplexers the situation is a little more complicated. A multiplexer also has two scopes, an inner "label"/identity-like scope and an outer "ambient" scope. When a multiplexer crosses a delimiter, from outside to inside, its "ambient" scope is changed to the delimiter's inside scope. Meanwhile the delimiter's scope is split into a new set of scopes, and this is indexed by the label scope. In the Stroscot code these are referred to as "variant" scopes. In particular, multiplexers with the same label scope must split other scopes into the same set of variant scopes at each interaction. This is not too hard to keep track of, just give each scope a map ``other scope -> variant scope set`` that's lazily created.
+
+Random old junk
+###############
+
+To handle level mismatches we might also need lifting operators. The conditions are unclear.
+
+.. math::
+
+    \begin{array}{cc}
+      \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash A^i, \Delta^i}{\text{lift}_R}_{j > i}
+      &
+      \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j > i}
+    \end{array}
+
+There are also quantifier rules, probably unnecessary but I'll write them down for reference. For these :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`, while :math:`y` may occur. :math:`A[t/x]` stands for the proposition :math:`A` where all free occurrences of the variable :math:`x` have been replaced by the proposition/term :math:`t` (and bound variables have been renamed when necessary).
+
+.. math::
+
+    \begin{array}{cccc}
+      \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
+      &
+      \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
+      &
+      \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
+      &
+      \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
+    \end{array}
+
+F2 G2
+=====
 
 For example, the term ``F2 G2 = (\x. x (\w. w) x x) (\y. (\x. x x) (y z))`` from page 17 of :cite:`aspertiOptimalImplementationFunctional1999`. To write the derivation tree we must define a recursive type; the simplest is :math:`\Omega = \, !\Omega \to \Omega` (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types :math:`S,T,f` parametrized over :math:`a` to obtain a finer scheme and make the derivation tree less ambiguous.
 
@@ -918,84 +1035,6 @@ Then we incrementally move the duplication node down and do cut elimination:
   ret_g2 [label="I"]
 
   }
-
-Random old junk
-###############
-
-Linear logic
-============
-
-Linear logic has boxes,  The difference is not observable if we do not use duplication; e.g. ``(\x.print(x+1)) (print("x"); 2)`` can only print ``x3``. But if we change ``x+1`` to ``x+x`` then CBV is ``x4`` while CBN is ``xx4``.
-
-So how do we specify the difference between the two, in linear logic?
-
-::
-
-  s x =
-    (y,z) = dup x
-    print(y+z)
-  s (print("x"); 2)
-
-Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:
-
-1. When the term is linear or affine and does not need to duplicate anything.
-2. When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`) Q: Does this change the evaluation semantics to be stricter?
-3. Inlining, when the duplication is carried out, resulting in two terms.
-4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
-
-Recursion
-=========
-
-Sequent Core :cite:`downenSequentCalculusCompiler2016a` also introduces two more rules "multicut" and "rec" that are illogical but computationally useful:
-
-.. math::
-
-    \begin{array}{cc}
-      \rule
-        {\Gamma, \Theta \vdash \Delta, \Lambda \quad \Gamma', \Lambda \vdash \Theta, \Delta' }
-        {\Gamma, \Gamma' \vdash \Delta, \Delta' }{\text{multicut}}
-      &
-      \rule
-        { \overrightarrow{\Gamma, \vec \Lambda, \Theta_i \vdash \Lambda_i, \vec \Theta, \Delta }}
-        {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
-    \end{array}
-
-These probably aren't needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular :cite:`kiselyovManyFacesFixedpoint2013` outline a polyvariadic combinator:
-
-::
-
-  fix_poly fl = fix (\self -> map ($ self) fl)
-
-To implement ``fix`` we can use the variant of the Y combinator :math:`\lambda f.(\lambda x.x x) (\lambda x.f (x x))`. To type it we need the cyclic/recursive type :math:`Wr = \Pi[(^w, Wr, r)]` (in the sense of an infinite, regular tree). Though, once we have recursive types, we could allow recursive proof trees as well; then implementing recursion directly is probably not too hard. BOHM uses a fan/duplication node combined with a loop.
-
-Optimal reduction
-=================
-
-In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is
-
-::
-
-  import System.IO.Unsafe
-  i = \w -> (unsafePerformIO (print "i")) `seq` w
-  z = 2 :: Integer
-  t = 3 :: Integer
-  f = \x -> (x z) + (x t)
-  main = print (f (\y -> i y) :: Integer)
-
-This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a "hoisting" transformation that makes ``i = (unsafePerformIO (print "i")) `seq` \w -> w``, but more complex cases have higher-level sharing that no code transformation can mimic.
-
-Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
-
-Implementation
-==============
-
-Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for ``case``, joining some eraser nodes. But what about duplication?
-
-Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of "environments" or "scopes". In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope ``0`` and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter's outer scope.
-
-To determine which scope becomes the outer scope, delimiters are also marked as "head", "full", or "empty" depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn't duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter's scope stays on the inside.
-
-For multiplexers the situation is a little more complicated. A multiplexer also has two scopes, an inner "label"/identity-like scope and an outer "ambient" scope. When a multiplexer crosses a delimiter, from outside to inside, its "ambient" scope is changed to the delimiter's inside scope. Meanwhile the delimiter's scope is split into a new set of scopes, and this is indexed by the label scope. In the Stroscot code these are referred to as "variant" scopes. In particular, multiplexers with the same label scope must split other scopes into the same set of variant scopes at each interaction. This is not too hard to keep track of, just give each scope a map ``other scope -> variant scope set`` that's lazily created.
 
 Readback
 ~~~~~~~~

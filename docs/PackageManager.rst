@@ -40,6 +40,20 @@ For both the NixOS/multiarch styles, we should include the hash in the SONAME si
 
 We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn't possible,  allowing dynamic resolving of binary names ``foo`` to paths ``/usr/bin/12345/foo`` is not trivial. A global view doesn't work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or ``/proc`` but for the system path; this can provide the necessary pid-dependent view as a symlink tree ``/system-path/foo -> /usr/bin/foo-12345``; even FUSE should be sufficiently fast since it is just one ``open()`` call and it doesn't have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in `/run/current-system/`, and chroot containers.
 
+Updates
+-------
+
+For seamless updates it seems worthwhile to use an `A/B partition scheme <https://source.android.com/devices/tech/ota/ab>`__. There are roughly 3 types of updates:
+* small updates that just update a user-level application
+* large updates that affect components such as the desktop manager, WiFi, etc.
+* kernel / initrd updates
+
+For small updates we want fast rebootless updates in-place and an easy way to rollback the application. But the update won't break the system so providing the rollback functionality via the package manager doing another update is fine. We do need some way to store/manage reproducible configurations though.
+
+For large updates the user's ability to access the package manager may be impaired, so we do need to make the last-known-good-configuration snapshot. In particular there needs to be a boot entry that the user can select to rollback after they hard-reset their computer.
+
+Kernel updates require a reboot or [kexec](https://github.com/NixOS/nixpkgs/issues/10726), but they are otherwise large updates.
+
 Automation system
 =================
 

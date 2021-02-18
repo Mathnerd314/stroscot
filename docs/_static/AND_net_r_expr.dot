@@ -1,0 +1,52 @@
+digraph {
+// dot2tex --debug -ftikz -tverbatim --template AND_net_template.tex --autosize AND_net_r_expr.dot > AND_net_r_expr.tex && pdflatex AND_net_r_expr.tex && pdf2svg AND_net_r_expr.pdf AND_net_r_expr.svg
+
+b [texlbl="\proof{\rl{\Sigma_{TR}}\ia{\vdash \B }}"]
+a [texlbl="\proof{\ix{\vdash \B^1 }\rl{!}\ib{\vdash !\B^0 }}"]
+c [texlbl="\proof{\rl{\Sigma_{FR}}\ia{\vdash \B }}"]
+d2 [texlbl="\proof{\ix{\text{and}}\rl{\text{Use}}\ib{\vdash \B \to !\B \to \B }}"]
+k [texlbl="\proof{\rl{\I}\ia{\B \vdash \B }}"]
+l [texlbl="\proof{\rl{\I}\ia{!\B \to\B \vdash !\B \to \B }}"]
+j [texlbl="\proof{\ix{\B \vdash \B }\ix{!\B \to\B \vdash !\B \to \B }\rl{\Pi_L}\ic{\B, \B \to !\B \to \B \vdash !\B \to \B }}"]
+c4 [texlbl="\proof{\ix{\vdash \B \to !\B \to \B }\ix{\B, \B \to !\B \to \B \vdash !\B \to \B }\rl{\C}\ic{\B \vdash !\B \to \B }}"]
+c3 [texlbl="\proof{\ix{\vdash \B }\ix{\B \vdash !\B \to \B }\rl{\C}\ic{\vdash !\B \to \B }}"]
+n [texlbl="\proof{\rl{\I}\ia{!\B \vdash !\B}}"]
+p [texlbl="\proof{\rl{\I}\ia{\B \vdash \B}}"]
+m [texlbl="\proof{\ix{!\B \vdash !\B}\ix{\B \vdash \B}\rl{\Pi_L}\ic{!\B, !\B \to \B \vdash \B}}"]
+c2 [texlbl="\proof{\ix{\vdash !\B \to \B }\ix{!\B, !\B \to \B \vdash \B}\rl{\C}\ic{!\B \vdash \B }}"]
+c1 [texlbl="\proof{\ix{\vdash !\B }\ix{!\B \vdash \B }\rl{\C}\ic{\vdash \B }}"]
+r [texlbl="\proof{\ix{\vdash \B }\rl{\text{Assign}}\ib{\text{r} = }}"]
+
+edge [weight=5]
+r -> p /* pr */ [color="red"]
+c1 -> a [color="red"]
+a -> b [color="red"]
+n -> c1 [color="blue",dir=back]
+c2 -> l /* lr */ [color="red"]
+m -> c2 [color="blue",dir=back]
+c3 -> c [color="red"]
+k -> c3 [color="blue",dir=back]
+c4 -> d2 [color="red"]
+j -> c4 [color="blue",dir=back]
+j -> k /* kr */ [color="red"]
+l -> j [color="blue",dir=back]
+m -> n /* nr */ [color="red"]
+p -> m [color="blue",dir=back]
+
+edge [weight=1]
+r -> c1
+c1 -> a
+a -> b
+c1 -> c2
+c2 -> c3
+c2 -> m
+c3 -> c
+c3 -> c4
+c4 -> d2
+c4 -> j
+j -> k
+j -> l
+m -> n
+m -> p
+
+}
