@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -59,6 +61,9 @@
           
 
           
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -87,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -107,6 +112,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#automatic-memory-management">Automatic memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#manual-memory-management">Manual memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#copy-management">Copy management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resource-management">Resource management</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
@@ -205,43 +212,43 @@
 <h2>Representation<a class="headerlink" href="#representation" title="Permalink to this headline">¶</a></h2>
 <p>Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly.</p>
 <p>So in Stroscot there is no fixed memory representation. Instead memory layout is defined by overloaded <code class="docutils literal notranslate"><span class="pre">pack</span></code>/<code class="docutils literal notranslate"><span class="pre">unpack</span></code> functions that write/read a memory buffer, similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a>. The pack/unpack functions will end up getting passed around a lot, but implicit parameters scale pretty well, so it shouldn’t be an issue. Unlike Narcissus <a class="bibtex reference internal" href="zzreferences.html#delawarenarcissuscorrectbyconstructionderivation2019" id="id1">[DSPitClaudel+19]</a> we don’t have a state parameter, also because of implicit parameters.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">unpack</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="n">a</span>
-<span class="n">pack</span> <span class="p">:</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">unpack</span> <span class="kt">:</span> <span class="kt">ReadBuffer</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+<span class="nf">pack</span> <span class="kt">:</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
 
-<span class="n">read</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="n">Vector</span> <span class="n">Word8</span>
-<span class="n">write</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="n">Vector</span> <span class="n">Word8</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
-<span class="n">length</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="n">Int</span>
+<span class="nf">read</span> <span class="kt">:</span> <span class="kt">ReadBuffer</span> <span class="ow">-&gt;</span> <span class="kt">Vector</span> <span class="kt">Word8</span>
+<span class="nf">write</span> <span class="kt">:</span> <span class="kt">WriteBuffer</span> <span class="ow">-&gt;</span> <span class="kt">Vector</span> <span class="kt">Word8</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
+<span class="nf">length</span> <span class="kt">:</span> <span class="kt">WriteBuffer</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
 
-<span class="n">shift</span> <span class="p">:</span> <span class="n">ReadBuffer</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReadBuffer</span>
-<span class="n">shift</span> <span class="p">:</span> <span class="n">WriteBuffer</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
+<span class="nf">shift</span> <span class="kt">:</span> <span class="kt">ReadBuffer</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="kt">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">ReadBuffer</span>
+<span class="nf">shift</span> <span class="kt">:</span> <span class="kt">WriteBuffer</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="kt">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
 </pre></div>
 </div>
 <p>Write buffers have a length, so to compute the size of the type, we can do <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code>. Read buffers don’t have a length so to figure out the length of something in memory we do <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span> <span class="pre">.</span> <span class="pre">unpack</span></code>. Some simple types:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pack</span> <span class="p">:</span> <span class="n">Either</span> <span class="n">a</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
-<span class="n">pack</span> <span class="p">(</span><span class="n">Left</span> <span class="n">a</span><span class="p">)</span> <span class="o">=</span>
-  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pack</span> <span class="kt">:</span> <span class="kt">Either</span> <span class="n">a</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="kt">Left</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
   <span class="n">write</span> <span class="n">w</span> <span class="mi">0</span>
   <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
-<span class="n">pack</span> <span class="p">(</span><span class="n">Right</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span>
-  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="kt">Right</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
   <span class="n">write</span> <span class="n">w</span> <span class="mi">1</span>
   <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
 
-<span class="n">unpack</span> <span class="n">r</span> <span class="o">=</span>
-  <span class="n">case</span> <span class="n">read</span> <span class="n">r</span> <span class="n">of</span>
-    <span class="mi">0</span> <span class="o">-&gt;</span> <span class="n">Left</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="mi">1</span> <span class="o">-&gt;</span> <span class="n">Right</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nf">unpack</span> <span class="n">r</span> <span class="ow">=</span>
+  <span class="kr">case</span> <span class="n">read</span> <span class="n">r</span> <span class="kr">of</span>
+    <span class="mi">0</span> <span class="ow">-&gt;</span> <span class="kt">Left</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="mi">1</span> <span class="ow">-&gt;</span> <span class="kt">Right</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
 
-<span class="n">pack</span> <span class="p">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WriteBuffer</span>
-<span class="n">pack</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">=</span>
-  <span class="n">w</span> <span class="o">=</span> <span class="n">emptyWriteBuffer</span>
+<span class="nf">pack</span> <span class="kt">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
   <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
   <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
 
-<span class="n">unpack</span> <span class="n">r</span> <span class="o">=</span>
-  <span class="n">a</span> <span class="o">=</span> <span class="n">unpack</span> <span class="n">r</span>
-  <span class="n">l</span> <span class="o">=</span> <span class="n">length</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
-  <span class="n">b</span> <span class="o">=</span> <span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="n">l</span><span class="p">)</span>
+<span class="nf">unpack</span> <span class="n">r</span> <span class="ow">=</span>
+  <span class="n">a</span> <span class="ow">=</span> <span class="n">unpack</span> <span class="n">r</span>
+  <span class="n">l</span> <span class="ow">=</span> <span class="n">length</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="n">b</span> <span class="ow">=</span> <span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="n">l</span><span class="p">)</span>
   <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -257,17 +264,17 @@
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alloc</span> <span class="p">:</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">Ref</span> <span class="n">a</span>
-<span class="n">deref</span> <span class="p">:</span> <span class="n">Ref</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="n">a</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">alloc</span> <span class="kt">:</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Ref</span> <span class="n">a</span>
+<span class="nf">deref</span> <span class="kt">:</span> <span class="kt">Ref</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span>
 </pre></div>
 </div>
 <p>A pointer type <code class="docutils literal notranslate"><span class="pre">Ptr</span></code> is a wrapper around the <code class="docutils literal notranslate"><span class="pre">UInt</span></code> type of the machine’s native address size. It deliberately does not support any arithmetic operations, to discourage careless pointer arithmetic. A further refinement is <code class="docutils literal notranslate"><span class="pre">APtr</span> <span class="pre">n</span></code>, an <code class="docutils literal notranslate"><span class="pre">n</span></code>-byte aligned pointer. A reference type <code class="docutils literal notranslate"><span class="pre">Ref</span> <span class="pre">a</span></code> is a pointer that is guaranteed to refer to an value of type <code class="docutils literal notranslate"><span class="pre">a</span></code> when its memory is dereferenced. References offer a lot of flexibility for memory layout. For example, we can encode a linked list in a number of ways:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># flat list, stored like 1a1a0
-List a = Nil | Cons a (List a)
-# intrusive list, stored like 1a* -&gt; 1a* -&gt; 0
-List a = Nil | Cons a (Ref (List a))
-# uniform list, stored like 1** -&gt; {a, 1** -&gt; {a, 0}}
-List a = Nil | Cons (Ref a) (Ref $ List a)
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">flat</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="mi">1</span><span class="n">a1a0</span>
+<span class="kt">List</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Nil</span> <span class="o">|</span> <span class="kt">Cons</span> <span class="n">a</span> <span class="p">(</span><span class="kt">List</span> <span class="n">a</span><span class="p">)</span>
+<span class="o">#</span> <span class="n">intrusive</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="mi">1</span><span class="n">a</span><span class="o">*</span> <span class="ow">-&gt;</span> <span class="mi">1</span><span class="n">a</span><span class="o">*</span> <span class="ow">-&gt;</span> <span class="mi">0</span>
+<span class="kt">List</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Nil</span> <span class="o">|</span> <span class="kt">Cons</span> <span class="n">a</span> <span class="p">(</span><span class="kt">Ref</span> <span class="p">(</span><span class="kt">List</span> <span class="n">a</span><span class="p">))</span>
+<span class="o">#</span> <span class="n">uniform</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="mi">1</span><span class="o">**</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="mi">1</span><span class="o">**</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">}}</span>
+<span class="kt">List</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Nil</span> <span class="o">|</span> <span class="kt">Cons</span> <span class="p">(</span><span class="kt">Ref</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Ref</span> <span class="o">$</span> <span class="kt">List</span> <span class="n">a</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Unrestricted, references introduce an entire class of memory errors; in particular, we cannot free the memory the reference refers to unless the reference will not be dereferenced anymore. Violating this condition is a use-after-free. Similarly freeing itself must happen exactly once, so we have double frees and memory leaks.</p>
@@ -303,6 +310,14 @@ List a = Nil | Cons (Ref a) (Ref $ List a)
 <h2>Compiler memory management<a class="headerlink" href="#compiler-memory-management" title="Permalink to this headline">¶</a></h2>
 <p>For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
 <p>Overall I don’t see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
+</div>
+<div class="section" id="copy-management">
+<h2>Copy management<a class="headerlink" href="#copy-management" title="Permalink to this headline">¶</a></h2>
+<p>As well as handling allocation/deallocation, it would also be good to provide copy/move operations. The copy has a copy-on-write semantics where the copy isn’t actually done unless/until the original is modified/deallocated. But the memory is managed under the new allocator.</p>
+</div>
+<div class="section" id="resource-management">
+<h2>Resource management<a class="headerlink" href="#resource-management" title="Permalink to this headline">¶</a></h2>
+<p>There are also non-memory resources like thread-handles, file-handles, locks, and sockets. These can be passed around and stored in data structures. The same usage analysis should work to close these resources.</p>
 </div>
 </div>
 

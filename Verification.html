@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -59,6 +61,9 @@
           
 
           
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -87,16 +92,18 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Verification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#sat-solving">SAT solving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#software-verification">Software verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configurable-program-analysis">Configurable Program Analysis</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#incremental-program-analysis">Incremental program analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#condition-checking">Condition checking</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#optimizations">Optimizations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
@@ -189,20 +196,19 @@
 <div class="section" id="sat-solving">
 <h2>SAT solving<a class="headerlink" href="#sat-solving" title="Permalink to this headline">¶</a></h2>
 <p>For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems <a class="bibtex reference internal" href="zzreferences.html#braussecdclstylecalculussolving2019" id="id1">[BKKM19]</a>, and one paper/PhD on using CDCL for termination checking <a class="bibtex reference internal" href="zzreferences.html#dsilvaconflictdrivenconditionaltermination2015" id="id2">[DSilvaU15]</a>.</p>
-<p>TT-Open-WBO-Inc</p>
-<p>Open-WBO-Inc-complete
-Loandra
-Open-WBO-Inc-satlike</p>
-<p>UWrMaxSat       436     148.97
-MaxHS   434     184.69
-RC2-B   417     205.88
-RC2-A   411     185.92
-maxino  393     203.21</p>
-<p>Pacose  385     197.83
-QMaxSAT 377     281.47</p>
-<p>maxino-pref     375     162.1
-smax_minisat    339     182.94
-smax_mergesat   282     293.93</p>
+</div>
+<div class="section" id="software-verification">
+<h2>Software verification<a class="headerlink" href="#software-verification" title="Permalink to this headline">¶</a></h2>
+<p>Verification is the process of verifying that, indeed, a system satisfies its specification. Verification techniques include model checking, deductive machine-checked proof, and randomized testing (fuzzing).</p>
+<p>Model-checking does not refer to a model of the system but to the formal logic sense: an interpretation 𝜑 in some semantic domain that satisfies the formula F (𝜑 ⊨ F) is a model for F. A model checker <em>checks</em> if a given 𝜑 is a <em>model</em> for a given F.</p>
+<p>The problem is this: <em>all</em> verification methods that verify arbitrary “deep” properties suffer from <em>extreme</em> scalability limitations (there are deep theoretical reasons for that). In practice, we can affordably verify such properties on ~2000 lines of formal specification. We can’t check deep properties on an actual program of 200KLOC.
+Correct/Cheap/Fast - pick 2. You can give up speed and only verify small programs. Or give up correctness and verify shallow properties. Or give up cheapness and verify high-level abstractions of the code.</p>
+<p>model checkers:
+[CPAChecker](<a class="reference external" href="https://cpachecker.sosy-lab.org/">https://cpachecker.sosy-lab.org/</a>)
+[NASA’s Java Pathfinder](<a class="reference external" href="https://github.com/javapathfinder">https://github.com/javapathfinder</a>)
+[JBMC](<a class="reference external" href="http://www.cprover.org/jbmc/">http://www.cprover.org/jbmc/</a>)
+[CBMC](<a class="reference external" href="https://www.cprover.org/cbmc/">https://www.cprover.org/cbmc/</a>)
+[SCADE](<a class="reference external" href="https://www.ansys.com/en-gb/products/embedded-software/ansys-scade-suite">https://www.ansys.com/en-gb/products/embedded-software/ansys-scade-suite</a>)</p>
 </div>
 <div class="section" id="configurable-program-analysis">
 <h2>Configurable Program Analysis<a class="headerlink" href="#configurable-program-analysis" title="Permalink to this headline">¶</a></h2>
@@ -243,75 +249,40 @@ the abstract domain and a set of operations that control the program analysis.
 Such a CPA can be plugged in as a component into the software-verification framework
 without the need to work on program parsers, exploration algorithms, and
 their general data structures.</p>
-<p>A <em>program</em> is represented by a <em>control-flow automaton</em> or CFA <span class="math notranslate nohighlight">\((\locs, l_o, G)\)</span>,
+<p>A <em>program</em> is represented by a <em>control-flow automaton</em> (CFA) / Kripke structure <span class="math notranslate nohighlight">\((\locs, l_o, G)\)</span>,
 which consists of</p>
 <ul class="simple">
-<li><p>a set <span class="math notranslate nohighlight">\(\locs\)</span> of program locations/states (models the program counter <span class="math notranslate nohighlight">\(\pc\)</span>)</p></li>
-<li><p>an initial program location/state <span class="math notranslate nohighlight">\(l_0\)</span> (models the program entry)</p></li>
-<li><p>a set <span class="math notranslate nohighlight">\(Ops\)</span> of program operations. In a simple model, <span class="math notranslate nohighlight">\(Ops\)</span> are either assignment operations or assume operations. The set of program variables that occur in operations from <span class="math notranslate nohighlight">\(Ops\)</span> is denoted by <span class="math notranslate nohighlight">\(X\)</span>.</p></li>
-<li><p>a set <span class="math notranslate nohighlight">\(G \subseteq \locs \times Ops \times \locs\)</span> of control-flow edges (models the operation that is executed when control flows from one program location to another).</p></li>
+<li><p>a set <span class="math notranslate nohighlight">\(Ops\)</span> of program operations. Operations include:</p>
+<ul>
+<li><p>Assignment of the form <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:=</span> <span class="pre">e</span></code>. The set of program variables that occur in operations from <span class="math notranslate nohighlight">\(Ops\)</span> is denoted by <span class="math notranslate nohighlight">\(X\)</span>, so <span class="math notranslate nohighlight">\(x \in X\)</span>. <span class="math notranslate nohighlight">\(e\)</span> is a (side-effect free) expression over variables from <span class="math notranslate nohighlight">\(X\)</span>.</p></li>
+<li><p>I/O operations</p></li>
+<li><p>A test <span class="math notranslate nohighlight">\([p]\)</span> with a predicate <span class="math notranslate nohighlight">\(p\)</span> over variables from <span class="math notranslate nohighlight">\(X\)</span>. This is used for branching.</p></li>
 </ul>
-<p>A <em>concrete state</em> of a program is
-a variable assignment <span class="math notranslate nohighlight">\(c: X \cup \{\pc\} \to V\)</span>
-that assigns to each variable a value <span class="math notranslate nohighlight">\(V\)</span>; a simple model takes <span class="math notranslate nohighlight">\(V = \Ints\)</span>.
-The set of all concrete states of a program is denoted by <span class="math notranslate nohighlight">\(C\)</span>.
-A set <span class="math notranslate nohighlight">\(r \subseteq C\)</span> of concrete states is called a <em>region</em>.
-Each edge <span class="math notranslate nohighlight">\(g \in G\)</span> defines a (labeled) transition relation
-<span class="math notranslate nohighlight">\(\mathord{\transconc{g}} \subseteq C \times \{g\} \times C\)</span>, which defines how concrete states of one program location (source) are transformed into concrete states of another program location (target).
-The complete transition relation <span class="math notranslate nohighlight">\(\transconc{}\)</span> is the union over
-all control-flow edges:
-<span class="math notranslate nohighlight">\(\mathord{\transconc{}} = \bigcup_{g \in G} \transconc{g}\)</span>.
-We write <span class="math notranslate nohighlight">\(c \transconc{g} c'\)</span> if <span class="math notranslate nohighlight">\((c, g, c') \in \mathord{\transconc{}}\)</span>,
-and <span class="math notranslate nohighlight">\(c \transconc{} c'\)</span> if there exists a <span class="math notranslate nohighlight">\(g\)</span> with <span class="math notranslate nohighlight">\(c \transconc{g} c'\)</span>.
-A concrete state <span class="math notranslate nohighlight">\(c_n\)</span> is <em>reachable</em> from a region <span class="math notranslate nohighlight">\(r\)</span>, denoted by <span class="math notranslate nohighlight">\(c_n \in Reach(r)\)</span>, if
-there exists a sequence of concrete states <span class="math notranslate nohighlight">\(\seq{c_0, c_1, \ldots, c_n}\)</span>
-such that <span class="math notranslate nohighlight">\(c_0 \in r\)</span> and for all <span class="math notranslate nohighlight">\(1 \leq i \leq n\)</span>,
-we have <span class="math notranslate nohighlight">\(c_{i-1} \transconc{} c_{i}\)</span>.</p>
+</li>
+<li><p>A concrete state <span class="math notranslate nohighlight">\((c, l) \in C = (X \to V) \times \locs\)</span> is a pair of:</p>
+<ul>
+<li><p>A <em>concrete data state</em>, a variable assignment <span class="math notranslate nohighlight">\(c \in X \to V\)</span> that assigns to each variable a value <span class="math notranslate nohighlight">\(V\)</span>; a simple model takes <span class="math notranslate nohighlight">\(V = \Ints\)</span>.</p></li>
+<li><p>A program location <span class="math notranslate nohighlight">\(l \in \locs\)</span>. There is an initial program location <span class="math notranslate nohighlight">\(l_I\)</span> (models the program entry)</p></li>
+</ul>
+</li>
+</ul>
+<p>The concrete transition relation <span class="math notranslate nohighlight">\(\mathord{\transconc{}} \subseteq C \times Ops \times C\)</span> defines a (labeled) transition relation of how concrete states evolve into other concrete states. We define the notation <span class="math notranslate nohighlight">\(\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}\)</span>. We write <span class="math notranslate nohighlight">\(c \transconc{o} c'\)</span> if <span class="math notranslate nohighlight">\((c, o, c') \in \mathord{\transconc{}}\)</span> and <span class="math notranslate nohighlight">\(c \transconc{} c'\)</span> if there exists an <span class="math notranslate nohighlight">\(o\)</span> with <span class="math notranslate nohighlight">\(c \transconc{o} c'\)</span>. There is typically only one concrete state succeeding a given concrete state, but outside input and multi-threaded programs make the next state non-deterministic.</p>
+<p>A path <span class="math notranslate nohighlight">\(\sigma = \langle (c_1, o_1 , c_2 ), (c_2 , o_2 , c_3 ), \ldots , (c_{n-1} , o_{n-1} , c_n ) \rangle\)</span> is a sequence of consecutive concrete states. A path is called a program path if it starts in the initial location <span class="math notranslate nohighlight">\(l_I\)</span>. A path is called feasible if the transitions are concrete transitions, <span class="math notranslate nohighlight">\(c_i \transconc{o_i} c_{i+1}\)</span>. A location <span class="math notranslate nohighlight">\(l\)</span> is called reachable if there exists a feasible program path from <span class="math notranslate nohighlight">\(l_I\)</span> to <span class="math notranslate nohighlight">\(l\)</span>.</p>
+<p>A verification task consists of a CFA and an error location, with the goal to show that the error location is unreachable, or otherwise to find a feasible program path to the error location.</p>
+<p>Dealing with concrete states is infeasible so the semantics can instead be defined by the <a class="reference external" href="https://en.wikipedia.org/wiki/Predicate_transformer_semantics#Strongest_postcondition">strongest-postcondition operator</a>. After an assignment operation the variable must contain the value of the expression evaluated on the old value, and after an assume operation the assertion must be true. A set of concrete states is called a <em>region</em>. A first-order formula <span class="math notranslate nohighlight">\(\psi\)</span> over variables from <span class="math notranslate nohighlight">\(X\)</span> and possible locations in <span class="math notranslate nohighlight">\(\locs\)</span> defines the region <span class="math notranslate nohighlight">\(\sem{\psi} = \{ c \mid c \models \psi \}\)</span>.</p>
 <p>A CPA <span class="math notranslate nohighlight">\(\mathbb{C} = (D, \leadsto, \merge, \stopop)\)</span> consists of 4 elements:</p>
 <ul class="simple">
 <li><p>an abstract domain <span class="math notranslate nohighlight">\(D = (C, {\cal E}, \sem{\cdot})\)</span>, consisting of</p>
 <ul>
 <li><p>a set <span class="math notranslate nohighlight">\(C\)</span> of concrete states,</p></li>
-<li><p>a bounded join <a class="reference external" href="https://en.wikipedia.org/wiki/Semilattice">semi-lattice</a> <span class="math notranslate nohighlight">\(({\cal E}, \sqsubseteq, \sqcup, \top)\)</span> over abstract-domain elements, and</p></li>
-<li><p>a concretization function <span class="math notranslate nohighlight">\(\sem{\cdot} : E \to 2^C\)</span> that maps each abstract-domain element to its represented set of concrete states.</p></li>
+<li><p>a bounded join <a class="reference external" href="https://en.wikipedia.org/wiki/Semilattice">semi-lattice</a> <span class="math notranslate nohighlight">\(({\cal E}, \sqsubseteq, \sqcup, \top, \bot)\)</span> over abstract-domain elements, and</p></li>
+<li><p>a concretization function <span class="math notranslate nohighlight">\(\sem{\cdot} : E \to 2^C\)</span> that maps each abstract-domain element to its represented set of concrete states. It should satisfy <span class="math notranslate nohighlight">\(\sem{\top} = C\)</span>, <span class="math notranslate nohighlight">\(\sem{\bot} = \emptyset\)</span>, <span class="math notranslate nohighlight">\(e \sqsubseteq e' \to \sem{e} \subseteq \sem{e'}\)</span>, <span class="math notranslate nohighlight">\(\sem{e \sqcup e'} \supseteq \sem{e} \cup \sem{e'}\)</span></p></li>
 </ul>
 </li>
 <li><p>a transfer relation <span class="math notranslate nohighlight">\(T \subseteq E × G × E\)</span> computes abstract successor states. It assigns to each abstract state <span class="math notranslate nohighlight">\(e\)</span> possible new abstract states <span class="math notranslate nohighlight">\(e'\)</span> that are abstract successors of <span class="math notranslate nohighlight">\(e\)</span>. Similarly to the CFA each transfer is labeled with a control-flow edge <span class="math notranslate nohighlight">\(g\)</span>, so we have <span class="math notranslate nohighlight">\(\overset{g}{\leadsto}\)</span> as well as <span class="math notranslate nohighlight">\(\leadsto\)</span> derived from <span class="math notranslate nohighlight">\(T\)</span>.</p></li>
 <li><p>a merge operator <span class="math notranslate nohighlight">\(\merge :  E × E → E\)</span> specifies if and how to merge abstract states when control flow meets. The operator weakens the abstract state (also called widening) that is given as second parameter depending on the first parameter. Note that the operator <span class="math notranslate nohighlight">\(\merge\)</span> is not commutative, and is not necessarily the same as the join operator of the lattice. The result of <span class="math notranslate nohighlight">\(\merge(e, e')\)</span> can be anything between <span class="math notranslate nohighlight">\(e'\)</span> and <span class="math notranslate nohighlight">\(\top\)</span>. Two simple ones are <span class="math notranslate nohighlight">\(\merge_{sep}(e,e')=e'\)</span> and <span class="math notranslate nohighlight">\(\merge_{join}(e,e')=e \sqcup e'\)</span></p></li>
-<li><p>a termination check <span class="math notranslate nohighlight">\(\stopop : E × 2^E \to B\)</span> checks whether the abstract state <span class="math notranslate nohighlight">\(e\)</span> that is given as first parameter is covered by the set <span class="math notranslate nohighlight">\(R\)</span> of abstract states given as second parameter, i.e., every concrete state that <span class="math notranslate nohighlight">\(e\)</span> represents is represented by some abstract state from <span class="math notranslate nohighlight">\(R\)</span>. Two simple termination checks are <span class="math notranslate nohighlight">\(\stopop_{sep}(e, R) = \exists e' ∈ R : e \sqsubseteq e'\)</span> and <span class="math notranslate nohighlight">\(\stopop_{join}(e, R) = e \sqsubseteq \bigsqcup R\)</span>. The second requires <span class="math notranslate nohighlight">\(D\)</span> to be a power-set domain, i.e. .</p></li>
+<li><p>a termination check <span class="math notranslate nohighlight">\(\stopop : E × 2^E \to B\)</span> checks whether the abstract state <span class="math notranslate nohighlight">\(e\)</span> that is given as first parameter is covered by the set <span class="math notranslate nohighlight">\(R\)</span> of abstract states given as second parameter, i.e., every concrete state that <span class="math notranslate nohighlight">\(e\)</span> represents is represented by some abstract state from <span class="math notranslate nohighlight">\(R\)</span>. Two simple termination checks are <span class="math notranslate nohighlight">\(\stopop_{sep}(e, R) = \exists e' ∈ R : e \sqsubseteq e'\)</span> and <span class="math notranslate nohighlight">\(\stopop_{join}(e, R) = e \sqsubseteq \bigsqcup R\)</span>. The second requires <span class="math notranslate nohighlight">\(D\)</span> to be a power-set domain.</p></li>
 </ul>
-<p>We run a CPA analysis with the following algorithm::</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>CPA(reached, wait)
-INPUT
-   a CPA cpa = (D, T, merge, stopop)
-   a set reached of abstract states in E (usually a single state e0)
-   a set wait of frontier abstract states, a subset of reached (also e0)
-OUTPUT
-   a set reached of reachable abstract states
-   a set wait of frontier abstract states (empty if the algorithm terminated correctly)
-
-WHILE not wait.empty
-  choose e from wait; remove e from wait;
-  FOR each e&#39; with T(e, e&#39;)
-    FOR each e&#39;&#39; in reached
-      // Combine with existing abstract state.
-      e_new := merge(e&#39;, e&#39;&#39;);
-      IF e_new != e&#39;&#39;
-        wait    := (wait    union {e_new}) setminus e&#39;&#39;;
-        reached := (reached union {e_new}) setminus e&#39;&#39;;
-      ENDIF
-    ENDFOR
-    // Add new abstract state?
-    IF not stop(e&#39;, reached)
-      wait := wait union e&#39;;
-      reached := reached union e&#39;;
-    ENDIF
-  ENDFOR
-ENDWHILE
-// wait is empty
-return reached
-</pre></div>
-</div>
 <div class="section" id="incremental-program-analysis">
 <h3>Incremental program analysis<a class="headerlink" href="#incremental-program-analysis" title="Permalink to this headline">¶</a></h3>
 <p>Another issue is incremental analysis. Solving the halting problem is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation <a class="bibtex reference internal" href="zzreferences.html#jakobsdifferentialmodularsoftware" id="id3">[Jak]</a> there doesn’t seem to be any major breakthrough. Marking the analyzer’s computation steps in the general incremental build framework is probably sufficient.</p>
@@ -320,6 +291,18 @@ return reached
 <h3>Condition checking<a class="headerlink" href="#condition-checking" title="Permalink to this headline">¶</a></h3>
 <p>There’s some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> on termination checking by Microsoft, called <a class="reference external" href="https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm">TERMINATOR</a>. There’s a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and resource use <a class="bibtex reference internal" href="zzreferences.html#albertresourceanalysisdriven2019" id="id4">[ABB+19]</a> and things of that nature.</p>
 </div>
+</div>
+<div class="section" id="optimizations">
+<h2>Optimizations<a class="headerlink" href="#optimizations" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference external" href="http://venge.net/graydon/talks/CompilerTalk-2019.pdf">talk</a> by Graydon Hoare on compilers mentions the paper <a class="bibtex reference internal" href="zzreferences.html#allencatalogueoptimizingtransformations1971" id="id5">[AC71]</a>. He says we need 8 optimization passes to get 80% of the performance:</p>
+<ul class="simple">
+<li><p>Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify opportunities for sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn’t increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in <a class="bibtex reference internal" href="zzreferences.html#mauborgnerepresentationsetstrees1999" id="id6">[Mau99]</a>.</p></li>
+<li><p>Inlining - Going through <a class="bibtex reference internal" href="zzreferences.html#peytonjonessecretsglasgowhaskell2002" id="id7">[PJM02]</a>, a lot of the cases are handled by partial evaluation / optimal reduction that moves cuts down and exposes/eliminates case statements. But we also want to do it inside recursive functions etc., which means we need a strictness/termination analysis.</p></li>
+<li><p>Constant Folding - partial evaluation of the code includes this</p></li>
+<li><p>Loop unrolling, code motion - These are optimizations on mutable variables, so will have to wait until a mutability story is worked out. But unrolling recursive functions could prove useful, as part of inlining.</p></li>
+<li><p>Dead code elimination - Unused expressions aren’t connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.</p></li>
+<li><p>Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.</p></li>
+</ul>
 </div>
 </div>
 

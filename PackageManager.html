@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -59,6 +61,9 @@
           
 
           
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -87,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -103,7 +108,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Package manager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-distribution">Linux distribution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#updates">Updates</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#automation-system">Automation system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#release-monitoring">Release monitoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automation">Automation</a><ul>
@@ -211,6 +219,16 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
 <p>So really only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as <code class="docutils literal notranslate"><span class="pre">&lt;path</span> <span class="pre">of</span> <span class="pre">executable&gt;/../share/something</span></code>. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can set the various autoconf options to <code class="docutils literal notranslate"><span class="pre">$path/$hash</span></code> and leave the rest up to the package; it may install things to <code class="docutils literal notranslate"><span class="pre">/usr/$hash/</span></code> if it’s not well-written, but everything respects <code class="docutils literal notranslate"><span class="pre">$PREFIX</span></code>.</p>
 <p>For both the NixOS/multiarch styles, we should include the hash in the SONAME similar to how the filename version works. This can be accomplished by linking with absolute paths (or relative paths, they would work too). There is <a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/24844">some work</a> in NixOS to do so, but the rpath solution that NixOS currently uses works too (albeit slower, because it has to search for the libraries in a relatively large search path).</p>
 <p>We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn’t possible,  allowing dynamic resolving of binary names <code class="docutils literal notranslate"><span class="pre">foo</span></code> to paths <code class="docutils literal notranslate"><span class="pre">/usr/bin/12345/foo</span></code> is not trivial. A global view doesn’t work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or <code class="docutils literal notranslate"><span class="pre">/proc</span></code> but for the system path; this can provide the necessary pid-dependent view as a symlink tree <code class="docutils literal notranslate"><span class="pre">/system-path/foo</span> <span class="pre">-&gt;</span> <span class="pre">/usr/bin/foo-12345</span></code>; even FUSE should be sufficiently fast since it is just one <code class="docutils literal notranslate"><span class="pre">open()</span></code> call and it doesn’t have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in <cite>/run/current-system/</cite>, and chroot containers.</p>
+<div class="section" id="updates">
+<h3>Updates<a class="headerlink" href="#updates" title="Permalink to this headline">¶</a></h3>
+<p>For seamless updates it seems worthwhile to use an <a class="reference external" href="https://source.android.com/devices/tech/ota/ab">A/B partition scheme</a>. There are roughly 3 types of updates:
+* small updates that just update a user-level application
+* large updates that affect components such as the desktop manager, WiFi, etc.
+* kernel / initrd updates</p>
+<p>For small updates we want fast rebootless updates in-place and an easy way to rollback the application. But the update won’t break the system so providing the rollback functionality via the package manager doing another update is fine. We do need some way to store/manage reproducible configurations though.</p>
+<p>For large updates the user’s ability to access the package manager may be impaired, so we do need to make the last-known-good-configuration snapshot. In particular there needs to be a boot entry that the user can select to rollback after they hard-reset their computer.</p>
+<p>Kernel updates require a reboot or [kexec](<a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/10726">https://github.com/NixOS/nixpkgs/issues/10726</a>), but they are otherwise large updates.</p>
+</div>
 </div>
 <div class="section" id="automation-system">
 <h2>Automation system<a class="headerlink" href="#automation-system" title="Permalink to this headline">¶</a></h2>
@@ -260,20 +278,20 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
 <div class="section" id="marking">
 <h3>Marking<a class="headerlink" href="#marking" title="Permalink to this headline">¶</a></h3>
 <p>For marking, we can model the test process as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>broken = false
-for commit in commits:
-  commit_type &lt;- choice([broken ? FIXING : BREAKING, NONE], broken, commit)
-  if commit_type = BREAKING:
-    broken = true
-  else if commit_type = FIXING:
-    broken = false
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">broken</span> <span class="ow">=</span> <span class="n">false</span>
+<span class="nf">for</span> <span class="n">commit</span> <span class="kr">in</span> <span class="n">commits</span><span class="kt">:</span>
+  <span class="n">commit_type</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="n">broken</span> <span class="o">?</span> <span class="kt">FIXING</span> <span class="kt">:</span> <span class="kt">BREAKING</span><span class="p">,</span> <span class="kt">NONE</span><span class="p">],</span> <span class="n">broken</span><span class="p">,</span> <span class="n">commit</span><span class="p">)</span>
+  <span class="kr">if</span> <span class="n">commit_type</span> <span class="ow">=</span> <span class="kt">BREAKING:</span>
+    <span class="n">broken</span> <span class="ow">=</span> <span class="n">true</span>
+  <span class="kr">else</span> <span class="kr">if</span> <span class="n">commit_type</span> <span class="ow">=</span> <span class="kt">FIXING:</span>
+    <span class="n">broken</span> <span class="ow">=</span> <span class="n">false</span>
 
-  for run in runs:
-    flaky &lt;- choice([YES, NO], broken)
-    if flaky = YES:
-      report(!broken)
-    else:
-      report(broken)
+  <span class="n">for</span> <span class="n">run</span> <span class="kr">in</span> <span class="n">runs</span><span class="kt">:</span>
+    <span class="n">flaky</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">broken</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">flaky</span> <span class="ow">=</span> <span class="kt">YES:</span>
+      <span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span>
+    <span class="kr">else</span><span class="kt">:</span>
+      <span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <a class="bibtex reference internal" href="zzreferences.html#najafibisectingcommitsmodeling2019" id="id1">[NRS19]</a> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
@@ -344,54 +362,54 @@ The table treats the build as a unit; for added precision we should make one tab
 <p>For backouts, we must first decide a backout strategy. The paper <a class="bibtex reference internal" href="zzreferences.html#ananthanarayanankeepingmastergreen2019" id="id5">[AAH+19]</a> provides a real-world case study. We should maximize the number of changes included, respecting chronological order. So for <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">A,C</span></code> we should prefer the earlier change <code class="docutils literal notranslate"><span class="pre">B</span></code>. Also, for <code class="docutils literal notranslate"><span class="pre">A</span></code> vs <code class="docutils literal notranslate"><span class="pre">B,C</span></code>, to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them, and the higher is the chosen result.</p>
 <p>We assume that if a build fails that adding more patches to that build will still result in a failing build; this rules out “fixing” changes where <code class="docutils literal notranslate"><span class="pre">A</span></code> fails but <code class="docutils literal notranslate"><span class="pre">A,B</span></code> succeeds because <code class="docutils literal notranslate"><span class="pre">B</span></code> fixed <code class="docutils literal notranslate"><span class="pre">A</span></code>. Detecting fixing changes would require speculatively building extra changes on top of failed builds. Instead, the fixing patchset must include the broken commits as well, so we would have <code class="docutils literal notranslate"><span class="pre">A</span></code> failing, <code class="docutils literal notranslate"><span class="pre">B</span></code> succeeding, and <code class="docutils literal notranslate"><span class="pre">A,B</span></code> resulting in a merge conflict (because <code class="docutils literal notranslate"><span class="pre">B</span></code> includes the changes from <code class="docutils literal notranslate"><span class="pre">A</span></code>). Merge conflicts can often be detected immediately without running tests, but complex failures can arise from code interactions.</p>
 <p>We need a more complex model accounting for breakages, dependencies, conflicts, and flakiness. But we’ll assume no higher-order phenomena, e.g. fixes to conflicts.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>breaking = []
-for c in changes:
-  is_breaking &lt;- choice([YES, NO], c)
-  if is_breaking:
-    breaking += c
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">breaking</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">is_breaking</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">)</span>
+  <span class="kr">if</span> <span class="n">is_breaking</span><span class="kt">:</span>
+    <span class="n">breaking</span> <span class="o">+=</span> <span class="n">c</span>
 
-dependencies = {}; dependencies.default = []
-for c2 in changes:
-  for c in changes:
-    if c2 &lt;= c:
-      continue
-    is_dependency &lt;- choice([YES, NO], c, c2)
-    if is_dependency:
-      dependencies[c2] += c
+<span class="nf">dependencies</span> <span class="ow">=</span> <span class="p">{};</span> <span class="n">dependencies</span><span class="o">.</span><span class="kr">default</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="n">c2</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="kt">:</span>
+      <span class="n">continue</span>
+    <span class="n">is_dependency</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">is_dependency</span><span class="kt">:</span>
+      <span class="n">dependencies</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c</span>
 
-conflicts = []
-for c2 in changes:
-  for c in changes:
-    if c2 &lt;= c:
-      continue
-    is_conflict &lt;- choice([YES, NO], c, c2)
-    if is_conflict:
-      conflicts[c2] += c
+<span class="nf">conflicts</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="n">c2</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="kt">:</span>
+      <span class="n">continue</span>
+    <span class="n">is_conflict</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">is_conflict</span><span class="kt">:</span>
+      <span class="n">conflicts</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c</span>
 
-function query_run(set):
-  fail_type = NONE
+<span class="nf">function</span> <span class="n">query_run</span><span class="p">(</span><span class="n">set</span><span class="p">)</span><span class="kt">:</span>
+  <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">NONE</span>
 
-  for b in breaking:
-    if !set.contains(b)
-      continue
-    fail_type = BREAKAGE
+  <span class="n">for</span> <span class="n">b</span> <span class="kr">in</span> <span class="n">breaking</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="o">!</span><span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+      <span class="n">continue</span>
+    <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">BREAKAGE</span>
 
-  for c in set:
-    for d in dependencies[c]:
-      if !set.contains(d)
-        fail_type = DEPENDENCY
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">set</span><span class="kt">:</span>
+    <span class="n">for</span> <span class="n">d</span> <span class="kr">in</span> <span class="n">dependencies</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="kt">:</span>
+      <span class="kr">if</span> <span class="o">!</span><span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">DEPENDENCY</span>
 
-  for c2 in conflicts:
-    for c in conflicts[c2]:
-      if set.contains(c) &amp;&amp; set.contains(c2)
-        fail_type = CONFLICT
+  <span class="n">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">conflicts</span><span class="kt">:</span>
+    <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">conflicts</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span><span class="kt">:</span>
+      <span class="kr">if</span> <span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+        <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">CONFLICT</span>
 
-  flaky = choice([YES, NO], fail_type)
-  broken = fail_type == NONE
-  if flaky = YES:
-    report(!broken)
-  else:
-    report(broken)
+  <span class="n">flaky</span> <span class="ow">=</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">fail_type</span><span class="p">)</span>
+  <span class="n">broken</span> <span class="ow">=</span> <span class="n">fail_type</span> <span class="o">==</span> <span class="kt">NONE</span>
+  <span class="kr">if</span> <span class="n">flaky</span> <span class="ow">=</span> <span class="kt">YES:</span>
+    <span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span>
+  <span class="kr">else</span><span class="kt">:</span>
+    <span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The size and complexity presents a challenge, but at the end of the day it’s just a large Bayesian network, and we want to determine the highest-ranking success, based on the (unobserved/hidden) brokenness properties.</p>

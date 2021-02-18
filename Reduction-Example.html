@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -59,6 +61,9 @@
           
 
           
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -87,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -177,32 +182,32 @@
             
   <div class="section" id="reduction-example">
 <h1>Reduction example<a class="headerlink" href="#reduction-example" title="Permalink to this headline">¶</a></h1>
-<p>For example, the term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id1">[AG99]</a>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
-<img alt="_images/Stroscot_M_Proof_Tree.svg" src="_images/Stroscot_M_Proof_Tree.svg" /><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Root</span> <span class="n">ret</span>
-  <span class="n">Cut</span> <span class="n">o1</span> <span class="n">o1l</span>
-    <span class="n">o1</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_o1</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-      <span class="n">x_o1</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_o1</span> <span class="n">x2_o1</span>
-        <span class="n">x2_o1</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x2i_o1</span>
-          <span class="n">x2i_o1</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x1_o1r</span><span class="p">,</span> <span class="n">x1_o1</span><span class="o">/</span><span class="n">x1_o1r</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ret_o1l</span><span class="p">,</span> <span class="n">ret_o1l</span><span class="o">/</span><span class="n">ret_o1</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-    <span class="n">o1l</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">fp</span><span class="p">,</span>
-      <span class="n">fp</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">f</span> <span class="p">[]</span><span class="o">/</span><span class="p">[]</span>
-        <span class="n">f</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">h_d</span><span class="p">],</span> <span class="p">[</span><span class="n">f_ret</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-          <span class="n">Cut</span> <span class="n">o2</span> <span class="n">o2l</span>
-            <span class="n">o2</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_o2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-              <span class="n">x_o2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_o2</span> <span class="n">x2_o2</span>
-                <span class="n">x2_o2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x2i_o2</span>
-                  <span class="n">x2i_o2</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x1_o2r</span><span class="p">,</span> <span class="n">x1_o2</span><span class="o">/</span><span class="n">x1_o2r</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ret_o2l</span><span class="p">,</span> <span class="n">ret_o2l</span><span class="o">/</span><span class="n">ret_o2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-            <span class="n">o2l</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">hi_retp</span><span class="p">,</span>
-              <span class="n">hi_retp</span><span class="o">/</span><span class="p">[</span><span class="n">h_d</span><span class="p">]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">hi_ret</span> <span class="p">[</span><span class="n">h_di</span><span class="p">]</span><span class="o">/</span><span class="p">[]</span>
-                <span class="n">h_di</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">h</span>
-                  <span class="n">Cut</span> <span class="n">i</span> <span class="n">h_app</span>
-                    <span class="n">i</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">i_i</span> <span class="p">[]</span><span class="o">/</span><span class="p">[]</span>
-                      <span class="n">i_i</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">il</span><span class="p">],</span> <span class="p">[</span><span class="n">i_ret</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                        <span class="n">il</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">ild</span>
-                          <span class="n">ild</span><span class="o">/</span><span class="n">i_ret</span> <span class="o">=</span> <span class="n">Identity</span>
-                    <span class="n">h</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">h_appr</span><span class="p">,</span> <span class="n">h_app</span><span class="o">/</span><span class="n">h_appr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">hi_retl</span><span class="p">,</span> <span class="n">hi_retl</span><span class="o">/</span><span class="n">hi_ret</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-            <span class="p">)]</span> <span class="p">[(</span><span class="n">f_retl</span><span class="p">,</span> <span class="n">f_retl</span><span class="o">/</span><span class="n">f_ret</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-    <span class="p">)]</span> <span class="p">[(</span><span class="n">ret_l</span><span class="p">,</span> <span class="n">ret_l</span><span class="o">/</span><span class="n">ret</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+<p>To show how optimal reduction works, we step through the example term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id1">[AG99]</a>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
+<img alt="_images/Stroscot_M_Proof_Tree.svg" src="_images/Stroscot_M_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">ret</span>
+  <span class="kt">Cut</span> <span class="n">o1</span> <span class="n">o1l</span>
+    <span class="n">o1</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_o1</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o1</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+      <span class="n">x_o1</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_o1</span> <span class="n">x2_o1</span>
+        <span class="n">x2_o1</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">x2i_o1</span>
+          <span class="n">x2i_o1</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x1_o1r</span><span class="p">,</span> <span class="n">x1_o1</span><span class="o">/</span><span class="n">x1_o1r</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ret_o1l</span><span class="p">,</span> <span class="n">ret_o1l</span><span class="o">/</span><span class="n">ret_o1</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+    <span class="n">o1l</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">fp</span><span class="p">,</span>
+      <span class="n">fp</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">Bang</span> <span class="n">f</span> <span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span>
+        <span class="n">f</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">h_d</span><span class="p">],</span> <span class="p">[</span><span class="n">f_ret</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+          <span class="kt">Cut</span> <span class="n">o2</span> <span class="n">o2l</span>
+            <span class="n">o2</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_o2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o2</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+              <span class="n">x_o2</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_o2</span> <span class="n">x2_o2</span>
+                <span class="n">x2_o2</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">x2i_o2</span>
+                  <span class="n">x2i_o2</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x1_o2r</span><span class="p">,</span> <span class="n">x1_o2</span><span class="o">/</span><span class="n">x1_o2r</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ret_o2l</span><span class="p">,</span> <span class="n">ret_o2l</span><span class="o">/</span><span class="n">ret_o2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+            <span class="n">o2l</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">hi_retp</span><span class="p">,</span>
+              <span class="n">hi_retp</span><span class="o">/</span><span class="p">[</span><span class="n">h_d</span><span class="p">]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">Bang</span> <span class="n">hi_ret</span> <span class="p">[</span><span class="n">h_di</span><span class="p">]</span><span class="o">/</span><span class="kt">[]</span>
+                <span class="n">h_di</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">h</span>
+                  <span class="kt">Cut</span> <span class="n">i</span> <span class="n">h_app</span>
+                    <span class="n">i</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">Bang</span> <span class="n">i_i</span> <span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span>
+                      <span class="n">i_i</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">il</span><span class="p">],</span> <span class="p">[</span><span class="n">i_ret</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+                        <span class="n">il</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">ild</span>
+                          <span class="n">ild</span><span class="o">/</span><span class="n">i_ret</span> <span class="ow">=</span> <span class="kt">Identity</span>
+                    <span class="n">h</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">h_appr</span><span class="p">,</span> <span class="n">h_app</span><span class="o">/</span><span class="n">h_appr</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">hi_retl</span><span class="p">,</span> <span class="n">hi_retl</span><span class="o">/</span><span class="n">hi_ret</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+            <span class="p">)]</span> <span class="p">[(</span><span class="n">f_retl</span><span class="p">,</span> <span class="n">f_retl</span><span class="o">/</span><span class="n">f_ret</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+    <span class="p">)]</span> <span class="p">[(</span><span class="n">ret_l</span><span class="p">,</span> <span class="n">ret_l</span><span class="o">/</span><span class="n">ret</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
 </pre></div>
 </div>
 <ol class="arabic simple">

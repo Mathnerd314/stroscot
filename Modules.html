@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -33,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -58,6 +59,9 @@
             <a href="index.html" class="icon icon-home"> Stroscot
           
 
+          
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -87,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -186,36 +190,38 @@
   <div class="section" id="modules">
 <h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
 <p>Modules from the programming perspective are records; they contain a list of bindings. They use the same brace syntax as statements.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">=</span> <span class="p">{</span>
-<span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">b</span> <span class="o">=</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">C</span> <span class="ow">=</span> <span class="p">{</span>
+<span class="nf">a</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">b</span> <span class="ow">=</span> <span class="mi">2</span>
 <span class="p">}</span>
 
-<span class="n">C</span> <span class="o">=</span> <span class="p">{</span> <span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span> <span class="p">}</span>
+<span class="kt">C</span> <span class="ow">=</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="s">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="ow">=</span> <span class="s">&quot;y&quot;</span> <span class="p">}</span>
 </pre></div>
 </div>
 <div class="section" id="access">
 <h2>Access<a class="headerlink" href="#access" title="Permalink to this headline">¶</a></h2>
 <p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. To save on typing there is the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># equivalent for most purposes</span>
-<span class="n">C</span><span class="o">.</span><span class="n">a</span>
-<span class="k">with</span> <span class="n">C</span> <span class="p">{</span> <span class="n">a</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">equivalent</span> <span class="n">for</span> <span class="n">most</span> <span class="n">purposes</span>
+<span class="kt">C</span><span class="o">.</span><span class="n">a</span>
+<span class="nf">with</span> <span class="kt">C</span> <span class="p">{</span> <span class="n">a</span> <span class="p">}</span>
 </pre></div>
 </div>
 <p>Without <code class="docutils literal notranslate"><span class="pre">with</span></code>, bare identifiers or the first component of a dotted name are qualified to the current module. If multiple modules are in scope through <code class="docutils literal notranslate"><span class="pre">with</span></code>, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code> were written for every identifier <code class="docutils literal notranslate"><span class="pre">a</span></code> and module <code class="docutils literal notranslate"><span class="pre">C</span></code>. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">=</span> <span class="nb">complex</span> <span class="n">computation</span> <span class="n">returning</span> <span class="n">a</span> <span class="n">module</span>
-<span class="n">D</span> <span class="o">=</span> <span class="nb">complex</span> <span class="n">computation</span> <span class="n">returning</span> <span class="n">a</span> <span class="n">module</span>
-<span class="k">with</span> <span class="n">D</span> <span class="p">{</span> <span class="k">with</span> <span class="n">C</span> <span class="p">{</span> <span class="n">a</span> <span class="p">}</span> <span class="p">}</span> <span class="c1"># refers to C.a or D.a</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>C = complex computation returning a module
+D = complex computation returning a module
+
+with D { with C { a } }
+-- refers to C.a or D.a
 </pre></div>
 </div>
 <p>To avoid ambiguity, <code class="docutils literal notranslate"><span class="pre">with</span></code> statements can be restricted by hiding identifiers or limiting the introduced identifiers to a list.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">C</span> <span class="n">hiding</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">D</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">with</span> <span class="kt">C</span> <span class="n">hiding</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+<span class="nf">with</span> <span class="kt">D</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Module exports can similarly be limited:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span> <span class="n">a</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;y&quot;</span> <span class="p">}</span>
-<span class="c1"># only a is accessible</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">C</span> <span class="ow">=</span> <span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="s">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="ow">=</span> <span class="s">&quot;y&quot;</span> <span class="p">}</span>
+<span class="o">#</span> <span class="n">only</span> <span class="n">a</span> <span class="n">is</span> <span class="n">accessible</span>
 </pre></div>
 </div>
 <p>Sometimes it is still necessary to access internal members, so they are actually still accessible with <code class="docutils literal notranslate"><span class="pre">C.__internal.b</span></code> .</p>
@@ -226,7 +232,10 @@
 </div>
 <div class="section" id="linking">
 <h2>Linking<a class="headerlink" href="#linking" title="Permalink to this headline">¶</a></h2>
-<p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary.</p>
+<p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary. There’s a set of convenient functions that cover common cases.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">project</span> <span class="p">[</span><span class="s">&quot;src/**.sct&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
 <div class="section" id="imports">
 <h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h3>
 <p>The primitive underlying the project file is the import; this parses a file path into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>

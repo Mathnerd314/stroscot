@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -33,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -58,6 +59,9 @@
             <a href="index.html" class="icon icon-home"> Stroscot
           
 
+          
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -87,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -105,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Exemplary programs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#social-network">Social network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminal-text-editor">Terminal / text editor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#other-ideas">Other ideas</a></li>
 </ul>
 </li>
@@ -181,7 +186,7 @@
             
   <div class="section" id="exemplary-programs">
 <h1>Exemplary programs<a class="headerlink" href="#exemplary-programs" title="Permalink to this headline">¶</a></h1>
-<p>A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged, but there is also a “halo effect” of “I like program X, therefore I like programming language L that X is written in”.</p>
+<p>A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged, but there is also a “halo effect” of “I like program X, therefore I like programming language L that X is written in”. Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.</p>
 <div class="section" id="social-network">
 <h2>Social network<a class="headerlink" href="#social-network" title="Permalink to this headline">¶</a></h2>
 <p>A social network is a large program for any web development / app development framework to cut its teeth on. For example, the Hack programming language was closely associated with Facebook.</p>
@@ -190,6 +195,16 @@
 - replying to a post (creates its own post)
 - reacting to a post (upvote, downvote, save, hide)</p>
 </div>
+<div class="section" id="terminal-text-editor">
+<h2>Terminal / text editor<a class="headerlink" href="#terminal-text-editor" title="Permalink to this headline">¶</a></h2>
+<p>After reading about elastic tabstops I’ve always thought that there’s a better solution, “tablike spaces”. The idea here is to use a normal proportional font for rendering, but to make the spaces jump to the pixel column they would use if the font was monospaced. So rendering “a bit of text” would render “a” at 0, “bit” at 2 ems, “of” at 6 ems, and “text” at 9 ems, where an em is the width of the widest character in the font.</p>
+<p>A more complex algorithm treats the text as a giant table, so “a bit of text” gets split up into 4 cells “a “, “bit “, “of “, “text” which span 2,4,3,4 columns respectively. Then the column widths are calculated using the <a class="reference external" href="https://www.w3.org/TR/CSS2/tables.html#auto-table-layout">auto table layout algorithm</a> (simplified):</p>
+<ul class="simple">
+<li><p>Set the width of each column to 0.</p></li>
+<li><p>For each cell, calculate the width as rendered by the font, and increase the widths of the columns it spans so that together, they are at least as wide as the cell. Widen all spanned columns to be approximately the same.</p></li>
+</ul>
+<p>I guess this could also be a linear programming problem: minimize the width of the table (sum of column widths) subject to the minimum width constraints, and as a secondary objective make the widths as uniform as possible. The Cassowary algorithm might work.</p>
+</div>
 <div class="section" id="other-ideas">
 <h2>Other ideas<a class="headerlink" href="#other-ideas" title="Permalink to this headline">¶</a></h2>
 <p>Trading engine (Stock, options, cryptocurrency…)
@@ -197,7 +212,9 @@ Game engine
 UI toolkit
 Raytracer
 Vector graphics library (bonus points for supporting SVG drawings and OpenType fonts)
-HPC simulation (wind tunnel, nukes, …)</p>
+HPC simulation (wind tunnel, nukes, …)
+abstract assembly (like High Level Assembly)
+expression problem (compiler)</p>
 </div>
 </div>
 

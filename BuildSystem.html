@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -33,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -58,6 +59,9 @@
             <a href="index.html" class="icon icon-home"> Stroscot
           
 
+          
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -87,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -504,17 +508,17 @@ We also need to store the list of acquire/release lock operations, but most prog
 <div class="section" id="exceptions">
 <h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
 <p>Shake tries to be exception-safe, handling GHC’s broken <a class="reference external" href="https://www.fpcomplete.com/blog/2018/04/async-exception-handling-haskell/">asynchronous exception system</a>. The system is broken because it is so complicated that nobody can agree on the desired behavior / correct form of even simple examples. The prototypical example of using it is <a class="reference external" href="https://hackage.haskell.org/package/unliftio-0.2.13.1/docs/UnliftIO-Exception.html#v:bracket">bracket</a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>bracket :: MonadUnliftIO m =&gt; m a -&gt; (a -&gt; m b) -&gt; (a -&gt; m c) -&gt; m c
-bracket before after thing = withRunInIO $ \run -&gt; EUnsafe.mask $ \restore -&gt; do
-  x &lt;- run before
-  res1 &lt;- EUnsafe.try $ restore $ run $ thing x
-  case res1 of
-    Left (e1 :: SomeException) -&gt; do
-      _ :: Either SomeException b &lt;- EUnsafe.try $ EUnsafe.uninterruptibleMask_ $ run $ after x
-      EUnsafe.throwIO e1
-    Right y -&gt; do
-      _ &lt;- EUnsafe.uninterruptibleMask_ $ run $ after x
-      return y
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bracket</span> <span class="ow">::</span> <span class="kt">MonadUnliftIO</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">c</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">c</span>
+<span class="nf">bracket</span> <span class="n">before</span> <span class="n">after</span> <span class="n">thing</span> <span class="ow">=</span> <span class="n">withRunInIO</span> <span class="o">$</span> <span class="nf">\</span><span class="n">run</span> <span class="ow">-&gt;</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">mask</span> <span class="o">$</span> <span class="nf">\</span><span class="n">restore</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
+  <span class="n">x</span> <span class="ow">&lt;-</span> <span class="n">run</span> <span class="n">before</span>
+  <span class="n">res1</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">try</span> <span class="o">$</span> <span class="n">restore</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">thing</span> <span class="n">x</span>
+  <span class="kr">case</span> <span class="n">res1</span> <span class="kr">of</span>
+    <span class="kt">Left</span> <span class="p">(</span><span class="n">e1</span> <span class="ow">::</span> <span class="kt">SomeException</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
+      <span class="kr">_</span> <span class="ow">::</span> <span class="kt">Either</span> <span class="kt">SomeException</span> <span class="n">b</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">try</span> <span class="o">$</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">uninterruptibleMask_</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">after</span> <span class="n">x</span>
+      <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">throwIO</span> <span class="n">e1</span>
+    <span class="kt">Right</span> <span class="n">y</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
+      <span class="kr">_</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">uninterruptibleMask_</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">after</span> <span class="n">x</span>
+      <span class="n">return</span> <span class="n">y</span>
 </pre></div>
 </div>
 <p>Here we use 4 operations: mask, try, <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask_</span></code>, throwIO. mask shields the cleanup action from being attacked by asynchronous exceptions, allowing exceptions inside restore. try catches exceptions and allows cleanup to occur. <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask_</span></code> blocks interrupts from interrupting the after handler. Finally throwIO rethrows the exception, so that any exception inside the after handler will be swallowed.</p>
@@ -558,11 +562,11 @@ bracket before after thing = withRunInIO $ \run -&gt; EUnsafe.mask $ \restore -&
 </dd>
 </dl>
 <p>We can construct modes from the various combinations:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">digest</span> <span class="n">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">digest</span> <span class="n">changes</span><span class="o">.</span>
-<span class="n">digest</span><span class="o">-</span><span class="ow">and</span> <span class="n">ModtimeAndDigest</span> <span class="n">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="ow">and</span> <span class="n">digest</span> <span class="n">change</span><span class="o">.</span>
-<span class="n">digest</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="nb">input</span> <span class="n">ModtimeAndDigestInput</span> <span class="n">Files</span> <span class="n">change</span> <span class="n">on</span> <span class="n">modtime</span> <span class="p">(</span><span class="ow">and</span> <span class="n">digest</span> <span class="k">for</span> <span class="n">inputs</span><span class="p">)</span><span class="o">.</span>
-<span class="n">digest</span><span class="o">-</span><span class="ow">or</span> <span class="n">ModtimeOrDigest</span> <span class="n">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="ow">or</span> <span class="n">digest</span> <span class="n">change</span><span class="o">.</span>
-<span class="n">digest</span><span class="o">-</span><span class="ow">not</span> <span class="n">Modtime</span> <span class="n">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="n">changes</span><span class="o">.</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">digest</span> <span class="kt">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">digest</span> <span class="n">changes</span><span class="o">.</span>
+<span class="nf">digest</span><span class="o">-</span><span class="n">and</span> <span class="kt">ModtimeAndDigest</span> <span class="kt">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="n">and</span> <span class="n">digest</span> <span class="n">change</span><span class="o">.</span>
+<span class="nf">digest</span><span class="o">-</span><span class="n">and</span><span class="o">-</span><span class="n">input</span> <span class="kt">ModtimeAndDigestInput</span> <span class="kt">Files</span> <span class="n">change</span> <span class="n">on</span> <span class="n">modtime</span> <span class="p">(</span><span class="n">and</span> <span class="n">digest</span> <span class="n">for</span> <span class="n">inputs</span><span class="p">)</span><span class="o">.</span>
+<span class="nf">digest</span><span class="o">-</span><span class="n">or</span> <span class="kt">ModtimeOrDigest</span> <span class="kt">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="n">or</span> <span class="n">digest</span> <span class="n">change</span><span class="o">.</span>
+<span class="nf">digest</span><span class="o">-</span><span class="n">not</span> <span class="kt">Modtime</span> <span class="kt">Files</span> <span class="n">change</span> <span class="n">when</span> <span class="n">modtime</span> <span class="n">changes</span><span class="o">.</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -611,46 +615,46 @@ bracket before after thing = withRunInIO $ \run -&gt; EUnsafe.mask $ \restore -&
 <li><p>neural net that does 5 runs/subtasks which write back to file</p></li>
 </ul>
 <p>What happens when a file is written to more than once.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">et</span><span class="p">:</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">et</span><span class="kt">:</span>
   <span class="n">run</span> <span class="n">d</span>
-  <span class="n">ans</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">e</span>
+  <span class="n">ans</span> <span class="ow">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">e</span>
 
-<span class="n">dt</span><span class="p">:</span>
+<span class="nf">dt</span><span class="kt">:</span>
   <span class="n">run</span> <span class="n">c</span>
-  <span class="n">o</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">d</span>
+  <span class="n">o</span> <span class="ow">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">d</span>
 
-<span class="n">ct</span><span class="p">:</span>
+<span class="nf">ct</span><span class="kt">:</span>
   <span class="n">run</span> <span class="n">b</span>
-  <span class="n">y</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">c</span>
+  <span class="n">y</span> <span class="ow">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">c</span>
 
-<span class="n">bt</span><span class="p">:</span>
+<span class="nf">bt</span><span class="kt">:</span>
   <span class="n">run</span> <span class="n">a</span>
-  <span class="n">o</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">b</span>
+  <span class="n">o</span> <span class="ow">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">b</span>
 
-<span class="n">at</span><span class="p">:</span>
-  <span class="n">o</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">a</span>
+<span class="nf">at</span><span class="kt">:</span>
+  <span class="n">o</span> <span class="ow">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">a</span>
 </pre></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">at</span></code>, <code class="docutils literal notranslate"><span class="pre">bt</span></code>, and <code class="docutils literal notranslate"><span class="pre">dt</span></code> write <code class="docutils literal notranslate"><span class="pre">o</span></code>. Let’s say the first run is <code class="docutils literal notranslate"><span class="pre">i=a=b=c=d=e=1</span></code>, so our trace journal is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">etm</span><span class="p">:</span> <span class="n">execafter</span> <span class="n">dtm</span> <span class="n">et</span>
-<span class="n">dtm</span><span class="p">:</span> <span class="n">execafter</span> <span class="n">ctm</span> <span class="n">dt</span>
-<span class="n">ctm</span><span class="p">:</span> <span class="n">execafter</span> <span class="n">btm</span> <span class="n">ct</span>
-<span class="n">btm</span><span class="p">:</span> <span class="n">execafter</span> <span class="n">at</span> <span class="n">bt</span>
-<span class="n">at</span><span class="p">:</span> <span class="n">read</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">at</span><span class="p">:</span> <span class="n">read</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">at</span><span class="p">:</span> <span class="n">write</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">}</span>
-<span class="n">bt</span><span class="p">:</span> <span class="n">read</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">}</span>
-<span class="n">bt</span><span class="p">:</span> <span class="n">read</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">bt</span><span class="p">:</span> <span class="n">write</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">}</span>
-<span class="n">ct</span><span class="p">:</span> <span class="n">read</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">}</span>
-<span class="n">ct</span><span class="p">:</span> <span class="n">read</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">ct</span><span class="p">:</span> <span class="n">write</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="n">dt</span><span class="p">:</span> <span class="n">read</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="n">dt</span><span class="p">:</span> <span class="n">read</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">dt</span><span class="p">:</span> <span class="n">write</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">5</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">}</span>
-<span class="n">et</span><span class="p">:</span> <span class="n">read</span> <span class="n">o</span> <span class="o">=</span> <span class="mi">5</span> <span class="p">{</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">}</span>
-<span class="n">et</span><span class="p">:</span> <span class="n">read</span> <span class="n">e</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">et</span><span class="p">:</span> <span class="n">write</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">6</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">etm</span><span class="kt">:</span> <span class="n">execafter</span> <span class="n">dtm</span> <span class="n">et</span>
+<span class="nf">dtm</span><span class="kt">:</span> <span class="n">execafter</span> <span class="n">ctm</span> <span class="n">dt</span>
+<span class="nf">ctm</span><span class="kt">:</span> <span class="n">execafter</span> <span class="n">btm</span> <span class="n">ct</span>
+<span class="nf">btm</span><span class="kt">:</span> <span class="n">execafter</span> <span class="n">at</span> <span class="n">bt</span>
+<span class="nf">at</span><span class="kt">:</span> <span class="n">read</span> <span class="n">i</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">at</span><span class="kt">:</span> <span class="n">read</span> <span class="n">a</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">at</span><span class="kt">:</span> <span class="n">write</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">2</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="nf">bt</span><span class="kt">:</span> <span class="n">read</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">2</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="nf">bt</span><span class="kt">:</span> <span class="n">read</span> <span class="n">b</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">bt</span><span class="kt">:</span> <span class="n">write</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">3</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">2</span> <span class="p">}</span>
+<span class="nf">ct</span><span class="kt">:</span> <span class="n">read</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">3</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">2</span> <span class="p">}</span>
+<span class="nf">ct</span><span class="kt">:</span> <span class="n">read</span> <span class="n">c</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">ct</span><span class="kt">:</span> <span class="n">write</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">4</span>
+<span class="nf">dt</span><span class="kt">:</span> <span class="n">read</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">4</span>
+<span class="nf">dt</span><span class="kt">:</span> <span class="n">read</span> <span class="n">d</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">dt</span><span class="kt">:</span> <span class="n">write</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">5</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">3</span> <span class="p">}</span>
+<span class="nf">et</span><span class="kt">:</span> <span class="n">read</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">5</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="mi">3</span> <span class="p">}</span>
+<span class="nf">et</span><span class="kt">:</span> <span class="n">read</span> <span class="n">e</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">et</span><span class="kt">:</span> <span class="n">write</span> <span class="n">ans</span> <span class="ow">=</span> <span class="mi">6</span>
 </pre></div>
 </div>
 <p>To keep the graph a DAG, we have split <code class="docutils literal notranslate"><span class="pre">o</span></code> into <code class="docutils literal notranslate"><span class="pre">o1,o2,o3</span></code> (the <code class="docutils literal notranslate"><span class="pre">v</span></code> version numbering):</p>
@@ -697,85 +701,85 @@ bracket before after thing = withRunInIO $ \run -&gt; EUnsafe.mask $ \restore -&
 <li><p><code class="docutils literal notranslate"><span class="pre">{c=0,o=3}</span></code>: run <code class="docutils literal notranslate"><span class="pre">ct,dt</span></code>, and <code class="docutils literal notranslate"><span class="pre">et</span></code> if <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">!=</span> <span class="pre">5</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">{y=0}</span></code>: run <code class="docutils literal notranslate"><span class="pre">at,bt</span></code>, <code class="docutils literal notranslate"><span class="pre">ct</span></code> if <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">!=</span> <span class="pre">3</span></code>, <code class="docutils literal notranslate"><span class="pre">dt</span></code> if <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">!=</span> <span class="pre">4</span></code>, and <code class="docutils literal notranslate"><span class="pre">et</span></code> if <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">!=</span> <span class="pre">5</span></code></p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>etm r
-etm r, dtm r [et]
-etm r, dtm r [et], ctm r [dt]
-etm r, dtm r [et], ctm r [dt], btm r [ct]
-etm r, dtm r [et], ctm r [dt], btm r [ct], at r [bt]
-at:
-  if i changed || a changed
-    run at
-  else
-    if o changed
-      record o damaged
-bt:
-  if o changed || b changed
-    if o damaged
-      run at
-      if o still damaged
-        error
-    run bt
-  else
-    if o changed
-      record o damaged
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">etm</span> <span class="n">r</span>
+<span class="nf">etm</span> <span class="n">r</span><span class="p">,</span> <span class="n">dtm</span> <span class="n">r</span> <span class="p">[</span><span class="n">et</span><span class="p">]</span>
+<span class="nf">etm</span> <span class="n">r</span><span class="p">,</span> <span class="n">dtm</span> <span class="n">r</span> <span class="p">[</span><span class="n">et</span><span class="p">],</span> <span class="n">ctm</span> <span class="n">r</span> <span class="p">[</span><span class="n">dt</span><span class="p">]</span>
+<span class="nf">etm</span> <span class="n">r</span><span class="p">,</span> <span class="n">dtm</span> <span class="n">r</span> <span class="p">[</span><span class="n">et</span><span class="p">],</span> <span class="n">ctm</span> <span class="n">r</span> <span class="p">[</span><span class="n">dt</span><span class="p">],</span> <span class="n">btm</span> <span class="n">r</span> <span class="p">[</span><span class="n">ct</span><span class="p">]</span>
+<span class="nf">etm</span> <span class="n">r</span><span class="p">,</span> <span class="n">dtm</span> <span class="n">r</span> <span class="p">[</span><span class="n">et</span><span class="p">],</span> <span class="n">ctm</span> <span class="n">r</span> <span class="p">[</span><span class="n">dt</span><span class="p">],</span> <span class="n">btm</span> <span class="n">r</span> <span class="p">[</span><span class="n">ct</span><span class="p">],</span> <span class="n">at</span> <span class="n">r</span> <span class="p">[</span><span class="n">bt</span><span class="p">]</span>
+<span class="nf">at</span><span class="kt">:</span>
+  <span class="kr">if</span> <span class="n">i</span> <span class="n">changed</span> <span class="o">||</span> <span class="n">a</span> <span class="n">changed</span>
+    <span class="n">run</span> <span class="n">at</span>
+  <span class="kr">else</span>
+    <span class="kr">if</span> <span class="n">o</span> <span class="n">changed</span>
+      <span class="n">record</span> <span class="n">o</span> <span class="n">damaged</span>
+<span class="nf">bt</span><span class="kt">:</span>
+  <span class="kr">if</span> <span class="n">o</span> <span class="n">changed</span> <span class="o">||</span> <span class="n">b</span> <span class="n">changed</span>
+    <span class="kr">if</span> <span class="n">o</span> <span class="n">damaged</span>
+      <span class="n">run</span> <span class="n">at</span>
+      <span class="kr">if</span> <span class="n">o</span> <span class="n">still</span> <span class="n">damaged</span>
+        <span class="ne">error</span>
+    <span class="n">run</span> <span class="n">bt</span>
+  <span class="kr">else</span>
+    <span class="kr">if</span> <span class="n">o</span> <span class="n">changed</span>
+      <span class="n">record</span> <span class="n">o</span> <span class="n">damaged</span>
 
 
 
 
-changed = Set(i,b,o3)
+<span class="nf">changed</span> <span class="ow">=</span> <span class="kt">Set</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">o3</span><span class="p">)</span>
 
-recheck = {}
-if {i,a,o1} &amp; changed
-  recheck |= a,b,c,d,e
-if {o1,b,o2} &amp; changed
-  recheck |= b,c,d,e
-if {o2,c,y} &amp; changed
-  recheck |= c,d,e
-if {y,d,o3} &amp; changed
-  recheck |= d,e
-if {o3,e,ans} &amp; changed
-  recheck |= e
+<span class="nf">recheck</span> <span class="ow">=</span> <span class="p">{}</span>
+<span class="kr">if</span> <span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">o1</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">changed</span>
+  <span class="n">recheck</span> <span class="o">|=</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span>
+<span class="kr">if</span> <span class="p">{</span><span class="n">o1</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">o2</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">changed</span>
+  <span class="n">recheck</span> <span class="o">|=</span> <span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span>
+<span class="kr">if</span> <span class="p">{</span><span class="n">o2</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">y</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">changed</span>
+  <span class="n">recheck</span> <span class="o">|=</span> <span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">e</span>
+<span class="kr">if</span> <span class="p">{</span><span class="n">y</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">o3</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">changed</span>
+  <span class="n">recheck</span> <span class="o">|=</span> <span class="n">d</span><span class="p">,</span><span class="n">e</span>
+<span class="kr">if</span> <span class="p">{</span><span class="n">o3</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">ans</span><span class="p">}</span> <span class="o">&amp;</span> <span class="n">changed</span>
+  <span class="n">recheck</span> <span class="o">|=</span> <span class="n">e</span>
 
-check e
+<span class="nf">check</span> <span class="n">e</span>
 
-check(x):
-  if !(x &amp; recheck)
-    return
+<span class="nf">check</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="kt">:</span>
+  <span class="kr">if</span> <span class="o">!</span><span class="p">(</span><span class="n">x</span> <span class="o">&amp;</span> <span class="n">recheck</span><span class="p">)</span>
+    <span class="n">return</span>
 
-  for( deps)
-
-
- || (o != 2 &amp;&amp; (o != 4 || x != 0))
-  run a
-if a ran || o = 2
-  run b
-if o != 4 || ans != 3
-  run c
+  <span class="n">for</span><span class="p">(</span> <span class="n">deps</span><span class="p">)</span>
 
 
+ <span class="o">||</span> <span class="p">(</span><span class="n">o</span> <span class="o">!=</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">o</span> <span class="o">!=</span> <span class="mi">4</span> <span class="o">||</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">))</span>
+  <span class="n">run</span> <span class="n">a</span>
+<span class="kr">if</span> <span class="n">a</span> <span class="n">ran</span> <span class="o">||</span> <span class="n">o</span> <span class="ow">=</span> <span class="mi">2</span>
+  <span class="n">run</span> <span class="n">b</span>
+<span class="kr">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="mi">4</span> <span class="o">||</span> <span class="n">ans</span> <span class="o">!=</span> <span class="mi">3</span>
+  <span class="n">run</span> <span class="n">c</span>
 
-c: check b
-b: check a
-a: if i=1
-a:  write o1 2
-a: else
-a:  rerun a
-a:  read i &lt;i&gt;
-a:  write o &lt;i+1&gt;
-aL return
 
-a: i != 1, rerun
-a: read i 0
-a: write o 1
-a: return
-b: a ran, rerun
-b: read o 1
-b: write o 2
-b: return
-c: o != 4, rerun
-c: read o 2
-c: write ans 1
-c: return
+
+<span class="nf">c</span><span class="kt">:</span> <span class="n">check</span> <span class="n">b</span>
+<span class="nf">b</span><span class="kt">:</span> <span class="n">check</span> <span class="n">a</span>
+<span class="nf">a</span><span class="kt">:</span> <span class="kr">if</span> <span class="n">i</span><span class="ow">=</span><span class="mi">1</span>
+<span class="nf">a</span><span class="kt">:</span>  <span class="n">write</span> <span class="n">o1</span> <span class="mi">2</span>
+<span class="nf">a</span><span class="kt">:</span> <span class="kr">else</span>
+<span class="nf">a</span><span class="kt">:</span>  <span class="n">rerun</span> <span class="n">a</span>
+<span class="nf">a</span><span class="kt">:</span>  <span class="n">read</span> <span class="n">i</span> <span class="o">&lt;</span><span class="n">i</span><span class="o">&gt;</span>
+<span class="nf">a</span><span class="kt">:</span>  <span class="n">write</span> <span class="n">o</span> <span class="o">&lt;</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="nf">aL</span> <span class="n">return</span>
+
+<span class="nf">a</span><span class="kt">:</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rerun</span>
+<span class="nf">a</span><span class="kt">:</span> <span class="n">read</span> <span class="n">i</span> <span class="mi">0</span>
+<span class="nf">a</span><span class="kt">:</span> <span class="n">write</span> <span class="n">o</span> <span class="mi">1</span>
+<span class="nf">a</span><span class="kt">:</span> <span class="n">return</span>
+<span class="nf">b</span><span class="kt">:</span> <span class="n">a</span> <span class="n">ran</span><span class="p">,</span> <span class="n">rerun</span>
+<span class="nf">b</span><span class="kt">:</span> <span class="n">read</span> <span class="n">o</span> <span class="mi">1</span>
+<span class="nf">b</span><span class="kt">:</span> <span class="n">write</span> <span class="n">o</span> <span class="mi">2</span>
+<span class="nf">b</span><span class="kt">:</span> <span class="n">return</span>
+<span class="nf">c</span><span class="kt">:</span> <span class="n">o</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">rerun</span>
+<span class="nf">c</span><span class="kt">:</span> <span class="n">read</span> <span class="n">o</span> <span class="mi">2</span>
+<span class="nf">c</span><span class="kt">:</span> <span class="n">write</span> <span class="n">ans</span> <span class="mi">1</span>
+<span class="nf">c</span><span class="kt">:</span> <span class="n">return</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -868,16 +872,16 @@ error: cannot connect to ‘mac’</p>
 <p>then you need to ensure that the PATH of non-interactive login shells contains Nix.
 Warning: If you are building via the Nix daemon, it is the Nix daemon user account (that is, root) that should have SSH access to the remote machine. If you can’t or don’t want to configure root to be able to access to remote machine, you can use a private Nix store instead by passing e.g. –store ~/my-nix.</p>
 <p>The list of remote machines can be specified on the command line or in the Nix configuration file. The former is convenient for testing. For example, the following command allows you to build a derivation for x86_64-darwin on a Linux machine:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ uname
-Linux
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uname
+<span class="go">Linux</span>
 
-$ nix build \
-  &#39;(with import &lt;nixpkgs&gt; { system = &quot;x86_64-darwin&quot;; }; runCommand &quot;foo&quot; {} &quot;uname &gt; $out&quot;)&#39; \
-  --builders &#39;ssh://mac x86_64-darwin&#39;
-[1/0/1 built, 0.0 MiB DL] building foo on ssh://mac
+<span class="gp">$ </span>nix build <span class="se">\</span>
+<span class="go">  &#39;(with import &lt;nixpkgs&gt; { system = &quot;x86_64-darwin&quot;; }; runCommand &quot;foo&quot; {} &quot;uname &gt; $out&quot;)&#39; \</span>
+<span class="go">  --builders &#39;ssh://mac x86_64-darwin&#39;</span>
+<span class="go">[1/0/1 built, 0.0 MiB DL] building foo on ssh://mac</span>
 
-$ cat ./result
-Darwin
+<span class="gp">$ </span>cat ./result
+<span class="go">Darwin</span>
 </pre></div>
 </div>
 <p>It is possible to specify multiple builders separated by a semicolon or a newline, e.g.</p>
@@ -953,18 +957,18 @@ Darwin
 <div class="section" id="debugging">
 <h3>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h3>
 <p>ninja subtools:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="n">browse</span>  <span class="n">browse</span> <span class="n">dependency</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">web</span> <span class="n">browser</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>   <span class="n">browse</span>  <span class="n">browse</span> <span class="n">dependency</span> <span class="n">graph</span> <span class="kr">in</span> <span class="n">a</span> <span class="n">web</span> <span class="n">browser</span>
     <span class="n">clean</span>  <span class="n">clean</span> <span class="n">built</span> <span class="n">files</span>
- <span class="n">commands</span>  <span class="nb">list</span> <span class="nb">all</span> <span class="n">commands</span> <span class="n">required</span> <span class="n">to</span> <span class="n">rebuild</span> <span class="n">given</span> <span class="n">targets</span>
-     <span class="n">deps</span>  <span class="n">show</span> <span class="n">dependencies</span> <span class="n">stored</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">deps</span> <span class="n">log</span>
-    <span class="n">graph</span>  <span class="n">output</span> <span class="n">graphviz</span> <span class="n">dot</span> <span class="n">file</span> <span class="k">for</span> <span class="n">targets</span>
-    <span class="n">query</span>  <span class="n">show</span> <span class="n">inputs</span><span class="o">/</span><span class="n">outputs</span> <span class="k">for</span> <span class="n">a</span> <span class="n">path</span>
-  <span class="n">targets</span>  <span class="nb">list</span> <span class="n">targets</span> <span class="n">by</span> <span class="n">their</span> <span class="n">rule</span> <span class="ow">or</span> <span class="n">depth</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">DAG</span>
-   <span class="n">compdb</span>  <span class="n">dump</span> <span class="n">JSON</span> <span class="n">compilation</span> <span class="n">database</span> <span class="n">to</span> <span class="n">stdout</span>
-<span class="n">recompact</span>  <span class="n">recompacts</span> <span class="n">ninja</span><span class="o">-</span><span class="n">internal</span> <span class="n">data</span> <span class="n">structures</span>
-   <span class="n">restat</span>  <span class="n">restats</span> <span class="nb">all</span> <span class="n">outputs</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">build</span> <span class="n">log</span>
-    <span class="n">rules</span>  <span class="nb">list</span> <span class="nb">all</span> <span class="n">rules</span>
-<span class="n">cleandead</span>  <span class="n">clean</span> <span class="n">built</span> <span class="n">files</span> <span class="n">that</span> <span class="n">are</span> <span class="n">no</span> <span class="n">longer</span> <span class="n">produced</span> <span class="n">by</span> <span class="n">the</span> <span class="n">manifest</span>
+ <span class="n">commands</span>  <span class="n">list</span> <span class="n">all</span> <span class="n">commands</span> <span class="n">required</span> <span class="n">to</span> <span class="n">rebuild</span> <span class="n">given</span> <span class="n">targets</span>
+     <span class="n">deps</span>  <span class="n">show</span> <span class="n">dependencies</span> <span class="n">stored</span> <span class="kr">in</span> <span class="n">the</span> <span class="n">deps</span> <span class="n">log</span>
+    <span class="n">graph</span>  <span class="n">output</span> <span class="n">graphviz</span> <span class="n">dot</span> <span class="n">file</span> <span class="n">for</span> <span class="n">targets</span>
+    <span class="n">query</span>  <span class="n">show</span> <span class="n">inputs</span><span class="o">/</span><span class="n">outputs</span> <span class="n">for</span> <span class="n">a</span> <span class="n">path</span>
+  <span class="n">targets</span>  <span class="n">list</span> <span class="n">targets</span> <span class="n">by</span> <span class="n">their</span> <span class="n">rule</span> <span class="n">or</span> <span class="n">depth</span> <span class="kr">in</span> <span class="n">the</span> <span class="kt">DAG</span>
+   <span class="n">compdb</span>  <span class="n">dump</span> <span class="kt">JSON</span> <span class="n">compilation</span> <span class="n">database</span> <span class="n">to</span> <span class="n">stdout</span>
+<span class="nf">recompact</span>  <span class="n">recompacts</span> <span class="n">ninja</span><span class="o">-</span><span class="n">internal</span> <span class="kr">data</span> <span class="n">structures</span>
+   <span class="n">restat</span>  <span class="n">restats</span> <span class="n">all</span> <span class="n">outputs</span> <span class="kr">in</span> <span class="n">the</span> <span class="n">build</span> <span class="n">log</span>
+    <span class="n">rules</span>  <span class="n">list</span> <span class="n">all</span> <span class="n">rules</span>
+<span class="nf">cleandead</span>  <span class="n">clean</span> <span class="n">built</span> <span class="n">files</span> <span class="n">that</span> <span class="n">are</span> <span class="n">no</span> <span class="n">longer</span> <span class="n">produced</span> <span class="n">by</span> <span class="n">the</span> <span class="n">manifest</span>
 </pre></div>
 </div>
 <p>demo”] (noArg [Demo]) “Run in demo mode.”
@@ -1171,41 +1175,41 @@ savings reflect improved resource utilization.</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    $ scons --debug=presub
-    Building myprog.o with action(s):
-      $SHCC $SHCFLAGS $SHCCFLAGS $CPPFLAGS $_CPPINCFLAGS -c -o $TARGET $SOURCES
-    ...
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>    <span class="o">$</span> <span class="n">scons</span> <span class="c1">--debug=presub</span>
+    <span class="kt">Building</span> <span class="n">myprog</span><span class="o">.</span><span class="n">o</span> <span class="n">with</span> <span class="n">action</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="kt">:</span>
+      <span class="o">$</span><span class="kt">SHCC</span> <span class="o">$</span><span class="kt">SHCFLAGS</span> <span class="o">$</span><span class="kt">SHCCFLAGS</span> <span class="o">$</span><span class="kt">CPPFLAGS</span> <span class="o">$</span><span class="n">_CPPINCFLAGS</span> <span class="o">-</span><span class="n">c</span> <span class="o">-</span><span class="n">o</span> <span class="o">$</span><span class="kt">TARGET</span> <span class="o">$</span><span class="kt">SOURCES</span>
+    <span class="o">...</span>
 
-stacktrace
+<span class="nf">stacktrace</span>
 
-    Prints an internal Python stack trace when encountering an otherwise unexplained error.
+    <span class="kt">Prints</span> <span class="n">an</span> <span class="n">internal</span> <span class="kt">Python</span> <span class="n">stack</span> <span class="n">trace</span> <span class="n">when</span> <span class="n">encountering</span> <span class="n">an</span> <span class="n">otherwise</span> <span class="n">unexplained</span> <span class="ne">error</span><span class="o">.</span>
 
-time
+<span class="nf">time</span>
 
-    Prints various time profiling information:
+    <span class="kt">Prints</span> <span class="n">various</span> <span class="n">time</span> <span class="n">profiling</span> <span class="n">information</span><span class="kt">:</span>
 
-        The time spent executing each individual build command
+        <span class="kt">The</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">executing</span> <span class="n">each</span> <span class="n">individual</span> <span class="n">build</span> <span class="n">command</span>
 
-        The total build time (time SCons ran from beginning to end)
+        <span class="kt">The</span> <span class="n">total</span> <span class="n">build</span> <span class="n">time</span> <span class="p">(</span><span class="n">time</span> <span class="kt">SCons</span> <span class="n">ran</span> <span class="n">from</span> <span class="n">beginning</span> <span class="n">to</span> <span class="n">end</span><span class="p">)</span>
 
-        The total time spent reading and executing SConscript files
+        <span class="kt">The</span> <span class="n">total</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">reading</span> <span class="n">and</span> <span class="n">executing</span> <span class="kt">SConscript</span> <span class="n">files</span>
 
-        The total time SCons itself spent running (that is, not counting reading and executing SConscript files)
+        <span class="kt">The</span> <span class="n">total</span> <span class="n">time</span> <span class="kt">SCons</span> <span class="n">itself</span> <span class="n">spent</span> <span class="n">running</span> <span class="p">(</span><span class="n">that</span> <span class="n">is</span><span class="p">,</span> <span class="n">not</span> <span class="n">counting</span> <span class="n">reading</span> <span class="n">and</span> <span class="n">executing</span> <span class="kt">SConscript</span> <span class="n">files</span><span class="p">)</span>
 
-        The total time spent executing all build commands
+        <span class="kt">The</span> <span class="n">total</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">executing</span> <span class="n">all</span> <span class="n">build</span> <span class="n">commands</span>
 
-        The elapsed wall-clock time spent executing those build commands
+        <span class="kt">The</span> <span class="n">elapsed</span> <span class="n">wall</span><span class="o">-</span><span class="n">clock</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">executing</span> <span class="n">those</span> <span class="n">build</span> <span class="n">commands</span>
 
-        The time spent processing each file passed to the SConscript function
+        <span class="kt">The</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">processing</span> <span class="n">each</span> <span class="n">file</span> <span class="n">passed</span> <span class="n">to</span> <span class="n">the</span> <span class="kt">SConscript</span> <span class="n">function</span>
 
-    (When scons is executed without the -j option, the elapsed wall-clock time will typically be slightly longer than the total time spent executing all the build commands, due to the SCons processing that takes place in between executing each command. When scons is executed with the -j option, and your build configuration allows good parallelization, the elapsed wall-clock time should be significantly smaller than the total time spent executing all the build commands, since multiple build commands and intervening SCons processing should take place in parallel.)
+    <span class="p">(</span><span class="kt">When</span> <span class="n">scons</span> <span class="n">is</span> <span class="n">executed</span> <span class="n">without</span> <span class="n">the</span> <span class="o">-</span><span class="n">j</span> <span class="n">option</span><span class="p">,</span> <span class="n">the</span> <span class="n">elapsed</span> <span class="n">wall</span><span class="o">-</span><span class="n">clock</span> <span class="n">time</span> <span class="n">will</span> <span class="n">typically</span> <span class="n">be</span> <span class="n">slightly</span> <span class="n">longer</span> <span class="n">than</span> <span class="n">the</span> <span class="n">total</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">executing</span> <span class="n">all</span> <span class="n">the</span> <span class="n">build</span> <span class="n">commands</span><span class="p">,</span> <span class="n">due</span> <span class="n">to</span> <span class="n">the</span> <span class="kt">SCons</span> <span class="n">processing</span> <span class="n">that</span> <span class="n">takes</span> <span class="n">place</span> <span class="kr">in</span> <span class="n">between</span> <span class="n">executing</span> <span class="n">each</span> <span class="n">command</span><span class="o">.</span> <span class="kt">When</span> <span class="n">scons</span> <span class="n">is</span> <span class="n">executed</span> <span class="n">with</span> <span class="n">the</span> <span class="o">-</span><span class="n">j</span> <span class="n">option</span><span class="p">,</span> <span class="n">and</span> <span class="n">your</span> <span class="n">build</span> <span class="n">configuration</span> <span class="n">allows</span> <span class="n">good</span> <span class="n">parallelization</span><span class="p">,</span> <span class="n">the</span> <span class="n">elapsed</span> <span class="n">wall</span><span class="o">-</span><span class="n">clock</span> <span class="n">time</span> <span class="n">should</span> <span class="n">be</span> <span class="n">significantly</span> <span class="n">smaller</span> <span class="n">than</span> <span class="n">the</span> <span class="n">total</span> <span class="n">time</span> <span class="n">spent</span> <span class="n">executing</span> <span class="n">all</span> <span class="n">the</span> <span class="n">build</span> <span class="n">commands</span><span class="p">,</span> <span class="n">since</span> <span class="n">multiple</span> <span class="n">build</span> <span class="n">commands</span> <span class="n">and</span> <span class="n">intervening</span> <span class="kt">SCons</span> <span class="n">processing</span> <span class="n">should</span> <span class="n">take</span> <span class="n">place</span> <span class="kr">in</span> <span class="n">parallel</span><span class="o">.</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>‘–debug[=options]’</p>
 <blockquote>
 <div><p>Print debugging information in addition to normal processing. Various levels and types of output can be chosen. With no arguments, print the “basic” level of debugging. Possible arguments are below; only the first character is considered, and values must be comma- or space-separated.</p>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>a (all)
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>a (all)
     All types of debugging output are enabled. This is equivalent to using ‘-d’.
 b (basic)
     Basic debugging prints each target that was found to be out-of-date, and whether the build was successful or not.
@@ -1278,9 +1282,9 @@ scons –tree=all,prune,status target</p>
 ‘–print-directory’
 ‘–no-print-directory’</p>
 <p>showing each directory as make starts processing it and as make finishes processing it. For example, if ‘make -w’ is run in the directory /u/gnu/make, make will print lines of the form:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>make: Entering directory `/u/gnu/make&#39;.
-...
-make: Leaving directory `/u/gnu/make&#39;.
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">make</span><span class="kt">:</span> <span class="kt">Entering</span> <span class="n">directory</span> <span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
+<span class="o">...</span>
+<span class="nf">make</span><span class="kt">:</span> <span class="kt">Leaving</span> <span class="n">directory</span> <span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
 </pre></div>
 </div>
 <p>In make this option improves the output of several levels of recursive make invocations. In Cot it is only useful for tracking down commands which change the current directory; the current directory should not be changed except with <code class="docutils literal notranslate"><span class="pre">-C</span></code>.</p>
@@ -1452,11 +1456,11 @@ return the number of threads used).</p>
 </dd>
 </dl>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ scons --interactive
-scons: Reading SConscript files ...
-scons: done reading SConscript files.
-scons&gt;&gt;&gt; build -n prog
-scons&gt;&gt;&gt; exit
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">$</span> <span class="n">scons</span> <span class="c1">--interactive</span>
+<span class="nf">scons</span><span class="kt">:</span> <span class="kt">Reading</span> <span class="kt">SConscript</span> <span class="n">files</span> <span class="o">...</span>
+<span class="nf">scons</span><span class="kt">:</span> <span class="n">done</span> <span class="n">reading</span> <span class="kt">SConscript</span> <span class="n">files</span><span class="o">.</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span> <span class="n">build</span> <span class="o">-</span><span class="n">n</span> <span class="n">prog</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span> <span class="n">exit</span>
 </pre></div>
 </div>
 <dl class="simple">

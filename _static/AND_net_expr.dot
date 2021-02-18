@@ -1,0 +1,34 @@
+digraph {
+// dot2tex --debug -ftikz -tverbatim --template AND_net_template.tex --autosize AND_net_expr.dot > AND_net_expr.tex && pdflatex AND_net_expr.tex && pdf2svg AND_net_expr.pdf AND_net_expr.svg
+
+h1 [texlbl="\proof{\rl{\Sigma_{FR}}\ia{\vdash \B }}"]
+g1 [texlbl="\proof{\ix{\vdash \B }\rl{!w}\ib{!\B \vdash \B }}"]
+f1 [texlbl="\proof{\ix{!\B \vdash \B }\rl{\Pi_R}\ib{\vdash !\B \to \B }}"]
+h2 [texlbl="\proof{\rl{\I}\ia{\B \vdash \B }}"]
+g2 [texlbl="\proof{\ix{\B^0 \vdash \B^0 }\rl{!d}\ib{!\B^0 \vdash \B^0 }}"]
+f2 [texlbl="\proof{\ix{!\B \vdash \B }\rl{\Pi_R}\ib{\vdash !\B \to \B }}"]
+e [texlbl="\proof{\ix{\vdash !\B \to \B }\ix{\vdash !\B \to \B }\rl{\Sigma_L}\ic{\B \vdash !\B \to \B }}"]
+d [texlbl="\proof{\ix{\B \vdash !\B \to \B }\rl{\Pi_R}\ib{\vdash \B \to !\B \to \B }}"]
+and [texlbl="\proof{\ix{\vdash \B \to !\B \to \B }\rl{\text{Assign}}\ib{\text{and} = }}"]
+
+edge [weight=5]
+g1 -> f1 [color="blue",dir=back]
+f1 -> h1 [color="red"]
+h2 -> g2 [color="blue",dir=back]
+g2 -> f2 [color="blue",dir=back]
+f2 -> h2 /* h2r */ [color="red"]
+e -> f1 [color="red"]
+e -> f2 [color="red"]
+e -> d [color="blue",dir=back]
+d -> e /* f */ [color="red"]
+
+edge [weight=1]
+g1 -> h1
+f1 -> g1
+g2 -> h2
+f2 -> g2
+e -> f1
+e -> f2
+d -> e
+and -> d
+}

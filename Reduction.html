@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -59,6 +61,9 @@
           
 
           
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -87,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -95,21 +100,26 @@
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#core">Core</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#syntax">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nets">Nets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rules">Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#syntax">Syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nets">Nets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simplified-graph">Simplified graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concrete-syntax">Concrete syntax</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#cut-elimination">Cut elimination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#normal-order-reduction">Normal Order Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#optimal-reduction">Optimal reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#primitives">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linear-logic">Linear logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recursion">Recursion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">Optimal reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#random-old-junk">Random old junk</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#linear-logic">Linear logic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recursion">Recursion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id12">Optimal reduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#f2-g2">F2 G2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#readback">Readback</a></li>
 </ul>
 </li>
@@ -197,15 +207,15 @@
             
   <div class="section" id="reduction">
 <h1>Reduction<a class="headerlink" href="#reduction" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="core">
-<h2>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
 <p>Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Considerations:</p>
 <ul class="simple">
 <li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id1">[DMAPJ16]</a>, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.</p></li>
 <li><p>Based on optimal reduction, mostly <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id2">[Gue96]</a>, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).</p></li>
 <li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#levyjumbolcalculus2006" id="id3">[Lev06]</a>, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. <span class="math notranslate nohighlight">\(\Sigma\)</span> contains LL’s synchronous/positive operators 0, 1, plus ⊕, and times ⊗. <span class="math notranslate nohighlight">\(\Pi\)</span> contains LL’s lollipop implication ⊸ and asynchronous/negative operators top ⊤, bottom ⊥, with &amp;, and par ⅋.</p></li>
 </ul>
-<p>We start with the generalized <span class="math notranslate nohighlight">\(\Pi\)</span> rule. This is similar to Levy’s rule except it allows multiple conclusions. We have indexed variables <span class="math notranslate nohighlight">\(A_{ij}\)</span> and <span class="math notranslate nohighlight">\(B_{ik}\)</span> where <span class="math notranslate nohighlight">\(0 \leq i &lt; N, 0 \leq j &lt; m_i, 0 \leq k &lt; n_i\)</span>. We call <span class="math notranslate nohighlight">\(N\)</span> the length of the jumbo type and the list <span class="math notranslate nohighlight">\((m_i,n_i)\)</span> the jumbo-arity.</p>
+<div class="section" id="rules">
+<h2>Rules<a class="headerlink" href="#rules" title="Permalink to this headline">¶</a></h2>
+<p>We start with the generalized <span class="math notranslate nohighlight">\(\Pi\)</span> rule. This is similar to Levy’s rule except it allows multiple conclusion propositions. We have indexed variables <span class="math notranslate nohighlight">\(A_{ij}\)</span> and <span class="math notranslate nohighlight">\(B_{ik}\)</span> where <span class="math notranslate nohighlight">\(0 \leq i &lt; N, 0 \leq j &lt; m_i, 0 \leq k &lt; n_i\)</span>. We call <span class="math notranslate nohighlight">\(N\)</span> the length of the jumbo type and the list <span class="math notranslate nohighlight">\([(m_i,n_i)]\)</span> the jumbo-arity.</p>
 <div class="math notranslate nohighlight">
 \[\newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#1~~ }{\displaystyle ~~#2~~ } \  (#3)}
 \begin{array}{cc}
@@ -217,7 +227,8 @@
   {\overrightarrow{\Gamma}, \vec \Theta, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \overrightarrow{\Delta}, \vec\Lambda}
   {\Pi_{i} {}_{L}}
 \end{array}\]</div>
-<p>Next we have the generalized <span class="math notranslate nohighlight">\(\Sigma\)</span> rule. This allows premises as well. Following <a class="bibtex reference internal" href="zzreferences.html#wadlercallbyvaluedualcallbyname2003" id="id4">[Wad03]</a> <a class="bibtex reference internal" href="zzreferences.html#crolardformulaeastypesinterpretationsubtractive2004" id="id5">[Cro04]</a> the dual of implication is called “subtraction” or “difference” and is denoted <span class="math notranslate nohighlight">\(-\)</span>. For normal ADTs, the RHS of the difference is empty, i.e. it looks like <span class="math notranslate nohighlight">\(A - []\)</span>. Ideally the difference operator allows creating zippers, or maybe it is useless.</p>
+<p>Next we have the generalized <span class="math notranslate nohighlight">\(\Sigma\)</span> rule. This is the dual of <span class="math notranslate nohighlight">\(\Pi\)</span>. Following <a class="bibtex reference internal" href="zzreferences.html#wadlercallbyvaluedualcallbyname2003" id="id4">[Wad03]</a> <a class="bibtex reference internal" href="zzreferences.html#crolardformulaeastypesinterpretationsubtractive2004" id="id5">[Cro04]</a> the dual of implication is called “subtraction” or “difference” and is denoted <span class="math notranslate nohighlight">\(-\)</span>. For normal ADTs, the RHS of the difference is empty, i.e. it looks like <span class="math notranslate nohighlight">\(\Pi (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)\)</span>. The syntax <span class="math notranslate nohighlight">\(\Pi [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]\)</span> might be clearer.</p>
+<p>When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. <a class="reference external" href="https://en.wikipedia.org/wiki/Difference_list">difference lists</a>. (TODO: check that this actually gives efficient concatenation)</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cc}
 \rule{\overrightarrow{ \Gamma_k, B_{i k} \vdash \Delta_k } \quad \overrightarrow{ \Theta_j \vdash A_{i j}, \Lambda_j } }
@@ -228,40 +239,28 @@
   {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
   {\Sigma_L}
 \end{array}\]</div>
-<p>To allow/restrict contraction and weakening we have two S4 modalities, bang/!/”of course” and whim/whimper/?/”why not”. A call-by-value function type is <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-o</span> <span class="pre">?B</span></code> while call-by-name is <code class="docutils literal notranslate"><span class="pre">!A</span> <span class="pre">-o</span> <span class="pre">B</span></code>. To enforce the S4 rules we add a level index to every term, as in <a class="bibtex reference internal" href="zzreferences.html#martinifinestructureexponential1995" id="id6">[MM95]</a> and <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id7">[Gue96]</a>. The level of a context is the maximum of the levels of its terms (0 or negative infinity if empty). As a notational convention, the indices are omitted when they are all the same, i.e. in all the rules besides promotion and dereliction. Normally promotion has <span class="math notranslate nohighlight">\(j=i+1\)</span> instead of <span class="math notranslate nohighlight">\(j&gt;i\)</span>, shrug.</p>
+<p>To allow/restrict contraction and weakening we have two S4 modalities, bang/!/”of course” and whim/whimper/?/”why not”. A call-by-value function type is <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-o</span> <span class="pre">?B</span></code> while call-by-name is <code class="docutils literal notranslate"><span class="pre">!A</span> <span class="pre">-o</span> <span class="pre">B</span></code>. To enforce the S4 rules we add a level index to every term, as in <a class="bibtex reference internal" href="zzreferences.html#martinifinestructureexponential1995" id="id6">[MM95]</a> and <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id7">[Gue96]</a>. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because all the indices in a non-promotion/dereliction sequent are the same value and so they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has <span class="math notranslate nohighlight">\(j=i+1\)</span> instead of <span class="math notranslate nohighlight">\(j&gt;i\)</span>, shrug.</p>
+<p>Instead of binary contraction we allow <span class="math notranslate nohighlight">\(n\)</span>-ary contraction for <span class="math notranslate nohighlight">\(n\geq 2\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cccc}
   \rule{!\Gamma^i \vdash A^j, ?\Delta^i }{!\Gamma^i \vdash !A^i, ?\Delta^i}{!}_{j &gt; i}
   &amp; \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{j\leq i}
-  &amp; \rule{\Gamma, !A, !A \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
+  &amp; \rule{\Gamma, \overrightarrow{!A_{0\leq i\lt n}} \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
   &amp; \rule{\Gamma \vdash \Delta }{\Gamma, !A \vdash \Delta}{!w}
 \end{array}\]</div>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cccc}
   \rule{!\Gamma^i, A^j \vdash ?\Delta^i }{!\Gamma^i, ?A^i \vdash ?\Delta^i}{?}_{j &gt; i}
   &amp; \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{j \leq i}
-  &amp; \rule{\Gamma \vdash ?A, ?A, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
+  &amp; \rule{\Gamma \vdash \overrightarrow{?A_{0\leq i\lt n}}, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
   &amp; \rule{\Gamma \vdash \Delta }{\Gamma \vdash ?A, \Delta}{?w}
 \end{array}\]</div>
-<p>To handle level mismatches we might also need lifting operators. The conditions are unclear.</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cc}
-  \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash A^i, \Delta^i}{\text{lift}_R}_{j &gt; i}
-  &amp;
-  \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j &gt; i}
-\end{array}\]</div>
-<p>There are also quantifier rules, probably unnecessary but I’ll write them down for reference. For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>, while <span class="math notranslate nohighlight">\(y\)</span> may occur. <span class="math notranslate nohighlight">\(A[t/x]\)</span> stands for the formula <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variable <span class="math notranslate nohighlight">\(x\)</span> have been replaced by the formula/term <span class="math notranslate nohighlight">\(t\)</span> (and bound variables have been renamed when necessary).</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cccc}
-  \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
-  &amp;
-  \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
-  &amp;
-  \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
-  &amp;
-  \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
-\end{array}\]</div>
-<p>Finally we have the structural rules. Exchange isn’t necessary because we assume multisets of formulas.</p>
+<p>So to review, the propositions in the sequent can be:</p>
+<ul class="simple">
+<li><p>Pi / Sigma</p></li>
+<li><p>A bang !A or whim ?A</p></li>
+</ul>
+<p>Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above).</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cccc}
   \rule{}{A \vdash A}{\text{id}}
@@ -272,141 +271,154 @@
   &amp;
   \rule{\Gamma, A, B, \Delta \vdash \Theta}{\Gamma, B, A, \Delta \vdash \Theta}{\text{x}_L}
 \end{array}\]</div>
-<p>So in the end our propositions can be:</p>
-<ul class="simple">
-<li><p>A variable in the context</p></li>
-<li><p>Pi / Sigma</p></li>
-<li><p>A bang !A or whim ?A</p></li>
-<li><p>A forall or exists type, where the proposition is in the context extended by the variable</p></li>
-</ul>
+<p>Following Haskell we also want to support infinite expressions like <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">:</span> <span class="pre">x</span></code>. These are constructed as a <a class="reference external" href="https://bartoszmilewski.com/2020/04/22/terminal-coalgebra-as-directed-limit/">terminal coalgebra</a>. We can represent these using variables and assignments as a system of equations. The semantics is that the variable usage is a “hole” that plugs in a copy of the derivation tree from the variable assignment. We disallow the trivial case of a variable being a usage of itself; there must be at least one other rule invocation.</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{cc}
+  \rule{X }{ \Gamma \vdash \Delta }{\text{Use}}
+  &amp;
+  \rule{\Gamma \vdash \Delta}{ X = }{\text{Assign}}
+\end{array}\]</div>
+<p>To handle level indices in infinite trees, we store the difference function <code class="docutils literal notranslate"><span class="pre">\a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">(j-i)</span></code> and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.</p>
+<p>When we compile following GHC’s model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there’s a “working graph” where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).</p>
 </div>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
-<p>Since proofs are programs by the Curry-Howard correspondence, we can use the rules as a programming language. But we need a syntax for it, since writing sequents all the time is tedious. The simplest, most explicit syntax enumerates the free variables (context/signature) of each sequent, all propositions, and all subderivations, for example <code class="docutils literal notranslate"><span class="pre">Bang</span> <span class="pre">context</span> <span class="pre">Gamma</span> <span class="pre">Delta</span> <span class="pre">A</span> <span class="pre">subderivation</span></code>. But we can slim this down:</p>
-<ul class="simple">
-<li><p>The signature can be reconstructed by finding the free variables of the cedents (antecedent/succedent). We still need to add a type signature to each variable.</p></li>
-<li><p>The level indices can be recovered by a constraint solving (in particular a topological sort)</p></li>
-<li><p>The identified elements can be identified by variable names. Each variable occurs exactly twice. For identifying elements in the hypotheses we simple use the name, <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>. For the conclusion, almost all the formulas have a single identified element in the conclusion, so we can use <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">...</span></code> to identify it. For identity we assign names to both left and right, <code class="docutils literal notranslate"><span class="pre">xl/xr</span> <span class="pre">=</span> <span class="pre">...</span></code>.</p></li>
-<li><p>Gamma, delta, theta, and lambda can be inferred in most cases by taking the subderivations and removing the identified elements. Since they are unchanged we do not need to bind/rename the variables at all. For PiRight/SigmaLeft we do need to rename and combine gamma/delta from each case, similar to a phi-node, but this can be skipped if there’s exactly one case. Also we need the context for ! / ?, so that the box is clearly defined and we can duplicate/erase it properly.</p></li>
-<li><p>Weakening and identity need a type argument <code class="docutils literal notranslate"><span class="pre">T</span></code> so we know the type of what’s being introduced. Similarly the absurdity cases of PiRight/SigmaLeft (0 and top) need type annotations on Gamma/Delta. (But these can often be omitted/inferred like any other type signatures)</p></li>
-<li><p>For tags we use <code class="docutils literal notranslate"><span class="pre">^i</span></code>, because Levy’s notation <code class="docutils literal notranslate"><span class="pre">#i</span></code> is interpreted as a comment</p></li>
-<li><p>To handle top-level variables we introduce a Root derivation for the start of the tree</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">PiRight</span>
-  <span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">i</span> <span class="p">[(</span><span class="n">Ai_j</span><span class="p">,</span><span class="n">left_subderivation_j</span><span class="p">)]</span> <span class="p">[(</span><span class="n">Bi_k</span><span class="p">,</span><span class="n">right_subderivation_k</span><span class="p">)]</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="n">i</span> <span class="p">[(</span><span class="n">Bi_k</span><span class="p">,</span><span class="n">left_subderivation_k</span><span class="p">)]</span> <span class="p">[(</span><span class="n">Ai_j</span><span class="p">,</span><span class="n">right_subderivation_k</span><span class="p">)]</span>
-<span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">SigmaLeft</span>
-  <span class="o">^</span><span class="n">i</span><span class="p">,</span> <span class="p">[</span><span class="n">A_ij</span><span class="p">],[</span><span class="n">B_ik</span><span class="p">],[</span><span class="n">Gamma_mi</span><span class="p">],[</span><span class="n">Delta_ni</span><span class="p">]</span> <span class="o">-&gt;</span> <span class="n">subderivation_i</span>
-<span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">A</span> <span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">A</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">BangW</span> <span class="n">subderivation</span> <span class="p">:</span> <span class="n">T</span>
-<span class="n">x</span><span class="o">/</span><span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">Whim</span> <span class="n">A</span> <span class="p">[</span><span class="n">Gamma_m</span><span class="p">]</span><span class="o">/</span><span class="p">[</span><span class="n">Delta_n</span><span class="p">]</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">WhimD</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">WhimC</span> <span class="n">A</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">WhimW</span> <span class="n">subderivation</span> <span class="p">:</span> <span class="n">T</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">LiftRight</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">LiftLeft</span> <span class="n">A</span> <span class="n">subderivation</span>
-<span class="n">l</span><span class="o">/</span><span class="n">r</span> <span class="o">=</span> <span class="n">Identity</span> <span class="p">:</span> <span class="n">T</span>
-<span class="n">Cut</span> <span class="n">Ar</span> <span class="n">subderivation_right</span> <span class="n">Al</span> <span class="n">subderivation_left</span>
-<span class="n">Root</span> <span class="p">[</span><span class="n">a_i</span><span class="p">]</span> <span class="p">[</span><span class="n">b_i</span><span class="p">]</span> <span class="n">subderivation</span>
-</pre></div>
-</div>
-</div>
+<p>Since proofs are programs by the Curry-Howard correspondence, we can use the rules as a programming language. But we need a syntax for it, since writing sequents all the time is tedious and rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used.</p>
 <div class="section" id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
 <p>So let’s look at a simple program, boolean “and”:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ow">and</span> <span class="o">=</span> \<span class="n">x</span> <span class="o">-&gt;</span> <span class="n">case</span> <span class="n">x</span> <span class="n">of</span> <span class="p">{</span> <span class="kc">False</span> <span class="o">-&gt;</span> \<span class="n">_</span> <span class="o">-&gt;</span> <span class="kc">False</span><span class="p">;</span> <span class="kc">True</span> <span class="o">-&gt;</span> \<span class="n">y</span> <span class="o">-&gt;</span> <span class="n">y</span> <span class="p">}</span>
-<span class="ow">and</span> <span class="kc">False</span> <span class="kc">True</span> <span class="p">:</span> <span class="n">Bool</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">and</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="kr">case</span> <span class="n">x</span> <span class="kr">of</span> <span class="p">{</span> <span class="kt">False</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="kt">False</span><span class="p">;</span> <span class="kt">True</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">y</span> <span class="p">}</span>
+<span class="nf">r</span> <span class="ow">=</span> <span class="n">and</span> <span class="kt">False</span> <span class="kt">True</span> <span class="kt">:</span> <span class="kt">Bool</span>
 </pre></div>
 </div>
 <p>We define the types <span class="math notranslate nohighlight">\(\text{B} = \Sigma [(F,[],[]),(T,[],[])]\)</span> and <span class="math notranslate nohighlight">\(a \to b = \Pi [(\text{func}, [a], [b])]\)</span>. <span class="math notranslate nohighlight">\(\to\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).</p>
-<img alt="_images/Stroscot_AND_Proof_Tree.svg" src="_images/Stroscot_AND_Proof_Tree.svg" /><p>Next is Core. We start with the rules, then assign variable names (alphabetically), then fill in the arguments, to obtain:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Root</span> <span class="n">pr</span>
-  <span class="n">Cut</span> <span class="n">a</span> <span class="n">n</span>
-    <span class="n">a</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">b</span> <span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="p">(</span><span class="n">b</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">True</span> <span class="p">[]</span> <span class="p">[])</span>
-    <span class="n">Cut</span> <span class="n">lr</span> <span class="n">m</span>
-      <span class="n">Cut</span> <span class="n">c</span> <span class="n">k</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[]</span>
-        <span class="n">Cut</span> <span class="n">d</span> <span class="n">j</span>
-          <span class="n">d</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">e</span><span class="p">],</span> <span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-            <span class="n">e</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">SigmaLeft</span>
-              <span class="o">^</span><span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f1</span><span class="p">]</span> <span class="o">-&gt;</span>
-                <span class="n">f1</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g1</span><span class="p">],</span> <span class="p">[</span><span class="n">h1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                  <span class="n">g1</span> <span class="o">=</span> <span class="n">BangW</span> <span class="p">(</span><span class="n">h1</span> <span class="o">=</span> <span class="n">SigmaRight</span> <span class="o">^</span><span class="kc">False</span> <span class="p">[]</span> <span class="p">[])</span>
-                <span class="p">}</span>
-              <span class="o">^</span><span class="kc">True</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">-&gt;</span>
-                <span class="n">f2</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">g2</span><span class="p">],</span> <span class="p">[</span><span class="n">h2r</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                  <span class="n">g2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">h2</span> <span class="p">(</span><span class="n">h2</span><span class="o">/</span><span class="n">h2r</span> <span class="o">=</span> <span class="n">Identity</span> <span class="n">Bool</span><span class="p">)</span>
-          <span class="n">j</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">kr</span><span class="p">,</span> <span class="n">k</span><span class="o">/</span><span class="n">kr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">l</span><span class="p">,</span> <span class="n">l</span><span class="o">/</span><span class="n">lr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-      <span class="n">m</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">nr</span><span class="p">,</span> <span class="n">n</span><span class="o">/</span><span class="n">nr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="o">/</span><span class="n">pr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-</pre></div>
-</div>
-</div>
+<img alt="_images/Stroscot_AND_Proof_Tree.svg" src="_images/Stroscot_AND_Proof_Tree.svg" /></div>
 <div class="section" id="nets">
-<h2>Nets<a class="headerlink" href="#nets" title="Permalink to this headline">¶</a></h2>
-<p>As a description the syntax is fine, but it suffers from what Girard calls “the bureaucracy of syntax”. For example the cuts <code class="docutils literal notranslate"><span class="pre">Cut</span> <span class="pre">a</span> <span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">Cut</span> <span class="pre">lr</span> <span class="pre">m</span></code> and the associated <code class="docutils literal notranslate"><span class="pre">a</span></code>/<code class="docutils literal notranslate"><span class="pre">m</span></code> can be swapped without changing the meaning. In fact, for computation, we do not need the syntactic subderivation inclusion relationship at all, only the variables. Furthermore, since each variable appears exactly twice, we can replace all the rule instances with nodes and variables with connecting edges. We thus obtain a graph, similar to a proof net / interaction net:</p>
-<div class="graphviz"><object data="_images/graphviz-f521b842b6f70fbb06f563400ad974f073bd8c5c.svg" type="image/svg+xml" class="graphviz">
+<h3>Nets<a class="headerlink" href="#nets" title="Permalink to this headline">¶</a></h3>
+<p>We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.</p>
+<img alt="_images/AND_net.svg" src="_images/AND_net.svg" /><img alt="_images/AND_net_r.svg" src="_images/AND_net_r.svg" /><p>The derivation tree suffers from what Girard calls “the bureaucracy of syntax”. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that we could have multiple B’s and the derivation tree would not specify which one is used. Furthermore using the exchange rule all the time is tedious.</p>
+<p>To solve these issues there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition’s introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.</p>
+<p>Most rules do not modify the contexts <span class="math notranslate nohighlight">\(\Gamma, \Delta, \Theta, \Lambda\)</span> and so the proposition edge skips the node as it is not an introduction/elimination. But there are exceptions that do need the context:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\Pi_R\)</span> and <span class="math notranslate nohighlight">\(\Sigma_L\)</span> rename and combine the context from each case, similar to a phi-node. This can be skipped if there’s exactly one case.</p></li>
+<li><p>! / ?. These define a box and the box must be clearly defined so we can duplicate/erase it properly.</p></li>
+<li><p>Use/Assign, so that substitution has something to work with and the free variables are identified</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="simplified-graph">
+<h3>Simplified graph<a class="headerlink" href="#simplified-graph" title="Permalink to this headline">¶</a></h3>
+<p>For computation, we do not need the syntactic subderivation inclusion relationship at all. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)</p>
+<p>If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents (=types), then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).</p>
+<div class="graphviz"><object data="_images/graphviz-efd237bc84994cc8b0aeb103ae4eb83d2672a0fe.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
-Root -&gt; c1 [style=invis]
-c1 -&gt; c2 [style=invis]
-c2 -&gt; c3 [style=invis]
-c3 -&gt; c4 [style=invis]
+and [label=&quot;and =&quot;]
+and -&gt; d [color=&quot;red&quot;]
 
-Root -&gt; p /* pr */ [color=&quot;red&quot;]
-c1 [label=&quot;Cut&quot;]
-c1 -&gt; a [color=&quot;red&quot;]
-c1 -&gt; n [color=&quot;blue&quot;]
-a [label=&quot;!&quot;]
-a -&gt; b [color=&quot;red&quot;]
-b [label=&quot;True&quot;]
-c2 [label=&quot;Cut&quot;]
-c2 -&gt; l /* lr */ [color=&quot;red&quot;]
-c2 -&gt; m [color=&quot;blue&quot;]
-c3 [label=&quot;Cut&quot;]
-c3 -&gt; c [color=&quot;red&quot;]
-c3 -&gt; k [color=&quot;blue&quot;]
-c [label=&quot;False&quot;]
-c4 [label=&quot;Cut&quot;]
-c4 -&gt; d [color=&quot;red&quot;]
-c4 -&gt; j [color=&quot;blue&quot;]
 d [label=&quot;PiR&quot;]
-d -&gt; e [color=&quot;blue&quot;]
+e -&gt; d [color=&quot;blue&quot;,dir=back]
 d -&gt; e /* f */ [color=&quot;red&quot;]
 e [label=&quot;SigmaL&quot;]
 e -&gt; f1 [color=&quot;red&quot;]
 e -&gt; f2 [color=&quot;red&quot;]
 f1 [label=&quot;PiR&quot;]
-f1 -&gt; g1 [color=&quot;blue&quot;]
+g1 -&gt; f1 [color=&quot;blue&quot;,dir=back]
 f1 -&gt; h1 [color=&quot;red&quot;]
 g1 [label=&quot;!w&quot;]
 h1 [label=&quot;False&quot;]
 f2 [label=&quot;PiR&quot;]
-f2 -&gt; g2 [color=&quot;blue&quot;]
+g2 -&gt; f2 [color=&quot;blue&quot;,dir=back]
 f2 -&gt; h2 /* h2r */ [color=&quot;red&quot;]
 g2 [label=&quot;!d&quot;]
-g2 -&gt; h2 [color=&quot;blue&quot;]
+h2 -&gt; g2 [color=&quot;blue&quot;,dir=back]
 h2 [label=&quot;I&quot;]
+}</p></object></div>
+<div class="graphviz"><object data="_images/graphviz-4a56c35357df5ff4abb8feef3afc2b9f1b0beb81.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph {
+r [label=&quot;r =&quot;]
+r -&gt; p /* pr */ [color=&quot;red&quot;]
+c1 [label=&quot;Cut&quot;]
+c1 -&gt; a [color=&quot;red&quot;]
+n -&gt; c1 [color=&quot;blue&quot;,dir=back]
+a [label=&quot;!&quot;]
+a -&gt; b [color=&quot;red&quot;]
+b [label=&quot;True&quot;]
+c2 [label=&quot;Cut&quot;]
+c2 -&gt; l /* lr */ [color=&quot;red&quot;]
+m -&gt; c2 [color=&quot;blue&quot;,dir=back]
+c3 [label=&quot;Cut&quot;]
+c3 -&gt; c [color=&quot;red&quot;]
+k -&gt; c3 [color=&quot;blue&quot;,dir=back]
+c [label=&quot;False&quot;]
+c4 [label=&quot;Cut&quot;]
+c4 -&gt; d2 [color=&quot;red&quot;]
+j -&gt; c4 [color=&quot;blue&quot;,dir=back]
+d2 [label=&quot;Use and&quot;]
+d2 -&gt; and [style=dotted]
+
 j [label=&quot;PiL&quot;]
 j -&gt; k /* kr */ [color=&quot;red&quot;]
-j -&gt; l [color=&quot;blue&quot;]
+l -&gt; j [color=&quot;blue&quot;,dir=back]
 k [label=&quot;I&quot;]
 l [label=&quot;I&quot;]
 m [label=&quot;PiL&quot;]
 m -&gt; n /* nr */ [color=&quot;red&quot;]
-m -&gt; p [color=&quot;blue&quot;]
+p -&gt; m [color=&quot;blue&quot;,dir=back]
 n [label=&quot;I&quot;]
 p [label=&quot;I&quot;]
 }</p></object></div>
-<p>Technically, the edges connect ports of nodes. The directionality and left=blue/right=red coloring is enough to identity the ports for the graph above, but disambiguating n-ary graphs in a clear way seems hard.</p>
-<p>If we reverse the directions of the blue edges, then the graph is almost a tree, except for the backedges that can show up in PiRight/SigmaLeft.</p>
+<p>The identity nodes function like a thunk constructor; the stuff in between the identity and the cut is a stack manipulation operation.</p>
+</div>
+<div class="section" id="concrete-syntax">
+<h3>Concrete syntax<a class="headerlink" href="#concrete-syntax" title="Permalink to this headline">¶</a></h3>
+<p>The concrete syntax serializes the non-simplified net into a textual form. Each edge is assigned a unique identifier, then all the nodes are written out. The order of the nodes is not important, but the pretty-printer can choose something for readability.</p>
+<p>We should also write out the types of the propositions, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.</p>
+<p>Currently the core syntax is just Haskell’s datatype syntax. You can see how it looks in <code class="docutils literal notranslate"><span class="pre">src/Core.hs</span></code>, <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">Syntax</span></code>.</p>
+<p>An idea of how a real syntax might look:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;and&quot;</span> <span class="ow">=</span> <span class="kt">Assign</span> <span class="n">d</span>
+  <span class="n">d</span> <span class="ow">=</span> <span class="kt">PiR</span>
+    <span class="o">^</span><span class="n">func</span> <span class="nf">\</span><span class="p">[</span><span class="n">e</span><span class="p">],</span><span class="kt">[]</span><span class="o">.</span> <span class="p">[</span><span class="n">f</span><span class="p">],</span><span class="kt">[]</span> <span class="ow">-&gt;</span>
+      <span class="n">f</span> <span class="ow">=</span> <span class="kt">SigmaL</span> <span class="n">e</span>
+        <span class="o">^</span><span class="kt">False</span> <span class="o">\.</span> <span class="n">f1</span> <span class="ow">-&gt;</span>
+          <span class="n">f1</span> <span class="ow">=</span> <span class="kt">PiR</span>
+            <span class="o">^</span><span class="n">func</span> <span class="nf">\</span><span class="p">[</span><span class="n">g1</span><span class="p">]</span><span class="o">.</span> <span class="n">h1</span>
+              <span class="n">h1</span> <span class="ow">=</span> <span class="kt">False</span>
+              <span class="kt">[]</span> <span class="ow">=</span> <span class="kt">BangW</span> <span class="n">g1</span>
+        <span class="o">^</span><span class="kt">True</span> <span class="o">\.</span> <span class="n">f2</span> <span class="ow">-&gt;</span>
+          <span class="n">f2</span> <span class="ow">=</span> <span class="kt">PiR</span>
+            <span class="o">^</span><span class="n">func</span> <span class="nf">\</span><span class="n">g2</span><span class="o">.</span> <span class="n">h2r</span>
+              <span class="n">h2</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">g2</span>
+                <span class="n">h2r</span> <span class="ow">=</span> <span class="kt">I</span> <span class="n">h2</span>
+
+<span class="s">&quot;r&quot;</span> <span class="ow">=</span> <span class="kt">Assign</span> <span class="n">pr</span>
+  <span class="n">n</span> <span class="ow">=</span> <span class="kt">Cut</span> <span class="n">a</span>
+    <span class="n">a</span> <span class="ow">=</span> <span class="kt">Bang</span> <span class="n">b</span>
+      <span class="n">b</span> <span class="ow">=</span> <span class="kt">True</span>
+    <span class="n">m</span> <span class="ow">=</span> <span class="kt">Cut</span> <span class="n">lr</span>
+      <span class="n">k</span> <span class="ow">=</span> <span class="kt">Cut</span> <span class="n">c</span>
+        <span class="n">c</span> <span class="ow">=</span> <span class="kt">False</span>
+        <span class="n">j</span> <span class="ow">=</span> <span class="kt">Cut</span> <span class="n">d2</span>
+          <span class="n">d2</span> <span class="ow">=</span> <span class="kt">Use</span> <span class="s">&quot;and&quot;</span>
+          <span class="p">[(</span><span class="n">l</span><span class="p">,</span>
+            <span class="n">lr</span> <span class="ow">=</span> <span class="kt">I</span> <span class="n">l</span>
+          <span class="p">)]</span> <span class="ow">=</span> <span class="kt">PiL</span> <span class="o">^</span><span class="n">func</span> <span class="n">j</span> <span class="p">[(</span><span class="n">kr</span><span class="p">,</span>
+            <span class="n">kr</span> <span class="ow">=</span> <span class="kt">I</span> <span class="n">k</span>
+          <span class="p">)]</span>
+      <span class="p">[(</span><span class="n">p</span><span class="p">,</span>
+        <span class="n">pr</span> <span class="ow">=</span> <span class="kt">I</span> <span class="n">p</span>
+      <span class="p">)]</span> <span class="ow">=</span> <span class="kt">PiL</span> <span class="o">^</span><span class="n">func</span> <span class="n">m</span> <span class="p">[(</span><span class="n">nr</span><span class="p">,</span>
+        <span class="n">nr</span> <span class="ow">=</span> <span class="kt">I</span> <span class="n">n</span>
+      <span class="p">)}</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="cut-elimination">
 <h2>Cut elimination<a class="headerlink" href="#cut-elimination" title="Permalink to this headline">¶</a></h2>
 <p>For all reductions:</p>
 <ul class="simple">
-<li><p>Move the two nodes of the cut next to the cut with copy-paste</p></li>
+<li><p>Move the two nodes of the cut next to the cut, replacing use with copy-paste</p></li>
 </ul>
 <p>Identity</p>
 <ul class="simple">
@@ -482,35 +494,117 @@ p [label=&quot;I&quot;]
 <div class="section" id="primitives">
 <h2>Primitives<a class="headerlink" href="#primitives" title="Permalink to this headline">¶</a></h2>
 <p>Primitives can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR.</p>
-<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id8">[AG99]</a>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
+</div>
+<div class="section" id="linear-logic">
+<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Permalink to this headline">¶</a></h2>
+<p>Linear logic has boxes,  The difference is not observable if we do not use duplication; e.g. <code class="docutils literal notranslate"><span class="pre">(\x.print(x+1))</span> <span class="pre">(print(&quot;x&quot;);</span> <span class="pre">2)</span></code> can only print <code class="docutils literal notranslate"><span class="pre">x3</span></code>. But if we change <code class="docutils literal notranslate"><span class="pre">x+1</span></code> to <code class="docutils literal notranslate"><span class="pre">x+x</span></code> then CBV is <code class="docutils literal notranslate"><span class="pre">x4</span></code> while CBN is <code class="docutils literal notranslate"><span class="pre">xx4</span></code>.</p>
+<p>So how do we specify the difference between the two, in linear logic?</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span> <span class="n">x</span> <span class="ow">=</span>
+  <span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="ow">=</span> <span class="n">dup</span> <span class="n">x</span>
+  <span class="n">print</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">z</span><span class="p">)</span>
+<span class="nf">s</span> <span class="p">(</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">);</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:</p>
+<ol class="arabic simple">
+<li><p>When the term is linear or affine and does not need to duplicate anything.</p></li>
+<li><p>When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per <a class="bibtex reference internal" href="zzreferences.html#filinskilinearcontinuations1992" id="id8">[Fil92]</a>) Q: Does this change the evaluation semantics to be stricter?</p></li>
+<li><p>Inlining, when the duplication is carried out, resulting in two terms.</p></li>
+<li><p>More complex cases enforced by a typing system, such as Elementary Affine Logic.</p></li>
+</ol>
+</div>
+<div class="section" id="recursion">
+<h2>Recursion<a class="headerlink" href="#recursion" title="Permalink to this headline">¶</a></h2>
+<p>Sequent Core <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id9">[DMAPJ16]</a> also introduces two more rules “multicut” and “rec” that are illogical but computationally useful:</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{cc}
+  \rule
+    {\Gamma, \Theta \vdash \Delta, \Lambda \quad \Gamma', \Lambda \vdash \Theta, \Delta' }
+    {\Gamma, \Gamma' \vdash \Delta, \Delta' }{\text{multicut}}
+  &amp;
+  \rule
+    { \overrightarrow{\Gamma, \vec \Lambda, \Theta_i \vdash \Lambda_i, \vec \Theta, \Delta }}
+    {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
+\end{array}\]</div>
+<p>These probably aren’t needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular <a class="bibtex reference internal" href="zzreferences.html#kiselyovmanyfacesfixedpoint2013" id="id10">[Kis13]</a> outline a polyvariadic combinator:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fix_poly</span> <span class="n">fl</span> <span class="ow">=</span> <span class="n">fix</span> <span class="p">(</span><span class="nf">\</span><span class="n">self</span> <span class="ow">-&gt;</span> <span class="n">map</span> <span class="p">(</span><span class="o">$</span> <span class="n">self</span><span class="p">)</span> <span class="n">fl</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To implement <code class="docutils literal notranslate"><span class="pre">fix</span></code> we can use the variant of the Y combinator <span class="math notranslate nohighlight">\(\lambda f.(\lambda x.x x) (\lambda x.f (x x))\)</span>. To type it we need the cyclic/recursive type <span class="math notranslate nohighlight">\(Wr = \Pi[(^w, Wr, r)]\)</span> (in the sense of an infinite, regular tree). Though, once we have recursive types, we could allow recursive proof trees as well; then implementing recursion directly is probably not too hard. BOHM uses a fan/duplication node combined with a loop.</p>
+</div>
+<div class="section" id="id11">
+<h2>Optimal reduction<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<p>In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="nn">System.IO.Unsafe</span>
+<span class="nf">i</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">w</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">unsafePerformIO</span> <span class="p">(</span><span class="n">print</span> <span class="s">&quot;i&quot;</span><span class="p">))</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">w</span>
+<span class="nf">z</span> <span class="ow">=</span> <span class="mi">2</span> <span class="ow">::</span> <span class="kt">Integer</span>
+<span class="nf">t</span> <span class="ow">=</span> <span class="mi">3</span> <span class="ow">::</span> <span class="kt">Integer</span>
+<span class="nf">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">x</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span> <span class="n">t</span><span class="p">)</span>
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">print</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">i</span> <span class="n">y</span><span class="p">)</span> <span class="ow">::</span> <span class="kt">Integer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This produces <code class="docutils literal notranslate"><span class="pre">5</span></code> in Haskell. However, without GHC’s optimizations, <code class="docutils literal notranslate"><span class="pre">&quot;i&quot;</span></code> is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a “hoisting” transformation that makes <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(unsafePerformIO</span> <span class="pre">(print</span> <span class="pre">&quot;i&quot;))</span> <span class="pre">`seq`</span> <span class="pre">\w</span> <span class="pre">-&gt;</span> <span class="pre">w</span></code>, but more complex cases have higher-level sharing that no code transformation can mimic.</p>
+<p>Although GHC will do this with <code class="docutils literal notranslate"><span class="pre">-O</span></code>, it does it messily; the interaction of <code class="docutils literal notranslate"><span class="pre">seq</span></code> and inlining is the source of <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/issues/2273">numerous bugs</a>. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for <code class="docutils literal notranslate"><span class="pre">seq</span></code>; instead there are boxes and duplicators.</p>
+</div>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for <code class="docutils literal notranslate"><span class="pre">case</span></code>, joining some eraser nodes. But what about duplication?</p>
+<p>Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of “environments” or “scopes”. In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope <code class="docutils literal notranslate"><span class="pre">0</span></code> and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter’s outer scope.</p>
+<p>To determine which scope becomes the outer scope, delimiters are also marked as “head”, “full”, or “empty” depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn’t duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter’s scope stays on the inside.</p>
+<p>For multiplexers the situation is a little more complicated. A multiplexer also has two scopes, an inner “label”/identity-like scope and an outer “ambient” scope. When a multiplexer crosses a delimiter, from outside to inside, its “ambient” scope is changed to the delimiter’s inside scope. Meanwhile the delimiter’s scope is split into a new set of scopes, and this is indexed by the label scope. In the Stroscot code these are referred to as “variant” scopes. In particular, multiplexers with the same label scope must split other scopes into the same set of variant scopes at each interaction. This is not too hard to keep track of, just give each scope a map <code class="docutils literal notranslate"><span class="pre">other</span> <span class="pre">scope</span> <span class="pre">-&gt;</span> <span class="pre">variant</span> <span class="pre">scope</span> <span class="pre">set</span></code> that’s lazily created.</p>
+</div>
+</div>
+<div class="section" id="random-old-junk">
+<h1>Random old junk<a class="headerlink" href="#random-old-junk" title="Permalink to this headline">¶</a></h1>
+<p>To handle level mismatches we might also need lifting operators. The conditions are unclear.</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{cc}
+  \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash A^i, \Delta^i}{\text{lift}_R}_{j &gt; i}
+  &amp;
+  \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j &gt; i}
+\end{array}\]</div>
+<p>There are also quantifier rules, probably unnecessary but I’ll write them down for reference. For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>, while <span class="math notranslate nohighlight">\(y\)</span> may occur. <span class="math notranslate nohighlight">\(A[t/x]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variable <span class="math notranslate nohighlight">\(x\)</span> have been replaced by the proposition/term <span class="math notranslate nohighlight">\(t\)</span> (and bound variables have been renamed when necessary).</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{cccc}
+  \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
+  &amp;
+  \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
+  &amp;
+  \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
+  &amp;
+  \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
+\end{array}\]</div>
+<div class="section" id="f2-g2">
+<h2>F2 G2<a class="headerlink" href="#f2-g2" title="Permalink to this headline">¶</a></h2>
+<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id12">[AG99]</a>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}S &amp;= \, \left(!T \to !T \right) \to f\\T &amp;= \, !T \to f\\f &amp;= \, !S \to !S \to a\end{aligned}\end{align} \]</div>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}F2 &amp;: \, !S \to a\\G2 &amp;: \, !T \to S\end{aligned}\end{align} \]</div>
-<img alt="_images/Stroscot_F2G2_Proof_Tree.svg" src="_images/Stroscot_F2G2_Proof_Tree.svg" /><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Root</span> <span class="n">z</span> <span class="n">ret</span>
-  <span class="n">Cut</span> <span class="n">f2r</span> <span class="n">f2l</span>
-    <span class="n">f2r</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_f2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_f2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-      <span class="n">x_f2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_f2</span> <span class="n">x23_f2</span>
-        <span class="n">x23_f2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x2_f2</span> <span class="n">x3_f2</span>
-          <span class="n">Cut</span> <span class="n">id_r</span> <span class="n">id_l</span>
-            <span class="n">id_r</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">al</span><span class="p">],</span> <span class="p">[</span><span class="n">ar</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-              <span class="n">al</span><span class="o">/</span><span class="n">ar</span> <span class="o">=</span> <span class="n">Identity</span>
-            <span class="n">x1_f2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x1i_f2</span>
-              <span class="n">x1i_f2</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">id_r2</span><span class="p">,</span> <span class="n">id_l</span><span class="o">/</span><span class="n">id_r2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ssa</span><span class="p">,</span>
-                <span class="n">ssa</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_f2</span><span class="p">,</span> <span class="n">x2_f2</span><span class="o">/</span><span class="n">x2r_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">sa</span><span class="p">,</span>
-                  <span class="n">sa</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x3r_f2</span><span class="p">,</span> <span class="n">x3_f2</span><span class="o">/</span><span class="n">x3r_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">/</span><span class="n">ret_f2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)])])]</span>
-    <span class="n">f2l</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">g2</span><span class="p">,</span>
-      <span class="n">g2</span> <span class="o">=</span> <span class="n">Bang</span> <span class="n">g2s</span>
-        <span class="n">g2s</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_g2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-          <span class="n">y</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">y_arg</span><span class="p">,</span>
-            <span class="n">Cut</span> <span class="n">o</span> <span class="n">o_app</span>
-              <span class="n">o</span><span class="o">/</span><span class="p">[]</span><span class="o">/</span><span class="p">[]</span> <span class="o">=</span> <span class="n">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_g2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[]</span> <span class="o">-&gt;</span>
-                <span class="n">x_g2</span> <span class="o">=</span> <span class="n">BangC</span> <span class="n">x1_g2</span> <span class="n">x2_g2</span>
-                  <span class="n">x1_g2</span> <span class="o">=</span> <span class="n">BangD</span> <span class="n">x1i_g2</span>
-                    <span class="n">x1i_g2</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_g2</span><span class="p">,</span> <span class="n">x2_g2</span><span class="o">/</span><span class="n">x2r_g2</span> <span class="o">=</span> <span class="n">Identity</span> <span class="n">Bool</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_o</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-              <span class="n">o_app</span> <span class="o">=</span> <span class="n">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">tr</span><span class="p">,</span> <span class="n">y_arg</span><span class="o">/</span><span class="n">tr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_g2</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-          <span class="p">)]</span> <span class="p">[(</span><span class="n">zr</span><span class="p">,</span> <span class="n">z</span><span class="o">/</span><span class="n">zr</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
-    <span class="p">)]</span> <span class="p">[(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">/</span><span class="n">ret</span> <span class="o">=</span> <span class="n">Identity</span><span class="p">)]</span>
+<img alt="_images/Stroscot_F2G2_Proof_Tree.svg" src="_images/Stroscot_F2G2_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">z</span> <span class="n">ret</span>
+  <span class="kt">Cut</span> <span class="n">f2r</span> <span class="n">f2l</span>
+    <span class="n">f2r</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_f2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_f2</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+      <span class="n">x_f2</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_f2</span> <span class="n">x23_f2</span>
+        <span class="n">x23_f2</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x2_f2</span> <span class="n">x3_f2</span>
+          <span class="kt">Cut</span> <span class="n">id_r</span> <span class="n">id_l</span>
+            <span class="n">id_r</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">al</span><span class="p">],</span> <span class="p">[</span><span class="n">ar</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+              <span class="n">al</span><span class="o">/</span><span class="n">ar</span> <span class="ow">=</span> <span class="kt">Identity</span>
+            <span class="n">x1_f2</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">x1i_f2</span>
+              <span class="n">x1i_f2</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">id_r2</span><span class="p">,</span> <span class="n">id_l</span><span class="o">/</span><span class="n">id_r2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">ssa</span><span class="p">,</span>
+                <span class="n">ssa</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_f2</span><span class="p">,</span> <span class="n">x2_f2</span><span class="o">/</span><span class="n">x2r_f2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">sa</span><span class="p">,</span>
+                  <span class="n">sa</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x3r_f2</span><span class="p">,</span> <span class="n">x3_f2</span><span class="o">/</span><span class="n">x3r_f2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">/</span><span class="n">ret_f2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)])])]</span>
+    <span class="n">f2l</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">g2</span><span class="p">,</span>
+      <span class="n">g2</span> <span class="ow">=</span> <span class="kt">Bang</span> <span class="n">g2s</span>
+        <span class="n">g2s</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_g2</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+          <span class="n">y</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">y_arg</span><span class="p">,</span>
+            <span class="kt">Cut</span> <span class="n">o</span> <span class="n">o_app</span>
+              <span class="n">o</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_g2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
+                <span class="n">x_g2</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_g2</span> <span class="n">x2_g2</span>
+                  <span class="n">x1_g2</span> <span class="ow">=</span> <span class="kt">BangD</span> <span class="n">x1i_g2</span>
+                    <span class="n">x1i_g2</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">x2r_g2</span><span class="p">,</span> <span class="n">x2_g2</span><span class="o">/</span><span class="n">x2r_g2</span> <span class="ow">=</span> <span class="kt">Identity</span> <span class="kt">Bool</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_o</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+              <span class="n">o_app</span> <span class="ow">=</span> <span class="kt">PiLeft</span> <span class="o">^</span><span class="n">func</span> <span class="p">[(</span><span class="n">tr</span><span class="p">,</span> <span class="n">y_arg</span><span class="o">/</span><span class="n">tr</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="o">/</span><span class="n">ret_g2</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+          <span class="p">)]</span> <span class="p">[(</span><span class="n">zr</span><span class="p">,</span> <span class="n">z</span><span class="o">/</span><span class="n">zr</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
+    <span class="p">)]</span> <span class="p">[(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">/</span><span class="n">ret</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
 </pre></div>
 </div>
 <div class="graphviz"><object data="_images/graphviz-03c2dfd4675bba32f5fddf317b3d197033b92e98.svg" type="image/svg+xml" class="graphviz">
@@ -1042,67 +1136,6 @@ x2_g2 [label=&quot;I&quot;]
 ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
-</div>
-</div>
-<div class="section" id="random-old-junk">
-<h1>Random old junk<a class="headerlink" href="#random-old-junk" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="linear-logic">
-<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Permalink to this headline">¶</a></h2>
-<p>Linear logic has boxes,  The difference is not observable if we do not use duplication; e.g. <code class="docutils literal notranslate"><span class="pre">(\x.print(x+1))</span> <span class="pre">(print(&quot;x&quot;);</span> <span class="pre">2)</span></code> can only print <code class="docutils literal notranslate"><span class="pre">x3</span></code>. But if we change <code class="docutils literal notranslate"><span class="pre">x+1</span></code> to <code class="docutils literal notranslate"><span class="pre">x+x</span></code> then CBV is <code class="docutils literal notranslate"><span class="pre">x4</span></code> while CBN is <code class="docutils literal notranslate"><span class="pre">xx4</span></code>.</p>
-<p>So how do we specify the difference between the two, in linear logic?</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="n">x</span> <span class="o">=</span>
-  <span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="o">=</span> <span class="n">dup</span> <span class="n">x</span>
-  <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">z</span><span class="p">)</span>
-<span class="n">s</span> <span class="p">(</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">);</span> <span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:</p>
-<ol class="arabic simple">
-<li><p>When the term is linear or affine and does not need to duplicate anything.</p></li>
-<li><p>When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per <a class="bibtex reference internal" href="zzreferences.html#filinskilinearcontinuations1992" id="id9">[Fil92]</a>) Q: Does this change the evaluation semantics to be stricter?</p></li>
-<li><p>Inlining, when the duplication is carried out, resulting in two terms.</p></li>
-<li><p>More complex cases enforced by a typing system, such as Elementary Affine Logic.</p></li>
-</ol>
-</div>
-<div class="section" id="recursion">
-<h2>Recursion<a class="headerlink" href="#recursion" title="Permalink to this headline">¶</a></h2>
-<p>Sequent Core <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id10">[DMAPJ16]</a> also introduces two more rules “multicut” and “rec” that are illogical but computationally useful:</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cc}
-  \rule
-    {\Gamma, \Theta \vdash \Delta, \Lambda \quad \Gamma', \Lambda \vdash \Theta, \Delta' }
-    {\Gamma, \Gamma' \vdash \Delta, \Delta' }{\text{multicut}}
-  &amp;
-  \rule
-    { \overrightarrow{\Gamma, \vec \Lambda, \Theta_i \vdash \Lambda_i, \vec \Theta, \Delta }}
-    {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
-\end{array}\]</div>
-<p>These probably aren’t needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular <a class="bibtex reference internal" href="zzreferences.html#kiselyovmanyfacesfixedpoint2013" id="id11">[Kis13]</a> outline a polyvariadic combinator:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>fix_poly fl = fix (\self -&gt; map ($ self) fl)
-</pre></div>
-</div>
-<p>To implement <code class="docutils literal notranslate"><span class="pre">fix</span></code> we can use the variant of the Y combinator <span class="math notranslate nohighlight">\(\lambda f.(\lambda x.x x) (\lambda x.f (x x))\)</span>. To type it we need the cyclic/recursive type <span class="math notranslate nohighlight">\(Wr = \Pi[(^w, Wr, r)]\)</span> (in the sense of an infinite, regular tree). Though, once we have recursive types, we could allow recursive proof trees as well; then implementing recursion directly is probably not too hard. BOHM uses a fan/duplication node combined with a loop.</p>
-</div>
-<div class="section" id="id12">
-<h2>Optimal reduction<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
-<p>In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>import System.IO.Unsafe
-i = \w -&gt; (unsafePerformIO (print &quot;i&quot;)) `seq` w
-z = 2 :: Integer
-t = 3 :: Integer
-f = \x -&gt; (x z) + (x t)
-main = print (f (\y -&gt; i y) :: Integer)
-</pre></div>
-</div>
-<p>This produces <code class="docutils literal notranslate"><span class="pre">5</span></code> in Haskell. However, without GHC’s optimizations, <code class="docutils literal notranslate"><span class="pre">&quot;i&quot;</span></code> is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a “hoisting” transformation that makes <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(unsafePerformIO</span> <span class="pre">(print</span> <span class="pre">&quot;i&quot;))</span> <span class="pre">`seq`</span> <span class="pre">\w</span> <span class="pre">-&gt;</span> <span class="pre">w</span></code>, but more complex cases have higher-level sharing that no code transformation can mimic.</p>
-<p>Although GHC will do this with <code class="docutils literal notranslate"><span class="pre">-O</span></code>, it does it messily; the interaction of <code class="docutils literal notranslate"><span class="pre">seq</span></code> and inlining is the source of <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/issues/2273">numerous bugs</a>. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for <code class="docutils literal notranslate"><span class="pre">seq</span></code>; instead there are boxes and duplicators.</p>
-</div>
-<div class="section" id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
-<p>Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for <code class="docutils literal notranslate"><span class="pre">case</span></code>, joining some eraser nodes. But what about duplication?</p>
-<p>Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of “environments” or “scopes”. In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope <code class="docutils literal notranslate"><span class="pre">0</span></code> and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter’s outer scope.</p>
-<p>To determine which scope becomes the outer scope, delimiters are also marked as “head”, “full”, or “empty” depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn’t duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter’s scope stays on the inside.</p>
-<p>For multiplexers the situation is a little more complicated. A multiplexer also has two scopes, an inner “label”/identity-like scope and an outer “ambient” scope. When a multiplexer crosses a delimiter, from outside to inside, its “ambient” scope is changed to the delimiter’s inside scope. Meanwhile the delimiter’s scope is split into a new set of scopes, and this is indexed by the label scope. In the Stroscot code these are referred to as “variant” scopes. In particular, multiplexers with the same label scope must split other scopes into the same set of variant scopes at each interaction. This is not too hard to keep track of, just give each scope a map <code class="docutils literal notranslate"><span class="pre">other</span> <span class="pre">scope</span> <span class="pre">-&gt;</span> <span class="pre">variant</span> <span class="pre">scope</span> <span class="pre">set</span></code> that’s lazily created.</p>
 <div class="section" id="readback">
 <h3>Readback<a class="headerlink" href="#readback" title="Permalink to this headline">¶</a></h3>
 <p>The real hard part is doing “readback”, i.e. proving that all of these transformations are either no-ops on the original lambda term or valid beta reductions. Since there is so much scope popping and pushing and varianting it is definitely a little complex. Also I decided to keep the levels from the original Lambdascope implementation for correctness verification purposes, so there is twice the work. But if you read Ian Mackie’s paper on efficient interaction nets implementation you will see that this “readback” algorithm also provides a way to directly execute the proof net / graph with call-by-value semantics at each reduction step. So it also has a close connection with how to compile the graph to machine code. Since our scopes are unique and the “stack” stores only one director index for a scope at a time, the scopes can correspond directly to machine registers or memory locations.</p>

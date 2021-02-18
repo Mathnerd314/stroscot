@@ -17,6 +17,8 @@
 
   
   
+    <link rel="shortcut icon" href="_static/hexagon_favicon.png"/>
+  
 
   
   
@@ -33,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -58,6 +59,9 @@
             <a href="index.html" class="icon icon-home"> Stroscot
           
 
+          
+            
+            <img src="_static/hexagon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -87,7 +91,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -102,7 +106,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Compiler design</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#optimizations">Optimizations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flags">Flags</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-messages">Error messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#output">Output</a></li>
@@ -205,18 +208,6 @@
 <p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <a class="bibtex reference internal" href="zzreferences.html#downenmakingfastercurry2019" id="id1">[DSAPJ19]</a>. Initially all user code starts out using one-argument functions.</p>
 <p>Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.</p>
 </div>
-<div class="section" id="optimizations">
-<h2>Optimizations<a class="headerlink" href="#optimizations" title="Permalink to this headline">¶</a></h2>
-<p>A <a class="reference external" href="http://venge.net/graydon/talks/CompilerTalk-2019.pdf">talk</a> by Graydon Hoare on compilers mentions the paper <a class="bibtex reference internal" href="zzreferences.html#allencatalogueoptimizingtransformations1971" id="id2">[AC71]</a>. He says we need 8 optimization passes to get 80% of the performance:</p>
-<ul class="simple">
-<li><p>Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn’t increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in <a class="bibtex reference internal" href="zzreferences.html#mauborgnerepresentationsetstrees1999" id="id3">[Mau99]</a>.</p></li>
-<li><p>Inlining - Going through <a class="bibtex reference internal" href="zzreferences.html#peytonjonessecretsglasgowhaskell2002" id="id4">[PJM02]</a>, a lot of the cases are handled, because of the graph structure and because partial evaluation / optimal reduction will move cuts down and expose/eliminate case statements. But we also want to do it inside recursive functions etc., which means we probably need a strictness/termination analysis.</p></li>
-<li><p>Loop unrolling, code motion - These are optimizations on mutable variables, probably unnecessary. But unrolling recursive functions could prove useful, as part of inlining.</p></li>
-<li><p>Constant Folding - partial evaluation of the code includes this</p></li>
-<li><p>Dead code elimination - Unused expressions aren’t connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.</p></li>
-<li><p>Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.</p></li>
-</ul>
-</div>
 <div class="section" id="flags">
 <h2>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h2>
 <p>In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.</p>
@@ -248,7 +239,7 @@ typechecking</p>
 <li><p>stage 1: New compiler on old ABI <code class="docutils literal notranslate"><span class="pre">c1=compile(s,cB)</span></code></p></li>
 <li><p>stage 2: New compiler on new ABI <code class="docutils literal notranslate"><span class="pre">c2=compile(s,c1)</span></code></p></li>
 </ul>
-<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=compile(s,c2)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <a class="bibtex reference internal" href="zzreferences.html#wheelerfullycounteringtrusting2010" id="id5">[Whe10]</a>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
+<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=compile(s,c2)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <a class="bibtex reference internal" href="zzreferences.html#wheelerfullycounteringtrusting2010" id="id2">[Whe10]</a>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
 <p>For cross-compiling, we build stage 1 for the host and stage 2 for the target.</p>
 <p>Actually this is more complex. The compiler is really two components, an interpreter and a specializer; in a full system there are many components:
 * source-level libraries (macros) <code class="docutils literal notranslate"><span class="pre">m</span></code>
@@ -362,16 +353,16 @@ platform. As GHC would be multi-target, we can infer the effective target of
 the <code class="docutils literal notranslate"><span class="pre">stage</span> <span class="pre">n</span></code> compiler by looking at the required host for the <code class="docutils literal notranslate"><span class="pre">stage</span>
 <span class="pre">(n+1)</span></code> compiler.</p>
 <p>Instead of having a list of stages, we could have a tree:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>0       -- (old stage 0) the bootstrap compiler version X
-|- 0    -- (old stage 1) compiler version X+1, same host as bootstrap,
-|  |       don&#39;t have `-target self` support because of ABI mismatch
-|  |- 0 -- (old stage 2) compiler version X+1 that supports `-target self`
-|  |- 1 -- same but with other build options (e.g. profiling enabled)
-|  |- 2 -- same but with other build options (e.g. debugging enabled)
-|
-|- 1    -- compiler version X+1, without `-target self` support,
-|  |       with other build options
-....
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span>       <span class="c1">-- (old stage 0) the bootstrap compiler version X</span>
+<span class="o">|-</span> <span class="mi">0</span>    <span class="c1">-- (old stage 1) compiler version X+1, same host as bootstrap,</span>
+<span class="o">|</span>  <span class="o">|</span>       <span class="n">don&#39;t</span> <span class="n">have</span> <span class="p">`</span><span class="o">-</span><span class="n">target</span> <span class="n">self</span><span class="p">`</span> <span class="n">support</span> <span class="n">because</span> <span class="kr">of</span> <span class="kt">ABI</span> <span class="n">mismatch</span>
+<span class="o">|</span>  <span class="o">|-</span> <span class="mi">0</span> <span class="c1">-- (old stage 2) compiler version X+1 that supports `-target self`</span>
+<span class="o">|</span>  <span class="o">|-</span> <span class="mi">1</span> <span class="c1">-- same but with other build options (e.g. profiling enabled)</span>
+<span class="o">|</span>  <span class="o">|-</span> <span class="mi">2</span> <span class="c1">-- same but with other build options (e.g. debugging enabled)</span>
+<span class="o">|</span>
+<span class="o">|-</span> <span class="mi">1</span>    <span class="c1">-- compiler version X+1, without `-target self` support,</span>
+<span class="o">|</span>  <span class="o">|</span>       <span class="n">with</span> <span class="n">other</span> <span class="n">build</span> <span class="n">options</span>
+<span class="o">....</span>
 </pre></div>
 </div>
 </li>
