@@ -37,3 +37,4 @@ Vector graphics library (bonus points for supporting SVG drawings and OpenType f
 HPC simulation (wind tunnel, nukes, ...)
 abstract assembly (like High Level Assembly)
 expression problem (compiler)
+inventory tracker for android (like todo-mvc but better)

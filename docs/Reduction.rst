@@ -5,7 +5,7 @@ Stroscot takes after Haskell in that all of the language is compiled to a smalli
 
 * Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.
 * Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).
-* Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. :math:`\Sigma` contains LL's synchronous/positive operators 0, 1, plus ⊕, and times ⊗. :math:`\Pi` contains LL's lollipop implication ⊸ and asynchronous/negative operators top ⊤, bottom ⊥, with &, and par ⅋.
+* Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. :math:`\Sigma` contains LL's synchronous/positive operators 0, 1, plus :math:`\oplus`, and times :math:`\otimes`. :math:`\Pi` contains LL's lollipop implication :math:`\multimap` and asynchronous/negative operators top :math:`\top`, bottom :math:`\bot`, with :math:`\&`, and par :math:`⅋`. (The unicode symbols, for copy-pasting:  ⊕⊗⊸⊤⊥&⅋).
 
 Rules
 =====
@@ -68,7 +68,7 @@ So to review, the propositions in the sequent can be:
 * Pi / Sigma
 * A bang !A or whim ?A
 
-Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above).
+Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above). Although the exchange rule is given, we define the contexts as multisets instead of lists so that a rule may match on a formula in any position.
 
 .. math::
 
@@ -99,21 +99,26 @@ When we compile following GHC's model, the use/assign variables nodes are all kn
 Syntax
 ======
 
-Since proofs are programs by the Curry-Howard correspondence, we can use the rules as a programming language. But we need a syntax for it, since writing sequents all the time is tedious and rule invocations with a sequent like :math:`A, A \vdash B` are ambiguous as to which proposition :math:`A` is used.
+Proofs are programs by the Curry-Howard correspondence. So we can use all these logical rules as a programming language. But we need a syntax for it.
 
 Example
 ~~~~~~~
 
-So let's look at a simple program, boolean "and":
+We use a simple program, boolean "and":
 
 ::
 
   and = \x -> case x of { False -> \_ -> False; True -> \y -> y }
   r = and False True : Bool
 
-We define the types :math:`\text{B} = \Sigma [(F,[],[]),(T,[],[])]` and :math:`a \to b = \Pi [(\text{func}, [a], [b])]`. :math:`\to` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
+Derivation tree
+~~~~~~~~~~~~~~~
+
+We define the types :math:`\text{B} = \Sigma [(F,[],[]),(T,[],[])]` and :math:`a \multimap b = \Pi [(\text{func}, [a], [b])]`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
 
 .. image:: _static/Stroscot_AND_Proof_Tree.svg
+
+The derivation tree representation suffers from what Girard calls "bureaucratic problems of transposing rules" (:cite:`girardGeometryInteraction1989`, page 30 / 98). Girard's example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on :math:`\Sigma_{F R}` and "Use and" can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like :math:`A, A \vdash B` are ambiguous as to which proposition :math:`A` is used - this isn't resolved by using the exchange rule as then exchange on :math:`A, A, A \vdash B` is ambiguous as to which pair of formulas was swapped.
 
 Nets
 ~~~~
@@ -124,9 +129,7 @@ We can split up the derivation tree into a graph, where each node is a rule inst
 
 .. image:: _static/AND_net_r.svg
 
-The derivation tree suffers from what Girard calls "the bureaucracy of syntax". For example the cuts on :math:`\Sigma_{F R}` and "Use and" can be swapped without changing the meaning. The derivation tree is also ambiguous in that we could have multiple B's and the derivation tree would not specify which one is used. Furthermore using the exchange rule all the time is tedious.
-
-To solve these issues there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition's introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.
+To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition's introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.
 
 Most rules do not modify the contexts :math:`\Gamma, \Delta, \Theta, \Lambda` and so the proposition edge skips the node as it is not an introduction/elimination. But there are exceptions that do need the context:
 
@@ -134,10 +137,10 @@ Most rules do not modify the contexts :math:`\Gamma, \Delta, \Theta, \Lambda` an
   * ! / ?. These define a box and the box must be clearly defined so we can duplicate/erase it properly.
   * Use/Assign, so that substitution has something to work with and the free variables are identified
 
-Simplified graph
-~~~~~~~~~~~~~~~~
+Expression "tree"
+~~~~~~~~~~~~~~~~~
 
-For computation, we do not need the syntactic subderivation inclusion relationship at all. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)
+For doing stuff, we do not need the syntactic subderivation inclusion relationship at all, all the important bits can be gotten from the blue/red edges. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)
 
 If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents (=types), then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).
 
@@ -188,7 +191,6 @@ If we drop the syntactic inclusion relationship, reverse the directions of the b
   c4 -> d2 [color="red"]
   j -> c4 [color="blue",dir=back]
   d2 [label="Use and"]
-  d2 -> and [style=dotted]
 
   j [label="PiL"]
   j -> k /* kr */ [color="red"]
@@ -202,16 +204,16 @@ If we drop the syntactic inclusion relationship, reverse the directions of the b
   p [label="I"]
   }
 
-The identity nodes function like a thunk constructor; the stuff in between the identity and the cut is a stack manipulation operation.
+The identity nodes function like thunk identifiers; the stuff in between the identity and the cut is what will get pushed on the stack to execute the thunk. So the I - Cut connections for True and False can be squinched together. Then the path from the assignment node to the use node reads "push !True to stack, push False to stack, reduce with and" (recall the original expression was ``and False True``).
 
 Concrete syntax
 ~~~~~~~~~~~~~~~
 
 The concrete syntax serializes the non-simplified net into a textual form. Each edge is assigned a unique identifier, then all the nodes are written out. The order of the nodes is not important, but the pretty-printer can choose something for readability.
 
-We should also write out the types of the propositions, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.
+We should also write out the types of the formulas, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.
 
-Currently the core syntax is just Haskell's datatype syntax. You can see how it looks in ``src/Core.hs``, ``data Syntax``.
+Currently the core syntax is just Haskell's datatype syntax. You can see how it looks in `Core.hs <https://github.com/Mathnerd314/stroscot/blob/fb648be1ecc3e5c062dbb000d6887a2ce7ac7eb0/src/Core.hs#L50>`__.
 
 An idea of how a real syntax might look:
 

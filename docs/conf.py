@@ -46,4 +46,5 @@ html_context = {
     'github_version': 'master', # Version
     'conf_py_path': '/docs/', # Path in the checkout to the docs root
     'theme_vcs_pageview_mode': 'edit',
+    'theme_logo_only': True,
 }
