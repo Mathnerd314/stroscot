@@ -1,0 +1,142 @@
+g↑a b 0=a
+g↑a b 1=b
+g↑a b n=n:h
+  where
+    h=g↑ a b (n−1)
+
+g(a,b,n) {
+  n1 n2 n3 <- dup n
+  if(n1 == 0) del b n; a
+  else if(n2 == 1) del a n; b
+  else {
+    r = a
+    m = 1
+    while(m < n) {
+      m = m + 1
+      r = m : r
+    }
+    r
+  }
+}
+
+f(a,b,n) {
+  n1 n2 n3 <- dup n
+  while(n1 > 1) {
+    a1 a2 <- dup a
+    a = g↑ a1 b n2
+    b = a
+    n = n3 ‘mod‘ 2
+  }
+  if(n2 == 0) del b; a
+  else if(n3 == 1) del a; b
+}
+
+(λx.
+  (λy.
+    ((
+      λf.((
+          λh.(h(
+              λp.(h(λq.q)))))
+        (λl.(((f(λn.(l n))) x) y))))
+    (λg.(λu.(λv.((g u) (g v)))))
+
+
+    )))
+
+(λx.(λy.((λf.((λh.(h(λp.(h(λq.p)))))
+              (λl.(((f(λn.(l n))) x) y))))
+         (λg.(λu.(λv.((g u) (g v))))))))
+
+Bxyz=x(yz) Composition, Cut
+Cxyz=(xz)y Exchange
+Ix=x Identity
+Kx!y=x Weakening
+Wx!y=x!y!yContraction
+
+
+D!x=x Dereliction
+δ!x=!!x Comultiplication
+F!x!y=!(xy) Monoidal Functoriality
+
+fw a1 b n1 a2 n2 = f (g a1 b n1) a2 (n2 ‘mod‘ 2)
+fwo b a1 a2 n1 n2 = fw a1 b n1 a2 n2
+f a b = W (W (fwo b) a)
+
+qp = K
+qq = KI
+ha = C (B qp)
+hhf = C (B ha)
+hf = W hhf
+lq = λx y f. C C x (B (B f (C y)))
+ff = B (B (B hf)) lq
+g2 = B (B (C B))
+gg = W g2
+
+λx.λy. (ff x y) gg
+
+
+(λx.(λy.((λf.( qp
+              (λ(((f(λ10)) x) y))))
+         (λλλ((2 1) (2 0))))))
+
+
+debrujinify
+choose lambda abstraction with no inner lambda abstractions
+take out free variables as parameters, using beta-abstraction
+  order free variables with inner-bound variables last
+name the lambda abstraction (for convenience)
+replace occurrence by name
+
+eta-reduce (f x = G x) to x
+
+
+s = B(B(B(CB)B)a)B x
+
+r = W s x
+
+
+^⊥ = ⊸ ⊥
+B ⅋ C = B ⊸ C
+0 = T = A⊕0
+1 = ⊥
+
+A ⊗ B = (A ⊸ B ⊸ ⊥)  ⊸ ⊥
+	∣ 	 ∣ A ⊕ A
+	∣ 	A & A
+	∣ 	1 ∣ 0 ∣ ⊤ ∣
+	∣ 	 !A ∣ ?A
+
+B−∘C
+(B⊗C)
+(B ⊗ (C⊸⊥)) ⊸ ⊥
+(B ⅋ (C⊸⊥)) ⊸ ⊥
+(B ⅋ (C⊸⊥)) ⊸ ⊥
+
+
+B⊗C = (B⅋C)
+
+
+B = B ⊸ ⊥
+
+B⊕C = (B&C)
+
+
+B⊗C = (B⅋C)
+
+B⅋C = B ⊸ C
+B−∘C = B ⅋ C = (B⊗C)
+
+(B ⅋ ⊥) ⅋ C
+
+
+> what exactly you mean by "a particular encoding of lambdas into linear logic"
+
+This is based on the linear continuations paper, https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.43.8416&rep=rep1&type=pdf. I don't actually know if there's a direct encoding of optimal reduction into linear logic, because the optimality depends on the reduction strategy and linear logic doesn't define a strategy. But the linear continuations paper does define encodings of call-by-name and call-by-value into linear logic, so I think such a thing exists. And I have a handwavy idea of translating from lambdas to the interaction net graphs used in optimal reduction to proof nets to linear logic terms.
+
+> I don't know exactly what redundant constraint evidence is.
+
+Constraints in GHC do have evidence, as you say. Except GHC erases everything besides dictionaries; dictionaries end up being explicit arguments. This is because e.g. equality constraints are "redundant", since there is only one type equality. But I was thinking in HoTT this isn't true.
+
+> FWIW, I barely have any intuition for anything HoTT
+
+I looked at the HotTT blog a few times and read some things about Agda's implementation. I'd call that "barely". :-)

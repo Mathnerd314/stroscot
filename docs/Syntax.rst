@@ -6,7 +6,7 @@ Almost everything in Stroscot is an expression. The basics are numbers, booleans
 Design
 ======
 
-The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.
+The stuff here is mostly a placeholder while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode and `Rigaux's list of syntax across languages <http://rigaux.org/language-study/syntax-across-languages/>`__) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.
 
 Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
 
@@ -273,6 +273,18 @@ Variables
   a := 2
 
 Mutable variables are completely distinct from name binding, so we have distinct notation for setting them.
+
+Type declarations
+=================
+
+::
+
+  a = 2 : s8
+  a = s8 2
+
+These two options seem more logical compared to other choices such as ``a : s8 = 2`` (Swift,Jai - hard to find the = with long types) or ``s8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program.
+
+The second syntax is similar to assembler syntax such as ``dword 0``.
 
 DSL
 ===

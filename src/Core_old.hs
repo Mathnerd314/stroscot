@@ -1,116 +1,3 @@
-data GD = GD
-  { side :: Side
-  , in_port :: Maybe Int
-  , in_num :: Maybe Int
-  , out_num :: Maybe Int
-  }
-   deriving (Eq,Ord,Show)
-
-combine :: HasCallStack => GD -> GD -> GD
-combine a b = GD
-  { side = assert (side a == side b) $ side a
-  , in_port = j (in_port a) (in_port b)
-  , in_num = j (in_num a) (in_num b)
-  , out_num = j (out_num a) (out_num b)
-  }
-  where
-    j = joinMaybes
-
-joinMaybes (Just a) (Just b) = assert False (Just a)
-joinMaybes (Just a) Nothing = Just a
-joinMaybes Nothing (Just b) = Just b
-joinMaybes Nothing Nothing = Nothing
-
-def_gd = GD L Nothing Nothing Nothing
-ctx_ports :: EDir -> Ctx v -> [(v,EDir,GD)]
-ctx_ports d (Ctx ll rr) = map (,d,l) ll ++ map (,d,r) rr
-
-l = def_gd {side = L}
-r = def_gd {side = R}
-
-type Edge = (String,Int,Int,GD)
-
-type Edges = [Edge]
-
-edges :: Graph -> Edges
-edges rs = let
-  ps = concat $ zipWith (\x -> map (x,)) [0..] $ map ports rs
-  ess = groupSortOn (\(_,(a,_,_))->a) ps
-  buildEdge es = case es of
-    [(i,(a,Out,sa)),(j,(b,In,sb))] -> assert (a == b) $
-      (a,i,j,combine sa sb)
-    [(j,(b,In,sb)),(i,(a,Out,sa))] -> assert (a == b) $
-      (a,i,j,combine sa sb)
-    _ -> error $ show es
-  in map buildEdge ess
-
-tagName :: RuleX v -> String
-tagName (PiRight _ _ _) = "PiR"
-tagName (PiLeft _ _ _ _) = "PiL"
-tagName (Bang _ _ _ _) = "!p"
-tagName (BangD _ _) = "!d"
-tagName (BangCW _ []) = "!w"
-tagName (BangCW _ _) = "!c"
-tagName (Whim _ _ _ _) = "?p"
-tagName (WhimD _ _) = "?d"
-tagName (WhimCW _ []) = "?w"
-tagName (WhimCW _ _) = "?c"
-tagName (Identity _ _) = "I"
-tagName (Cut _ _) = "Cut"
-tagName (Root _) = "Root"
-tagName (Dup _) = "Dup"
-
-type Names = [(Rule, String)]
-
-nodeNames :: Graph -> Names
-nodeNames rs = let
-  rss = groupSortOn tagName rs
-  in rss >>= zipWith (\n x -> (x,tagName x ++ show n)) [0..]
-
-quote n = "\"" ++ n ++ "\""
-
-nodes :: Names -> (Edge,Rule) -> Rule -> [String]
-nodes names ((e,_,_,_),actN) r =
-  case r of
-    Dup ns -> take (length ns) $ map buildDupNode [0..]
-    _ -> [buildNode n (r == actN)]
-  where
-    n = fromJust (lookup r names)
-    buildNode n b = quote n ++ " [label=" ++ quote (tagName r) ++
-      (if b then ",shape=doublecircle" else "") ++ "]\n"
-    Dup xs = actN
-    idx = fromJust $ flip findIndex xs $ \(_,o,is) -> o == e || e `elem` is
-    buildDupNode i =
-      buildNode (n ++ "_" ++ show i) (r == actN && i == idx)
-
-edgeOut :: Names -> Graph -> [Edge] -> (String,Int,Int,GD) -> String
-edgeOut names graph activeE edge@(e,i,j,gd) = let
-  getN n = fromJust (lookup (graph !! n) names)
-  maybeNum m = case m of { Nothing -> ""; Just m -> "_" ++ show m}
-  ax = getN i ++ maybeNum (out_num gd)
-  bx = getN j ++ maybeNum (in_num gd)
-  (a,b) = case side gd of L -> (bx,ax); R -> (ax,bx)
-  arrowhead p = (case side gd of L -> ",arrowtail="; R -> ",arrowhead=") ++ case p of
-    0 -> "dot"
-    1 -> "odot"
-  in
-    quote a ++ " -> " ++ quote b
-      ++ "[color=" ++ case side gd of { L -> "blue"; R -> "red" }
-      ++ ",tooltip=" ++ quote e
-      ++ case in_port gd of { Nothing -> ""; Just p -> arrowhead p}
-      ++ (if edge `elem` activeE then ",penwidth=2" else "")
-      ++ case side gd of { L -> ",dir=back"; R -> ""}
-      ++ "]\n"
-
-mkDot graph edgesG active = let
-  names = nodeNames graph
-  activeE = map fst active
-  activeN = last active
-  nodetxt = concat (graph >>= nodes names activeN)
-  edgetxt = edgesG >>= edgeOut names graph activeE
-  in
-    "digraph {\n" ++ nodetxt ++ edgetxt ++ "}\n"
-
 iterGraph edge_num graph ((redex,redex_dir):rs) = let
   names = nodeNames graph
   edgesG = edges graph
@@ -149,11 +36,6 @@ findNode graph e@(_,from,to,gd) Down = graph !! to
 
 get_from_id (_,from,to,gd) = from
 get_gd (_,_,_,gd) = gd
-
-mkedge = do
-  n <- get
-  put (n+1)
-  return ("e" ++ show n)
 
 reduce :: Graph -> Edges -> Edge -> GDir -> ([(Edge,Rule)], State Int Graph)
 reduce graph edges e@(_,from_id,to_id,gd) dir = let
@@ -312,12 +194,6 @@ reduce graph edges e@(_,from_id,to_id,gd) dir = let
         bang = Bang i (Ctx (delete idx il) ir) o (Ctx (delete idx ol) or)
         in replace [r,left_node] [cut,bang]
       (_,_) -> traceShow (r,right_node,left_node) $ replace undefined undefined
-
--- | A combination of 'group' and 'sort', using a part of the value to compare on.
---
--- > groupSortOn length ["test","of","sized","item"] == [["of"],["test","item"],["sized"]]
-groupSortOn :: Ord b => (a -> b) -> [a] -> [[a]]
-groupSortOn f = map (map snd) . groupBy ((==) `on` fst) . sortBy (compare `on` fst) . map (f &&& id)
 
 delete :: HasCallStack => Int -> [a] -> [a]
 delete _ []     = error "delete: element not present"

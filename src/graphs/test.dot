@@ -1,0 +1,14 @@
+digraph {
+rankdir="BT"
+"Identity0" [label="Identity"]
+"BangD0" [label="BangD"]
+"PiR0" [label="PiR"]
+"Assign0" [label="Assign",shape=doublecircle]
+"Assign0" -> "PiR0"[color=red,weight=2,tooltip="ret1",arrowhead=normal,arrowtail=none,penwidth=2,dir=both]
+"PiR0" -> "Identity0"[color=red,weight=2,tooltip="ret4",arrowhead=normal,arrowtail=none,dir=both]
+"Assign0" -> "PiR0"[color=black,weight=5,tooltip="retseq0",arrowhead=normal,arrowtail=none,dir=both]
+"PiR0" -> "BangD0"[color=black,weight=5,tooltip="seq2",arrowhead=normal,arrowtail=none,dir=both]
+"BangD0" -> "PiR0"[color=blue,constraint=false,weight=0,tooltip="x3",arrowtail=normal,arrowhead=none,dir=both]
+"Identity0" -> "BangD0"[color=blue,constraint=false,weight=0,tooltip="xret6",arrowtail=normal,arrowhead=none,dir=both]
+"BangD0" -> "Identity0"[color=black,weight=5,tooltip="xseq5",arrowhead=normal,arrowtail=none,dir=both]
+}

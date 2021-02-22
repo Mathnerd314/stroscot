@@ -1,0 +1,409 @@
+B ~ b a c d e
+(~ b)
+
+
+  let rec ($$): type g a b. (g,a->b) repr -> (g,a) repr -> (g,b) repr =
+   fun e1 e2 ->
+    match (e1,e2) with
+    | (W e1, W e2)      -> W (e1 $$ e2)          (* both weakened *)
+    | (W e, C d)        -> W (e $$ C d)
+    | (C d, W e)        -> W (C d $$ e)
+    (* (K (e1 xm ... x1) (e2 xn ... x1 x0)
+       == (e1 xm ... x1) ((e2 xn ... x1) x0)
+       == B (e1 xm ... x1) (e2 xn ... x1) x0
+    *)
+    | (W e1, N e2)      -> N ((C S.kB) $$ e1 $$ e2)
+    (* Mirror image *)
+    | (N e1, W e2)      -> N ((C S.kC) $$ e1 $$ e2)
+    (* (e1 x0) (e2 x0) == S e1 e2 x0 *)
+    | (N e1, N e2)      -> N ((C S.kS) $$ e1 $$ e2)
+
+    | (C d, N e)        -> N (C S.(kB $! d) $$ e)
+    (* C C f g x --> C g f x --> g x f *)
+    (* | (N e, C d)        -> N ((C S.kC) $$ e $$ C d)  below is better *)
+    | (N e, C d)        -> N (C S.(kC $! kC $! d) $$ e)
+    | (C d1, C d2)      -> C (S.(d1 $! d2))
+
+  let lam: ('a*'g,'b) repr -> ('g,'a->'b) repr = function
+    | C d -> C (S.(kK $! d))
+    | N e -> e                          (* eta-contraction *)
+    | W e -> (C S.kK) $$ e
+
+  let observe : (unit,'a) repr -> 'a S.repr = function
+  (C d) -> d
+
+end
+;;
+
+(* A bit more optimal compilation scheme ... *)
+
+
+module Conv2(S:SKI) (* : Lam *) = struct
+  (* Generally open code with variables x0 x1 ... xn where
+     x has the index 0
+     is represented as
+     D xn ... x0 where D is closed
+     If a term does not have a variable with index 0 as
+     free, we add it, using combinators
+
+    Variables are eliminated by eta-reduction
+   *)
+  (* A generally open expression *)
+  type ('g,'a) repr =
+    | C: 'a S.repr -> ('g,'a) repr   (* closed code *)
+    | V: ('a*'g,'a) repr             (* reference to the top env variable *)
+    | N: ('g,'a->'b) repr -> ('a*'g,'b) repr  (* N e === (s e) z *)
+    | W: ('g,'a) repr -> (_*'g,'a) repr  (* weakened: W e === K e *)
+
+  let z:   ('a*'g,'a) repr = V
+  let s:   ('b*'g,'a) repr -> (_*('b*'g),'a) repr = fun e   -> W e
+
+  let rec ($$): type g a b. (g,a->b) repr -> (g,a) repr -> (g,b) repr =
+   fun e1 e2 ->
+    match (e1,e2) with
+    | (W e1, W e2)      -> W (e1 $$ e2)          (* both weakened *)
+    | (W e, C d)        -> W (e $$ C d)
+    | (C d, W e)        -> W (C d $$ e)
+    | (W e,V)           -> N e                   (* e x *)
+    | (V, W e)          -> N (C (S.(kC $! kI)) $$ e)
+    (* (K (e1 xm ... x1) (e2 xn ... x1 x0)
+       == (e1 xm ... x1) ((e2 xn ... x1) x0)
+       == B (e1 xm ... x1) (e2 xn ... x1) x0
+    *)
+    | (W e1, N e2)      -> N ((C S.kB) $$ e1 $$ e2)
+    (* Mirror image *)
+    | (N e1, W e2)      -> N ((C S.kC) $$ e1 $$ e2)
+    (* (e1 x0) (e2 x0) == S e1 e2 x0 *)
+    | (N e1, N e2)      -> N ((C S.kS) $$ e1 $$ e2)
+    (* e x x *)
+    | (N e, V)          -> N (C S.kS $$ e $$ C S.kI)
+    (* x (e x) *)
+    | (V, N e)          -> N (C S.(kS $! kI) $$ e)
+
+    | (C d, N e)        -> N ((C S.(kB $! d)) $$ e)
+    | (C d, V)          -> N (C d)                    (* d x *)
+    | (V, C d)          -> N (C S.(kC $! kI $! d))    (* x d *)
+    (* x x, can't actually happen for simple types *)
+    | (V,V)             -> failwith "can't happen for simple types" (* N (C S.(kS $! kI $! kI)) *)
+    (* C C f g x --> C g f x --> g x f *)
+    (* | (N e, C d)        -> N ((C S.kC) $$ e $$ C d)  below is better *)
+    | (N e, C d)        -> N ((C S.(kC $! kC $! d)) $$ e)
+    | (C d1, C d2)      -> C (S.(d1 $! d2))
+
+  let lam: type a b g. (a*g,b) repr -> (g,a->b) repr = function
+    | V   -> C S.kI
+    | C d -> C (S.(kK $! d))
+    | N e -> e                          (* eta-contraction *)
+    | W e -> (C S.kK) $$ e
+
+  let observe : (unit,'a) repr -> 'a S.repr = function
+  (C d) -> d
+
+end
+;;
+
+(*
+ * ------------------------------------------------------------------------
+ * Practical extensions
+ *)
+
+(* Extension of BigLam with more constants *)
+module type BigLam = sig
+  include Lam
+
+  val int:  int -> ('g,int) repr
+  val bool: bool -> ('g,bool) repr
+
+  val add: ('g,int->int->int) repr
+  val sub: ('g,int->int->int) repr
+  val mul: ('g,int->int->int) repr
+  val div: ('g,int->int->int) repr
+  val rem: ('g,int->int->int) repr
+
+  val eq:  ('g,'a->'a->bool) repr
+  val if_: ('g,bool->'a->'a->'a) repr
+
+  val fix: ('g, ('a->'a)->'a) repr
+end
+
+module BigEx(S:BigLam) = struct
+  open S
+  (* ((\x. + x x) 5), SLPJ book, PDF p. 277 *)
+  let a5 () = (lam (add $$ z $$ z)) $$ int 5
+
+  let fact () = fix $$ lam (lam
+    (if_ $$ (eq $$ z $$ int 0) $$ int 1
+         $$ (mul $$ z $$ (s z $$ (sub $$ z $$ int 1)))))
+
+  (* The gcd of two integers a and b where b <= a.
+     The example from 16.2.6 of SPJ Book, p. 287 *)
+  let gcd () = fix $$ lam (lam (lam
+    (let self = s (s z) and a = s z and b = z in
+     if_ $$ (eq $$ int 0 $$ b) $$ a
+         $$ (self $$ b $$ (rem $$ a $$ b)))))
+
+end
+
+module type BigSKI = sig
+  include SKI
+
+  val int:  int  -> int repr
+  val bool: bool -> bool repr
+
+  val add:  (int->int->int) repr
+  val sub:  (int->int->int) repr
+  val mul:  (int->int->int) repr
+  val div:  (int->int->int) repr
+  val rem:  (int->int->int) repr
+
+  val eq:   ('a->'a->bool) repr
+  val if_:  (bool->'a->'a->'a) repr
+
+  val fix:  (('a->'a)->'a) repr
+end
+
+module PBigSKI = struct
+  include PSKI
+
+  let int:  int  -> int repr = fun i -> parens true @@ string_of_int i
+  let bool: bool -> bool repr = function
+    | true  -> "(true)"
+    | false -> "(false)"
+
+  let add:  (int->int->int) repr = "(+)"
+  let sub:  (int->int->int) repr = "(-)"
+  let mul:  (int->int->int) repr = "(*)"
+  let div:  (int->int->int) repr = "(/)"
+  let rem:  (int->int->int) repr = "Rem"
+
+  let eq:   ('a->'a->bool) repr  = "(=)"
+  let if_:  (bool->'a->'a->'a) repr = "IF"
+
+  let fix:  (('a->'a)->'a) repr = "Y"
+end
+
+(* The evaluator that implements head-first reductions. Now we have to
+   be careful: with fix, the divergence is possible.
+*)
+module RBigSKI = struct
+  type 'a repr =
+    | B: 'a -> 'a repr                  (* constants, strict functions  *)
+    | F: ('a repr -> 'b repr) -> ('a->'b) repr   (* possibly non-strict *)
+    | A: ('a->'b) repr * 'a repr -> 'b repr (* non-commited application *)
+
+  let kI:  ('a->'a) repr     = F (fun x -> x)
+  let kK:  ('a->'b->'a) repr = F (fun x -> F (fun y -> x))
+  let kS:  (('a->'b->'c)->('a->'b)->'a->'c) repr =
+    F (fun f -> F (fun g -> F(fun x -> A(A(f,x),A(g,x)))))
+  let kB:  (('a -> 'b) -> ('c -> 'a) -> 'c -> 'b) repr =
+    F (fun f -> F (fun g -> F(fun x -> A(f,A(g,x)))))
+  let kC:  (('a -> 'b -> 'c) -> ('b -> 'a -> 'c)) repr =
+    F (fun f -> F (fun g -> F(fun x -> A(A(f,x),g))))
+  let ($!): type a b. (a->b) repr -> a repr -> b repr = fun f x ->
+    match (f,x) with
+    | (B f, B x) -> B (f x)             (* strict function *)
+    | (F f, x)   -> f x
+    | (f,x)      -> A(f,x)
+
+  let int:  int  -> int repr  = fun x -> B x
+  let bool: bool -> bool repr = fun x -> B x
+
+  let add:  (int->int->int) repr = B ( + )
+  let sub:  (int->int->int) repr = B ( - )
+  let mul:  (int->int->int) repr = B ( * )
+  let div:  (int->int->int) repr = B ( / )
+  let rem:  (int->int->int) repr = B (fun  x y -> x mod y)
+
+  let eq:   ('a->'a->bool) repr  = B ( = )
+
+  let rec fix:  (('a->'a)->'a) repr = F(function
+    | B _ -> failwith "<loop>"          (* fix of a strict function *)
+    | f   -> A(f,A(fix,f)))
+
+  let rec observe: type a. a repr -> a = function
+    | B x -> x
+    | F f -> fun x -> observe @@ f (B x)
+    | A(B f,x)   -> f (observe x)       (* strict function *)
+    | A(F f,x)   -> observe @@ f x
+    | A(f,x)     -> observe @@ A (hnf f,x)
+  and hnf: type a. a repr -> a repr = function
+    | A(B f,x) -> B (f (observe x))
+    | A(F f,x) -> hnf @@ f x
+    | A(f,x)   -> hnf @@ A(hnf f,x)
+    | x -> x
+
+  let if_:  (bool->'a->'a->'a) repr = F(fun test -> F (fun th -> F(fun el ->
+    let rec loop = function
+      | B true  -> th
+      | B false -> el
+      | test    -> A(F (fun x -> loop (hnf x)),test)
+    in loop test)))
+end
+
+
+module BigConv2(S:BigSKI) (* : BigLam *) = struct
+  (* A generally open expression *)
+  type ('g,'a) repr =
+    | C: 'a S.repr -> ('g,'a) repr   (* closed code *)
+    | V: ('a*'g,'a) repr             (* reference to the top env variable *)
+    | N: ('g,'a->'b) repr -> ('a*'g,'b) repr  (* N e === (s e) z *)
+    | W: ('g,'a) repr -> (_*'g,'a) repr  (* weakened: W e === K e *)
+
+  let z:   ('a*'g,'a) repr = V
+  let s:   ('b*'g,'a) repr -> (_*('b*'g),'a) repr = fun e   -> W e
+
+  let rec ($$): type g a b. (g,a->b) repr -> (g,a) repr -> (g,b) repr =
+   fun e1 e2 ->
+    match (e1,e2) with
+    | (W e1, W e2)      -> W (e1 $$ e2)          (* both weakened *)
+    | (W e, C d)        -> W (e $$ C d)
+    | (C d, W e)        -> W (C d $$ e)
+    | (W e,V)           -> N e                   (* e x *)
+    | (V, W e)          -> N (C (S.(kC $! kI)) $$ e)
+    (* (K (e1 xm ... x1) (e2 xn ... x1 x0)
+       == (e1 xm ... x1) ((e2 xn ... x1) x0)
+       == B (e1 xm ... x1) (e2 xn ... x1) x0
+    *)
+    | (W e1, N e2)      -> N ((C S.kB) $$ e1 $$ e2)
+    (* Mirror image *)
+    | (N e1, W e2)      -> N ((C S.kC) $$ e1 $$ e2)
+    (* (e1 x0) (e2 x0) == S e1 e2 x0 *)
+    | (N e1, N e2)      -> N ((C S.kS) $$ e1 $$ e2)
+    (* e x x *)
+    | (N e, V)          -> N (C S.kS $$ e $$ C S.kI)
+    (* x (e x) *)
+    | (V, N e)          -> N (C S.(kS $! kI) $$ e)
+
+    | (C d, N e)        -> N ((C S.(kB $! d)) $$ e)
+    | (C d, V)          -> N (C d)                    (* d x *)
+    | (V, C d)          -> N (C S.(kC $! kI $! d))    (* x d *)
+    (* x x, can't actually happen for simple types *)
+    | (V,V)             -> failwith "can't happen for simple types" (* N (C S.(kS $! kI $! kI)) *)
+    (* C C f g x --> C g f x --> g x f *)
+    (* | (N e, C d)        -> N ((C S.kC) $$ e $$ C d)  below is better *)
+    | (N e, C d)        -> N ((C S.(kC $! kC $! d)) $$ e)
+    | (C d1, C d2)      -> C (S.(d1 $! d2))
+
+  let lam: type a b g. (a*g,b) repr -> (g,a->b) repr = function
+    | V   -> C S.kI
+    | C d -> C (S.(kK $! d))
+    | N e -> e                          (* eta-contraction *)
+    | W e -> (C S.kK) $$ e
+
+  let observe : (unit,'a) repr -> 'a S.repr = function
+  (C d) -> d
+
+  let int:  int -> ('g,int) repr   = fun x -> C S.(int x)
+  let bool: bool -> ('g,bool) repr = fun x -> C S.(bool x)
+
+  let add: ('g,int->int->int) repr = C S.add
+  let sub: ('g,int->int->int) repr = C S.sub
+  let mul: ('g,int->int->int) repr = C S.mul
+  let div: ('g,int->int->int) repr = C S.div
+  let rem: ('g,int->int->int) repr = C S.rem
+
+  let eq:  ('g,'a->'a->bool) repr  = C S.eq
+  let if_: ('g,bool->'a->'a->'a) repr = C S.if_
+
+  let fix: ('g, ('a->'a)->'a) repr = C S.fix
+end
+
+
+let iterate : int -> ('a -> 'a) -> 'a -> 'a list = fun n f z ->
+  let rec loop last acc = function
+    | 0 -> List.rev acc
+    | 1 -> List.rev @@ last :: acc
+    | n -> loop (f last) (last :: acc) (n-1)
+  in loop z [] n
+
+let [1;2;3;4;5] = iterate 5 succ 1;;
+
+  (* Primed combinators *)
+  let kK' : (('a -> 'b) -> ('w -> 'a) -> 'w -> 'b) repr = kB
+
+  (* S' t a b x = t (a x) (b x);; *)
+  let kS' :
+      (('a -> 'b -> 'c) -> ('d -> 'a) -> ('d -> 'b) -> 'd -> 'c) repr =
+   kB $! (kB $! kS) $! kB
+
+  (* B' t a b x = t a (b x);; *)
+  let kB' : (('a -> 'b -> 'c) -> 'a -> ('d -> 'b) -> 'd -> 'c) repr =
+    kB $! kB
+
+  (* C' t a b x = t (a x) b;; *)
+  let kC' : (('a -> 'b -> 'c) -> ('d -> 'a) -> 'b -> 'd -> 'c) repr =
+   kB $! (kB $! kC) $! kB
+
+  let max_depth = 10 (* We pre-compute all combinators to that depth,
+                        for simplicity. In production, just use flexible arrays:
+                        that is, reallocate to the twice the current size when
+                        about to overflow. For now, we skip the reallocation *)
+
+  (* The 0th element is K1 *)
+  let kKs = Array.of_list @@
+              iterate max_depth (mapU (fun d -> kK' $! d)) (U kK)
+
+  let kSs = Array.of_list @@
+              iterate max_depth (mapU (fun d -> kS' $! d)) (U kS)
+
+  let kBs = Array.of_list @@
+              iterate max_depth (mapU (fun d -> kB' $! d)) (U kB)
+
+  let kCs = Array.of_list @@
+              iterate max_depth (mapU (fun d -> kC' $! d)) (U kC)
+
+  let kKn i = kKs.(i-1)
+  let kSn i = kSs.(i-1)
+  let kBn i = kBs.(i-1)
+  let kCn i = kCs.(i-1)
+end
+
+
+module PBulkSKI = struct
+  include PSKI
+  type u = string
+
+  let kSn i = "S" ^ string_of_int i
+  let kBn i = "B" ^ string_of_int i
+  let kCn i = "C" ^ string_of_int i
+
+  let ($?) = ($!)
+  let uclose x = x
+  let uopen  x = x
+end
+
+
+module LinearConv(S:BulkSKI) (* : Lam *) = struct
+  type ('g,'a) repr =
+    | C: 'a S.repr -> ('g,'a) repr   (* closed code *)
+    | N: S.u S.repr * int -> ('g,'a) repr
+
+  let ($$): type g a b. (g,a->b) repr -> (g,a) repr -> (g,b) repr =
+   fun x y -> match (x,y) with
+    | (C d1,C d2)     -> C (S.(d1 $! d2))
+    | (C d1,N (d2,l)) -> N (S.(kBn l $? uclose d1 $? d2),l)  (* D1 (D2 x) *)
+    | (N (d1,l),C d2) -> N (S.(kCn l $? d1 $? uclose d2),l)  (* (D1 x) D2 *)
+    | (N (d1,l),N (d2,l2)) when l = l2 ->
+        N (S.(kSn l $? d1 $? d2),l)  (* (D1 x) (D2 x) *)
+    | (N (d1,l1),N (d2,l2)) when l1 < l2 ->
+        let k = l2 - l1 in
+        N (S.(kBn k $? (kSn l1 $? d1) $? d2),l2)
+    | (N (d1,l1),N (d2,l2)) (* when l1 > l2 *) ->
+        let k = l1 - l2 in
+        let d1' = S.(kBn k $? kSn l2 $? d1) in
+        N (S.(kCn k $? d1' $? d2), l1)
+
+  let uI = S.(uclose kI)                (* for the sake of polymorphism in z *)
+  let z:   ('a*'g,'a) repr = N (uI, 1)
+  let s:   ('b*'g,'a) repr -> (_*('b*'g),'a) repr = fun e ->
+    let N (d,l) = (C S.kK) $$ e in N (d,l+1)
+
+  let lam: type a g b. (a*g,b) repr -> (g,a->b) repr = function
+    | C k        -> C (S.(kK $! k))
+    | N (d,1)    -> C (S.uopen d)
+    | N (d,l)    -> N (d,l-1)
+
+  let observe : (unit,'a) repr -> 'a S.repr = function
+    | C d -> d
+    | _   -> failwith "impossible"
+end
