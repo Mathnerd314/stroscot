@@ -3,7 +3,20 @@ Library
 
 Stroscot will support the standard libraries of other languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination.
 
-But building on the work of others isn't enough, we also have to improve and synthesize a new, universal standard library.
+Standard libraries:
+* `Rust <https://github.com/rust-lang/rust/tree/master/library>`__ (MIT + Apache 2.0)
+* `Go <https://github.com/golang/go/tree/master/src>`__ (BSD-style)
+* `Haskell <https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries>`__ (BSD-style)
+  * The alternate prelude `Foundation <https://github.com/haskell-foundation/foundation>`__ (BSD)
+* Julia `1 <https://github.com/JuliaLang/julia/tree/master/base>`__ `2 <https://github.com/JuliaLang/julia/tree/master/stdlib>`__ (MIT)
+* C
+  * `glibc <https://sourceware.org/git/?p=glibc.git;a=tree>`__ (LGPLv2.1, some files BSD/ISC/etc.)
+  * `Musl <https://git.musl-libc.org/cgit/musl/tree/>`__ (MIT)
+* Python `1 <https://github.com/python/cpython/tree/master/Modules>`__ `2 <https://github.com/python/cpython/tree/master/Lib>`__ (PSFv2)
+* `Zig <https://github.com/ziglang/zig/tree/master/lib/std>`__ (MIT)
+* Slate `1 <https://github.com/briantrice/slate-language/tree/master/src/core>`__ `2 <https://github.com/briantrice/slate-language/tree/master/src/lib>`__ `3 <https://github.com/briantrice/slate-language/tree/master/src/i18n>`__
+
+But building on the work of others isn't enough, we also have to improve and synthesize a new, universal standard library for new programs to use.
 
 Numbers
 =======
@@ -11,7 +24,7 @@ Numbers
 In the mathematical world there are integers and real numbers, which have well-defined arithmetic operations (besides division by 0). In the computer world we do not have either of these luxurious spaces, but rather various formats for numbers which represent subsets of the space.
 
 Literals
--------
+--------
 
 Literals are parsed into records like ``NumberLiteral { digits = "123", exponent = "24" }``. We can define implicit conversions to the various the numeric types. Leadings 0's restrict the type, so ``010`` must be stored in a type that can contain 999.
 

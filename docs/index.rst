@@ -22,6 +22,7 @@ Stroscot is an imperative programming language designed for modern processors.
   Modules
   Memory
   Compiler
+  Library
   BuildSystem
   PackageManager
   Programs

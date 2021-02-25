@@ -21,7 +21,7 @@ The implementation of sets is based on syntax tree manipulation. Non-set values 
 Types
 =====
 
-Types are simply a wrapper around the sets defined earlier. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
+Types are simply a wrapper around the sets defined earlier. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in :cite:`dolanAlgebraicSubtyping`. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
 
 ::
 
@@ -59,6 +59,30 @@ The second version restricts the definition of the function so it is only define
       ret
    }
 
+ADTs
+====
+
+Abstract data types are sets containing trees of uninterpreted symbols. So a datatype declaration (from `here <https://github.com/UlfNorell/insane/blob/master/Context.agda>`__)
+
+::
+
+   data Cxt [ Ty : Cxt Ty -> Set ] : Set where
+      nil  : Cxt Ty
+      snoc : (G : Cxt Ty) -> Ty G -> Cxt Ty
+
+is equivalent to
+
+::
+
+   symbol nil
+   symbol snoc
+   Cxt Ty = assert(Ty isElemOf (Cxt Ty)); Set { x where
+      (x == nil
+      || exists G y. x == (snoc G y) && G isElemOf (Cxt Ty) && y isElemOf (Ty G))
+   }
+
+The recursive appearance of ``Cxt Ty`` is interpreted using the least pre-fixed point and Bekić's theorem as in :cite:`dolanPolymorphismSubtypingType2017` section 2.2.
+
 Records
 =======
 
@@ -67,10 +91,10 @@ You can pass ``{a: undefined, b: 2}`` to a function ``f rec = rec.b``. This is s
 Type synthesis
 ==============
 
-Type synthesis is tricky, but with the termination checker we don't have any visible types. The optimizer does a form of type synthesis when it assigns formats to values, but the optimizer will use a catch-all format for hard cases, so the formats don't have to be complete, and they can also be conditional on . The only useful case for a complex type synthesis algorithm might be pretty-printed type signatures in documentation, but there having the developer specify type signatures is a viable option.
+Type synthesis is tricky, but with the termination checker we don't have any visible types. The optimizer does a form of type synthesis when it assigns formats to values, but the formats can be conditional on state, and the optimizer will use a catch-all format for hard cases, so the formats are complete but not sound. The only useful case for a complex type synthesis algorithm might be pretty-printed type signatures in documentation, but there having the developer specify type signatures is a viable option.
 
-`typing <>`__ stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But `dependent <https://github.com/UlfNorell/insane/>`__
-`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking :cite:`dunfieldBidirectionalTyping2019` should be able to minimize the amount of signatures required.
+But `dependent <https://github.com/UlfNorell/insane/>`__
+`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures.
 
 Roles
 =====

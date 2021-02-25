@@ -33,15 +33,12 @@ Inspiring projects
 ==================
 
 -  `Lever <https://github.com/cheery/lever/>`__
--  `GHC <https://github.com/ghc/ghc/>`__
--  `Zig <https://github.com/ziglang/zig/>`__
 -  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
 -  `Pinafore <https://pinafore.info/>`__
 -  `Macro Lambda Calculus <http://github.com/codedot/lambda>`__
 -  `A Pint-sized Earley Parser <https://github.com/JoshuaGrams/pep>`__
 -  `Wat <https://github.com/manuel/wat-js>`__
 -  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
--  `Slate <https://github.com/briantrice/slate-language>`__
 
 Tagline
 =======

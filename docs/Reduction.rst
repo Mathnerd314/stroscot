@@ -5,7 +5,7 @@ Stroscot takes after Haskell in that all of the language is compiled to a smalli
 
 * Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.
 * Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).
-* Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. :math:`\Sigma` contains LL's synchronous/positive operators 0, 1, plus :math:`\oplus`, and times :math:`\otimes`. :math:`\Pi` contains LL's lollipop implication :math:`\multimap` and asynchronous/negative operators top :math:`\top`, bottom :math:`\bot`, with :math:`\&`, and par :math:`⅋`. (The unicode symbols, for copy-pasting:  ⊕⊗⊸⊤⊥&⅋).
+* Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators ⊕⊗⊸⊤⊥&⅋ into two jumbo operators, :math:`\Sigma` (sigma) and :math:`\Pi` (pi).
 
 Rules
 =====
@@ -25,9 +25,7 @@ We start with the generalized :math:`\Pi` rule. This is similar to Levy's rule e
       {\Pi_{i} {}_{L}}
     \end{array}
 
-Next we have the generalized :math:`\Sigma` rule. This is the dual of :math:`\Pi`. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`\Pi (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)`. The syntax :math:`\Pi [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]` might be clearer.
-
-When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
+Next we have the generalized :math:`\Sigma` rule. This is the dual of :math:`\Pi`. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`\Sigma (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)`. The syntax :math:`\Sigma [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]` might be clearer.
 
 .. math::
 
@@ -41,7 +39,52 @@ When the RHS is nonempty we get terms with holes, that can be pattern-matched by
       {\Sigma_L}
     \end{array}
 
-To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"of course" and whim/whimper/?/"why not". A call-by-value function type is ``A -o ?B`` while call-by-name is ``!A -o B``. To enforce the S4 rules we add a level index to every term, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because all the indices in a non-promotion/dereliction sequent are the same value and so they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has :math:`j=i+1` instead of :math:`j>i`, shrug.
+When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
+
+All of the standard operators in linear logic can be expressed using :math:`\Sigma` and :math:`\Pi`. :math:`\Sigma` contains synchronous/positive operators while :math:`\Pi` contains asynchronous/negative operators.
+
+.. list-table::
+   :header-rows: 1
+   :widths: auto
+
+   * - Operator
+     - Name
+     - Jumbo Type
+   * - :math:`0`
+     - Zero
+     - :math:`\Sigma []`
+   * - :math:`1`
+     - One
+     - :math:`\Sigma [(\#s,[] - [])]`
+   * - :math:`A \oplus B`
+     - Plus
+     - :math:`\Sigma [(\#l,[A] - []),(\#r,[B] - [])]`
+   * - :math:`A \otimes B`
+     - Times
+     - :math:`\Sigma [(\#s,[A,B] - [])]`
+   * - :math:`\top`
+     - Top
+     - :math:`\Pi []`
+   * - :math:`\bot`
+     - Bottom
+     - :math:`\Pi [(\#s,[] \multimap [])]`
+   * - :math:`A \& B`
+     - With
+     - :math:`\Pi [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]`
+   * - :math:`A ⅋ B`
+     - Par
+     - :math:`\Pi [(\#s,[] \multimap [A,B])]`
+   * - :math:`A \multimap B`
+     - Lollipop (implication)
+     - :math:`\Pi [(\#s,[A] \multimap [B])]`
+   * - :math:`A^{\bot}`
+     - Negation
+     - :math:`\Pi [(\#s,[A] \multimap [])]` or :math:`\Sigma [(\#s,[] - [A])]`
+
+Exponentials
+~~~~~~~~~~~~
+
+To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"of course" and whim/whimper/?/"why not". A call-by-name function type is :math:`!A \multimap B` while call-by-value is :math:`A \multimap ? B`  :cite:`maraistCallbynameCallbyvalueCallbyneed1995`. To enforce the S4 rules we add a level index to every term, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has :math:`j=i+1` instead of :math:`j>i`, shrug.
 
 Instead of binary contraction we allow :math:`n`-ary contraction for :math:`n\geq 2`.
 
@@ -67,6 +110,9 @@ So to review, the propositions in the sequent can be:
 
 * Pi / Sigma
 * A bang !A or whim ?A
+
+Structural
+~~~~~~~~~~
 
 Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above). Although the exchange rule is given, we define the contexts as multisets instead of lists so that a rule may match on a formula in any position.
 

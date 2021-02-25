@@ -72,9 +72,6 @@ To reason about the code we need a pencil-and-paper model of how it works. First
 .. raw:: html
 
   <style>
-    .shal-trace-example th p {
-      margin-bottom: 0px;
-    }
     .shal-trace-example tr:nth-child(1) td,
     .shal-trace-example tr:nth-child(2) td,
     .shal-trace-example tr:nth-child(3) td,
