@@ -18,30 +18,61 @@ Linux distribution
 
 Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn't strictly necessary and it's easily broken anyways as few people use it.
 
-The goal of the Linux distribution, compared to others, is automation: all package updates are automatic, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.
+The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.
 
-Package pinning is an issue, to handle broken software and stale dependencies. A new release of a tool might just not work; then it needs to be pinned to the old version. In contrast, a library update might work most of the time but break a few packages; the distro should then package multiple versions of the library and build most packages with the new libary while pinning the library to the old version for the specific breakages.
+Upgrade cycle
+=============
 
-The key question is where to store the multiple versions of the libraries. For a basic path like ``/usr/lib/libfoo.so.1``, we can put a hash ``123456`` in various places:
+A package has various versions. It also depends on other packages which can themselves be various versions.
 
-1. ``/usr/lib/libfoo.so.123456.1`` or ``/usr/lib/libfoo.so.1.123456`` (filename version)
-2. ``/usr/lib/123456/libfoo.so.1`` (multiarch layout similar to Debian)
-3. ``/usr/123456/lib/libfoo.so.1`` (NixOS layout)
-4. ``/123456/usr/lib/libfoo.so.1`` ("multisystem" layout)
+In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form "breakage: A-2 B-2 C-2".
+
+There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.
+
+Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.
+
+Versioning
+==========
+
+Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
+For a basic path like ````/usr/share/foo/img.jpg````, we can put a hash ``HASH`` in various places:
+
+1. ``/usr/lib/libfoo.so.HASH.1`` or ``/usr/lib/libfoo.so.1.HASH`` (filename version)
+2. ``/usr/lib/HASH/libfoo.so.1`` ("multiarch" layout similar to Debian)
+3. ``/usr/HASH/lib/libfoo.so.1`` (NixOS layout)
+4. ``/HASH/usr/lib/libfoo.so.1`` ("multisystem" layout)
 
 The multisystem layout isn't useful, as the point of ``/usr`` is to allow putting system files on a separate partition. Also the root directory would become cluttered with all the hashed files.
 
-For the filename version, simply renaming it doesn't work, as there is a symlink ``/usr/lib/libfoo.so.1`` and its target is ambiguous if there are multiple versions. But if we modify the soname we can include the hash anywhere in the soname, so then the symlink also includes the hash. Although we could `detect ABI changes <https://lvc.github.io/abi-compliance-checker/>`__, versions aren't linear in general so it has to be a hash instead of a sequential number. The soname can be set with a linker wrapper. The library will still have to be renamed during installation to include the hash. The library can then be linked with by setting a symlink from ``libfoo.so`` to the real version, as usual. ldconfig should work unmodified. Prebuilt binaries can be patchelf'd, but using ``--replace-needed`` rather than ``--set-rpath``.
-Where this solution breaks down, however, is with data files. Maintaining hashed file versions like ``/usr/share/foo/foo-123456.jpg`` would require patching every application to look things up in the right place. So the only option seems to be using a hashed layout, ``/usr/share/foo-123456/foo.jpg``. But autoconf only has the option ``--datarootdir`` to change ``/usr/share``; it doesn't have a standard option to rename the subdirectory. So once again we'd have to manually patch every package. The only feasible option is to introduce another layer, ``/usr/share/foo-123456/foo/foo.jpg``. But that's the multiarch layout.
+The filename solution breaks down with data files. Maintaining hashed file versions like  would require patching every application to look things up in the right place. We can move it up to the package directory, ``/usr/share/foo-HASH/foo.jpg``. But autoconf only has the option ``--datarootdir`` to change ``/usr/share``; it doesn't have a standard option to rename the subdirectory. So once again we'd have to manually patch every package. The only feasible option is to move it up more, ``/usr/share/HASH/foo/foo.jpg``. But that's the multiarch layout. So for data files only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as ``<path of executable>/../share/something``. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can change the various `autoconf directories <https://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`__ by appending ``/HASH`` and leave the rest up to the package; it may install things to ``/usr/$hash/`` if it's not well-written, but everything respects ``$PREFIX``.
 
-So really only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as ``<path of executable>/../share/something``. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can set the various autoconf options to ``$path/$hash`` and leave the rest up to the package; it may install things to ``/usr/$hash/`` if it's not well-written, but everything respects ``$PREFIX``.
-
-For both the NixOS/multiarch styles, we should include the hash in the SONAME similar to how the filename version works. This can be accomplished by linking with absolute paths (or relative paths, they would work too). There is `some work <https://github.com/NixOS/nixpkgs/issues/24844>`__ in NixOS to do so, but the rpath solution that NixOS currently uses works too (albeit slower, because it has to search for the libraries in a relatively large search path).
+For multiarch/NixOS the hash can be put in the SONAME by linking with absolute paths (or relative paths, they would work too). There is `some work <https://github.com/NixOS/nixpkgs/issues/24844>`__ in NixOS to do so. The rpath solution that NixOS uses currently is slow and doesn't solve the diamond problem.
 
 We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn't possible,  allowing dynamic resolving of binary names ``foo`` to paths ``/usr/bin/12345/foo`` is not trivial. A global view doesn't work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or ``/proc`` but for the system path; this can provide the necessary pid-dependent view as a symlink tree ``/system-path/foo -> /usr/bin/foo-12345``; even FUSE should be sufficiently fast since it is just one ``open()`` call and it doesn't have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in `/run/current-system/`, and chroot containers.
 
+
+Side-by-side C libraries
+========================
+
+.. graphviz::
+
+  digraph foo {
+    rankdir=LR;
+    A -> B;
+    A -> C;
+    B -> L [label="v1"];
+    C -> L [label="v2"];
+  }
+
+
+Solving the diamond dependency problem is tricky but possible. Shared libraries support symbol versioning, which essentially changes the name of each symbol so they don't conflict. The ``--default-symver`` option sets the version string of each symbol to the SONAME of the library it is exported from. So if we include a hash in the SONAME and build with ``--default-symver`` then the libraries won't conflict. Versions aren't linear in general so it has to be a hash instead of a sequential number. The SONAME can be set with a linker / libtool wrapper.
+
+There are two symlinks, the library symlink ``libfoo.HASH -> libfoo.HASH.1`` and the development symlink ``libfoo.so -> libfoo.HASH`` which tells which version to link. ldconfig should create these normally. Prebuilt binaries can be patchelf'd using ``--replace-needed``.
+
+Another solution is to create a manifest that specifies where to load libraries from, but this is basically the same as specifying absolute paths.
+
 Updates
--------
+=======
 
 For seamless updates it seems worthwhile to use an `A/B partition scheme <https://source.android.com/devices/tech/ota/ab>`__. There are roughly 3 types of updates:
 * small updates that just update a user-level application
@@ -62,7 +93,7 @@ Although a distribution is sufficient for setting up a single computer, to set u
 Release monitoring
 ==================
 
-Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is `Anitya <https://fedoraproject.org/wiki/Upstream_release_monitoring>`__, which solves some of this, and also `cuppa <https://github.com/DataDrake/cuppa>`__. But both of them work by writing backends/providers for each major hosting site.
+Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is `Anitya <https://fedoraproject.org/wiki/Upstream_release_monitoring>`__, which solves some of this, and also `cuppa <https://github.com/DataDrake/cuppa>`__. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.
 
 Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version.
 
@@ -91,6 +122,19 @@ Overall, there are only a few mechanisms:
 * Versions: For a package, a list of its available versions
 
 For each top-level project, figuring out when/if there will be a new update is a machine learning problem. The simplest algorithm is to poll everything at a fixed interval, say daily. But most projects release a lot less frequently, and some projects (software collection, main development branches) release more frequently. If there is a push service like email we can use that, otherwise we need some sort of adaptive polling. We can model it as a homogeneous Poisson point process; then the estimate for the rate is simply the number of updates divided by the time interval we have observed. Then the time between two updates is an exponential distribution with parameter the rate, so we can poll if the probability of an update is > 50%, adjusting the 50% so we poll an average of once a day. To get even more complex, we can build a feature vector classifier to predict the time between events.
+
+Build scripts
+=============
+
+To obtain an initial build script set we can do the following:
+
+1. Evaluate Nixpkgs (nix-instantiate) in a fresh Nix store
+1. Change all .drv from ATerm to JSON for ease of processing
+1. Assemble a mega pseudo-JSON of all the properties and values in the .drv
+1. Rename .drv according to a non-hashed scheme
+1. Change fetchurl to a flat list
+1. Create a set of builders which covers the rest of the mega-JSON
+
 
 Automation
 ==========

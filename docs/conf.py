@@ -1,38 +1,40 @@
 # Configuration file for the Sphinx documentation builder.
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
+# -- Project information
 
 project = 'Stroscot'
 copyright = '2019-2020 Mathnerd314'
 author = 'Mathnerd314'
 
-
-# -- General configuration ---------------------------------------------------
+# -- General configuration
 
 # Add any Sphinx extension module names here, as strings.
 extensions = [
-    'sphinx_rtd_theme',
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
     # ,'sphinxcontrib.fulltoc'
+    'sphinx_rtd_theme',
 ]
 
+highlight_language='haskell'
+
 mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"
+
 graphviz_output_format = 'svg'
+
+bibtex_bibfiles = ['references.bib']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
+# List of patterns, relative to source directory, to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-highlight_language='haskell'
-
-# -- Options for HTML output -------------------------------------------------
+# -- Options for HTML output and RTD theme
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']

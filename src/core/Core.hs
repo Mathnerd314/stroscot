@@ -9,7 +9,9 @@ import Data.Maybe(fromJust)
 import Control.Arrow((&&&))
 import Control.Monad (forM_)
 import Control.Monad.State
-import Data.Traversable(traverse)
+import Control.Monad.Writer
+import Data.Traversable(traverse, for)
+import qualified Data.Functor.Identity as FIdentity ( Identity(..) )
 import Debug.Trace
 import Data.Tuple (swap)
 import Data.Set (Set)
@@ -113,6 +115,9 @@ data Syntax
       )
   | Use Var (Rule () (Sequent Gamma Delta)) -- contexts kept because they're bindings
   | Assign Var (Rule (Sequent Gamma Delta) ()) -- contexts kept because they're bindings
+  | Dup Level HDir (Rule EID [EID])
+  | DupInv Level HDir (Rule [EID] EID)
+  | Lift HDir (Rule (Level,EID) (Level,EID))
    deriving (Eq,Ord,Show)
 
 type Graph = [Syntax]
@@ -254,15 +259,18 @@ ports s =
     Cut r -> rp r
     Use _ r -> rp r
     Assign _ r -> rp r
+    Dup _ hd r -> map (\(v,gd) -> (v,gd {side = hd})) (rp r)
+    DupInv _ hd r ->  map (\(v,gd) -> (v,gd {side = hd})) (rp r)
+    Lift hd r -> map (\(v,gd) -> (v,gd {side = hd})) (rp r)
   where
     rp (Rule {..}) = map (Top,) (getHPorts top) ++ map (Bottom,) (getHPorts bottom)
 
 addPath p = map (\gd -> gd { sequent_path = p : sequent_path gd})
-addHPath p = map (\gd -> gd { outer_path = p : outer_path gd})
+addHPath p = map (\gd -> gd { outer_path = p : outer_path gd })
 
 class GetHPorts s where
   getHPorts :: s -> [GD]
-instance (GetPorts a, GetPorts b) => GetHPorts (Sequent a b) where
+instance {-# OVERLAPPABLE #-} (GetPorts a, GetPorts b) => GetHPorts (Sequent a b) where
   getHPorts (Sequent{..}) =
     [t_gd turnstile] ++
     map (\gd -> gd { side = Left}) (getPorts left) ++
@@ -277,6 +285,10 @@ instance GetHPorts () where
   getHPorts () = []
 instance GetHPorts Tag where
   getHPorts _ = []
+instance GetHPorts EID where
+  getHPorts e = [GD e undefined Nothing [] []]
+instance{-# OVERLAPPING #-} GetHPorts (Level, EID) where
+  getHPorts (l,e) = [GD e undefined (Just l) [] []]
 
 class GetPorts s where
   getPorts :: s -> [GD]
@@ -294,10 +306,16 @@ instance (GetPorts a) => GetPorts [a] where
 tagName :: Syntax -> String
 tagName s =
   case s of
+    PiR _ | lambdaStyle -> "λ"
+    PiL _ _ | lambdaStyle -> "@"
     PiR _ -> "PiR"
     PiL _ _ -> "PiL"
     SigmaR _ _ -> "SigmaR"
     SigmaL _ -> "SigmaL"
+    Bang _ | lambdaStyle -> "!p"
+    BangD _ | lambdaStyle -> "!d"
+    BangC _ | lambdaStyle -> "!c"
+    BangW _ | lambdaStyle -> "!w"
     Bang _ -> "Bang"
     BangD _ -> "BangD"
     BangC _ -> "BangC"
@@ -306,10 +324,14 @@ tagName s =
     WhimD _ -> "WhimD"
     WhimC _ -> "WhimC"
     WhimW _ -> "WhimW"
-    Identity _ -> "Identity"
+    Identity _ | lambdaStyle -> "I"
+               | otherwise -> "Identity"
     Cut _ -> "Cut"
     Use _ _ -> "Use"
     Assign _ _ -> "Assign"
+    Dup l _ _ -> "Dup" ++ show l
+    DupInv l _ _ -> "DupI" ++ show l
+    Lift _ _ -> "Lift"
 
 data EdgeInfo = EdgeInfo
   { e_eid :: EID
@@ -376,14 +398,18 @@ nodes names actN r = [buildNode n (r == actN)]
     buildNode n b = quote n ++ " [label=" ++ quote (tagName r) ++
       (if b then ",shape=doublecircle" else "") ++ "]\n"
 
+lambdaStyle = True
+
 edgeOut :: Names -> Graph -> Set EID -> Edge -> String
+edgeOut names graph activeE (i,j,einf) | lambdaStyle && e_side einf == Turnstile = ""
 edgeOut names graph activeE (i,j,einf) = let
   getN n = fromJust (Map.lookup (graph !! n) names)
   ax = getN i
   bx = getN j
   getEIDStr (EID e) = e
   (a,b,color,weight,arrowhead,arrowtail) = case e_side einf of
-    Left ->  (bx,ax,"blue,constraint=false",0,",arrowtail=",",arrowhead=")
+    Left | lambdaStyle ->  (bx,ax,"blue",1,",arrowtail=",",arrowhead=")
+         | otherwise   ->  (ax,bx,"blue",2,",arrowhead=",",arrowtail=")
     Right -> (ax,bx,"red",2,",arrowhead=",",arrowtail=")
     Turnstile -> (ax,bx,"black",5,",arrowhead=",",arrowtail=")
     -- Left ->  (bx,ax,"blue",1,",arrowtail=",",arrowhead=")
@@ -424,7 +450,7 @@ mkDot graph active = let
   nodetxt = concat (graph >>= nodes names activeN)
   edgetxt = edges graph >>= edgeOut names graph activeE
   in
-    "digraph {\nrankdir=\"BT\"\n" ++ nodetxt ++ edgetxt ++ "}\n"
+    "digraph {\nrankdir=\"" ++ (if lambdaStyle then "TB" else "BT") ++ "\"\n" ++ nodetxt ++ edgetxt ++ "}\n"
 
 writeFirst = do
   let graph = fst $ runState example_m 0
@@ -453,46 +479,47 @@ deleteM [] ys = ys
 deleteM [x] ys = delete x ys
 deleteM (x:xs@(xp:_)) ys = assert (x < xp) $ delete x (deleteM xs ys)
 
-class FmapEID s where
-  fmapEID :: (EID -> EID) -> s -> s
-instance FmapEID Syntax where
-  fmapEID f s = case s of
-    PiR r -> PiR (fmapEID f r)
-    PiL t r -> PiL t (fmapEID f r)
-    SigmaR t r -> SigmaR t (fmapEID f r)
-    SigmaL r -> SigmaL (fmapEID f r)
-    Bang r -> Bang (fmapEID f r)
-    BangD r -> BangD (fmapEID f r)
-    BangC r -> BangC (fmapEID f r)
-    BangW r -> BangW (fmapEID f r)
-    Whim r -> Whim (fmapEID f r)
-    WhimD r -> WhimD (fmapEID f r)
-    WhimC r -> WhimC (fmapEID f r)
-    WhimW r -> WhimW (fmapEID f r)
-    Identity r -> Identity (fmapEID f r)
-    Cut r -> Cut (fmapEID f r)
-    Use t r -> Use t (fmapEID f r)
-    Assign t r -> Assign t (fmapEID f r)
-instance (FmapEID a, FmapEID b) => FmapEID (Rule a b) where
-  fmapEID f (Rule t b) = Rule (fmapEID f t) (fmapEID f b)
-instance (FmapEID a, FmapEID b) => FmapEID (Sequent a b) where
-  fmapEID f (Sequent{..}) = Sequent
-    { turnstile = fmapEID f turnstile
-    , left = fmapEID f left
-    , right = fmapEID f right
-    }
-instance (FmapEID a, FmapEID b) => FmapEID (a, b) where
-  fmapEID f (a,b) = (fmapEID f a, fmapEID f b)
-instance (FmapEID a) => FmapEID [a] where
-  fmapEID f xs = map (fmapEID f) xs
-instance FmapEID () where
-  fmapEID f () = ()
-instance FmapEID Tag where
-  fmapEID f x = x
-instance FmapEID EID where
-  fmapEID f e = f e
-instance FmapEID Level where
-  fmapEID f l = l
+class TraverseEID s where
+  traverseEID :: (Applicative f) => (EID -> f EID) -> s -> f s
+instance TraverseEID Syntax where
+  traverseEID f s = case s of
+    PiR r -> PiR <$> traverseEID f r
+    PiL t r -> PiL t <$> traverseEID f r
+    SigmaR t r -> SigmaR t <$> traverseEID f r
+    SigmaL r -> SigmaL <$> traverseEID f r
+    Bang r -> Bang <$> traverseEID f r
+    BangD r -> BangD <$> traverseEID f r
+    BangC r -> BangC <$> traverseEID f r
+    BangW r -> BangW <$> traverseEID f r
+    Whim r -> Whim <$> traverseEID f r
+    WhimD r -> WhimD <$> traverseEID f r
+    WhimC r -> WhimC <$> traverseEID f r
+    WhimW r -> WhimW <$> traverseEID f r
+    Identity r -> Identity <$> traverseEID f r
+    Cut r -> Cut <$> traverseEID f r
+    Use t r -> Use t <$> traverseEID f r
+    Assign t r -> Assign t <$> traverseEID f r
+    Dup l h r -> Dup l h <$> traverseEID f r
+    DupInv l h r -> DupInv l h <$> traverseEID f r
+    Lift h r -> Lift h <$> traverseEID f r
+instance (TraverseEID a, TraverseEID b) => TraverseEID (Rule a b) where
+  traverseEID f (Rule t b) = Rule <$> traverseEID f t <*> traverseEID f b
+instance (TraverseEID a, TraverseEID b) => TraverseEID (Sequent a b) where
+  traverseEID f (Sequent{..}) = Sequent <$> traverseEID f turnstile <*> traverseEID f left <*> traverseEID f right
+instance (TraverseEID a, TraverseEID b) => TraverseEID (a, b) where
+  traverseEID f (a,b) = (,) <$> traverseEID f a <*> traverseEID f b
+instance (TraverseEID a) => TraverseEID [a] where
+  traverseEID f xs = traverse (traverseEID f) xs
+instance TraverseEID () where
+  traverseEID f () = pure ()
+instance TraverseEID Tag where
+  traverseEID f x = pure x
+instance TraverseEID EID where
+  traverseEID f e = f e
+instance TraverseEID Level where
+  traverseEID f l = pure l
+
+fmapEID f = FIdentity.runIdentity . traverseEID (FIdentity.Identity . f)
 
 reduce :: Graph -> Edges -> Edge -> GDir -> ([(Edge,Syntax)], State Int Graph)
 reduce graph edges e@(from_id,to_id,einf) dir = let
@@ -501,31 +528,92 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
 
   follow e = findNode graph (findEdge edges e)
 
-  replaceM :: State Int ([Syntax], [Syntax]) -> ([(Edge,Syntax)], State Int Graph)
-  replaceM s = ([(e,r)], do
-    (del, add) <- s
-    return $ filter (\x -> not (x `elem` del)) graph ++ add
-    )
+  replaceM :: State Int [Syntax] -> ([(Edge,Syntax)], State Int Graph)
+  replaceM s = ([(e,r)], s)
 
-  replace :: [Syntax] -> [Syntax] -> ([(Edge,Syntax)], State Int Graph)
-  replace del add = replaceM (return (del,add))
+  replace :: [Syntax] -> [Syntax] -> Graph -> Graph
+  replace del add graph = filter (\x -> not (x `elem` del)) graph ++ add
 
-  join_edges :: [EID] -> [EID] -> ([Syntax],[Syntax])
-  join_edges top bottom = let
-    bot_nodes :: [Syntax]
-    bot_nodes = map (\e -> follow e Down) bottom
-    change :: EID -> EID -> EID -> EID
-    change bn bo b = if b == bo then bn else b
-    change_all :: EID -> EID -> Syntax -> Syntax
-    change_all bn bo rr = fmapEID (change bn bo) rr
-    new_bots = zipWith3 change_all top bottom bot_nodes
-    in (bot_nodes,new_bots)
+  -- join [(top,bottom)] replaces all top with bottom
+  join_edges :: [(EID,EID)] -> Graph -> Graph
+  join_edges replacements graph = let
+    replacements_map = Map.fromList replacements
+    change :: EID -> EID
+    change b = case Map.lookup b replacements_map of
+      Just bn -> change bn
+      Nothing -> b
+    in fmapEID change graph
 
   expand en dn = let (rest, g) = reduce graph edges (findEdge edges en) dn in ((e,r) : rest, g)
   in case (r,s,dir) of
+  (Dup l hd (Rule dup_out dup_ins), _, Down) -> let
+    dup_target = follow dup_out Down
+    in case dup_target of
+      Dup _ _ _ | dir == Down -> expand dup_out Down
+      DupInv li hdi (Rule dupi_ins dupi_out) | l == li && hd == hdi -> replaceM $ do
+        pure . join_edges (zip dupi_ins dup_ins) . replace [r,dup_target] [] $ graph
+      _ -> replaceM $ do
+        (newnodes, newedges) <- fmap unzip . for dup_ins $ \in_edge -> runWriterT $ traverseEID (\e ->
+            if e == dup_out then pure in_edge else do
+              e' <- lift $ e %% ""
+              tell [(e,e')]
+              pure e') dup_target
+        -- make dup/dupinv nodes
+        let t_ports = filter (\(_,gd) -> eid gd /= dup_out) $ ports dup_target
+        let tr_edges = transpose newedges
+        let f (v,gd) out_edges = traceShow (v,gd,out_edges) $ case v of {
+          Top -> Dup l (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+        ; Bottom -> DupInv l (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+        }
+        let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
+        pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
+  (Cut (Rule (Sequent rseq () rr, Sequent lseq ll ()) (Sequent bseq () ())), _, Up)-> let
+    right_node = follow rr Down
+    left_node = follow ll Down
+    in case (right_node,left_node) of
+      (_, Identity (Rule () (Sequent iseq ill irr))) | ill == ll -> replaceM $ do
+        pure . join_edges [(irr,rr),(rseq,iseq),(lseq,bseq){-,(ll,ill)-}] . replace [r,left_node] [] $ graph
+      (Identity (Rule () (Sequent iseq ill irr)), _) | irr == rr -> replaceM $ do
+        pure . join_edges [(ill,ll),(lseq,iseq),(rseq,bseq){-,(rr,irr)-}] . replace [r,right_node] [] $ graph
+      (Dup _ _ _, _) -> expand rr Down
+      (_, Dup _ _ _) -> expand ll Down
+      (PiR (Rule cs (Sequent prseq pbg (pr, pbd))),
+       PiL t (Rule (prr, pll) (Sequent iseq il ()))) | rr == pr && il == ll -> replaceM $ do
+        let Just (Sequent (ptg, mrr) (mll, ptd)) = lookup t cs
+        seqAs <- assert (length prr == length mll) $ replicateM (length mll) (mkEID "seqA")
+        seqBs <- assert (length pll == length mrr) $ replicateM (length mrr) (mkEID "seqB")
+        let mkcutA (Sequent rs () r) ml ls bs = Cut (Rule (Sequent rs () r, Sequent ls l ()) (Sequent bs () ()))
+        let newcuts = zipWith mkcutA prr mll ++ zipWith Cut mrr pll
+        pure . join_edges (zip ptg pbg ++ zip ptd pbd) .
+          replace [r,right_node,left_node] newcuts $ graph
+      (Bang (Rule (Sequent oseq ol (o, or)) (Sequent iseq il (irr, ir))), BangC (Rule (Sequent ocseq f ()) (Sequent icseq ill ()))) | rr == irr && ll == ill -> replaceM $ do
+        let repF = replicateM (length f)
+        cut_bang <- repF mkedge
+        bang_dup_main <- repF mkedge
+        bang_dup_aux_r <- repF $ replicateM (length or) mkedge
+        bang_dup_aux_l <- repF $ replicateM (length ol) mkedge
+        cw_bang_l <- repF $ replicateM (length il) mkedge
+        cw_bang_r <- repF $ replicateM (length ir) mkedge
+        let tr = transpose
+        let cuts = zipWith Cut cut_bang f
+        let dup = if f == [] then [] else return . Dup $ [(R,o,bang_dup_main)] ++ zipWith (R,,) or (tr bang_dup_aux_r) ++ zipWith (L,,) ol (tr bang_dup_aux_l)
+        let cws_l = zipWith BangCW il (tr cw_bang_l)
+        let cws_r = zipWith WhimCW ir (tr cw_bang_r)
+        let bangs = zipWith4 Bang cut_bang (zipWith Ctx cw_bang_l cw_bang_r) bang_dup_main (zipWith Ctx bang_dup_aux_l bang_dup_aux_r)
+        return ([r,right_node,left_node], dup ++ bangs ++ cuts ++ cws_l ++ cws_r)
+      (Bang (Rule (Sequent oseq ol (o, or)) (Sequent iseq il (irr, ir))), BangD (Rule (Sequent doseq f ()) (Sequent dseq ill ()))) | ill == ll -> let
+        (del,add) = join_edges (il++or) (ol++or)
+        cut = Cut o f
+        in replace ([r,left_node,right_node]++del) ([cut]++add)
+      (_, Bang (Rule (Sequent oseq ol (o, or)) (Sequent iseq il (irr, ir)))) | Just idx <- ll `elemIndex` il -> let
+        newll = ol !! idx
+        cut = Cut rr newll
+        bang = Bang i (Ctx (delete idx il) ir) o (Ctx (delete idx ol) or)
+        in replace [r,left_node] [cut,bang]
+      (_,_) -> replaceM $ traceShow (r,right_node,left_node) undefined
   (Identity (Rule () (Sequent _ ll _)),Right,Down) -> expand ll Up
   (Identity (Rule () (Sequent _ _ rr)),Left,Down) -> expand rr Up
-  (p,_,Up) | tagName p /= "Cut" -> expand i Up
+  (p,_,Up) -> expand i Up
     where
       i = case p of
           (PiR (Rule _ (Sequent _ _ (i, _)))) -> i
@@ -541,128 +629,3 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
           (WhimD (Rule _ (Sequent _ () (_,i)))) -> i
           (WhimC (Rule _ (Sequent _ () i))) -> i
           (WhimW (Rule _ (Sequent _ () i))) -> i
- {-
-  -- active cases
-  (Dup xs, _, _) -> let
-    didx = fromJust $ (case dir of Down -> in_num; Up -> out_num) gd
-    (side,dup_out,dup_ins) = xs !! didx
-    dup_target = follow dup_out Down
-    repD = replicateM (length dup_ins)
-    in case dup_target of
-      Identity _ _ | dir == Down -> expand dup_out Down
-      Dup _ | dir == Down -> expand dup_out Down
-      Identity ll rr | dir == Up -> let
-        id_edge@(_,_,_,gdi) = findEdge edges (case side of R -> ll; L -> rr)
-        other_node = findNode graph id_edge Up
-        didx2 = assert (other_node == r) $ fromJust (out_num gdi)
-        dup_cleaned = Dup $ deleteM (sort [didx,didx2]) xs
-        (_,_,other_ins) = xs !! didx2
-        (dup_l,dup_r) = case assert (side == s) s of L -> (dup_ins,other_ins); R -> (other_ins, dup_ins)
-        in replace [r,dup_target] (zipWith Identity dup_l dup_r++[dup_cleaned])
-      PiRight i (Ctx [] []) cs | i == dup_out -> replaceM $ do
-        let in_ctxs = trace "d_lam" $ replicate (length dup_ins) (Ctx [] [] :: Ctx String)
-        (cases_rep, newdups) <- fmap unzip . flip mapM cs $ \(t,Ctx vl vr,Ctx [] []) -> do
-          new_l <- repD $ replicateM (length vl) mkedge
-          new_r <- repD $ replicateM (length vr) mkedge
-          let dups = zipWith (L,,) vl (transpose new_l) ++ zipWith (R,,) vr (transpose new_r)
-          let ctxs = zipWith Ctx new_l new_r
-          let cases  = map (t,,Ctx [] []) ctxs
-          return (cases, dups)
-        let pirs = zipWith3 PiRight dup_ins in_ctxs (transpose cases_rep)
-        let dup = Dup $ delete didx xs ++ concat newdups
-        return ([r,dup_target],pirs++[dup])
-      PiLeft _ t rr ll -> replaceM $ do
-        new_l <- trace "d_app" $ repD $ replicateM (length ll) mkedge
-        new_r <- repD $ replicateM (length rr) mkedge
-        let newdups = zipWith (L,,) ll (transpose new_l) ++ zipWith (R,,) rr (transpose new_r)
-        let ts = replicate (length dup_ins) t
-        let pils = zipWith4 PiLeft dup_ins ts new_r new_l
-        let dup = Dup $ delete didx xs ++ newdups
-        return ([r,dup_target],pils++[dup])
-      BangCW _ os -> replaceM $ do
-        new_os <- repD $ replicateM (length os) mkedge
-        let newdups = zipWith (L,,) os (transpose new_os)
-        let newcws = zipWith BangCW dup_ins new_os
-        let dup = Dup $ delete didx xs ++ newdups
-        return ([r,dup_target],newcws++[dup])
-      BangD _ o -> replaceM $ do
-        os <- repD mkedge
-        let newdup = (L,o,os)
-        let bangds = zipWith BangD dup_ins os
-        let dup = Dup $ delete didx xs ++ [newdup]
-        return ([r,dup_target],bangds++[dup])
-      Bang i (Ctx il ir) o (Ctx ol or) -> let
-        this_dup = case dir of Down -> to_id; Up -> from_id
-        check_input_edge i = let
-          up_edge = findEdge edges i
-          didx = fromJust . out_num . get_gd $ up_edge
-          is_dup = get_from_id up_edge == this_dup
-          in if is_dup then Right didx else Left up_edge
-        dup_besides didxs = deleteM (sort didxs) xs
-        get_ins = (\(_,_,i) -> i) . (xs !!)
-        res = do
-          idx <- check_input_edge i
-          ildx <- mapM check_input_edge il
-          irdx <- mapM check_input_edge ir
-          return (get_ins idx, map get_ins ildx, map get_ins irdx, dup_besides ([idx]++ildx++irdx))
-        in case res of
-        Left e_next ->
-            let (rest, g) = reduce graph edges e_next Up
-            in ((e,r) : (e_next,dup_target) : rest, g)
-        Right res@(id,ild,ird,dup_rest) -> replaceM $ do
-          os <- repD mkedge
-          ols <- repD $ replicateM (length ol) mkedge
-          ors <- repD $ replicateM (length or) mkedge
-          let newdups = [(R,o,os)] ++ zipWith (L,,) ol (transpose ols) ++ zipWith (R,,) or (transpose ors)
-          let tr x = case x of [] -> replicate (length dup_ins) []; _ -> transpose x
-          let ic = zipWith Ctx (tr ild) (tr ird)
-          let oc = zipWith Ctx ols ors
-          let bangs = zipWith4 Bang id ic os oc
-          let dup = Dup $ dup_rest ++ newdups
-          return ([r,dup_target],bangs++[dup])
-      _ -> traceShow (r,dup_target) $ replace undefined undefined
-  (Cut rr ll, _, Up)-> let
-    right_node = follow rr Down
-    left_node = follow ll Down
-    in case (right_node,left_node) of
-      (_, Identity ill irr) | ill == ll -> let
-        (del,add) = join_edges [irr] [rr]
-        in replace ([r,left_node]++del) add
-      (Identity ill irr, _) | irr == rr -> let
-        (del,add) = join_edges [ill] [ll]
-        in replace ([r,right_node]++del) add
-      (Dup _, _) -> expand rr Down
-      -- (_, Dup _) -> expand ll Down
-      (PiRight ir ic cs, PiLeft il t prr pll) | rr == ir && il == ll -> let
-        [(_,Ctx mll mrr,context)] = filter (\(tr,_,_) -> tr == t) cs
-        Ctx ic_l ic_r = ic
-        Ctx context_l context_r = context
-        (del,add) = trace "beta" $ join_edges (ic_l++ic_r) (context_l++context_r)
-        in replace ([r,right_node,left_node]++del) (zipWith Cut prr mll ++ zipWith Cut mrr pll ++ add)
-      (Bang irr (Ctx il ir) o (Ctx ol or), BangCW ill f) | rr == irr && ll == ill -> replaceM $ do
-        let repF = replicateM (length f)
-        cut_bang <- repF mkedge
-        bang_dup_main <- repF mkedge
-        bang_dup_aux_r <- repF $ replicateM (length or) mkedge
-        bang_dup_aux_l <- repF $ replicateM (length ol) mkedge
-        cw_bang_l <- repF $ replicateM (length il) mkedge
-        cw_bang_r <- repF $ replicateM (length ir) mkedge
-        let tr = transpose
-        let cuts = zipWith Cut cut_bang f
-        let dup = if f == [] then [] else return . Dup $ [(R,o,bang_dup_main)] ++ zipWith (R,,) or (tr bang_dup_aux_r) ++ zipWith (L,,) ol (tr bang_dup_aux_l)
-        let cws_l = zipWith BangCW il (tr cw_bang_l)
-        let cws_r = zipWith WhimCW ir (tr cw_bang_r)
-        let bangs = zipWith4 Bang cut_bang (zipWith Ctx cw_bang_l cw_bang_r) bang_dup_main (zipWith Ctx bang_dup_aux_l bang_dup_aux_r)
-        return ([r,right_node,left_node], dup ++ bangs ++ cuts ++ cws_l ++ cws_r)
-      (Bang _ (Ctx il ir) o (Ctx ol or), BangD _ f) -> let
-        (del,add) = join_edges (il++or) (ol++or)
-        cut = Cut o f
-        in replace ([r,left_node,right_node]++del) ([cut]++add)
-      (_, Bang i (Ctx il ir) o (Ctx ol or)) | Just idx <- ll `elemIndex` il -> let
-        newll = ol !! idx
-        cut = Cut rr newll
-        bang = Bang i (Ctx (delete idx il) ir) o (Ctx (delete idx ol) or)
-        in replace [r,left_node] [cut,bang]
-      (_,_) -> traceShow (r,right_node,left_node) $ replace undefined undefined
-
--}

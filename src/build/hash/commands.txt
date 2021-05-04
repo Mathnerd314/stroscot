@@ -1,0 +1,3 @@
+nix-shell ../../..
+clang -O3 -S -emit-llvm hash.c && sed -i 's/preserve_allcc/ghccc/' hash.ll
+ghc -O4 -fllvm -keep-llvm-files -fforce-recomp -ddump-simpl -ddump-to-file XXHash.hs hash.ll

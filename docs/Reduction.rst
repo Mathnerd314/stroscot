@@ -1,146 +1,37 @@
 Reduction
 #########
 
-Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Considerations:
+Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus. Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic. But we make modifications to the rules.
 
-* Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.
-* Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).
-* Based on :cite:`levyJumboLCalculus2006`, we aim for the largest allowable set of operators. In particular we generalize all of the different operators ⊕⊗⊸⊤⊥&⅋ into two jumbo operators, :math:`\Sigma` (sigma) and :math:`\Pi` (pi).
+Infinite structures
+===================
 
-Rules
-=====
+When we compile following GHC's model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there's a "working graph" where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
 
-We start with the generalized :math:`\Pi` rule. This is similar to Levy's rule except it allows multiple conclusion propositions. We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`[(m_i,n_i)]` the jumbo-arity.
+Levels
+======
 
-.. math::
-
-    \newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#1~~ }{\displaystyle ~~#2~~ } \  (#3)}
-    \begin{array}{cc}
-    \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta }}
-      {\Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
-      {\Pi_R}
-    &
-    \rule{\overrightarrow{ \Gamma_j \vdash A_{i j}, \Delta_j } \quad \overrightarrow{ \Theta_k, B_{i k} \vdash \Lambda_k }}
-      {\overrightarrow{\Gamma}, \vec \Theta, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \overrightarrow{\Delta}, \vec\Lambda}
-      {\Pi_{i} {}_{L}}
-    \end{array}
-
-Next we have the generalized :math:`\Sigma` rule. This is the dual of :math:`\Pi`. Following :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeasTypesInterpretationSubtractive2004` the dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For normal ADTs, the RHS of the difference is empty, i.e. it looks like :math:`\Sigma (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)`. The syntax :math:`\Sigma [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]` might be clearer.
-
-.. math::
-
-    \begin{array}{cc}
-    \rule{\overrightarrow{ \Gamma_k, B_{i k} \vdash \Delta_k } \quad \overrightarrow{ \Theta_j \vdash A_{i j}, \Lambda_j } }
-      {\overrightarrow{\Gamma}, \overrightarrow{\Theta} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \overrightarrow{\Delta}, \overrightarrow{\Lambda}}
-      {\Sigma_{i} {}_{R}}
-    &
-    \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }
-      {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
-      {\Sigma_L}
-    \end{array}
-
-When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
-
-All of the standard operators in linear logic can be expressed using :math:`\Sigma` and :math:`\Pi`. :math:`\Sigma` contains synchronous/positive operators while :math:`\Pi` contains asynchronous/negative operators.
-
-.. list-table::
-   :header-rows: 1
-   :widths: auto
-
-   * - Operator
-     - Name
-     - Jumbo Type
-   * - :math:`0`
-     - Zero
-     - :math:`\Sigma []`
-   * - :math:`1`
-     - One
-     - :math:`\Sigma [(\#s,[] - [])]`
-   * - :math:`A \oplus B`
-     - Plus
-     - :math:`\Sigma [(\#l,[A] - []),(\#r,[B] - [])]`
-   * - :math:`A \otimes B`
-     - Times
-     - :math:`\Sigma [(\#s,[A,B] - [])]`
-   * - :math:`\top`
-     - Top
-     - :math:`\Pi []`
-   * - :math:`\bot`
-     - Bottom
-     - :math:`\Pi [(\#s,[] \multimap [])]`
-   * - :math:`A \& B`
-     - With
-     - :math:`\Pi [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]`
-   * - :math:`A ⅋ B`
-     - Par
-     - :math:`\Pi [(\#s,[] \multimap [A,B])]`
-   * - :math:`A \multimap B`
-     - Lollipop (implication)
-     - :math:`\Pi [(\#s,[A] \multimap [B])]`
-   * - :math:`A^{\bot}`
-     - Negation
-     - :math:`\Pi [(\#s,[A] \multimap [])]` or :math:`\Sigma [(\#s,[] - [A])]`
-
-Exponentials
-~~~~~~~~~~~~
-
-To allow/restrict contraction and weakening we have two S4 modalities, bang/!/"of course" and whim/whimper/?/"why not". A call-by-name function type is :math:`!A \multimap B` while call-by-value is :math:`A \multimap ? B`  :cite:`maraistCallbynameCallbyvalueCallbyneed1995`. To enforce the S4 rules we add a level index to every term, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has :math:`j=i+1` instead of :math:`j>i`, shrug.
-
-Instead of binary contraction we allow :math:`n`-ary contraction for :math:`n\geq 2`.
-
-.. math::
-
-    \begin{array}{cccc}
-      \rule{!\Gamma^i \vdash A^j, ?\Delta^i }{!\Gamma^i \vdash !A^i, ?\Delta^i}{!}_{j > i}
-      & \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{j\leq i}
-      & \rule{\Gamma, \overrightarrow{!A_{0\leq i\lt n}} \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
-      & \rule{\Gamma \vdash \Delta }{\Gamma, !A \vdash \Delta}{!w}
-    \end{array}
-
-.. math::
-
-    \begin{array}{cccc}
-      \rule{!\Gamma^i, A^j \vdash ?\Delta^i }{!\Gamma^i, ?A^i \vdash ?\Delta^i}{?}_{j > i}
-      & \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{j \leq i}
-      & \rule{\Gamma \vdash \overrightarrow{?A_{0\leq i\lt n}}, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
-      & \rule{\Gamma \vdash \Delta }{\Gamma \vdash ?A, \Delta}{?w}
-    \end{array}
-
-So to review, the propositions in the sequent can be:
-
-* Pi / Sigma
-* A bang !A or whim ?A
-
-Structural
-~~~~~~~~~~
-
-Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above). Although the exchange rule is given, we define the contexts as multisets instead of lists so that a rule may match on a formula in any position.
-
-.. math::
-
-    \begin{array}{cccc}
-      \rule{}{A \vdash A}{\text{id}}
-      &
-      \rule{\Gamma \vdash A, \Delta \quad \Theta, A \vdash \Lambda }{\Gamma, \Theta \vdash \Delta, \Lambda }{\text{cut}}
-      &
-      \rule{\Gamma \vdash \Delta, A, B, \Theta}{\Gamma \vdash \Delta, B, A, \Theta}{\text{x}_R}
-      &
-      \rule{\Gamma, A, B, \Delta \vdash \Theta}{\Gamma, B, A, \Delta \vdash \Theta}{\text{x}_L}
-    \end{array}
-
-Following Haskell we also want to support infinite expressions like ``x = 1 : x``. These are constructed as a `terminal coalgebra <https://bartoszmilewski.com/2020/04/22/terminal-coalgebra-as-directed-limit/>`__. We can represent these using variables and assignments as a system of equations. The semantics is that the variable usage is a "hole" that plugs in a copy of the derivation tree from the variable assignment. We disallow the trivial case of a variable being a usage of itself; there must be at least one other rule invocation.
-
-.. math::
-
-    \begin{array}{cc}
-      \rule{X }{ \Gamma \vdash \Delta }{\text{Use}}
-      &
-      \rule{\Gamma \vdash \Delta}{ X = }{\text{Assign}}
-    \end{array}
+For the reduction implementation of contraction we add level indices to the terms in the promotion and dereliction rules of :math:`\bangc/\whimc`, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. Conceptually all terms have indices, but we can recover the indices in a proof tree by propagating the indices from the promotion/dereliction rules up/down according to the criteria that the indices involved in all non-:math:`\bangc/\whimc` promotion/dereliction rules must be the same.
 
 To handle level indices in infinite trees, we store the difference function ``\a -> a + (j-i)`` and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.
 
-When we compile following GHC's model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there's a "working graph" where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
+The level of a context is the maximum of the levels of its terms, 0 if it is empty.
+
+.. math::
+
+    \begin{array}{ccc}
+      \rule{\bangc\Gamma^i \vdash A^j, \whimc\Delta^i }{\bangc\Gamma^i \vdash \bangc A^i, \whimc\Delta^i}{\bangc}_{j = i+1}
+      & \rule{\sk{\Gamma^i}, A^i \vdash \sk{\Delta^i} }{\sk{\Gamma^i}, \bangc A^j \vdash \sk{\Delta^i}}{\bangc d}_{j\leq i}
+      & \rule{\sk{\Gamma}, \overrightarrow{\bangc A, \bangc A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bangc A \vdash \sk{\Delta}}{\bangc c_n}
+    \end{array}
+
+.. math::
+
+    \begin{array}{ccc}
+      \rule{\bangc\Gamma^i, A^j \vdash \whimc\Delta^i }{\bangc\Gamma^i, \whimc A^i \vdash \whimc\Delta^i}{\whimc}_{j = i+1}
+      & \rule{\sk{\Gamma^i} \vdash A^i, \sk{\Delta^i} }{\sk{\Gamma^i} \vdash \whimc A^j, \sk{\Delta^i}}{\whimc d}_{j \leq i}
+      & \rule{\sk{\Gamma} \vdash \overrightarrow{\whimc A, \whimc A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whimc A, \sk{\Delta}}{\whimc c_n}
+    \end{array}
 
 Syntax
 ======
@@ -160,7 +51,7 @@ We use a simple program, boolean "and":
 Derivation tree
 ~~~~~~~~~~~~~~~
 
-We define the types :math:`\text{B} = \Sigma [(F,[],[]),(T,[],[])]` and :math:`a \multimap b = \Pi [(\text{func}, [a], [b])]`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
+See the connectives :math:`\text{B} = \text{Bool}` and :math:`\multimap` defined :ref:`above <connectives>`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
 
 .. image:: _static/Stroscot_AND_Proof_Tree.svg
 
@@ -177,10 +68,10 @@ We can split up the derivation tree into a graph, where each node is a rule inst
 
 To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition's introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.
 
-Most rules do not modify the contexts :math:`\Gamma, \Delta, \Theta, \Lambda` and so the proposition edge skips the node as it is not an introduction/elimination. But there are exceptions that do need the context:
+Most rules do not modify the contexts :math:`\Gamma, \Delta, \Theta, \Lambda` and so the proposition edge skips the node as it is not an introduction/elimination (gray in the presentation above). But there are exceptions that do need the context:
 
   * :math:`\Pi_R` and :math:`\Sigma_L` rename and combine the context from each case, similar to a phi-node. This can be skipped if there's exactly one case.
-  * ! / ?. These define a box and the box must be clearly defined so we can duplicate/erase it properly.
+  * Exponential promotion defines a box around a subtree of the derivation, and the box edge must be clearly defined so we can duplicate/erase it properly, so we keep the context there.
   * Use/Assign, so that substitution has something to work with and the free variables are identified
 
 Expression "tree"
@@ -188,7 +79,7 @@ Expression "tree"
 
 For doing stuff, we do not need the syntactic subderivation inclusion relationship at all, all the important bits can be gotten from the blue/red edges. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)
 
-If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents (=types), then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).
+If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents, then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).
 
 .. graphviz::
 
@@ -372,9 +263,9 @@ Dup-Id-Dup:
 Normal Order Reduction
 ======================
 
-Looking at the graph for our simple ``and False True`` example we can see the general pattern for reduction, at least normal-order leftmost-outermost WHNF reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -> I -> PiL -> Cut -> SigmaL -> Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.
+Looking at the graph for our simple ``and False True`` example we can see the general pattern for reduction, at least normal-order leftmost-outermost reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF, and evaluate the children with NF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -> I -> PiL -> Cut -> SigmaL -> Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.
 
-So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node with target covered)
+So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node)
 
 Optimal reduction
 =================
@@ -385,8 +276,6 @@ Primitives
 ==========
 
 Primitives can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR.
-
-
 
 Linear logic
 ============
@@ -474,20 +363,6 @@ To handle level mismatches we might also need lifting operators. The conditions 
       \rule{\Gamma^i \vdash A^j, \Delta^i }{\Gamma^i \vdash A^i, \Delta^i}{\text{lift}_R}_{j > i}
       &
       \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j > i}
-    \end{array}
-
-There are also quantifier rules, probably unnecessary but I'll write them down for reference. For these :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`, while :math:`y` may occur. :math:`A[t/x]` stands for the proposition :math:`A` where all free occurrences of the variable :math:`x` have been replaced by the proposition/term :math:`t` (and bound variables have been renamed when necessary).
-
-.. math::
-
-    \begin{array}{cccc}
-      \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
-      &
-      \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
-      &
-      \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
-      &
-      \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
     \end{array}
 
 F2 G2

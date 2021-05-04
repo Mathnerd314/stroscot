@@ -16,6 +16,7 @@ Stroscot is an imperative programming language designed for modern processors.
   Arguments
   Delimited-Continuations
   Fexprs
+  Logic
   Reduction
   Reduction-Example
   Types

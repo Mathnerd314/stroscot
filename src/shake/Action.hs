@@ -622,3 +622,64 @@ actionShareSanity = do
     case globalShared of
         Nothing -> throwM $ errorInternal "actionShareSanity with no shared"
         Just x -> liftIO $ sanityShared x
+
+-- | Enqueue an Action into the pool and return a Fence to wait for it.
+--   Returns the value along with how long it spent executing.
+addPoolWait :: PoolPriority -> Action a -> Action (Fence IO (Either SomeException (Seconds, a)))
+addPoolWait pri act = do
+  fence <- newFence
+  addPool pri globalPool $ do
+    offset <- offsetTime
+    res <- act
+    offset <- offset
+    signalFence fence (offset, res)
+  pure fence
+
+actionFenceSteal :: Fence IO (Either SomeException a) -> Action (Seconds, a)
+actionFenceSteal fence = do
+  res <- liftIO $ testFence fence
+  case res of
+    Just (Left e) -> throwRAW e
+    Just (Right v) -> pure (0, v)
+    Nothing -> do
+      offset <- offsetTime
+      waitFence fence $ \v -> do
+      offset <- offset
+      continue $ (offset,) <$> v
+
+actionFenceRequeue :: (a -> Either SomeException b) -> Fence IO a -> Action (Seconds, b)
+actionFenceRequeue fence = Action $ do
+  res <- liftIO $ testFence fence
+  case res of
+    Just (Left e) -> throwRAW e
+    Just (Right v) -> pure (0, v)
+    Nothing -> do
+      Global{..} <- getRO
+      offset <- liftIO offsetTime
+      captureRAW $ \continue -> waitFence fence $ \v -> do
+        addPool (priority v) globalPool $ do
+          offset <- offset
+          continue $ (offset,) <$> v
+
+
+actionAlwaysRequeue :: Either SomeException a -> Action (Seconds, a)
+actionAlwaysRequeue res = actionAlwaysRequeuePriority (priority res) res
+
+actionAlwaysRequeuePriority :: PoolPriority -> Either SomeException a -> Action (Seconds, a)
+actionAlwaysRequeuePriority pri res = Action $ do
+  Global{..} <- getRO
+  offset <- liftIO offsetTime
+  captureRAW $ \continue ->
+    addPool pri globalPool $ do
+      offset <- offset
+      continue $ (offset,) <$> res
+
+-- | Make sure the pool cannot run out of tasks (and thus everything finishes) until after the cancel is called.
+--   Ensures that a pool that will requeue in time doesn't go idle.
+keepAlivePool :: Pool -> IO (IO ())
+keepAlivePool pool = do
+  bar <- newBarrier
+  addPool pool $ waitBarrier bar
+  pure $ signalBarrier bar ()
+
+

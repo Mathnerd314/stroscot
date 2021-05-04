@@ -1,38 +1,30 @@
 Verification
 ############
 
-SMT solvers have become very powerful. but termination checking is still in its infancy. It is a difficult (undecidable) task. The state-of-the-art seems to be the ULTIMATE framework that does abstract interpretation of the program via Buchi automata. CPAChecker has also done well in SV-COMP using an extension of dataflow analysis.
+Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, "state space explosion". To get around this there are various tricks:
 
-SAT solving
-===========
+* combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
+* optimize checking individual states, so larger state spaces can be checked in a given amount of time (brute force proof)
+* change the order states are explored, so that the failure mode is found earlier, before we run out of time or memory. But here we are not exploring the full state space (smart fuzzing)
 
-For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems :cite:`brausseCDCLstyleCalculusSolving2019`, and one paper/PhD on using CDCL for termination checking :cite:`dsilvaConflictDrivenConditionalTermination2015`.
+These techniques combine to form a much more powerful toolkit than conventional unit testing. Furthermore since they are built into the language there is a standardized API and UX for understanding tracebacks.
 
-TODO: conversion to CNF
-
-Software verification
-=====================
-
-Verification is the process of verifying that, indeed, a system satisfies its specification. Verification techniques include model checking, deductive machine-checked proof, and randomized testing (fuzzing).
-
-Model-checking does not refer to a model of the system but to the formal logic sense: an interpretation 𝜑 in some semantic domain that satisfies the formula F (𝜑 ⊨ F) is a model for F. A model checker *checks* if a given 𝜑 is a *model* for a given F.
-
-The problem is this: *all* verification methods that verify arbitrary “deep” properties suffer from *extreme* scalability limitations (there are deep theoretical reasons for that). In practice, we can affordably verify such properties on ~2000 lines of formal specification. We can't check deep properties on an actual program of 200KLOC.
-Correct/Cheap/Fast - pick 2. You can give up speed and only verify small programs. Or give up correctness and verify shallow properties. Or give up cheapness and verify high-level abstractions of the code.
+In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And then properties can be "shallow" and not result in a state space explosion.
 
 model checkers:
-[CPAChecker](https://cpachecker.sosy-lab.org/)
-[NASA’s Java Pathfinder](https://github.com/javapathfinder)
-[JBMC](http://www.cprover.org/jbmc/)
 [CBMC](https://www.cprover.org/cbmc/)
-[SCADE](https://www.ansys.com/en-gb/products/embedded-software/ansys-scade-suite)
+
+The state-of-the-art seems to be the ULTIMATE framework that does abstract interpretation of the program via Buchi automata. CPAChecker has also done well in SV-COMP using an extension of dataflow analysis.
 
 
+Verdi, Ironfleet, JSCert, Cosette, FSCQ, Chapar, CertiKOS, Linksem, miTLS and HACL*, Versat and IsaSAT
+CakeML
 
+Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, KLEE, [NASA’s Java Pathfinder](https://github.com/javapathfinder), jCUTE, SAGE
 
 
 Configurable Program Analysis
-=============================
+-----------------------------
 
 .. raw:: html
 
@@ -76,50 +68,81 @@ Such a CPA can be plugged in as a component into the software-verification frame
 without the need to work on program parsers, exploration algorithms, and
 their general data structures.
 
-A *program* is represented by a *control-flow automaton* (CFA) / Kripke structure :math:`(\locs, l_o, G)`,
+A *program* is represented by a *control-flow automaton* (CFA) / Kripke structure :math:`(C, Ops, \transconc{})`,
 which consists of
 
-* a set :math:`Ops` of program operations. Operations include:
+* A set :math:`C` of concrete states. Many papers use a simple state model consisting of a program counter/location and a data store mapping variable names to integers.
+* A set :math:`Ops` of program operations (alphabet). Typical operations include:
+  * Computation, where the state evolves with no input
+  * Unmodeled parts of the system; e.g. IO operations ``Read 1`` for a read that returned 1 or ``Write`` for a write.
+  * Havoc operations, similar to unmodeled operations
+* A concrete transition function :math:`\mathord{\transconc{}} \subseteq C \times Ops \times C` defining a (labeled) transition relation of how concrete states evolve into other concrete states. There is at most one concrete state succeeding a given concrete state and program operation, but we allow halting states with no available operations and a state to evolve differently with different operations. We define the notation :math:`\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}`. We write :math:`c \transconc{o} c'` if :math:`(c, o, c') \in \mathord{\transconc{}}` and :math:`c \transconc{} c'` if there exists an :math:`o` with :math:`c \transconc{o} c'`.
 
-  * Assignment of the form ``x := e``. The set of program variables that occur in operations from :math:`Ops` is denoted by :math:`X`, so :math:`x \in X`. :math:`e` is a (side-effect free) expression over variables from :math:`X`.
-  * I/O operations
-  * A test :math:`[p]` with a predicate :math:`p` over variables from :math:`X`. This is used for branching.
-* A concrete state :math:`(c, l) \in C = (X \to V) \times \locs` is a pair of:
+A concrete path :math:`\sigma = \langle (c_1, o_1 , c_2 ), (c_2 , o_2 , c_3 ), \ldots , (c_{n-1} , o_{n-1} , c_n ) \rangle` is a sequence of consecutive concrete states. A concrete path is called a program path if it starts with the initial state :math:`c_I`. A path is called feasible if the transitions are concrete transitions, :math:`c_i \transconc{o_i} c_{i+1}`; paths are assumed to be feasible unless declared infeasible. A state :math:`c` is called reachable if there exists a feasible program path from :math:`c_I` to :math:`c`.
 
-  * A *concrete data state*, a variable assignment :math:`c \in X \to V` that assigns to each variable a value :math:`V`; a simple model takes :math:`V = \Ints`.
-  * A program location :math:`l \in \locs`. There is an initial program location :math:`l_I` (models the program entry)
+Dealing with concrete states will immediately lead to state explosion. So we introduce abstract states, that are sets of concrete states, and abstract operations, that are sets of concrete operations. An abstract domain :math:`D = ({\cal E}, G, \leadsto)` consists of
 
-The concrete transition relation :math:`\mathord{\transconc{}} \subseteq C \times Ops \times C` defines a (labeled) transition relation of how concrete states evolve into other concrete states. We define the notation :math:`\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}`. We write :math:`c \transconc{o} c'` if :math:`(c, o, c') \in \mathord{\transconc{}}` and :math:`c \transconc{} c'` if there exists an :math:`o` with :math:`c \transconc{o} c'`. There is typically only one concrete state succeeding a given concrete state, but outside input and multi-threaded programs make the next state non-deterministic.
+* a set :math:`{\cal E} \subseteq 2^C` of abstract states
+* a set :math:`G \subseteq 2^{Ops}` of abstract operations.
+* a transfer relation :math:`\leadsto \subseteq E × G × E`  of (labeled) abstract state transitions. We define :math:`\overset{g}{\leadsto}`, :math:`s \leadsto s'`, and abstract paths and reachability, in a manner similar to concrete states.
 
-A path :math:`\sigma = \langle (c_1, o_1 , c_2 ), (c_2 , o_2 , c_3 ), \ldots , (c_{n-1} , o_{n-1} , c_n ) \rangle` is a sequence of consecutive concrete states. A path is called a program path if it starts in the initial location :math:`l_I`. A path is called feasible if the transitions are concrete transitions, :math:`c_i \transconc{o_i} c_{i+1}`. A location :math:`l` is called reachable if there exists a feasible program path from :math:`l_I` to :math:`l`.
+We have to tie this to our program. The domain *covers* the program if each reachable concrete state is contained in some abstract state in :math:`{\cal E}` and each operation encountered during a feasible path is contained in some abstract operation in :math:`G`. The domain is *compatible* with the program if :math:`(e,g,e')\in\leadsto \iff \exists c\ in e, c' \in e', o \in g. c,o,c' \in \mathord{\transconc{}}`.
 
-A verification task consists of a CFA and an error location, with the goal to show that the error location is unreachable, or otherwise to find a feasible program path to the error location.
+To support loop acceleration we could extend our notion of compatibility to allow mapping multiple concrete state transitions to one abstract transition. But which abstract state would the intermediate concrete states map to? It seems better to model loop acceleration as a transformation on the concrete state transition graph that is reflected into a transformation on the abstract state graph.
 
-Dealing with concrete states is infeasible so the semantics can instead be defined by the `strongest-postcondition operator <https://en.wikipedia.org/wiki/Predicate_transformer_semantics#Strongest_postcondition>`__. After an assignment operation the variable must contain the value of the expression evaluated on the old value, and after an assume operation the assertion must be true. A set of concrete states is called a *region*. A first-order formula :math:`\psi` over variables from :math:`X` and possible locations in :math:`\locs` defines the region :math:`\sem{\psi} = \{ c \mid c \models \psi \}`.
+The simplest covering domain is :math:`({C},{Ops})`. Slightly more complicated is the domain containing an abstract state for each program location. But the real meat lies in creating an abstract domain with complicated predicates on concrete states.
 
-A CPA :math:`\mathbb{C} = (D, \leadsto, \merge, \stopop)` consists of 4 elements:
+CPAChecker algorithm
+--------------------
 
-* an abstract domain :math:`D = (C, {\cal E}, \sem{\cdot})`, consisting of
+* A transfer operator that identifies successor abstract states to a given abstract state as well as their abstract operations, :math:`t : E → 2^{(E,G)}`.
 
-  * a set :math:`C` of concrete states,
-  * a bounded join `semi-lattice <https://en.wikipedia.org/wiki/Semilattice>`__ :math:`({\cal E}, \sqsubseteq, \sqcup, \top, \bot)` over abstract-domain elements, and
-  * a concretization function :math:`\sem{\cdot} : E \to 2^C` that maps each abstract-domain element to its represented set of concrete states. It should satisfy :math:`\sem{\top} = C`, :math:`\sem{\bot} = \emptyset`, :math:`e \sqsubseteq e' \to \sem{e} \subseteq \sem{e'}`, :math:`\sem{e \sqcup e'} \supseteq \sem{e} \cup \sem{e'}`
+* a merge operator :math:`\merge :  E × E → E` specifies if and how to merge abstract states when control flow meets. The operator weakens/widens the abstract state that is given as second parameter depending on the first parameter. Note that the operator :math:`\merge` is not commutative, and is not necessarily the same as the join operator of the lattice. :math:`e' \subseteq \merge(e, e') \subseteq \top`. Two simple ones are :math:`\merge_{sep}(e,e')=e'` and :math:`\merge_{join}(e,e')=e \cup e'`.
 
-* a transfer relation :math:`T \subseteq E × G × E` computes abstract successor states. It assigns to each abstract state :math:`e` possible new abstract states :math:`e'` that are abstract successors of :math:`e`. Similarly to the CFA each transfer is labeled with a control-flow edge :math:`g`, so we have :math:`\overset{g}{\leadsto}` as well as :math:`\leadsto` derived from :math:`T`.
+* The termination check :math:`\stopop : E × 2^E \to \{Stop,Continue\}` checks whether the abstract state :math:`e` that is given as first parameter is covered by the set :math:`R` of abstract states given as second parameter. Usually this is :math:`\stopop_{join}(e, R) = e \subseteq \bigcup R` but we can also use :math:`\stopop_{sep}(e, R) = \exists e' \in R . e \subseteq e'`.
 
-* a merge operator :math:`\merge :  E × E → E` specifies if and how to merge abstract states when control flow meets. The operator weakens the abstract state (also called widening) that is given as second parameter depending on the first parameter. Note that the operator :math:`\merge` is not commutative, and is not necessarily the same as the join operator of the lattice. The result of :math:`\merge(e, e')` can be anything between :math:`e'` and :math:`\top`. Two simple ones are :math:`\merge_{sep}(e,e')=e'` and :math:`\merge_{join}(e,e')=e \sqcup e'`
-* a termination check :math:`\stopop : E × 2^E \to B` checks whether the abstract state :math:`e` that is given as first parameter is covered by the set :math:`R` of abstract states given as second parameter, i.e., every concrete state that :math:`e` represents is represented by some abstract state from :math:`R`. Two simple termination checks are :math:`\stopop_{sep}(e, R) = \exists e' ∈ R : e \sqsubseteq e'` and :math:`\stopop_{join}(e, R) = e \sqsubseteq \bigsqcup R`. The second requires :math:`D` to be a power-set domain.
+Properties
+==========
 
+Reachability
+------------
+
+A reachability (safety) task consists of a program and a set of error states, with the goal to show that the error states are unreachable, or otherwise to find a feasible program path to an error state. This can be used to verify assertions and check for type errors.
+
+To prove unreachability we exhibit a covering domain with no concrete error states in any of the abstract states. To prove reachability we produce a concrete feasible path ending in an error state.
+
+Termination
+-----------
+
+Termination checking verifies properties like "A function call must eventually return" or "A program execution that calls malloc() must eventually call free()". A counterexample can be an infinite state transition sequence that doesn't call free, so it is a liveness property. Note that it's different from a safety property "A call to free must be preceded by a call to malloc". It's also different from "If the program ends gracefully then all memory has been freed". A lot of programs look like ``repeat { handleCommand{} }`` and for those we can prove termination of ``handleCommand`` but not the loop. But we can prove graceful exit.
+
+Proving termination is of undecidable complexity, but in practice we can prove termination and nontermination in many cases. We can reduce liveness to fair termination constraints ``<A, B>``, in each trace either ``A`` is true for only finitely many states or ``B`` is true for infinitely many states.
+
+To prove termination we construct an abstract state graph of reachable states and a ranking function mapping states to some well-ordered set such that every cycle in the state graph has a transition that decreases the rank.
+
+To prove nontermination we need an infinite path of concrete states. This can be simplified to an initial path of concrete states leading to a strongly connected component of abstract states with no exits.
+
+There's also some interesting `work <http://mmjb.github.io/T2/>`__ on termination checking by Microsoft. There's a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy.
+
+Logic
+-----
+
+Both reachability and termination can be expressed in CTL*. There is an even more expressive language, the modal μ-calculus.
+
+
+Supercompilation
+----------------
+
+Supercompilation produces an output program with observable behavior equivalent to an input program but faster.  Essentially we are transforming abstract states into pieces of code, creating a term in the output for every intermediate state.
+
+The algorithm in :cite:`bolingbrokeSupercompilationEvaluation2010` is similar to that of CPAChecker. There is a termination check that takes a list of states and a state and either stops or continues - in particular it stops if any previously examined states are less than the current state by a well-quasi-order. Reduction produces successor states as with the transfer operator; as an optimization they skip merging/termination checking "intermediate" states. Another difference is that they are compiling pure programs so there is a "splitting" operation that transforms a state into a composition of substates. They are evaluating to full normal form rather than WHNF, so there is some nondeterminism in the evaluation order.
 
 Incremental program analysis
 ----------------------------
 
-Another issue is incremental analysis. Solving the halting problem is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation :cite:`jakobsDifferentialModularSoftware` there doesn't seem to be any major breakthrough. Marking the analyzer's computation steps in the general incremental build framework is probably sufficient.
+Another issue is incremental analysis. Checking is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation :cite:`jakobsDifferentialModularSoftware` there doesn't seem to be any major breakthrough. Marking the analyzer's computation steps in the general incremental build framework is probably sufficient.
 
-Condition checking
-------------------
-
-There's some interesting `work <http://mmjb.github.io/T2/>`__ on termination checking by Microsoft, called `TERMINATOR <https://web.archive.org/web/20131005142732/http://research.microsoft.com:80/en-us/um/cambridge/projects/terminator/papers.htm>`__. There's a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy. But since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and resource use :cite:`albertResourceAnalysisDriven2019` and things of that nature.
+since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and resource use :cite:`albertResourceAnalysisDriven2019` and things of that nature.
 
 Optimizations
 =============
@@ -132,3 +155,15 @@ A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoa
 * Loop unrolling, code motion - These are optimizations on mutable variables, so will have to wait until a mutability story is worked out. But unrolling recursive functions could prove useful, as part of inlining.
 * Dead code elimination - Unused expressions aren't connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.
 * Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.
+
+SAT solving
+===========
+
+For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems :cite:`brausseCDCLstyleCalculusSolving2019`, and one paper/PhD on using CDCL for termination checking :cite:`dsilvaConflictdrivenConditionalTermination2015`.
+
+SAT solving can be recast as proving a sequent :math:`C_1, \ldots, C_n \vdash \bot` with clauses :math:`C_i = (a_1 \land \ldots \land a_n \to b_1 \lor \ldots \lor b_m)`. Resolution is just the cut rule (although resolution-based solving are different from CDCL).
+
+The conversion to CNF uses properties of classical reasoning. In the intuitionistic case, every formula can be transformed into an equiprovable sequent :math:`\Gamma_i, \Gamma_f \vdash d` with :math:`d` an atom, :math:`\Gamma_f` made of flat clauses as in the :math:`C_i` above, and implication clauses :math:`(a \to b) \to c`.
+
+There are definitions of resolution for fragments of linear logic, and linear logic theorem provers.
+

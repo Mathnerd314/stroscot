@@ -10,7 +10,16 @@ The stuff here is mostly a placeholder while the rest of the language is designe
 
 Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
 
-Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is short and terse, as well as flexible and general.
+Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
+
+Legibility
+----------
+
+The main factor improving readability is consistency; reading is disrupted when unconventional layouts are used.
+
+Spacing is important to identify word boundaries (intra-letter spacing significantly smaller than inter-word spacing) and sentence boundaries (two spaces after the period, although the period's whitespace itself is distinctive). Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking. Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line. The default line spacing seems fine.
+
+Line length is a good question. Programming uses fixed-width characters so it's measured in characters. 80 characters is standard, but monitors are wider now, so 100 is plausible. Diff programs are often the limiting factor, but on my monitor I can fit 2 108-character texts side-by-side along with a space in the middle and the taskbar. 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt (24px) I can fit 97 characters, while 23px fits 102 characters.
 
 Unicode
 =======
@@ -125,6 +134,8 @@ Sequences and slices:
   slice(list, 0, 2)
   slice(list, a, length list - b)
 
+Monad comprehensions
+
 Records
 =======
 
@@ -149,6 +160,54 @@ Atoms are any identifiers that don't have a grammar rule defined.
   underscore_atom
   unícσdє-αtσm
   symbol ++++ tree
+
+Patterns
+========
+
+::
+
+   _ # matches anything
+   a # matches anything and binds a
+   ^a # matches the atom a
+   [(1, "x"), {c: 'a'}] # literal matching itself
+   [1, ...] # matches any list starting with 1
+   {a: 1, ...: rest} # matches a and the rest of the record
+   pat AND pat # matches both patterns simultaneously
+   pat OR pat # matches either pattern
+   ~pat # desugars to u_ = let pat = u_ in ..., where u_ is a unique name
+
+Guards allow arbitrary functions:
+
+::
+
+   a with a > 0
+
+View patterns
+
+::
+
+   (f -> a)
+
+Functions patterns
+
+::
+
+   Int z = toInteger z
+
+   Int a
+
+Pattern synonyms
+
+::
+
+   pattern F a b = ["f",a,b]
+
+Arbitrary patterns
+
+::
+
+   _f a # matches any function application
+
 
 Operators
 =========

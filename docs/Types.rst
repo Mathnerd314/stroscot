@@ -3,30 +3,22 @@ Types
 
 Types are hard. Academics have spent decades in search of the perfect type system. But really precise types end up looking like ``(Nil-->0) & (Cons a b-->1+(length b))``, which is just the original program. So Stroscot opts instead for model checking: leave programs with a dynamic, unityped semantics, but try to prove properties about execution. In particular the idea "well-typed programs don't go wrong" is simplified to "prove programs don't go wrong", "wrong" is defined via assertions, and these assertions are statically checked. ``assert`` is deeply special, since it has to work with descriptions executable properties, so unfortunately not all properties can be checked.
 
-Dynamically typed doesn't mean that Stroscot has no types; types can still be specified and used to control your program.
+Dynamically typed doesn't mean that Stroscot has no types; types can still be specified and used to control your program, a la TypeScript.
 
-Sets
-====
 
-Stroscot includes mathematical sets as a data type. We follow New Foundations (specifically NFU) in allowing any stratified formula to define a set. Our stratification condition is very loose. The usual formulation requires ``lvl(b)=lvl(a)+1`` for ``a in b``, but this can be relaxed to ``lvl(b) > lvl(a)``. Consistency follows from the proof of the Statified Comprehension Theorem on page 45 of :cite:`holmesElementarySetTheory1998`, changing ``n-1`` to ``n-k,k>0``. In practice, this means levels must form a poset, or said another way, that there cannot be a cyclic chain of set membership tests (a in b, b in c, c in a, for example).
 
-Note that membership tests :math:`a \in b` can be replaced with a subset inclusion check :math:`\{a\} \subseteq b` if the left side :math:`a` is known to be a set. The :math:`\subseteq` expands to a logical formula and there is no constraint generated at all. So it is only when we are dealing with mixed sets containing both sets and primitive elements that we can really run into trouble. Overall, since the stratification only applies to quantified variables and most types do not use quantification, stratification errors most likely will never come up as an issue in practice.
 
-NFU has a universal set, so there is no issue of function types being a power set that is "too large" for the universe; the power set of the universe is actually a subset of the universal set.
-
-We define the set of sets as :math:`S =\{ \emptyset \} \cup \left\{ s \mid \exists x. x \in s\right\}`. Equality on sets is the usual extensional equality :math:`A \in S \land B \in S \rightarrow \left(\left(x \in A \leftrightarrow x\in B\right) \leftrightarrow A=B \right)`. ``A`` is a subset of ``B`` (:math:`A \subseteq B`) if every element of ``A`` is also in ``B``. Set inclusion forms a distributive lattice.
-
-The implementation of sets is based on syntax tree manipulation. Non-set values include all the core expressions, ADT elements and lambda expressions and so on.
+The implementation of sets is based on syntax tree manipulation. Non-set values include all the core expressions, ADT elements and lambda expressions and so on. Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).
 
 Types
 =====
 
-Types are simply a wrapper around the sets defined earlier. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in :cite:`dolanAlgebraicSubtyping`. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
+Types are simply sets. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in :cite:`dolanAlgebraicSubtyping2016`. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
 
 ::
 
-  a : (Type T) = { assert(a isElemOf T); a }
-  (Type T) a = a : T
+  a : T = { assert(a isElemOf T); a }
+  T a = a : T
 
 Functions
 =========
@@ -39,8 +31,9 @@ Function type declarations come in two forms. The first version simply checks co
 
    -- expands to
 
-   s = arbElemOfType(S)
-   assert(isElemOfType (A s) Int)
+   s = arbElem()
+   assume(s isElemOf S)
+   assert(A s isElemOf Int)
 
 The second version restricts the definition of the function so it is only defined on the type. This is useful for overloading.
 
@@ -59,6 +52,21 @@ The second version restricts the definition of the function so it is only define
       ret
    }
 
+Dependent types
+---------------
+
+Since the value is in scope, defining an (insanely) dependent type is easy:
+
+::
+
+  A : (s : S s) -> T s
+  A = ...
+
+  -- expands to
+  s = arbElem()
+  assume(s isElemOf S s)
+  assert(A s isElemOf T s)
+
 ADTs
 ====
 
@@ -76,9 +84,9 @@ is equivalent to
 
    symbol nil
    symbol snoc
-   Cxt Ty = assert(Ty isElemOf (Cxt Ty)); Set { x where
+   Cxt Ty = a = arbElem(); assume(a isOfType Cxt Ty); assert(Ty a isElemOf Set); Set { x where
       (x == nil
-      || exists G y. x == (snoc G y) && G isElemOf (Cxt Ty) && y isElemOf (Ty G))
+      or exists G y. x == (snoc G y) && G isElemOf (Cxt Ty) && y isElemOf (Ty G))
    }
 
 The recursive appearance of ``Cxt Ty`` is interpreted using the least pre-fixed point and Bekić's theorem as in :cite:`dolanPolymorphismSubtypingType2017` section 2.2.

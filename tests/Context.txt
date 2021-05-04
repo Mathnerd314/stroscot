@@ -1,0 +1,37 @@
+symbol nil
+symbol snoc
+Cxt Ty = a = arbElem(); assume(a isOfType Cxt Ty); assert(Ty a isElemOf Set); Set { x |
+  case x of
+    nil -> True
+    snoc G y -> G isElemOf (Cxt Ty) && y isElemOf (Ty G)
+}
+
+construct nil Ty = nil : Cxt Ty
+construct snoc Ty G a = snoc G a : Cxt Ty
+
+-- Cons-based context extension
+symbol nilE
+symbol consE
+
+Ext Ty G = assert(Ty : Cxt Ty -> Set); assert(G : Cxt Ty); Set { x |
+  case x of
+    nilE -> True
+    consE a D -> a isElemOf (Ty G) && D isElemOf (Ext Ty (snoc Ty G a))
+}
+
+construct nilE Ty G = nilE : Ext Ty G
+construct consE Ty G a D = consE a D : Ext Ty G
+
+append : [ Ty : Cxt Ty -> Set ] -> (G : Cxt Ty) -> Ext Ty G -> Cxt Ty
+append Ty G nilE = G
+append Ty G (consE a D) = append Ty (snoc Ty G a) D
+
+-- Snoc-based context extension
+data ExtR [ Ty : Cxt Ty -> Set ] (G : Cxt Ty) : Set where
+  nilR  : ExtR Ty G
+  snocR : (E : ExtR Ty G) -> Ty (appendR Ty G E) -> ExtR Ty G
+
+appendR : [ Ty : Cxt Ty -> Set ] -> (G : Cxt Ty) -> ExtR Ty G -> Cxt Ty
+appendR Ty G nilR = G
+appendR Ty G (snocR E a) = snoc Ty (appendR Ty G E) a
+

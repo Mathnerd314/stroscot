@@ -1,3 +1,22 @@
+{-# LANGUAGE CPP #-}
+module Data.Digest.CXXHash
+(
+    c_XXH32
+) where
+
+import qualified Data.ByteString as B
+import Data.Word (Word32)
+import Foreign.C.String
+import Foreign.C.Types
+
+#include <xxhash.h>
+-- | Compresses a string.
+foreign import ccall unsafe "xxhash.h XXH32"
+  c_XXH32 :: CString -- ^ Data
+          -> CSize   -- ^ Size
+          -> CUInt   -- ^ Seed
+          -> IO Word32   -- ^ Seed
+
 #include "stdlib.h"   /* abort() */
 #include "xxhash.h"
 
@@ -50,11 +69,6 @@ digest_file (const char *filename, int *binary, unsigned char *bin_result, bool 
   fp = fopen (filename, (O_BINARY && *binary ? "rb" : "r"));
   if (fp == NULL)
     {
-      if (ignore_missing && errno == ENOENT)
-        {
-          *missing = true;
-          return true;
-        }
       error (0, errno, "%s", quotef (filename));
       return false;
     }

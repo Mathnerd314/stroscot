@@ -1,8 +1,9 @@
 { nixpkgs ? import <nixpkgs> {} }:
 let
   inherit (nixpkgs) pkgs;
-  ghc = pkgs.haskellPackages.ghcWithPackages (ps: with ps; [
-          ioref-stable
+  ghc = (pkgs.haskellPackages.ghcWithPackages (ps: with ps; [
+          persistent-sqlite persistent-template
+          ioref-stable concurrent-extra
             # for mutable interaction-net style graphs
           store
             # for fast serialization/deserialization
@@ -17,13 +18,15 @@ let
             # this will get replaced by the custom C file-hashing code, but for now it's a good reference.
           memory
             # FNV1/1a and siphash. also a dependency of cryptonite providing unpinned byte array methods.
-        ]);
+        ])).override {
+          withLLVM = true;
+        };
   tex = pkgs.texlive.combine {
     inherit (pkgs.texlive) scheme-small pgf bussproofs preview varwidth standalone geometry amsmath;
   };
 in
 pkgs.stdenv.mkDerivation {
   name = "my-env-0";
-  buildInputs = [ ghc pkgs.pdf2svg pkgs.dot2tex tex ];
+  buildInputs = [ ghc pkgs.haskellPackages.llvmPackages.clang ] ++ []; # pkgs.pdf2svg pkgs.dot2tex tex ];
   shellHook = "eval $(egrep ^export ${ghc}/bin/ghc)";
 }

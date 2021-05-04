@@ -114,49 +114,23 @@ The implementation is similar to that used for checking equality of dependent ty
 Patterns
 ========
 
-::
-
-   _ # matches anything
-   a # matches anything and binds a
-   ^a # matches the atom a
-   [(1, "x"), {c: 'a'}] # literal matching itself
-   [1, ...] # matches any list starting with 1
-   {a: 1, ...: rest} # matches a and the rest of the record
-   pat AND pat # matches both patterns simultaneously
-   pat OR pat # matches either pattern
-   ~pat # desugars to u_ = let pat = u_ in ..., where u_ is a unique name
-
-Guards allow arbitrary functions:
+Patterns all compile to guard conditions on ``$args``. They also check that the arity of ``$args`` is the number of patterns.
 
 ::
 
-   a with a > 0
-
-View patterns
-
-::
-
-   (f -> a)
-
-Functions patterns
-
-::
-
-   Int z = toInteger z
-
-   Int a
-
-Pattern synonyms
-
-::
-
-   pattern F a b = ["f",a,b]
-
-Arbitrary patterns
-
-::
-
-   _f a # matches any function application
+   _ --> True
+   a --> True
+   ^a --> $args[i] == a
+   [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}]
+   [1, ...] --> $args[i][0] == 1
+   {a: 1, ...: rest} --> $args[a] == 1
+   pat1 AND pat2 --> match $args pat1 and match $args pat2
+   pat1 OR pat2 --> match $args pat1 or match $args pat2
+   ~pat --> True
+   a with f a --> f a
+   (f -> a) --> match (f $args[i]) a
+   Int z --> $args[0] == Int
+   _f a --> True
 
 Overrides
 =========

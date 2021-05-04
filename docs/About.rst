@@ -36,7 +36,6 @@ Inspiring projects
 -  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
 -  `Pinafore <https://pinafore.info/>`__
 -  `Macro Lambda Calculus <http://github.com/codedot/lambda>`__
--  `A Pint-sized Earley Parser <https://github.com/JoshuaGrams/pep>`__
 -  `Wat <https://github.com/manuel/wat-js>`__
 -  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
 
@@ -102,13 +101,25 @@ World domination is of course very far off, the roadmap at the moment is, in rou
 * pass tower of interpreters test
 * cool parser with fexprs
 * x86-64 compiler backend
+* "One thing that I should have foreseen and prepared for is that a large number of people would make assumptions about the language based on sample code and complain without checking to see if those complaints were valid."
 
 Principles
 ==========
 
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
-* Make the irreducible basic elements as simple and as few as possible, but don't ignore a single datum of experience. (Albert Einstein)
+* Make the irreducible basic elements as simple and as few as possible without [surrendering] the adequate representation of a single datum of experience. (Albert Einstein)
 * Choose a random modification. Accept with a probability decreasing over time if it worsens the system and a positive probability otherwise. Repeat until the system reaches a state that is good enough for the application. (Simulated annealing)
 * Never finished, never complete, but tracking the progress of technology (Lennart Poettering)
 * Code can be used as data, data can be used as code (Lisp)
-* Productivity is being able to do things that you were never able to do before.
+* Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)
+* If it isn't documented, it doesn't exist (Coding Horror)
+* Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)
+* People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)
+* Better depends on your goodness metric
+
+Statistics
+==========
+
+* Bus factor: 1
+* 10k lines of code
+* 2 commits/month

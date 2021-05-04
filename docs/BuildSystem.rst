@@ -1,7 +1,7 @@
 Build system
 ############
 
-Stroscot's build system is called "Cot". Although build systems are often an afterthought in programming language design, they interface with the compiler in several areas, so it is better to integrate the build system into the compiler as a library. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed. What is usually called "separate compilation" is actually incremental compilation. Compilation's goal is to produce a single executable / DLL, so these "separate" files are still part of the same assembly. Object files are simply one way of storing intermediate results so that compilation work done on the files can be shared; but it does not handle some patterns, e.g. recursive references. Also, the compiler's include-following mechanism can be tightly integrated with the build system, so that generated files can be created before they are used. Finally the compiler's source code will need a build system to manage the complexity of the build.
+Stroscot's build system is called "Cot" - it is integrated with the compiler. That way intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.
 
 Overview
 ========
@@ -15,13 +15,6 @@ Overview
     IKey [label="Input keystate"]
     IKey2 [label="Modified keystate"]
     }
-    subgraph cluster_keys {
-      style=filled; color=lightgrey
-      node [style=filled,color=white]
-      Files, Network, Database, Journal, Time [shape="circle"]
-    }
-    {Files; Network; Database; Journal; Time} -> IKey
-
     IKey -> "Rule engine"
     "Rule engine" -> OKey
     {
@@ -30,36 +23,39 @@ Overview
     OKey2 [label="Updated keystate"]
     }
 
-    "Traces" -> OKey [dir=back]
-    "Rule engine" -> "Traces" [color = "black:black:black"]
+    "Rule engine" -> "Trace database"
+    "Trace database" -> "Incremental rule engine" [dir=both]
 
-    IKey -> "Changes"
-    IKey2 -> "Changes"
+    IKey -> "Changelist"
+    IKey2 -> "Changelist"
 
-    {"Changes"; "Traces"} -> "Incremental rule engine"
+    "Changelist" -> "Incremental rule engine"
     "Incremental rule engine" -> OKey2
   }
 
-Broadly, a build system is an execution engine combined with logic for incremental computing.
-A clean build starts with inputs, which the execution engine uses to execute to completion to produce the set of outputs. For most builds, we also have reference to the previous runs of the engine. In the simplest case it is only the trace of the previous run that is available, but a caching build system with constructive traces ("build farm") can maintain many sets of traces in parallel and interpolate between them.
+Broadly, a build system is a set of rules intended to be run by an execution engine (rule engine) that has logic for incremental computing. We use the term "keystate" to refer to an arbitrary dataset consisting of keys and values; it may be files, a Web API, a database, or some observations of the system time or ``/dev/random``. A clean build consists of the rule engine using the input keystate to execute to completion to produce the output keystate.
 
-Logically, there is a clear separation between inputs and outputs. If the build system creates the data, it is an output, otherwise it's an input. If we modify a file during the build, e.g. a source code formatter tidying up, this is an input (the original file) and an output (the tidied file) indexed by the same key. We can always remove the confusion by backing up the input, running the build, moving the output to a different key, and restoring the input.
+Logically, there is a clear separation between inputs and outputs. Inputs are consumed by the build system (e.g. system header files or ``/dev/random``), while outputs are produced by the build system (e.g. an executable, a private key). A source code formatter tidying up file during the build consists of an input (the original file) and an output (the tidied file) indexed by the same filename. In general the input keystate may not be accessible after the build. Note that a file that is overwritten before any data is read from it is not an input; but the existence of the file might be an input.
 
-If an input is overwritten before any data is read, then it is not actually used and the key is an output key. Detecting this in a filesystem tracer might be tricky.
+For incremental builds (builds that aren't clean), we also have reference to the previous runs of the engine, in the form of traces produced by the rule engine. In the simplest case it is only the trace of the previous run that is available, but a caching build system with constructive traces ("build farm") can maintain many sets of traces in parallel and interpolate between them, a trace database. And the incremental build itself produces a trace.
 
-If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don't care about most of the outputs (intermediate files) so Stroscot includes damage handling logic to compute the minimal rebuild for the desired outputs.
+Determining the input keystate for an incremental build is a bit tricky, because the output files from a clean build may become input files for the incremental build. Generally we don't want to mix in artifacts produced from previous builds. Hence we define the inputs of the incremental build as the inputs of the clean build plus any other files so long as those files are not the outputs of the clean build. But we may include some output files as well, as exceptions.
+
+Another issue is "time travel", a thunk reading a file from the previous build that hasn't yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.
 
 Design
 ======
 
-It's based on iThreads (:cite:`bhatotiaIThreadsThreadingLibrary2015`), which out of a few dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build. Instead, it requires structuring the build into fine-grained units of computation called thunks. Thunks are the smallest addressable unit of execution and constrain the amount of re-use that an incremental build can achieve. A thunk reads and writes the shared memory as it pleases, so long as it avoids data races with other concurrently executing thunks, and then calls a synchronization operation. Synchronization operations enforce control dependencies and structure the flow of time in the program. Stroscot implements a sequencing operation based on Shake's concurrency support as well as acquire/release lock from the paper. It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``.
+The design is based on iThreads :cite:`bhatotiaIThreadsThreadingLibrary2015`, which out of a few dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build. Instead, it requires structuring the build into fine-grained units of computation called thunks. Thunks are the smallest addressable unit of execution and constrain the amount of re-use that an incremental build can achieve. A thunk reads and writes the shared memory as it pleases, so long as it avoids data races with other concurrently executing thunks, and then calls a synchronization operation. Synchronization operations enforce control dependencies and structure the flow of time in the program. It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``; the only constraint is that they are executed on every build and rebuild.
 
 Two thunks conflict if they access the same key, and at least one is a write. Data races are conflicting accesses not ordered by synchronization. To ensure that two conflicting ordinary operations do not happen simultaneously, they must be ordered by intervening synchronization operations. For example, one thunk could write a variable and then release a lock; other thunks must acquire the lock before accessing the variable, so that there is a locking operation intervening. If the build is not data race free it might  execution orders produce the same results. This is not checked thoroughly.
+
+If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don't care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.
 
 Thunk names
 ===========
 
-Thunk naming adds some complexity to the implementation of a build system, as the thunk names also affect the way computations can be re-used. From the implementation side there is no restriction on the names; they can be any sequence of bytes. iThreads uses a simple "thread # thunk #" scheme, which assumes a fixed number of long-running threads and invalidates all of the thunks in a thread after a modified thunk. A scheme similar to ``make`` uses filenames; for each file f there are two thunks "run f" and "exec f". The "run f" just does ``Sequence [subtargets,[exec f]]`` while "exec f" runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use thunk names like "exec f step #" but this leads to invalidating later thunks. Using names like "exec f step cmd" requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.
+Thunk naming adds some complexity to the implementation of a build system, as the thunk names also affect the way computations can be re-used. From the implementation side there is no restriction on the names; they can be any sequence of bytes. iThreads uses a simple "thread # thunk #" scheme, which assumes a fixed number of long-running threads and invalidates all of the thunks in a thread after a modified thunk. A scheme similar to ``make`` uses filenames; for each file f there are two thunks "run f" and "exec f". The "run f" just does ``Sequence [subtargets,["exec f"]]`` while "exec f" runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use thunk names like "exec f step #" but this leads to invalidating later thunks. Using names like "exec f step cmd" requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.
 
 Also, in a dynamic build, a direct file action map like this is not always available, and so the naming scheme must be relaxed to allow dependencies on things that aren't files. For example, we may have one command that generates two files; so long as we use a consistent thunk name for this command there is no issue. For another example, we may have include headers that are picked up in a search path directory listing. To deal with this directly, we would need to introduce build logic into the search mechanism and run dependencies when seeing ``#include``. But a phase separation handles it fine with minimal changes - we generate the files first and then call the compiler, filling in the build dependencies from an output list of used headers. In this case we would need thunks for each phase.
 
@@ -67,7 +63,7 @@ Also, in a dynamic build, a direct file action map like this is not always avail
 Model
 =====
 
-To reason about the code we need a pencil-and-paper model of how it works. First we have thunk IDs (``tid`` s); these come from the program and are quoted strings "abc". For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a "machine" column, but this is the same for all rows in a single trace so it is omitted. An example database based on the example in :cite:`shalBuildSystemRules2009` might be
+To reason about the behavior we need a pencil-and-paper model of how it works. First we have thunk IDs (``tid`` s); these come from the program and are quoted strings "abc". For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a "machine" column, but this is the same for all rows in a single trace so it is omitted. An example database based on the example in :cite:`shalBuildSystemRules2009` might be
 
 .. raw:: html
 
@@ -115,8 +111,8 @@ One way to understand the database is to draw it in a graph:
 
     digraph multi {
         rankdir=RL
-        node [shape="rect",fontsize=20]
-        "main.c", "main.o", "prog", "parse.o", "parse.h", "parse.c", "parse.y" [shape="circle"]
+        node [shape="circle",fontsize=20]
+        "main.c", "main.o", "prog", "parse.o", "parse.h", "parse.c", "parse.y" [shape="rect"]
 
         // run prog = ExecAfter [run main,run parse] ld
         "run prog" -> "run main" [style=dotted, color=grey,penwidth=3]
@@ -147,7 +143,7 @@ One way to understand the database is to draw it in a graph:
 
     }
 
-Square nodes represent thunks while circular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto's two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.
+Circular nodes represent thunks while rectangular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto's two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.
 
 Then during an incremental run we start with a list of changed keys and their values; this is allowed to contain unmodified keys, so generating this list may be as simple as calculating the state of all keys and saying they all might be modified, or it may be a more precise list from a filesystem watcher or similar API. The keys can also include volatile information such as FTP server listings or stdin.
 
@@ -177,13 +173,13 @@ If a thunk is enabled, then we can consider the available traces and compare the
 
 * new: The thunk is not referenced by any trace but has been enabled in the current build. Examples: control flow change, clean build
 
-When we have at least one trace, things get more interesting. A trace is valid if all of its recorded reads match the state of the build. There is also relevancy; a key is relevant if it might have changed this run, relative to the previous run.
+When we have at least one trace, things get more interesting. A trace is valid if all of its recorded reads match the state of the build. The state on disk also becomes relevant.
 
 * dirty: There are traces but no valid trace. Example: input change
 * clean: There is a valid trace where all recorded writes match the state on disk. Example: A thunk is always clean immediately after it is executed, since running a thunk records its trace.
 * damaged: There is at least one valid trace but no valid trace has its recorded writes matching the state on disk. Examples: shallow build, external modification, overwritten output
 
-After resolving the thunk, it can only be clean or damaged; the clean state may have been achieve by substitution, reuse, or rebuilding, while the damaged state can only be from a damaged thunk passing the no-future-use check.
+After resolving the thunk, it can only be clean or damaged; the clean state may have been achieved by substitution, reuse, or rebuilding, while the damaged state can only be from a damaged thunk passing the no-future-use check.
 
 In a cloud build setting we have one more state to handle constructive traces. A constructive trace stores the full value for each key and allows fetching the output files without running the build.
 
@@ -194,14 +190,13 @@ A substitutable thunk can be clean or damaged but not dirty. So in total we have
 Simulation
 ==========
 
-It's possible for a thunk to be handled in several ways: leave damaged/clean, rebuild, or substitute with one of the applicable versions. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding's cost is unknown but can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Dmaaged thunks can only be left alone if they are not need during the rest of the build, i.e. no thunk reading the damaged data is rebuilding. Substitutions from different sources may be incompatible (e.g. GHC used to produce `randomized symbols names <https://gitlab.haskell.org/ghc/ghc/-/issues/4012>`__), so picking the version is not as simple as first from a list.
+It's possible for a thunk to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged thunks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding thunk reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce `randomized symbols names <https://gitlab.haskell.org/ghc/ghc/-/issues/4012>`__), so picking the version influences the substitutability of other thunks.
 
-The problem is NP-hard since we can encode 3-SAT in the substitution versions :cite:`coxVersionSAT2016`. But of course, it it's that hard, we might as well use a SAT solver. In particular we can encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:
+The problem is NP-hard since we can encode 3-SAT in the substitution versions :cite:`coxVersionSAT2016`. Since it's that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:
 
 * each thunk can be left alone, substituted, or built, and we can only do one: ``t_leave + t_rebuild + t_v1 + ... + t_vn = 1`` (this is a pseudo-Boolean constraint that be easily encoded)
-* compatibility on the read/write values, ``t_vj -> (s_vx or s_vy or ...)``, where t reads a value that s writes and x,y, etc. are the versions that are compatible (this leaves out rebuilding, which could generate identical data)
-* a conservative assumption that rebuilding changes all outputs to new versions, ``s_rebuild -> t_rebuild`` where t reads from what s writes
-* a requirement that rebuilds not use damaged data, ``t_rebuild -> not s_leave``, where s is damaged and t reads from s.
+* For substitution, compatibility on the read/write values, ``t_vj -> (s_vx or s_vy or ...)``, where t reads a value that s writes and vx,vy, etc. are the versions of s that are compatible with version vj of t.
+* For rebuilding, a conservative assumption that all outputs will be changed, ``s_rebuild -> t_rebuild`` where t reads from what s writes, and a requirement that rebuilds not use damaged data, ``t_rebuild -> not s_leave``, where s is damaged and t reads from s.
 
 Then we have soft constraints for each variable weighted with the cost of using that option.
 
@@ -214,7 +209,7 @@ Wanted files
 
 When using Cot as a package manager rather than a build system, we have lots of produced files that aren't used by anything. Since Cot doesn't see any users of the files it'll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we'd run special thunks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These thunks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special thunks are actually the packages.
 
-We could also add functionality to force re-executing specific damaged thunks.
+We could also add functionality to force realizing specific damaged thunks.
 
 Restarting
 ----------
@@ -234,17 +229,12 @@ So in our build example, we would go from "main.c" to "cc main". Next we want lo
 
 We also have to load "ld"; this is done by looking up the writes of "cc main" in the filename->thunk table. We need to load thunks that read from the writes during execution, in case they are different from the recorded writes.
 
-Note that we'll always load the initial thunk, because we load the chain of parents. So after everything is loaded, execution can start from the initial thunk as normal, no need for a topological sort like in Tup. The difference is that we may have unloaded thunks as children; we do not want to execute these. But to keep the keystate consistent we need to be able to modify the keystate as though they were executed. In particular for each thunk we need the list of all the writes performed by the thunk and its children. But the thunk itself already stores the writes in its ThunkRecord; so computing the total writes is a matter of combination, ``Total = Thunk // Union(Children)``, where ``//`` is record update from Nix. These write lists can be precomputed during the initial run. Storing them efficiently with fast access is a little tricky since there is a lot of copying in the lists. For now I'll store the full write list for each thunk, compressed, but there is probably a persistent data structure (`tree <https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree>`__\ ?) that can efficiently re-use the data from other thunks while maintaining performance. At the other extreme we can just regenerate all the write lists by walking the thunk records, so these write lists can be cached and expired using LRU or something.
+Note that we'll always load the initial thunk, because we load the chain of parents. So after everything is loaded, execution can start from the initial thunk as normal, no need for a topological sort like in Tup. The difference is that we may have unloaded thunks as children; we do not want to execute these. But to keep the keystate consistent we need to be able to modify the keystate as though they were executed. In particular for each thunk we need the list of all the writes performed by the thunk and its children. But the thunk itself already stores the writes in its ThunkRecord; so computing the total writes is a matter of combination, ``Total = Thunk // Union(Children)``, where ``//`` is record update. These write lists can be precomputed during the initial run. Storing them efficiently with fast access is a little tricky since there is a lot of copying in the lists. For now I'll store the full write list for each thunk, compressed, but there is probably a persistent data structure (`tree <https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree>`__\ ?) that can efficiently re-use the data from other thunks while maintaining performance. At the other extreme we can just regenerate all the write lists by walking the thunk records, so these write lists can be cached and expired using LRU or something.
 We also need to store the list of acquire/release lock operations, but most programs don't use locks so this will be small.
 
 The write lists can also be used as an incomplete check for data races; if after executing a thunk A, A has read a key from the global/shared keystate with a value different from the local keystate passed into the thunk (state passed into the parent thunk P // modifications of P // modifications synced in from synchronization operation of P), then a thunk not in the execution history of A must have modified the key - since this execution could have been delayed by the scheduler, it is a read-write data race. Similarly in the union of the children, if there are differing values among the children then there is a write-write data race.
 
 Anyway, the recorded state also records if the key is damaged and the thunk that regenerates it. So we can use this during our damage simulation to load in damaged thunks when referenced and re-run them if necessary.
-
-Pipeline
-========
-
-We could think of an option to allowing a "what-if" query, "what would the output be if the task that made the output generated this". But the semantics is murky - to preserve the modification, we must disable all of the tasks that would modify the generated file, which if they write other files means that the build will contain out-of-date files.
 
 Cleaning
 ========
@@ -255,9 +245,9 @@ When we re-execute a thunk, it is a good idea to restore the state of the output
 
     Clean up by removing the selected targets, well as any files or directories associated with a selected target through calls to the Clean function. Will not remove any targets which are marked for preservation through calls to the NoClean function.
 
-* Before running a task, we clean up old build results, if any, i.e. delete all provided keys (outputs) that are still present. After running a task we store its (keyed) outputs with either verifying or constructive traces.
-* To prune the store (which is a bad idea if there are multiple configurations that build different subsets), we can do as above and also load all the subtasks of present tasks. Then anything not loaded is not needed and its files etc. can be deleted.
+--clean-old
 
+    clean built files that are no longer produced by the current build. A bad idea if there are multiple configurations that build different subsets. Basically we load all the tasks, then anything not loaded is not needed and its files etc. can be deleted.
 
 Exceptions
 ==========
@@ -282,15 +272,20 @@ Here we use 4 operations: mask, try, ``uninterruptibleMask_``, throwIO. mask shi
 
 Apparently, though, nobody can agree on whether the after handle should run with an uninterruptible mask.
 
-Trace journal
-=============
+Another issue with exceptions is handling them. The top-level build function can throw exceptions, or it can catch them, printing them and exiting with an error code.
 
-A robust build system design fundamentally depends on keeping a database of build traces. In particular to rebuild a command like ``cat src/*`` we must store the file list so as to detect deleted/added files. We could store this in a file, but an append-only journal is crash-tolerant and less HD-intensive. Since file paths have lots of redundant components, some lightweight streaming compression like lz4 is appropriate.
+Trace database
+==============
+
+A robust build system design fundamentally depends on keeping a database of build traces. In particular to rebuild a command like ``cat src/*`` we must store the file list so as to detect deleted/added files.
+
+For now the database is just a simple SQLite database with a few indexes, as having a working system is 90% of the work. But there are likely ways to speed it up (the other 90% of work).
+
+We could store this in a file, but an append-only journal is crash-tolerant and less HD-intensive. Since file paths have lots of redundant components, some lightweight streaming compression like lz4 is appropriate.
 
 We record all of the process/thread semantics, with fork, locks, wait/signal, etc. as well as its I/O. The tasks's version number / digest of its source code is also relevant. Reading the journal back, we end up with a list of interleaved thread traces.
 
 Requesting execution of other tasks can be done sequentially or in parallel.
-
 
 There are 3 main operations that show up in a task's trace:
 
@@ -309,18 +304,21 @@ If the key contents are large, we can intern it - journal an association "#5 = x
 
 The simplest example of an in-memory key is the command line arguments; we can store the full initial command line, and then have a thunk that parses the command line and writes various option keys. Another example is versioning keys. The initial thunk writes a key for each thunk with the compiled-in version, ``write (Version abc) v2.3``. Then each thunk reads its version and this read is stored in the thunk record, causing rebuilds when the version is changed.
 
+--ignore-rule-versions
+  Ignore versions in the build rules.
+
 Files
 -----
 
 Files are a little trickier because storing the whole contents of the file in the journal is infeasible. Instead we journal a proxy of the contents, stored in-memory. So writes look like "write file f with proxy p" and reads are "read file f with proxy p". We assume that there aren't any untracked writes during the build so the reads can be recorded using the in-memory value of p calculated from the writes.
 
 trivial proxy
-  Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, "always rebuild" and "never rebuild". In the never case, the rebuild can still be triggered by a different file.
+  Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, "always rebuild" and "never rebuild". In the never case, a thunk's rebuild can still be triggered by a different file.
 
 dirty bit
    The idea of a dirty bit is to have one piece of information per key, saying whether the key is dirty or clean. In the initial state all keys are clean. If a thunk executes, all its writes set the keys to dirty. A thunk that reads a dirty key must also execute. But if all read keys are clean, the thunk does not need to be rerun.
 
-version number
+version number/custom detector
   For toolchains in small projects, the version number from running ``gcc -V`` etc. is often sufficient. Although modtime is more robust, it's worth listing this as an example of a custom file modification detector.
 
 file size/permissions/inode number
@@ -337,36 +335,31 @@ watcher/change journal
 
 We can construct modes from the various combinations:
 
-::
-
-  digest Files change when digest changes.
-  digest-and ModtimeAndDigest Files change when modtime and digest change.
-  digest-and-input ModtimeAndDigestInput Files change on modtime (and digest for inputs).
-  digest-or ModtimeOrDigest Files change when modtime or digest change.
-  digest-not Modtime Files change when modtime changes.
-
-* digest-only, if modification times on your file system are missing or don't update on changes.
-* modtime-only, if your timestamps change mostly in sync with the file content
-* modtime-then-digest, if you could use modtimes but want to avoid spurious rebuilds. In particular git touches a lot of files when switching branches, vim copies over the file so its inode changes frequently, and scripts/you can write identical files.
-* modtime-then-some-digest, skipping digests for generated files as they're large and change with almost every rebuild. Generated file modtimes can be kept constant by writing to a temporary file and only replacing the output if it's different.
+* digest-only: Files change when digest changes. Use if modification times on your file system are missing or don't update on changes.
+* modtime-only: Files change when modtime changes. Use if your timestamps change mostly in sync with the file content
+* modtime-then-digest: Files change when modtime and digest change. Use if you could use modtimes but want to avoid spurious rebuilds. In particular git touches a lot of files when switching branches, vim copies over the file so its inode changes frequently, and scripts/you can write identical files.
+* modtime-then-digest-for-inputs: modtime-only for generated files and modtime-then-digest for inputs. It skips digests for generated files as they're large and change with almost every rebuild. Generated file modtimes can be kept constant by writing to a temporary file and only replacing the output if it's different.
 * watcher-only, if your watcher runs continuously or if you delete all files after every run
-* modtime-then-watcher, if your watcher's change journal is incomplete
+* modtime-then-watcher: if your watcher's change journal is incomplete, do a modtime scan on startup.
 * modtime-then-watcher-then-digest, to get the fastest file tracking and fewest rebuilds
 
-‘-L’
-‘--check-symlink-times’
+Symlinks
+~~~~~~~~
+
+-L, --check-symlink-times
 
     On systems that support symbolic links, this option causes make to consider the timestamps on any symbolic links in addition to the timestamp on the file referenced by those links. When this option is provided, the most recent timestamp among the file and the symbolic links is taken as the modification time for this target file.
 
 io_uring
 ~~~~~~~~
 
-It's a little overkill, but the io_uring interface on Linux allows batching up calls asynchronously, which can speed up stat() and thus modtime reading by 20%. For hashing parallelism is likely counterproductive, as xxHash is I/O bound and parallelism turns sequential reads into random reads.
+It's a little overkill, but the io_uring interface on Linux allows batching up calls asynchronously, which can `speed up stat() <https://twitter.com/axboe/status/1205991776474955777>`__ and thus modtime reading . For hashing parallelism is likely counterproductive, as xxHash is I/O bound and parallelism turns sequential reads into random reads.
 
 Access Tracing
 ~~~~~~~~~~~~~~
 
 Specifying a lot of file read/write dependencies manually is tedious and error-prone, although writing a small script from scratch is not too difficult. So instead we want to use automatic tracing. There are various tracing methods:
+
 * library preloading with fsatrace: fails on static linking, Go programs, and Mac system binaries
 * ptrace with BigBro-fsatrace: Linux-only at present, might work on Windows/Mac eventually.
 * chroot with FUSE: mount real system at ``/real-system/``, FUSE system with all files ``/x`` as symlinks to ``/real-system/x``. The program shouldn't access ``/real-system/`` directly. Handles all programs, even forking/multiprocess programs like make, and gives build system the abilities to hide new files and generate files on-demand. Requires Linux + root.
@@ -381,432 +374,103 @@ Network
 
 Often we wish to fetch data from over the network. There are a few common protocols:
 
-* HTTP downloads: we can use wget, curl, aria2, or a custom library. The caching headers (Last-Modified & ETag) are important for re-using old downloads.
-* FTP: this can be treated similarly to HTTP
+* HTTP downloads: we can use wget, curl, aria2, or a custom library. The `caching headers <https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching>`__ are important for re-using old downloads.
+* FTP: this can be treated similarly to the filesystem
 * Git, Bittorrent, IPFS: these are content-addressed stores so keeping track of the hash is sufficient
 
 A more complex example is deploying a container to AWS. The inputs are: all the configuration details for the host, the container image itself, and secret credential information. The output is a running instance or else a long log file / error message. But the running instance cannot be checksummed, so we must use some proxy criterion - the easiest is to redeploy if any inputs have changed, but we could also use a script to interrogate the running instance over the network.
 
-If there are multiple containers that depend on each other, we have to encode the restarting behavior somehow. The easiest is probably to write a single script that takes all the configuration and starts up the containers in order, but this duplicates the build system task scheduling logic.
+If there are multiple containers that depend on each other, we have to encode the restarting behavior somehow. The easiest is probably to write a single script that takes all the configuration and starts up the containers in order, but this duplicates the build system task scheduling logic. So a script for each strongly-connected component.
 
-Damage scratchwork
-------------------
+Damage
+------
 
-* neural net that does 5 runs/subtasks which write back to file
-
-What happens when a file is written to more than once.
-
-::
-
-  et:
-    run d
-    ans = o + e
-
-  dt:
-    run c
-    o = y + d
-
-  ct:
-    run b
-    y = o + c
-
-  bt:
-    run a
-    o = o + b
-
-  at:
-    o = i + a
-
-Here ``at``, ``bt``, and ``dt`` write ``o``. Let's say the first run is ``i=a=b=c=d=e=1``, so our trace journal is:
-
-::
-
-  etm: execafter dtm et
-  dtm: execafter ctm dt
-  ctm: execafter btm ct
-  btm: execafter at bt
-  at: read i = 1
-  at: read a = 1
-  at: write o = 2 { v = 1 }
-  bt: read o = 2 { v = 1 }
-  bt: read b = 1
-  bt: write o = 3 { v = 2 }
-  ct: read o = 3 { v = 2 }
-  ct: read c = 1
-  ct: write y = 4
-  dt: read y = 4
-  dt: read d = 1
-  dt: write o = 5 { v = 3 }
-  et: read o = 5 { v = 3 }
-  et: read e = 1
-  et: write ans = 6
-
-To keep the graph a DAG, we have split ``o`` into ``o1,o2,o3`` (the ``v`` version numbering):
-
-..
-  ([a-z]): exec ([a-z])
-  $1 -> $2 [style=dotted, color=grey]
-
-  ([a-z]): read ([a-z]) = ([0-9])
-  $1 -> $2 [label="$3"]
-
-  ([a-z]): write ([a-z]+) = ([0-9])
-  $2 -> $1 [label="$3",color=blue]
-
-.. graphviz::
-
-    digraph multi {
-        rankdir=RL
-        node [shape="rect",fontsize=20]
-        at, bt, ct, dt, et, btm, ctm, dtm, etm [shape="circle"]
-        o1 [label="o₁",margin="0,0"];
-        o2 [label="o₂",margin="0,0"];
-        o3 [label="o₃",margin="0,0"];
-
-        etm -> dtm [style=dotted, color=grey,penwidth=3]
-        dtm -> ctm [style=dotted, color=grey,penwidth=3]
-        ctm -> btm [style=dotted, color=grey,penwidth=3]
-        btm -> at [style=dotted, color=grey,penwidth=3]
-        etm -> et [style=dotted, color=grey,penwidth=3]
-        dtm -> dt [style=dotted, color=grey,penwidth=3]
-        ctm -> ct [style=dotted, color=grey,penwidth=3]
-        btm -> bt [style=dotted, color=grey,penwidth=3]
-
-        at -> i [label="1"]
-        at -> a [label="1"]
-        o1 -> at [label="2",color=blue]
-        bt -> o1 [label="2"]
-        bt -> b [label="1"]
-        o2 -> bt [label="3",color=blue]
-        ct -> o2 [label="3"]
-        ct -> c [label="1"]
-        y -> ct [label="4",color=blue]
-        dt -> y [label="4"]
-        dt -> d [label="1"]
-        o3 -> dt [label="5",color=blue]
-        et -> o3 [label="5"]
-        et -> e [label="1"]
-        ans -> et [label="6",color=blue]
-    }
-
-* ``(i,a,b,c,d,e,o,y,ans)=(1,1,1,1,1,1,5,4,6) [default]``: nothing is run
-* ``{ans = 0}`` or ``{e = 0}``: run ``et``
-* ``{o = 0}`` or ``{d = 0}``: run ``dt``, and ``et`` if ``o != 5``
-* ``{a=0}`` or ``{b=0}`` or ``{c=0}``: run ``at,bt,ct,dt``, and ``et`` if ``o != 5``
-* ``{b=0,o=2}``: run ``bt,ct,dt``, and ``et`` if ``o != 5``
-* ``{c=0,o=3}``: run ``ct,dt``, and ``et`` if ``o != 5``
-* ``{y=0}``: run ``at,bt``, ``ct`` if ``o != 3``, ``dt`` if ``y != 4``, and ``et`` if ``o != 5``
-
-::
-
-  etm r
-  etm r, dtm r [et]
-  etm r, dtm r [et], ctm r [dt]
-  etm r, dtm r [et], ctm r [dt], btm r [ct]
-  etm r, dtm r [et], ctm r [dt], btm r [ct], at r [bt]
-  at:
-    if i changed || a changed
-      run at
-    else
-      if o changed
-        record o damaged
-  bt:
-    if o changed || b changed
-      if o damaged
-        run at
-        if o still damaged
-          error
-      run bt
-    else
-      if o changed
-        record o damaged
-
-
-
-
-  changed = Set(i,b,o3)
-
-  recheck = {}
-  if {i,a,o1} & changed
-    recheck |= a,b,c,d,e
-  if {o1,b,o2} & changed
-    recheck |= b,c,d,e
-  if {o2,c,y} & changed
-    recheck |= c,d,e
-  if {y,d,o3} & changed
-    recheck |= d,e
-  if {o3,e,ans} & changed
-    recheck |= e
-
-  check e
-
-  check(x):
-    if !(x & recheck)
-      return
-
-    for( deps)
-
-
-   || (o != 2 && (o != 4 || x != 0))
-    run a
-  if a ran || o = 2
-    run b
-  if o != 4 || ans != 3
-    run c
-
-
-
-  c: check b
-  b: check a
-  a: if i=1
-  a:  write o1 2
-  a: else
-  a:  rerun a
-  a:  read i <i>
-  a:  write o <i+1>
-  aL return
-
-  a: i != 1, rerun
-  a: read i 0
-  a: write o 1
-  a: return
-  b: a ran, rerun
-  b: read o 1
-  b: write o 2
-  b: return
-  c: o != 4, rerun
-  c: read o 2
-  c: write ans 1
-  c: return
-
-
-* ``(i=1,x=0,o=4,ans=3)``: nothing is run
-* ``(1,0,4,_)``: ``c`` disabled. nothing is run
-* ``(1,0,_,3)``: ``a,b`` disabled. run ``c``
-* ``(1,0,_,_)``: ``a,b,c`` disabled. nothing is run
-* ``(_,_,4,3)``: nothing disabled. run ``a,b``. If ``o != 4`` run ``c``
-* ``(_,_,4,_)``: ``c`` disabled. run ``a,b``
-* ``(_,_,_,3)``: ``a,b`` disabled. run ``c``
-* ``(_,_,_,_)``: ``a,b,c`` disabled. nothing is run
-
+Cot allows writing to a file more than once, e.g. training a neural net with iterative optimization. The behavior is that changed inputs always rerun all affected thunks, but changed outputs only rerun the thunks if the simulation predicts that the output is needed. If a build cache is not used then thunks that generate files needed for the build will rerun as well.
 
 Options
 =======
 
-Files :: FilePath
- ^ Defaults to @.shake@. The directory used for storing Shake metadata files.
-   All metadata files will be named @'shakeFiles'\/.shake./file-name/@, for some @/file-name/@.
-   If the 'shakeFiles' directory does not exist it will be created.
-   If set to @\"\/dev\/null\"@ then no shakeFiles are read or written (even on Windows).
-Flush :: Maybe Seconds
- ^ Defaults to @'Just' 10@. How often to flush Shake metadata files in seconds, or 'Nothing' to never flush explicitly.
-   It is possible that on abnormal termination (not Haskell exceptions) any rules that completed in the last
-   'shakeFlush' seconds will be lost.
+* ``-m, --metadata`` The directory used for storing metadata files. All metadata files will be named ``$files/$file-name``. If the 'shakeFiles' directory does not exist it will be created. If set to ``Nothing`` then no metadata files are read or written (clean build mode). Defaults to ``.cot``.
+* ``--flush N`` How often to flush metadata files in seconds, or ``--never-flush`` to never flush explicitly. On abnormal termination the completion data that has not been flushed will be lost.
 
-    ""  ["flush"] (reqIntArg 1 "flush" "N" (\i s -> s{shakeFlush=Just i})) "Flush metadata every N seconds."
-    ""  ["never-flush"] (noArg $ \s -> s{shakeFlush=Nothing}) "Never explicitly flush metadata."
-    "m" ["metadata"] (reqArg "PREFIX" $ \x s -> s{shakeFiles=x}) "Prefix for storing metadata files."
-    ""  ["rule-version"] (reqArg "VERSION" $ \x s -> s{shakeVersion=x}) "Version of the build rules."
-    ""  ["no-rule-version"] (noArg $ \s -> s{shakeVersionIgnore=True}) "Ignore the build rules version."
+Cached build
+------------
 
-Cloud build
------------
+A build cache records the outputs of each thunk in a reproducible manner, i.e. the trace is constructive in the sense of :cite:`mokhovBuildSystemsCarte2020`.
 
-Share :: Maybe FilePath
- ^ Defaults to 'Nothing'. Whether to use and store outputs in a shared directory.
-Cloud :: [String]
- ^ Defaults to @[]@. Cloud servers to talk to forming a shared cache.
-Symlink :: Bool
- ^ Defaults to @False@. Use symlinks for 'shakeShare' if they are available.
-   If this setting is @True@ (even if symlinks are not available) then files will be
-   made read-only to avoid inadvertantly poisoning the shared cache.
-   Note the links are actually hard links, not symlinks.
+--cache-create PATH
+  Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.
 
- --cache-debug=file
+--cache-disable, --cache-delete
+  The disable option can be used to temporarily disable the cache without modifying the cache, while the delete option deletes it.
 
-    Write debug information about derived-file caching to the specified file. If file is a hyphen (-), the debug information is printed to the standard output. The printed messages describe what signature-file names are being looked for in, retrieved from, or written to the derived-file cache specified by CacheDir.
-
---cache-disable, --no-cache
-
-    Disable derived-file caching. scons will neither retrieve files from the cache nor copy files to the cache. This option can be used to temporarily disable the cache without modifying the build scripts.
-
---cache-force, --cache-populate
-
-    When using CacheDir, populate a derived-file cache by copying any already-existing, up-to-date derived files to the cache, in addition to files built by this invocation. This is useful to populate a new cache with all the current derived files, or to add to the cache any derived files recently built with caching disabled via the --cache-disable option.
+--cache-links PATHS
+  For files matching listed path patterns, make files in the cache read-only to avoid inadvertently poisoning the shared cache. Use hard links or reflinks to replay thunks, instead of copying files.
 
 --cache-readonly
+  Use the cache, if enabled, to retrieve files, but do not not update the cache with any files actually built during this invocation.
 
-    Use the derived-file cache, if enabled, to retrieve files, but do not not update the cache with any files actually built during this invocation.
+--cache-populate
+  When using CacheDir, populate a derived-file cache by copying any already-existing, up-to-date derived files to the cache, in addition to files built by this invocation. This is useful to populate a new cache with all the current derived files, or to add to the cache any derived files recently built with caching disabled via the --cache-disable option.
 
---cache-show
+--cache-check
+    Sanity check the shared cache files.
 
-    When using a derived-file cache and retrieving a file from it, show the command that would have been executed to build the file. Without this option, scons reports "Retrieved 'file' from cache.". This allows producing consistent output for build logs, regardless of whether a target file was rebuilt or retrieved from the cache.
+--cache-cloud URL
+  HTTP server providing a (read-only) cache in the cloud.
 
-,yes $ Option ""  ["cloud"] (reqArg "URL" $ \x s -> s{shakeCloud=shakeCloud s ++ [x]}) "HTTP server providing a cloud cache."
-""  ["share"] (optArg "DIRECTORY" $ \x s -> s{shakeShare=Just $ fromMaybe "" x, shakeChange=ensureHash $ shakeChange s}) "Shared cache location."
-,hide $ Option ""  ["share-list"] (noArg ([ShareList], ensureShare)) "List the shared cache files."
-,hide $ Option ""  ["share-sanity"] (noArg ([ShareSanity], ensureShare)) "Sanity check the shared cache files."
-,hide $ Option ""  ["share-remove"] (OptArg (\x -> Right ([ShareRemove $ fromMaybe "**" x], ensureShare)) "SUBSTRING") "Remove the shared cache keys."
-""  ["share-copy"] (noArg $ \s -> s{shakeSymlink=False}) "Copy files into the cache."
-""  ["share-symlink"] (noArg $ \s -> s{shakeSymlink=True}) "Symlink files into the cache."
 
 Remote Builds
+-------------
 
-Nix supports remote builds, where a local Nix installation can forward Nix builds to other machines. This allows multiple builds to be performed in parallel and allows Nix to perform multi-platform builds in a semi-transparent way. For instance, if you perform a build for a x86_64-darwin on an i686-linux machine, Nix can automatically forward the build to a x86_64-darwin machine, if available.
+A remote build consists of a local build setup forwarding thunk invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.
 
-To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Nix installed. You can test whether connecting to the remote Nix instance works, e.g.
-
-$ nix ping-store --store ssh://mac
-
-will try to connect to the machine named mac. It is possible to specify an SSH identity file as part of the remote store URI, e.g.
-
-$ nix ping-store --store ssh://mac?ssh-key=/home/alice/my-key
-
-Since builds should be non-interactive, the key should not have a passphrase. Alternatively, you can load identities ahead of time into ssh-agent or gpg-agent.
-
-If you get the error
-
-bash: nix-store: command not found
-error: cannot connect to 'mac'
-
-then you need to ensure that the PATH of non-interactive login shells contains Nix.
-Warning: If you are building via the Nix daemon, it is the Nix daemon user account (that is, root) that should have SSH access to the remote machine. If you can’t or don’t want to configure root to be able to access to remote machine, you can use a private Nix store instead by passing e.g. --store ~/my-nix.
-
-The list of remote machines can be specified on the command line or in the Nix configuration file. The former is convenient for testing. For example, the following command allows you to build a derivation for x86_64-darwin on a Linux machine:
-
-.. code-block:: shell-session
-
-  $ uname
-  Linux
-
-  $ nix build \
-    '(with import <nixpkgs> { system = "x86_64-darwin"; }; runCommand "foo" {} "uname > $out")' \
-    --builders 'ssh://mac x86_64-darwin'
-  [1/0/1 built, 0.0 MiB DL] building foo on ssh://mac
-
-  $ cat ./result
-  Darwin
-
-It is possible to specify multiple builders separated by a semicolon or a newline, e.g.
-
-  --builders 'ssh://mac x86_64-darwin ; ssh://beastie x86_64-freebsd'
+cot ping-builders
+  Test whether connecting to each remote instance works. To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Cot installed. If you get the error ``cot: command not found`` then you need to ensure that the PATH of non-interactive login shells contains Cot.
 
 Each machine specification consists of the following elements, separated by spaces. Only the first element is required. To leave a field at its default, set it to -.
 
-    The URI of the remote store in the format ssh://[username@]hostname, e.g. ssh://nix@mac or ssh://mac. For backward compatibility, ssh:// may be omitted. The hostname may be an alias defined in your ~/.ssh/config.
+    The URI of the remote store in the format ssh://[username@]hostname, e.g. ssh://nix@mac or ssh://mac. For backward compatibility, ssh:// may be omitted. The hostname may be an alias defined in your ~/.ssh/config. It is possible to specify an SSH identity file as part of the remote store URI, e.g. ``ssh://mac?ssh-key=/home/alice/my-key``. Since builds should be non-interactive, the key should not have a passphrase. Alternatively, you can load identities ahead of time into ssh-agent or gpg-agent, as SSH will use its regular identities.
 
-    A comma-separated list of Nix platform type identifiers, such as x86_64-darwin. It is possible for a machine to support multiple platform types, e.g., i686-linux,x86_64-linux. If omitted, this defaults to the local platform type.
+    The maximum number of builds to execute in parallel on the machine. Typically this should be equal to the number of CPU cores. For instance, the machine itchy in the example will execute up to 8 builds in parallel.
 
-    The SSH identity file to be used to log in to the remote machine. If omitted, SSH will use its regular identities.
+    The “speed factor”, indicating the relative speed of the machine. If there are multiple machines of the right type, Cot will prefer the fastest, taking load into account.
 
-    The maximum number of builds that Nix will execute in parallel on the machine. Typically this should be equal to the number of CPU cores. For instance, the machine itchy in the example will execute up to 8 builds in parallel.
+    A comma-separated list of supported features and platform identifiers, such as ``i686-linux,x86_64-linux,kvm``. Cot will only perform the derivation on a machine that has the specified features.
 
-    The “speed factor”, indicating the relative speed of the machine. If there are multiple machines of the right type, Nix will prefer the fastest, taking load into account.
+    A comma-separated list of mandatory features. A machine will only be used to build a derivation if all of the machine’s mandatory features appear in the derivation’s features attribute.
 
-    A comma-separated list of supported features. If a derivation has the requiredSystemFeatures attribute, then Nix will only perform the derivation on a machine that has the specified features. For instance, the attribute
+Remote builders can be configured on the command line with ``--builders`` or in general conf or in a separate configuration file included in builders via the syntax @file.
 
-    requiredSystemFeatures = [ "kvm" ];
+builders-use-cache
 
-    will cause the build to be performed on a machine that has the kvm feature.
-
-    A comma-separated list of mandatory features. A machine will only be used to build a derivation if all of the machine’s mandatory features appear in the derivation’s requiredSystemFeatures attribute..
-
-For example, the machine specification
-
-nix@scratchy.labs.cs.uu.nl  i686-linux      /home/nix/.ssh/id_scratchy_auto        8 1 kvm
-nix@itchy.labs.cs.uu.nl     i686-linux      /home/nix/.ssh/id_scratchy_auto        8 2
-nix@poochie.labs.cs.uu.nl   i686-linux      /home/nix/.ssh/id_scratchy_auto        1 2 kvm benchmark
-
-specifies several machines that can perform i686-linux builds. However, poochie will only do builds that have the attribute
-
-requiredSystemFeatures = [ "benchmark" ];
-
-or
-
-requiredSystemFeatures = [ "benchmark" "kvm" ];
-
-itchy cannot do builds that require kvm, but scratchy does support such builds. For regular builds, itchy will be preferred over scratchy because it has a higher speed factor.
-
-Remote builders can also be configured in nix.conf, e.g.
-
-builders = ssh://mac x86_64-darwin ; ssh://beastie x86_64-freebsd
-
-Finally, remote builders can be configured in a separate configuration file included in builders via the syntax @file. For example,
-
-builders = @/etc/nix/machines
-
-causes the list of machines in /etc/nix/machines to be included. (This is the default.)
-
-builders-use-substitutes
-
-    If set to true, Nix will instruct remote build machines to use their own binary substitutes if available. In practical terms, this means that remote hosts will fetch as many build dependencies as possible from their own substitutes (e.g, from cache.nixos.org), instead of waiting for this host to upload them all. This can drastically reduce build times if the network connection between this computer and the remote build host is slow. Defaults to false.
+    If set to true, remote hosts will fetch as many build dependencies as possible from a build cache, instead of upload the files from the host. This can drastically reduce build times if the network connection between this computer and the remote build host is slow. Defaults to false.
 
 To build only on remote builders and disable building on the local machine, you can use the option --max-jobs 0.
-
-Not relevant to Stroscot
-------------------------
-
-‘-e’
-‘--environment-overrides’
-
-    Give variables taken from the environment precedence over variables from makefiles. See Variables from the Environment.
-
-‘-E string’
-‘--eval=string’
-
-    Evaluate string as makefile syntax. This is a command-line version of the eval function (see Eval Function). The evaluation is performed after the default rules and variables have been defined, but before any makefiles are read.
-
-‘-f file’
-‘--file=file’
-‘--makefile=file’
-
-    Read the file named file as a makefile. See Writing Makefiles.
-
-‘-I dir’
-‘--include-dir=dir’
-
-    Specifies a directory dir to search for included makefiles. See Including Other Makefiles. If several ‘-I’ options are used to specify several directories, the directories are searched in the order specified.
-
-‘-r’
-‘--no-builtin-rules’
-
-    Eliminate use of the built-in implicit rules (see Using Implicit Rules). You can still define your own by writing pattern rules (see Defining and Redefining Pattern Rules). The ‘-r’ option also clears out the default list of suffixes for suffix rules (see Old-Fashioned Suffix Rules). But you can still define your own suffixes with a rule for .SUFFIXES, and then define your own suffix rules. Note that only rules are affected by the -r option; default variables remain in effect (see Variables Used by Implicit Rules); see the ‘-R’ option below.
-
-‘-R’
-‘--no-builtin-variables’
-
-    Eliminate use of the built-in rule-specific variables (see Variables Used by Implicit Rules). You can still define your own, of course. The ‘-R’ option also automatically enables the ‘-r’ option (see above), since it doesn’t make sense to have implicit rules without any definitions for the variables that they use.
 
 Debugging
 ---------
 
-ninja subtools:
-::
+browse dependency graph in a web browser
+show dependencies stored in the deps log
+output graphviz dot file for targets
 
-    browse  browse dependency graph in a web browser
-     clean  clean built files
-  commands  list all commands required to rebuild given targets
-      deps  show dependencies stored in the deps log
-     graph  output graphviz dot file for targets
-     query  show inputs/outputs for a path
-   targets  list targets by their rule or depth in the DAG
-    compdb  dump JSON compilation database to stdout
- recompact  recompacts ninja-internal data structures
-    restat  restats all outputs in the build log
-     rules  list all rules
- cleandead  clean built files that are no longer produced by the manifest
+profiling information
 
-demo"] (noArg [Demo]) "Run in demo mode."
-sleep"] (noArg [Sleep]) "Sleep for a second before building."
-exception"] (noArg [Exception]) "Throw exceptions from the top-level build function, instead of printing them and exiting with an error code."
-numeric-version"] (noArg [NumericVersion]) "Print just the version number and exit."
+list all commands required to rebuild given targets
+list all rules
+show inputs/outputs for a path
+list targets by their rule or depth in the DAG
+dump JSON compilation database to stdout
 
-StorageLog :: Bool
- ^ Defaults to 'False'. Write a message to @'shakeFiles'\/.shake.storage.log@ whenever a storage event happens which may impact
-   on the current stored progress. Examples include database version number changes, database compaction or corrupt files.
+recompacts internal data structures
+restats all outputs in the build log
 
-    "r" ["report","profile"] (optArg "FILE" $ \x s -> s{shakeReport=shakeReport s ++ [fromMaybe "report.html" x]}) "Write out profiling information [to report.html]."
-    ""  ["no-reports"] (noArg $ \s -> s{shakeReport=[]}) "Turn off --report."
+--version
+  Print the version number and exit.
+
+--storage-log
+  Write a message to ``storage.log`` whenever a storage event happens which may impact on the current stored progress. Examples include database version number changes, database compaction or corrupt files.
 
 --no-build
   Load all the database files but stop before executing the initial thunk and don't build anything.
@@ -828,17 +492,23 @@ LintWatch :: [FilePattern]
  ^ File patterns whose modification causes an error. Raises an error even if 'shakeLint' is 'Nothing'.
 CreationCheck :: Bool
  ^ Default to 'True'. After running a rule to create a file, is it an error if the file does not exist.
-   Provided for compatibility with @make@ and @ninja@ (which have ugly file creation semantics).
+   Provided for compatibility with ``make`` and ``ninja`` (which have ugly file creation semantics).
 NeedDirectory :: Bool
- ^ Defaults to @False@. Is depending on a directory an error (default), or it is permitted with
-   undefined results. Provided for compatibility with @ninja@.
+ ^ Defaults to ``False``. Is depending on a directory an error (default), or it is permitted with
+   undefined results. Provided for compatibility with ``ninja``.
 VersionIgnore :: Bool
  ^ Defaults to 'False'. Ignore any differences in 'shakeVersion'.
 
 dupbuild={err,warn}  multiple build lines for one target
 phonycycle={err,warn}  phony build statement references itself
 
-An issue is "time travel", a thunk reading a file from the previous build that hasn't yet been generated in this build. Technically, our notion of consistency is based on a "clean build", with the filesystem initialized to source files and all generated files deleted. For true replication, when re-building a task T, we would have to delete all the build files generated by tasks depending on T, in case T accidentally read "from the future". But this is more easily detected after-the-fact, particularly in the case of parallel builds.
+--cache-show
+
+    When using a derived-file cache and retrieving a file from it, show the command that would have been executed to build the file. Without this option, scons reports "Retrieved 'file' from cache.". This allows producing consistent output for build logs, regardless of whether a target file was rebuilt or retrieved from the cache.
+
+--cache-debug=file
+
+    Write debug information about derived-file caching to the specified file. If file is a hyphen (-), the debug information is printed to the standard output. The printed messages describe what signature-file names are being looked for in, retrieved from, or written to the derived-file cache specified by CacheDir.
 
 Shake features a built in "lint" features to check the build system is well formed. To run use build --lint. You are likely to catch more lint violations if you first build clean. The lint features are listed in this document. There is a performance penalty for building with --lint, but it is typically small.
 * Detects changing the current directory, typically with setCurrentDirectory. You should never change the current directory within the build system as multiple rules running at the same time share the current directory. You can still run ``cmd_`` calls in different directories using the Cwd argument.
@@ -861,13 +531,13 @@ Using fsatrace you can augment command line programs (called with cmd or command
 This feature requires fsatrace to be on the $PATH, as documented on the homepage. If you are using Windows, you can download a binary release here.
 
 LiveFiles :: [FilePath]
- ^ Default to @[]@. After the build system completes, write a list of all files which were /live/ in that run,
+ ^ Default to ``[]``. After the build system completes, write a list of all files which were /live/ in that run,
    i.e. those which Shake checked were valid or rebuilt. Produces best answers if nothing rebuilds.
 Report :: [FilePath]
- ^ Defaults to @[]@. Write a profiling report to a file, showing which rules rebuilt,
+ ^ Defaults to ``[]``. Write a profiling report to a file, showing which rules rebuilt,
    why, and how much time they took. Useful for improving the speed of your build systems.
-   If the file extension is @.json@ it will write JSON data; if @.js@ it will write Javascript;
-   if @.trace@ it will write trace events (load into @about:\/\/tracing@ in Chrome);
+   If the file extension is ``.json`` it will write JSON data; if ``.js`` it will write Javascript;
+   if ``.trace`` it will write trace events (load into ``about:\/\/tracing`` in Chrome);
    otherwise it will write HTML.
 Progress :: IO Progress -> IO ()
  ^ Defaults to no action. A function called when the build starts, allowing progress to be reported.
@@ -1169,10 +839,6 @@ In make this option improves the output of several levels of recursive make invo
 
         Warnings about the version of Python not being able to support parallel builds when the -j option is used. These warnings are enabled by default.
 
-    python-version
-
-        Warnings about running SCons with a deprecated version of Python. These warnings are enabled by default.
-
     reserved-variable
 
         Warnings about attempts to set the reserved construction variable names $CHANGED_SOURCES, $CHANGED_TARGETS, $TARGET, $TARGETS, $SOURCE, $SOURCES, $UNCHANGED_SOURCES or $UNCHANGED_TARGETS. These warnings are disabled by default.
@@ -1187,17 +853,18 @@ In make this option improves the output of several levels of recursive make invo
 
 Parallel Execution
 ------------------
---random
 
-    Build dependencies in a random order. This is useful when building multiple trees simultaneously with caching enabled, to prevent multiple builds from simultaneously trying to build or retrieve the same target files.
+--random, --random=SEED, --no-random
+
+    Build dependencies in a random order (the default) or a deterministic order. This is useful to prevent various scheduling slowdowns in the build, and can reduce contention in a build farm.
 
 ‘-j [jobs]’
 ‘--jobs[=jobs]’
 
   Specifies the number of recipes (jobs) to run simultaneously. With no argument, make runs as many recipes simultaneously as possible. If there is more than one ‘-j’ option, the last one is effective. See Parallel Execution, for more information on how recipes are run. Note that this option is ignored on MS-DOS.
-  Defaults to @1@. Maximum number of rules to run in parallel, similar to @make --jobs=/N/@.
+  Defaults to ``1``. Maximum number of rules to run in parallel, similar to ``make --jobs=/N/``.
   For many build systems, a number equal to or slightly less than the number of physical processors
-  works well. Use @0@ to match the detected number of processors (when @0@, 'getShakeOptions' will
+  works well. Use ``0`` to match the detected number of processors (when ``0``, 'getShakeOptions' will
   return the number of threads used).
 
 ‘-l [load]’
@@ -1206,25 +873,11 @@ Parallel Execution
 
     Specifies that no new recipes should be started if there are other recipes running and the load average is at least load (a floating-point number). With no argument, removes a previous load limit.
 
-GNU make knows how to execute several recipes at once. Normally, make will execute only one recipe at a time, waiting for it to finish before executing the next. However, the ‘-j’ or ‘--jobs’ option tells make to execute many recipes simultaneously. You can inhibit parallelism in a particular makefile with the .NOTPARALLEL pseudo-target (see Special Built-in Target Names).
+Cot can execute several recipes at once. This is implemented using a resource system; by default each task consumes one "thread" resource and there are as many thread resources as there are physical processors. But you can specify the number of threads consumed and also define other resources so in general a task runs with a multiset of resources.
 
-On MS-DOS, the ‘-j’ option has no effect, since that system doesn’t support multi-processing.
+Cot also implements a priority system for scheduling jobs. Ties are broken by adjoining the priority with a random number. This seems enough to implement things like "schedule this long job first" or "prioritize this set of tasks that's related to a modified file". Automatically determining these things when build times are noisy and dependencies change frequently seems hard, and the usual case is lots of cheap tasks where scheduling is easy, so it doesn't seem worthwhile to implement a more complicated scheduler.
 
-If the ‘-j’ option is followed by an integer, this is the number of recipes to execute at once; this is called the number of job slots. If there is nothing looking like an integer after the ‘-j’ option, there is no limit on the number of job slots. The default number of job slots is one, which means serial execution (one thing at a time).
-
-Handling recursive make invocations raises issues for parallel execution. For more information on this, see Communicating Options to a Sub-make.
-
-If a recipe fails (is killed by a signal or exits with a nonzero status), and errors are not ignored for that recipe (see Errors in Recipes), the remaining recipe lines to remake the same target will not be run. If a recipe fails and the ‘-k’ or ‘--keep-going’ option was not given (see Summary of Options), make aborts execution. If make terminates for any reason (including a signal) with child processes running, it waits for them to finish before actually exiting.
-
-When the system is heavily loaded, you will probably want to run fewer jobs than when it is lightly loaded. You can use the ‘-l’ option to tell make to limit the number of jobs to run at once, based on the load average. The ‘-l’ or ‘--max-load’ option is followed by a floating-point number. For example,
-
--l 2.5
-
-will not let make start more than one job if the load average is above 2.5. The ‘-l’ option with no following number removes the load limit, if one was given with a previous ‘-l’ option.
-
-More precisely, when make goes to start up a job, and it already has at least one job running, it checks the current load average; if it is not lower than the limit given with ‘-l’, make waits until the load average goes below that limit, or until all the other jobs finish.
-
-By default, there is no load limit.
+GNU Make allows defining a load limit instead of a thread limit, basically "pause new executions if the load is above some number". The hard part is that the load average is too coarse, so it needs to be mixed with the number of jobs started recently, and also the load can never exceed the number of cores, so load limits above a certain level are invalid. In practice it seems nobody uses the load limit. Builds generally run on unloaded systems and predicting the load by counting threads and resources is more accurate. The useful feature seems to be measuring the system load on startup and subtracting that number from the number of cores to get a lower maximum thread count.
 
 Output control
 --------------
@@ -1289,8 +942,8 @@ Output control
     scons>>> exit
 
 Abbreviations :: [(String,String)]
- ^ Defaults to @[]@. A list of substrings that should be abbreviated in status messages, and their corresponding abbreviation.
-   Commonly used to replace the long paths (e.g. @.make\/i586-linux-gcc\/output@) with an abbreviation (e.g. @$OUT@).
+ ^ Defaults to ``[]``. A list of substrings that should be abbreviated in status messages, and their corresponding abbreviation.
+   Commonly used to replace the long paths (e.g. ``.make\/i586-linux-gcc\/output``) with an abbreviation (e.g. ``$OUT``).
 Color :: Bool
  ^ Defaults to 'False'. Whether to colorize the output.
     [opts $ Option "a" ["abbrev"] (reqArgPair "abbrev" "FULL=SHORT" $ \a s -> s{shakeAbbreviations=shakeAbbreviations s ++ [a]}) "Use abbreviation in status messages."
@@ -1350,7 +1003,7 @@ Command Options
 ---------------
 
 CommandOptions :: [CmdOption]
- ^ Defaults to @[]@. Additional options to be passed to all command invocations.
+ ^ Defaults to ``[]``. Additional options to be passed to all command invocations.
 
 Cwd FilePath -- Change the current directory of the spawned process. By default uses the parent process's current directory. If multiple options are specified, each is interpreted relative to the previous one: ``[Cwd "/", Cwd "etc"]`` is equivalent to ``[Cwd "/etc"]``.
 
@@ -1360,45 +1013,45 @@ Cwd FilePath -- Change the current directory of the spawned process. By default 
 Env [(String,String)] -- ^ Replace the environment block in the spawned process. By default uses this processes environment.
 AddEnv String String -- ^ Add an environment variable in the child process.
 RemEnv String -- ^ Remove an environment variable from the child process.
-AddPath [String] [String] -- ^ Add some items to the prefix and suffix of the @$PATH@ variable.
+AddPath [String] [String] -- ^ Add some items to the prefix and suffix of the ``$PATH`` variable.
 
-Stdin String -- ^ Given as the @stdin@ of the spawned process. By default the @stdin@ is inherited.
-StdinBS LBS.ByteString -- ^ Given as the @stdin@ of the spawned process.
-FileStdin FilePath -- ^ Take the @stdin@ from a file.
+Stdin String -- ^ Given as the ``stdin`` of the spawned process. By default the ``stdin`` is inherited.
+StdinBS LBS.ByteString -- ^ Given as the ``stdin`` of the spawned process.
+FileStdin FilePath -- ^ Take the ``stdin`` from a file.
 InheritStdin -- ^ Cause the stdin from the parent to be inherited. Might also require NoProcessGroup on Linux. Ignored if you explicitly pass a stdin.
 
 Two processes cannot both take input from the same device at the same time. To make sure that only one recipe tries to take input from the terminal at once, make will invalidate the standard input streams of all but one running recipe. If another recipe attempts to read from standard input it will usually incur a fatal error (a ‘Broken pipe’ signal).
 
 It is unpredictable which recipe will have a valid standard input stream (which will come from the terminal, or wherever you redirect the standard input of make). The first recipe run will always get it first, and the first recipe started after that one finishes will get it next, and so on.
 
-WithStdout Bool -- ^ Should I include the @stdout@ in the exception if the command fails? Defaults to 'False'.
-WithStderr Bool -- ^ Should I include the @stderr@ in the exception if the command fails? Defaults to 'True'.
-EchoStdout Bool -- ^ Should I echo the @stdout@? Defaults to 'True' unless a 'Stdout' result is required or you use 'FileStdout'.
-EchoStderr Bool -- ^ Should I echo the @stderr@? Defaults to 'True' unless a 'Stderr' result is required or you use 'FileStderr'.
-FileStdout FilePath -- ^ Should I put the @stdout@ to a file.
-FileStderr FilePath -- ^ Should I put the @stderr@ to a file.
+WithStdout Bool -- ^ Should I include the ``stdout`` in the exception if the command fails? Defaults to 'False'.
+WithStderr Bool -- ^ Should I include the ``stderr`` in the exception if the command fails? Defaults to 'True'.
+EchoStdout Bool -- ^ Should I echo the ``stdout``? Defaults to 'True' unless a 'Stdout' result is required or you use 'FileStdout'.
+EchoStderr Bool -- ^ Should I echo the ``stderr``? Defaults to 'True' unless a 'Stderr' result is required or you use 'FileStderr'.
+FileStdout FilePath -- ^ Should I put the ``stdout`` to a file.
+FileStderr FilePath -- ^ Should I put the ``stderr`` to a file.
 
-BinaryPipes -- ^ Treat the @stdin@\/@stdout@\/@stderr@ messages as binary. By default 'String' results use text encoding and 'ByteString' results use binary encoding.
-CloseFileHandles -- ^ Before starting the command in the child process, close all file handles except stdin, stdout, stderr in the child process. Uses @close_fds@ from package process and comes with the same caveats, i.e. runtime is linear with the maximum number of open file handles (@RLIMIT_NOFILE@, see @man 2 getrlimit@ on Linux).
+BinaryPipes -- ^ Treat the ``stdin``\/``stdout``\/``stderr`` messages as binary. By default 'String' results use text encoding and 'ByteString' results use binary encoding.
+CloseFileHandles -- ^ Before starting the command in the child process, close all file handles except stdin, stdout, stderr in the child process. Uses ``close_fds`` from package process and comes with the same caveats, i.e. runtime is linear with the maximum number of open file handles (``RLIMIT_NOFILE``, see ``man 2 getrlimit`` on Linux).
 
--- | Collect the @stdout@ of the process.
---   If used, the @stdout@ will not be echoed to the terminal, unless you include 'EchoStdout'.
+-- | Collect the ``stdout`` of the process.
+--   If used, the ``stdout`` will not be echoed to the terminal, unless you include 'EchoStdout'.
 --   The value type may be either 'String', or either lazy or strict 'ByteString'.
 --
 --   Note that most programs end their output with a trailing newline, so calling
---   @ghc --numeric-version@ will result in 'Stdout' of @\"6.8.3\\n\"@. If you want to automatically
+--   ``ghc --numeric-version`` will result in 'Stdout' of ``\"6.8.3\\n\"``. If you want to automatically
 --   trim the resulting string, see 'StdoutTrim'.
 newtype Stdout a = Stdout {fromStdout :: a}
 
 -- | Like 'Stdout' but remove all leading and trailing whitespaces.
 newtype StdoutTrim a = StdoutTrim {fromStdoutTrim :: a}
 
--- | Collect the @stderr@ of the process.
---   If used, the @stderr@ will not be echoed to the terminal, unless you include 'EchoStderr'.
+-- | Collect the ``stderr`` of the process.
+--   If used, the ``stderr`` will not be echoed to the terminal, unless you include 'EchoStderr'.
 newtype Stderr a = Stderr {fromStderr :: a}
 
--- | Collect the @stdout@ and @stderr@ of the process.
---   If used, the @stderr@ and @stdout@ will not be echoed to the terminal, unless you include 'EchoStdout' and 'EchoStderr'.
+-- | Collect the ``stdout`` and ``stderr`` of the process.
+--   If used, the ``stderr`` and ``stdout`` will not be echoed to the terminal, unless you include 'EchoStdout' and 'EchoStderr'.
 newtype Stdouterr a = Stdouterr {fromStdouterr :: a}
 
 -- | Collect the 'ExitCode' of the process.
@@ -1429,12 +1082,12 @@ newtype CmdTime = CmdTime {fromCmdTime :: Double}
 newtype CmdLine = CmdLine {fromCmdLine :: String}
 
 Shell -- ^ Pass the command to the shell without escaping - any arguments will be joined with spaces. By default arguments are escaped properly.
-Traced String -- ^ Name to use with 'traced', or @\"\"@ for no tracing. By default traces using the name of the executable.
+Traced String -- ^ Name to use with 'traced', or ``\"\"`` for no tracing. By default traces using the name of the executable.
 Timeout Double -- ^ Abort the computation after N seconds, will raise a failure exit code. Calls 'interruptProcessGroupOf' and 'terminateProcess', but may sometimes fail to abort the process and not timeout.
 AutoDeps -- ^ Compute dependencies automatically. Only works if 'shakeLintInside' has been set to the files where autodeps might live.
 UserCommand String -- ^ The command the user thinks about, before any munging. Defaults to the actual command.
-FSAOptions String -- ^ Options to @fsatrace@, a list of strings with characters such as @\"r\"@ (reads) @\"w\"@ (writes). Defaults to @\"rwmdqt\"@ if the output of @fsatrace@ is required.
-NoProcessGroup -- ^ Don't run the process in its own group. Required when running @docker@. Will mean that process timeouts and asyncronous exceptions may not properly clean up child processes.
+FSAOptions String -- ^ Options to ``fsatrace``, a list of strings with characters such as ``\"r\"`` (reads) ``\"w\"`` (writes). Defaults to ``\"rwmdqt\"`` if the output of ``fsatrace`` is required.
+NoProcessGroup -- ^ Don't run the process in its own group. Required when running ``docker``. Will mean that process timeouts and asyncronous exceptions may not properly clean up child processes.
 
 EchoCommand Bool -- ^ Print each command to stdout before it is executed. We call this echoing because it gives the appearance that you are typing the lines yourself.
 
@@ -1561,6 +1214,9 @@ shake staunch mode: if an error is encountered during the middle of a build, unl
 
 When an error happens that propagates out of the thunk, it implies that the current thunk cannot be correctly remade, and neither can any other thunk that is chronologically after. No further thunks will be executed after the thunk, since the preconditions have not been achieved.
 
+If a recipe fails (is killed by a signal or exits with a nonzero status), and errors are not ignored for that recipe (see Errors in Recipes), the remaining recipe lines to remake the same target will not be run. If a recipe fails and the ‘-k’ or ‘--keep-going’ option was not given (see Summary of Options), make aborts execution. If make terminates for any reason (including a signal) with child processes running, it waits for them to finish before actually exiting.
+
+
 ‘-k’
 ‘--keep-going’
 -k N
@@ -1576,7 +1232,7 @@ When an error happens that propagates out of the thunk, it implies that the curr
 
 Staunch :: Bool
  ^ Defaults to 'False'. Operate in staunch mode, where building continues even after errors,
-   similar to @make --keep-going@.
+   similar to ``make --keep-going``.
 
 Normally make gives up immediately in this circumstance, returning a nonzero status. However, if the ‘-k’ or ‘--keep-going’ flag is specified, make continues to consider the other prerequisites of the pending targets, remaking them if necessary, before it gives up and returns nonzero status.
 
@@ -1592,3 +1248,8 @@ For example, after an error in compiling one object file, ‘make -k’ will con
 The usual behavior assumes that your purpose is to get the specified targets up to date; once make learns that this is impossible, it might as well report the failure immediately. The ‘-k’ option says that the real purpose is to test as many of the changes made in the program as possible, perhaps to find several independent problems so that you can correct them all before the next attempt to compile. This is why Emacs’ compile command passes the ‘-k’ flag by default.
 
 Usually when a recipe line fails, if it has changed the target file at all, the file is corrupted and cannot be used—or at least it is not completely updated. Yet the file’s time stamp says that it is now up to date, so the next time make runs, it will not try to update that file. The situation is just the same as when the shell is killed by a signal; see Interrupts. So generally the right thing to do is to delete the target file if the recipe fails after beginning to change the file. make will do this if .DELETE_ON_ERROR appears as a target. This is almost always what you want make to do, but it is not historical practice; so for compatibility, you must explicitly request it.
+
+Creating a build system
+=======================
+
+Initially a build system starts out as a list of commands. Then when we trace the commands, the list becomes a partially ordered set of commands because we can relax the ordering to write-read constraints. Then we abstract the commands, adding in-memory keys for configuration changes such as the command line, thunk arguments to share command handling logic, and a nesting relation for which thunks call which other thunks.
