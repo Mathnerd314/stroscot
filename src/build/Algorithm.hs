@@ -23,19 +23,6 @@ getThunkState l = pure $ case HM.lookup l (thunkList global) of
   Nothing -> Uninitialized []
   Just s -> s
 
-data ThunkState
-  -- | A thunk starts uninitialized, with no entry. This state is if it has a waiter.
-  = Uninitialized { waiters :: [IO ()] }
-  -- | 'Loaded' thunks include thunks that are cleanly restored from a previous run
-  --   as well as damaged thunks where not all writes can be restored (due to missing data etc.)
-  --   The damage is only relevant for giving an error when reading thunks so we store that information in 'reconstructDamaged'
-  | Loaded { waiters :: [IO ()], record :: ThunkRecord }
-  -- | Starting execution of a thunk will create thunks in the running state. Running is either a thread in the body of the code,
-  -- or else an IO () inside a child's waitlist
-  | Running { waiters :: [IO ()] }
-  -- | A thunk finishes if it dies and once all children have finished
-  | Finished { record :: ThunkRecord }
-
 -- the way to execute thunks is fixed throughout the build system
 -- for example in iThreads it is a register-saving/restoring routine + address jump + tracing
 -- but here we use M () and record actions manually

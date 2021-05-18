@@ -3,7 +3,8 @@ let
   inherit (nixpkgs) pkgs;
   ghc = (pkgs.haskellPackages.ghcWithPackages (ps: with ps; [
           persistent-sqlite persistent-template
-          ioref-stable concurrent-extra
+          ioref-stable concurrent-extra unliftio
+          extra heaps unordered-containers
             # for mutable interaction-net style graphs
           store
             # for fast serialization/deserialization

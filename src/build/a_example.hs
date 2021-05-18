@@ -98,6 +98,12 @@ addStack i k (Stack _ ks is)
     | otherwise = Right stack2
     where stack2 = Stack (Just k) (Left k:ks) (Set.insert i is)
 
+discount f = do
+  offsetStart <- liftIO now
+  res <- f
+  offsetEnd <- liftIO now
+  Action $ modifyRW $ addDiscount (offsetEnd - offsetStart)
+  pure res
 
 data Rules a where
     Thunk :: Label -> M a -> M (Thunk a)

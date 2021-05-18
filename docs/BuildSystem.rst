@@ -396,7 +396,7 @@ Options
 Cached build
 ------------
 
-A build cache records the outputs of each thunk in a reproducible manner, i.e. the trace is constructive in the sense of :cite:`mokhovBuildSystemsCarte2020`.
+A build cache records the outputs of each thunk in a reproducible manner, i.e. the trace is constructive in the sense of :cite:`mokhovBuildSystemsCarte2020`. A build can be made reproducible by forcing every non-reproducible thunk to be loaded from the cache.
 
 --cache-create PATH
   Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.

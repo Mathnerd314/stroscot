@@ -14,6 +14,8 @@ Basic features copied from Reddit
 - replying to a post (creates its own post)
 - reacting to a post (upvote, downvote, save, hide)
 
+As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.
+
 Terminal / text editor
 --------------------------------
 
@@ -24,7 +26,7 @@ A more complex algorithm treats the text as a giant table, so "a bit of text" ge
 * Set the width of each column to 0.
 * For each cell, calculate the width as rendered by the font, and increase the widths of the columns it spans so that together, they are at least as wide as the cell. Widen all spanned columns to be approximately the same.
 
-I guess this could also be a linear programming problem: minimize the width of the table (sum of column widths) subject to the minimum width constraints, and as a secondary objective make the widths as uniform as possible. The Cassowary algorithm might work.
+Yet more complex is to treat it as a constraint problem. The constraints consist of minimum width constraints from the width of the tokens and order constraints that specify which chunks of text are before/after/line up with other chunks. The goal is to minimize the width of the table (sum of column widths), and as a secondary objective make the widths as uniform as possible (lowest standard deviation or absolute deviation). The Cassowary algorithm might work.
 
 Other ideas
 -----------

@@ -6,7 +6,6 @@ import Control.Exception
 import System.Time.Extra
 import Data.Either.Extra
 import Control.Monad.IO.Class
-import General.Fence
 import Control.Concurrent.Extra
 import System.Time.Extra
 import Control.Exception
@@ -27,7 +26,7 @@ data S = S
   }
 
 emptyS :: S
-emptyS = S Nothing Map.empty 0 0 0
+emptyS = S True Map.empty 0 0 0
 
 -- | The thread pool keeps a list of active threads.
 --   If any thread throws an exception, this exception is rethrown in a timely manner to all the other threads to cancel them,
@@ -48,7 +47,7 @@ addPool' pool@(Pool var done) act = modifyVar var $ \s -> case alive s of
       join $ modifyVar var $ \s -> case alive s of
         False -> pure (s, pure ()) -- silently exit if pool is stopped
         True -> case res of
-          Left e -> pure $ (s{alive = False}, cleanup t s e)
+          Left e -> pure $ (s{alive = False}, cleanup pool t s e)
           Right () -> pure $
                       (s {threads = Map.delete t $ threads s, threadsCount = threadsCount s - 1}, pure ())
     pure . (,Just bar) $ s{threads = Map.insert t bar $ threads s, threadsCount = threadsCount s + 1,
@@ -58,7 +57,7 @@ addPool :: Pool -> IO () -> IO ()
 addPool pool act = void $ addPool' pool act
 
 -- | Quit the pool. This throws an error if the pool is already stopped,
--- and returns False if other threads are executing.
+-- and returns False if other threads are executing. (There should be no other threads in a clean exit.)
 quitPool :: Pool -> IO Bool
 quitPool pool@(Pool var done) = do
   t <- myThreadId
@@ -74,22 +73,22 @@ instance Exception ThreadKilledDueTo where
     toException   = asyncExceptionToException
     fromException = asyncExceptionFromException
 
--- | If someone kills our thread, make sure we kill the other threads. There should be no other threads in a clean exit.
-cleanup t s e = do
+-- | If someone kills our thread, make sure we kill the other threads.
+cleanup (Pool var done) t s e = do
   -- if a thread is in a masked action, killing it may take some time, so kill them in parallel
-  bars <- foldrWithKey f (pure []) (Map.delete t $ threads s)
-    where
-      f bar tid bars_act = do
-        bars <- bars_act
-        forkIO $ throwTo tid (ThreadKilledDueTo e)
-        pure (bar:bars)
+  let
+    f tid bar bars_act = do
+      bars <- bars_act
+      forkIO $ throwTo tid (ThreadKilledDueTo e)
+      pure (bar:bars)
+  bars <- Map.foldrWithKey f (pure []) (Map.delete t $ threads s)
   mapM_ waitBarrier bars
   signalBarrier done (Just e, threadsMax s, threadsSum s)
 
 -- | Run all the tasks in the pool.
 --   If any thread throws an exception, the exception will be reraised.
 --   Returns once 'quitPool' is called.
-runPool :: Bool -> Int -> (Pool -> IO ()) -> IO () -- run all tasks in the pool
+runPool :: (Pool -> IO ()) -> IO (Maybe SomeException, Int, Int) -- run all tasks in the pool
 runPool act = do
   s <- newVar emptyS
   done <- newBarrier
