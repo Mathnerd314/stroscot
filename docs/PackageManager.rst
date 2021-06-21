@@ -35,7 +35,7 @@ Versioning
 ==========
 
 Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
-For a basic path like ````/usr/share/foo/img.jpg````, we can put a hash ``HASH`` in various places:
+For a basic path like ``/usr/share/foo/img.jpg``, we can put a hash ``HASH`` in various places:
 
 1. ``/usr/lib/libfoo.so.HASH.1`` or ``/usr/lib/libfoo.so.1.HASH`` (filename version)
 2. ``/usr/lib/HASH/libfoo.so.1`` ("multiarch" layout similar to Debian)

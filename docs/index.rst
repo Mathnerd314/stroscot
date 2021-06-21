@@ -3,30 +3,34 @@ The Stroscot Programming Language
 
 Stroscot is an imperative programming language designed for modern processors.
 
+.. _links:
+
 * Github repository: https://github.com/Mathnerd314/stroscot
 * Discord: https://discord.gg/4BznM5ZYGq
+* Reddit: https://www.reddit.com/r/stroscot
 
 .. toctree::
   :maxdepth: 2
 
   About
+  FAQ
   Syntax
-  Overloading
-  Verification
-  Arguments
-  Delimited-Continuations
   Fexprs
+  Arguments
+  Modules
+  Overloading
+  Delimited-Continuations
+  Types
+  Verification
   Logic
   Reduction
   Reduction-Example
-  Types
-  Modules
-  Memory
   Compiler
-  Library
+  Memory
+  Assembly
   BuildSystem
   PackageManager
   Programs
-  FAQ
+  Library
   zzreferences
 

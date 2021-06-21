@@ -425,3 +425,8 @@ We want to support infinite types like the lambda calculus or lists, and similar
     \end{array}
 
 Infinite structures can be paradoxical, e.g. we can prove :math:`\vdash\bot` using cut on the proposition :math:`A=\neg A`. Cut elimination will often fail to complete, but there is a progress property in the sense that the cut can always be pushed down and eliminate an identity rule or two matching logical rules.
+
+Hashing
+=======
+
+To hash the graphs we can use the tree structure of the sequent derivations. Each upward slot in a node is hashed with a fixed value and each downward slot is hashed with a value corresponding to the path through the derivation tree followed by the label of the upward slot. It is written as a single DFS traversal from the leaves upwards that stores the hashed subtree and a map from edge name to partial path.

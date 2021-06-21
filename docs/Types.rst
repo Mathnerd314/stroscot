@@ -28,26 +28,29 @@ Function type declarations come in two forms. The first version simply checks co
 ::
 
    A : S -> Int
+   A = ...
 
    -- expands to
 
    s = arbElem()
    assume(s isElemOf S)
    assert(A s isElemOf Int)
+   A = ...
 
-The second version restricts the definition of the function so it is only defined on the type. This is useful for overloading.
+The second version, "strict typing", restricts the definition of the function so it is only defined on the type, i.e. it will throw an error if given something outside its type. You can define multiple strict functions to obtain overloaded behavior on different types.
 
 ::
 
-   restrict A : (S,T) -> Int
-   A = ...
+   strict
+      A : (S,T) -> Int
+      A = ...
 
    -- expands to
 
    A$untyped = ...
    A = {
       assert ($args isElemOf (S,T))
-      ret = A$untyped args
+      ret = A$untyped $args
       assert (ret isElemOf Int)
       ret
    }

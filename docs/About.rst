@@ -4,8 +4,10 @@ About
 Executive summary
 =================
 
-An executive summary is "half a slide using large print" and gets across how people should use the language. Stroscot has no users and is not yet usable so there is no executive summary.
+..
+  An executive summary is "half a slide using large print" (128 x's) and gets across how people should use the language.
 
+Stroscot targets unoccupied programming enthusiasts. Feel free to improve the design WIP and maybe send a pull request.
 
 Motivation
 ==========
@@ -13,7 +15,7 @@ Motivation
 Why another programming language, you may ask? Why does a painter paint?
 When there is beauty to be found in programming languages, it is our duty to discover it and spread it far and wide. To paraphrase `XKCD <https://xkcd.com/927/>`__:
 
-::
+.. code-block:: RST
 
   How programming languages proliferate
   -------------------------------------
@@ -48,20 +50,20 @@ Stros
   This is a vague reference to Charles Stross, author of the sci-fi book "Accelerando". In particular Stroscot aims to speed up the pace of technological development.
 
 cot
-  Similar to how "Star Trek" expresses a journey to find new worlds, the cot here expresses that Stroscot provides a comfortable, lighweight yet flexible, portable, and compact support. In particular the build system uses the command ``cot``.
+  Similar to how the "trek" in "Star Trek" expresses a journey to find new worlds, the cot here expresses that Stroscot provides comfortable support while still being flexible, lightweight, portable, and compact.
 
 imperative programming language
   This is a riff of the assertion "Haskell is the world's finest imperative programming language", first said in  the awkward squad paper :cite:`jonesTacklingAwkwardSquad2001` because "actions are first class values" in Haskell.
 
 modern processors
-  This is mostly because I don't want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 and then later add a mode to generate LLVM bytecode.
+  This is mostly because I don't want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 / ARM and then later add a mode to generate LLVM IR.
 
 Logo
 ----
 
 The logo for Stroscot is inspired by the color scheme of the cover of Accelerando (the red rise of the machines), the `cot icon <https://thenounproject.com/term/cot/154357/>`__ by P Thanga Vignesh from the Noun Project, and a design I made a while back of "the infinite stack". The Paint picture I made is lost in time, but the general idea is you had a (potentially infinite) stack of reusable/composable components (the white/black blocks in the current icon) going left-to-right, and underneath it a processor (white) and various glue bits (red/blue).
 
-The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is basically "programmer art". People can submit alternate designs and once there are a few submissions there will be a vote.
+The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is an instance of "programmer art". Interested parties can submit alternate designs and once there are a few submissions there will be a vote.
 
 Goals
 =====
@@ -108,14 +110,17 @@ Principles
 
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
 * Make the irreducible basic elements as simple and as few as possible without [surrendering] the adequate representation of a single datum of experience. (Albert Einstein)
-* Choose a random modification. Accept with a probability decreasing over time if it worsens the system and a positive probability otherwise. Repeat until the system reaches a state that is good enough for the application. (Simulated annealing)
+* Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (`Branch and bound <https://en.wikipedia.org/wiki/Branch_and_bound>`__)
 * Never finished, never complete, but tracking the progress of technology (Lennart Poettering)
 * Code can be used as data, data can be used as code (Lisp)
 * Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)
+* As size and complexity increase, architectural design dominates materials. Create durable, non-leaky, beautiful interfaces. (`VPRI <http://www.vpri.org/pdf/tr2011004_steps11.pdf>`__, `John Regehr <https://blog.regehr.org/archives/666>`__)
 * If it isn't documented, it doesn't exist (Coding Horror)
 * Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)
 * People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)
-* Better depends on your goodness metric
+* Better depends on your goodness metric (`Jim Waldo <http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807>`__)
+* The shorter the [edit-test] cycle, the happier the programmer. (`Yue Yao <https://tripack45.github.io/2018/11/03/edit-compile-run/>`__)
+* Do all things without grumbling or complaining (Philippians 2:14)
 
 Statistics
 ==========

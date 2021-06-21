@@ -1,29 +1,67 @@
 Memory management
 #################
 
-Every program has to use memory in order to store mutable values and interact with system calls.
+Programming in Stroscot by default sees a mathematical view of data: all data is fixed once created, and there is infinite storage space. And with the availability of cloud storage this model is pretty much accurate: global storage capacity is measured in zettabytes, and there is always a backup / history mechanism in place.
 
-Terms
------
+But the path from cloud to CPU is long, so there is a lot of caching in between:
+
+Physical registers (0.3 ns): managed by the CPU
+Logical registers (0.3 ns): assembly
+Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
+Main Memory (0.1us-4us): assembly
+SSD (16us-62us): file APIs
+LAN (0.5-500ms): network stack
+HDD (3 ms): file APIs
+WAN (150ms): network stack
+
+for more advanced programming there is the need to avoid the use of slow storage mechanisms as much as possible by addressing the fast storage mechanisms directly.
+
+The point of the memory system is to assign a storage location for every value, insert moves / frees where necessary, and overall minimize the amount of resources consumed.
+
+User-level primitives
+=====================
+
+Pointers
+--------
 
 memory cell
-  A circuit that can store some fixed number of logical bits (0/1). Since ternary computers might eventually become popular, a cell is probably best modeled as a register containing an integer ``i`` with ``0 <= i < MAX``, with no restriction that ``MAX`` is a power of 2.
+  An integer ``i`` with ``0 <= i < MAX``. Since ternary computers `might <https://www.extremetech.com/computing/295424-back-off-binary-samsung-backed-researchers-debut-ternary-semiconductor>`__ eventually become popular, you should not assume that ``MAX`` is a power of 2, but for all practical purposes this will be some fixed number of logical bits (0/1).
 
-RAM value
-  an associative array going from memory cell names to memory cell values, together with a distinguished memory cell name.
+Pointers are indices into a shared global sparse array of memory cells. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address, `mmap <https://man7.org/linux/man-pages/man2/mmap.2.html>`__ with MAP_FIXED_NOREPLACE on Linux and `VirtualAlloc <https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc>`__ on Windows. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages.
 
-Core expression
-  Any instance of a Core net
+In practice direct allocation is never used and instead there are ``mmap NULL`` and ``malloc`` which allocate memory with system-chosen location. This means that the program behavior must be observationally equivalent no matter what addresses the system picks. The limitations on the system's choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn't have to result in equivalent behavior so it can be ignored.)
 
-Core value
-  Core expressions that are not reducible (does not contain cut).
+We also want to support interfacing with other languages, so we need a pair ``record_foreign`` / ``erase_foreign`` that functions similarly to direct allocation but doesn't actually call into the OS.
 
-The point of the memory system is to ensure every Core value has a corresponding RAM value representation, and to rewrite the program to use RAM values instead of Core values.
+Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. The analysis is complex as it has to deal with symbolic intervals but should be possible. We also want ``volatile_read`` / ``visible_write`` to prevent optimizing these away, e.g. for multithreaded situations with shared memory. Or maybe these should be the default and pointer operations should never be optimized.
+
+Eliminating pointers entirely is not possible as they have to be used for system calls and interfacing with C. But we can minimize the lifetime of pointers in the standard library to the duration of the call, and use values / references everywhere else.
+
+Pointers introduce a class of memory errors: use-after-free, double free, and memory leaks. But at this low level of operation it seems reasonable to expect programmers to worry about such errors.
+
+References
+----------
+
+A reference is essentially a pointer but allocated using a specific Stroscot function and with deallocation managed by Stroscot.
+
+There is no need for a read-only reference, because Stroscot supports cyclic data so it is simply the value directly.
+
+A mutable array is simply a reference containing a pure array.
+
+
+Since we work with datatypes first and their representations only incidentally, we do not have to handle buffer overflows; pointer arithmetic is implicit in the pack/unpack functions and due to our correctness properties, unpacking fields of the datatype must read within the allocated buffer.
 
 Representation
---------------
+==============
 
-Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS's `value type <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__, and the choices often impact performance significantly.
+Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS's `value type <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__, and the choices often impact performance significantly. Finally there is the use of pointers. For example, we can encode a list in a number of ways:
+
+::
+
+  ["a","b"]
+  # flat list, stored like [2,"a","b"] or [1,"a",1,"b",0]
+  # intrusive list, stored like x=[1,"a",&y], y=[1,"b",&0]
+  # uniform list, stored like x=[1,&x1,&y],x1="a",y = [1,&y1,&0],y1="b"
 
 So in Stroscot there is no fixed memory representation. Instead memory layout is defined by overloaded ``pack``/``unpack`` functions that write/read a memory buffer, similar to the `store library <https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs>`__. The pack/unpack functions will end up getting passed around a lot, but implicit parameters scale pretty well, so it shouldn't be an issue. Unlike Narcissus :cite:`delawareNarcissusCorrectbyconstructionDerivation2019` we don't have a state parameter, also because of implicit parameters.
 
@@ -85,35 +123,14 @@ The translation to use pack/unpack is pretty simple: a pack is inserted around e
 
 But this translation uses whatever pack/unpack are in scope; they can be overridden like any other implicit parameters. To prevent mismatches the result of pack actually contains the matching unpack function.
 
-References
-----------
+Memory management
+=================
 
-::
+Ownership a la Rust cannot even handle doubly-linked lists. Code frequently switches to the ``Rc`` type, which besides cycles has the semantics of GC. There is even a `library <https://github.com/Others/shredder>`__ for a ``Gc`` type that does intrusive scanning.
 
-  alloc : a -> Ref a
-  deref : Ref a -> a
+And the malloc/free model is also not correct;
 
-A pointer type ``Ptr`` is a wrapper around the ``UInt`` type of the machine's native address size. It deliberately does not support any arithmetic operations, to discourage careless pointer arithmetic. A further refinement is ``APtr n``, an ``n``-byte aligned pointer. A reference type ``Ref a`` is a pointer that is guaranteed to refer to an value of type ``a`` when its memory is dereferenced. References offer a lot of flexibility for memory layout. For example, we can encode a linked list in a number of ways:
-
-::
-
-  # flat list, stored like 1a1a0
-  List a = Nil | Cons a (List a)
-  # intrusive list, stored like 1a* -> 1a* -> 0
-  List a = Nil | Cons a (Ref (List a))
-  # uniform list, stored like 1** -> {a, 1** -> {a, 0}}
-  List a = Nil | Cons (Ref a) (Ref $ List a)
-
-Unrestricted, references introduce an entire class of memory errors; in particular, we cannot free the memory the reference refers to unless the reference will not be dereferenced anymore. Violating this condition is a use-after-free. Similarly freeing itself must happen exactly once, so we have double frees and memory leaks.
-
-On a positive note, since we work with datatypes first and their representations only incidentally, we do not have to handle buffer overflows; pointer arithmetic is implicit in the pack/unpack functions and due to our correctness properties, unpacking fields of the datatype must read within the allocated buffer.
-
-Since Stroscot is non-strict we have actually two reference types, evaluated and non-evaluated.
-
-Automatic memory management
----------------------------
-
-Ownership a la Rust cannot even handle doubly-linked lists. Code frequently switches to the ``Rc`` type, which besides cycles has the semantics of GC. There is even a `library <https://github.com/Others/shredder>`__ for a ``Gc`` type that does intrusive scanning. Meanwhile, as far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime. The interesting area of research is static analysis. To that end some work :cite:`proustASAPStaticPossible2017` :cite:`corbynPracticalStaticMemory2020` on "as static as possible" (ASAP) memory management is quite relevant.
+Meanwhile, as far as tracing GC goes, moving and compaction have been optimized using clever algorithms, but there is not a lot of room for performance improvements at runtime. The interesting area of research is static analysis. To that end some work :cite:`proustASAPStaticPossible2017` :cite:`corbynPracticalStaticMemory2020` on "as static as possible" (ASAP) memory management is quite relevant.
 
 To begin with we must model memory. In reality memory is simply a map from addresses to words. But this doesn't prevent any memory errors. So instead we have memory mapping (opaque) addresses to memory blocks, which are byte arrays of fixed size mapping to a single type. The type's fields then determine the data / unpacked fields (ignored for memory purposes) and the references. We can name the references by their dereferencing list, e.g. ``.a.b.c``. A given type may contain arbitrarily many references. A zone is the set of memory blocks reachable from a given value by following all the references. Function ``scan`` (figure 4.9) marks or frees the blocks in a zone. This is used in function ``clean`` which frees blocks from the zones of the antimatter set that aren't in the zones of the matter set, using `tri-color marking <https://en.wikipedia.org/wiki/Tracing_garbage_collection#Tri-color_marking>`__.
 
@@ -160,3 +177,36 @@ Resource management
 -------------------
 
 There are also non-memory resources like thread-handles, file-handles, locks, and sockets. These can be passed around and stored in data structures. The same usage analysis should work to close these resources.
+
+
+
+
+It is important to free memory when it is no longer needed, because otherwise you will run out.
+
+garbage collection partially solves the memory management problem. Garbage collection decreases performance and increases memory usage.
+
+The problem in parallel programming is race conditions. The standard solution is mutexes and condition variables, and variants thereof.
+
+
+
+Languages that support exceptions need to support destructors or they need to support a try/finally construct. Otherwise using exceptions is too difficult, because if you have some local state to clean up in a function, you have to catch and rethrow every exception.
+
+The goal of exceptions in C++ is that code which does not throw an exception should be just as efficient as code which is compiled without any support for exceptions. Unfortunately, this is impossible. When any function can throw an exception, and when there are destructors which must be run if an exception is thrown, the compiler is limited in its ability to move instructions across function calls. Of course it is not generally possible to move instructions which change global or heap memory across a function call, but in the absence of exceptions it is generally possible to move instructions which do not change memory or which change only stack memory. This means that exceptions limit what the compiler is able to do, and it follows that compiling with exception support generates code which is less efficient than compiling without exception support.
+
+Of course exceptions still have their uses, but lets consider programming without them (this is easy for me to imagine–I didn’t use exceptions in the gold linker). If you program without exceptions, how useful are destructors and/or try/finally? What comes to mind is functions with multiple return points, loops with multiple exits, and RAII coding.
+
+C has neither destructors nor try/finally. Does it miss them? I would say yes. A common workaround I’ve seen is to change all return points and loop exit points to use a goto to a label which does cleanups.
+
+The gcc compiler has an extension to C to support, in effect, destructors. You can use __attribute__ ((__cleanup__ (function))) with any local variable. When the variable goes out of scope, the function will be called, passing it the address of the variable. This is an effective extension, but it is not widely used.
+
+
+
+The Go language does not have destructors. Instead, it has two more dynamic mechanisms. A defer statement may be used to run a function on function exit or when processing a panic. A finalizer may be used to run a function when the garbage collector finds that a block of memory has nothing pointing to it and can be released. Both approaches are dynamic, in that you have to executed the defer statement or call the runtime.SetFinalizer function. They are have no lexical scoping; a single defer statement in a loop can cause its argument to be called many times on function exit.
+
+These ideas are significantly different from destructors, which are associated with a type, and are executed when an object of that type goes out of lexical scope or is explicitly deleted. Destructors are primarily used to release resources acquired by an object of the type. This is a less important concept in a garbage collected language like Go.
+
+The absence of destructors means that Go does not support the RAII pattern, in which an object is used to acquire a mutex or some other resource for the scope of a lexical block. Implementing this in Go requires two statements: one to acquire the mutex, and a defer statement to release the mutex on function exit. Because deferred functions are run on function exit, the mapping is not exact; you can not use this technique to acquire a lock in a loop. In fact, acquiring a mutex in a loop and correctly releasing it when a panic occurs is rather difficult in Go; fortunately it is easy to handle correctly by moving the body of the loop to a separate function. In any case, Go discourages this type of programming. Mutexes are available in Go, but channels are the preferred mechanism for synchronization.
+
+Are defer statements and finalizers sufficient replacement for destructors in a garbage collected language? They are for me. When I write C++ my destructors are almost entirely concerned with releasing memory. In fact, in the gold linker I often deliberately omitted destructors, because many of the data structures live for the life the program; in such a case, destructors serve only to slow down program exit. I would be interested to hear of a pattern of programming which relies on destructors for cases other than releasing memory or RAII.
+
+

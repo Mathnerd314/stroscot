@@ -24,7 +24,7 @@ Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, 
 
 
 Configurable Program Analysis
------------------------------
+=============================
 
 .. raw:: html
 
@@ -129,6 +129,14 @@ Logic
 
 Both reachability and termination can be expressed in CTL*. There is an even more expressive language, the modal μ-calculus.
 
+Equivalence
+-----------
+
+Equivalence of pure programs is based on comparing results over all possible inputs.
+
+Equivalence of I/O programs is based on comparing events: we represent all I/O actions in a datatype and then compare as for pure programs.
+
+In the literature there is a notion of bisimulation. But here our state transition graph includes computation transitions, while the amount of computation is not relevant for equivalence. But of course bisimulation implies equivalence.
 
 Supercompilation
 ----------------
