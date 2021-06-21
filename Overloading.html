@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,6 +35,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -41,8 +45,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Verification" href="Verification.html" />
-    <link rel="prev" title="Syntax" href="Syntax.html" /> 
+    <link rel="next" title="Delimited continuations" href="Delimited-Continuations.html" />
+    <link rel="prev" title="Modules" href="Modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,7 +96,11 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overloading</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#semantics">Semantics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sequential-matches">Sequential matches</a></li>
@@ -104,21 +112,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#equality">Equality</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -280,37 +286,20 @@
 </div>
 <div class="section" id="patterns">
 <h2>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">anything</span>
-<span class="nf">a</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">anything</span> <span class="n">and</span> <span class="n">binds</span> <span class="n">a</span>
-<span class="o">^</span><span class="n">a</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">the</span> <span class="n">atom</span> <span class="n">a</span>
-<span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span> <span class="o">#</span> <span class="n">literal</span> <span class="n">matching</span> <span class="n">itself</span>
-<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">any</span> <span class="n">list</span> <span class="n">starting</span> <span class="n">with</span> <span class="mi">1</span>
-<span class="p">{</span><span class="n">a</span><span class="kt">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">...:</span> <span class="n">rest</span><span class="p">}</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">a</span> <span class="n">and</span> <span class="n">the</span> <span class="n">rest</span> <span class="kr">of</span> <span class="n">the</span> <span class="n">record</span>
-<span class="nf">pat</span> <span class="kt">AND</span> <span class="n">pat</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">both</span> <span class="n">patterns</span> <span class="n">simultaneously</span>
-<span class="nf">pat</span> <span class="kt">OR</span> <span class="n">pat</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">either</span> <span class="n">pattern</span>
-<span class="o">~</span><span class="n">pat</span> <span class="o">#</span> <span class="n">desugars</span> <span class="n">to</span> <span class="n">u_</span> <span class="ow">=</span> <span class="kr">let</span> <span class="n">pat</span> <span class="ow">=</span> <span class="n">u_</span> <span class="kr">in</span> <span class="o">...</span><span class="p">,</span> <span class="kr">where</span> <span class="n">u_</span> <span class="n">is</span> <span class="n">a</span> <span class="n">unique</span> <span class="n">name</span>
-</pre></div>
-</div>
-<p>Guards allow arbitrary functions:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="n">with</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span>
-</pre></div>
-</div>
-<p>View patterns</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Functions patterns</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Int</span> <span class="n">z</span> <span class="ow">=</span> <span class="n">toInteger</span> <span class="n">z</span>
-
-<span class="kt">Int</span> <span class="n">a</span>
-</pre></div>
-</div>
-<p>Pattern synonyms</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pattern</span> <span class="kt">F</span> <span class="n">a</span> <span class="n">b</span> <span class="ow">=</span> <span class="p">[</span><span class="s">&quot;f&quot;</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>Arbitrary patterns</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">_f</span> <span class="n">a</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">any</span> <span class="n">function</span> <span class="n">application</span>
+<p>Patterns all compile to guard conditions on <code class="docutils literal notranslate"><span class="pre">$args</span></code>. They also check that the arity of <code class="docutils literal notranslate"><span class="pre">$args</span></code> is the number of patterns.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span> <span class="o">--&gt;</span> <span class="kt">True</span>
+<span class="nf">a</span> <span class="o">--&gt;</span> <span class="kt">True</span>
+<span class="o">^</span><span class="n">a</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span>
+<span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span> <span class="ow">-&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="p">{</span><span class="n">a</span><span class="kt">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">...:</span> <span class="n">rest</span><span class="p">}</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="nf">pat1</span> <span class="kt">AND</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">and</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span>
+<span class="nf">pat1</span> <span class="kt">OR</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">or</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span>
+<span class="o">~</span><span class="n">pat</span> <span class="o">--&gt;</span> <span class="kt">True</span>
+<span class="nf">a</span> <span class="n">with</span> <span class="n">f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="n">f</span> <span class="n">a</span>
+<span class="p">(</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="p">(</span><span class="n">f</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="n">a</span>
+<span class="kt">Int</span> <span class="n">z</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="kt">Int</span>
+<span class="nf">_f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="kt">True</span>
 </pre></div>
 </div>
 </div>
@@ -355,8 +344,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Delimited-Continuations.html" class="btn btn-neutral float-right" title="Delimited continuations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

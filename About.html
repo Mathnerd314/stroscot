@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,6 +35,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -41,7 +45,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Syntax" href="Syntax.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="The Stroscot Programming Language" href="index.html" /> 
 </head>
 
@@ -107,25 +111,28 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#roadmap">Roadmap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#principles">Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -200,20 +207,20 @@
 <h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="executive-summary">
 <h2>Executive summary<a class="headerlink" href="#executive-summary" title="Permalink to this headline">¶</a></h2>
-<p>An executive summary is “half a slide using large print” and gets across how people should use the language. Stroscot has no users and is not yet usable so there is no executive summary.</p>
+<p>Stroscot targets unoccupied programming enthusiasts. Feel free to improve the design WIP and maybe send a pull request.</p>
 </div>
 <div class="section" id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
 <p>Why another programming language, you may ask? Why does a painter paint?
 When there is beauty to be found in programming languages, it is our duty to discover it and spread it far and wide. To paraphrase <a class="reference external" href="https://xkcd.com/927/">XKCD</a>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">How</span> <span class="n">programming</span> <span class="n">languages</span> <span class="n">proliferate</span>
-<span class="c1">-------------------------------------</span>
-<span class="kt">SITUATION:</span> <span class="kt">There</span> <span class="n">are</span> <span class="mi">14</span> <span class="n">competing</span> <span class="n">programming</span> <span class="n">languages</span><span class="o">.</span>
+<div class="highlight-RST notranslate"><div class="highlight"><pre><span></span><span class="gh">How programming languages proliferate</span>
+<span class="gh">-------------------------------------</span>
+SITUATION: There are 14 competing programming languages.
 
-<span class="kt">Geek:</span> <span class="mi">14</span><span class="o">?!</span> <span class="kt">Ridiculous</span><span class="o">!</span> <span class="kt">We</span> <span class="n">need</span> <span class="n">to</span> <span class="n">develop</span> <span class="n">one</span> <span class="n">universal</span> <span class="n">programming</span> <span class="n">language</span>
-  <span class="n">that</span> <span class="n">covers</span> <span class="n">everyone&#39;s</span> <span class="n">use</span> <span class="n">cases</span><span class="o">.</span>
+Geek: 14?! Ridiculous! We need to develop one universal programming language
+  that covers everyone&#39;s use cases.
 
-<span class="kt">Soon:</span> <span class="kt">There</span> <span class="n">are</span> <span class="mi">15</span> <span class="n">competing</span> <span class="n">programming</span> <span class="n">languages</span><span class="o">.</span>
+Soon: There are 15 competing programming languages.
 </pre></div>
 </div>
 <p>Stroscot aims to be that universal language. The shackles of languages past are no more, and
@@ -223,15 +230,11 @@ programs are freed to be idealized to their purest form.</p>
 <span id="id1"></span><h2>Inspiring projects<a class="headerlink" href="#inspiring-projects" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/cheery/lever/">Lever</a></p></li>
-<li><p><a class="reference external" href="https://github.com/ghc/ghc/">GHC</a></p></li>
-<li><p><a class="reference external" href="https://github.com/ziglang/zig/">Zig</a></p></li>
 <li><p><a class="reference external" href="https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md">Jai</a></p></li>
 <li><p><a class="reference external" href="https://pinafore.info/">Pinafore</a></p></li>
 <li><p><a class="reference external" href="http://github.com/codedot/lambda">Macro Lambda Calculus</a></p></li>
-<li><p><a class="reference external" href="https://github.com/JoshuaGrams/pep">A Pint-sized Earley Parser</a></p></li>
 <li><p><a class="reference external" href="https://github.com/manuel/wat-js">Wat</a></p></li>
 <li><p><a class="reference external" href="https://github.com/vito/atomo">Atomo</a> / <a class="reference external" href="https://github.com/vito/atomy">Atomy</a></p></li>
-<li><p><a class="reference external" href="https://github.com/briantrice/slate-language">Slate</a></p></li>
 </ul>
 </div>
 <div class="section" id="tagline">
@@ -240,17 +243,17 @@ programs are freed to be idealized to their purest form.</p>
 <dl class="simple">
 <dt>Stros</dt><dd><p>This is a vague reference to Charles Stross, author of the sci-fi book “Accelerando”. In particular Stroscot aims to speed up the pace of technological development.</p>
 </dd>
-<dt>cot</dt><dd><p>Similar to how “Star Trek” expresses a journey to find new worlds, the cot here expresses that Stroscot provides a comfortable, lighweight yet flexible, portable, and compact support. In particular the build system uses the command <code class="docutils literal notranslate"><span class="pre">cot</span></code>.</p>
+<dt>cot</dt><dd><p>Similar to how the “trek” in “Star Trek” expresses a journey to find new worlds, the cot here expresses that Stroscot provides comfortable support while still being flexible, lightweight, portable, and compact.</p>
 </dd>
-<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <a class="bibtex reference internal" href="zzreferences.html#jonestacklingawkwardsquad2001" id="id2">[Jon01]</a> because “actions are first class values” in Haskell.</p>
+<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id2">[<a class="reference internal" href="zzreferences.html#id37" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
 </dd>
-<dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 and then later add a mode to generate LLVM bytecode.</p>
+<dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 / ARM and then later add a mode to generate LLVM IR.</p>
 </dd>
 </dl>
 <div class="section" id="logo">
 <h3>Logo<a class="headerlink" href="#logo" title="Permalink to this headline">¶</a></h3>
 <p>The logo for Stroscot is inspired by the color scheme of the cover of Accelerando (the red rise of the machines), the <a class="reference external" href="https://thenounproject.com/term/cot/154357/">cot icon</a> by P Thanga Vignesh from the Noun Project, and a design I made a while back of “the infinite stack”. The Paint picture I made is lost in time, but the general idea is you had a (potentially infinite) stack of reusable/composable components (the white/black blocks in the current icon) going left-to-right, and underneath it a processor (white) and various glue bits (red/blue).</p>
-<p>The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is basically “programmer art”. People can submit alternate designs and once there are a few submissions there will be a vote.</p>
+<p>The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is an instance of “programmer art”. Interested parties can submit alternate designs and once there are a few submissions there will be a vote.</p>
 </div>
 </div>
 <div class="section" id="goals">
@@ -282,17 +285,33 @@ programs are freed to be idealized to their purest form.</p>
 <li><p>pass tower of interpreters test</p></li>
 <li><p>cool parser with fexprs</p></li>
 <li><p>x86-64 compiler backend</p></li>
+<li><p>“One thing that I should have foreseen and prepared for is that a large number of people would make assumptions about the language based on sample code and complain without checking to see if those complaints were valid.”</p></li>
 </ul>
 </div>
 <div class="section" id="principles">
 <h2>Principles<a class="headerlink" href="#principles" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)</p></li>
-<li><p>Make the irreducible basic elements as simple and as few as possible, but don’t ignore a single datum of experience. (Albert Einstein)</p></li>
-<li><p>Choose a random modification. Accept with a probability decreasing over time if it worsens the system and a positive probability otherwise. Repeat until the system reaches a state that is good enough for the application. (Simulated annealing)</p></li>
+<li><p>Make the irreducible basic elements as simple and as few as possible without [surrendering] the adequate representation of a single datum of experience. (Albert Einstein)</p></li>
+<li><p>Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (<a class="reference external" href="https://en.wikipedia.org/wiki/Branch_and_bound">Branch and bound</a>)</p></li>
 <li><p>Never finished, never complete, but tracking the progress of technology (Lennart Poettering)</p></li>
 <li><p>Code can be used as data, data can be used as code (Lisp)</p></li>
-<li><p>Productivity is being able to do things that you were never able to do before.</p></li>
+<li><p>Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)</p></li>
+<li><p>As size and complexity increase, architectural design dominates materials. Create durable, non-leaky, beautiful interfaces. (<a class="reference external" href="http://www.vpri.org/pdf/tr2011004_steps11.pdf">VPRI</a>, <a class="reference external" href="https://blog.regehr.org/archives/666">John Regehr</a>)</p></li>
+<li><p>If it isn’t documented, it doesn’t exist (Coding Horror)</p></li>
+<li><p>Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)</p></li>
+<li><p>People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)</p></li>
+<li><p>Better depends on your goodness metric (<a class="reference external" href="http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807">Jim Waldo</a>)</p></li>
+<li><p>The shorter the [edit-test] cycle, the happier the programmer. (<a class="reference external" href="https://tripack45.github.io/2018/11/03/edit-compile-run/">Yue Yao</a>)</p></li>
+<li><p>Do all things without grumbling or complaining (Philippians 2:14)</p></li>
+</ul>
+</div>
+<div class="section" id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Bus factor: 1</p></li>
+<li><p>10k lines of code</p></li>
+<li><p>2 commits/month</p></li>
 </ul>
 </div>
 </div>
@@ -303,7 +322,7 @@ programs are freed to be idealized to their purest form.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="The Stroscot Programming Language" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,18 +35,18 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Modules" href="Modules.html" />
-    <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
+    <link rel="next" title="Verification" href="Verification.html" />
+    <link rel="prev" title="Delimited continuations" href="Delimited-Continuations.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,40 +96,36 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#terminology">Terminology</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#type-declarations">Type declarations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#type-synthesis">Type synthesis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#numbers">Numbers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#integers">Integers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#floating-point">Floating point</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#actual-types">Actual types</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#operations">Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dependent-types">Dependent types</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#strings">Strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adts">ADTs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#records">Records</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#type-synthesis">Type synthesis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#roles">Roles</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -199,107 +198,93 @@
             
   <div class="section" id="types">
 <h1>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h1>
-<p>Types are hard. Academics have spent decades in search of the perfect type system. The alternative is model checking, almost the opposite approach: take an existing program and try to prove properties about it. These meet in the middle with assertions. In particular a type signature <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">T</span></code> is just an assertion <code class="docutils literal notranslate"><span class="pre">assert(isElemOfType(a,</span> <span class="pre">T))</span></code>.</p>
-<div class="section" id="terminology">
-<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this headline">¶</a></h2>
-<p>At this point you might be getting confused about terminology. I certainly am. So here we are:</p>
-<dl class="simple">
-<dt>reference</dt><dd><p>A subset of the associative array within a RAM value that decodes to a set of memory cell names.</p>
-</dd>
-<dt>variable</dt><dd><p>A name/symbol/identifier representing a function argument or mathematical object</p>
-</dd>
-<dt>l-value</dt><dd><p>A variable representing a memory cell name, for example <code class="docutils literal notranslate"><span class="pre">arr[i+foo()]</span></code></p>
-</dd>
-<dt>r-value</dt><dd><p>A value. Except in C++11 (but not Stroscot) you can still bind its memory address, to get an x-value. Segfaults galore. ¯\_(ツ)_/¯</p>
-</dd>
-</dl>
-</div>
-<div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>We follow the semantic definition: types are sets. In particular, we have typing as membership <span class="math notranslate nohighlight">\(A : B = A \in B\)</span>. We define the set of sets as <span class="math notranslate nohighlight">\(S =\{ \emptyset \} \cup \left\{ s \mid \exists x. x \in s\right\}\)</span>. Equality on sets is the usual extensional equality <span class="math notranslate nohighlight">\(A \in S \land B \in S \rightarrow \left(\left(x \in A \leftrightarrow x\in B\right) \leftrightarrow A=B \right)\)</span>. <code class="docutils literal notranslate"><span class="pre">A</span></code> is a subtype of <code class="docutils literal notranslate"><span class="pre">B</span></code> if every element of <code class="docutils literal notranslate"><span class="pre">A</span></code> is also in <code class="docutils literal notranslate"><span class="pre">B</span></code>. Said another way, there are no elements that are in <code class="docutils literal notranslate"><span class="pre">A</span></code> but not in <code class="docutils literal notranslate"><span class="pre">B</span></code>. So subtyping is just set inclusion <span class="math notranslate nohighlight">\(A \subseteq B\)</span> (and forms a distributive lattice).</p>
-<p>Stroscot is dependently typed, so you can pass around types (sets). The semantics is that they’re AST nodes. Only ensure is special, since it has to compute properties of types. The values (things that aren’t types/sets) are as defined in the core: ADT elements (a list of elements with a tag) and lambda expressions and functions and so on. For simple types, checking whether an element is a member is as simple as checking the tag, but the set can describe an almost arbitrary computation.</p>
-<p>We follow New Foundations (specifically NFU) in allowing any type (set) to be specified with a stratified formula. Our stratification condition is very loose. The usual formulation requires <code class="docutils literal notranslate"><span class="pre">lvl(b)=lvl(a)+1</span></code> for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">in</span> <span class="pre">b</span></code>, but this can be relaxed to <code class="docutils literal notranslate"><span class="pre">lvl(b)</span> <span class="pre">&gt;</span> <span class="pre">lvl(a)</span></code>. Holmes had a paper proving this consistent, but his site has been reorganized; consistency also follows from the proof of the Statified Comprehension Theorem on page 45 of <a class="bibtex reference internal" href="zzreferences.html#holmeselementarysettheory1998" id="id1">[Hol98]</a>, changing <code class="docutils literal notranslate"><span class="pre">n-1</span></code> to <code class="docutils literal notranslate"><span class="pre">n-k,k&gt;0</span></code>. In practice, this means levels must form a poset, or said another way, that there cannot be a cyclic chain of set membership tests (a in b, b in c, c in a, for example). Also note that if the left side is known to be a set, then the membership test can be replaced with a subset inclusion check (expandable to a logical formula) and there is no constraint generated at all. So it is only when we are dealing with mixed sets containing both sets and primitive elements that we can really run into trouble. Overall, since the stratification only applies to quantified variables and most types do not use quantification, this most likely will never come up as an issue in practice.</p>
-<p>NFU has universal sets, so there is no issue of function types being a power set that is “too large” for the universe; the power set of the universe is actually a subset of the universal set.</p>
-</div>
-<div class="section" id="type-declarations">
-<h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this headline">¶</a></h2>
-<p>Types in Stroscot act as identity functions restricted to a certain domain. So you use an application, similar to assembly syntax such as <code class="docutils literal notranslate"><span class="pre">dword</span> <span class="pre">0</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="n">s8</span> <span class="mi">2</span>
+<p>Types are hard. Academics have spent decades in search of the perfect type system. But really precise types end up looking like <code class="docutils literal notranslate"><span class="pre">(Nil--&gt;0)</span> <span class="pre">&amp;</span> <span class="pre">(Cons</span> <span class="pre">a</span> <span class="pre">b--&gt;1+(length</span> <span class="pre">b))</span></code>, which is just the original program. So Stroscot opts instead for model checking: leave programs with a dynamic, unityped semantics, but try to prove properties about execution. In particular the idea “well-typed programs don’t go wrong” is simplified to “prove programs don’t go wrong”, “wrong” is defined via assertions, and these assertions are statically checked. <code class="docutils literal notranslate"><span class="pre">assert</span></code> is deeply special, since it has to work with descriptions executable properties, so unfortunately not all properties can be checked.</p>
+<p>Dynamically typed doesn’t mean that Stroscot has no types; types can still be specified and used to control your program, a la TypeScript.</p>
+<p>The implementation of sets is based on syntax tree manipulation. Non-set values include all the core expressions, ADT elements and lambda expressions and so on. Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).</p>
+<div class="section" id="id1">
+<h2>Types<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Types are simply sets. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in <span id="id2">[<a class="reference internal" href="zzreferences.html#id20" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span>. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="kt">:</span> <span class="kt">T</span> <span class="ow">=</span> <span class="p">{</span> <span class="n">assert</span><span class="p">(</span><span class="n">a</span> <span class="n">isElemOf</span> <span class="kt">T</span><span class="p">);</span> <span class="n">a</span> <span class="p">}</span>
+<span class="kt">T</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">a</span> <span class="kt">:</span> <span class="kt">T</span>
 </pre></div>
 </div>
-<p>To match Haskell, there is also a standard operator <code class="docutils literal notranslate"><span class="pre">(:)</span></code> defined as <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">:</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">y</span> <span class="pre">x</span></code>, with low precedence, so you can write</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="mi">2</span> <span class="kt">:</span> <span class="n">s8</span>
-</pre></div>
-</div>
-<p>These two options seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to read with long types) or <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program.</p>
-</div>
-<div class="section" id="type-synthesis">
-<h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this headline">¶</a></h2>
-<p>Type synthesis is tricky, but it’s only tricky because it’s trying to do the work of the termination checker. It’s not actually necessary from a user-level perspective. The only useful case might be pretty-printed type signatures. But with really precise types, they end up looking like <code class="docutils literal notranslate"><span class="pre">(Nil--&gt;0)</span> <span class="pre">&amp;</span> <span class="pre">(Cons</span> <span class="pre">a</span> <span class="pre">b--&gt;1+(length</span> <span class="pre">b))</span></code>, which is just the original program, so having the developer specify type signatures seem like the best option.</p>
-<p>There’s the <a class="reference external" href="https://github.com/stedolan/fyp">sub</a><a class="reference external" href="https://github.com/stedolan/mlsub">typing</a> stuff which actually has some pretty powerful type synthesis, better (and slower) than Hindley-Milner. But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
-<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures. However, bidirectional type checking <a class="bibtex reference internal" href="zzreferences.html#dunfieldbidirectionaltyping2019" id="id2">[DK19]</a> should be able to minimize the amount of signatures required.</p>
-</div>
-<div class="section" id="numbers">
-<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h2>
-<p>In the mathematical world there are integers and real numbers, which have well-defined arithmetic operations (besides division by 0). In the computer world we do not have either of these luxurious spaces, but rather various formats for numbers which represent subsets of the space.</p>
-<div class="section" id="integers">
-<h3>Integers<a class="headerlink" href="#integers" title="Permalink to this headline">¶</a></h3>
-<p>The most common integer format is a signed/unsigned integer with the range <span class="math notranslate nohighlight">\([0,2^{k}-1]\)</span> or <span class="math notranslate nohighlight">\([-2^{k-1},2^{k-1}-1]\)</span>, taking <span class="math notranslate nohighlight">\(k\)</span> bits. But it is not too tricky to implement the basic operations for arbitrarily-ranged integers <span class="math notranslate nohighlight">\([a,b]\)</span>, where <span class="math notranslate nohighlight">\(b-a+1\)</span> is a power of 2. We can represent as <span class="math notranslate nohighlight">\(a+k\)</span> or <span class="math notranslate nohighlight">\(b-k\)</span> where <span class="math notranslate nohighlight">\(k\)</span> is unsigned or <span class="math notranslate nohighlight">\((a+b+1)/2 + k\)</span> for signed <span class="math notranslate nohighlight">\(k\)</span>. The operations use <span class="math notranslate nohighlight">\(\log_2 (b-a+1)\)</span> bits and expand the constants out (<span class="math notranslate nohighlight">\((x+a)+(y+a)=(x+y)+2*a\)</span>, etc. - there’s definitely clever ways to structure the computations for efficiency). When the range can be determined statically there is no overhead besides the extra operations (and there are no extra operations if the range fits into the machine-sized integer). If we use branching operations we can go even farther and use a tag bit to represent unions of ranges, <span class="math notranslate nohighlight">\([-23,2] \cup [56,100]\)</span>.</p>
-</div>
-<div class="section" id="floating-point">
-<h3>Floating point<a class="headerlink" href="#floating-point" title="Permalink to this headline">¶</a></h3>
-<p>Floating point numbers are an integer mantissa times an integer radix raised to an integer exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range. We can also include posits; these are mantissa * radix ^ exponent * useed ^ regime, where the first part is the floating point stuff, useed is 2 ^ 2 ^ maximum exponent size, and the regime is nonnegative.</p>
-</div>
-<div class="section" id="actual-types">
-<h3>Actual types<a class="headerlink" href="#actual-types" title="Permalink to this headline">¶</a></h3>
-<p>We could try to define generic integer/float types, but only a few have efficient arithmetic operations. So in practice we have only <code class="docutils literal notranslate"><span class="pre">sN</span></code> / <code class="docutils literal notranslate"><span class="pre">uN</span></code> (for <code class="docutils literal notranslate"><span class="pre">N</span></code> restricted to 8/16/32/64), <code class="docutils literal notranslate"><span class="pre">Float</span></code>, and <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Non-power-of-2 integers, fixed-point arithmetic, unums, and posits can all be defined in libraries. It would also be good to have arbitrary-precision types, like <a class="reference external" href="https://gmplib.org/">GMP</a>’s integer/rational and <a class="reference external" href="https://www.mpfr.org/">MFPR</a>’s float that uses an s32/s64 exponent and an arbitrary precision mantissa. The binding could be at the C level like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s integer-gmp</a> or it could use the assembly routines directly.</p>
-</div>
-<div class="section" id="operations">
-<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this headline">¶</a></h3>
-<p>Literals are parsed into records like <code class="docutils literal notranslate"><span class="pre">NumberLiteral</span> <span class="pre">{</span> <span class="pre">digits</span> <span class="pre">=</span> <span class="pre">&quot;123&quot;,</span> <span class="pre">exponent</span> <span class="pre">=</span> <span class="pre">&quot;24&quot;</span> <span class="pre">}</span></code>. We can define implicit conversions to the various the numeric types. Leadings 0’s restrict the type, so <code class="docutils literal notranslate"><span class="pre">010</span></code> must be stored in a type that can contain 999.</p>
-<p>For arithmetic we define implicit conversions, <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on to an arbitrary precision type <code class="docutils literal notranslate"><span class="pre">Arb</span></code> with the usual arithmetic operations, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on. Then narrowing the result back into a restrictive format is represented explicitly with an operation, <code class="docutils literal notranslate"><span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(2+30*x)</span></code> and so on. The compiler then figures out how to compute the answer as efficiently as possible. For floating point the narrowing also takes a precision argument, or optimizes for the best precision like Herbie, depending on whether speed or accuracy is preferred.</p>
-<p>For compatibility with other languages we can define narrowed arithmetic operations, like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">plus</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">assert(a</span> <span class="pre">is</span> <span class="pre">s16</span> <span class="pre">&amp;&amp;</span> <span class="pre">b</span> <span class="pre">is</span> <span class="pre">s16);</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(a+b);</span> <span class="pre">assert(x</span> <span class="pre">is</span> <span class="pre">s16)</span></code>. These give an out-of-range / overflow / unrepresentable error if the result doesn’t fit. We can also support implicit conversions <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">s16</span></code> and so on; the compiler has to check that the narrowed arbitrary-precision computation matches the various fixed-width computations, but it should be resolvable.</p>
-<p>Floating points numbers don’t have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">::</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span></code> and so on.</p>
-</div>
-</div>
-<div class="section" id="strings">
-<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
-<p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer together with a length. There can be different encodings: 8-bit UTF8, 16-bit UTF16, 32-bit UTF32, or some other encoding like Shift JIS or Big5. There are some optimizations that can be made for non-mutating views (substrings), e.g. storing an offset too to gives zero-copy slices (although ignoring allocators, a pointer is sufficient instead of start+offset). Iterating through strings is an interesting API design problem, particularly seeking for the <span class="math notranslate nohighlight">\(n\)</span> th character, but isn’t too hard overall. Dealing with invalid characters is a little trickier, but an implicit mode parameter should be sufficient. We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
-</div>
-<div class="section" id="records">
-<h2>Records<a class="headerlink" href="#records" title="Permalink to this headline">¶</a></h2>
-<p>Structural subtyping of records allows you to pass <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">1,</span> <span class="pre">b:</span> <span class="pre">2}</span></code> to a function expecting <code class="docutils literal notranslate"><span class="pre">{b:</span> <span class="pre">Int}</span></code>. This is similar to inheritance in other languages.</p>
 </div>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <p>Function type declarations come in two forms. The first version simply checks compatibility, that the return type is as expected on the given input.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span> <span class="kt">:</span> <span class="kt">S</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+<span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
 
 <span class="c1">-- expands to</span>
 
-<span class="nf">s</span> <span class="ow">=</span> <span class="n">arbElemOfType</span><span class="p">(</span><span class="kt">S</span><span class="p">)</span>
-<span class="nf">assert</span><span class="p">(</span><span class="n">isElemOfType</span> <span class="p">(</span><span class="kt">A</span> <span class="n">s</span><span class="p">)</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="nf">s</span> <span class="ow">=</span> <span class="n">arbElem</span><span class="nb">()</span>
+<span class="nf">assume</span><span class="p">(</span><span class="n">s</span> <span class="n">isElemOf</span> <span class="kt">S</span><span class="p">)</span>
+<span class="nf">assert</span><span class="p">(</span><span class="kt">A</span> <span class="n">s</span> <span class="n">isElemOf</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
 </pre></div>
 </div>
-<p>The second version restricts the definition of the function so it is only defined on the type. This is useful for overloading.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">restrict</span> <span class="kt">A</span> <span class="kt">:</span> <span class="kt">S</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
-<span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+<p>The second version, “strict typing”, restricts the definition of the function so it is only defined on the type, i.e. it will throw an error if given something outside its type. You can define multiple strict functions to obtain overloaded behavior on different types.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">strict</span>
+   <span class="kt">A</span> <span class="kt">:</span> <span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="kt">T</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+   <span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
 
 <span class="c1">-- expands to</span>
 
 <span class="kt">A</span><span class="o">$</span><span class="n">untyped</span> <span class="ow">=</span> <span class="o">...</span>
 <span class="kt">A</span> <span class="ow">=</span> <span class="p">{</span>
-   <span class="n">assert</span> <span class="p">(</span><span class="n">isElemOfType</span> <span class="o">$</span><span class="n">args</span> <span class="kt">S</span><span class="p">)</span>
-   <span class="n">ret</span> <span class="ow">=</span> <span class="kt">A</span><span class="o">$</span><span class="n">untyped</span> <span class="n">args</span>
-   <span class="n">assert</span> <span class="p">(</span><span class="n">isElemOfType</span> <span class="n">ret</span> <span class="kt">Int</span><span class="p">)</span>
+   <span class="n">assert</span> <span class="p">(</span><span class="o">$</span><span class="n">args</span> <span class="n">isElemOf</span> <span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="kt">T</span><span class="p">))</span>
+   <span class="n">ret</span> <span class="ow">=</span> <span class="kt">A</span><span class="o">$</span><span class="n">untyped</span> <span class="o">$</span><span class="n">args</span>
+   <span class="n">assert</span> <span class="p">(</span><span class="n">ret</span> <span class="n">isElemOf</span> <span class="kt">Int</span><span class="p">)</span>
    <span class="n">ret</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+<div class="section" id="dependent-types">
+<h3>Dependent types<a class="headerlink" href="#dependent-types" title="Permalink to this headline">¶</a></h3>
+<p>Since the value is in scope, defining an (insanely) dependent type is easy:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span> <span class="kt">:</span> <span class="p">(</span><span class="n">s</span> <span class="kt">:</span> <span class="kt">S</span> <span class="n">s</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">T</span> <span class="n">s</span>
+<span class="kt">A</span> <span class="ow">=</span> <span class="o">...</span>
+
+<span class="c1">-- expands to</span>
+<span class="nf">s</span> <span class="ow">=</span> <span class="n">arbElem</span><span class="nb">()</span>
+<span class="nf">assume</span><span class="p">(</span><span class="n">s</span> <span class="n">isElemOf</span> <span class="kt">S</span> <span class="n">s</span><span class="p">)</span>
+<span class="nf">assert</span><span class="p">(</span><span class="kt">A</span> <span class="n">s</span> <span class="n">isElemOf</span> <span class="kt">T</span> <span class="n">s</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="adts">
+<h2>ADTs<a class="headerlink" href="#adts" title="Permalink to this headline">¶</a></h2>
+<p>Abstract data types are sets containing trees of uninterpreted symbols. So a datatype declaration (from <a class="reference external" href="https://github.com/UlfNorell/insane/blob/master/Context.agda">here</a>)</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">data</span> <span class="kt">Cxt</span> <span class="p">[</span> <span class="kt">Ty</span> <span class="kt">:</span> <span class="kt">Cxt</span> <span class="kt">Ty</span> <span class="ow">-&gt;</span> <span class="kt">Set</span> <span class="p">]</span> <span class="kt">:</span> <span class="kt">Set</span> <span class="kr">where</span>
+   <span class="n">nil</span>  <span class="kt">:</span> <span class="kt">Cxt</span> <span class="kt">Ty</span>
+   <span class="n">snoc</span> <span class="kt">:</span> <span class="p">(</span><span class="kt">G</span> <span class="kt">:</span> <span class="kt">Cxt</span> <span class="kt">Ty</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Ty</span> <span class="kt">G</span> <span class="ow">-&gt;</span> <span class="kt">Cxt</span> <span class="kt">Ty</span>
+</pre></div>
+</div>
+<p>is equivalent to</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span> <span class="n">nil</span>
+<span class="nf">symbol</span> <span class="n">snoc</span>
+<span class="kt">Cxt</span> <span class="kt">Ty</span> <span class="ow">=</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">arbElem</span><span class="nb">()</span><span class="p">;</span> <span class="n">assume</span><span class="p">(</span><span class="n">a</span> <span class="n">isOfType</span> <span class="kt">Cxt</span> <span class="kt">Ty</span><span class="p">);</span> <span class="n">assert</span><span class="p">(</span><span class="kt">Ty</span> <span class="n">a</span> <span class="n">isElemOf</span> <span class="kt">Set</span><span class="p">);</span> <span class="kt">Set</span> <span class="p">{</span> <span class="n">x</span> <span class="kr">where</span>
+   <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">nil</span>
+   <span class="n">or</span> <span class="n">exists</span> <span class="kt">G</span> <span class="n">y</span><span class="o">.</span> <span class="n">x</span> <span class="o">==</span> <span class="p">(</span><span class="n">snoc</span> <span class="kt">G</span> <span class="n">y</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="kt">G</span> <span class="n">isElemOf</span> <span class="p">(</span><span class="kt">Cxt</span> <span class="kt">Ty</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="n">isElemOf</span> <span class="p">(</span><span class="kt">Ty</span> <span class="kt">G</span><span class="p">))</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem as in <span id="id3">[<a class="reference internal" href="zzreferences.html#id21" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2.</p>
+</div>
+<div class="section" id="records">
+<h2>Records<a class="headerlink" href="#records" title="Permalink to this headline">¶</a></h2>
+<p>You can pass <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">undefined,</span> <span class="pre">b:</span> <span class="pre">2}</span></code> to a function <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">rec</span> <span class="pre">=</span> <span class="pre">rec.b</span></code>. This is similar to structural subtyping. If the function used <code class="docutils literal notranslate"><span class="pre">a</span></code>, it would give an error.</p>
+</div>
+<div class="section" id="type-synthesis">
+<h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this headline">¶</a></h2>
+<p>Type synthesis is tricky, but with the termination checker we don’t have any visible types. The optimizer does a form of type synthesis when it assigns formats to values, but the formats can be conditional on state, and the optimizer will use a catch-all format for hard cases, so the formats are complete but not sound. The only useful case for a complex type synthesis algorithm might be pretty-printed type signatures in documentation, but there having the developer specify type signatures is a viable option.</p>
+<p>But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
+<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures.</p>
 </div>
 <div class="section" id="roles">
 <h2>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h2>
-<p>Roles are just an optimization for <code class="docutils literal notranslate"><span class="pre">coerce</span></code>. I don’t know why GHC polluted their type system with them, besides that it was a dirty hack to solve a pressing problem.</p>
+<p>Roles are just an optimization for <code class="docutils literal notranslate"><span class="pre">coerce</span></code>, but there are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.</p>
 </div>
 </div>
 
@@ -309,8 +294,8 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Delimited-Continuations.html" class="btn btn-neutral float-left" title="Delimited continuations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

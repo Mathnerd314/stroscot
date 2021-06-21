@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,6 +35,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -41,8 +45,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Metaprogramming" href="Fexprs.html" />
-    <link rel="prev" title="Argument passing" href="Arguments.html" /> 
+    <link rel="next" title="Types" href="Types.html" />
+    <link rel="prev" title="Overloading" href="Overloading.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,26 +96,29 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Delimited continuations</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#undelimited-continuations">Undelimited continuations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -201,7 +208,7 @@ continuation, analogous to how call/cc captures an undelimited
 continuation. k can then be applied like any other function.</p></li>
 <li><p><strong>pushSubCont</strong> k v —  evaluates its first subexpression to yield a subcontinuation, then evaluates its second subexpression in a continuation that composes the subcontinuation with the current continuation.</p></li>
 </ul>
-<p>This is based on <a class="bibtex reference internal" href="zzreferences.html#dyvbigmonadicframeworkdelimited2007" id="id1">[DPJS07]</a>.</p>
+<p>This is based on <span id="id1">[<a class="reference internal" href="zzreferences.html#id26" title="R. Kent Dyvbig, Simon Peyton Jones, and Amr Sabry. A monadic framework for delimited continuations. Journal of Functional Programming, 17(6):687–730, November 2007. URL: https://doi.org/10.1017/S0956796807006259 (visited on 2020-06-19), doi:10.1017/S0956796807006259.">DPJS07</a>]</span>.</p>
 <p>An example from the paper is the following:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">p</span> <span class="ow">=</span> <span class="n">newPrompt</span><span class="p">;</span>
 <span class="mi">2</span> <span class="o">+</span> <span class="n">pushPrompt</span> <span class="n">p</span>
@@ -258,6 +265,258 @@ pushPrompt p v = v</p>
 <p>A naked withSubCont results in the “Prompt not found” exception.</p>
 <p>pushSubCont can be safely ignored as a no-op type conversion.</p>
 </div>
+<div class="section" id="undelimited-continuations">
+<h2>Undelimited continuations<a class="headerlink" href="#undelimited-continuations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>call allocates a frame object
+   &quot;the locals&quot; (name -&gt; object bindings)
+   a little evaluation stack for holding temps and dynamic
+      block-nesting info
+   the offset to the current bytecode instruction, relative to the
+      start of the code object&#39;s fixed (immutable) bytecode vector
+
+When a subroutine returns, it decrefs the frame and then the frame typically
+goes away; if it returns because of an exception, though, traceback objects
+may keep the frame alive.
+
+GENERATORS
+
+Generators add two new abstract operations, &quot;suspend&quot; and &quot;resume&quot;.  When a
+generator suspends, it&#39;s exactly like a return today except we simply
+decline to decref the frame.  That&#39;s it!  The locals, and where we are in
+the computation, aren&#39;t thrown away.  A &quot;resume&quot; then consists of
+restarting the frame at its next bytecode instruction, with the retained
+frame&#39;s locals and eval stack just as they were.
+
+Some generator properties:
+
++ They&#39;re asymmetric:  &quot;suspend&quot; is something only a generator can do, and
+&quot;resume&quot; something only its caller can do (this does not preclude a
+generator from being &quot;the caller&quot; wrt to some other generator, though, and
+indeed that&#39;s very useful in practice).
+
++ A generator always returns control directly to its caller, at the point
+the caller invoked the generator.  And upon resumption, a generator always
+picks up where it left off.
+
++ Because a generator remembers where it is and what its locals are, its
+state and &quot;what to do next&quot; don&#39;t have to be encoded in global data
+structures then decoded from scratch upon entry.  That is, whenever you
+build a little (or large!) state machine to figure out &quot;what to do next&quot;
+from a collection of persistent flags and state vrbls, chances are good
+there&#39;s a simple algorithm dying to break free of that clutter &lt;wink&gt;.
+
+COROUTINES
+
+Coroutines add only one new abstract operation, &quot;transfer&quot;.  They&#39;re fully
+symmetric so can get away with only one.  &quot;transfer&quot; names a coroutine to
+transfer to, and gives a value to deliver to it (there are variations, but
+this one is common &amp; most useful).  When A transfers to B, it acts like a
+generator &quot;suspend&quot; wrt A and like a generator &quot;resume&quot; wrt B.  So A
+remembers where it is, and what its locals etc are, and B gets restarted
+from the point *it* last transfered to someone else.
+
+Coroutines grew up in simulation languages because they&#39;re an achingly
+natural way to model independent objects that interact with feedback.  There
+each object (which may itself be a complex system of other stuff) is written
+as an infinite loop, transferring control to other objects when it has
+something to tell them, and transferred to by other objects when they have
+something to tell it.
+
+A Unix pipeline &quot;A | B | C | D&quot; doesn&#39;t exploit the full power but is
+suggestive.  A may be written as
+
+while 1:
+   x = compute my next output
+   B.transfer(x)     # resume B with my output
+
+B as
+
+while 1:
+   x = A.transfer()  # resume A to get my input
+   y = compute something from x and my own history
+   C.transfer(y)     # resume C with my output
+
+C as
+
+while 1:
+   x = B.transfer()  # resume B to get my input
+   y = compute something from x and my own history
+   D.transfer(y)     # resume D with my output
+
+and D as
+
+while 1:
+   x = C.transfer()  # resume C to get my input
+   y = compute something from x and my own history
+   print y
+
+If e.g. C collapses pairs of values from B, it can be written instead as
+
+while 1:
+   # get a pair of B&#39;s
+   x = B.transfer()
+   y = B.transfer()
+   z = f(x, y, whatever)
+   D.transfer(z)     # resume D with my output
+
+It&#39;s a local modification to C:  B doesn&#39;t know and shouldn&#39;t need to know.
+This keeps complex algorithms manageable as things evolve.
+
+Initialization and shutdown can be delicate, but once the pipe is set up it
+doesn&#39;t even matter which of {A, B, C, D} first gets control!  You can view
+A as pushing results through the pipe, or D as pulling them, or whatever.
+In reality they&#39;re all equal partners.
+
+Why these are so much harder to implement than generators:  &quot;transfer&quot;
+*names* who next gets control, while generators always return to their
+(unnamed) caller.  So a generator simply &quot;pops the stack&quot; when it suspends,
+while coroutine flow need not  be (and typically isn&#39;t) stack-like.
+
+In Python this is currently a coroutine-killer, because the C stack gets
+intertwined.  So if coroutine A merely calls (in the regular sense) function
+F, and F tries to transfer to coroutine B, the info needed to resume A
+includes the chunk of the C stack between A and F.  And that&#39;s why the
+Python coroutine implementation I referenced earlier uses threads under the
+covers (where capturing pieces of the C stack isn&#39;t a problem).
+
+Early versions of coroutines didn&#39;t allow for this, though!  At first
+coroutines could only transfer *directly* to other coroutines, and as soon
+as a coroutine made &quot;a regular call&quot; transfers were prohibited until the
+call returned (unless the called function kicked off a brand new collection
+of coroutines, which could then transfer among themselves -- making the
+distinction leads to convoluted rules, so modern practice is to generalize
+from the start).
+
+Then the current state of each coroutine was contained in a single frame,
+and it&#39;s really no harder to implement than generators.  Knuth seems to have
+this restricted flavor of coroutine in mind when he describes generator
+behavior as &quot;semi-coroutine&quot;.
+
+CONTINUATIONS
+
+Given the pedagogical structure so far, you&#39;re primed to view continuations
+as an enhancement of coroutines.  And that&#39;s exactly what will get you
+nowhere &lt;wink&gt;.  Continuations aren&#39;t more elaborate than coroutines,
+they&#39;re simpler.  Indeed, they&#39;re simpler than generators, and even simpler
+than &quot;a regular call&quot;!  That&#39;s what makes them so confusing at first:
+they&#39;re a different *basis* for *all* call-like behavior.  Generators and
+coroutines are variations on what you already know; continuations challenge
+your fundamental view of the universe.
+
+Legend has it they were discovered when theorists were trying to find a
+solid reason for why goto statements suck:  the growth of &quot;denotational
+semantics&quot; (DS) boomed at the same time &quot;structured programming&quot; took off.
+The former is a solid &amp; fruitful approach to formally specifying the
+semantics of programming languages, built on the lambda calculus (and so
+dear to the Lisp/Scheme community -- this all ties together, of course
+&lt;wink&gt;).
+
+The early hope was that goto statements would prove to present intractable
+problems for formal specification, and then &quot;that&#39;s why they suck:  we can&#39;t
+even sort them out on paper, let alone in practice&quot;.
+
+But in one of God&#39;s cleverer tricks on the programming world &lt;tee hee&gt;, the
+semantics of goto turned out to be trivial:  at a branch point, you can go
+one of two ways.  Represent one of those ways by a function f that computes
+what happens if you branch one way, and the other way by a function g.  Then
+an if+goto simply picks one of f or g as &quot;the continuation&quot; of the program,
+depending on whether the &quot;if&quot; condition is true or false.  And a plain goto
+simply replaces the current continuation with a different one (representing
+what happens at the branch target) unconditionally.  So goto turned out to
+be simpler (from the DS view) than even an assignment stmt!
+
+I&#39;ve often suspected theorists were *surprised* (and maybe appalled &lt;0.7
+wink&gt;) when the language folks went on to *implement* the continuation idea.
+Don&#39;t really know, but suppose it doesn&#39;t matter anyway.  The fact is we&#39;re
+stuck with them now &lt;wink&gt;.
+
+In theory a continuation is a function that computes &quot;the rest of the
+program&quot;, or &quot;its future&quot;.  And it really is like a supercharged goto!  It&#39;s
+the formal DS basis for all control flow, from goto stmts to exception
+handling, subsuming vanilla call flow, recursion, generators, coroutines,
+backtracking, and even loops along the way.
+
+To a certain frame of mind (like Sam&#39;s, and Christian is temporarily under
+his evil influence &lt;wink&gt;), this relentless uniformity &amp; consistency of
+approach is very appealing.  Guido tends to like his implementations to
+mirror his surface semantics, though, and if he has ten constructs they&#39;re
+likely to be implemented ten ways.  View that as a preview of future battles
+that have barely been hinted at so far &lt;0.3 wink&gt;.
+
+Anyway, in implementation terms a continuation &quot;is like&quot; what a coroutine
+would be if you could capture its resumption state at any point (even
+without the coroutine&#39;s knowledge!) and assign that state to a vrbl.  So we
+could say it adds an abstract operation &quot;capture&quot;, which essentially
+captures the program counter, call stack, and local (in Python terms) &quot;block
+stack&quot; at its point of invocation, and packages all that into a first-class
+&quot;continuation object&quot;.  IOW, a building block on top of which a generator&#39;s
+suspend, and the suspend half of a coroutine transfer, can be built.  In a
+pure vision, there&#39;s no difference at all between a regular return and the
+&quot;resume&quot; half of a coroutine transfer:  both amount to no more than picking
+some continuation to evaluate next.
+
+A continuation can be captured anywhere (even in the middle of an
+expression), and any continuation can be invoked at will from anywhere else.
+Note that &quot;invoking a continuation&quot; is *not* like &quot;a call&quot;, though:  it&#39;s
+abandoning the current continuation, *replacing* it with another one.  In
+formal DS this isn&#39;t formally true (it&#39;s still &quot;a call&quot; -- a function
+application), but in practice it&#39;s a call that never returns to its caller
+so the implementation takes a shortcut.
+
+Like a goto, this is as low-level as it gets, and even hard-core
+continuation fans don&#39;t use them directly except as a means to implement
+better-behaved abstractions.
+
+As to whether continuations have &quot;volatile state&quot;, I&#39;m not sure what that
+was asking.  If a given continuation is invoked more than once (which is
+something that&#39;s deliberately done when e.g. implementing backtracking
+searches), then changes made to the locals by the first invocation are
+visible to the second (&amp; so on), so maybe &lt;wink&gt; the answer is &quot;yes&quot;.  It&#39;s
+more accurate to think of a continuation as being immutable, though:  it
+holds a reference to the structure that implements name bindings, but does
+not copy (save or restore) the bindings.
+
+Quick example, given:
+
+(define continuation 0)
+
+(define (test)
+(let ((i 0))
+   (call/cc (lambda (k)
+               (set! continuation k)))
+   (set! i (+ i 1))
+   i))
+
+That&#39;s like the Python:
+
+def test():
+   i = 0
+   global continuation
+   continuation = magic to resume at the start of the next line
+   i = i + 1
+   return i
+
+Then (this is interactive output from a Scheme shell):
+
+&gt; (test) ; Python &quot;test()&quot;
+1
+&gt; (continuation) ; Python &quot;continuation()&quot;
+2
+&gt; (continuation)
+3
+&gt; (define thisguy continuation) ; Python &quot;thisguy = continuation&quot;
+&gt; (test)
+1
+&gt; (continuation)
+2
+&gt; (thisguy)
+4
+&gt;
+
+too-simple-to-be-obvious?-ly y&#39;rs  - tim
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -266,8 +525,8 @@ pushPrompt p v = v</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Metaprogramming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Arguments.html" class="btn btn-neutral float-left" title="Argument passing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Overloading.html" class="btn btn-neutral float-left" title="Overloading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,6 +35,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -93,27 +97,31 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Package manager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#linux-distribution">Linux distribution</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#updates">Updates</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrade-cycle">Upgrade cycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#versioning">Versioning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#side-by-side-c-libraries">Side-by-side C libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updates">Updates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automation-system">Automation system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#release-monitoring">Release monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-scripts">Build scripts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automation">Automation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#marking">Marking</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#backouts">Backouts</a></li>
@@ -122,7 +130,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -204,23 +212,46 @@
 <div class="section" id="linux-distribution">
 <h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this headline">¶</a></h2>
 <p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways as few people use it.</p>
-<p>The goal of the Linux distribution, compared to others, is automation: all package updates are automatic, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
-<p>Package pinning is an issue, to handle broken software and stale dependencies. A new release of a tool might just not work; then it needs to be pinned to the old version. In contrast, a library update might work most of the time but break a few packages; the distro should then package multiple versions of the library and build most packages with the new libary while pinning the library to the old version for the specific breakages.</p>
-<p>The key question is where to store the multiple versions of the libraries. For a basic path like <code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.1</span></code>, we can put a hash <code class="docutils literal notranslate"><span class="pre">123456</span></code> in various places:</p>
+<p>The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
+</div>
+<div class="section" id="upgrade-cycle">
+<h2>Upgrade cycle<a class="headerlink" href="#upgrade-cycle" title="Permalink to this headline">¶</a></h2>
+<p>A package has various versions. It also depends on other packages which can themselves be various versions.</p>
+<p>In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form “breakage: A-2 B-2 C-2”.</p>
+<p>There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.</p>
+<p>Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.</p>
+</div>
+<div class="section" id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
+<p>Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
+For a basic path like <code class="docutils literal notranslate"><span class="pre">/usr/share/foo/img.jpg</span></code>, we can put a hash <code class="docutils literal notranslate"><span class="pre">HASH</span></code> in various places:</p>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.123456.1</span></code> or <code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.1.123456</span></code> (filename version)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/123456/libfoo.so.1</span></code> (multiarch layout similar to Debian)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">/usr/123456/lib/libfoo.so.1</span></code> (NixOS layout)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">/123456/usr/lib/libfoo.so.1</span></code> (“multisystem” layout)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.HASH.1</span></code> or <code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.1.HASH</span></code> (filename version)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/HASH/libfoo.so.1</span></code> (“multiarch” layout similar to Debian)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/HASH/lib/libfoo.so.1</span></code> (NixOS layout)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/HASH/usr/lib/libfoo.so.1</span></code> (“multisystem” layout)</p></li>
 </ol>
 <p>The multisystem layout isn’t useful, as the point of <code class="docutils literal notranslate"><span class="pre">/usr</span></code> is to allow putting system files on a separate partition. Also the root directory would become cluttered with all the hashed files.</p>
-<p>For the filename version, simply renaming it doesn’t work, as there is a symlink <code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.1</span></code> and its target is ambiguous if there are multiple versions. But if we modify the soname we can include the hash anywhere in the soname, so then the symlink also includes the hash. Although we could <a class="reference external" href="https://lvc.github.io/abi-compliance-checker/">detect ABI changes</a>, versions aren’t linear in general so it has to be a hash instead of a sequential number. The soname can be set with a linker wrapper. The library will still have to be renamed during installation to include the hash. The library can then be linked with by setting a symlink from <code class="docutils literal notranslate"><span class="pre">libfoo.so</span></code> to the real version, as usual. ldconfig should work unmodified. Prebuilt binaries can be patchelf’d, but using <code class="docutils literal notranslate"><span class="pre">--replace-needed</span></code> rather than <code class="docutils literal notranslate"><span class="pre">--set-rpath</span></code>.
-Where this solution breaks down, however, is with data files. Maintaining hashed file versions like <code class="docutils literal notranslate"><span class="pre">/usr/share/foo/foo-123456.jpg</span></code> would require patching every application to look things up in the right place. So the only option seems to be using a hashed layout, <code class="docutils literal notranslate"><span class="pre">/usr/share/foo-123456/foo.jpg</span></code>. But autoconf only has the option <code class="docutils literal notranslate"><span class="pre">--datarootdir</span></code> to change <code class="docutils literal notranslate"><span class="pre">/usr/share</span></code>; it doesn’t have a standard option to rename the subdirectory. So once again we’d have to manually patch every package. The only feasible option is to introduce another layer, <code class="docutils literal notranslate"><span class="pre">/usr/share/foo-123456/foo/foo.jpg</span></code>. But that’s the multiarch layout.</p>
-<p>So really only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as <code class="docutils literal notranslate"><span class="pre">&lt;path</span> <span class="pre">of</span> <span class="pre">executable&gt;/../share/something</span></code>. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can set the various autoconf options to <code class="docutils literal notranslate"><span class="pre">$path/$hash</span></code> and leave the rest up to the package; it may install things to <code class="docutils literal notranslate"><span class="pre">/usr/$hash/</span></code> if it’s not well-written, but everything respects <code class="docutils literal notranslate"><span class="pre">$PREFIX</span></code>.</p>
-<p>For both the NixOS/multiarch styles, we should include the hash in the SONAME similar to how the filename version works. This can be accomplished by linking with absolute paths (or relative paths, they would work too). There is <a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/24844">some work</a> in NixOS to do so, but the rpath solution that NixOS currently uses works too (albeit slower, because it has to search for the libraries in a relatively large search path).</p>
+<p>The filename solution breaks down with data files. Maintaining hashed file versions like  would require patching every application to look things up in the right place. We can move it up to the package directory, <code class="docutils literal notranslate"><span class="pre">/usr/share/foo-HASH/foo.jpg</span></code>. But autoconf only has the option <code class="docutils literal notranslate"><span class="pre">--datarootdir</span></code> to change <code class="docutils literal notranslate"><span class="pre">/usr/share</span></code>; it doesn’t have a standard option to rename the subdirectory. So once again we’d have to manually patch every package. The only feasible option is to move it up more, <code class="docutils literal notranslate"><span class="pre">/usr/share/HASH/foo/foo.jpg</span></code>. But that’s the multiarch layout. So for data files only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as <code class="docutils literal notranslate"><span class="pre">&lt;path</span> <span class="pre">of</span> <span class="pre">executable&gt;/../share/something</span></code>. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can change the various <a class="reference external" href="https://www.gnu.org/prep/standards/html_node/Directory-Variables.html">autoconf directories</a> by appending <code class="docutils literal notranslate"><span class="pre">/HASH</span></code> and leave the rest up to the package; it may install things to <code class="docutils literal notranslate"><span class="pre">/usr/$hash/</span></code> if it’s not well-written, but everything respects <code class="docutils literal notranslate"><span class="pre">$PREFIX</span></code>.</p>
+<p>For multiarch/NixOS the hash can be put in the SONAME by linking with absolute paths (or relative paths, they would work too). There is <a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/24844">some work</a> in NixOS to do so. The rpath solution that NixOS uses currently is slow and doesn’t solve the diamond problem.</p>
 <p>We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn’t possible,  allowing dynamic resolving of binary names <code class="docutils literal notranslate"><span class="pre">foo</span></code> to paths <code class="docutils literal notranslate"><span class="pre">/usr/bin/12345/foo</span></code> is not trivial. A global view doesn’t work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or <code class="docutils literal notranslate"><span class="pre">/proc</span></code> but for the system path; this can provide the necessary pid-dependent view as a symlink tree <code class="docutils literal notranslate"><span class="pre">/system-path/foo</span> <span class="pre">-&gt;</span> <span class="pre">/usr/bin/foo-12345</span></code>; even FUSE should be sufficiently fast since it is just one <code class="docutils literal notranslate"><span class="pre">open()</span></code> call and it doesn’t have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in <cite>/run/current-system/</cite>, and chroot containers.</p>
+</div>
+<div class="section" id="side-by-side-c-libraries">
+<h2>Side-by-side C libraries<a class="headerlink" href="#side-by-side-c-libraries" title="Permalink to this headline">¶</a></h2>
+<div class="graphviz"><object data="_images/graphviz-650a9ea069ae9b3926ce856e5426cb0e4b6f7178.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph foo {
+  rankdir=LR;
+  A -&gt; B;
+  A -&gt; C;
+  B -&gt; L [label=&quot;v1&quot;];
+  C -&gt; L [label=&quot;v2&quot;];
+}</p></object></div>
+<p>Solving the diamond dependency problem is tricky but possible. Shared libraries support symbol versioning, which essentially changes the name of each symbol so they don’t conflict. The <code class="docutils literal notranslate"><span class="pre">--default-symver</span></code> option sets the version string of each symbol to the SONAME of the library it is exported from. So if we include a hash in the SONAME and build with <code class="docutils literal notranslate"><span class="pre">--default-symver</span></code> then the libraries won’t conflict. Versions aren’t linear in general so it has to be a hash instead of a sequential number. The SONAME can be set with a linker / libtool wrapper.</p>
+<p>There are two symlinks, the library symlink <code class="docutils literal notranslate"><span class="pre">libfoo.HASH</span> <span class="pre">-&gt;</span> <span class="pre">libfoo.HASH.1</span></code> and the development symlink <code class="docutils literal notranslate"><span class="pre">libfoo.so</span> <span class="pre">-&gt;</span> <span class="pre">libfoo.HASH</span></code> which tells which version to link. ldconfig should create these normally. Prebuilt binaries can be patchelf’d using <code class="docutils literal notranslate"><span class="pre">--replace-needed</span></code>.</p>
+<p>Another solution is to create a manifest that specifies where to load libraries from, but this is basically the same as specifying absolute paths.</p>
+</div>
 <div class="section" id="updates">
-<h3>Updates<a class="headerlink" href="#updates" title="Permalink to this headline">¶</a></h3>
+<h2>Updates<a class="headerlink" href="#updates" title="Permalink to this headline">¶</a></h2>
 <p>For seamless updates it seems worthwhile to use an <a class="reference external" href="https://source.android.com/devices/tech/ota/ab">A/B partition scheme</a>. There are roughly 3 types of updates:
 * small updates that just update a user-level application
 * large updates that affect components such as the desktop manager, WiFi, etc.
@@ -229,14 +260,13 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
 <p>For large updates the user’s ability to access the package manager may be impaired, so we do need to make the last-known-good-configuration snapshot. In particular there needs to be a boot entry that the user can select to rollback after they hard-reset their computer.</p>
 <p>Kernel updates require a reboot or [kexec](<a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/10726">https://github.com/NixOS/nixpkgs/issues/10726</a>), but they are otherwise large updates.</p>
 </div>
-</div>
 <div class="section" id="automation-system">
 <h2>Automation system<a class="headerlink" href="#automation-system" title="Permalink to this headline">¶</a></h2>
 <p>Although a distribution is sufficient for setting up a single computer, to set up multiple computers it is more complicated. Salt provides a command-execution agent, but the commands are not idempotent. We want a map from packages to their latest versions or pinned versions. The ‘autoremove’ option is on by default because packages being secretly installed is a bad idea. But with autoremove off, packages are left installed on the system if they aren’t explicitly specified for removal.</p>
 </div>
 <div class="section" id="release-monitoring">
 <h2>Release monitoring<a class="headerlink" href="#release-monitoring" title="Permalink to this headline">¶</a></h2>
-<p>Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is <a class="reference external" href="https://fedoraproject.org/wiki/Upstream_release_monitoring">Anitya</a>, which solves some of this, and also <a class="reference external" href="https://github.com/DataDrake/cuppa">cuppa</a>. But both of them work by writing backends/providers for each major hosting site.</p>
+<p>Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is <a class="reference external" href="https://fedoraproject.org/wiki/Upstream_release_monitoring">Anitya</a>, which solves some of this, and also <a class="reference external" href="https://github.com/DataDrake/cuppa">cuppa</a>. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.</p>
 <p>Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version.</p>
 <p>We can write our own project scraper:</p>
 <ul class="simple">
@@ -263,6 +293,16 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
 <li><p>Versions: For a package, a list of its available versions</p></li>
 </ul>
 <p>For each top-level project, figuring out when/if there will be a new update is a machine learning problem. The simplest algorithm is to poll everything at a fixed interval, say daily. But most projects release a lot less frequently, and some projects (software collection, main development branches) release more frequently. If there is a push service like email we can use that, otherwise we need some sort of adaptive polling. We can model it as a homogeneous Poisson point process; then the estimate for the rate is simply the number of updates divided by the time interval we have observed. Then the time between two updates is an exponential distribution with parameter the rate, so we can poll if the probability of an update is &gt; 50%, adjusting the 50% so we poll an average of once a day. To get even more complex, we can build a feature vector classifier to predict the time between events.</p>
+</div>
+<div class="section" id="build-scripts">
+<h2>Build scripts<a class="headerlink" href="#build-scripts" title="Permalink to this headline">¶</a></h2>
+<p>To obtain an initial build script set we can do the following:</p>
+<p>1. Evaluate Nixpkgs (nix-instantiate) in a fresh Nix store
+1. Change all .drv from ATerm to JSON for ease of processing
+1. Assemble a mega pseudo-JSON of all the properties and values in the .drv
+1. Rename .drv according to a non-hashed scheme
+1. Change fetchurl to a flat list
+1. Create a set of builders which covers the rest of the mega-JSON</p>
 </div>
 <div class="section" id="automation">
 <h2>Automation<a class="headerlink" href="#automation" title="Permalink to this headline">¶</a></h2>
@@ -294,11 +334,11 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
       <span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <a class="bibtex reference internal" href="zzreferences.html#najafibisectingcommitsmodeling2019" id="id1">[NRS19]</a> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
+<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="zzreferences.html#id46" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
 <p>For observations, if we assume that the probability of false positive / false success <span class="math notranslate nohighlight">\(P(p_k)\)</span> and false negative / false failure <span class="math notranslate nohighlight">\(P(n_k)\)</span> are fixed per commit, then the probability of observing <span class="math notranslate nohighlight">\(i\)</span> test failures and <span class="math notranslate nohighlight">\(j\)</span> test successes (in a given/fixed order) given that the build is broken / not broken is</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
-<p>We will want to use the logit function <a class="bibtex reference internal" href="zzreferences.html#wikipedialogit2020" id="id2">[Wikipedia20b]</a> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <a class="bibtex reference internal" href="zzreferences.html#wikipediaforwardbackwardalgorithm2020" id="id3">[Wikipedia20a]</a> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
+<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="zzreferences.html#id59" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="zzreferences.html#id58" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 17%" />
@@ -348,7 +388,7 @@ Where this solution breaks down, however, is with data files. Maintaining hashed
 </tr>
 </tbody>
 </table>
-<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <a class="bibtex reference internal" href="zzreferences.html#ziftciwhobrokebuild2017" id="id4">[ZR17]</a>
+<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="zzreferences.html#id61" title="Celal Ziftci and Jim Reardon. Who broke the build? Automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
 The table treats the build as a unit; for added precision we should make one table for each failing test and a UI to aggregate them somehow. From this table, we can make decisions: reporting breakages, hiding flaky runs, blacklisting broken builds, blessing working revisions, etc. once a certainty threshold is reached.</p>
 <p>For deciding the next build, a simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; but this ignores flakiness. What we want is to maximize the expected <a class="reference external" href="https://en.wikipedia.org/wiki/Information_gain_in_decision_trees">information gain</a> from a run <span class="math notranslate nohighlight">\(X\)</span>.</p>
 <p>, i.e. something like</p>
@@ -359,7 +399,7 @@ The table treats the build as a unit; for added precision we should make one tab
 </div>
 <div class="section" id="backouts">
 <h3>Backouts<a class="headerlink" href="#backouts" title="Permalink to this headline">¶</a></h3>
-<p>For backouts, we must first decide a backout strategy. The paper <a class="bibtex reference internal" href="zzreferences.html#ananthanarayanankeepingmastergreen2019" id="id5">[AAH+19]</a> provides a real-world case study. We should maximize the number of changes included, respecting chronological order. So for <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">A,C</span></code> we should prefer the earlier change <code class="docutils literal notranslate"><span class="pre">B</span></code>. Also, for <code class="docutils literal notranslate"><span class="pre">A</span></code> vs <code class="docutils literal notranslate"><span class="pre">B,C</span></code>, to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them, and the higher is the chosen result.</p>
+<p>For backouts, we must first decide a backout strategy. The paper <span id="id5">[<a class="reference internal" href="zzreferences.html#id7" title="Sundaram Ananthanarayanan, Masoud Saeida Ardekani, Denis Haenikel, Balaji Varadarajan, Simon Soriano, Dhaval Patel, and Ali-Reza Adl-Tabatabai. Keeping master green at scale. In Proceedings of the Fourteenth EuroSys Conference 2019, EuroSys '19, 1–15. Dresden, Germany, March 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3302424.3303970 (visited on 2020-07-06), doi:10.1145/3302424.3303970.">AAH+19</a>]</span> provides a real-world case study. We should maximize the number of changes included, respecting chronological order. So for <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">A,C</span></code> we should prefer the earlier change <code class="docutils literal notranslate"><span class="pre">B</span></code>. Also, for <code class="docutils literal notranslate"><span class="pre">A</span></code> vs <code class="docutils literal notranslate"><span class="pre">B,C</span></code>, to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them, and the higher is the chosen result.</p>
 <p>We assume that if a build fails that adding more patches to that build will still result in a failing build; this rules out “fixing” changes where <code class="docutils literal notranslate"><span class="pre">A</span></code> fails but <code class="docutils literal notranslate"><span class="pre">A,B</span></code> succeeds because <code class="docutils literal notranslate"><span class="pre">B</span></code> fixed <code class="docutils literal notranslate"><span class="pre">A</span></code>. Detecting fixing changes would require speculatively building extra changes on top of failed builds. Instead, the fixing patchset must include the broken commits as well, so we would have <code class="docutils literal notranslate"><span class="pre">A</span></code> failing, <code class="docutils literal notranslate"><span class="pre">B</span></code> succeeding, and <code class="docutils literal notranslate"><span class="pre">A,B</span></code> resulting in a merge conflict (because <code class="docutils literal notranslate"><span class="pre">B</span></code> includes the changes from <code class="docutils literal notranslate"><span class="pre">A</span></code>). Merge conflicts can often be detected immediately without running tests, but complex failures can arise from code interactions.</p>
 <p>We need a more complex model accounting for breakages, dependencies, conflicts, and flakiness. But we’ll assume no higher-order phenomena, e.g. fixes to conflicts.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">breaking</span> <span class="ow">=</span> <span class="kt">[]</span>

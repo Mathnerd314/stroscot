@@ -13,7 +13,10 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -32,6 +35,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -43,7 +47,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Reduction example" href="Reduction-Example.html" />
-    <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
+    <link rel="prev" title="Logic" href="Logic.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,14 +97,19 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Arguments.html">Argument passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#rules">Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#infinite-structures">Infinite structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#levels">Levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#syntax">Syntax</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#derivation-tree">Derivation tree</a></li>
@@ -115,7 +124,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#primitives">Primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#linear-logic">Linear logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recursion">Recursion</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id12">Optimal reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">Optimal reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
@@ -128,14 +137,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Memory.html">Memory management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="zzreferences.html">References</a></li>
 </ul>
 
@@ -208,79 +215,28 @@
             
   <div class="section" id="reduction">
 <h1>Reduction<a class="headerlink" href="#reduction" title="Permalink to this headline">¶</a></h1>
-<p>Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Considerations:</p>
-<ul class="simple">
-<li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id1">[DMAPJ16]</a>, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus.</p></li>
-<li><p>Based on optimal reduction, mostly <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id2">[Gue96]</a>, we use linear logic sequents, with operators for contraction (duplication) and weakening (erasing).</p></li>
-<li><p>Based on <a class="bibtex reference internal" href="zzreferences.html#levyjumbolcalculus2006" id="id3">[Lev06]</a>, we aim for the largest allowable set of operators. In particular we generalize all of the different operators into two jumbo operators, sigma and pi. <span class="math notranslate nohighlight">\(\Sigma\)</span> contains LL’s synchronous/positive operators 0, 1, plus <span class="math notranslate nohighlight">\(\oplus\)</span>, and times <span class="math notranslate nohighlight">\(\otimes\)</span>. <span class="math notranslate nohighlight">\(\Pi\)</span> contains LL’s lollipop implication <span class="math notranslate nohighlight">\(\multimap\)</span> and asynchronous/negative operators top <span class="math notranslate nohighlight">\(\top\)</span>, bottom <span class="math notranslate nohighlight">\(\bot\)</span>, with <span class="math notranslate nohighlight">\(\&amp;\)</span>, and par <span class="math notranslate nohighlight">\(⅋\)</span>. (The unicode symbols, for copy-pasting:  ⊕⊗⊸⊤⊥&amp;⅋).</p></li>
-</ul>
-<div class="section" id="rules">
-<h2>Rules<a class="headerlink" href="#rules" title="Permalink to this headline">¶</a></h2>
-<p>We start with the generalized <span class="math notranslate nohighlight">\(\Pi\)</span> rule. This is similar to Levy’s rule except it allows multiple conclusion propositions. We have indexed variables <span class="math notranslate nohighlight">\(A_{ij}\)</span> and <span class="math notranslate nohighlight">\(B_{ik}\)</span> where <span class="math notranslate nohighlight">\(0 \leq i &lt; N, 0 \leq j &lt; m_i, 0 \leq k &lt; n_i\)</span>. We call <span class="math notranslate nohighlight">\(N\)</span> the length of the jumbo type and the list <span class="math notranslate nohighlight">\([(m_i,n_i)]\)</span> the jumbo-arity.</p>
-<div class="math notranslate nohighlight">
-\[\newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#1~~ }{\displaystyle ~~#2~~ } \  (#3)}
-\begin{array}{cc}
-\rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta }}
-  {\Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
-  {\Pi_R}
-&amp;
-\rule{\overrightarrow{ \Gamma_j \vdash A_{i j}, \Delta_j } \quad \overrightarrow{ \Theta_k, B_{i k} \vdash \Lambda_k }}
-  {\overrightarrow{\Gamma}, \vec \Theta, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \overrightarrow{\Delta}, \vec\Lambda}
-  {\Pi_{i} {}_{L}}
-\end{array}\]</div>
-<p>Next we have the generalized <span class="math notranslate nohighlight">\(\Sigma\)</span> rule. This is the dual of <span class="math notranslate nohighlight">\(\Pi\)</span>. Following <a class="bibtex reference internal" href="zzreferences.html#wadlercallbyvaluedualcallbyname2003" id="id4">[Wad03]</a> <a class="bibtex reference internal" href="zzreferences.html#crolardformulaeastypesinterpretationsubtractive2004" id="id5">[Cro04]</a> the dual of implication is called “subtraction” or “difference” and is denoted <span class="math notranslate nohighlight">\(-\)</span>. For normal ADTs, the RHS of the difference is empty, i.e. it looks like <span class="math notranslate nohighlight">\(\Pi (a. A - \cdot \mid b. B_1,B_2 - \cdot \mid c. \cdot - \cdot)\)</span>. The syntax <span class="math notranslate nohighlight">\(\Pi [(a, [A], []),(b, [B_1, B_2], []), (c,[],[])]\)</span> might be clearer.</p>
-<p>When the RHS is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. <a class="reference external" href="https://en.wikipedia.org/wiki/Difference_list">difference lists</a>. (TODO: check that this actually gives efficient concatenation)</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cc}
-\rule{\overrightarrow{ \Gamma_k, B_{i k} \vdash \Delta_k } \quad \overrightarrow{ \Theta_j \vdash A_{i j}, \Lambda_j } }
-  {\overrightarrow{\Gamma}, \overrightarrow{\Theta} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \overrightarrow{\Delta}, \overrightarrow{\Lambda}}
-  {\Sigma_{i} {}_{R}}
-&amp;
-\rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }
-  {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
-  {\Sigma_L}
-\end{array}\]</div>
-<p>To allow/restrict contraction and weakening we have two S4 modalities, bang/!/”of course” and whim/whimper/?/”why not”. A call-by-value function type is <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-o</span> <span class="pre">?B</span></code> while call-by-name is <code class="docutils literal notranslate"><span class="pre">!A</span> <span class="pre">-o</span> <span class="pre">B</span></code>. To enforce the S4 rules we add a level index to every term, as in <a class="bibtex reference internal" href="zzreferences.html#martinifinestructureexponential1995" id="id6">[MM95]</a> and <a class="bibtex reference internal" href="zzreferences.html#guerrinitheoreticalpracticalissues1996" id="id7">[Gue96]</a>. The level of a context is the maximum of the levels of its terms, negative infinity if empty. As a convention, the indices are omitted in all the rules besides promotion and dereliction, because all the indices in a non-promotion/dereliction sequent are the same value and so they can be recovered by propagating the indices from the promotion/dereliction rule(s). Normally promotion has <span class="math notranslate nohighlight">\(j=i+1\)</span> instead of <span class="math notranslate nohighlight">\(j&gt;i\)</span>, shrug.</p>
-<p>Instead of binary contraction we allow <span class="math notranslate nohighlight">\(n\)</span>-ary contraction for <span class="math notranslate nohighlight">\(n\geq 2\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cccc}
-  \rule{!\Gamma^i \vdash A^j, ?\Delta^i }{!\Gamma^i \vdash !A^i, ?\Delta^i}{!}_{j &gt; i}
-  &amp; \rule{\Gamma^i, A^i \vdash \Delta^i }{\Gamma^i, !A^j \vdash \Delta^i}{!d}_{j\leq i}
-  &amp; \rule{\Gamma, \overrightarrow{!A_{0\leq i\lt n}} \vdash \Delta }{\Gamma, !A \vdash \Delta}{!c}
-  &amp; \rule{\Gamma \vdash \Delta }{\Gamma, !A \vdash \Delta}{!w}
-\end{array}\]</div>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cccc}
-  \rule{!\Gamma^i, A^j \vdash ?\Delta^i }{!\Gamma^i, ?A^i \vdash ?\Delta^i}{?}_{j &gt; i}
-  &amp; \rule{\Gamma^i \vdash A^i, \Delta^i }{\Gamma^i \vdash ?A^j, \Delta^i}{?d}_{j \leq i}
-  &amp; \rule{\Gamma \vdash \overrightarrow{?A_{0\leq i\lt n}}, \Delta }{\Gamma \vdash ?A, \Delta}{?c}
-  &amp; \rule{\Gamma \vdash \Delta }{\Gamma \vdash ?A, \Delta}{?w}
-\end{array}\]</div>
-<p>So to review, the propositions in the sequent can be:</p>
-<ul class="simple">
-<li><p>Pi / Sigma</p></li>
-<li><p>A bang !A or whim ?A</p></li>
-</ul>
-<p>Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to bang/whim above). Although the exchange rule is given, we define the contexts as multisets instead of lists so that a rule may match on a formula in any position.</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cccc}
-  \rule{}{A \vdash A}{\text{id}}
-  &amp;
-  \rule{\Gamma \vdash A, \Delta \quad \Theta, A \vdash \Lambda }{\Gamma, \Theta \vdash \Delta, \Lambda }{\text{cut}}
-  &amp;
-  \rule{\Gamma \vdash \Delta, A, B, \Theta}{\Gamma \vdash \Delta, B, A, \Theta}{\text{x}_R}
-  &amp;
-  \rule{\Gamma, A, B, \Delta \vdash \Theta}{\Gamma, B, A, \Delta \vdash \Theta}{\text{x}_L}
-\end{array}\]</div>
-<p>Following Haskell we also want to support infinite expressions like <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">:</span> <span class="pre">x</span></code>. These are constructed as a <a class="reference external" href="https://bartoszmilewski.com/2020/04/22/terminal-coalgebra-as-directed-limit/">terminal coalgebra</a>. We can represent these using variables and assignments as a system of equations. The semantics is that the variable usage is a “hole” that plugs in a copy of the derivation tree from the variable assignment. We disallow the trivial case of a variable being a usage of itself; there must be at least one other rule invocation.</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cc}
-  \rule{X }{ \Gamma \vdash \Delta }{\text{Use}}
-  &amp;
-  \rule{\Gamma \vdash \Delta}{ X = }{\text{Assign}}
-\end{array}\]</div>
-<p>To handle level indices in infinite trees, we store the difference function <code class="docutils literal notranslate"><span class="pre">\a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">(j-i)</span></code> and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.</p>
+<p>Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Based on <span id="id1">[<a class="reference internal" href="zzreferences.html#id23" title="Paul Downen, Luke Maurer, Zena M. Ariola, and Simon Peyton Jones. Sequent calculus as a compiler intermediate language. In Proceedings of the 21st ACM SIGPLAN International Conference on Functional Programming, ICFP 2016, 74–88. Nara, Japan, September 2016. Association for Computing Machinery. URL: https://www.microsoft.com/en-us/research/publication/sequent-calculus-as-a-compiler-intermediate-language/ (visited on 2020-06-14), doi:10.1145/2951913.2951931.">DMAPJ16</a>]</span>, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus. Based on optimal reduction, mostly <span id="id2">[<a class="reference internal" href="zzreferences.html#id33" title="Stefano Guerrini. Theoretical and Practical Issues of Optimal Implementations of Functional Languages. PhD thesis, Università di Pisa. Dipartimento di Informatica, 1996. URL: https://www-lipn.univ-paris13.fr/~guerrini/mysite/sites/default/files/biblio/PhDThesis.pdf.">Gue96</a>]</span>, we use linear logic. But we make modifications to the rules.</p>
+<div class="section" id="infinite-structures">
+<h2>Infinite structures<a class="headerlink" href="#infinite-structures" title="Permalink to this headline">¶</a></h2>
 <p>When we compile following GHC’s model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there’s a “working graph” where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).</p>
+</div>
+<div class="section" id="levels">
+<h2>Levels<a class="headerlink" href="#levels" title="Permalink to this headline">¶</a></h2>
+<p>For the reduction implementation of contraction we add level indices to the terms in the promotion and dereliction rules of <span class="math notranslate nohighlight">\(\bangc/\whimc\)</span>, as in <span id="id3">[<a class="reference internal" href="zzreferences.html#id43" title="S. Martini and A. Masini. On the fine structure of the exponential rule. In Jean-Yves Girard, Yves Lafont, and Laurent Regnier, editors, Advances in Linear Logic, pages 197–210. Cambridge University Press, Cambridge, 1995. URL: https://pdfs.semanticscholar.org/b2cb/538c8ef21af42e48134a17a3c62ce5167837.pdf (visited on 2020-08-01), doi:10.1017/CBO9780511629150.010.">MM95</a>]</span> and <span id="id4">[<a class="reference internal" href="zzreferences.html#id33" title="Stefano Guerrini. Theoretical and Practical Issues of Optimal Implementations of Functional Languages. PhD thesis, Università di Pisa. Dipartimento di Informatica, 1996. URL: https://www-lipn.univ-paris13.fr/~guerrini/mysite/sites/default/files/biblio/PhDThesis.pdf.">Gue96</a>]</span>. Conceptually all terms have indices, but we can recover the indices in a proof tree by propagating the indices from the promotion/dereliction rules up/down according to the criteria that the indices involved in all non-<span class="math notranslate nohighlight">\(\bangc/\whimc\)</span> promotion/dereliction rules must be the same.</p>
+<p>To handle level indices in infinite trees, we store the difference function <code class="docutils literal notranslate"><span class="pre">\a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">(j-i)</span></code> and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.</p>
+<p>The level of a context is the maximum of the levels of its terms, 0 if it is empty.</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{ccc}
+  \rule{\bangc\Gamma^i \vdash A^j, \whimc\Delta^i }{\bangc\Gamma^i \vdash \bangc A^i, \whimc\Delta^i}{\bangc}_{j = i+1}
+  &amp; \rule{\sk{\Gamma^i}, A^i \vdash \sk{\Delta^i} }{\sk{\Gamma^i}, \bangc A^j \vdash \sk{\Delta^i}}{\bangc d}_{j\leq i}
+  &amp; \rule{\sk{\Gamma}, \overrightarrow{\bangc A, \bangc A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bangc A \vdash \sk{\Delta}}{\bangc c_n}
+\end{array}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{array}{ccc}
+  \rule{\bangc\Gamma^i, A^j \vdash \whimc\Delta^i }{\bangc\Gamma^i, \whimc A^i \vdash \whimc\Delta^i}{\whimc}_{j = i+1}
+  &amp; \rule{\sk{\Gamma^i} \vdash A^i, \sk{\Delta^i} }{\sk{\Gamma^i} \vdash \whimc A^j, \sk{\Delta^i}}{\whimc d}_{j \leq i}
+  &amp; \rule{\sk{\Gamma} \vdash \overrightarrow{\whimc A, \whimc A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whimc A, \sk{\Delta}}{\whimc c_n}
+\end{array}\]</div>
 </div>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
@@ -295,18 +251,18 @@
 </div>
 <div class="section" id="derivation-tree">
 <h3>Derivation tree<a class="headerlink" href="#derivation-tree" title="Permalink to this headline">¶</a></h3>
-<p>We define the types <span class="math notranslate nohighlight">\(\text{B} = \Sigma [(F,[],[]),(T,[],[])]\)</span> and <span class="math notranslate nohighlight">\(a \multimap b = \Pi [(\text{func}, [a], [b])]\)</span>. <span class="math notranslate nohighlight">\(\multimap\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).</p>
-<img alt="_images/Stroscot_AND_Proof_Tree.svg" src="_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<a class="bibtex reference internal" href="zzreferences.html#girardgeometryinteraction1989" id="id8">[Gir89]</a>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
+<p>See the connectives <span class="math notranslate nohighlight">\(\text{B} = \text{Bool}\)</span> and <span class="math notranslate nohighlight">\(\multimap\)</span> defined <a class="reference internal" href="Logic.html#connectives"><span class="std std-ref">above</span></a>. <span class="math notranslate nohighlight">\(\multimap\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).</p>
+<img alt="_images/Stroscot_AND_Proof_Tree.svg" src="_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id5">[<a class="reference internal" href="zzreferences.html#id31" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
 </div>
 <div class="section" id="nets">
 <h3>Nets<a class="headerlink" href="#nets" title="Permalink to this headline">¶</a></h3>
 <p>We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.</p>
 <img alt="_images/AND_net.svg" src="_images/AND_net.svg" /><img alt="_images/AND_net_r.svg" src="_images/AND_net_r.svg" /><p>To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition’s introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.</p>
-<p>Most rules do not modify the contexts <span class="math notranslate nohighlight">\(\Gamma, \Delta, \Theta, \Lambda\)</span> and so the proposition edge skips the node as it is not an introduction/elimination. But there are exceptions that do need the context:</p>
+<p>Most rules do not modify the contexts <span class="math notranslate nohighlight">\(\Gamma, \Delta, \Theta, \Lambda\)</span> and so the proposition edge skips the node as it is not an introduction/elimination (gray in the presentation above). But there are exceptions that do need the context:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\Pi_R\)</span> and <span class="math notranslate nohighlight">\(\Sigma_L\)</span> rename and combine the context from each case, similar to a phi-node. This can be skipped if there’s exactly one case.</p></li>
-<li><p>! / ?. These define a box and the box must be clearly defined so we can duplicate/erase it properly.</p></li>
+<li><p>Exponential promotion defines a box around a subtree of the derivation, and the box edge must be clearly defined so we can duplicate/erase it properly, so we keep the context there.</p></li>
 <li><p>Use/Assign, so that substitution has something to work with and the free variables are identified</p></li>
 </ul>
 </div></blockquote>
@@ -314,7 +270,7 @@
 <div class="section" id="expression-tree">
 <h3>Expression “tree”<a class="headerlink" href="#expression-tree" title="Permalink to this headline">¶</a></h3>
 <p>For doing stuff, we do not need the syntactic subderivation inclusion relationship at all, all the important bits can be gotten from the blue/red edges. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)</p>
-<p>If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents (=types), then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).</p>
+<p>If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents, then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).</p>
 <div class="graphviz"><object data="_images/graphviz-efd237bc84994cc8b0aeb103ae4eb83d2672a0fe.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 and [label=&quot;and =&quot;]
@@ -487,8 +443,8 @@ p [label=&quot;I&quot;]
 </div>
 <div class="section" id="normal-order-reduction">
 <h2>Normal Order Reduction<a class="headerlink" href="#normal-order-reduction" title="Permalink to this headline">¶</a></h2>
-<p>Looking at the graph for our simple <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">False</span> <span class="pre">True</span></code> example we can see the general pattern for reduction, at least normal-order leftmost-outermost WHNF reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -&gt; I -&gt; PiL -&gt; Cut -&gt; SigmaL -&gt; Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.</p>
-<p>So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node with target covered)</p>
+<p>Looking at the graph for our simple <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">False</span> <span class="pre">True</span></code> example we can see the general pattern for reduction, at least normal-order leftmost-outermost reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF, and evaluate the children with NF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -&gt; I -&gt; PiL -&gt; Cut -&gt; SigmaL -&gt; Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.</p>
+<p>So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node)</p>
 </div>
 <div class="section" id="optimal-reduction">
 <h2>Optimal reduction<a class="headerlink" href="#optimal-reduction" title="Permalink to this headline">¶</a></h2>
@@ -511,14 +467,14 @@ p [label=&quot;I&quot;]
 <p>Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:</p>
 <ol class="arabic simple">
 <li><p>When the term is linear or affine and does not need to duplicate anything.</p></li>
-<li><p>When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per <a class="bibtex reference internal" href="zzreferences.html#filinskilinearcontinuations1992" id="id9">[Fil92]</a>) Q: Does this change the evaluation semantics to be stricter?</p></li>
+<li><p>When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per <span id="id6">[<a class="reference internal" href="zzreferences.html#id29" title="Andrzej Filinski. Linear continuations. In Proceedings of the 19th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages, POPL '92, 27–38. Albuquerque, New Mexico, USA, February 1992. Association for Computing Machinery. URL: https://doi.org/10.1145/143165.143174 (visited on 2020-06-19), doi:10.1145/143165.143174.">Fil92</a>]</span>) Q: Does this change the evaluation semantics to be stricter?</p></li>
 <li><p>Inlining, when the duplication is carried out, resulting in two terms.</p></li>
 <li><p>More complex cases enforced by a typing system, such as Elementary Affine Logic.</p></li>
 </ol>
 </div>
 <div class="section" id="recursion">
 <h2>Recursion<a class="headerlink" href="#recursion" title="Permalink to this headline">¶</a></h2>
-<p>Sequent Core <a class="bibtex reference internal" href="zzreferences.html#downensequentcalculuscompiler2016a" id="id10">[DMAPJ16]</a> also introduces two more rules “multicut” and “rec” that are illogical but computationally useful:</p>
+<p>Sequent Core <span id="id7">[<a class="reference internal" href="zzreferences.html#id23" title="Paul Downen, Luke Maurer, Zena M. Ariola, and Simon Peyton Jones. Sequent calculus as a compiler intermediate language. In Proceedings of the 21st ACM SIGPLAN International Conference on Functional Programming, ICFP 2016, 74–88. Nara, Japan, September 2016. Association for Computing Machinery. URL: https://www.microsoft.com/en-us/research/publication/sequent-calculus-as-a-compiler-intermediate-language/ (visited on 2020-06-14), doi:10.1145/2951913.2951931.">DMAPJ16</a>]</span> also introduces two more rules “multicut” and “rec” that are illogical but computationally useful:</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cc}
   \rule
@@ -529,14 +485,14 @@ p [label=&quot;I&quot;]
     { \overrightarrow{\Gamma, \vec \Lambda, \Theta_i \vdash \Lambda_i, \vec \Theta, \Delta }}
     {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
 \end{array}\]</div>
-<p>These probably aren’t needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular <a class="bibtex reference internal" href="zzreferences.html#kiselyovmanyfacesfixedpoint2013" id="id11">[Kis13]</a> outline a polyvariadic combinator:</p>
+<p>These probably aren’t needed, as let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular <span id="id8">[<a class="reference internal" href="zzreferences.html#id39" title="Oleg Kiselyov. Many faces of the fixed-point combinator. August 2013. URL: http://okmij.org/ftp/Computation/fixed-point-combinators.html (visited on 2020-07-31).">Kis13</a>]</span> outline a polyvariadic combinator:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fix_poly</span> <span class="n">fl</span> <span class="ow">=</span> <span class="n">fix</span> <span class="p">(</span><span class="nf">\</span><span class="n">self</span> <span class="ow">-&gt;</span> <span class="n">map</span> <span class="p">(</span><span class="o">$</span> <span class="n">self</span><span class="p">)</span> <span class="n">fl</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To implement <code class="docutils literal notranslate"><span class="pre">fix</span></code> we can use the variant of the Y combinator <span class="math notranslate nohighlight">\(\lambda f.(\lambda x.x x) (\lambda x.f (x x))\)</span>. To type it we need the cyclic/recursive type <span class="math notranslate nohighlight">\(Wr = \Pi[(^w, Wr, r)]\)</span> (in the sense of an infinite, regular tree). Though, once we have recursive types, we could allow recursive proof trees as well; then implementing recursion directly is probably not too hard. BOHM uses a fan/duplication node combined with a loop.</p>
 </div>
-<div class="section" id="id12">
-<h2>Optimal reduction<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2>Optimal reduction<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <p>In call-by-value reduction, work is duplicated quite frequently. And lazy or call-by-need reduction, although more efficient computation-wise than call-by-value, still duplicates work. An example is</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="nn">System.IO.Unsafe</span>
 <span class="nf">i</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">w</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">unsafePerformIO</span> <span class="p">(</span><span class="n">print</span> <span class="s">&quot;i&quot;</span><span class="p">))</span> <span class="p">`</span><span class="n">seq</span><span class="p">`</span> <span class="n">w</span>
@@ -566,20 +522,9 @@ p [label=&quot;I&quot;]
   &amp;
   \rule{\Gamma^i, A^j \vdash \Delta^i }{\Gamma^i, A^i \vdash \Delta^i}{\text{lift}_L}_{j &gt; i}
 \end{array}\]</div>
-<p>There are also quantifier rules, probably unnecessary but I’ll write them down for reference. For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>, while <span class="math notranslate nohighlight">\(y\)</span> may occur. <span class="math notranslate nohighlight">\(A[t/x]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variable <span class="math notranslate nohighlight">\(x\)</span> have been replaced by the proposition/term <span class="math notranslate nohighlight">\(t\)</span> (and bound variables have been renamed when necessary).</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cccc}
-  \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
-  &amp;
-  \rule{\Gamma, A[t/x] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
-  &amp;
-  \rule{\Gamma \vdash A[t/x], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
-  &amp;
-  \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
-\end{array}\]</div>
 <div class="section" id="f2-g2">
 <h2>F2 G2<a class="headerlink" href="#f2-g2" title="Permalink to this headline">¶</a></h2>
-<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id13">[AG99]</a>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
+<p>For example, the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <span id="id10">[<a class="reference internal" href="zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}S &amp;= \, \left(!T \to !T \right) \to f\\T &amp;= \, !T \to f\\f &amp;= \, !S \to !S \to a\end{aligned}\end{align} \]</div>
 <div class="math notranslate nohighlight">
@@ -1632,7 +1577,7 @@ f_ret [label=&quot;I&quot;]
 ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<p>Then the 3rd PiL-PiR cut / beta reduction, corresponding to Fig 2.14 (4) / (5) on page 31 of <a class="bibtex reference internal" href="zzreferences.html#aspertioptimalimplementationfunctional1999" id="id14">[AG99]</a>:</p>
+<p>Then the 3rd PiL-PiR cut / beta reduction, corresponding to Fig 2.14 (4) / (5) on page 31 of <span id="id11">[<a class="reference internal" href="zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>:</p>
 <div class="graphviz"><object data="_images/graphviz-024b0b462abed3277876bc984312d93d0705d1b4.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
@@ -2810,7 +2755,7 @@ i_ret1 [label=&quot;I&quot;]
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Reduction-Example.html" class="btn btn-neutral float-right" title="Reduction example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Logic.html" class="btn btn-neutral float-left" title="Logic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
