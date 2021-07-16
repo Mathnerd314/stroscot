@@ -443,6 +443,21 @@
   language = {en}
 }
 
+@phdthesis{erkokValueRecursionMonadic2002,
+  title = {Value {{Recursion}} in {{Monadic Computations}}},
+  author = {Erkok, Levent},
+  year = {2002},
+  month = oct,
+  url = {http://leventerkok.github.io/papers/erkok-thesis.pdf},
+  language = {en},
+  school = {Oregon Health and Science University}
+}
+% == BibTeX quality report for erkokValueRecursionMonadic2002:
+% ? Title looks like it was stored in title-case in Zotero
+% ? Unused archive: 10.6083/M4SQ8XBW
+% ? Unused libraryCatalog: Zotero
+% ? Unused numPages: 170
+
 @inproceedings{filinskiLinearContinuations1992,
   title = {Linear Continuations},
   booktitle = {Proceedings of the 19th {{ACM SIGPLAN}}-{{SIGACT}} Symposium on {{Principles}} of Programming Languages},
@@ -567,6 +582,23 @@
 % ? Unsure about the formatting of the booktitle
 % ? Unused libraryCatalog: www.microsoft.com
 
+@inproceedings{kangFormalMemoryModel2015,
+  title = {A Formal {{C}} Memory Model Supporting Integer-Pointer Casts},
+  booktitle = {Proceedings of the 36th {{ACM SIGPLAN Conference}} on {{Programming Language Design}} and {{Implementation}}},
+  author = {Kang, Jeehoon and Hur, Chung-Kil and Mansky, William and Garbuzov, Dmitri and Zdancewic, Steve and Vafeiadis, Viktor},
+  year = {2015},
+  month = jun,
+  pages = {326--335},
+  publisher = {{ACM}},
+  address = {{Portland OR USA}},
+  doi = {10.1145/2737924.2738005},
+  url = {https://dl.acm.org/doi/10.1145/2737924.2738005},
+  urldate = {2021-06-14},
+  abstract = {The ISO C standard does not specify the semantics of many valid programs that use non-portable idioms such as integer-pointer casts. Recent efforts at formal definitions and verified implementation of the C language inherit this feature. By adopting high-level abstract memory models, they validate common optimizations. On the other hand, this prevents reasoning about much low-level code relying on the behavior of common implementations, where formal verification has many applications.},
+  isbn = {978-1-4503-3468-6},
+  language = {en}
+}
+
 @article{karazerisFinalCoalgebrasAccessible2011,
   title = {Final Coalgebras in Accessible Categories},
   author = {Karazeris, Panagis and Matzaris, Apostolos and Velebil, Jiří},
@@ -602,6 +634,28 @@
   url = {http://iml.univ-mrs.fr/~lafont/pub/llpages.pdf},
   language = {en}
 }
+
+@inproceedings{leaJavaForkJoin2000,
+  ids = {leaJavaForkJoin},
+  title = {A {{Java}} Fork/Join Framework},
+  booktitle = {Proceedings of the {{ACM}} 2000 Conference on {{Java Grande}}},
+  author = {Lea, Doug},
+  year = {2000},
+  month = jun,
+  pages = {36--43},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/337449.337465},
+  url = {https://doi.org/10.1145/337449.337465},
+  urldate = {2021-07-09},
+  abstract = {This paper describes the design, implementation, and performance of a Java framework for supporting a style of parallel programming in which problems are solved by (recursively) splitting them into subtasks that are solved in parallel, waiting for them to complete, and then composing results. The general design is a variant of the work−stealing framework devised for Cilk. The main implementation techniques surround efficient construction and management of tasks queues and worker threads. The measured performance shows good parallel speedups for most programs, but also suggests possible improvements.},
+  isbn = {978-1-58113-288-5},
+  language = {en},
+  series = {{{JAVA}} '00}
+}
+% == BibTeX quality report for leaJavaForkJoin2000:
+% ? Unsure about the formatting of the booktitle
+% ? Unused libraryCatalog: ACM Digital Library
 
 @inproceedings{levyJumboLcalculus2006,
   title = {Jumbo λ-Calculus},
@@ -639,6 +693,20 @@
   language = {en},
   series = {{{MFPS XI}}, {{Mathematical Foundations}} of {{Programming Semantics}}, {{Eleventh Annual Conference}}}
 }
+
+@article{marlowDesugaringHaskellDonotation2016,
+  title = {Desugaring {{Haskell}}'s Do-Notation {{Into Applicative Operations}}},
+  author = {Marlow, Simon and Jones, Simon Peyton and Kmett, Edward and Mokhov, Andrey},
+  year = {2016},
+  month = aug,
+  url = {https://www.microsoft.com/en-us/research/publication/desugaring-haskells-do-notation-into-applicative-operations/},
+  urldate = {2020-08-02},
+  abstract = {Monads have taken the world by storm, and are supported by do-notation (at least in Haskell). Programmers are increasingly waking up to the usefulness and ubiquity of Applicatives, but they have so far been hampered by the absence of supporting notation. In this paper we show how to re-use the very same do-notation to work […]},
+  language = {en-US}
+}
+% == BibTeX quality report for marlowDesugaringHaskellDonotation2016:
+% Missing required field 'journal'
+% ? Unused libraryCatalog: www.microsoft.com
 
 @incollection{martiniFineStructureExponential1995,
   ids = {martiniFineStructureExponential1995a},
@@ -683,6 +751,23 @@
   abstract = {Build systems are awesome, terrifying – and unloved. They are used by every developer around the world, but are rarely the object of study. In this paper, we offer a systematic, and executable, framework for developing and comparing build systems, viewing them as related points in a landscape rather than as isolated phenomena. By teasing apart existing build systems, we can recombine their components, allowing us to prototype new build systems with desired properties.},
   journal = {Journal of Functional Programming},
   language = {en}
+}
+
+@article{naikTypeSystemEquivalent2008,
+  title = {A Type System Equivalent to a Model Checker},
+  author = {Naik, Mayur and Palsberg, Jens},
+  year = {2008},
+  month = aug,
+  volume = {30},
+  pages = {1--24},
+  issn = {0164-0925, 1558-4593},
+  doi = {10.1145/1387673.1387678},
+  url = {https://dl.acm.org/doi/10.1145/1387673.1387678},
+  urldate = {2021-07-15},
+  abstract = {Type systems and model checking are two prevalent approaches to program verification. A prominent difference between them is that type systems are typically defined in a syntactic and modular style whereas model checking is usually performed in a semantic and whole-program style. This difference between the two approaches makes them complementary to each other: type systems are good at explaining why a program was accepted while model checkers are good at explaining why a program was rejected.             We present a type system that is equivalent to a model checker for verifying temporal safety properties of imperative programs. The model checker is natural and may be instantiated with any finite-state abstraction scheme such as predicate abstraction. The type system, which is also parametric, type checks exactly those programs that are accepted by the model checker. It uses a variant of function types to capture flow sensitivity and intersection and union types to capture context sensitivity. Our result sheds light on the relationship between type systems and model checking, provides a methodology for studying their relative expressiveness, is a step towards sharing results between the two approaches, and motivates synergistic program analyses involving interplay between them.},
+  journal = {ACM Transactions on Programming Languages and Systems},
+  language = {en},
+  number = {5}
 }
 
 @inproceedings{najafiBisectingCommitsModeling2019,
@@ -752,6 +837,24 @@
   number = {UCAM-CL-TR-908}
 }
 
+@article{sewellX86TSORigorousUsable2010,
+  title = {X86-{{TSO}}: A Rigorous and Usable Programmer's Model for X86 Multiprocessors},
+  shorttitle = {X86-{{TSO}}},
+  author = {Sewell, Peter and Sarkar, Susmit and Owens, Scott and Nardelli, Francesco Zappa and Myreen, Magnus O.},
+  year = {2010},
+  month = jul,
+  volume = {53},
+  pages = {89--97},
+  issn = {0001-0782, 1557-7317},
+  doi = {10.1145/1785414.1785443},
+  url = {https://dl.acm.org/doi/10.1145/1785414.1785443},
+  urldate = {2021-07-07},
+  abstract = {Exploiting the multiprocessors that have recently become ubiquitous requires high-performance and reliable concurrent systems code, for concurrent data structures, operating system kernels, synchronisation libraries, compilers, and so on. However, concurrent programming, which is always challenging, is made much more so by two problems. First, real multiprocessors typically do not provide the sequentially consistent memory that is assumed by most work on semantics and verification. Instead, they have relaxed memory models, varying in subtle ways between processor families, in which different hardware threads may have only loosely consistent views of a shared memory. Second, the public vendor architectures, supposedly specifying what programmers can rely on, are often in ambiguous informal prose (a particularly poor medium for loose specifications), leading to widespread confusion.},
+  journal = {Communications of the ACM},
+  language = {en},
+  number = {7}
+}
+
 @misc{shalBuildSystemRules2009,
   title = {Build System Rules and Algorithms},
   author = {Shal, Mike},
@@ -808,6 +911,29 @@
   language = {en}
 }
 
+@inproceedings{shiVirtualMachineShowdown2005,
+  ids = {shiVirtualMachineShowdown,shiVirtualMachineShowdown2008},
+  title = {Virtual Machine Showdown: Stack versus Registers},
+  shorttitle = {Virtual Machine Showdown},
+  booktitle = {Proceedings of the 1st {{ACM}}/{{USENIX}} International Conference on {{Virtual}} Execution Environments},
+  author = {Shi, Yunhe and Gregg, David and Beatty, Andrew and Ertl, M. Anton},
+  year = {2005},
+  month = jun,
+  pages = {153--163},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/1064979.1065001},
+  url = {https://dl.acm.org/doi/10.1145/1328195.1328197},
+  urldate = {2021-06-29},
+  abstract = {Virtual machines (VMs) are commonly used to distribute programs in an architecture-neutral format, which can easily be interpreted or compiled. A long-running question in the design of VMs is whether stack architecture or register architecture can be implemented more efficiently with an interpreter. We extend existing work on comparing virtual stack and virtual register architectures in two ways. Firstly, our translation from stack to register code is much more sophisticated. The result is that we eliminate an average of more than 47\% of executed VM instructions, with the register machine bytecode size only 25\% larger than that of the corresponding stack bytecode. Secondly we present an implementation of a register machine in a fully standard-compliant implementation of the Java VM. We find that, on the Pentium 4, the register architecture requires an average of 32.3\% less time to execute standard benchmarks if dispatch is performed using a C switch statement. Even if more efficient threaded dispatch is available (which requires labels as first class values), the reduction in running time is still approximately 26.5\% for the register architecture.},
+  isbn = {978-1-59593-047-7},
+  keywords = {interpreter,Interpreter,register architecture,stack architecture,virtual machine},
+  series = {{{VEE}} '05}
+}
+% == BibTeX quality report for shiVirtualMachineShowdown2005:
+% ? Unsure about the formatting of the booktitle
+% ? Unused libraryCatalog: ACM Digital Library
+
 @article{shulmanLinearLogicConstructive2018,
   title = {Linear Logic for Constructive Mathematics},
   author = {Shulman, Michael},
@@ -841,6 +967,22 @@
   language = {en},
   number = {2}
 }
+
+@article{trinderAlgorithmStrategyParallelism1998,
+  title = {Algorithm + {{Strategy}} = {{Parallelism}}},
+  author = {Trinder, P. W. and Hammond, K. and Loidl, H.-W. and Jones, Simon Peyton},
+  year = {1998},
+  month = jan,
+  volume = {8},
+  url = {https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/},
+  urldate = {2020-08-02},
+  abstract = {The process of writing large parallel programs is complicated by the eed to specify both the parallel behaviour of the program and the algorithm that is to be used to compute its result. This paper introduces evaluation strategies: lazy higher-order functions that control the parallel evaluation of non-strict functional languages. Using evaluation strategies, it is […]},
+  journal = {Journal of Functional Programming},
+  language = {en-US}
+}
+% == BibTeX quality report for trinderAlgorithmStrategyParallelism1998:
+% ? Title looks like it was stored in title-case in Zotero
+% ? Unused libraryCatalog: www.microsoft.com
 
 @inproceedings{wadlerCallbyvalueDualCallbyname2003,
   ids = {wadlerCallbyValueDualCallbyName},

@@ -16,17 +16,18 @@ Stroscot is an imperative programming language designed for modern processors.
   FAQ
   Syntax
   Fexprs
-  Arguments
   Modules
   Overloading
+  State
   Delimited-Continuations
+  Memory
   Types
   Verification
   Logic
   Reduction
   Reduction-Example
   Compiler
-  Memory
+  Memory-Management
   Assembly
   BuildSystem
   PackageManager

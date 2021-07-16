@@ -5,6 +5,8 @@ let
           persistent-sqlite persistent-template
           ioref-stable concurrent-extra unliftio
           extra heaps unordered-containers
+          cabal-install
+          quickcheck-instances tasty tasty-hunit tasty-quickcheck
             # for mutable interaction-net style graphs
           store
             # for fast serialization/deserialization

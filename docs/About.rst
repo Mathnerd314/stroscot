@@ -27,7 +27,7 @@ When there is beauty to be found in programming languages, it is our duty to dis
   Soon: There are 15 competing programming languages.
 
 Stroscot aims to be that universal language. The shackles of languages past are no more, and
-programs are freed to be idealized to their purest form.
+programs are freed to be idealized to their purest form. Abstractions reach their highest level and coding is automated as far as possible.
 
 .. _inspiring-projects:
 
@@ -108,6 +108,8 @@ World domination is of course very far off, the roadmap at the moment is, in rou
 Principles
 ==========
 
+Paradigms are vague and only express common patterns; they cannot be used to design a programming language. So instead we have principles.
+
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
 * Make the irreducible basic elements as simple and as few as possible without [surrendering] the adequate representation of a single datum of experience. (Albert Einstein)
 * Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (`Branch and bound <https://en.wikipedia.org/wiki/Branch_and_bound>`__)
@@ -125,6 +127,16 @@ Principles
 Statistics
 ==========
 
-* Bus factor: 1
+* `Bus factor <https://en.wikipedia.org/wiki/Bus_factor>`__: 1
 * 10k lines of code
-* 2 commits/month
+* ~1 commit/month
+
+Choices
+=======
+
+Documentation first
+  It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, "if it isn't documented, it doesn't exist". Looking at HN submissions of programming languages, the best docs win - it's only "famous" languages that can submit a Github repo full of files. To do well we need at least a README. But I'm going with a wiki style so I can write down every last detail. And there are code scraps for the places where writing code is simpler than explaining, but none of them really work yet.
+
+Sphinx
+  GH Pages/Jekyll can't do forward/back links. Checking out various options, Sphinx is used by Clang, GHC, Futhark, etc., although not Rust or Java. And it has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, ... so far it's proving its worth. It's run via a Travis CI script and the generated docs are stored in the gh-pages branch.
+

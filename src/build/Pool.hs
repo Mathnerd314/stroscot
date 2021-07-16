@@ -32,7 +32,9 @@ emptyS = S True Map.empty 0 0 0
 --   If any thread throws an exception, this exception is rethrown in a timely manner to all the other threads to cancel them,
 --   and no new threads are started. If all threads finish the pool is done.
 data Pool = Pool !(Var S)
-                 !(Barrier (Maybe SomeException, Int, Int)) -- Barrier to signal that we are finished, (e, max, sum)
+                 !((Maybe SomeException, Int, Int) -> IO ())
+                    -- Function to signal that we are finished, (e, max, sum)
+                    -- Only called when alive transitions from True to False
 
 -- | Spawn a new thread in the pool. Returns a barrier that ends when the thread ends, or Nothing if the pool is stopped.
 addPool' :: Pool -> IO () -> IO (Maybe (Barrier ()))
@@ -48,6 +50,10 @@ addPool' pool@(Pool var done) act = modifyVar var $ \s -> case alive s of
         False -> pure (s, pure ()) -- silently exit if pool is stopped
         True -> case res of
           Left e -> pure $ (s{alive = False}, cleanup pool t s e)
+          Right () | threadsCount s == 1 -> -- last thread to stop quits the pool
+            pure $
+              (s{alive = False, threads = Map.delete t $ threads s, threadsCount = threadsCount s - 1},
+              done (Nothing, threadsMax s, threadsSum s))
           Right () -> pure $
                       (s {threads = Map.delete t $ threads s, threadsCount = threadsCount s - 1}, pure ())
     pure . (,Just bar) $ s{threads = Map.insert t bar $ threads s, threadsCount = threadsCount s + 1,
@@ -55,16 +61,6 @@ addPool' pool@(Pool var done) act = modifyVar var $ \s -> case alive s of
 
 addPool :: Pool -> IO () -> IO ()
 addPool pool act = void $ addPool' pool act
-
--- | Quit the pool. This throws an error if the pool is already stopped,
--- and returns False if other threads are executing. (There should be no other threads in a clean exit.)
-quitPool :: Pool -> IO Bool
-quitPool pool@(Pool var done) = do
-  t <- myThreadId
-  join $ modifyVar var $ \s -> case null (Map.delete t $ threads s) of
-    False -> pure (s, pure False)
-    True | alive s -> pure $ (s{alive = False}, signalBarrier done (Nothing, threadsMax s, threadsSum s) >> pure True)
-         | otherwise -> pure (s, throwIO $ AssertionFailed "Pool is already stopped")
 
 data ThreadKilledDueTo = ThreadKilledDueTo SomeException
     deriving Show
@@ -75,23 +71,22 @@ instance Exception ThreadKilledDueTo where
 
 -- | If someone kills our thread, make sure we kill the other threads.
 cleanup (Pool var done) t s e = do
-  -- if a thread is in a masked action, killing it may take some time, so kill them in parallel
   let
     f tid bar bars_act = do
       bars <- bars_act
+      -- if a thread is in a masked action, killing it may take some time, so kill them in parallel
       forkIO $ throwTo tid (ThreadKilledDueTo e)
       pure (bar:bars)
   bars <- Map.foldrWithKey f (pure []) (Map.delete t $ threads s)
   mapM_ waitBarrier bars
-  signalBarrier done (Just e, threadsMax s, threadsSum s)
+  done (Just e, threadsMax s, threadsSum s)
 
 -- | Run all the tasks in the pool.
---   If any thread throws an exception, the exception will be reraised.
---   Returns once 'quitPool' is called.
-runPool :: (Pool -> IO ()) -> IO (Maybe SomeException, Int, Int) -- run all tasks in the pool
-runPool act = do
+--   If any thread throws an exception, the exception will be rethrown to all other threads in the pool.
+--   Once all threads have terminated (either gracefully or due to the exceptions), the second argument is called
+--   from the last thread in the pool.
+runPool :: (Pool -> IO ()) -> ((Maybe SomeException, Int, Int) -> IO ()) -> IO () -- run all tasks in the pool
+runPool act done = do
   s <- newVar emptyS
-  done <- newBarrier
   let pool = Pool s done
   addPool pool $ act pool
-  waitBarrier done

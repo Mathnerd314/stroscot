@@ -9,7 +9,7 @@ Stroscot supports pattern matching as well as predicate dispatch:
    f 2 = 2
    f y | y != 1 && y != 2 = 3
 
-The cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:
+Dispatch cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:
 
 ::
 
@@ -157,14 +157,27 @@ If the override statement was not in module 2, then using ``foo`` in module 3 wo
 Implicit conversion
 ===================
 
-There is a function ``convert`` in the core library. It includes as cases / requirements:
+There is a function ``convert`` in a module in the core library. It includes as cases / requirements:
 
-* ``convert a = a`` (reflexivity)
 * ``convert a = convert (convert a))`` (transitivity)
 
-A pass early in compilation adds a call to ``convert`` around every literal, e.g. ``1+2`` becomes ``convert (convert (+) (convert 1) (convert 2)``.
+Conversions are implicitly applied with this rule:
 
-New cases can be added; this is useful in various instances. For example we can create subtyping.
+::
+
+  f e | isError (f e) = f (convert e)
+
+New cases to convert can be added; this is useful in various instances. For example we can create subtyping.
+
+::
+
+  convert e | e : S = T e
+
+The default conversions are chosen follows:
+* Conversions should be total, otherwise they are simply replacing one error with another error.
+* Also they should be injective, e.g. int32 `can <https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double>`__ be converted to float64, but int64 cannot.
+
+Without these rules it is easy to get into trouble where the overloading is ambiguous.
 
 Equality
 ========

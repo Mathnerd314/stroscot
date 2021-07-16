@@ -1,19 +1,18 @@
 Types
 #####
 
-Types are hard. Academics have spent decades in search of the perfect type system. But really precise types end up looking like ``(Nil-->0) & (Cons a b-->1+(length b))``, which is just the original program. So Stroscot opts instead for model checking: leave programs with a dynamic, unityped semantics, but try to prove properties about execution. In particular the idea "well-typed programs don't go wrong" is simplified to "prove programs don't go wrong", "wrong" is defined via assertions, and these assertions are statically checked. ``assert`` is deeply special, since it has to work with descriptions executable properties, so unfortunately not all properties can be checked.
+Programmers can use types to annotate syntactic constructs. Types restrict the possible range of values an identifier may take, allowing the compiler to optimize to a specific runtime representation. Without any type annotations, programs follow a dynamically typed semantics. But the compiler still tries to prove properties about execution, so you can get type mismatch errors if a function is not defined on a value, and the whole-program analysis narrows the storage class of values.
 
-Dynamically typed doesn't mean that Stroscot has no types; types can still be specified and used to control your program, a la TypeScript.
+Type inference is undecidable in general, and the reduction is to weird problems like `semi-unification <https://www.quora.com/Why-is-type-inference-in-System-F-undecidable>`__, so Stroscot doesn't deal with types internally. Instead it uses model checking / automata theory, which better encodes undecidable properties. :cite:`naikTypeSystemEquivalent2008` provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types; maybe this can be used as type inference. But the types will be complex and precise, e.g. ``length : (Nil-->0) & (Cons a b-->1+(length b))``. OTOH when there's a type error, model checking produces a concrete program trace of a failing path, which should be easy to turn into a good error message.
 
+In particular type annotations are translated to assertions, and these assertions are statically checked. ``assert`` is deeply special, since it has to work with descriptions of executable properties, so unfortunately not all programs/properties will produce an answer.
 
+We don't have substructural types because the language itself is substructural (based on linear logic).
 
+Sets
+====
 
-The implementation of sets is based on syntax tree manipulation. Non-set values include all the core expressions, ADT elements and lambda expressions and so on. Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).
-
-Types
-=====
-
-Types are simply sets. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in :cite:`dolanAlgebraicSubtyping2016`. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
+Since types are assertions and assertions are boolean-valued just like set membership, we can think of types as sets of values defined by a predicate ``isElemOf S``. Since distributive lattices are isomorphic to collections of sets this is equivalent to the definition of types in :cite:`dolanAlgebraicSubtyping2016`. Often a type will be a simple definition checking whether an element has a given tag, but the set can describe almost any side effect free computation.
 
 ::
 
@@ -58,7 +57,8 @@ The second version, "strict typing", restricts the definition of the function so
 Dependent types
 ---------------
 
-Since the value is in scope, defining an (insanely) dependent type is easy:
+The types (assertions) can bind the value, so Stroscot can express dependent types.
+And the values are in scope in the type, so even `insanely dependent types <https://github.com/UlfNorell/insane/>`__ can be defined:
 
 ::
 

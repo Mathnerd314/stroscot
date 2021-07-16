@@ -9,7 +9,7 @@ As of 2016, The Google repo has 1 billion files, of which 9 million are code
 Pipeline
 ========
 
-The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add token start/end and other debugging information.
+The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.
 
 Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.
 
@@ -37,18 +37,68 @@ A technique for testing the compiler and systems in general is to use a "fuel" c
 Optimization
 ============
 
+The path from cloud to CPU is long, so there is a lot of caching in between:
+
+* Physical registers (0.3 ns): managed by the CPU
+* Logical registers (0.3 ns): assembly
+* Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
+* Main Memory (0.1us-4us): assembly
+* SSD (16us-62us): file APIs
+* LAN (0.5-500ms): network stack
+* HDD (3 ms): file APIs
+* WAN (150ms): network stack
+
+Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application.
+
+
 For a lot of compilation decisions we don't have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guide optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don't use a code path very often, then we can de-optimize it and use a slow version. But if it's a hot path then we want to streamline that path as much as possible.
 
 With respect to optimization we have various criteria to minimize.
-* Compile time - when we are just running static verification
-* Run time - faster programs are more useful
-* Execute time (compile + run) - the edit-compile-test cycle for debug builds, and similarly REPL loops
-* Output size - as binaries are often transferred across a network
-* Other statistics for Compile/Run/Execute - memory usage, power usage
-
-The options O0, On, Og, Os/Oz correspond to using compile, run, execute, and output size as the primary objective.
+* O0 - Compile time - when we are just running static verification
+* On - Run time - faster programs are more useful
+* Og - Execute time (compile + run) - the edit-compile-test cycle for debug builds, and similarly REPL loops
+* Os/Oz - Output size - as binaries are often transferred across a network
+* O? - Other statistics for Compile/Run/Execute - memory usage, power usage
 
 Profiles themselves introduce a "Heisenbug" problem: we cannot measure the detailed performance of an unprofiled program. The solution is to build with profiling support for almost all of the compilation pipeline. We should only omit profiling instructions for non-profiled builds at the assembly level. And if we use hardware-assisted sampling profiling then we don't even need profiling instructions, in many cases.
+
+General purpose use
+Prepackaged software is very often expected to be executed on a variety of machines and CPUs that may share the same instruction set, but have different timing, cache or memory characteristics. As a result, the code may not be tuned to any particular CPU, or may be tuned to work best on the most popular CPU and yet still work acceptably well on other CPUs.
+Special-purpose use
+If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
+Embedded systems
+These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code's speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code's timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.
+
+* Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.
+  * Peephole optimizations / strength reduction - like ``x*2`` by ``x << 1``/``x+x``, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.
+  * Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation
+    * Partial evaluation
+  * common subexpression elimination, global value numbering - tricky with blocks
+    * code factoring - CSE but for control flow
+  * Test reordering - do simpler tests first - treat control flow as data
+  * Removing conditional branch cases if can prove won't be taken
+  * Inlining
+  * Space optimizations - anti-inlining
+    * Trampolines allow placing code at low addresses
+    * Macro compression compresses common sequences of code
+* Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.
+* Scheduling / reordering / pipelining
+  * minimize pipeline stalls, when an instruction in one stage of the pipeline depends on the result of another instruction ahead of it in the pipeline but not yet completed.
+  * ensure the various functional units are fully fed with instructions to execute.
+  * avoid cache misses by grouping accesses
+  * clear out unconditional jumps (inlining). Avoid inlining so much that it cannot fit in the cache.
+  * splitting/combining recursive calls / basic blocks
+  * Bias conditional jumps towards the common case
+* Recursion
+  * induction variable analysis to replace multiplication by a loop index with addition
+  * loop reversal - changing condition to zero comparison
+  * loop unswitching - moving conditional outside loop
+  * hoisting invariants, partial/total redundancy elimination
+  * parallelization - multi-threaded or vectorized code
+* Alias analysis - changing memory references into values
+* tail call optimization, Stack height reduction - stack optimizations
+* deforestation - remove data structure
+
 
 Output
 ======
@@ -160,6 +210,10 @@ We want to execute code that runs at compile time, e.g. reading a blob of data t
 
 We may also want to read configuration, e.g. the target platform properties (word size, endianness, etc.).
 
+
+Also we want to do computations with no runtime inputs, like 1+2.
+
+
 Compiler ways
 =============
 
@@ -181,3 +235,16 @@ multi-threading, debugging, and profiling enabled. See the gory details on the
 Installed packages usually don't provide objects for all the possible ways as it
 would make compilation times and disk space explode for features rarely used.
 The compiler itself and its boot libraries must be built for the target way.
+
+
+Compiler memory management
+==========================
+
+For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.
+
+Overall I don't see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it's clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.
+
+Documentation generator
+=======================
+
+The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There's regex-based search, and special searches for identifiers.

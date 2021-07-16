@@ -1,0 +1,40 @@
+digraph {
+rankdir="BT"
+
+"Assign29" [label="A"]
+"BangD27" [label="B"]
+"PiR20" [label="D"]
+"break2" [label="X",style=dotted]
+"break3" [label="Y",style=dotted]
+
+"cut" [label="Cut"]
+"lift_main_l" [label="Lift"]
+"lift_main_r" [label="Lift"]
+"lift_seq_l" [label="Lift"]
+"lift_seq_r" [label="Lift"]
+"lift_l[0]" [label="Lift"]
+"lift_r[0]" [label="Lift"]
+
+
+edge [fontsize=9 ]
+
+"Assign29" -> "break2"[color=black,weight=5,taillabel="c_bseq",headlabel="c_lseq",arrowhead=normal,arrowtail=none,dir=both]
+"break2" -> "break3"[color=black,weight=5,taillabel="bd_bseq",headlabel="c_rseq",arrowhead=none,arrowtail=none,dir=both]
+"break3" -> "cut" [color=black,weight=5,label="b_bseq",arrowhead=normal,arrowtail=none,dir=both]
+
+"cut" -> "lift_seq_l" [color=black,weight=5,label="bd_lift_tseq",arrowhead=normal,arrowtail=inv,dir=both]
+"lift_seq_l" -> "BangD27" [color=black,weight=5,label="bd_tseq",arrowhead=normal,arrowtail=inv,dir=both]
+"cut" -> "lift_seq_r" [color=black,weight=5,label="b_lift_tseq",arrowhead=normal,arrowtail=none,dir=both]
+"lift_seq_r" -> "PiR20" [color=black,weight=5,label="b_tseq",arrowhead=normal,arrowtail=none,dir=both]
+
+"cut" -> "lift_main_r"[color=red,weight=2,label="b_lift_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"lift_main_r" -> "PiR20"[color=red,weight=2,label="b_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"cut" -> "lift_main_l"[color=blue,weight=2,label="bd_lift_t",arrowhead=normal,arrowtail=none,dir=both]
+"lift_main_l" -> "BangD27"[color=blue,weight=2,label="bd_t",arrowhead=normal,arrowtail=none,dir=both]
+
+"E" -> "lift_l[0]"[color=blue,weight=2,label="b_bl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"F" -> "lift_r[0]"[color=red,weight=2,label="b_br[0]",arrowhead=normal,arrowtail=none,dir=both]
+"lift_l[0]" -> "G"[color=blue,weight=2,label="b_tl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"lift_r[0]" -> "H"[color=red,weight=2,label="b_tr[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+}

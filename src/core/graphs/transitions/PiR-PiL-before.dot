@@ -1,0 +1,36 @@
+digraph {
+rankdir="BT"
+
+"Assign29" [label="A"]
+"BangD27" [label="B"]
+"Bang24" [label="C"]
+"PiR20" [label="D"]
+"break2" [label="X",style=dotted]
+"break3" [label="Y",style=dotted]
+
+"r" [label="Cut",shape=doublecircle]
+"left_node" [label="PiL"]
+"right_node" [label="PiR"]
+
+"Assign29" -> "r"[color=black,weight=5,label="c_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "break3"[color=black,weight=5,label="c_rseq",arrowhead=none,arrowtail=none,dir=both]
+"r" -> "break2"[color=black,weight=5,label="c_lseq",arrowhead=none,arrowtail=inv,dir=both]
+
+"break3" -> "right_node"[color=black,weight=5,label="pr_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"E" -> "right_node"[color=blue,weight=2,label="pr_bl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "right_node"[color=red,weight=2,taillabel="c_r",headlabel="pr_main",arrowhead=normal,arrowtail=none,dir=both]
+"F" -> "right_node"[color=red,weight=2,label="pr_br[0]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "PiR20"[color=black,weight=5,label="pr_m_seq",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "PiR20"[color=red,weight=2,label="pr_m_r[0]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "J"[color=blue,weight=2,label="pr_m_l[0]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "G"[color=blue,weight=2,label="pr_m_tl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "H"[color=red,weight=2,label="pr_m_tr[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+"break2" -> "left_node"[color=black,weight=5,label="pl_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "left_node"[color=blue,weight=2,taillabel="c_l",headlabel="pl_main",arrowhead=none,arrowtail=none,penwidth=2,dir=both]
+"left_node" -> "BangD27"[color=black,weight=5,label="pl_l[0]_t",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "BangD27"[color=blue,weight=2,label="pl_l[0]_l",arrowhead=normal,arrowtail=none,penwidth=2,dir=both]
+"left_node" -> "Bang24"[color=black,weight=5,label="pl_r[0]_t",arrowhead=normal,arrowtail=inv,dir=both]
+"left_node" -> "Bang24"[color=red,weight=2,label="pl_r[0]_r",arrowhead=normal,arrowtail=inv,dir=both]
+
+}

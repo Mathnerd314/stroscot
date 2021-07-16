@@ -159,7 +159,7 @@ We can also write some types common from programming:
      - Linked list of A
      - :math:`\Sigma\{(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])`
 
-With these we see the justification for the jumbo types: they can represent abstract data types (ADTs). Although we can encode :math:`\Pi,\Sigma` using the common connectives:
+With these we see the justification for the jumbo types: they can represent abstract data types (ADTs). Even though we can encode :math:`\Pi,\Sigma` using the common connectives:
 
 .. math::
 
@@ -174,7 +174,7 @@ Polarized logic
 
 The polarized negations and shifts show up in polarized linear logic. :cite:`zeilbergerLogicalBasisEvaluation2009` In particular :math:`\Sigma` is positive while :math:`\Pi` is negative. We use the opposite direction for shifts from :cite:`zeilbergerLogicalBasisEvaluation2009` with the mnemonic that an up shift converts from negative to positive, hence increases the value. For most purposes the polarity does not matter (they have identical derivation rules) so we write :math:`\neg A` and :math:`\smash{\updownarrow}A`. :cite:`nigamAlgorithmicSpecificationsLinear2009` uses delay operators :math:`\delta^\pm(\cdot)` instead of shifts.
 
-The jumbo connectives have the nice property that any purely-positive or purely-negative combination connectives  can be written as a single jumbo connective.
+The jumbo connectives have the nice property that any combination of purely-positive or purely-negative connectives is equivalent to a single jumbo connective, "unpacking" the formulas.
 
 Exponentials
 ============
@@ -234,14 +234,18 @@ For :math:`(x,m)\geq(y,n)`, :math:`\bang^x_m \bang^y_n A \equiv \bang^x_m A \equ
 
 For :math:`(x,n)\leq(z,p)` and :math:`(y,o)\leq(w,m)` we can prove :math:`\bang^w_m \whim^x_n \bang^y_o \whim^z_p A \equiv \bang^w_m \whim^z_p A`.
 
-So for a single modality there are 7 derived modalities, with the relationships :math:`\bang A \to A \to \whim A`, :math:`\bang A \to \bang \whim \bang A \to \{\bang \whim A, \whim \bang A\} \to \whim \bang \whim A \ to \whim A`.:cite:`coniglioEqualityLinearLogic2002` But with multiple modalities the possibilities become infinite. On the other hand, from an operational perspective, we can always erase the subexponential information and use the normal !/?.
+So for a single modality there are 7 derived modalities, with the relationships :math:`\bang A \to A \to \whim A`, :math:`\bang A \to \bang \whim \bang A \to \{\bang \whim A, \whim \bang A\} \to \whim \bang \whim A \to \whim A`. :cite:`coniglioEqualityLinearLogic2002` But with multiple modalities the possibilities become infinite, for example elements of the alternating sequence :math:`\bang_1 \bang_2 \bang_1 \ldots`. On the other hand, from an operational perspective, we can always erase the subexponential information and use the normal !/?.
+
+We can prove the equivalences :math:`\whim A \leftrightarrow A \leftrightarrow \bang A` for certain "cartesian" types, like booleans, integers, and ADTs of cartesian types, with a natural proof structure that preserves information. This is an extension of :cite:`filinskiLinearContinuations1992`'s observation in section 3.1 - we destruct the value, then use bang, then construct the same value.
+
+Does this mean there is a deeper structure to proofs? We can also write proofs for non-cartesian types like :math:`\text{Bool} \to \text{Bool}`, they just cannot preserve information (because we would have to use the function twice). I think the conclusion is to be generous with exponentials and use them whenever you want weakening/contraction, so that you don't have to examine the proof structure to identify those operations.
 
 Structural rules
 ================
 
 Finally we have the structural rules. As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to the exponentials above).
 
-First is the exchange rule, given for permutations :math:`\sigma_L, \sigma_R`. In practice we use a graph or multiset representation that internalizes the exchange rule.
+First is the exchange rule, given for permutations :math:`\sigma_L, \sigma_R`. In practice we use a graph or multiset representation that internalizes the exchange rule. Restricting the exchange rule would result in an ordered type system / noncommutative logic, similar to a stack machine. But :cite:`shiVirtualMachineShowdown2005` shows that a register model is much better for an implementation - the extra stack swapping instructions give no benefit. Similarly restricting associativity would turn sequent lists into a binary tree - but this also has no benefit, it would just be a lot of shuffling operations. The number of operators would explode because every tree structure / stack index would create a new operator. Overall messing with the exchange rule seems like a nothing burger - some theoretical papers, but no real meat.
 
 .. math::
   :nowrap:
@@ -309,7 +313,7 @@ We also allow quantification over modalities, as in :cite:`nigamAlgorithmicSpeci
 Logic translations
 ==================
 
-First we must define classical and intuitionistic logic. To define classical logic we simply add standard structural weakening and contraction rules to our linear logic. Then :math:`A\otimes B \equiv A \land B`, :math:`A\par B \equiv A \lor B`, and we obtain the usual classical logic with modalities;:cite:`lafontLinearLogicPages` all the connectives decompose into or are equivalent to the standard ones. To define intuitionistic logic we take classical logic and restrict the right hand side of all sequents to have at most one consequent; various pi/sigma connectives cannot be used as they would create multiple consequents, and similarly right contraction cannot be used. We allow disallow right weakening to make the translation easier.
+First we must define classical and intuitionistic logic. To define classical logic we simply add standard structural weakening and contraction rules to our linear logic. Then :math:`A\otimes B \equiv A \land B`, :math:`A\par B \equiv A \lor B`, and we obtain the usual classical logic with modalities :cite:`lafontLinearLogicPages`; all the connectives decompose into or are equivalent to the standard ones. To define intuitionistic logic we take classical logic and restrict the right hand side of all sequents to have at most one consequent; various pi/sigma connectives cannot be used as they would create multiple consequents, and similarly right contraction cannot be used. We allow disallow right weakening to make the translation easier.
 
 The translation from intuitionistic logic to linear logic decorates every proposition and subproposition with !. :cite:`dicosmoIntroductionLinearLogic2015`
 
@@ -414,7 +418,7 @@ Alternatively we could use intuitionistic equality :math:`A\overset{!}{=}B \defe
 Infinite structures
 ===================
 
-We want to support infinite types like the lambda calculus or lists, and similarly infinite expressions like ``x = 1 : x``. We construct "infinite" as a terminal coalgebra - our proof trees turn into fixed points of systems of formal equations. :cite:`karazerisFinalCoalgebrasAccessible2011` We represent these using variable and assignment rules. The semantics is that the variable usage is a "hole" that plugs in a copy of the derivation tree from the variable assignment. The type of the use rule can performs a substitution on the free variables of the type of the assignment.
+We want to support infinite types like the lambda calculus or lists, and similarly infinite expressions like ``x = 1 : x``. We construct "infinite" as a terminal coalgebra - our proof trees turn into fixed points of systems of formal equations :cite:`karazerisFinalCoalgebrasAccessible2011`. We represent these using variable and assignment rules. The semantics is that the variable usage is a "hole" that plugs in a copy of the derivation tree from the variable assignment. The type of the use rule can performs a substitution on the free variables of the type of the assignment.
 
 .. math::
 

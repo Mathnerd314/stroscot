@@ -1,0 +1,33 @@
+digraph {
+rankdir="BT"
+
+"Assign29" [label="A"]
+"BangD27" [label="B"]
+"Bang24" [label="C"]
+"PiR20" [label="D"]
+"break2" [label="X",style=dotted]
+"break3" [label="Y",style=dotted]
+
+"cuts[1]" [label="Cut",tooltip="CutLL[0]"]
+"cuts[0]" [label="Cut",tooltip="CutLR[0]"]
+
+edge [fontsize=9]
+
+"Assign29" -> "break2"[color=black,weight=5,taillabel="c_bseq",headlabel="c_lseq",arrowhead=normal,arrowtail=none,dir=both]
+"break2" -> "break3"[color=black,weight=5,taillabel="pl_bseq",headlabel="c_rseq",arrowhead=none,arrowtail=none,dir=both]
+"break3" -> "cuts[0]" [color=black,weight=5,label="pr_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[0]" -> "cuts[1]" [color=black,weight=5,label="seqP[0]",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[1]" -> "PiR20" [color=black,weight=5,label="pr_m_seq",arrowhead=normal,arrowtail=none,dir=both]
+
+"cuts[1]" -> "BangD27"[color=black,weight=5,label="pl_l[0]_t",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[1]" -> "BangD27"[color=blue,weight=2,label="pl_l[0]_l",arrowhead=normal,arrowtail=none,penwidth=2,dir=both]
+"cuts[0]" -> "Bang24"[color=black,weight=5,label="pl_r[0]_t",arrowhead=normal,arrowtail=inv,dir=both]
+"cuts[0]" -> "Bang24"[color=red,weight=2,label="pl_r[0]_r",arrowhead=normal,arrowtail=inv,dir=both]
+
+"cuts[1]" -> "PiR20"[color=red,weight=2,label="pr_m_r[0]",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[0]" -> "J"[color=blue,weight=2,label="pr_m_l[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+"E" -> "G"[color=blue,weight=2,taillabel="pr_bl[0]",headlabel="pr_m_tl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"F" -> "H"[color=red,weight=2,taillabel="pr_br[0]",headlabel="pr_m_tr[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+}

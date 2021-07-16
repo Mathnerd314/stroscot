@@ -11,6 +11,8 @@ These techniques combine to form a much more powerful toolkit than conventional 
 
 In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And then properties can be "shallow" and not result in a state space explosion.
 
+Model checking requires annotations only for marking the specific states that should be unreachable. A model checker rejects a program by providing a program trace counterexample. The counterexample can then be fed into a debugger to determine what changes to make to the program.
+
 model checkers:
 [CBMC](https://www.cprover.org/cbmc/)
 
@@ -21,6 +23,9 @@ Verdi, Ironfleet, JSCert, Cosette, FSCQ, Chapar, CertiKOS, Linksem, miTLS and HA
 CakeML
 
 Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, KLEE, [NASA’s Java Pathfinder](https://github.com/javapathfinder), jCUTE, SAGE
+
+
+Another goal: allow creating custom optimizations with formal proofs of their correctness
 
 
 Configurable Program Analysis
@@ -104,6 +109,8 @@ CPAChecker algorithm
 Properties
 ==========
 
+The halting problem merely prevents a program from evaluating a nontrivial property of another program with perfect accuracy. It does not prevent a program from evaluating a nontrivial property (bound checks, type safety, whatever) with possible outputs Yes/No/IDK.
+
 Reachability
 ------------
 
@@ -174,4 +181,9 @@ SAT solving can be recast as proving a sequent :math:`C_1, \ldots, C_n \vdash \b
 The conversion to CNF uses properties of classical reasoning. In the intuitionistic case, every formula can be transformed into an equiprovable sequent :math:`\Gamma_i, \Gamma_f \vdash d` with :math:`d` an atom, :math:`\Gamma_f` made of flat clauses as in the :math:`C_i` above, and implication clauses :math:`(a \to b) \to c`.
 
 There are definitions of resolution for fragments of linear logic, and linear logic theorem provers.
+
+CFG
+===
+
+So, executing this model some amount of loops, we get a tree of executions. Going deeper in the tree extends the execution, and the tree branching is due to the nondeterministic choices at the beginning of each iteration of the loop. We can turn this tree into a graph by grouping nodes using an `equivalence relation <https://en.wikipedia.org/wiki/Equivalence_relation>`__ that determines if the behavior is the same for two executions. This forms the control flow graph that we need for verification. In particular we want to verify that observable behavior of the program is not affected by the choices of the scheduler, as defined by I/O. For example, equivalent executions must write the same files and the same contents to the files, but not necessarily in the same order. But really it is up to the user to decide, maybe writing in a different order is bad.
 

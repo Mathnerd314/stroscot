@@ -414,9 +414,10 @@ sleep s
 now :: IO Seconds
 now = toNanoSecs <$> getTime Monotonic
 
--- | An 'IO' action that when evaluated calls 'assert' in the 'IO' monad and throws an 'AssertionFailed' exception if the argument is 'False'.
+-- | An 'IO' action that when evaluated calls 'assert' in the 'IO' monad, which throws an 'AssertionFailed' exception if the argument is 'False'.
 --
--- > catch (errorIO "Hello") (\(ErrorCall x) -> pure x) == pure "Hello"
--- > seq (errorIO "foo") (print 1) == print 1
+-- > catch (assertIO True  >> pure 1) (\(x :: AssertionFailed) -> pure 2) == pure 1
+-- > catch (assertIO False >> pure 1) (\(x :: AssertionFailed) -> pure 2) == pure 2
+-- > seq (assertIO False) (print 1) == print 1
 assertIO :: Partial => Bool -> IO ()
 assertIO x = withFrozenCallStack $ evaluate $ assert x ()

@@ -1,0 +1,62 @@
+digraph {
+rankdir="BT"
+
+"Assign29" [label="A"]
+"BangD27" [label="B"]
+"Bang24" [label="C"]
+"PiR20" [label="D"]
+"break2" [label="X",style=dotted]
+"break3" [label="Y",style=dotted]
+
+"cuts[0]" [label="Cut"]
+"cuts[1]" [label="Cut"]
+"bangs[0]" [label="Bang"]
+"bangs[1]" [label="Bang"]
+"dup_main" [label="Dup"]
+"dup_seq" [label="Dup"]
+"dup_l[0]" [label="Dup"]
+"dup_r[0]" [label="Dup"]
+"bangcs[0]" [label="BangC"]
+"whimcs[0]" [label="WhimC"]
+
+
+edge [fontsize=9 ]
+
+"Assign29" -> "break2"[color=black,weight=5,taillabel="c_bseq",headlabel="c_lseq",arrowhead=normal,arrowtail=none,dir=both]
+"break2" -> "break3"[color=black,weight=5,taillabel="bc_bseq",headlabel="c_rseq",arrowhead=none,arrowtail=none,dir=both]
+"break3" -> "bangcs[0]" [color=black,weight=5,label="b_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"bangcs[0]" -> "whimcs[0]" [color=black,weight=5,label="bangseq[0]",arrowhead=normal,arrowtail=none,dir=both]
+"whimcs[0]" -> "cuts[0]" [color=black,weight=5,label="whimseq[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+"cuts[0]" -> "cuts[1]" [color=black,weight=5,label="cutseq[0]",arrowhead=normal,arrowtail=inv,dir=both]
+"cuts[1]" -> "BangD27" [color=black,weight=5,label="bc_tseq",arrowhead=normal,arrowtail=inv,dir=both]
+"cuts[0]" -> "bangs[0]" [color=black,weight=5,label="bangs_bseq[0]",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[1]" -> "bangs[1]" [color=black,weight=5,label="bangs_bseq[1]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[0]" -> "dup_seq" [color=black,weight=5,label="bangs_tseq[0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[1]" -> "dup_seq" [color=black,weight=5,label="bangs_tseq[1]",arrowhead=onormal,arrowtail=none,dir=both]
+"dup_seq" -> "PiR20" [color=black,weight=5,label="b_tseq",arrowhead=normal,arrowtail=none,dir=both]
+
+"cuts[0]" -> "bangs[0]"[color=red,weight=2,label="bangs_bmain[0]",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[1]" -> "bangs[1]"[color=red,weight=2,label="bangs_bmain[1]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[0]" -> "dup_main"[color=red,weight=2,label="bangs_tmain[0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[1]" -> "dup_main"[color=red,weight=2,label="bangs_tmain[1]",arrowhead=onormal,arrowtail=none,dir=both]
+"dup_main" -> "PiR20"[color=red,weight=2,label="b_tmain",arrowhead=normal,arrowtail=none,dir=both]
+
+"cuts[0]" -> "BangD27"[color=blue,weight=2,label="bc_t[0]",arrowhead=normal,arrowtail=none,dir=both]
+"cuts[1]" -> "Bang24"[color=blue,weight=2,label="bc_t[1]",arrowhead=normal,arrowtail=none,dir=both]
+
+"E" -> "bangcs[0]"[color=blue,weight=2,label="b_bl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"F" -> "whimcs[0]"[color=red,weight=2,label="b_br[0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangcs[0]" -> "bangs[0]"[color=blue,weight=2,label="bangs_bl[0][0]",arrowhead=normal,arrowtail=none,dir=both]
+"whimcs[0]" -> "bangs[0]"[color=red,weight=2,label="bangs_br[0][0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangcs[0]" -> "bangs[1]"[color=blue,weight=2,label="bangs_bl[1][0]",arrowhead=normal,arrowtail=none,dir=both]
+"whimcs[0]" -> "bangs[1]"[color=red,weight=2,label="bangs_br[1][0]",arrowhead=normal,arrowtail=none,dir=both]
+
+"bangs[0]" -> "dup_l[0]"[color=blue,weight=2,label="bangs_tl[0][0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[0]" -> "dup_r[0]"[color=red,weight=2,label="bangs_tr[0][0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[1]" -> "dup_l[0]"[color=blue,weight=2,label="bangs_tl[1][0]",arrowhead=normal,arrowtail=none,dir=both]
+"bangs[1]" -> "dup_r[0]"[color=red,weight=2,label="bangs_tr[1][0]",arrowhead=normal,arrowtail=none,dir=both]
+"dup_l[0]" -> "G"[color=blue,weight=2,label="b_tl[0]",arrowhead=normal,arrowtail=none,dir=both]
+"dup_r[0]" -> "H"[color=red,weight=2,label="b_tr[0]",arrowhead=normal,arrowtail=none,dir=both]
+
+}

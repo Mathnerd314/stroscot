@@ -341,6 +341,12 @@ This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is
 
 Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
 
+How does strict/lazy/optimal interact with memory management?
+
+* Strict: use a stack
+* Lazy: evaluation graph stored on the heap
+* Optimal: also an evaluation graph, I guess
+
 Implementation
 ==============
 
@@ -2678,3 +2684,5 @@ Add the last duplication node and reduce, for consistency with figure 2.17 (7)
 2.17(7) has 5 duplicator nodes, 3 app nodes, and 3 lambda nodes. In comparison, our graph has 5 duplicators, 4 cuts, 3 identities, and one each of PiL, PiR, !p, and !d. So there are still the two pairs of fans but the nodes otherwise look completely different.
 
 Anyway, for the pair on the right, if we scroll up a bit we can see that we were duplicating a single PiR-!d-I loop, the identity function. So the duplication of the I must resolve to another identity function, with the two connecting.
+
+stack machines: waste of time. the stack manipulation takes up more resources than register allocation.
