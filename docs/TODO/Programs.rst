@@ -17,7 +17,7 @@ Basic features copied from Reddit
 As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.
 
 Terminal / text editor
---------------------------------
+----------------------
 
 After reading about elastic tabstops I've always thought that there's a better solution, "tablike spaces". The idea here is to use a normal proportional font for rendering, but to make the spaces jump to the pixel column they would use if the font was monospaced. So rendering "a bit of text" would render "a" at 0, "bit" at 2 ems, "of" at 6 ems, and "text" at 9 ems, where an em is the width of the widest character in the font.
 

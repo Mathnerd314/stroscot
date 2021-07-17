@@ -51,41 +51,41 @@ The GC status of an object is set by two bits, the mark bit and the gray bit. Th
     "Add Referenced Objects To Gray Stack" -> "Object Fully Traversed"
   }
 
-  10:50:15 From  Chris Engelbert  to  Everyone : That is kinda like the distinction that go has, errors are returned from functions and can be handled, panics are like real issues that normally cannot be handled anyways
-  10:55:37 From  Chris Engelbert  to  Everyone : They are super handy. If you have a go lib which bubbles up an error multiple levels, you’ll have a really hard time to find the real issuer of the error.
-  10:56:39 From  Yorick Peterse  to  Everyone : http://joeduffyblog.com/2016/02/07/the-error-model/
-  10:58:25 From  Matt Dziubinski  to  Everyone : This is interesting: https://tuplex.cs.brown.edu/
-  This part in particular: https://twitter.com/ms705/status/1410658222885773315
-  "The key insight in Tuplex is that we can *specialize* the  code *to the data*, rather than emitting general code.
+10:50:15 From  Chris Engelbert  to  Everyone : That is kinda like the distinction that go has, errors are returned from functions and can be handled, panics are like real issues that normally cannot be handled anyways
+10:55:37 From  Chris Engelbert  to  Everyone : They are super handy. If you have a go lib which bubbles up an error multiple levels, you’ll have a really hard time to find the real issuer of the error.
+10:56:39 From  Yorick Peterse  to  Everyone : http://joeduffyblog.com/2016/02/07/the-error-model/
+10:58:25 From  Matt Dziubinski  to  Everyone : This is interesting: https://tuplex.cs.brown.edu/
+This part in particular: https://twitter.com/ms705/status/1410658222885773315
+"The key insight in Tuplex is that we can *specialize* the  code *to the data*, rather than emitting general code.
 
-  E.g., if input data is mostly integers, Tuplex generates LLVM IR that assumes integers & splits the data into common case (compiled) and exceptions (interpret)."
+E.g., if input data is mostly integers, Tuplex generates LLVM IR that assumes integers & splits the data into common case (compiled) and exceptions (interpret)."
 
-  Error handling in Swift resembles exception handling in other languages, with the use of the try, catch and throw keywords. Unlike exception handling in many languages—including Objective-C—error handling in Swift doesn’t involve unwinding the call stack, a process that can be computationally expensive. As such, the performance characteristics of a throw statement are comparable to those of a return statement.”
-  11:18:21 From  Aaron Goldman  to  Everyone : Proceedings of an International Conference on Algol 86 Implementation : Department of Computer Science, University of Manitoba, Winnipeg, June 18-20, 1974
-  11:33:09 From  Matt Dziubinski  to  Everyone : Cf. this part (page 26): 8 Benchmark II: Variation in Locality (Long Running)
-  11:33:20 From  Matt Dziubinski  to  Everyone : "Perhaps the most valuable aspects of local (“arena”) allocators is that, besides speeding up short-running programs, as demonstrated in the previous benchmark, they keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference."
-  11:33:29 From  Matt Dziubinski  to  Everyone : "N.B., diffusionshouldnot be confused with fragmentation–an entirely different phenomenon pertaining solely to (“coalescing”) allocators (not covered in this paper) where initially large chunks of contiguous memory decay into many smaller (non-adjacent) ones, thereby precluding larger ones from subsequently being allocated –even though there is sufficient total memory available to accommodate the request. Substituting a pooling allocator, such as theone used in this benchmark (AS7), is a well-known solution to the fragmentationproblems that might otherwise threaten long-running mission-critical systems."
+Error handling in Swift resembles exception handling in other languages, with the use of the try, catch and throw keywords. Unlike exception handling in many languages—including Objective-C—error handling in Swift doesn’t involve unwinding the call stack, a process that can be computationally expensive. As such, the performance characteristics of a throw statement are comparable to those of a return statement.”
+11:18:21 From  Aaron Goldman  to  Everyone : Proceedings of an International Conference on Algol 86 Implementation : Department of Computer Science, University of Manitoba, Winnipeg, June 18-20, 1974
+11:33:09 From  Matt Dziubinski  to  Everyone : Cf. this part (page 26): 8 Benchmark II: Variation in Locality (Long Running)
+11:33:20 From  Matt Dziubinski  to  Everyone : "Perhaps the most valuable aspects of local (“arena”) allocators is that, besides speeding up short-running programs, as demonstrated in the previous benchmark, they keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference."
+11:33:29 From  Matt Dziubinski  to  Everyone : "N.B., diffusionshouldnot be confused with fragmentation–an entirely different phenomenon pertaining solely to (“coalescing”) allocators (not covered in this paper) where initially large chunks of contiguous memory decay into many smaller (non-adjacent) ones, thereby precluding larger ones from subsequently being allocated –even though there is sufficient total memory available to accommodate the request. Substituting a pooling allocator, such as theone used in this benchmark (AS7), is a well-known solution to the fragmentationproblems that might otherwise threaten long-running mission-critical systems."
 
 
 Newly allocated traversable objects are light-gray. Writing only changes the state of non-gray objects.
 
-  When the object is marked during the mark phase, it's turned dark-gray (mark bit turned black) and pushed onto the gray stack. In case it's unreachable, the sweep phase can free a light-gray object like any other object marked white.
+When the object is marked during the mark phase, it's turned dark-gray (mark bit turned black) and pushed onto the gray stack. In case it's unreachable, the sweep phase can free a light-gray object like any other object marked white.
 
-  Dark-gray objects are turned black after traversal (clearing the gray bit) and turned white after sweeping. The write barrier may trigger during this short period and move the barrier back by turning it dark-gray again.
+Dark-gray objects are turned black after traversal (clearing the gray bit) and turned white after sweeping. The write barrier may trigger during this short period and move the barrier back by turning it dark-gray again.
 
-  An object that survived one GC cycle is turned white like all other survivors. In case the object is written to after that, it's turned light-gray again. But this doesn't push the object onto the gray stack right away! In fact, only the gray bit needs to be flipped, which avoids further barriers as explained above.
+An object that survived one GC cycle is turned white like all other survivors. In case the object is written to after that, it's turned light-gray again. But this doesn't push the object onto the gray stack right away! In fact, only the gray bit needs to be flipped, which avoids further barriers as explained above.
 
-  The main advantage of the quad-color algorithm is the ultra-cheap write barrier: just check the gray bit, which needs only 2 or 3 machine instructions. And due to the initial coloring and the specific color transitions, write barriers for e.g. tables are hardly ever triggered in practice. The fast path of the write barrier doesn't need to access the mark bitmap, which avoids polluting the cache with GC metadata while the mutator is running.
+The main advantage of the quad-color algorithm is the ultra-cheap write barrier: just check the gray bit, which needs only 2 or 3 machine instructions. And due to the initial coloring and the specific color transitions, write barriers for e.g. tables are hardly ever triggered in practice. The fast path of the write barrier doesn't need to access the mark bitmap, which avoids polluting the cache with GC metadata while the mutator is running.
 
-  The quad-color algorithm can easily fall back to the tri-color algorithm for some traversable objects by turning them white initially and using forward write barriers. And there's an obvious shortcut for non-traversable objects: marking turns a white object black right away, which touches the mark bitmap only. Since these kind of objects are in segregated arenas, they don't need to be traversed and their data never needs to be brought into the cache during the mark phase.
+The quad-color algorithm can easily fall back to the tri-color algorithm for some traversable objects by turning them white initially and using forward write barriers. And there's an obvious shortcut for non-traversable objects: marking turns a white object black right away, which touches the mark bitmap only. Since these kind of objects are in segregated arenas, they don't need to be traversed and their data never needs to be brought into the cache during the mark phase.
 
 
 Arena-based bump allocator for objects
-  Cheap write barrier in the common case
-  Mark-and-compact collection for oldest generation
-  Copying generational collection for younger generations
-  Special space (in cache?) for nursery generation
-  State Transitions
+Cheap write barrier in the common case
+Mark-and-compact collection for oldest generation
+Copying generational collection for younger generations
+Special space (in cache?) for nursery generation
+State Transitions
 
 
 I think it's better to write a faster GC than to try to special-case various types of allocation. The GC itself can special case things. Optimizing requires global information and only the GC has a global view.

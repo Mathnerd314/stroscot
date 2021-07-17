@@ -12,26 +12,10 @@ Stroscot is an imperative programming language designed for modern processors.
 .. toctree::
   :maxdepth: 2
 
-  About
-  FAQ
-  Syntax
-  Fexprs
-  Modules
-  Overloading
-  State
-  Delimited-Continuations
-  Memory
-  Types
-  Verification
-  Logic
-  Reduction
-  Reduction-Example
-  Compiler
-  Memory-Management
-  Assembly
-  BuildSystem
-  PackageManager
-  Programs
-  Library
+  GettingStarted/index
+  HowTo/index
+  Reference/index
+  Explanation/index
+  TODO/index
   zzreferences
 

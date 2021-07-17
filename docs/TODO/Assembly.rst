@@ -54,7 +54,7 @@ For ARM we have XML `Machine Readable Architecture instruction tables <https://d
 
 Timing:
 * https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions
-*
+* ARM: ?
 
 
 Templates

@@ -694,19 +694,25 @@
   series = {{{MFPS XI}}, {{Mathematical Foundations}} of {{Programming Semantics}}, {{Eleventh Annual Conference}}}
 }
 
-@article{marlowDesugaringHaskellDonotation2016,
-  title = {Desugaring {{Haskell}}'s Do-Notation {{Into Applicative Operations}}},
-  author = {Marlow, Simon and Jones, Simon Peyton and Kmett, Edward and Mokhov, Andrey},
+@inproceedings{marlowDesugaringHaskellDonotation2016a,
+  ids = {marlowDesugaringHaskellDonotation2016},
+  title = {Desugaring {{Haskell}}'s Do-Notation into Applicative Operations},
+  booktitle = {Proceedings of the 9th {{International Symposium}} on {{Haskell}}},
+  author = {Marlow, Simon and Peyton Jones, Simon and Kmett, Edward and Mokhov, Andrey},
   year = {2016},
-  month = aug,
-  url = {https://www.microsoft.com/en-us/research/publication/desugaring-haskells-do-notation-into-applicative-operations/},
-  urldate = {2020-08-02},
-  abstract = {Monads have taken the world by storm, and are supported by do-notation (at least in Haskell). Programmers are increasingly waking up to the usefulness and ubiquity of Applicatives, but they have so far been hampered by the absence of supporting notation. In this paper we show how to re-use the very same do-notation to work […]},
-  language = {en-US}
+  month = sep,
+  pages = {92--104},
+  publisher = {{Association for Computing Machinery}},
+  address = {{New York, NY, USA}},
+  doi = {10.1145/2976002.2976007},
+  url = {https://doi.org/10.1145/2976002.2976007},
+  urldate = {2021-07-16},
+  abstract = {Monads have taken the world by storm, and are supported by do-notation (at least in Haskell). Programmers are increasingly waking up to the usefulness and ubiquity of Applicatives, but they have so far been hampered by the absence of supporting notation. In this paper we show how to re-use the very same do-notation to work for Applicatives as well, providing efficiency benefits for some types that are both Monad and Applicative, and syntactic convenience for those that are merely Applicative. The result is fully implemented as an optional extension in GHC, and is in use at Facebook to make it easy to write highly-parallel queries in a distributed system.},
+  isbn = {978-1-4503-4434-0},
+  keywords = {Applicative Functors,concurrency,Monads,parallelism},
+  language = {en-US},
+  series = {Haskell 2016}
 }
-% == BibTeX quality report for marlowDesugaringHaskellDonotation2016:
-% Missing required field 'journal'
-% ? Unused libraryCatalog: www.microsoft.com
 
 @incollection{martiniFineStructureExponential1995,
   ids = {martiniFineStructureExponential1995a},

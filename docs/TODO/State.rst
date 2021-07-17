@@ -399,7 +399,7 @@ Mutation creates a new snapshot from an old snapshot by adding, removing, or cha
 Stroscot is concurrent and parallel.
 
 
-The implementation uses work stealing FIFO queues :cite:`leaJavaForkJoin`. In practice these queues combine pure and imperative/concurrent sparks, so there's one per processor and not much overhead besides cache pollution, the need to use memory locations instead of registers, and synchronization.
+The implementation uses work stealing FIFO queues :cite:`leaJavaForkJoin2000`. In practice these queues combine pure and imperative/concurrent sparks, so there's one per processor and not much overhead besides cache pollution, the need to use memory locations instead of registers, and synchronization.
 
 Then there are concurrent operations. These are just load/store and the various architecture-specific fence instructions.
 

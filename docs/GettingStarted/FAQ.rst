@@ -33,7 +33,6 @@ How do I contribute?
 Any and all input will be taken into consideration. Commit access is
 available for anyone with 2 or more commits to the project.
 
-Why do you put quotes before commas?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The license isn't set yet so for now use CC0.
 
-The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this.
+While I am far from a documentation expert I believe that open source projects—and their supporting documentation—can and should be inviting to people of all skill levels. Documenting items like how to get started, where to find key files, expectations, etc are easy wins that positively impact how people interact or contribute to your project.
