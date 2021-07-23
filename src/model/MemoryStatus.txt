@@ -1,0 +1,229 @@
+address flags:
+  whether it is free
+
+non-free flags:
+  nndPreferred preferred NUMA node. This can be NUMA_NO_PREFERRED_NODE to obtain non-NUMA behavior.
+  allocation base/size
+  MEM_PRIVATE: whether it is private to the process.
+  one of:
+    anonymous: nonpageable or backed by the paging file, i.e. not mapped to a real file
+      whether it is pagefile-backed
+    MEM_MAPPED: it is a mapped view of a data file.
+      file handle or backed by OS paging file (INVALID_HANDLE_VALUE, maximum size)
+      name of mapping or NULL
+      (optional) security descriptor describing if can be inherited
+      type of file
+        normal - specify memory protection constant that committed pages will use
+      dwDesiredAccess:
+        FILE_MAP_READ or FILE_MAP_WRITE
+        and flags: FILE_MAP_COPY FILE_MAP_EXECUTE FILE_MAP_LARGE_PAGES FILE_MAP_TARGETS_INVALID
+      allocation type - default, MEM_RESERVE, MEM_COMMIT, MEM_REPLACE_PLACEHOLDER
+    MEM_IMAGE: it is a mapped view of an executable image.
+        SEC_IMAGE - protection determined by executable
+        SEC_IMAGE_NO_EXECUTE - PAGE_READONLY protection
+    MEM_PHYSICAL: view of the \Device\PhysicalMemory section. (for AWE allocation)
+    mapped view of a direct-mapped file: maybe something to do with virtual machine memory passthrough. IDK
+  page protection specified for region when it was allocated (memory protection constant)
+    one of:
+      PAGE_EXECUTE_READ
+      PAGE_EXECUTE_READWRITE
+      PAGE_READONLY
+      PAGE_READWRITE
+
+      if not file mapping:
+        PAGE_EXECUTE
+        PAGE_EXECUTE_WRITECOPY
+        PAGE_WRITECOPY
+
+      if not file mapping and not enclave:
+        PAGE_NOACCESS
+
+    if executable, extra flags:
+      PAGE_TARGETS_INVALID
+      PAGE_TARGETS_NO_UPDATE
+      set of valid targets for control flow guard
+
+    zero or more of the following, zero if NOACCESS or enclave:
+      PAGE_GUARD
+      PAGE_NOCACHE / SEC_NOCACHE (for anonymous vs file)
+      PAGE_WRITECOMBINE / SEC_WRITECOMBINE (for anonymous vs file)
+
+  MEM_LARGE_PAGES / FILE_MAP_LARGE_PAGES: mapped with large pages
+    anonymous large pages is always read/write
+  MEM_WRITE_WATCH: if set, additional bit stores whether memory has been written to since the write-tracking state has been reset
+
+
+
+  one of:
+    reserved
+      MEM_RESERVE_PLACEHOLDER (for file mapping) - if set, protection must be PAGE_NOACCESS
+    committed
+      current page protection (memory protection constant)
+      one of:
+        normal status
+        discarded, undefined contents (DiscardVirtualMemory, failed ReclaimVirtualMemory)
+        offered with priority (OfferVirtualMemory)
+          VMOfferPriorityVeryLow
+          VMOfferPriorityLow
+          VMOfferPriorityBelowNormal
+          VMOfferPriorityNormal
+        locked into memory (VirtualLock)
+        within an enclave:
+          type ENCLAVE_TYPE_SGX or ENCLAVE_TYPE_VBS
+          lpEnclaveInformation
+          flags:
+            PAGE_ENCLAVE_THREAD_CONTROL
+            PAGE_ENCLAVE_UNVALIDATED
+        AWE-allocated:
+          physical page frame numbers buffer (AllocateUserPhysicalPages)
+          always read/write protected
+      contents: normal, uninitialized, zeroed, securely zeroed
+      if heap allocated:
+        allocating heap:
+          heap handle, heap size
+          HEAP_CREATE_ENABLE_EXECUTE to add execute bit to committed pages
+        memory protection is always PAGE_READWRITE or PAGE_EXECUTE_READWRITE
+
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualallocexnuma
+https://docs.microsoft.com/en-us/windows/win32/memory/large-page-support
+https://docs.microsoft.com/en-us/windows/win32/memory/page-state
+https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-globalalloc
+https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-localalloc
+https://docs.microsoft.com/en-us/windows/win32/memory/heap-functions
+https://docs.microsoft.com/en-us/windows/win32/api/heapapi/nf-heapapi-heapcreate
+https://docs.microsoft.com/en-us/windows/win32/api/heapapi/nf-heapapi-heapalloc
+https://docs.microsoft.com/en-us/windows/win32/api/heapapi/nf-heapapi-heapfree
+https://docs.microsoft.com/en-us/windows/win32/memory/memory-management-functions
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfilemappinga
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-createfilemapping2
+https://docs.microsoft.com/en-us/windows/win32/memory/file-mapping-security-and-access-rights
+https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfilemappingnumaa
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-mapviewoffile3fromapp
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-allocateuserphysicalpages
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-discardvirtualmemory
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/ns-memoryapi-win32_memory_region_information
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-reclaimvirtualmemory
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-offervirtualmemory
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtuallock
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualqueryex
+https://docs.microsoft.com/en-us/windows/win32/memory/memory-protection-constants
+https://docs.microsoft.com/en-us/windows/win32/memory/creating-guard-pages
+https://patents.google.com/patent/US20170123996A1/en
+
+Linux:
+
+address data:
+  effective NUMA policy - combination of system, process/task, VMA, shared policies
+  if allocated:
+    VMA base/size
+    page mapping: one of the following:
+      present in RAM:
+        page frame number
+        number of times this page is mapped
+        flags: lots available through pagemap, the ones I thought interesting:
+          HWPOISON - hardware detected memory corruption on this page: don't touch the data!
+          IDLE - page has not been accessed since it was marked idle
+          DIRTY - page has been written to, hence contains new data i.e. for file backed page: (in-memory data revision > on-disk one)
+          ACTIVE - page is in the active LRU list
+          REFERENCED - page has been referenced since last LRU list enqueue/requeue
+      not present but in swap:
+        swap file number and offset
+      not present at all (unmapped)
+    memory protection flags:
+      zero or more of the following flags:
+          PROT_EXEC
+          PROT_READ
+          PROT_WRITE
+    MAP_SHARED or MAP_PRIVATE (copy-on-write)
+    one of:
+      anonymous mapping, not backed by any file, maybe with pseudo-path:
+        [stack] - contains stack start location
+        [vdso] The virtual dynamically linked shared object.
+        [heap] within program break / data segment
+      file, identified by fd/offset (fd has symlink device inode pathname, but may be deleted)
+    protection key, or -1 if not present
+    NUMA node page is allocated to
+    if in enclave:
+      associated SGX Enclave Control Structure (SECS)
+    read advise, one of:
+      MADV_NORMAL: no read advise
+      MADV_SEQUENTIAL: sequential read advise provided
+      MADV_RANDOM: random read advise provided
+
+    zero or more of the following flags can be set:
+      MADV_DONTFORK: do not copy area on fork
+      MADV_WIPEONFORK: wipe on fork
+      MADV_DONTDUMP: do not include area into core dump
+      MADV_MERGEABLE: mergeable advise flag
+      MADV_HUGEPAGE/MADV_NOHUGEPAGE: huge page advise flag, no-huge page advise flag (mutually exclusive but may have neither set)
+      MAP_GROWSDOWN: stack segment, grows down
+      MAP_LOCKED: pages are locked in memory
+      MAP_NORESERVE: swap space is not reserved for the area
+      MAP_HUGETLB: area uses huge tlb pages, hugetlb page size
+      MLOCK_ONFAULT: Lock the pages covered when they are faulted in
+      MAP_SYNC: synchronous page fault, used with various device-mapped files
+      pure PFN range
+      disabled write to the mapped file
+      memory mapped I/O area
+      do not expand area on remapping
+      area is accountable
+      soft dirty flag
+      mixed map area
+      arm64 BTI guarded page
+      arm64 MTE allocation tags are enabled
+      userfaultfd missing tracking
+      userfaultfd wr-protect tracking
+      offered (MADV_FREE). a write will reclaim.
+      MAP_UNINITIALIZED: may contain arbitrary data (theoretical, in practice always zeroed)
+      zeroed (MADV_DONTNEED for anonymous private pages, MADV_REMOVE for shared files)
+
+References:
+
+https://elixir.bootlin.com/linux/latest/C/ident/vm_area_struct
+VmFlags https://elixir.bootlin.com/linux/latest/C/ident/VM_NONE
+https://elixir.bootlin.com/linux/latest/C/ident/madvise_behavior
+
+https://stackoverflow.com/questions/9922928/what-does-pss-mean-in-proc-pid-smaps
+https://stackoverflow.com/questions/35391017/the-meaning-of-referenced-in-process-smaps
+https://man7.org/linux/man-pages/man7/pkeys.7.html
+https://lore.kernel.org/patchwork/patch/1094742/
+https://www.kernel.org/doc/html/latest/admin-guide/mm/pagemap.html
+https://www.kernel.org/doc/html/latest/admin-guide/mm/soft-dirty.html
+https://www.kernel.org/doc/html/latest/admin-guide/mm/numa_memory_policy.html
+https://www.kernel.org/doc/html/latest/x86/sgx.html
+https://github.com/torvalds/linux/blob/master/arch/x86/include/uapi/asm/sgx.h
+
+https://man7.org/linux/man-pages/man5/proc.5.html (map_files maps pagemap smaps)
+https://man7.org/linux/man-pages/man7/numa.7.html (numa_maps)
+https://man7.org/linux/man-pages/man2/mmap.2.html
+https://man7.org/linux/man-pages/man2/mprotect.2.html
+https://man7.org/linux/man-pages/man2/brk.2.html
+https://man7.org/linux/man-pages/man2/mremap.2.html
+https://man7.org/linux/man-pages/man2/msync.2.html
+https://man7.org/linux/man-pages/man2/mincore.2.html
+https://man7.org/linux/man-pages/man2/madvise.2.html
+https://man7.org/linux/man-pages/man2/mlock.2.html
+https://man7.org/linux/man-pages/man2/remap_file_pages.2.html
+https://man7.org/linux/man-pages/man2/mbind.2.html
+https://man7.org/linux/man-pages/man2/set_mempolicy.2.html
+https://man7.org/linux/man-pages/man2/migrate_pages.2.html
+https://man7.org/linux/man-pages/man2/move_pages.2.html
+
+
+GMEM_MOVEABLE memory allocates a “handle”. This handle can be converted to memory via GlobalLock. You can call GlobalReAlloc() on an unlocked GMEM_MOVEABLE block (or a locked GMEM_MOVEABLE block when you pass the GMEM_MOVEABLE flag to GlobalReAlloc which means “move it even if it’s locked”) and the memory will move, but the handle will continue to refer to it. You have to re-lock the handle to get the new address it got moved to. All this lock/unlock overhead becomes a real pain, since you can’t use pointers any more. You have to use handles and convert them to pointers right before you use them. (This also means no pointers into the middle of a moveable object.)  Consequently, moveable memory is useless in practice.
+
+  * state: Free (no further information) or committed
+  * memory mapping: anonymous or a file/device mapping (offset, device, inode, pathname, deleted). anonymous is (0,0,0,"",false) and might have a pseudo path - stack, vdso, or heap. We can extend the pseudo path to the list of ELF segments - text, static data, global data.
+  * extended status: number of processes sharing it (`Pss <https://stackoverflow.com/questions/9922928/what-does-pss-mean-in-proc-pid-smaps>`__), clean/dirty, marked as `referenced/accessed <https://stackoverflow.com/questions/35391017/the-meaning-of-referenced-in-process-smaps>`__ (i.e. not currently reclaimable), locked mapping, memory protection key (see pkeys(7))
+  * NUMA node: each committed page lives on a specific NUMA node. (obtainable via `move_pages <https://man7.org/linux/man-pages/man2/move_pages.2.html>`__ with nodes=NULL)
+  * NUMA policy: Where uncommitted pages will be backed. The default is local to the current thread's node.
+* Allocator bits (based on Memcheck):
+
+  * (un)allocated - It is an error to read or write an unallocated location. To properly match the malloc/free pair when using multiple allocators simultaneously, a freeable allocated status stores the set of bits belonging to the allocation and a stateful zero-argument function that frees the allocation.
+  * (un)initialized - it is an error to have observable program behavior dependent on uninitialized data. But it is not an error merely to read/write/copy it.
+  * MMS-internal - This page is managed by the memory management subsystem. Access to this memory must have the implicit argument ``inMMS`` set to true, to prevent accidental corruption.
+* Unknown status - Programs using the FFI may have external allocators allocate pages. So besides the initial memory setup, all memory is set to unknown status to indicate that one needs to check if it is allocated / not allocated before using it for anything. Allocations at system-chosen addresses automatically skip already-allocated pages, so they can ignore the unknown status.
+* Thread sharing: list of threads that may read/write this memory
+
