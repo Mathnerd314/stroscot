@@ -7,35 +7,62 @@ import Data.List
 import Data.List.Split(splitOn)
 import Data.Ord(comparing)
 import qualified Data.Map as M
+import Data.Set (Set)
+import qualified Data.Set as S
 import Data.Maybe(catMaybes)
 import Control.Arrow(first)
 import Control.Monad(join)
 import System.Environment(getArgs)
+import Prelude hiding (max)
 
-data Object = Object String | Group String [Object] deriving (Eq,Ord)
+type Object = String
+data Group = Group String (Set Object) deriving (Eq,Ord)
 
-instance Show Object where
-  show (Object s) = s
+instance Show Group where
   show (Group s l) = s
 
-count :: Object -> Integer
-count (Object _) = 1
-count (Group _ x)  = sum (map count x)
-
 -- Remove groups
-flatten :: Object -> [Object]
-flatten (Object s) = [Object s]
-flatten (Group _ xs) = xs >>= flatten
+flatten :: Group -> Set Object
+flatten (Group _ xs) = xs
 
-data Precedes = P Object Object deriving (Eq,Show)
+subsetOf :: Group -> Group -> Bool
+subsetOf x y = flatten x `S.isSubsetOf` flatten y
 
-type Power = Integer
+data PrecedesX a = P a a deriving (Eq,Show,Ord)
+
+type PrecG = PrecedesX Group
+type Precedes = PrecedesX Object
+
+data Power = Power (Set PrecG) -- power is the least upper bound (maximum / supremum) of the set
+   deriving Eq
 
 -- Inverse of specificity
-power :: Precedes -> Power
-power (P x y) = (count x) * (count y)
+power :: PrecG -> Power
+power = Power . S.singleton
 
-powerUp :: [Precedes] -> [(Precedes, Power)]
+max :: Power -> Power -> Power
+max (Power p1) (Power p2) = Power (S.fromList . takeMaxes . S.toList $ S.union p1 p2)
+
+takeMaxes :: [PrecG] -> [PrecG]
+takeMaxes l = takeMaxes' l []
+  where
+   -- 'xs' is the list of things we've seen so far,
+   -- 'y' is the potential new element
+   -- 'ys' is the rest of the list
+   takeMaxes' [] _         = []
+   takeMaxes' (y:ys) xs
+      |  y `dominatedBy` (ys++xs) = takeMaxes' ys xs
+      | otherwise       = y : takeMaxes' ys (y:xs)
+
+   dominatedBy _ []         =  False
+   dominatedBy y (x:xs)     =  y `subsetOfPrec` x || y `dominatedBy` xs
+
+subsetOfPrec :: PrecG -> PrecG -> Bool
+subsetOfPrec (P a b) (P c d) =
+   (a `subsetOf` c && b `subsetOf` d && (a /= c || b /= d))
+   || (a `subsetOf` d && b `subsetOf` c && (a /= d || b /= c))
+
+powerUp :: [PrecG] -> [(PrecG, Power)]
 powerUp list = zip list (map power list)
 
 -- a X b and b X c -> a X c
@@ -65,8 +92,8 @@ q :: [(Precedes, Power)] -> [(Precedes, Power)]
 q = fix p
 
 -- P (Group [a,b,...] [c,d,...]) -> [P a c, P a d, ..., P b c, P b d, ...]
-split :: [(Precedes, Power)] -> [(Precedes, Power)]
-split  = (=<<) (\(P x y,p) -> map (,p) $ liftA2 P (flatten x) (flatten y))
+split :: [(PrecG, Power)] -> [(Precedes, Power)]
+split  = (=<<) (\(P x y,p) -> map (,p) $ liftA2 P (S.toList $ flatten x) (S.toList $ flatten y))
 
 -- cancel out pairs P x y  P y x, also flipping them for topological sort
 double :: [(Precedes, Power)] -> [(Order, Power)]
@@ -82,8 +109,8 @@ reduce = (=<<) (\((k1,k2),(b,v)) -> if b then [] else [P k1 k2]) . M.toList . fo
 collect :: [Precedes] -> [([Object], [Object])]
 collect = M.toList . foldr (\(P k v) -> M.insertWith (++) [k] [v]) M.empty
 
-solve :: [Precedes] -> [Object]
-solve = toposort . collect . reduce . double . nub2 . split . powerUp . (map fst) . q . map (,1)
+solve :: [PrecG] -> [Object]
+solve = toposort . collect . reduce . double . nub2 . q . split . powerUp
 
 -- From http://rosettacode.org/wiki/Topological_sort#Haskell (modified to be slightly more generific)
 combs :: (Eq t, Num t) => t -> [a] -> [[a]]
@@ -111,8 +138,10 @@ toposort xs
 
 -- Group/Object
 parseObject dict (name,value) = if (last name) == ':'
-                                  then M.insert (reverse . tail . reverse $ name) (Group name (catMaybes (liftA2 M.lookup (words value) [dict]))) dict
-                                  else M.insert name (Object value) dict
+                                  then M.insert
+                                          (reverse . tail . reverse $ name)
+                                          (Group name (S.unions (map flatten (catMaybes (liftA2 M.lookup (words value) [dict]))))) dict
+                                  else M.insert name (Group name (S.singleton value)) dict
 
 -- Constraints
 parseConstraints dict = map (\(name,value) -> P (dict M.! name) (dict M.! value))
