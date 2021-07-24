@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Memory &mdash; Stroscot  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Logic" href="Logic.html" />
+    <link rel="prev" title="Overloading" href="Overloading.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Memory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#variable">Variable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shared-variable">Shared variable</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#destructors">Destructors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO/index.html">In-progress design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Language Reference</a> &raquo;</li>
+        
+      <li>Memory</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Memory.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="memory">
+<h1>Memory<a class="headerlink" href="#memory" title="Permalink to this headline">¶</a></h1>
+<dl class="simple">
+<dt>word</dt><dd><p>An integer <code class="docutils literal notranslate"><span class="pre">i</span></code> with <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">MAX</span></code>. Since ternary computers <a class="reference external" href="https://www.extremetech.com/computing/295424-back-off-binary-samsung-backed-researchers-debut-ternary-semiconductor">might</a> eventually become popular, you should not assume that <code class="docutils literal notranslate"><span class="pre">MAX</span></code> is a power of 2, but for all practical purposes this will be. Hence a word corresponds to some fixed number of logical bits (0/1).</p>
+</dd>
+</dl>
+<p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id39" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
+<div class="section" id="value-representation">
+<h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this headline">¶</a></h2>
+<p>Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly. Finally there is the use of pointers. For example, we can encode a list in a number of ways:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="s">&quot;b&quot;</span><span class="p">]</span>
+<span class="o">#</span> <span class="n">flat</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="s">&quot;b&quot;</span><span class="p">]</span> <span class="n">or</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;b&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="o">#</span> <span class="n">intrusive</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="n">x</span><span class="ow">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">y</span><span class="p">],</span> <span class="n">y</span><span class="ow">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;b&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="mi">0</span><span class="p">]</span>
+<span class="o">#</span> <span class="n">uniform</span> <span class="n">list</span><span class="p">,</span> <span class="n">stored</span> <span class="n">like</span> <span class="n">x</span><span class="ow">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">&amp;</span><span class="n">x1</span><span class="p">,</span><span class="o">&amp;</span><span class="n">y</span><span class="p">],</span><span class="n">x1</span><span class="ow">=</span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="n">y</span> <span class="ow">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">&amp;</span><span class="n">y1</span><span class="p">,</span><span class="o">&amp;</span><span class="mi">0</span><span class="p">],</span><span class="n">y1</span><span class="ow">=</span><span class="s">&quot;b&quot;</span>
+</pre></div>
+</div>
+<p>So in Stroscot there is no fixed memory representation. Instead memory layout is defined by overloaded <code class="docutils literal notranslate"><span class="pre">pack</span></code>/<code class="docutils literal notranslate"><span class="pre">unpack</span></code> functions, similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a>. Unlike Narcissus <span id="id2">[<a class="reference internal" href="../zzreferences.html#id18" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span> we don’t have a state parameter, because the pack/unpack functions can take implicit parameters. To prevent mismatches unpack is not top-level and the result of pack is actually a tuple <code class="docutils literal notranslate"><span class="pre">(buffer,unpack)</span></code> containing the matching unpack function.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pack</span> <span class="kt">:</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Write</span><span class="p">,</span> <span class="n">unpack</span> <span class="kt">:</span> <span class="kt">Read</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="nf">newWrite</span> <span class="kt">:</span> <span class="n">inout</span> <span class="p">(</span><span class="n">w</span> <span class="kt">:</span> <span class="kt">Write</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Write</span>
+<span class="nf">write</span> <span class="kt">:</span> <span class="n">inout</span> <span class="p">(</span><span class="n">w</span> <span class="kt">:</span> <span class="kt">Write</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kr">data</span> <span class="kt">:</span> <span class="kt">Bits</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">mask</span> <span class="kt">:</span> <span class="kt">Bits</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="nb">()</span>
+<span class="nf">shift</span> <span class="kt">:</span> <span class="n">inout</span> <span class="p">(</span><span class="n">w</span> <span class="kt">:</span> <span class="kt">Write</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Write</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="kt">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="nb">()</span>
+
+<span class="nf">read</span> <span class="kt">:</span> <span class="kt">ReadBuffer</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">mask</span> <span class="kt">:</span> <span class="kt">Bits</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">Vector</span> <span class="kt">Word8</span>
+<span class="nf">shift</span> <span class="kt">:</span> <span class="kt">ReadBuffer</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">offset</span> <span class="kt">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">ReadBuffer</span>
+</pre></div>
+</div>
+<p>The mask creates / filters out undefined bits. For example <code class="docutils literal notranslate"><span class="pre">010</span></code> masked with <code class="docutils literal notranslate"><span class="pre">101</span></code> produces <code class="docutils literal notranslate"><span class="pre">0*0</span></code> and then the runtime is free to use the center bit for garbage collection purposes.</p>
+<p>Some simple types:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pack</span> <span class="kt">:</span> <span class="kt">Either</span> <span class="n">a</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="kt">Left</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="mi">0</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">unpack</span><span class="p">)</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="kt">Right</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="mi">1</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">unpack</span><span class="p">)</span>
+
+<span class="nf">unpack</span> <span class="n">r</span> <span class="ow">=</span>
+  <span class="kr">case</span> <span class="n">read</span> <span class="n">r</span> <span class="kr">of</span>
+    <span class="mi">0</span> <span class="ow">-&gt;</span> <span class="kt">Left</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="mi">1</span> <span class="ow">-&gt;</span> <span class="kt">Right</span> <span class="p">(</span><span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="nf">pack</span> <span class="kt">:</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">WriteBuffer</span>
+<span class="nf">pack</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="ow">=</span>
+  <span class="n">w</span> <span class="ow">=</span> <span class="n">emptyWriteBuffer</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="n">write</span> <span class="n">w</span> <span class="p">(</span><span class="n">pack</span> <span class="n">b</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">unpack</span><span class="p">)</span>
+
+<span class="nf">unpack</span> <span class="n">r</span> <span class="ow">=</span>
+  <span class="n">a</span> <span class="ow">=</span> <span class="n">unpack</span> <span class="n">r</span>
+  <span class="n">l</span> <span class="ow">=</span> <span class="n">length</span> <span class="p">(</span><span class="n">pack</span> <span class="n">a</span><span class="p">)</span>
+  <span class="n">b</span> <span class="ow">=</span> <span class="n">unpack</span> <span class="p">(</span><span class="n">shift</span> <span class="n">r</span> <span class="n">l</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">unpack</span></code> can fail on invalid byte sequences, but <code class="docutils literal notranslate"><span class="pre">pack</span></code> must always return a byte sequence. Also <code class="docutils literal notranslate"><span class="pre">unpack</span></code> can be more lenient and decode sequences that <code class="docutils literal notranslate"><span class="pre">pack</span></code> doesn’t produce. <code class="docutils literal notranslate"><span class="pre">pack</span></code> may narrow the range of values, e.g. rounding 1.23 to 1.2.</p>
+<p>So for correctness we require <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">.</span> <span class="pre">unpack</span> <span class="pre">.</span> <span class="pre">pack</span> <span class="pre">=</span> <span class="pre">pack</span></code>. Using this constraint we can derive <code class="docutils literal notranslate"><span class="pre">unpack</span></code> from <code class="docutils literal notranslate"><span class="pre">pack</span></code>, or vice-versa, if the format isn’t too complicated.</p>
+<p>One tricky part is that the naive way to specify types interferes with overloading, subtyping and implicit conversions. <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code> can give a byte as expected, but it can also implicitly convert to an <code class="docutils literal notranslate"><span class="pre">Int32</span></code> and give 4 bytes. Since we have dependent types this isn’t a real issue, just make sure the code generated after representation specialization passes the type explicitly: <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">Int32</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code>.</p>
+<p>A few things need to optimize away for reasonable performance.  <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code> should optimize to something like <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">20</span></code> for most values, or at least something that doesn’t allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.</p>
+<p>Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL’s will be the standard / default, it’ll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn’t be hard.</p>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple <code class="docutils literal notranslate"><span class="pre">(cell,unpack)</span></code>, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn’t be an issue.</p>
+</div>
+</div>
+<div class="section" id="pointers">
+<h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this headline">¶</a></h2>
+<p>Pointers are numeric indices into a shared global array. This array is sparse, in that some (most) addresses will not be allocated. The memory array is an array of statuses, which allows detecting and erroring on use-after-free and double free. For example we can implement fenceposts that mark the bytes above / below an allocation as undefined and then we’ll get bounds checking. The array is a bit array and the statuses are stored at the bit level because that’s the granularity <a class="reference external" href="https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine">Valgrind’s Memcheck</a> uses.</p>
+<p>The status is an ADT:</p>
+<ul class="simple">
+<li><p>on Windows:
+* protection state: one of <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/memory/page-state">Free, Reserved,</a> <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/memory/memory-protection-constants">NOACCESS, EXECUTE, EXECUTE_READ, EXECUTE_READWRITE, EXECUTE_WRITECOPY, READONLY, READWRITE</a>
+* additional flags: TARGETS_INVALID, TARGETS_NO_UPDATE, WRITECOPY, GUARD, NOCACHE, or WRITECOMBINE</p></li>
+<li><p>on Linux: based on <a class="reference external" href="https://elixir.bootlin.com/linux/latest/C/ident/vm_area_struct">vm_area_struct</a> / data from /proc/[pid]/maps, /proc/[pid]/map_files, and .
+* state: Free (no further information) or Reserved
+* flags listed in <a class="reference external" href="https://elixir.bootlin.com/linux/latest/C/ident/VM_NONE">VmFlags</a> in <a class="reference external" href="https://man7.org/linux/man-pages/man5/proc.5.html">/proc/[pid]/smaps</a> - readable, writeable, etc.
+* memory mapping: anonymous or a file/device mapping (offset, device, inode, pathname, deleted). anonymous is (0,0,0,””,false) and might have a pseudo path - stack, vdso, or heap. We can extend the pseudo path to the list of ELF segments - text, static data, global data.
+* extended status: currently resident in RAM, number of processes sharing it (<a class="reference external" href="https://stackoverflow.com/questions/9922928/what-does-pss-mean-in-proc-pid-smaps">Pss</a>), clean/dirty, marked as <a class="reference external" href="https://stackoverflow.com/questions/35391017/the-meaning-of-referenced-in-process-smaps">referenced/accessed</a> (i.e. not currently reclaimable), swapped out, locked mapping, memory protection key (see pkeys(7))</p></li>
+<li><p>Allocator bits (based on Memcheck):
+* (un)allocated - It is an error to read or write an unallocated location. To properly match the malloc/free pair when using multiple allocators simultaneously, a freeable allocated status stores the set of bits belonging to the allocation and a stateful zero-argument function that frees the allocation.
+* (un)initialized - it is an error to have observable behavior dependent on uninitialized data. But it is not an error to copy uninitialized data around in memory.
+* MMS-internal - This page is managed by the memory management subsystem. Access to this memory must have the implicit argument <code class="docutils literal notranslate"><span class="pre">inMMS</span></code> set to true, to prevent accidental corruption.</p></li>
+<li><p>Unknown status - Programs using the FFI may have external allocators allocate pages. So besides the initial memory setup, all memory is set to unknown status to indicate that one needs to check if it is in use before using it for anything. Allocations at system-chosen addresses automatically skip already-allocated pages, so they can ignore the unknown status.</p></li>
+<li><p>Thread sharing: list of threads that may read/write this memory</p></li>
+</ul>
+<p>when can memory access can be optimized away</p>
+<p>TODO: These statuses can be overlapped and mixed. Complete and clean up the list.</p>
+<blockquote>
+<div><p>Various functions record different statuses for chunks of memory. Memory functions check the status of memory before operating (prevention of double free). Inaccessible memory cannot be read/written (prevention of use after free).</p>
+</div></blockquote>
+<p>It is in fact possible to implement the typical <a class="reference external" href="https://developer.android.com/reference/android/util/SparseArray">sparse array operations</a>. There are functions to directly allocate memory at an address, <a class="reference external" href="https://man7.org/linux/man-pages/man2/mmap.2.html">mmap</a> with MAP_FIXED_NOREPLACE on Linux and <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc">VirtualAlloc</a> on Windows. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from <code class="docutils literal notranslate"><span class="pre">/proc/self/maps</span></code> and <a class="reference external" href="https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299">VirtualQueryEx</a>, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it’s easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages.</p>
+<p>It’s a little more complicated than simple sparsity because there are actually two pairs of operations, reserve/release to manage virtual address space and commit/decommit for backing pages.</p>
+<p>In practice direct allocation is never used and instead there are <code class="docutils literal notranslate"><span class="pre">mmap</span> <span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">malloc</span></code> which allocate memory with system-chosen location. This means that the program behavior must be observationally equivalent no matter what addresses the system picks. The limitations on the system’s choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn’t have to result in equivalent behavior so it can be ignored.)</p>
+<p>There is also the C library API alloc/realloc/free for non-page-sized allocations.</p>
+<p>Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. The analysis is complex as it has to deal with symbolic intervals but should be possible.</p>
+<p>Eliminating pointers entirely is not possible as they have to be used for system calls and interfacing with C. But we can minimize the lifetime of pointers in the standard library to the duration of the call, and use values / references everywhere else.</p>
+<p>The memory management system uses the pointer API internally, just with a special tag to avoid overlapping with user data.</p>
+<p>unsafe blocks for pointer manipulation - are they necessary?</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p>An reference is a symbolic index into an associative array. Operations include allocation, reading, and writing, all of which operate on arbitrary types of values.</p>
+<p>Because cells can be reallocated and copied freely by the runtime, and may not be laid out contiguously in memory, there is no conversion from a reference to an address. But references can be compared for equality and hashed to an integer.</p>
+<p>Deallocation is done automatically when the symbolic index is no longer used/accessible, similar to GC. Ownership a la Rust cannot even handle doubly-linked lists. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id3">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data.</p>
+<p>A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to just be a reference to an array plus metadata. They don’t require any special support AFAICT.</p>
+<p>Types of references:</p>
+<div class="section" id="variable">
+<h3>Variable<a class="headerlink" href="#variable" title="Permalink to this headline">¶</a></h3>
+<p>A variable is a thread-local reference that can store anything.</p>
+</div>
+<div class="section" id="shared-variable">
+<h3>Shared variable<a class="headerlink" href="#shared-variable" title="Permalink to this headline">¶</a></h3>
+<p>These references are limited to storing things that pack to word size (atomically readable/writable), but can be used cross-thread.</p>
+</div>
+</div>
+<div class="section" id="destructors">
+<span id="id4"></span><h2>Destructors<a class="headerlink" href="#destructors" title="Permalink to this headline">¶</a></h2>
+<p>Destructors allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets.  A destructor is essentially a magic value, created with the stateful <code class="docutils literal notranslate"><span class="pre">newDestructor</span></code>. It supports equality, hashing, and a stateful operation <code class="docutils literal notranslate"><span class="pre">lastUse</span></code>. All calls to <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> but the last in the program return false; the last <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> returns true. There is also a <code class="docutils literal notranslate"><span class="pre">useForever</span></code> call which ensures that <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> always returns false.</p>
+<p>An example usage is based on <a class="reference external" href="https://android.googlesource.com/platform/system/vold/+/android-7.1.1_r11/AutoCloseFD.h">AutoCloseFD</a>. We store the destructor and the file descriptor in a tuple for brevity - in a real implementation this would use an internal symbol so as to strengthen encapsulation.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">open</span> <span class="n">path</span> <span class="n">mode</span> <span class="n">flags</span> <span class="ow">=</span>
+  <span class="n">fd</span> <span class="ow">=</span> <span class="n">sys_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">flags</span> <span class="o">|</span> <span class="kt">O_CLOEXEC</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">newDestructor</span><span class="p">)</span>
+
+<span class="nf">maybeClose</span> <span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">if</span> <span class="n">lastUse</span> <span class="n">d</span> <span class="kr">then</span> <span class="n">sys_close</span> <span class="n">fd</span> <span class="kr">else</span> <span class="p">{}</span>
+
+<span class="nf">write</span> <span class="n">t</span><span class="o">@</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="o">...</span> <span class="ow">=</span>
+  <span class="n">sys_write</span> <span class="n">fd</span> <span class="o">...</span>
+  <span class="n">maybeClose</span> <span class="n">t</span>
+</pre></div>
+</div>
+<p>The determination of which lastUse call is actually the last use is somewhat complex, but for non-branching control flow it’s easy to follow. With branches it is possible to get time-travel errors, for example</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">d</span> <span class="ow">=</span> <span class="n">newDestructor</span>
+<span class="kr">if</span> <span class="n">lastUse</span> <span class="n">d</span>
+  <span class="n">print</span> <span class="s">&quot;Contradiction!&quot;</span>
+  <span class="n">lastUse</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p>In a lot of cases there is no observable difference in which lastUse returns true. E.g. just removing the print statement from the example we’d have nothing depending on lastUse and it can be eliminated. Similarly for <code class="docutils literal notranslate"><span class="pre">maybeClose;</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">{</span> <span class="pre">maybeClose</span> <span class="pre">}</span></code> the control flow is equivalent to having a lastUse at the end outside the conditional. So hopefully these sorts of errors will remain curiosities.</p>
+<p>Destructors are inspired by C++ RAII destructors, hence the name. Admittedly the actual API doesn’t bear much resemblance. <a class="reference external" href="https://en.wikipedia.org/wiki/Finalizer">Finalizers</a> can resurrect objects and don’t have deterministic execution, hence would be a bad name. Go’s defer statement and try-finally are related, but they only work locally and have imprecise execution semantics.</p>
+<p>Stroscot checks a fairness property that one of the following holds:
+* <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> is called infinitely often
+* <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> returns true
+* <code class="docutils literal notranslate"><span class="pre">useForever</span></code> is called</p>
+<p>In particular (in the absence of <code class="docutils literal notranslate"><span class="pre">useForever</span></code>) the program may not execute infinitely without calling <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> and without <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> having returned true.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Logic.html" class="btn btn-neutral float-right" title="Logic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Overloading.html" class="btn btn-neutral float-left" title="Overloading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2020 Mathnerd314.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

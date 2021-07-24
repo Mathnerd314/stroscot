@@ -1,0 +1,65 @@
+
+digraph G
+{
+  {
+    node [shape = record];
+    a [ label ="<a11> A11 | <a12> A12 | <a21> A21 | <a22> A22"];
+    b [ label ="<b11> B11 | <b12> B12 | <b21> B21 | <b22> B22"];
+    t [ label ="<t11> T11 | <t12> T12 | <t21> T21 | <t22> T22"];
+  }
+
+	a -> b [style=invis]
+
+
+	{
+    rank=same; c11, c12, c21, c22 [label="×"]
+	}
+  a:a11 -> c11
+  b:b11 -> c11
+
+  a:a11 -> c12
+  b:b12 -> c12
+
+  a:a21 -> c21
+  b:b11 -> c21
+
+  a:a21 -> c22
+  b:b12 -> c22
+
+	{
+    rank=same; d11, d12, d21, d22 [label="×"]
+	}
+
+	c11 -> d11 [style=invis]
+
+  a:a12 -> d11
+  b:b21 -> d11
+
+  a:a12 -> d12
+  b:b22 -> d12
+
+  a:a22 -> d21
+  b:b21 -> d21
+
+  a:a22 -> d22
+  b:b22 -> d22
+
+  p11, p12, p21, p22 [label="+"]
+
+  c11 -> p11
+  d11 -> p11
+
+  c12 -> p12
+  d12 -> p12
+
+  c21 -> p21
+  d21 -> p21
+
+  c22 -> p22
+  d22 -> p22
+
+  p11 -> t:t11
+  p12 -> t:t12
+  p21 -> t:t21
+  p22 -> t:t22
+}

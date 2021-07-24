@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Library &mdash; Stroscot  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Metaprogramming" href="Fexprs.html" />
+    <link rel="prev" title="Syntax" href="Syntax.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#numbers">Numbers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#integers">Integers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fractions">Fractions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#actual-types">Actual types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#operations">Operations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#iterators">Iterators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#i-o">I/O</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#errors">Errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#values">Values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#traces">Traces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stateful-exceptions">Stateful exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#concurrency">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#condition-variables">Condition variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Overloading.html">Overloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO/index.html">In-progress design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Language Reference</a> &raquo;</li>
+        
+      <li>Library</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Library.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="library">
+<h1>Library<a class="headerlink" href="#library" title="Permalink to this headline">¶</a></h1>
+<p>Stroscot will support the standard libraries of other languages, so e.g. if you want the C functions with C semantics you would <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">Library.C</span></code>. Compatibility is a natural step to world domination.</p>
+<p>Standard libraries:
+* <a class="reference external" href="https://github.com/rust-lang/rust/tree/master/library">Rust</a> (MIT + Apache 2.0)
+* <a class="reference external" href="https://github.com/golang/go/tree/master/src">Go</a> (BSD-style)
+* <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries">Haskell</a> (BSD-style)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The alternate prelude <a class="reference external" href="https://github.com/haskell-foundation/foundation">Foundation</a> (BSD)</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>Julia <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/base">1</a> <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/stdlib">2</a> (MIT)</p></li>
+<li><p>C</p>
+<ul>
+<li><p><a class="reference external" href="https://sourceware.org/git/?p=glibc.git;a=tree">glibc</a> (LGPLv2.1, some files BSD/ISC/etc.)</p></li>
+<li><p><a class="reference external" href="https://git.musl-libc.org/cgit/musl/tree/">Musl</a> (MIT)</p></li>
+</ul>
+</li>
+<li><p>Python <a class="reference external" href="https://github.com/python/cpython/tree/master/Modules">1</a> <a class="reference external" href="https://github.com/python/cpython/tree/master/Lib">2</a> (PSFv2)</p></li>
+<li><p><a class="reference external" href="https://github.com/ziglang/zig/tree/master/lib/std">Zig</a> (MIT)</p></li>
+<li><p>Slate <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/core">1</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/lib">2</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/i18n">3</a></p></li>
+</ul>
+<p>But building on the work of others isn’t enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily but should eventually include even things like audio and graphics (and way before that — cryptography). If it’s not an unsolved mathematical problem, there’s no reason it can’t have a standard solution. The same common problems getting solved by different people is a waste of man‑hours that can be spent developing something new. But the library should be divided up into modules and the modules should be versioned so that there’s a deprecation cycle in place.</p>
+<p>For this, the proposals of the various languages are useful, as they encapsulate changes and include motivation as to why the change was made. A feature of a language might be historical accident but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library “smells”, areas that could use improvement.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pulls">GHC</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps">Python</a></p></li>
+<li><p><a class="reference external" href="https://github.com/rust-lang/rfcs/pulls">Rust</a> (<a class="reference external" href="https://rust-lang.github.io/rfcs/">accepted</a>)</p></li>
+<li><p><a class="reference external" href="https://github.com/golang/go/labels/Proposal">Go</a></p></li>
+</ul>
+<p>TODO: go through these, unfortunately there’s a lot</p>
+<div class="section" id="numbers">
+<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h2>
+<p>In the mathematical world there are integers and real numbers, which have well-defined arithmetic operations (besides division by 0). In the computer world we do not have either of these luxurious spaces, but rather various formats for numbers which represent subsets of the space.</p>
+<div class="section" id="integers">
+<h3>Integers<a class="headerlink" href="#integers" title="Permalink to this headline">¶</a></h3>
+<div style="display: none">
+\[
+\newcommand{\seq}[1]{{\langle #1 \rangle}}
+\newcommand{\abs}[1]{{\vert #1 \rvert}}
+\newcommand{\sem}[1]{[\![ #1 ]\!]}
+\]
+</div><p>The most common integer format is a signed/unsigned integer with the range <span class="math notranslate nohighlight">\([0,2^{k}-1]\)</span> or <span class="math notranslate nohighlight">\([-2^{k-1},2^{k-1}-1]\)</span>, taking <span class="math notranslate nohighlight">\(k\)</span> bits. But it is not too tricky to implement efficient arithmetic operations for arbitrarily-ranged integers <span class="math notranslate nohighlight">\([a,b)\)</span>, where the modulus <span class="math notranslate nohighlight">\(b-a\)</span> is a power of 2. We can represent as <span class="math notranslate nohighlight">\(a+k\)</span> or <span class="math notranslate nohighlight">\(b-k\)</span> where <span class="math notranslate nohighlight">\(k\)</span> is unsigned or <span class="math notranslate nohighlight">\((a+b)/2 + k\)</span> for signed <span class="math notranslate nohighlight">\(k\)</span>. The operations use <span class="math notranslate nohighlight">\(\log_2 (b-a)\)</span> bits and expand the constants out (<span class="math notranslate nohighlight">\((x+a)+(y+a)=(x+y)+2*a\)</span>, etc. - there’s definitely clever ways to structure the computations for efficiency). When the range can be determined statically there is no overhead besides the extra operations (and there are no extra operations if the range fits into the machine-sized integer). If we use branching operations we can go even farther and use a tag bit to represent unions of ranges, <span class="math notranslate nohighlight">\([-23,2] \cup [56,100]\)</span>.</p>
+<p>With these extended ranges, the key difference between “signed” and “unsigned” is not that signed can represent negative numbers, but rather that signed integers represent an unbounded integer, that errors if the result is not representable (overflow, underflow, gap missing), while unsigned integers represent equivalence classes <span class="math notranslate nohighlight">\(\sem{a} = \{ a + k m \mid k \in \mathbb{N} \}\)</span>, <span class="math notranslate nohighlight">\(m\)</span> being the modulus. The format defines the representatives used, operations are done in <span class="math notranslate nohighlight">\(\mathbb{Z}\)</span> on the representatives, and then the result is converted via the equivalence class to a representative. So better names might be signed integer format = erroring integer format, unsigned integer format = wrapping integer format.</p>
+<p>Division for all of these formats is defined using the <a class="reference external" href="https://en.wikipedia.org/wiki/Euclidean_domain">division algorithm for Euclidean domains</a>. For <span class="math notranslate nohighlight">\(a, b \mid b \neq 0\)</span>, <span class="math notranslate nohighlight">\(a divMod b\)</span> produces <span class="math notranslate nohighlight">\((q,r)\)</span> such that <span class="math notranslate nohighlight">\(a = bq + r\)</span> and the norm <span class="math notranslate nohighlight">\(\abs{r}\)</span> is minimized. This gives “round to nearest” behavior and is different from most other programming languages, e.g. <code class="docutils literal notranslate"><span class="pre">11</span> <span class="pre">divMod</span> <span class="pre">4</span> <span class="pre">=</span> <span class="pre">(3,-1)</span></code> rather than <code class="docutils literal notranslate"><span class="pre">(2,3)</span></code>. But mathematically it has nice properties. Ties are broken by choosing positive <span class="math notranslate nohighlight">\(r\)</span>, this amounts to tweaking the norm function so <span class="math notranslate nohighlight">\(\abs{+x} = x - 0.1\)</span>. We can also consider other variants like setting <span class="math notranslate nohighlight">\(\abs{-x} = \infty\)</span>, this gives Euclidean division. For a complicated split-range number number format, the computation will probably have to use brute force to determine the result. The range of <span class="math notranslate nohighlight">\(q\)</span> is another question, most likely we have to give it as an argument.</p>
+<p>This division is different from <a class="reference external" href="https://en.wikipedia.org/wiki/Modulo_operation#In_programming_languages">most other programming languages</a>. In particular the C / assembly behavior of truncation is just wrong and cannot be emulated with a norm function - there is no consistent ranking giving <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">divmod</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">1)</span></code>, <code class="docutils literal notranslate"><span class="pre">-1</span> <span class="pre">divmod</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">(0,</span> <span class="pre">-1)</span></code>. But of course C’s behavior can still be defined for the relevant formats, it just is not universal.</p>
+</div>
+<div class="section" id="fractions">
+<h3>Fractions<a class="headerlink" href="#fractions" title="Permalink to this headline">¶</a></h3>
+<p>The simplest is ratios <span class="math notranslate nohighlight">\(a / b\)</span>, using integers over some domain. Fixed-point arithmetic is a special case of this where <span class="math notranslate nohighlight">\(b\)</span> is fixed. Floating point numbers are an integer mantissa times an integer radix raised to an integer exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range. We can also include posits; these are mantissa * radix ^ exponent * useed ^ regime, where the first part is the floating point stuff, useed is 2 ^ 2 ^ maximum exponent size, and the regime is nonnegative.</p>
+</div>
+<div class="section" id="actual-types">
+<h3>Actual types<a class="headerlink" href="#actual-types" title="Permalink to this headline">¶</a></h3>
+<p>We could try to define generic integer/float types with a statically inferred range of possible values, but only a few have efficient arithmetic operations, and YAGNI. So in practice we have only <code class="docutils literal notranslate"><span class="pre">sN</span></code> / <code class="docutils literal notranslate"><span class="pre">uN</span></code> (for <code class="docutils literal notranslate"><span class="pre">N</span></code> restricted to 8/16/32/64), <code class="docutils literal notranslate"><span class="pre">Float</span></code>, and <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Differently-ranged integers, fixed-point arithmetic, unums, and posits can all be defined in libraries. It would also be good to have arbitrary-precision types, like <a class="reference external" href="https://gmplib.org/">GMP</a>’s integer/rational and <a class="reference external" href="https://www.mpfr.org/">MFPR</a>’s float that uses an s32/s64 exponent and an arbitrary precision mantissa. The binding could be at the C level like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s integer-gmp</a> or it could use the assembly routines directly.</p>
+</div>
+<div class="section" id="operations">
+<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this headline">¶</a></h3>
+<p>For arithmetic we define implicit conversions, <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on to an arbitrary precision type <code class="docutils literal notranslate"><span class="pre">Arb</span></code> with the usual arithmetic operations, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on. Then narrowing the result back into a restrictive format is represented explicitly with an operation, <code class="docutils literal notranslate"><span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(2+30*x)</span></code> and so on. The compiler then figures out how to compute the answer as efficiently as possible. For floating point the narrowing also takes a precision argument, or optimizes for the best precision like Herbie, depending on whether speed or accuracy is preferred.</p>
+<p>For compatibility with other languages we can define narrowed arithmetic operations, like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">assert(a</span> <span class="pre">is</span> <span class="pre">s16</span> <span class="pre">&amp;&amp;</span> <span class="pre">b</span> <span class="pre">is</span> <span class="pre">s16);</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(a+b);</span> <span class="pre">assert(x</span> <span class="pre">is</span> <span class="pre">s16)</span></code>. These give an error if the result doesn’t fit. We can also support implicit conversions <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">s16</span></code> and so on; the compiler has to check that the narrowed arbitrary-precision computation matches the various fixed-width computations, but it should be resolvable.</p>
+<p>Floating points numbers don’t have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">::</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span></code> and so on.</p>
+<p>Literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. 0001 cannot be stored in a byte (type must be able to contain 9999).</p>
+</div>
+</div>
+<div class="section" id="iterators">
+<h2>Iterators<a class="headerlink" href="#iterators" title="Permalink to this headline">¶</a></h2>
+<p>lazy iterators - aren’t these just linked lists?</p>
+<p>Haskell Foldable / Traversable</p>
+<p>some way to get imperative for-in loops.</p>
+</div>
+<div class="section" id="strings">
+<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
+<p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer of bytes together with a length. There can be different encodings: UTF8, UTF16, UTF32, or some other encodings like Shift JIS or Big5. UTF8 is the most common so it should be the default, <a class="reference external" href="https://utf8everywhere.org/">UTF-8 everywhere</a>.</p>
+<p>Normalization to NFC is an operation. Refinement type for always-normalized, let operations take a parameter.</p>
+<p>Operations can take place through code points, graphemes, bytes (code units, but utf-8 everywhere so there’s no difference). Provide each type unless there’s a good reason not to. Moving forward or backward in a text editor would use graphemes. Writing a file would use bytes.</p>
+<p>Invalid characters can be handled different ways according to a mode parameter: delete from string, preserve, transcode to private use area, etc.</p>
+<ul class="simple">
+<li><p>slices/views: these are a string value plus data.</p></li>
+<li><p>indexing / length</p></li>
+<li><p>next / previous (using utf8 synchronization)</p></li>
+<li><p>regexes / parsers</p></li>
+<li><p>I/O - do like Go and always open files in binary mode. stream API</p></li>
+<li><p>packed arrays</p></li>
+<li><p>ropes for mutable strings (so splitting the string apart and inserting things is efficient)</p></li>
+<li><p>hierarchical streams/generators.</p></li>
+<li><p><a class="reference external" href="https://juliastrings.github.io/utf8proc/">https://juliastrings.github.io/utf8proc/</a></p></li>
+</ul>
+</div>
+<div class="section" id="i-o">
+<h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this headline">¶</a></h2>
+<p>The general API for I/O follows the io_uring design, we write a bunch of operations to a buffer and then execute callbacks based on the result.
+We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
+<p>The functions themselves are written in the token-passing style <code class="docutils literal notranslate"><span class="pre">RealWorld,</span> <span class="pre">a</span> <span class="pre">-o</span> <span class="pre">RealWorld,</span> <span class="pre">b</span></code>, passing around the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token.</p>
+<p>The standard library wraps all relevant functions in <a class="reference internal" href="Memory.html#destructors"><span class="std std-ref">destructors</span></a> to ensure safety. But there is also a corresponding .Raw module which provides the unwrapped versions.</p>
+</div>
+<div class="section" id="errors">
+<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
+<p>Safety - errors in your program lead to error messages, as opposed to unpredictable crashes.</p>
+<div class="section" id="values">
+<h3>Values<a class="headerlink" href="#values" title="Permalink to this headline">¶</a></h3>
+<p>Most errors behave by producing a <a class="reference external" href="https://llvm.org/devmtg/2020-09/slides/Lee-UndefPoison.pdf">poison value</a>. For example <code class="docutils literal notranslate"><span class="pre">{}.x</span></code> produces like <code class="docutils literal notranslate"><span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span></code>. Similarly invalid pointer reads return <code class="docutils literal notranslate"><span class="pre">InvalidPointer</span></code>, rather than crashing the program. Division by zero is handled in the same way, producing <code class="docutils literal notranslate"><span class="pre">DivisionByZeroError</span></code>. There’s also standard poison values like <code class="docutils literal notranslate"><span class="pre">undefined</span></code> and <code class="docutils literal notranslate"><span class="pre">panic</span> <span class="pre">&quot;string&quot;</span></code>.</p>
+<p>Behind the scenes this requires some work to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal “Segmentation fault” (SIGSEGV). C/C++ <a class="reference external" href="https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux">can’t handle these easukt</a> because they are <a class="reference external" href="https://lwn.net/Articles/414618/">synchronous signals</a> and signal behavior is mostly left undefined, but in fact signals are <a class="reference external" href="https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/">fairly well-behaved</a> (<a class="reference external" href="https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48">OpenSSL</a>’s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go <a class="reference external" href="https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover">allows</a> turning (synchronous) signals into “panics” that can be caught with recover.</p>
+<p>Similarly DIV by 0 produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. We could instead insert a check for 0; it’ll require testing to see which is faster in typical programs (likely the handler, since crashing is the default). UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error definitely requires checking if the argument is zero beforehand - the people that really can’t afford this check will have to use the division instruction in the assembly module.</p>
+</div>
+<div class="section" id="traces">
+<h3>Traces<a class="headerlink" href="#traces" title="Permalink to this headline">¶</a></h3>
+<p>Most operations on an error will produce another error, e.g. <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code> produces <code class="docutils literal notranslate"><span class="pre">MissingCaseError</span> <span class="pre">(NoSuchAttributeError</span> <span class="pre">...)</span></code>. So the errors bubble up until we get something that handles the error, e.g. the main program handler that prints the error and exits. With fancy formatting the nested errors will look like a stacktrace. The semantics are a little different because it’s demand-driven, but close enough. TODO: make sure the stack trace is syntax-based and isn’t infinite.</p>
+<p>We can redefine this error value to be something else, e.g. add a definition <code class="docutils literal notranslate"><span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span> <span class="pre">=</span> <span class="pre">3</span></code>. Then <code class="docutils literal notranslate"><span class="pre">{}.x</span> <span class="pre">==</span> <span class="pre">3</span></code> and the error is silenced. Similarly we can do <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span> <span class="pre">-&gt;</span> <span class="pre">3</span></code>, or pass the error to a function that does such error-handling. We can also match on generic errors, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isError</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">3</span></code>. The alternative to <code class="docutils literal notranslate"><span class="pre">isError</span></code> is a single standard error constructor, IDK.</p>
+<p>The errors can also keep track of their continuation, e.g. a <code class="docutils literal notranslate"><span class="pre">MissingCaseError</span></code> can store its continuation <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">...</span></code>. These compose up the stack so that we can pass in a value at any point and resume computing.</p>
+</div>
+<div class="section" id="stateful-exceptions">
+<h3>Stateful exceptions<a class="headerlink" href="#stateful-exceptions" title="Permalink to this headline">¶</a></h3>
+<p>For a stateful function, the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token also is replaced with an error value. So no further states can be executed until the error is handled. But the error value itself contains a new <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token to allow resuming the computation. We can define the standard levels of safety: no-throw is that the normal state will be returned, strong exception safety of a function is the assertion that the state in the error value is no different from the state passed in, and basic safety is that all documented invariants are maintained for the state in the error value. Most operations with basic safety can be made strongly safe by copying all relevant data beforehand, besides actual I/O operations.</p>
+<p>try-catch-else-finally: we can handle the try-catch part with continuations and the error-redefining trick, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">reset</span> <span class="pre">(Left</span> <span class="pre">(foo</span> <span class="pre">{e</span> <span class="pre">|</span> <span class="pre">isDesiredError</span> <span class="pre">e</span> <span class="pre">=</span> <span class="pre">shift</span> <span class="pre">(const</span> <span class="pre">e)})</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isDesiredError</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">handle</span> <span class="pre">e</span></code>. We can also use the bubbling: <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isError</span> <span class="pre">e</span> <span class="pre">and</span> <span class="pre">isDesiredError</span> <span class="pre">(firstError</span> <span class="pre">e)</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>. For finally we want a state field to extract the token, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">e</span> <span class="pre">{</span> <span class="pre">state</span> <span class="pre">=</span> <span class="pre">cleanup</span> <span class="pre">(state</span> <span class="pre">e)</span> <span class="pre">}</span></code>. Python also supports an else clause - it is executed if control flows normally off the end of the try clause and is not protected by the catch clauses of the try.</p>
+<p>asynchronous exceptions: this instruments every memory allocation and I/O operation to check for calls to <code class="docutils literal notranslate"><span class="pre">throwTo</span> <span class="pre">ThreadId</span></code> and if so return <code class="docutils literal notranslate"><span class="pre">Interrupted</span></code>, <code class="docutils literal notranslate"><span class="pre">ThreadKilled</span></code> (<code class="docutils literal notranslate"><span class="pre">PleaseStop</span></code>), etc. But every operation is also given a parameter <code class="docutils literal notranslate"><span class="pre">Masked</span></code> (for memory and nonblocking I/O operations) or <code class="docutils literal notranslate"><span class="pre">Interruptible</span></code> (for blocking I/O operations) that disables this behavior. Then there’s the mask function, <code class="docutils literal notranslate"><span class="pre">mask</span> <span class="pre">io</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">Masked</span> <span class="pre">then</span> <span class="pre">io</span> <span class="pre">{unmask</span> <span class="pre">=</span> <span class="pre">id}</span> <span class="pre">else</span> <span class="pre">io</span> <span class="pre">{Masked</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">unmask</span> <span class="pre">io</span> <span class="pre">=</span> <span class="pre">io</span> <span class="pre">{Masked</span> <span class="pre">=</span> <span class="pre">False}</span> <span class="pre">}</span></code> and similarly <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask</span></code> which also checks/sets <code class="docutils literal notranslate"><span class="pre">Interruptible</span></code>.</p>
+</div>
+</div>
+<div class="section" id="concurrency">
+<span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this headline">¶</a></h2>
+<p>Synchronization operations impose constraints on execution order. For example, acquiring a lock blocks until the lock is released. They introduce the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders.</p>
+<p>In practice the synchronization primitives one can use are dictated by the scheduler.</p>
+<p>Various synchronization primitives:</p>
+<ul class="simple">
+<li><p>Linux kernel internal operations: <a class="reference external" href="https://github.com/torvalds/linux/blob/3d5c70329b910ab583673a33e3a615873c5d4115/tools/memory-model/linux-kernel.def">model</a> <a class="reference external" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/include/asm/atomic64_64.h">atomic x86 operations</a> <a class="reference external" href="https://www.infradead.org/~mchehab/kernel_docs/locking/locktypes.html">lock types</a></p></li>
+<li><p>atomic operations</p></li>
+<li><p>memory barrier</p></li>
+<li><p>spin lock</p></li>
+<li><p>mutex</p></li>
+<li><p>condition variable</p></li>
+<li><p>threads:
+* the kernel scheduler has fairness, SMP balancing, RT scheduling, preemption, execution statistics, credentials, virtual memory, etc.
+* Userspace scheduler will always lose in functionality. Only has a performance advantage - kernel call is expensive. But so is cache miss - small memory footprint. Requires changes to debuggers, tracers.</p></li>
+<li><p>wait-free data types</p></li>
+<li><p>Haskell’s MVar</p></li>
+<li><p>goroutines, channels</p></li>
+<li><p>global variables</p></li>
+<li><p>shared memory</p></li>
+<li><p>message passing (queues)</p></li>
+</ul>
+<p>All of these generate happens-before relationships on the various operations. We could track this with vector clocks, IDK why - the posets are easier to reason about directly.</p>
+</div>
+<div class="section" id="condition-variables">
+<h2>Condition variables<a class="headerlink" href="#condition-variables" title="Permalink to this headline">¶</a></h2>
+<p>A condition variable is a unique symbolic value type <code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">:</span> <span class="pre">Cv</span> <span class="pre">a</span></code> with equality and hashing. For each condition variable the scheduler maintains <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">:</span> <span class="pre">Ref</span> <span class="pre">a</span></code>, the current value of the condition variable. Condition variables are usually specified as multiple operations but I found it clearer to combine all of these into a single operation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Cond</span> <span class="pre">(c</span> <span class="pre">:</span> <span class="pre">Cv</span> <span class="pre">a)</span> <span class="pre">(p</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Bool)</span> <span class="pre">(update</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a)</span> <span class="pre">(continuation</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Task)</span> <span class="pre">:</span> <span class="pre">Task</span></code></p></li>
+</ul>
+<p>The event loop looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newRequests</span> <span class="ow">=</span> <span class="n">queue</span> <span class="kt">[]</span>
+<span class="nf">for</span><span class="p">(</span><span class="n">r</span> <span class="kr">in</span> <span class="n">requests_in_nondet_order</span><span class="p">)</span>
+  <span class="kr">case</span> <span class="n">r</span> <span class="kr">of</span>
+    <span class="o">...</span>
+    <span class="kt">Cond</span> <span class="n">c</span> <span class="n">p</span> <span class="n">update</span> <span class="n">t</span> <span class="ow">=</span>
+      <span class="n">v</span> <span class="ow">=</span> <span class="n">lookup</span> <span class="n">map</span> <span class="n">c</span>
+      <span class="kr">if</span> <span class="n">p</span> <span class="n">v</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">executeThisCycle</span> <span class="ow">=</span> <span class="n">nonDetBool</span><span class="p">)</span>
+        <span class="n">oldV</span> <span class="ow">=</span> <span class="n">read</span> <span class="n">v</span>
+        <span class="n">v</span> <span class="kt">:=</span> <span class="n">update</span> <span class="n">v</span>
+        <span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">t</span> <span class="n">oldV</span><span class="p">)</span>
+      <span class="kr">else</span>
+        <span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a traditional condition variable we have:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">wait</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">update</span> <span class="ow">=</span> <span class="n">id</span> <span class="p">}</span>
+<span class="nf">signal</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>A lock looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">acquire</span> <span class="n">l</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">held</span> <span class="ow">-&gt;</span> <span class="n">held</span> <span class="o">==</span> <span class="kt">False</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="nf">\</span><span class="kt">False</span> <span class="ow">-&gt;</span> <span class="kt">True</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span> <span class="p">}</span>
+<span class="nf">release</span> <span class="n">l</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="nf">\</span><span class="kt">True</span> <span class="ow">-&gt;</span> <span class="kt">False</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span> <span class="p">}</span>
+  <span class="c1">-- crashes the program if release can be called with v == False</span>
+<span class="nf">isHeld</span> <span class="n">l</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="n">id</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="n">t</span> <span class="p">}</span>
+  <span class="c1">-- explodes the state graph, practically unusable</span>
+</pre></div>
+</div>
+<p>Similarly a semaphore:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">wait</span> <span class="n">s</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">n</span> <span class="ow">-&gt;</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span> <span class="p">}</span>
+<span class="nf">signal</span> <span class="n">s</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">n</span> <span class="ow">-&gt;</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span> <span class="p">}</span>
+<span class="nf">read</span> <span class="n">s</span> <span class="n">t</span> <span class="ow">=</span> <span class="kt">Cond</span> <span class="p">{</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="n">id</span><span class="p">,</span> <span class="n">continuation</span> <span class="ow">=</span> <span class="n">t</span> <span class="p">}</span>
+  <span class="c1">-- again: explodes the state graph, practically unusable</span>
+</pre></div>
+</div>
+<p>A <a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.BoundedSemaphore">bounded semaphore</a> is similar:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">signal_Bounded</span> <span class="ow">=</span>
+  <span class="kt">Cond</span> <span class="p">{</span>
+    <span class="n">c</span> <span class="ow">=</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">=</span> <span class="n">const</span> <span class="kt">True</span><span class="p">,</span> <span class="n">update</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">n</span> <span class="ow">-&gt;</span> <span class="kr">let</span> <span class="n">n&#39;</span> <span class="ow">=</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span> <span class="kr">in</span> <span class="kr">if</span> <span class="n">n&#39;</span> <span class="o">&gt;</span> <span class="n">bound</span> <span class="kr">then</span> <span class="n">crash</span> <span class="kr">else</span> <span class="n">n&#39;</span><span class="p">,</span>
+    <span class="n">continuation</span> <span class="ow">=</span> <span class="nf">\</span><span class="kr">_</span> <span class="ow">-&gt;</span> <span class="n">t</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>As far as implementation, the basic implementation choices are atomic instructions on shared memory and OS-provided mutexes. Spinlocks are hard to use (<a class="reference external" href="https://matklad.github.io/2020/01/02/spinlocks-considered-harmful.html">1</a> <a class="reference external" href="https://mjtsai.com/blog/2020/01/06/beware-spinlocks-in-user-space/">2</a>), they will waste power and the scheduler will run the busy wait a lot instead of doing real work. But <a class="reference external" href="https://webkit.org/blog/6161/locking-in-webkit/">WebKit</a> implements locks and condition variables using a byte-size reference and some global queues. There’s still a spinning loop, the number of times to spin before giving up and parking should be optimized for each lock operation.</p>
+<p>Q: are there schedulers that have a deterministic-enough scheduling pattern that there are no race conditions?
+the relaxed-consistency model allows implementing private memory that is then mapped back to shared on synchronization</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Metaprogramming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2020 Mathnerd314.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
