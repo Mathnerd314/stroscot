@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#access">Access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-statement">With statement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linking">Linking</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#imports">Imports</a></li>
@@ -117,8 +118,7 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../TODO/index.html">In-progress design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Discussion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
 </ul>
 
@@ -204,7 +204,13 @@
 </div>
 <div class="section" id="access">
 <h2>Access<a class="headerlink" href="#access" title="Permalink to this headline">¶</a></h2>
-<p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. To save on typing there is the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
+<p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>.</p>
+<p>Later in the pipeline:
+* A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
+</div>
+<div class="section" id="with-statement">
+<h2>With statement<a class="headerlink" href="#with-statement" title="Permalink to this headline">¶</a></h2>
+<p>To save on typing there is the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">equivalent</span> <span class="n">for</span> <span class="n">most</span> <span class="n">purposes</span>
 <span class="kt">C</span><span class="o">.</span><span class="n">a</span>
 <span class="nf">with</span> <span class="kt">C</span> <span class="p">{</span> <span class="n">a</span> <span class="p">}</span>

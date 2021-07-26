@@ -100,10 +100,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Syntax</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#design">Design</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#legibility">Legibility</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#unicode">Unicode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#layout">Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parsing">Parsing</a><ul>
@@ -117,7 +113,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#strings">Strings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#arrays">Arrays</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#records">Records</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#atoms-symbols">Atoms / Symbols</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#symbols">Symbols</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#variables">Variables</a></li>
@@ -135,11 +131,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#blocks">Blocks</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#applicativedo">ApplicativeDo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#recursivedo">RecursiveDo</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#arrows">Arrows</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#idiom-brackets">Idiom brackets</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#c-like-reference-access">C-like reference access</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bang-notation">Bang notation</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#control-structures">Control structures</a></li>
@@ -158,8 +150,7 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../TODO/index.html">In-progress design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Discussion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
 </ul>
 
@@ -234,20 +225,7 @@
             
   <div class="section" id="syntax">
 <h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h1>
-<p>Almost everything in Stroscot is an expression. The basics are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
-<div class="section" id="design">
-<h2>Design<a class="headerlink" href="#design" title="Permalink to this headline">¶</a></h2>
-<p>The stuff here is mostly a dumping ground of ideas while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode and <a class="reference external" href="http://rigaux.org/language-study/syntax-across-languages/">Rigaux’s list of syntax across languages</a>) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.</p>
-<p>Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can’t use a lot of the research, and the research is limited to begin with.</p>
-<p>Some languages offer a “simple” syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot’s goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.</p>
-<p>Haskell/Idris syntax is mostly awesome, use it.</p>
-<div class="section" id="legibility">
-<h3>Legibility<a class="headerlink" href="#legibility" title="Permalink to this headline">¶</a></h3>
-<p>The main factor improving readability is consistency; reading is disrupted when unconventional layouts are used.</p>
-<p>Spacing is important to identify word boundaries (intra-letter spacing significantly smaller than inter-word spacing) and sentence boundaries (two spaces after the period, although the period’s whitespace itself is distinctive). Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking. Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line. The default line spacing seems fine.</p>
-<p>Line length is a good question. Programming uses fixed-width characters so it’s measured in characters. 80 characters is standard, but monitors are wider now, so 100 is plausible. Diff programs are often the limiting factor, but on my monitor I can fit 2 108-character texts side-by-side along with a space in the middle and the taskbar. 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it’s a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt (24px) I can fit 97 characters, while 23px fits 102 characters.</p>
-</div>
-</div>
+<p>Almost everything in Stroscot is an expression. Values are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
 <div class="section" id="unicode">
 <h2>Unicode<a class="headerlink" href="#unicode" title="Permalink to this headline">¶</a></h2>
 <p>Practically, most programs will use ASCII. But the Unicode algorithms are robust and supporting other languages isn’t too hard. <a class="reference external" href="https://rosettacode.org/wiki/Unicode_variable_names">Lots of languages</a> have support for Unicode, although the exact set of allowed characters varies.</p>
@@ -260,13 +238,10 @@
 * <a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, to determine hard / mandatory breaks)
 * <a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
 * <a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters</p>
-<p>Later in the pipeline:
-* A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
-<p>TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser</p>
 </div>
 <div class="section" id="layout">
 <h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline">¶</a></h2>
-<p>Blocks of sequential statements are a common occurrence in a program. The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
+<p>The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span>
  <span class="n">b</span>
  <span class="n">c</span>
@@ -372,11 +347,10 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <p>Values include all the core expressions, ADT elements and lambda expressions and so on. Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).</p>
 <div class="section" id="numbers">
 <h3>Numbers<a class="headerlink" href="#numbers" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">0</span><span class="p">[</span><span class="n">box</span><span class="p">])</span><span class="o">?</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="o">\.</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="o">+</span><span class="p">)</span><span class="o">?</span><span class="p">([</span><span class="n">eEpP</span><span class="p">][</span><span class="o">+-</span><span class="p">]</span><span class="o">?</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span><span class="p">)</span><span class="o">?</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">])</span><span class="o">?</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="o">\.</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="o">+</span><span class="p">)</span><span class="o">?</span><span class="p">([</span><span class="n">eEpP</span><span class="p">][</span><span class="o">+-</span><span class="p">]</span><span class="o">?</span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span><span class="p">)</span><span class="o">?</span>
 </pre></div>
 </div>
-<p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, slightly liberalized to allow using floating-point notation for integers and binary exponents for decimals.</p>
-<p>Number literals are parsed into records like <code class="docutils literal notranslate"><span class="pre">NumberLiteral</span> <span class="pre">{</span> <span class="pre">digits</span> <span class="pre">=</span> <span class="pre">&quot;123&quot;,</span> <span class="pre">exponent</span> <span class="pre">=</span> <span class="pre">&quot;24&quot;</span> <span class="pre">}</span></code>. Leadings 0’s could be significant, e.g. <code class="docutils literal notranslate"><span class="pre">010</span></code> could be different from <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p>
+<p>Number literals are parsed into records like <code class="docutils literal notranslate"><span class="pre">NumberLiteral</span> <span class="pre">{</span> <span class="pre">string</span> <span class="pre">=</span> <span class="pre">&quot;123e24&quot;</span> <span class="pre">}</span></code>. Leadings 0’s could be significant, e.g. <code class="docutils literal notranslate"><span class="pre">010</span></code> could be different from <code class="docutils literal notranslate"><span class="pre">10</span></code>. Defined <code class="docutils literal notranslate"><span class="pre">0x</span></code> sequences allow <code class="docutils literal notranslate"><span class="pre">x</span></code> to be <code class="docutils literal notranslate"><span class="pre">x</span></code> (hexadecimal), <code class="docutils literal notranslate"><span class="pre">o</span></code> (octal), and <code class="docutils literal notranslate"><span class="pre">b</span></code> (binary). <code class="docutils literal notranslate"><span class="pre">p/P</span></code> is a binary exponent.</p>
 </div>
 <div class="section" id="strings">
 <h3>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h3>
@@ -433,8 +407,8 @@ length arr # 3</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="atoms-symbols">
-<h3>Atoms / Symbols<a class="headerlink" href="#atoms-symbols" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="symbols">
+<h3>Symbols<a class="headerlink" href="#symbols" title="Permalink to this headline">¶</a></h3>
 <p>If an expression tree has no reduction rules, it is treated as a symbol tree. Symbols are essentially data constructors and can be freely applied to construct data.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">atom</span>
 <span class="nf">underscore_atom</span>
@@ -443,6 +417,14 @@ length arr # 3</p>
 <span class="nf">some</span> <span class="p">(</span><span class="n">weird</span> <span class="n">thing</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span>
 </pre></div>
 </div>
+<p>To export the symbol to other modules a special keyword <code class="docutils literal notranslate"><span class="pre">symbol</span></code> is used:</p>
+<blockquote>
+<div><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span> <span class="n">foo</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>This ensures that no rules for <code class="docutils literal notranslate"><span class="pre">foo</span></code> are defined in the module. It is good practice to use the <code class="docutils literal notranslate"><span class="pre">symbol</span></code> keyword even if the identifier is not exported.</p>
+<p>Examples of predefined atoms include null, true, and false.</p>
 </div>
 </div>
 <div class="section" id="variables">
@@ -512,6 +494,14 @@ the shorter the code will be.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">_f</span> <span class="n">a</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">any</span> <span class="n">function</span> <span class="n">application</span>
 </pre></div>
 </div>
+<p>This will produce <code class="docutils literal notranslate"><span class="pre">4</span></code> if <code class="docutils literal notranslate"><span class="pre">foo</span></code> is a symbol:</p>
+<blockquote>
+<div><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="p">(</span><span class="n">foo</span> <span class="n">x</span><span class="p">)</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
+
+<span class="nf">f</span> <span class="p">(</span><span class="n">foo</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
 </div>
 <div class="section" id="inline-definitions">
 <h3>Inline definitions<a class="headerlink" href="#inline-definitions" title="Permalink to this headline">¶</a></h3>
@@ -738,119 +728,19 @@ supplied.</p>
   <span class="n">http_server</span><span class="o">.</span><span class="n">serve</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Blocks are inspired by Haskell’s do notation, but have a twist, based on the observation that the continuation monad is <a class="reference external" href="https://www.schoolofhaskell.com/school/to-infinity-and-beyond/pick-of-the-week/the-mother-of-all-monads">the mother of all monads</a>. Since it’s the mother, we don’t lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations. That link gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the <a class="reference external" href="https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs">StateT monad</a>.</p>
-<p>Using the continuation monad allows us to modify the translation:</p>
+<p>A program is a block. The translation rules are based on the continuation monad:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">e</span><span class="p">}</span> <span class="ow">=</span> <span class="n">e</span>
 <span class="p">{</span><span class="n">e</span><span class="p">;</span><span class="n">stmts</span><span class="p">}</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">c</span> <span class="ow">-&gt;</span> <span class="n">e</span> <span class="p">({</span><span class="n">stmts</span><span class="p">}</span> <span class="n">c</span><span class="p">)</span> <span class="ow">=</span> <span class="n">e</span> <span class="o">.</span> <span class="p">{</span><span class="n">stmts</span><span class="p">}</span>
 <span class="p">{</span><span class="n">p</span> <span class="ow">&lt;-</span> <span class="n">e</span><span class="p">;</span> <span class="n">stmts</span><span class="p">}</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">c</span> <span class="ow">-&gt;</span> <span class="n">e</span> <span class="p">(</span><span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="nf">\</span><span class="n">p</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="n">stmts</span><span class="p">})</span> <span class="n">x</span> <span class="n">c</span><span class="p">)</span> <span class="ow">=</span> <span class="n">e</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span><span class="n">stmts</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>Haskell has the translation <code class="docutils literal notranslate"><span class="pre">{e;stmts}</span> <span class="pre">=</span> <span class="pre">e</span> <span class="pre">&gt;&gt;</span> <span class="pre">stmts</span> <span class="pre">=</span> <span class="pre">\c</span> <span class="pre">-&gt;</span> <span class="pre">e</span> <span class="pre">(\_</span> <span class="pre">-&gt;</span> <span class="pre">{stmts}</span> <span class="pre">c)</span></code>. But usually <code class="docutils literal notranslate"><span class="pre">e</span></code> returns <code class="docutils literal notranslate"><span class="pre">()</span></code>, so <code class="docutils literal notranslate"><span class="pre">(&gt;&gt;)</span></code> is applied at the type <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">()</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">b</span></code> and that <code class="docutils literal notranslate"><span class="pre">\_</span></code> is a <code class="docutils literal notranslate"><span class="pre">\()</span></code>. With our translation, operations which don’t return a value are functions <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>. Haskell’s translation would require them to be <code class="docutils literal notranslate"><span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">()</span> <span class="pre">=</span> <span class="pre">(()</span> <span class="pre">-&gt;</span> <span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>, which is equivalent but has an extra <code class="docutils literal notranslate"><span class="pre">()</span></code> floating around. But in both translations operations whose value is used are of type <code class="docutils literal notranslate"><span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>. The non-uniform type for actions might make copying monads from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That’s right, the most basic operation in category theory is available as syntactic sugar. Take that, monads. And also we can easily use indexed monads, just change <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> to <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">-&gt;</span> <span class="pre">s</span></code>.</p>
-<p>It’s worth noting that even though monads can be implemented easily, monads are overrated to begin with:</p>
-<ul class="simple">
-<li><p>ReaderT is handled by implicit parameters</p></li>
-<li><p>StateT is a mutable reference</p></li>
-<li><p>WriterT is a StateT that’s not read</p></li>
-<li><p>Error/Except are handled by poison values</p></li>
-</ul>
-<p>To see how I/O works, consider printing hello world: <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;Hi&quot;</span></code>. As a task this looks like <code class="docutils literal notranslate"><span class="pre">Print</span> <span class="pre">&quot;Hi&quot;</span> <span class="pre">exit</span></code>, where <code class="docutils literal notranslate"><span class="pre">exit</span></code> is what happens after (the continuation). The operation is <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">\cont</span> <span class="pre">-&gt;</span> <span class="pre">Print</span> <span class="pre">a</span> <span class="pre">cont</span></code>. With the continuation as the last argument we can just use the partially-applied function, <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">=</span> <span class="pre">Print</span></code>. <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">a</span> <span class="pre">&gt;&gt;</span> <span class="pre">print</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">\cont</span> <span class="pre">-&gt;</span> <span class="pre">Print</span> <span class="pre">a</span> <span class="pre">(Print</span> <span class="pre">b</span> <span class="pre">cont)</span></code>. Now consider <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">ref</span> <span class="pre">&gt;&gt;=</span> <span class="pre">print</span></code>. The operation is <code class="docutils literal notranslate"><span class="pre">\cont</span> <span class="pre">-&gt;</span> <span class="pre">Read</span> <span class="pre">ref</span> <span class="pre">(\v</span> <span class="pre">-&gt;</span> <span class="pre">Print</span> <span class="pre">v</span> <span class="pre">cont)</span></code>, which is just <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">ref</span> <span class="pre">&gt;&gt;=</span> <span class="pre">Print</span></code> where <code class="docutils literal notranslate"><span class="pre">&gt;&gt;=</span></code> is the continuation monad’s bind operation.</p>
-<div class="section" id="applicativedo">
-<h3>ApplicativeDo<a class="headerlink" href="#applicativedo" title="Permalink to this headline">¶</a></h3>
-<p>ApplicativeDo <span id="id2">[]</span> has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form <code class="docutils literal notranslate"><span class="pre">{a</span> <span class="pre">&lt;-</span> <span class="pre">ax;</span> <span class="pre">b</span> <span class="pre">&lt;-</span> <span class="pre">bx;</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">a</span> <span class="pre">b)}</span> <span class="pre">=</span> <span class="pre">apply</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span></code>. Idiom brackets are shorter, so the value this provides is minimal.</p>
-<p>The second function is to use applicative operations instead of monadic operations because in “some” monads the applicative operation is more efficient. Their example is the Haxl DSL:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>numCommonFriends :: Id → Id → Haxl Int
-numCommonFriends x y = do
-   fx ← friendsOf x
-   fy ← friendsOf y
-   return (length (intersect fx fy))
+<div class="section" id="bang-notation">
+<h3>Bang notation<a class="headerlink" href="#bang-notation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">apply</span><span class="o">!</span> <span class="p">{</span> <span class="n">f</span> <span class="o">!</span><span class="p">(</span><span class="n">g</span> <span class="o">!</span><span class="p">(</span><span class="n">print</span> <span class="n">y</span><span class="p">)</span> <span class="o">!</span><span class="n">x</span><span class="p">)</span> <span class="p">}</span>
 </pre></div>
 </div>
-<p>Well, sorry to burst the bubble, but if you’re writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It’s exactly these kinds of details that <em>are</em> accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the <a class="reference external" href="https://en.wikipedia.org/wiki/Use-define_chain">use/def analysis</a> that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.</p>
-<p>For regular do notation, the applicative notation translates to exactly the same continuation as the monadic notation.</p>
-<p>Verdict: DSL in disguise. Just write a DSL. Stroscot does not benefit at all by adding ApplicativeDo.</p>
-</div>
-<div class="section" id="recursivedo">
-<h3>RecursiveDo<a class="headerlink" href="#recursivedo" title="Permalink to this headline">¶</a></h3>
-<p>RecursiveDo <span id="id3">[<a class="reference internal" href="../zzreferences.html#id29" title="Levent Erkok. Value Recursion in Monadic Computations. PhD thesis, Oregon Health and Science University, October 2002. URL: http://leventerkok.github.io/papers/erkok-thesis.pdf.">Erk02</a>]</span> is an older extension to do notation. The motivating example is a circuit DSL:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">toggle</span> <span class="kt">:</span> <span class="kt">Signal</span> <span class="kt">Bool</span>
-<span class="nf">toggle</span> <span class="ow">=</span> <span class="n">out</span>
-   <span class="kr">where</span>
-      <span class="n">inp</span> <span class="ow">=</span> <span class="n">inv</span> <span class="n">out</span>
-      <span class="n">out</span> <span class="ow">=</span> <span class="n">delay</span> <span class="kt">False</span> <span class="n">inp</span>
-
-<span class="nf">counter</span> <span class="kt">:</span> <span class="kt">Signal</span> <span class="kt">Bool</span> <span class="ow">-&gt;</span> <span class="kt">Signal</span> <span class="kt">Int</span>
-<span class="nf">counter</span> <span class="n">reset</span> <span class="ow">=</span> <span class="n">out</span>
-   <span class="kr">where</span>
-      <span class="n">next</span> <span class="ow">=</span> <span class="n">delay</span> <span class="mi">0</span> <span class="n">inc</span>
-      <span class="n">inc</span> <span class="ow">=</span> <span class="n">out</span> <span class="o">+</span> <span class="mi">1</span>
-      <span class="n">out</span> <span class="ow">=</span> <span class="n">mux</span> <span class="n">reset</span> <span class="n">zero</span> <span class="n">next</span>
-      <span class="n">zero</span> <span class="ow">=</span> <span class="mi">0</span>
-</pre></div>
-</div>
-<p>But wait, where’s the do notation? In fact, this is really just a DSL. There are no monads and no sequencing to be found. All of these operations happen in parallel. The uses for these circuit descriptions all depend on the circuits being specified using a small set of operations specified in a typeclass.</p>
-<p>Investigating Hackage, mdo is uncommon. “Many Haskell programmers will never use it in their careers.” (<a class="reference external" href="https://ro-che.info/articles/2015-09-02-monadfix">1</a>) Uses fall into categories:
-* DSLs, where variable assignments are interpreted as data
-* Gratuitous (no/one binding, or bindings do not refer to bindings from later)
-* Examples where it would be clearer to use mfix or the do-rec notation that is just <code class="docutils literal notranslate"><span class="pre">(a,b,c)</span> <span class="pre">&lt;-</span> <span class="pre">mfix</span> <span class="pre">(\(a,b,c)</span> <span class="pre">-&gt;</span> <span class="pre">(_,_,_))</span></code>
-* I/O monad, mfix is used to write the code in a recursive style instead of modifying a variable, e.g. forking two threads that kill each other:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">mdo</span>
-   <span class="n">a</span> <span class="ow">&lt;-</span> <span class="n">fork</span> <span class="o">$</span> <span class="n">killThread</span> <span class="n">b</span>
-   <span class="n">b</span> <span class="ow">&lt;-</span> <span class="n">fork</span> <span class="o">$</span> <span class="n">killThread</span> <span class="n">a</span>
-
-<span class="c1">-- vs</span>
-<span class="nf">bId</span> <span class="ow">&lt;-</span> <span class="n">newEmptyMVar</span>
-<span class="nf">a</span> <span class="ow">&lt;-</span> <span class="n">fork</span> <span class="o">$</span> <span class="n">readMVar</span> <span class="n">b</span> <span class="o">&gt;&gt;=</span> <span class="n">killThread</span>
-<span class="nf">b</span> <span class="ow">&lt;-</span> <span class="n">fork</span> <span class="o">$</span> <span class="n">killThread</span> <span class="n">a</span>
-<span class="nf">writeMVar</span> <span class="n">bId</span> <span class="n">b</span>
-</pre></div>
-</div>
-<p>The code for IO’s mfix uses unsafeDupableInterleaveIO. This has been the subject of at least one <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/issues/5421">bug</a> (<a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/issues/15349">two</a> counting fixST), and is why there is both fixIO and <a class="reference external" href="https://hackage.haskell.org/package/base-4.15.0.0/docs/System-IO-Unsafe.html#v:unsafeFixIO">unsafeFixIO</a>. Reasoning about fixIO seems to <a class="reference external" href="https://wiki.haskell.org/Evaluation_order_and_state_tokens">require</a> laziness semantics and maybe also an understanding of Haskell’s State-based I/O model.</p>
-<p>Also, most monads fail to satisfy monadic right shrinking, which IMO makes the notation completely unintuitive:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">mdo</span>
-   <span class="n">z</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="n">z</span>
-   <span class="n">w</span> <span class="ow">&lt;-</span> <span class="n">g</span> <span class="n">z</span>
-   <span class="n">return</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
-
-<span class="c1">-- is NOT equivalent to</span>
-
-<span class="nf">z</span> <span class="ow">&lt;-</span> <span class="n">mdo</span>
-         <span class="n">z</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="n">z</span>
-         <span class="n">return</span> <span class="n">z</span>
-<span class="nf">w</span> <span class="ow">&lt;-</span> <span class="n">g</span> <span class="n">z</span>
-<span class="nf">return</span> <span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with <code class="docutils literal notranslate"><span class="pre">mfix</span></code>. We can still implement <code class="docutils literal notranslate"><span class="pre">mfix</span></code> for the monads that matter, like <code class="docutils literal notranslate"><span class="pre">State</span></code>. According to all available knowledge, <code class="docutils literal notranslate"><span class="pre">mfix</span></code> can’t be implemented for continuations, so nothing is lost from regular programs.</p>
-<p>Verdict: Not only a DSL in disguise, but also a footgun. Provide mfix and the rec{} notation in an obscure library for those who care.</p>
-</div>
-<div class="section" id="arrows">
-<h3>Arrows<a class="headerlink" href="#arrows" title="Permalink to this headline">¶</a></h3>
-<p>You might be getting the pattern here. Arrows were inspired by a parsing DSL. Any arrow which supports the ArrowApply class is a monad. Arrows not supporting ArrowApply must write operations for every language element supported (variable, function, conditional, grammar production choice, and so on). Continuations require ArrowApply to even implement the basic arrow interface. Verdict: trash, a leaky “abstraction” that just wastes everyone’s time.</p>
-</div>
-<div class="section" id="idiom-brackets">
-<h3>Idiom brackets<a class="headerlink" href="#idiom-brackets" title="Permalink to this headline">¶</a></h3>
-<p>While do notation is defined for monads, idiom brackets are defined for applicative functors, <code class="docutils literal notranslate"><span class="pre">[[</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">]]</span> <span class="pre">=</span> <span class="pre">pure</span> <span class="pre">f</span> <span class="pre">&lt;*&gt;</span> <span class="pre">a</span> <span class="pre">&lt;*&gt;</span> <span class="pre">b</span></code>. But DSL notation works too: <code class="docutils literal notranslate"><span class="pre">apply</span> <span class="pre">{</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">}</span></code>.</p>
-<p>The issue with translating to <code class="docutils literal notranslate"><span class="pre">&lt;*&gt;</span></code> is that it assumes left-to-right evaluation. You can see this in the <a class="reference external" href="https://hackage.haskell.org/package/base-4.15.0.0/docs/Control-Applicative.html#t:Applicative">translation</a> for Monads: <code class="docutils literal notranslate"><span class="pre">m1</span> <span class="pre">&lt;*&gt;</span> <span class="pre">m2</span></code> binds <code class="docutils literal notranslate"><span class="pre">m1</span></code> before <code class="docutils literal notranslate"><span class="pre">m2</span></code>. In Stroscot the program is required to be equivalent under all evaluation orders. So to enforce this we need a function <code class="docutils literal notranslate"><span class="pre">parallel</span> <span class="pre">:</span> <span class="pre">[m</span> <span class="pre">a]</span> <span class="pre">-&gt;</span> <span class="pre">m</span> <span class="pre">[a]</span></code> that checks there is no issue with evaluating in parallel. Then using parallel the translation of <code class="docutils literal notranslate"><span class="pre">apply</span> <span class="pre">{</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">x</span> <span class="pre">}</span></code> looks like <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">(av,bv,cv)</span> <span class="pre">=</span> <span class="pre">parallel</span> <span class="pre">(a,b,c);</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">av</span> <span class="pre">bv</span> <span class="pre">cv)</span> <span class="pre">}</span></code></p>
-<p>Idris defines <a class="reference external" href="http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation">!-notation</a>, “implicitly bound application”. The scoping is <a class="reference external" href="https://github.com/idris-lang/Idris-dev/issues/4395">unintuitive</a>, but the notation itself is powerful. As a DSL <code class="docutils literal notranslate"><span class="pre">apply!</span> <span class="pre">{</span> <span class="pre">f</span> <span class="pre">!(g</span> <span class="pre">!(print</span> <span class="pre">y)</span> <span class="pre">!x)</span> <span class="pre">}</span></code> the scoping issue is resolved. TODO: define the exact translation rules</p>
-</div>
-<div class="section" id="c-like-reference-access">
-<h3>C-like reference access<a class="headerlink" href="#c-like-reference-access" title="Permalink to this headline">¶</a></h3>
-<p>For example we want to do:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="n">ref</span> <span class="mi">1</span>
-<span class="nf">b</span> <span class="ow">=</span> <span class="n">ref</span> <span class="mi">2</span>
-<span class="nf">c</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
-<span class="nf">a</span> <span class="kt">:=</span> <span class="n">c</span>
-</pre></div>
-</div>
-<p>Translated this looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">ref</span> <span class="mi">1</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span>
-<span class="nf">ref</span> <span class="mi">2</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="n">b</span> <span class="ow">-&gt;</span>
-<span class="nf">parallel</span> <span class="p">(</span><span class="n">read</span> <span class="n">a</span><span class="p">,</span> <span class="n">read</span> <span class="n">b</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="nf">\</span><span class="p">(</span><span class="n">av</span><span class="p">,</span><span class="n">bv</span><span class="p">)</span>  <span class="ow">-&gt;</span>
-<span class="kr">let</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">av</span> <span class="o">+</span> <span class="n">bv</span> <span class="kr">in</span>
-<span class="nf">writeRef</span> <span class="n">a</span> <span class="n">c</span>
-</pre></div>
-</div>
-<p>I think the solution is another DSL. Inserting <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">a</span></code> is not too complicated, just follow the C/C++ rules about converting lvalues to rvalues.</p>
+<p>Idris defines <a class="reference external" href="http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation">!-notation</a>, “implicitly bound application”.</p>
+<p>TODO: define the exact translation rules</p>
 </div>
 </div>
 <div class="section" id="control-structures">
@@ -883,9 +773,9 @@ numCommonFriends x y = do
 <h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">comment</span>
 <span class="o">/*</span> <span class="n">multiline</span>
-<span class="nf">comment</span> <span class="o">*/</span>
+   <span class="n">comment</span> <span class="o">*/</span>
 <span class="cm">{- nesting {- comment -} -}</span>
-<span class="kr">if</span><span class="p">(</span><span class="n">false</span><span class="p">)</span> <span class="p">{</span> <span class="n">code_comment</span> <span class="p">}</span>
+<span class="kr">if</span><span class="p">(</span><span class="n">false</span><span class="p">)</span> <span class="p">{</span> <span class="n">code_comment</span> <span class="o">-</span> <span class="n">lexed</span> <span class="n">but</span> <span class="n">not</span> <span class="n">parsed</span> <span class="n">except</span> <span class="n">for</span> <span class="n">start</span><span class="o">/</span><span class="n">end</span> <span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -895,12 +785,12 @@ numCommonFriends x y = do
 <span class="nf">a</span> <span class="ow">=</span> <span class="n">s8</span> <span class="mi">2</span>
 </pre></div>
 </div>
-<p>These two options seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to find the = with long types) or <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program.</p>
-<p>The second syntax is similar to assembler syntax such as <code class="docutils literal notranslate"><span class="pre">dword</span> <span class="pre">0</span></code>.</p>
 </div>
 <div class="section" id="dsl">
 <h2>DSL<a class="headerlink" href="#dsl" title="Permalink to this headline">¶</a></h2>
-<p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
+<p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a DSL.
+Due to the fexpr semantics any expression can be used and pattern-matched, like <code class="docutils literal notranslate"><span class="pre">javascript</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">&quot;abc&quot;</span> <span class="pre">{</span> <span class="pre">234</span> <span class="pre">})</span></code>.</p>
+<p>E.g. we could write a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">run_sql_statement</span> <span class="p">{</span> <span class="kt">SELECT</span> <span class="o">...</span> <span class="p">}</span>
 </pre></div>
 </div>
@@ -918,7 +808,7 @@ numCommonFriends x y = do
 </div>
 <div class="section" id="namespacing">
 <h2>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this headline">¶</a></h2>
-<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition. <code class="docutils literal notranslate"><span class="pre">.</span></code> is preferred to <code class="docutils literal notranslate"><span class="pre">::</span></code> because it’s shorter and because modules are first-class.</p>
+<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition.</p>
 </div>
 </div>
 

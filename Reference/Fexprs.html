@@ -100,10 +100,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Metaprogramming</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#atoms">Atoms</a></li>
-</ul>
-</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
@@ -111,8 +108,7 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../TODO/index.html">In-progress design notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Discussion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
 </ul>
 
@@ -189,22 +185,6 @@
 <span id="fexprs"></span><h1>Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permalink to this headline">¶</a></h1>
 <p>In Stroscot, as in <a class="reference external" href="http://web.cs.wpi.edu/~jshutt/kernel.html">Kernel</a>, fexprs are functions that take code AST’s and a lexical environment instead of evaluated values. So when you write <cite>f a b</cite>, and <cite>f</cite> is an operative, then <cite>f</cite> has a type like <cite>f : Env -&gt; Ast -&gt; …</cite>. The <code class="docutils literal notranslate"><span class="pre">Env</span></code> is an opaque map that might or might not have bindings to <cite>a</cite> and <cite>b</cite>, and the AST is fragment like <cite>App (Sym ‘a’) (Sym ‘b’)</cite>. Then <cite>f</cite> can do arbitrary operations with those, with the full power of the programming language, and in particular <cite>f</cite> can <cite>eval</cite> AST fragments with the env it’s given (or with envs from elsewhere).</p>
 <p>The main power fexprs give over macros is that there’s no phase distinction. A macro is like an fexpr that builds up a single AST and calls eval at the end. But fexprs can call eval multiple times, and these can depend on the results of previous evaluations, so for example you can lookup a variable name stored in an argument and evaluate that name.</p>
-<div class="section" id="atoms">
-<h2>Atoms<a class="headerlink" href="#atoms" title="Permalink to this headline">¶</a></h2>
-<p>Any atom without a definition can be used as a symbolic expression. For example this will produce <code class="docutils literal notranslate"><span class="pre">4</span></code> if <code class="docutils literal notranslate"><span class="pre">foo</span></code> is undefined:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="p">(</span><span class="n">foo</span> <span class="n">x</span><span class="p">)</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
-
-<span class="nf">f</span> <span class="p">(</span><span class="n">foo</span> <span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Due to the fexpr semantics any expression can be used and pattern-matched, like <code class="docutils literal notranslate"><span class="pre">javascript</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">&quot;abc&quot;</span> <span class="pre">{</span> <span class="pre">234</span> <span class="pre">})</span></code>.</p>
-<p>To export the semantics to other modules a special keyword <code class="docutils literal notranslate"><span class="pre">atom</span></code> is used:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">atom</span> <span class="n">foo</span>
-</pre></div>
-</div>
-<p>This ensures that no rules for <code class="docutils literal notranslate"><span class="pre">foo</span></code> are defined and adds the symbol to the export list. It is good practice to use this even if the identifier is not exported.</p>
-<p>Examples of predefined atoms include null, true, and false.</p>
-</div>
 </div>
 
 

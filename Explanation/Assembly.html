@@ -98,11 +98,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">In-progress design notes</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Discussion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
@@ -195,7 +195,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">In-progress design notes</a> &raquo;</li>
+          <li><a href="index.html">Discussion</a> &raquo;</li>
         
       <li>Assembly</li>
     
@@ -204,7 +204,7 @@
         
           
             
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/TODO/Assembly.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Explanation/Assembly.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -422,7 +422,7 @@ the arguments passed in the branch.</p>
 </dd>
 </dl>
 <p>A basic block is a mixture of jump and non-jump instructions that is complete, in the sense that any execution of the program will take one of the jumps. Any arbitrary sequence of instructions can be turned into a basic block by adding an unconditional jump at the end.</p>
-<p>Although phi nodes were an interesting idea all the cool kids are now using block arguments. Blocks arguments fit better into various analysis passes.</p>
+<p>Although phi nodes were an interesting idea all the <a class="reference external" href="https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes">cool kids</a> are now using block arguments. Blocks arguments fit better into various analysis passes.</p>
 </div>
 <div class="section" id="symbols">
 <h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this headline">¶</a></h2>

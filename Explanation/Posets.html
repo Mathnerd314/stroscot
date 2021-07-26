@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Posets &mdash; Stroscot  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Discussion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Posets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Explanation/Posets.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="posets">
+<h1>Posets<a class="headerlink" href="#posets" title="Permalink to this headline">¶</a></h1>
+<p>Posets are used in a few places in Stroscot (operator precedence, method combination).</p>
+<div class="section" id="sets">
+<h2>Sets<a class="headerlink" href="#sets" title="Permalink to this headline">¶</a></h2>
+<p>Sets are defined by a method <code class="docutils literal notranslate"><span class="pre">(:)</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Set</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code>.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="kt">:</span> <span class="kt">A</span> <span class="ow">=</span> <span class="n">true</span>
+<span class="mi">2</span> <span class="kt">:</span> <span class="kt">A</span> <span class="ow">=</span> <span class="n">false</span>
+<span class="nf">a</span> <span class="kt">:</span> <span class="kt">A</span> <span class="ow">=</span> <span class="p">(</span><span class="n">a</span> <span class="kt">:</span> <span class="kt">B</span><span class="p">)</span> <span class="n">and</span> <span class="n">not</span> <span class="p">(</span><span class="n">a</span> <span class="kt">:</span> <span class="kt">C</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The usual method combination mechanisms apply.</p>
+<p>You can also define sets with set-builder notation, set literals, and set operations (union intersection difference complement).</p>
+</div>
+<div class="section" id="id1">
+<h2>Posets<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>A poset is a set with a comparison operation where exactly one of these holds: x &lt; y, x &gt; y, x = y, x ~ y (~ is incomparable).</p>
+<p>To specify a poset, we specify a subset of these relations. The relations are then checked/extended to satisfy the properties of transitivity, antisymmetry, reflexivity, and duality. If there is ambiguity in the definition, ~ is preferred, otherwise it’s an error.</p>
+<div class="section" id="relations">
+<h3>Relations<a class="headerlink" href="#relations" title="Permalink to this headline">¶</a></h3>
+<p>The simplest relation is specifying the results of comparison. For flexibility one can specify any set of the 4 outcomes (2^4 possibilities, minus the trivial none/all). The syntax is to combine characters in the order <code class="docutils literal notranslate"><span class="pre">&lt;&gt;=~</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">elemR</span> <span class="kt">P</span> <span class="n">x</span> <span class="o">&lt;=~</span> <span class="n">y</span>
+<span class="nf">elemR</span> <span class="kt">P</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">y</span>
+<span class="nf">elemR</span> <span class="kt">P</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span>
+</pre></div>
+</div>
+<p>Specifying each of the elements individually is tedious, so you can also define relations on all elements of two sets:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">setR</span> <span class="kt">P</span> <span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">}</span> <span class="o">&lt;</span> <span class="p">{</span><span class="n">z</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="priorities">
+<h3>Priorities<a class="headerlink" href="#priorities" title="Permalink to this headline">¶</a></h3>
+<p>Similar to overloading you can specify priorities for the rules:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioDef</span> <span class="n">plow</span> <span class="o">&lt;</span> <span class="n">phigh</span>
+
+<span class="nf">prio</span> <span class="n">plow</span>
+<span class="nf">setR</span> <span class="kt">P</span> <span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">}</span> <span class="o">&lt;</span> <span class="p">{</span><span class="n">z</span><span class="p">}</span>
+
+<span class="nf">prio</span> <span class="n">phigh</span>
+<span class="nf">elemR</span> <span class="kt">P</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span>
+</pre></div>
+</div>
+<p>There’s also Zarf’s Precedes thing:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span> <span class="kt">P</span> <span class="kt">A</span> <span class="kt">B</span> <span class="ow">=</span>
+  <span class="kr">if</span> <span class="kt">A</span> <span class="n">subsetOf</span> <span class="kt">B</span>
+    <span class="n">setR</span> <span class="kt">P</span> <span class="kt">A</span> <span class="p">(</span><span class="kt">B</span> <span class="nf">\</span> <span class="kt">A</span><span class="p">)</span>
+  <span class="kr">else</span> <span class="kr">if</span> <span class="kt">B</span> <span class="n">subsetOf</span> <span class="kt">A</span>
+    <span class="n">setR</span> <span class="kt">P</span> <span class="p">(</span><span class="kt">A</span> <span class="nf">\</span> <span class="kt">B</span><span class="p">)</span> <span class="kt">B</span>
+</pre></div>
+</div>
+<p>b covers a: no element c exists such that a &lt; c &lt; b
+checkable assertion, not sure if useful</p>
+<p>defining a relation on all elements of 2 sets is automatic:
+{a} &lt;&gt; {b}</p>
+<p>chain C: C &lt;&gt;= C
+antichain C: C ~= C</p>
+<dl class="simple">
+<dt>upper bound of A:</dt><dd><p>element g s.t. A ≤ g</p>
+</dd>
+<dt>lower bound of A:</dt><dd><p>element m s.t. A ≥ m</p>
+</dd>
+<dt>max of A:</dt><dd><p>element g s.t. A ≤~ g</p>
+</dd>
+<dt>min of A:</dt><dd><p>element m s.t. A ≥~ m</p>
+</dd>
+</dl>
+<p>meet of A: upper bound of lower bounds of A
+join of A: lower bound of upper bounds of A
+greatest element: join/upper bound of universal set
+least element: meet/lower bound of universal set</p>
+<p>combinations of posets
+- lexicographical order
+- product order
+- direct product
+- ordinal sum
+- disjoint union</p>
+</div>
+</div>
+<div class="section" id="total-order">
+<h2>Total order<a class="headerlink" href="#total-order" title="Permalink to this headline">¶</a></h2>
+<p>Making the above generate a total order is fairly easy, just pick a linearization or error if it’s ambiguous.</p>
+<p>price (obj : Treasure) = 10</p>
+<dl class="simple">
+<dt>hit (obj<span class="classifier">MingVase) =</span></dt><dd><p>print “it cracks”
+price obj := 0</p>
+</dd>
+<dt>main =</dt><dd><p>mv = MingVase
+print (price mv)
+hit mv
+print (price mv)</p>
+</dd>
+</dl>
+<p>This is defining a rule at runtime to override the static rule. := is an fexpr; otherwise price obj would be resolved to 10. Similarly all the price calls are dynamic. So translated this looks like:</p>
+<p>static_price (obj : Treasure) = 10</p>
+<dl>
+<dt>hit (obj<span class="classifier">MingVase) =</span></dt><dd><p>print “it cracks”
+set_dynamic “price” obj 0</p>
+</dd>
+<dt>price obj | has_dynamic state “price” obj = run_dynamic state “price” obj</dt><dd><div class="line-block">
+<div class="line">otherwise = static_price obj</div>
+</div>
+</dd>
+<dt>main =</dt><dd><p>state = …
+mv = MingVase
+print (price mv)
+hit mv
+print (price mv)</p>
+</dd>
+</dl>
+<p>With a uniform translation everything will be wrapped in this dynamic override. Since dynamic overrides static, nothing from static needs to carry over - the rule system can be completely different. In particular the dynamic system does not need to implement priorities, method combination, or specificity overriding. (Although, it could, with enough work).</p>
+<p>As far as rulesets go, set theory seems sufficient. Exceptions are just setminus {x} and then there’s a macro for defining a group of rules all in a set.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019-2020 Mathnerd314.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

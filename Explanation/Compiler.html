@@ -99,11 +99,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">In-progress design notes</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Discussion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
@@ -124,6 +124,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#compiler-ways">Compiler ways</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#documentation-generator">Documentation generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-code">Dynamic code</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
@@ -181,7 +183,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">In-progress design notes</a> &raquo;</li>
+          <li><a href="index.html">Discussion</a> &raquo;</li>
         
       <li>Compiler design</li>
     
@@ -190,7 +192,7 @@
         
           
             
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/TODO/Compiler.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Explanation/Compiler.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -407,6 +409,21 @@ The compiler itself and its boot libraries must be built for the target way.</p>
 <div class="section" id="documentation-generator">
 <h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this headline">¶</a></h2>
 <p>The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There’s regex-based search, and special searches for identifiers.</p>
+</div>
+<div class="section" id="notebooks">
+<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h2>
+<p>Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.</p>
+<p>But, jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code”, no information on what cell it’s from.
+So we would have to hack jupyter to get this to work.</p>
+<p>The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a “soft_reset” message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it’s the same as the previous execution - I don’t know if sending all the code is much of a bottleneck.</p>
+<p>For now the imperative approach seems fine.</p>
+</div>
+<div class="section" id="dynamic-code">
+<h2>Dynamic code<a class="headerlink" href="#dynamic-code" title="Permalink to this headline">¶</a></h2>
+<p>loading code at runtime
+- typecheck, JIT, etc.
+- return function pointer
+the function pointer doesn’t have to be machine code, it can be bytecode- then running is is running the interpreter</p>
 </div>
 </div>
 

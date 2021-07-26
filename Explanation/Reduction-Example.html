@@ -99,11 +99,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">In-progress design notes</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Discussion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
@@ -164,7 +164,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">In-progress design notes</a> &raquo;</li>
+          <li><a href="index.html">Discussion</a> &raquo;</li>
         
       <li>Reduction example</li>
     
@@ -173,7 +173,7 @@
         
           
             
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/TODO/Reduction-Example.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Explanation/Reduction-Example.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -190,7 +190,7 @@
   <div class="section" id="reduction-example">
 <h1>Reduction example<a class="headerlink" href="#reduction-example" title="Permalink to this headline">¶</a></h1>
 <p>To show how optimal reduction works, we step through the example term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
-<img alt="TODO/_static/Stroscot_M_Proof_Tree.svg" src="TODO/_static/Stroscot_M_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">ret</span>
+<img alt="../_images/Stroscot_M_Proof_Tree.svg" src="../_images/Stroscot_M_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">ret</span>
   <span class="kt">Cut</span> <span class="n">o1</span> <span class="n">o1l</span>
     <span class="n">o1</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_o1</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_o1</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
       <span class="n">x_o1</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_o1</span> <span class="n">x2_o1</span>
@@ -220,7 +220,7 @@
 <ol class="arabic simple">
 <li></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-97e1b6f08ef7f1f5d0a85440975df3d06aaaab32.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-ab7e9a77d19a9291639763e43d55d8b97f7d1ada.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1
 f -&gt; c2
@@ -320,7 +320,7 @@ ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="2">
 <li><p>First we reduce the top cut.</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-5ce06debed866af1490c6dc6321ea1280bbc3621.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-e1988dbec5d84435418a5ec56982d062a75e22c2.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -413,7 +413,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="3">
 <li></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-bdef78be1f24084abbfd735310215bd4bc972790.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-a31b424ec9c0ce875978e8bf7101bccabb8ce1f9.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -501,7 +501,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="4">
 <li><p>To handle the duplication from the contraction we duplicate the cuts/promotion rule and introduce a duplication node Dup to incrementally duplicate the rest of the structure:</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-79cf4c40d1b21e732e5995b8f546939b1d16cd1c.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-04dd4e7a4852d84edb3b8d665db030dbb5eb8918.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -595,7 +595,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="5">
 <li><p>The !d/!p pair removes a box; to track level we have renumber the levels of the contents of the box. Instead we retain the levels on the cut node. We also need to remember which side had the box, but in our example the higher side is always the box (this is not true in general because !d can renumber arbitrarily high).</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-33f8b34d6b19127d3c09e5ef9dbd27f319241c7a.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-2673dacfe5af5b3b8b40976f49de7afaa65efee2.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -684,7 +684,7 @@ f_ret [label=&quot;I&quot;]
 <li><p>Next we move the dup down; this is duplicating the binder as discussed on page 29.</p></li>
 </ol>
 <p>When it encounters the PiR, technically the Dup node grows in size and becomes a 4-input 2-output node. But since dot doesn’t have enough edge labels for the monster node this is depicted in the graph as a series of 2-input 1-output Dup nodes linked with dashed lines.</p>
-<div class="graphviz"><object data="../_images/graphviz-a6599f2df791b2b07a02eb5fd2f17b69d0dd9d36.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-78cc4bd832e6c4842a7d9bed6eabe6003fed1851.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -781,7 +781,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="7">
 <li><p>On to the reduction in Figure 2.14 (4)-(5).</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-9a95dcae7a8b98e9ea7034c68886c72fcdb4d499.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-efc9a6b5dae43fbe150084339aedfb257113c11c.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; ret [color=&quot;red&quot;,penwidth=2]
 
@@ -872,7 +872,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>8</p>
-<div class="graphviz"><object data="../_images/graphviz-fd1566d0eff67adad4529ff63db87021f213c6e8.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-1a1e878aa267bb19ce17be24f7bf02ea1a4e2e24.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -959,7 +959,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="9">
 <li><p>We are doing things a little out of order compared to Asperti; next is the reduction in Fig 2.11 (2)-(3).</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-6fcf974646bba9339994c01f16728f38ab5cea60.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-c88731267d48e20d199ae26b2c40efad8c64b62b.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1040,7 +1040,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>10</p>
-<div class="graphviz"><object data="../_images/graphviz-d6dc1f4a1c942c0ad5d0faba25d604d2b0204cac.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-db309b1c765995940fb82c2a07f195a54226aeb2.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1116,7 +1116,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>11</p>
-<div class="graphviz"><object data="../_images/graphviz-63e442e888e0e0a176656572495c95535f05e366.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-1348ac19a549118bf397244cb3c8762186837840.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1208,7 +1208,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>12</p>
-<div class="graphviz"><object data="../_images/graphviz-0c78971d77853d32af71578f4d43593eb45958ab.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-c4b55e31f620de9351466c0ae20776f260bb8ccb.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1293,7 +1293,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>13</p>
-<div class="graphviz"><object data="../_images/graphviz-f147f0c43cc0979234543e2931561da92902025c.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-f2a60d1bcc9cbb4eeb7964fad25d05dfc5fcfcec.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1381,7 +1381,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>14</p>
-<div class="graphviz"><object data="../_images/graphviz-3cbf518526ec0e3cbdddd3b9b2bd5f372531c2f9.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-7cdaafc877cb52fc167b93c5b9e0b8b0b7e80982.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1477,7 +1477,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>15</p>
-<div class="graphviz"><object data="../_images/graphviz-c6ae9a9225c6fd4aa5013a3035228e4d6c37cbb6.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-039b6bd6e5c0b1a1307ef662ee57423254455837.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1566,7 +1566,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>16</p>
-<div class="graphviz"><object data="../_images/graphviz-8932bce7ff30fc7a3cc49b01f934bb01aadc8714.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-731f613b3197029d4f8d288925a85b4374e8f7d6.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1652,7 +1652,7 @@ f_ret [label=&quot;I&quot;]
 <ol class="arabic simple" start="17">
 <li><p>… 4 duplication steps later …</p></li>
 </ol>
-<div class="graphviz"><object data="../_images/graphviz-fd9659d9832deae864234edd315a5718b61ab547.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-514865347900a3441708be4faef8fb955b8b7bae.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; d1 [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1761,7 +1761,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>18</p>
-<div class="graphviz"><object data="../_images/graphviz-f052cb2c75861bfd069baa7dd4680bf79534e9a1.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-7cdc43634baa005fba7ccc30ab364df7a685ec56.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1864,7 +1864,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>19</p>
-<div class="graphviz"><object data="../_images/graphviz-c9c02358906dcd358805dcf6e341059a1d91a2dd.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-7af975eff030475844459735d5e63a93a176bc5a.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -1962,7 +1962,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>20</p>
-<div class="graphviz"><object data="../_images/graphviz-3c4f7b5ff5451167f09408117c271be4ea12c091.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-b821716d769554a342bfed8403b7db4d2320966f.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2066,7 +2066,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>21</p>
-<div class="graphviz"><object data="../_images/graphviz-b2d8a4d34d09ed3ff5bce71df50a692b3e60dc11.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-dd913491af005e9d8f02407119c469f9675ddabd.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2164,7 +2164,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>22</p>
-<div class="graphviz"><object data="../_images/graphviz-ca7888e36db623d729b483dc1870ffbaeb1d7d34.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-e8b0bac63a3bb3b325642fed46a3254cfe5c0934.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2271,7 +2271,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>23</p>
-<div class="graphviz"><object data="../_images/graphviz-1acf4b8f97ad5bbe8867b838c27aaa829f38bfbc.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-59f9f95d2685431d8e718f5c8421f8ca2c310ced.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2374,7 +2374,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>24</p>
-<div class="graphviz"><object data="../_images/graphviz-31c82a9085c5caabaf3ddfedaaa914b910d5ef9c.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-36cf54007c95c4895ae6e6d1b7a7a01762c9453c.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2502,7 +2502,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>25</p>
-<div class="graphviz"><object data="../_images/graphviz-67cc82cdd14dde0c96174783b3420abc457976f2.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-ddfcb54d4d16da3adc41ef26e2cc0abf40ffa00b.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2624,7 +2624,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>26</p>
-<div class="graphviz"><object data="../_images/graphviz-ee3a1d8674f19305e7874eb7fca2b462b59ed154.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-94966a9c1df84a31051ed431f06e41a86f033058.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2740,7 +2740,7 @@ h_app [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>27</p>
-<div class="graphviz"><object data="../_images/graphviz-d5219025994cf7aa16d723f1e72c0be837e5efc4.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-e669acd077f6658c8d2be297873a9336da299097.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2851,7 +2851,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>28</p>
-<div class="graphviz"><object data="../_images/graphviz-531c8cb9cc6681b4d09cf4f8cc680c4a85e7cb0f.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-a98da4b6c0cac75a3c17f180ca4503f9937bdae0.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -2965,7 +2965,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>29</p>
-<div class="graphviz"><object data="../_images/graphviz-477066e3248960836f189cfea7529a68ad1af448.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-96af431808c24570803a893f6126ef161618d7d0.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -3084,7 +3084,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>30</p>
-<div class="graphviz"><object data="../_images/graphviz-46882fa911abacb92ca1f7b4800f544bcfd8427d.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-8864e7f80cc0849cc1fcf0653d4155f6f7937b92.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -3209,7 +3209,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>31</p>
-<div class="graphviz"><object data="../_images/graphviz-d0c2e362e1790de0e041ef2577a89f8ab1785175.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-aed82f4526fdfd8f78fb3d38422b00e8048a378d.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -3328,7 +3328,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>32</p>
-<div class="graphviz"><object data="../_images/graphviz-0e6d8d5ee252b71d63bd5546c9f7a74bf3f7c584.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-59db39efacd3f8cda44aa61d3469cec84f6599c3.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 
@@ -3456,7 +3456,7 @@ i_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>33</p>
-<div class="graphviz"><object data="../_images/graphviz-6fce01c90c95816811923957d1907c62b291ff53.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-8872ecb70bb153ebbfc94c057c702a94e8e48289.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; f_retf [color=&quot;red&quot;,penwidth=2,label=&quot;0-&gt;1&quot;]
 

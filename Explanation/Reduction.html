@@ -99,11 +99,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Rationale</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">In-progress design notes</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Discussion</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delimited-Continuations.html">Delimited continuations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Reduction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#infinite-structures">Infinite structures</a></li>
@@ -191,7 +191,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">In-progress design notes</a> &raquo;</li>
+          <li><a href="index.html">Discussion</a> &raquo;</li>
         
       <li>Reduction</li>
     
@@ -200,7 +200,7 @@
         
           
             
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/TODO/Reduction.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Explanation/Reduction.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -253,12 +253,12 @@
 <div class="section" id="derivation-tree">
 <h3>Derivation tree<a class="headerlink" href="#derivation-tree" title="Permalink to this headline">¶</a></h3>
 <p>See the connectives <span class="math notranslate nohighlight">\(\text{B} = \text{Bool}\)</span> and <span class="math notranslate nohighlight">\(\multimap\)</span> defined <a class="reference internal" href="../Reference/Logic.html#connectives"><span class="std std-ref">above</span></a>. <span class="math notranslate nohighlight">\(\multimap\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).</p>
-<img alt="TODO/_static/Stroscot_AND_Proof_Tree.svg" src="TODO/_static/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id5">[<a class="reference internal" href="../zzreferences.html#id32" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
+<img alt="../_images/Stroscot_AND_Proof_Tree.svg" src="../_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id5">[<a class="reference internal" href="../zzreferences.html#id32" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
 </div>
 <div class="section" id="nets">
 <h3>Nets<a class="headerlink" href="#nets" title="Permalink to this headline">¶</a></h3>
 <p>We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.</p>
-<img alt="TODO/_static/AND_net.svg" src="TODO/_static/AND_net.svg" /><img alt="TODO/_static/AND_net_r.svg" src="TODO/_static/AND_net_r.svg" /><p>To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition’s introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.</p>
+<img alt="../_images/AND_net.svg" src="../_images/AND_net.svg" /><img alt="../_images/AND_net_r.svg" src="../_images/AND_net_r.svg" /><p>To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition’s introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.</p>
 <p>Most rules do not modify the contexts <span class="math notranslate nohighlight">\(\Gamma, \Delta, \Theta, \Lambda\)</span> and so the proposition edge skips the node as it is not an introduction/elimination (gray in the presentation above). But there are exceptions that do need the context:</p>
 <blockquote>
 <div><ul class="simple">
@@ -272,7 +272,7 @@
 <h3>Expression “tree”<a class="headerlink" href="#expression-tree" title="Permalink to this headline">¶</a></h3>
 <p>For doing stuff, we do not need the syntactic subderivation inclusion relationship at all, all the important bits can be gotten from the blue/red edges. (TODO: is this true? how hard is it to preserve the syntactic relationship under cut elimination?)</p>
 <p>If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents, then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).</p>
-<div class="graphviz"><object data="../_images/graphviz-fc6789ea092517abbf3c589c1c9045d71c2eeb45.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-963562c2e248dda5a948082ab955157fa7c2f0a6.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 and [label=&quot;and =&quot;]
 and -&gt; d [color=&quot;red&quot;]
@@ -295,7 +295,7 @@ g2 [label=&quot;!d&quot;]
 h2 -&gt; g2 [color=&quot;blue&quot;,dir=back]
 h2 [label=&quot;I&quot;]
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-67398881407071cc1bdc5617e6d02d90969e79e4.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-985d25522b053673aa16399d505c0ce56a7c02a9.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 r [label=&quot;r =&quot;]
 r -&gt; p /* pr */ [color=&quot;red&quot;]
@@ -536,7 +536,7 @@ p [label=&quot;I&quot;]
 \[ \begin{align}\begin{aligned}S &amp;= \, \left(!T \to !T \right) \to f\\T &amp;= \, !T \to f\\f &amp;= \, !S \to !S \to a\end{aligned}\end{align} \]</div>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}F2 &amp;: \, !S \to a\\G2 &amp;: \, !T \to S\end{aligned}\end{align} \]</div>
-<img alt="TODO/_static/Stroscot_F2G2_Proof_Tree.svg" src="TODO/_static/Stroscot_F2G2_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">z</span> <span class="n">ret</span>
+<img alt="../_images/Stroscot_F2G2_Proof_Tree.svg" src="../_images/Stroscot_F2G2_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span> <span class="n">z</span> <span class="n">ret</span>
   <span class="kt">Cut</span> <span class="n">f2r</span> <span class="n">f2l</span>
     <span class="n">f2r</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span> <span class="ow">=</span> <span class="kt">PiRight</span> <span class="o">^</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="n">x_f2</span><span class="p">],</span> <span class="p">[</span><span class="n">ret_f2</span><span class="p">],</span> <span class="kt">[]</span><span class="p">,</span> <span class="kt">[]</span> <span class="ow">-&gt;</span>
       <span class="n">x_f2</span> <span class="ow">=</span> <span class="kt">BangC</span> <span class="n">x1_f2</span> <span class="n">x23_f2</span>
@@ -562,7 +562,7 @@ p [label=&quot;I&quot;]
     <span class="p">)]</span> <span class="p">[(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">/</span><span class="n">ret</span> <span class="ow">=</span> <span class="kt">Identity</span><span class="p">)]</span>
 </pre></div>
 </div>
-<div class="graphviz"><object data="../_images/graphviz-a7ecfb8b2aee090736bd2cbaef386f43c0af30b5.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-ca0b8d3909d86717bcebb85e03a32fafe27c6a5c.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; c1 [style=invis]
@@ -667,7 +667,7 @@ ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>We want this to reduce without duplicating a cut. So first we reduce everything except the contraction:</p>
-<div class="graphviz"><object data="../_images/graphviz-7ff92e27c7292a408a6b49f363c22baacc87805c.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-cfa7690dd6011efb7893cfd0829364a525583227.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -738,7 +738,7 @@ ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Next we move the !c over to a duplication node:</p>
-<div class="graphviz"><object data="../_images/graphviz-418b6379f065e5db4f31c0165f789eb0f849fa8b.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-5a5708bdefd0058a7db4dd85d5597237dcd62ae9.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -812,7 +812,7 @@ ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Then we incrementally move the duplication node down and do cut elimination:</p>
-<div class="graphviz"><object data="../_images/graphviz-43438b2a38e2dc7e5ab07ab646b650840ace4fc7.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-accdbc6b777583051f067aaaa535a277fa358ba2.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -882,7 +882,7 @@ x2_g2 [label=&quot;I&quot;]
 ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-3dd1201cc9cc7ad1bb3c582382dde9b69c71c8f7.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-559ac8ec37a23f76a608c6fa861aa120a8d50a7c.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -947,7 +947,7 @@ x2_g2 [label=&quot;I&quot;]
 ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-8f176a3d5152d11730dc66d43e7bb17d343b23c0.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-83c2816d2b009a7174101f0341893b34f3364d82.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -1019,7 +1019,7 @@ x2_g2 [label=&quot;I&quot;]
 ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-8f176a3d5152d11730dc66d43e7bb17d343b23c0.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-83c2816d2b009a7174101f0341893b34f3364d82.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 
 Root -&gt; ret [color=&quot;red&quot;]
@@ -1097,7 +1097,7 @@ ret_g2 [label=&quot;I&quot;]
 <p>Scopes are nested, forming a simple tree hierarchy. When an opening head delimiter of scope A encounters a closing full or empty delimiter of scope B, then A is reparented under B. In particular the one closing delimiter of scope B vanishes, and duplicates of it are propagated to the outside of all other delimiters of A.</p>
 <p>It should be possible to avoid this <code class="docutils literal notranslate"><span class="pre">O(n)</span></code> operation by keeping a depth counter in the scope and each delimiter, with the total number of scopes that the delimiter enters/exit being the sum of the scope’s depth and the delimiter’s depth. Then the interaction would decrement the A scope delimiter’s local depth counter by 1, increment A’s scope-wide depth counter by 1, and vanish B’s delimiter as before. But this hasn’t been implemented yet.</p>
 <p>First we reduce the top cut:</p>
-<div class="graphviz"><object data="../_images/graphviz-69768bdc5a59bdaae3ba08289df2e22e3f5a46f5.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-bb55e2375eb6f2a7d14f0fe84180b1fc2bef2f86.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -1192,7 +1192,7 @@ ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Next the other PiR-PiL cut:</p>
-<div class="graphviz"><object data="../_images/graphviz-f10ad6062ad21922a80a73a1bb48e4713843c1da.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-abbc2385c0fc33c397845ec114b0ef0737531b48.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -1284,7 +1284,7 @@ ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Then, to clean up the graph, the trivial cuts:</p>
-<div class="graphviz"><object data="../_images/graphviz-84585573e2029e7d963a6a2404ed404376a84daf.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-8291e479e786528f449f4880dc01658c05113c38.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 f -&gt; c2b
@@ -1358,7 +1358,7 @@ ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>To handle the duplication from the contraction we duplicate the cuts/promotion rule and introduce a duplication node Dup to incrementally duplicate the rest of the structure:</p>
-<div class="graphviz"><object data="../_images/graphviz-ae5696978ebd79e77296a03038b5ab9de41b4995.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-add2d30270830a871d726f0deff86e1f540e7a23.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -1439,7 +1439,7 @@ ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Then we do cut elimination on what remains. Cut/id is trivial.</p>
-<div class="graphviz"><object data="../_images/graphviz-4e393863ef280944e55a3526c652022803df85f6.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-8e310e0a0e40644f4b467a2e54fae3ec6f97356d.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 f -&gt; c2b
@@ -1507,7 +1507,7 @@ f_ret [label=&quot;I&quot;]
 ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-0e86af0cb5f71f963d9bc880b81f789efe7aace9.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-cb031dc7c6768323feabeaea8c91d856b43eb540.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 fa -&gt; c2b
@@ -1585,7 +1585,7 @@ ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Then the 3rd PiL-PiR cut / beta reduction, corresponding to Fig 2.14 (4) / (5) on page 31 of <span id="id11">[<a class="reference internal" href="../zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>:</p>
-<div class="graphviz"><object data="../_images/graphviz-2f4a777e9e093ca55c91736809a55abef5d895cb.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-5bbfd89904167b068c4b689703a02dafcd44260f.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -1659,7 +1659,7 @@ f_ret [label=&quot;I&quot;]
 ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-7fd7519c373a7af2741c06c4d0a01f5bd6189d1e.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-d4410c640b4a62398e723a91611fae16bf80a7ad.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 fa -&gt; c2b
@@ -1728,7 +1728,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>At this stage we can’t duplicate any more because of the !p box. So we do the other cut.</p>
-<div class="graphviz"><object data="../_images/graphviz-84a2d7fac4371aa58f53a1285c7337821790fbc6.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-39a0fc2b48d99f3b09a8d090c5b577dc4d3afd2f.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 fa -&gt; c2b
@@ -1813,7 +1813,7 @@ hi_ret [label=&quot;I&quot;]
 f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-8605707eb5295125fbfced127e0068acc0243a9d.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-f45d4648d898f90f89cb986cbbf42bf0b470e1b7.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 fa -&gt; c2b
@@ -1885,7 +1885,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>The !c is exposed so we can create another duplication.</p>
-<div class="graphviz"><object data="../_images/graphviz-f3d11e811ef912d7e27504b446eecccf7ac6dd89.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-94d3ee37140e25f510f27e74cf1a4ff25dcfd2bc.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1b
 fa -&gt; c2b
@@ -1964,7 +1964,7 @@ hi_ret [label=&quot;I&quot;]
 f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-5d7f87480d71516211cf625c1ba9ddedc43a449d.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-9476e093e45f80f842b9df72d4d01cf878ee6b77.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2052,7 +2052,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>More duplication</p>
-<div class="graphviz"><object data="../_images/graphviz-26c83975e7e26b664e159cb63b5ae3c7b4fe7da9.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-a7372b4f4a7b94656cd7fc1cdc73598d556957e4.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2142,7 +2142,7 @@ hi_ret [label=&quot;I&quot;]
 f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-bce447f17dbd3dcb76cff1fcace71a053f039ce3.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-c8ffff1b4fd59c97a8d7eee899c5de9b1727d56a.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2241,7 +2241,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>Up until now we have avoided duplicating identity nodes; this is because duplicating an identity node from only one side would require creating an up-moving duplicator; since cuts reduce downwards this would break the reduction semantics and possibly lead to work duplication. But here we have duplicators on both sides of the identity node, and can duplicate it without reversing directions.</p>
-<div class="graphviz"><object data="../_images/graphviz-5f1db6117b63c2f1e831a72e38f41b80205f2b19.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-a0ae6496838c6f1a13ae1af8bce36b6e91e26422.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2332,7 +2332,7 @@ hi_retb [label=&quot;I&quot;]
 f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-d1e7986f2a2acec10d86af7fa30f9994bd9580d0.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-f3def9c56571edb58cb8c3b6ef35033fae526f09.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2416,7 +2416,7 @@ f_ret [label=&quot;I&quot;]
 
 }</p></object></div>
 <p>At this point we finish out the duplication of the identity function, similar to Fig 2.19(8).</p>
-<div class="graphviz"><object data="../_images/graphviz-903c2fc921658cfa966b519bb70cef07208a1247.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-8d1adc8af03e30e22a0757989996ff671588e182.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2509,7 +2509,7 @@ il2 -&gt; i_ret2 [color=&quot;blue&quot;]
 i_ret2 [label=&quot;I&quot;]
 }</p></object></div>
 <p>Now we can do the other duplication. Duplicating the !p requires all inputs to be covered. similar to identity nodes.</p>
-<div class="graphviz"><object data="../_images/graphviz-04ee4f2a88af103983d262256219f1e0d32551e9.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-4cc71973982fa67a24bb33d9bca694ed620ce145.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2629,7 +2629,7 @@ il1 -&gt; i_ret1 [color=&quot;blue&quot;]
 i_ret1 [label=&quot;I&quot;]
 
 }</p></object></div>
-<div class="graphviz"><object data="../_images/graphviz-0a85fe335620caa99d651701f48d5c445f14a931.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="../_images/graphviz-a4419ae0d0cc2ddaaaf6fa02a81e257b1eec8e3d.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
 Root -&gt; c1a
 Root -&gt; c1b
@@ -2753,6 +2753,8 @@ i_ret1 [label=&quot;I&quot;]
 <p>2.17(7) has 5 duplicator nodes, 3 app nodes, and 3 lambda nodes. In comparison, our graph has 5 duplicators, 4 cuts, 3 identities, and one each of PiL, PiR, !p, and !d. So there are still the two pairs of fans but the nodes otherwise look completely different.</p>
 <p>Anyway, for the pair on the right, if we scroll up a bit we can see that we were duplicating a single PiR-!d-I loop, the identity function. So the duplication of the I must resolve to another identity function, with the two connecting.</p>
 <p>stack machines: waste of time. the stack manipulation takes up more resources than register allocation.</p>
+<p>The implementation of overloading is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn’t omniscient. The optimizer decides which case is dead code and will be dropped.
+The <code class="docutils literal notranslate"><span class="pre">lub</span></code> operation is implemented as a primitive that desugars in the middle of compilation, in a deterministic manner based on termination checking.</p>
 </div>
 </div>
 
