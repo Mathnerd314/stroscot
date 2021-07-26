@@ -32,13 +32,6 @@ But ``f 2 = 2`` would be allowed. This behavior is useful for creating optimized
    # test
    fib 5 = 5
 
-Semantics
-=========
-
-The exact semantics is that all cases are run in parallel using the `lub operation <http://conal.net/blog/posts/merging-partial-values>`__ (or maybe its less powerful cousin ``unamb``). The ``lub`` operation is implemented as a primitive that desugars in the middle of compilation, in a deterministic manner based on termination checking. Predicate failure, failed assertions, and nontermination are all treated as bottom.
-
-In fact the semantics is even more complicated, because return values that are not accepted by the surrounding context are also discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.
-
 Sequential matches
 ==================
 
@@ -51,44 +44,55 @@ The pipe syntax matches cases from top to bottom:
    | x 2 = 2
    | x y = 3
 
-It expands to an unordered set of matches:
-
-::
-
-   f | p1 = ...
-   f | p2 and not(p1) = ...
-   f | p3 and not(p1) and not(p2) = ...
-
-   # p1, p2, etc. functions of $args
-
-So our previous example would be
-
-::
-
-   f 1 y = 1
-   f x 2 | x != 1 = 2
-   f x y | x != 1 && y != 2 = 3
-
 Maybe you will also be able to use ``match`` within a function, if the syntax details work out:
 
+   ::
+
+      f = match (2+2) (5+5) | x y = 2
+                            | 1 y = 2
+
+Priorities
+==========
+
+The way this expands is that there is a poset of priorities.
+
 ::
 
-   f = match (2+2) (5+5) | x y = 2
-                         | 1 y = 2
+   prioDef p1 > p2 > p3
+
+   prio p1
+   f 1 y = 1
+
+   prio p2
+   f x 2 = 2
+
+   prio p3
+   f x y = 3
+
+Clauses with lower priority are ignored if there are clauses with higher priorities. Clauses with incomparable priorities are combined with lub. Clauses with equal priorities have their priorities disambiguated by adding specificity (lexicographical order). Specificity is another poset relation defined by an SMT solver: ``a`` is less specific than ``b`` if ``SAT(a & not b)`` and ``UNSAT (not a & b)``. If the priorities + specificity are still equal then a warning is given and they are combined with lub.
+
+If a priority is not specified it uses a fresh priority incomparable with all others.
 
 Method qualifiers
 =================
 
 Stroscot also supports Common Lisp's method qualifiers ``before``, ``after``, and ``around``, as well as a custom qualifier ``list``. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone's time by avoiding the need to reimplement it.
 
-The basic idea of method combination can be seen in this `illustration <https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png>`__, except that primaries are not ordered by specificity. Also, there is no reference to classes. Specificity is defined by an SMT solver: ``a`` is less specific than ``b`` if ``SAT(a & not b)`` and ``UNSAT (not a & b)``. This is used to group the methods with a topological sort. To make the sort unique we put recently-defined methods first if possible.
+The basic idea of method combination can be seen in this `illustration <https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png>`__
 
-``list`` exposes the topological sort dispatch mechanism directly and simply produces the sorted list of lists of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).
+``list`` simply produces the list of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).
+
+Semantics
+=========
+
+The exact semantics is that all cases are run in parallel using the `lub operation <http://conal.net/blog/posts/merging-partial-values>`__ (or maybe its less powerful cousin ``unamb``). Predicate failure, failed assertions, and nontermination are all treated as bottom.
+
+In fact the semantics is even more complicated, because return values that are not accepted by the surrounding context are also discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.
 
 Implementation
 ==============
 
-The implementation is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn't omniscient. The optimizer decides which case is dead code and will be dropped. The full dispatch mechanism is as follows:
+The full dispatch mechanism is as follows:
 
 ::
 
@@ -96,20 +100,17 @@ The implementation is similar to that used for checking equality of dependent ty
      [arounds, befores, afters, primaries] = map topological_sort $ partition methods
      next-method = DispatchError
      f arounds where
-     f = \x ->
-      case x of
-         a:as -> call a { next-method = f as }
-         [] -> g
-     g = case primaries of
-       [] -> DispatchError
-       _ ->
-         map call befores
-         x = call (concat primaries)
-         map call (reverse afters)
-         return x
+        f (a:as) = call a { next-method = f as }
+        f [] = g primaries
+
+        g [] = DispatchError
+        g _ =
+            map call befores
+            x = call (concat primaries)
+            map call (reverse afters)
+            return x
 
    call binds args = fold lub DispatchError (map ($ args) binds)
-
 
 Patterns
 ========

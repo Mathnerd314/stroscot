@@ -28,8 +28,10 @@ Statistics
 
 * `Bus factor <https://en.wikipedia.org/wiki/Bus_factor>`__: 1
 * 10k lines of code
-* ~1 commit/month
+* |activity|
 * `First commit <https://github.com/Mathnerd314/stroscot/tree/a5264d6697f3e4a4034c4acc87c2a2022070a2bc>`__: December 2018
+
+.. |activity| image:: https://img.shields.io/github/commit-activity/m/Mathnerd314/stroscot
 
 Code of Conduct
 ===============

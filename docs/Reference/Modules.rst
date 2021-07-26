@@ -15,7 +15,16 @@ Modules from the programming perspective are records; they contain a list of bin
 Access
 ======
 
-To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``. To save on typing there is the `dreaded <https://2ality.com/2011/06/with-statement.html>`__ ``with`` statement.
+To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``.
+
+Later in the pipeline:
+* A similarly-named identifiers warning based on `confusables <http://www.unicode.org/reports/tr39/#Confusable_Detection>`_
+
+
+With statement
+==============
+
+To save on typing there is the `dreaded <https://2ality.com/2011/06/with-statement.html>`__ ``with`` statement.
 
 ::
 

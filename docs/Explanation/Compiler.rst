@@ -248,3 +248,24 @@ Documentation generator
 =======================
 
 The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There's regex-based search, and special searches for identifiers.
+
+
+Notebooks
+=========
+
+Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.
+
+But, jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code", no information on what cell it's from.
+So we would have to hack jupyter to get this to work.
+
+The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a "soft_reset" message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it's the same as the previous execution - I don't know if sending all the code is much of a bottleneck.
+
+For now the imperative approach seems fine.
+
+Dynamic code
+============
+
+loading code at runtime
+- typecheck, JIT, etc.
+- return function pointer
+the function pointer doesn't have to be machine code, it can be bytecode- then running is is running the interpreter

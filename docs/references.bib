@@ -4,12 +4,12 @@
   author = {Abramsky, Samson and Haghverdi, Esfandiar and Scott, Philip},
   year = {2002},
   month = oct,
+  journal = {Mathematical Structures in Computer Science},
   volume = {12},
   pages = {625--665},
   doi = {10.1017/S0960129502003730},
   url = {https://www.researchgate.net/profile/Samson_Abramsky/publication/220173613_Geometry_of_Interaction_and_Linear_Combinatory_Algebras/links/0c96052560eec33e21000000/Geometry-of-Interaction-and-Linear-Combinatory-Algebras.pdf},
-  abstract = {this paper was quite di\#erent, stemming from the axiomatics of categories of tangles (although the authors were aware of possible connections to iteration theories. In fact, similar axiomatics in the symmetric case, motivated by flowcharts and "flownomials" had been developed some years earlier by Stefanescu (Stefanescu 2000).) However, the first author realized, following a stimulating discussion with Gordon Plotkin, that traced monoidal categories provided a common denominator for the axiomatics of both the Girard-style and Abramsky-Jagadeesan-style versions of the Geometry of Interaction, at the basic level of the multiplicatives. This insight was presented in (Abramsky 1996), in which Girard-style GoI was dubbed "particle-style", since it concerns information particles or tokens flowing around a network, while the Abramsky-Jagadeesan style GoI was dubbed "wave-style", since it concerns the evolution of a global information state or "wave". Formally, this distinction is based on whether the tensor product (i.e. the symmetric monoidal structure) in the underlying category is interpreted as a coproduct (particle style) or as a product (wave style). This computational distinction between coproduct and product interpretations of the same underlying network geometry turned out to have been partially anticipated, in a rather di\#erent context, in a pioneering paper by E. S. Bainbridge (Bainbridge 1976), as observed by Dusko Pavlovic. These two forms of interpretation, and ways of combining them, have also been studied recently in (Stefanescu 2000). He uses the terminology "additive" for coproduct-based (i.e. our "particle-style") and "multiplicative" for product-based (i.e. our "wave-style"); this is not suitable for our purposes, because of the clash with Linear Logic term...},
-  journal = {Mathematical Structures in Computer Science}
+  abstract = {this paper was quite di\#erent, stemming from the axiomatics of categories of tangles (although the authors were aware of possible connections to iteration theories. In fact, similar axiomatics in the symmetric case, motivated by flowcharts and "flownomials" had been developed some years earlier by Stefanescu (Stefanescu 2000).) However, the first author realized, following a stimulating discussion with Gordon Plotkin, that traced monoidal categories provided a common denominator for the axiomatics of both the Girard-style and Abramsky-Jagadeesan-style versions of the Geometry of Interaction, at the basic level of the multiplicatives. This insight was presented in (Abramsky 1996), in which Girard-style GoI was dubbed "particle-style", since it concerns information particles or tokens flowing around a network, while the Abramsky-Jagadeesan style GoI was dubbed "wave-style", since it concerns the evolution of a global information state or "wave". Formally, this distinction is based on whether the tensor product (i.e. the symmetric monoidal structure) in the underlying category is interpreted as a coproduct (particle style) or as a product (wave style). This computational distinction between coproduct and product interpretations of the same underlying network geometry turned out to have been partially anticipated, in a rather di\#erent context, in a pioneering paper by E. S. Bainbridge (Bainbridge 1976), as observed by Dusko Pavlovic. These two forms of interpretation, and ways of combining them, have also been studied recently in (Stefanescu 2000). He uses the terminology "additive" for coproduct-based (i.e. our "particle-style") and "multiplicative" for product-based (i.e. our "wave-style"); this is not suitable for our purposes, because of the clash with Linear Logic term...}
 }
 
 @incollection{abrusciNoncommutativeProofNets1995,
@@ -18,6 +18,7 @@
   author = {Abrusci, V. M.},
   editor = {Girard, Jean-Yves and Regnier, Laurent and Lafont, Yves},
   year = {1995},
+  series = {London {{Mathematical Society Lecture Note Series}}},
   pages = {271--296},
   publisher = {{Cambridge University Press}},
   address = {{Cambridge}},
@@ -25,8 +26,7 @@
   url = {https://www.cambridge.org/core/books/advances-in-linear-logic/noncommutative-proof-nets/D0811717B2F7F378AF56856575ECF891},
   urldate = {2021-03-03},
   abstract = {IntroductionThe aim of this paper is to give a purely graph-theoretical definition of noncommutative proof nets, i.e. graphs coming from proofs in MNLL (multiplicative noncommutative linear logic, the (⊗, ℘)-fragment of the one-sided sequent calculus for classical noncommutative linear logic, introduced in [Abr91]). Analogously, one of the aims of [Gir87] was to give a purely graph-theoretical definition of proof nets, i.e. graphs coming from the proofs in MLL (multiplicative linear logic, the (⊗, ℘)-fragment of the one-sided sequent calculus for classical linear logic - better, for classical commutative linear logic). - The relevance of the purely graph-theoretical definition of proof nets for the development of commutative linear logic is well-know; thus we hope the results of this paper will be useful for a similar development of noncommutative linear logic.The language for MNLL is an extension of the language for MLL, obtained simply adding, as atomic formulas, propositional letters with an arbitrary finite number of negations written after the propositional letter (linear post-negation) or before the propositional letter (linear retronegation). Every formula A of MNLL may be translated into a formula Tv(A) of MLL (simply by replacing each propositional letter with an even number of negations by the propositional letter without negations, and each propositional letter with an odd number of negations by the propositional letter with only one negation after the propositional letter).},
-  isbn = {978-0-521-55961-4},
-  series = {London {{Mathematical Society Lecture Note Series}}}
+  isbn = {978-0-521-55961-4}
 }
 
 @article{albertResourceAnalysisDriven2019,
@@ -34,7 +34,11 @@
   author = {Albert, Elvira and Bofill, Miquel and Borralleras, Cristina and {Martin-Martin}, Enrique and Rubio, Albert},
   year = {2019},
   month = sep,
+  journal = {Theory and Practice of Logic Programming},
   volume = {19},
+  number = {5-6},
+  eprint = {1907.10096},
+  eprinttype = {arxiv},
   pages = {722--739},
   issn = {1471-0684, 1475-3081},
   doi = {10.1017/S1471068419000152},
@@ -42,20 +46,16 @@
   urldate = {2020-06-22},
   abstract = {When programs feature a complex control flow, existing techniques for resource analysis produce cost relation systems (CRS) whose cost functions retain the complex flow of the program and, consequently, might not be solvable into closed-form upper bounds. This paper presents a novel approach to resource analysis that is driven by the result of a termination analysis. The fundamental idea is that the termination proof encapsulates the flows of the program which are relevant for the cost computation so that, by driving the generation of the CRS using the termination proof, we produce a linearly-bounded CRS (LB-CRS). A LB-CRS is composed of cost functions that are guaranteed to be locally bounded by linear ranking functions and thus greatly simplify the process of CRS solving. We have built a new resource analysis tool, named MaxCore, that is guided by the VeryMax termination analyzer and uses CoFloCo and PUBS as CRS solvers. Our experimental results on the set of benchmarks from the Complexity and Termination Competition 2019 for C Integer programs show that MaxCore outperforms all other resource analysis tools. Under consideration for acceptance in TPLP.},
   archiveprefix = {arXiv},
-  eprint = {1907.10096},
-  eprinttype = {arxiv},
-  journal = {Theory and Practice of Logic Programming},
-  keywords = {Computer Science - Logic in Computer Science,Computer Science - Programming Languages},
-  number = {5-6}
+  keywords = {Computer Science - Logic in Computer Science,Computer Science - Programming Languages}
 }
 
 @article{allenCatalogueOptimizingTransformations1971,
   title = {A Catalogue of Optimizing Transformations},
   author = {Allen, Frances E and Cocke, John},
   year = {1971},
+  journal = {IBM Research Center},
   pages = {30},
   url = {https://www.clear.rice.edu/comp512/Lectures/Papers/1971-allen-catalog.pdf},
-  journal = {IBM Research Center},
   language = {en}
 }
 
@@ -83,6 +83,7 @@
   author = {Ananthanarayanan, Sundaram and Ardekani, Masoud Saeida and Haenikel, Denis and Varadarajan, Balaji and Soriano, Simon and Patel, Dhaval and {Adl-Tabatabai}, Ali-Reza},
   year = {2019},
   month = mar,
+  series = {{{EuroSys}} '19},
   pages = {1--15},
   publisher = {{Association for Computing Machinery}},
   address = {{Dresden, Germany}},
@@ -90,8 +91,7 @@
   url = {https://doi.org/10.1145/3302424.3303970},
   urldate = {2020-07-06},
   abstract = {Giant monolithic source-code repositories are one of the fundamental pillars of the back end infrastructure in large and fast-paced software companies. The sheer volume of everyday code changes demands a reliable and efficient change management system with three uncompromisable key requirements --- always green master, high throughput, and low commit turnaround time. Green refers to a master branch that always successfully compiles and passes all build steps, the opposite being red. A broken master (red) leads to delayed feature rollouts because a faulty code commit needs to be detected and rolled backed. Additionally, a red master has a cascading effect that hampers developer productivity--- developers might face local test/build failures, or might end up working on a codebase that will eventually be rolled back. This paper presents the design and implementation of SubmitQueue. It guarantees an always green master branch at scale: all build steps (e.g., compilation, unit tests, UI tests) successfully execute for every commit point. SubmitQueue has been in production for over a year, and can scale to thousands of daily commits to giant monolithic repositories.},
-  isbn = {978-1-4503-6281-8},
-  series = {{{EuroSys}} '19}
+  isbn = {978-1-4503-6281-8}
 }
 
 @article{appelGarbageCollectionCan1987,
@@ -99,16 +99,16 @@
   author = {Appel, Andrew W.},
   year = {1987},
   month = jun,
+  journal = {Information Processing Letters},
   volume = {25},
+  number = {4},
   pages = {275--279},
   issn = {00200190},
   doi = {10.1016/0020-0190(87)90175-X},
   url = {https://www.cs.princeton.edu/~appel/papers/45.pdf},
   urldate = {2020-07-24},
   abstract = {A very old and simple algorithm for garbage collection gives very good results when the physical memory is much larger than the number of reachable cells. In fact, the overhead associated with allocating and collecting cells from the heap can be reduced to less than one instruction per cell by increasing the size of physical memory. Special hardware, intricate garbage-collection algorithms, and fancy compiler analysis become unnecessary.},
-  journal = {Information Processing Letters},
-  language = {en},
-  number = {4}
+  language = {en}
 }
 
 @book{aspertiOptimalImplementationFunctional1999,
@@ -116,13 +116,13 @@
   author = {Asperti, Andrea and Guerrini, Stefano},
   year = {1999},
   month = jan,
+  series = {Cambridge {{Tracts}} in {{Theoretical Computer Science}}},
   edition = {1st},
+  number = {45},
   publisher = {{Cambridge University Press}},
   address = {{USA}},
   abstract = {All traditional implementation techniques for functional languages fail to avoid useless repetition of work. They are not "optimal" in their implementation of sharing, often causing a catastrophic, exponential explosion in reduction time. Optimal reduction is an innovative graph reduction technique for functional expressions, introduced by Lamping in 1990, that solves the sharing problem. This work, the first on the subject, is a comprehensive account by two of its leading exponents. Practical implementation aspects are fully covered as are the mathematical underpinnings of the subject. The relationship to the pioneering work of L\&\#233;vy and to Girard's more recent "Geometry of Interaction" are explored; optimal reduction is thereby revealed as a prime example of how a beautiful mathematical theory can lead to practical benefit. The book is essentially self-contained, requiring no more than basic familiarity with functional languages. It will be welcomed by graduate students and research workers in lambda calculus, functional programming or linear logic.},
-  isbn = {978-0-521-62112-0},
-  number = {45},
-  series = {Cambridge {{Tracts}} in {{Theoretical Computer Science}}}
+  isbn = {978-0-521-62112-0}
 }
 
 @inproceedings{bhatotiaIThreadsThreadingLibrary2015,
@@ -147,6 +147,7 @@
   author = {Bolingbroke, Maximilian and Peyton Jones, Simon},
   year = {2010},
   month = sep,
+  series = {Haskell '10},
   pages = {135--146},
   publisher = {{Association for Computing Machinery}},
   address = {{New York, NY, USA}},
@@ -155,9 +156,8 @@
   urldate = {2021-03-24},
   abstract = {This paper shows how call-by-need supercompilation can be recast to be based explicitly on an evaluator, contrasting with standard presentations which are specified as algorithms that mix evaluation rules with reductions that are unique to supercompilation. Building on standard operational-semantics technology for call-by-need languages, we show how to extend the supercompilation algorithm to deal with recursive let expressions.},
   isbn = {978-1-4503-0252-4},
-  keywords = {deforestation,haskell,optimisation,specialisation,supercompilation},
   language = {en-US},
-  series = {Haskell '10}
+  keywords = {deforestation,haskell,optimisation,specialisation,supercompilation}
 }
 % == BibTeX quality report for bolingbrokeSupercompilationEvaluation2010:
 % ? Unsure about the formatting of the booktitle
@@ -168,16 +168,16 @@
   author = {Brauße, Franz and Korovin, Konstantin and Korovina, Margarita and Müller, Norbert Th},
   year = {2019},
   month = jul,
+  journal = {arXiv:1905.09227 [cs]},
+  eprint = {1905.09227},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
   url = {http://arxiv.org/abs/1905.09227},
   urldate = {2020-07-25},
   abstract = {In this paper we propose a novel approach for checking satisfiability of non-linear constraints over the reals, called ksmt. The procedure is based on conflict resolution in CDCL-style calculus, using a composition of symbolical and numerical methods. To deal with the nonlinear components in case of conflicts we use numerically constructed restricted linearisations. This approach covers a large number of computable non-linear real functions such as polynomials, rational or trigonometrical functions and beyond. A prototypical implementation has been evaluated on several non-linear SMT-LIB examples and the results have been compared with state-of-the-art SMT solvers.},
   archiveprefix = {arXiv},
-  eprint = {1905.09227},
-  eprinttype = {arxiv},
-  journal = {arXiv:1905.09227 [cs]},
-  keywords = {Computer Science - Logic in Computer Science},
   language = {en},
-  primaryclass = {cs}
+  keywords = {Computer Science - Logic in Computer Science}
 }
 % == BibTeX quality report for brausseCDCLstyleCalculusSolving2019:
 % ? Possibly abbreviated journal title arXiv:1905.09227 [cs]
@@ -188,18 +188,18 @@
   author = {Castagna, Giuseppe},
   year = {2020},
   month = feb,
+  journal = {arXiv:1809.01427 [cs]},
   volume = {16},
+  number = {1},
+  eprint = {1809.01427},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
   doi = {10.23638/LMCS-16(1:15)2020},
   url = {http://arxiv.org/abs/1809.01427},
   urldate = {2020-06-22},
   abstract = {Twenty years ago, in an article titled "Covariance and contravariance: conflict without a cause", I argued that covariant and contravariant specialization of method parameters in object-oriented programming had different purposes and deduced that, not only they could, but actually they should both coexist in the same language. In this work I reexamine the result of that article in the light of recent advances in (sub-)typing theory and programming languages, taking a fresh look at this old issue. Actually, the revamping of this problem is just an excuse for writing an essay that aims at explaining sophisticated type-theoretic concepts, in simple terms and by examples, to undergraduate computer science students and/or willing functional programmers. Finally, I took advantage of this opportunity to describe some undocumented advanced techniques of type-systems implementation that are known only to few insiders that dug in the code of some compilers: therefore, even expert language designers and implementers may find this work worth of reading.},
   archiveprefix = {arXiv},
-  eprint = {1809.01427},
-  eprinttype = {arxiv},
-  journal = {arXiv:1809.01427 [cs]},
-  keywords = {Computer Science - Programming Languages},
-  number = {1},
-  primaryclass = {cs}
+  keywords = {Computer Science - Programming Languages}
 }
 % == BibTeX quality report for castagnaCovarianceControvarianceFresh2020:
 % ? Possibly abbreviated journal title arXiv:1809.01427 [cs]
@@ -210,25 +210,25 @@
   author = {Coniglio, Marcelo and Miraglia, Francisco},
   year = {2002},
   month = jan,
+  journal = {Logique et Analyse},
   volume = {39},
+  number = {153/154},
   pages = {113--151},
   publisher = {{Peeters Publishers}},
   issn = {0024-5836},
   url = {https://www.researchgate.net/profile/Marcelo-Coniglio/publication/2387274_Equality_In_Linear_Logic/links/0deec5165a6babbd8a000000/Equality-In-Linear-Logic.pdf},
-  abstract = {reference is [Ros]). Quantales were introduced by Mulvey ([Mul]) as an algebraic tool for studying representations of non-commutative C -algebras. Informally, a quantale is a complete lattice Q equipped with a product distributive over arbitrary sup's. The importance of quantales for Linear Logic is revealed in Yetter's work ([Yet]), who proved that semantics of classical linear logic is given by a class of quantales, named Girard quantales, which coincides with Girard's phase semantics. An analogous result is obtained for a sort of non-commutative linear logic, as well as intuitionistic linear logic without negation, which suggest that the utilisation of the theory of quantales (or even weaker structures, such that *-autonomous posets) might be fruitful in studying the semantic of several variants of linear logic. As usual, we denote the order in a lattice by , while W and V denote the operatio},
-  journal = {Logique et Analyse},
-  number = {153/154}
+  abstract = {reference is [Ros]). Quantales were introduced by Mulvey ([Mul]) as an algebraic tool for studying representations of non-commutative C -algebras. Informally, a quantale is a complete lattice Q equipped with a product distributive over arbitrary sup's. The importance of quantales for Linear Logic is revealed in Yetter's work ([Yet]), who proved that semantics of classical linear logic is given by a class of quantales, named Girard quantales, which coincides with Girard's phase semantics. An analogous result is obtained for a sort of non-commutative linear logic, as well as intuitionistic linear logic without negation, which suggest that the utilisation of the theory of quantales (or even weaker structures, such that *-autonomous posets) might be fruitful in studying the semantic of several variants of linear logic. As usual, we denote the order in a lattice by , while W and V denote the operatio}
 }
 
 @phdthesis{corbynPracticalStaticMemory2020,
+  type = {Bachelor's Thesis},
   title = {Practical Static Memory Management},
   author = {Corbyn, Nathan},
   year = {2020},
   month = may,
   url = {http://nathancorbyn.com/nc513.pdf},
   language = {en},
-  school = {King’s College},
-  type = {Bachelor's Thesis}
+  school = {King’s College}
 }
 
 @misc{coxVersionSAT2016,
@@ -236,9 +236,9 @@
   author = {Cox, Russ},
   year = {2016},
   month = dec,
+  journal = {research!rsc},
   url = {https://research.swtch.com/version-sat},
-  urldate = {2021-01-26},
-  journal = {research!rsc}
+  urldate = {2021-01-26}
 }
 % == BibTeX quality report for coxVersionSAT2016:
 % ? Title looks like it was stored in title-case in Zotero
@@ -248,7 +248,9 @@
   author = {Crolard, Tristan},
   year = {2004},
   month = aug,
+  journal = {Journal of Logic and Computation},
   volume = {14},
+  number = {4},
   pages = {529--570},
   publisher = {{Oxford Academic}},
   issn = {0955-792X},
@@ -256,9 +258,7 @@
   url = {https://academic.oup.com/logcom/article/14/4/529/933555},
   urldate = {2020-06-18},
   abstract = {Abstract.  We present a formulae-as-types interpretation of Subtractive Logic (i.e. bi-intuitionistic logic). This presentation is two-fold: we first define a v},
-  journal = {Journal of Logic and Computation},
-  language = {en},
-  number = {4}
+  language = {en}
 }
 
 @article{delawareNarcissusCorrectbyconstructionDerivation2019,
@@ -267,15 +267,15 @@
   author = {Delaware, Benjamin and Suriyakarn, Sorawit and {Pit-Claudel}, Clément and Ye, Qianchuan and Chlipala, Adam},
   year = {2019},
   month = jul,
+  journal = {Proceedings of the ACM on Programming Languages},
   volume = {3},
+  number = {ICFP},
   pages = {1--29},
   issn = {2475-1421, 2475-1421},
   doi = {10.1145/3341686},
   url = {https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf},
   urldate = {2020-07-26},
-  journal = {Proceedings of the ACM on Programming Languages},
-  language = {en},
-  number = {ICFP}
+  language = {en}
 }
 
 @book{dicosmoIntroductionLinearLogic2015,
@@ -304,6 +304,7 @@
   author = {Dolan, Stephen and Mycroft, Alan},
   year = {2017},
   month = jan,
+  series = {{{POPL}} 2017},
   pages = {60--72},
   publisher = {{Association for Computing Machinery}},
   address = {{Paris, France}},
@@ -312,8 +313,7 @@
   urldate = {2020-06-15},
   abstract = {We present a type system combining subtyping and ML-style parametric polymorphism. Unlike previous work, our system supports type inference and has compact principal types. We demonstrate this system in the minimal language MLsub, which types a strict superset of core ML programs. This is made possible by keeping a strict separation between the types used to describe inputs and those used to describe outputs, and extending the classical unification algorithm to handle subtyping constraints between these input and output types. Principal types are kept compact by type simplification, which exploits deep connections between subtyping and the algebra of regular languages. An implementation is available online.},
   isbn = {978-1-4503-4660-3},
-  keywords = {Algebra,Polymorphism,Subtyping,Type Inference},
-  series = {{{POPL}} 2017}
+  keywords = {Algebra,Polymorphism,Subtyping,Type Inference}
 }
 
 @inproceedings{downenMakingFasterCurry2019,
@@ -322,6 +322,7 @@
   author = {Downen, Paul and Sullivan, Zachary and Ariola, Zena M. and Peyton Jones, Simon},
   year = {2019},
   month = aug,
+  series = {Haskell 2019},
   pages = {58--70},
   publisher = {{Association for Computing Machinery}},
   address = {{Berlin, Germany}},
@@ -330,8 +331,7 @@
   urldate = {2020-06-14},
   abstract = {Curried functions apparently take one argument at a time, which is slow. So optimizing compilers for higher-order languages invariably have some mechanism for working around currying by passing several arguments at once, as many as the function can handle, which is known as its arity. But such mechanisms are often ad-hoc, and do not work at all in higher-order functions. We show how extensional, call-by-name functions have the correct behavior for directly expressing the arity of curried functions. And these extensional functions can stand side-by-side with functions native to practical programming languages, which do not use call-by-name evaluation. Integrating call-by-name with other evaluation strategies in the same intermediate language expresses the arity of a function in its type and gives a principled and compositional account of multi-argument curried functions. An unexpected, but significant, bonus is that our approach is equally suitable for a call-by-value language and a call-by-need language, and it can be readily integrated into an existing compilation framework.},
   isbn = {978-1-4503-6813-1},
-  keywords = {arity,extensionality,type systems},
-  series = {Haskell 2019}
+  keywords = {arity,extensionality,type systems}
 }
 
 @inproceedings{downenSequentCalculusCompiler2016a,
@@ -341,6 +341,7 @@
   author = {Downen, Paul and Maurer, Luke and Ariola, Zena M. and Peyton Jones, Simon},
   year = {2016},
   month = sep,
+  series = {{{ICFP}} 2016},
   pages = {74--88},
   publisher = {{Association for Computing Machinery}},
   address = {{Nara, Japan}},
@@ -349,8 +350,7 @@
   urldate = {2020-06-14},
   abstract = {The λ-calculus is popular as an intermediate language for practical compilers. But in the world of logic it has a lesser-known twin, born at the same time, called the sequent calculus. Perhaps that would make for a good intermediate language, too? To explore this question we designed Sequent Core, a practically-oriented core calculus based on the sequent calculus, and used it to re-implement a substantial chunk of the Glasgow Haskell Compiler.},
   isbn = {978-1-4503-4219-3},
-  keywords = {Compiler optimizations,Continuations,Haskell,Intermediate representations,Natural deduction,Sequent calculus},
-  series = {{{ICFP}} 2016}
+  keywords = {Compiler optimizations,Continuations,Haskell,Intermediate representations,Natural deduction,Sequent calculus}
 }
 
 @inproceedings{dsilvaConflictdrivenConditionalTermination2015,
@@ -359,6 +359,7 @@
   author = {D’Silva, Vijay and Urban, Caterina},
   editor = {Kroening, Daniel and Păsăreanu, Corina S.},
   year = {2015},
+  series = {Lecture {{Notes}} in {{Computer Science}}},
   pages = {271--286},
   publisher = {{Springer International Publishing}},
   address = {{Cham}},
@@ -366,9 +367,8 @@
   url = {http://homepages.inf.ed.ac.uk/wadler/papers/dual/dual.pdf},
   abstract = {Conflict-driven learning, which is essential to the performance of sat and smt solvers, consists of a procedure that searches for a model of a formula, and refutation procedure for proving that no model exists. This paper shows that conflict-driven learning can improve the precision of a termination analysis based on abstract interpretation. We encode non-termination as satisfiability in a monadic second-order logic and use abstract interpreters to reason about the satisfiability of this formula. Our search procedure combines decisions with reachability analysis to find potentially non-terminating executions and our refutation procedure uses a conditional termination analysis. Our implementation extends the set of conditional termination arguments discovered by an existing termination analyzer.},
   isbn = {978-3-319-21668-3},
-  keywords = {Abstract Domain,Conflict Analysis,Ranking Function,Reachability Analysis,Trace Formula},
   language = {en},
-  series = {Lecture {{Notes}} in {{Computer Science}}}
+  keywords = {Abstract Domain,Conflict Analysis,Ranking Function,Reachability Analysis,Trace Formula}
 }
 % == BibTeX quality report for dsilvaConflictdrivenConditionalTermination2015:
 % ? Unsure about the formatting of the booktitle
@@ -379,15 +379,15 @@
   author = {Dunfield, Joshua and Krishnaswami, Neel},
   year = {2019},
   month = aug,
+  journal = {arXiv:1908.05839 [cs]},
+  eprint = {1908.05839},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
   url = {http://arxiv.org/abs/1908.05839},
   urldate = {2020-06-22},
   abstract = {Bidirectional typing combines two modes of typing: type checking, which checks that a program satisfies a known type, and type synthesis, which determines a type from the program. Using checking enables bidirectional typing to break the decidability barrier of Damas-Milner approaches; using synthesis enables bidirectional typing to avoid the large annotation burden of explicitly typed languages. In addition, bidirectional typing improves error locality. We highlight the design principles that underlie bidirectional type systems, survey the development of bidirectional typing from the prehistoric period before Pierce and Turner's local type inference to the present day, and provide guidance for future investigations.},
   archiveprefix = {arXiv},
-  eprint = {1908.05839},
-  eprinttype = {arxiv},
-  journal = {arXiv:1908.05839 [cs]},
-  keywords = {Computer Science - Logic in Computer Science,Computer Science - Programming Languages},
-  primaryclass = {cs}
+  keywords = {Computer Science - Logic in Computer Science,Computer Science - Programming Languages}
 }
 % == BibTeX quality report for dunfieldBidirectionalTyping2019:
 % ? Possibly abbreviated journal title arXiv:1908.05839 [cs]
@@ -398,15 +398,15 @@
   author = {Dyvbig, R. Kent and Peyton Jones, Simon and Sabry, Amr},
   year = {2007},
   month = nov,
+  journal = {Journal of Functional Programming},
   volume = {17},
+  number = {6},
   pages = {687--730},
   issn = {0956-7968},
   doi = {10.1017/S0956796807006259},
   url = {https://doi.org/10.1017/S0956796807006259},
   urldate = {2020-06-19},
-  abstract = {Delimited continuations are more expressive than traditional abortive continuations and they apparently require a framework beyond traditional continuation-passing style (CPS). We show that this is not the case: standard CPS is sufficient to explain the common control operators for delimited continuations. We demonstrate this fact and present an implementation as a Scheme library. We then investigate a typed account of delimited continuations that makes explicit where control effects can occur. This results in a monadic framework for typed and encapsulated delimited continuations, which we design and implement as a Haskell library.},
-  journal = {Journal of Functional Programming},
-  number = {6}
+  abstract = {Delimited continuations are more expressive than traditional abortive continuations and they apparently require a framework beyond traditional continuation-passing style (CPS). We show that this is not the case: standard CPS is sufficient to explain the common control operators for delimited continuations. We demonstrate this fact and present an implementation as a Scheme library. We then investigate a typed account of delimited continuations that makes explicit where control effects can occur. This results in a monadic framework for typed and encapsulated delimited continuations, which we design and implement as a Haskell library.}
 }
 
 @incollection{erdwegLayoutsensitiveGeneralizedParsing2013,
@@ -464,6 +464,7 @@
   author = {Filinski, Andrzej},
   year = {1992},
   month = feb,
+  series = {{{POPL}} '92},
   pages = {27--38},
   publisher = {{Association for Computing Machinery}},
   address = {{Albuquerque, New Mexico, USA}},
@@ -471,8 +472,7 @@
   url = {https://doi.org/10.1145/143165.143174},
   urldate = {2020-06-19},
   abstract = {We present a functional interpretation of classical linear logic based on the concept of linear continuations. Unlike their non-linear counterparts, such continuations lead to a model of control that does not inherently impose any particular evaluation strategy. Instead, such additional structure is expressed by admitting closely controlled copying and discarding of continuations. We also emphasize the importance of classicality in obtaining computationally appealing categorical models of linear logic and propose a simple “coreflective subcategory” interpretation of the modality “!”.},
-  isbn = {978-0-89791-453-6},
-  series = {{{POPL}} '92}
+  isbn = {978-0-89791-453-6}
 }
 % == BibTeX quality report for filinskiLinearContinuations1992:
 % ? Unsure about the formatting of the booktitle
@@ -501,12 +501,12 @@
   author = {Girard, Jean-Yves},
   editor = {Gray, J. W. and Scedrov, A.},
   year = {1989},
+  series = {Contemporary {{Mathematics}}},
   volume = {92},
   pages = {69--108},
   publisher = {{American Mathematical Society}},
   address = {{University of Colorado in Boulder}},
-  url = {https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf},
-  series = {Contemporary {{Mathematics}}}
+  url = {https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf}
 }
 % == BibTeX quality report for girardGeometryInteraction1989:
 % ? Unsure about the formatting of the booktitle
@@ -552,7 +552,11 @@
   author = {Jones, Neil D. and Bohr, Nina},
   year = {2008},
   month = mar,
+  journal = {Logical Methods in Computer Science},
   volume = {4},
+  number = {1},
+  eprint = {0801.0882},
+  eprinttype = {arxiv},
   pages = {3},
   issn = {18605974},
   doi = {10.2168/LMCS-4(1:3)2008},
@@ -560,11 +564,7 @@
   urldate = {2021-03-06},
   abstract = {A fully-automated algorithm is developed able to show that evaluation of a given untyped lambda-expression will terminate under CBV (call-by-value). The ``size-change principle'' from first-order programs is extended to arbitrary untyped lambda-expressions in two steps. The first step suffices to show CBV termination of a single, stand-alone lambda;-expression. The second suffices to show CBV termination of any member of a regular set of lambda-expressions, defined by a tree grammar. (A simple example is a minimum function, when applied to arbitrary Church numerals.) The algorithm is sound and proven so in this paper. The Halting Problem's undecidability implies that any sound algorithm is necessarily incomplete: some lambda-expressions may in fact terminate under CBV evaluation, but not be recognised as terminating. The intensional power of the termination algorithm is reasonably high. It certifies as terminating many interesting and useful general recursive algorithms including programs with mutual recursion and parameter exchanges, and Colson's ``minimum'' algorithm. Further, our type-free approach allows use of the Y combinator, and so can identify as terminating a substantial subset of PCF.},
   archiveprefix = {arXiv},
-  eprint = {0801.0882},
-  eprinttype = {arxiv},
-  journal = {Logical Methods in Computer Science},
-  keywords = {Computer Science - Programming Languages,D.3.1,F.3.2},
-  number = {1}
+  keywords = {Computer Science - Programming Languages,D.3.1,F.3.2}
 }
 
 @inproceedings{jonesTacklingAwkwardSquad2001,
@@ -604,16 +604,16 @@
   author = {Karazeris, Panagis and Matzaris, Apostolos and Velebil, Jiří},
   year = {2011},
   month = oct,
+  journal = {Mathematical Structures in Computer Science},
   volume = {21},
+  number = {5},
   pages = {1067--1108},
   issn = {0960-1295, 1469-8072},
   doi = {10.1017/S0960129511000351},
   url = {https://www.cambridge.org/core/product/identifier/S0960129511000351/type/journal_article},
   urldate = {2021-03-11},
   abstract = {We propose a construction of the final coalgebra for a finitary endofunctor of a finitely accessible category and study conditions under which this construction is available. Our conditions always apply when the accessible category is cocomplete, and is thus a locally finitely presentable (l.f.p.) category, and we give an explicit and uniform construction of the final coalgebra in this case. On the other hand, our results also apply to some interesting examples of final coalgebras beyond the realm of l.f.p. categories. In particular, we construct the final coalgebra for every finitary endofunctor on the category of linear orders, and analyse Freyd's coalgebraic characterisation of the closed unit as an instance of this construction. We use and extend results of Tom Leinster, developed for his study of self-similar objects in topology, relying heavily on his formalism of modules (corresponding to endofunctors) and complexes for a module.},
-  journal = {Mathematical Structures in Computer Science},
-  language = {en},
-  number = {5}
+  language = {en}
 }
 
 @misc{kiselyovManyFacesFixedpoint2013,
@@ -621,9 +621,9 @@
   author = {Kiselyov, Oleg},
   year = {2013},
   month = aug,
+  journal = {okmij.org},
   url = {http://okmij.org/ftp/Computation/fixed-point-combinators.html},
-  urldate = {2020-07-31},
-  journal = {okmij.org}
+  urldate = {2020-07-31}
 }
 % == BibTeX quality report for kiselyovManyFacesFixedpoint2013:
 % ? Possibly abbreviated journal title okmij.org
@@ -642,6 +642,7 @@
   author = {Lea, Doug},
   year = {2000},
   month = jun,
+  series = {{{JAVA}} '00},
   pages = {36--43},
   publisher = {{Association for Computing Machinery}},
   address = {{New York, NY, USA}},
@@ -650,8 +651,7 @@
   urldate = {2021-07-09},
   abstract = {This paper describes the design, implementation, and performance of a Java framework for supporting a style of parallel programming in which problems are solved by (recursively) splitting them into subtasks that are solved in parallel, waiting for them to complete, and then composing results. The general design is a variant of the work−stealing framework devised for Cilk. The main implementation techniques surround efficient construction and management of tasks queues and worker threads. The measured performance shows good parallel speedups for most programs, but also suggests possible improvements.},
   isbn = {978-1-58113-288-5},
-  language = {en},
-  series = {{{JAVA}} '00}
+  language = {en}
 }
 % == BibTeX quality report for leaJavaForkJoin2000:
 % ? Unsure about the formatting of the booktitle
@@ -663,6 +663,7 @@
   author = {Levy, Paul Blain},
   editor = {Bugliesi, Michele and Preneel, Bart and Sassone, Vladimiro and Wegener, Ingo},
   year = {2006},
+  series = {Lecture {{Notes}} in {{Computer Science}}},
   pages = {444--455},
   publisher = {{Springer}},
   address = {{Berlin, Heidelberg}},
@@ -670,8 +671,7 @@
   url = {https://www.cs.bham.ac.uk/~pbl/papers/jumboicalp.pdf},
   abstract = {We make an argument that, for any study involving computational effects such as divergence or continuations, the traditional syntax of simply typed lambda-calculus cannot be regarded as canonical, because standard arguments for canonicity rely on isomorphisms that may not exist in an effectful setting. To remedy this, we define a “jumbo lambda-calculus” that fuses the traditional connectives together into more general ones, so-called “jumbo connectives”. We provide two pieces of evidence for our thesis that the jumbo formulation is advantageous.Firstly, we show that the jumbo lambda-calculus provides a “complete” range of connectives, in the sense of including every possible connective that, within the beta-eta theory, possesses a reversible rule.Secondly, in the presence of effects, we show that there is no decomposition of jumbo connectives into non-jumbo ones that is valid in both call-by-value and call-by-name.},
   isbn = {978-3-540-35908-1},
-  language = {en},
-  series = {Lecture {{Notes}} in {{Computer Science}}}
+  language = {en}
 }
 % == BibTeX quality report for levyJumboLcalculus2006:
 % ? Unsure about the formatting of the booktitle
@@ -682,6 +682,8 @@
   author = {Maraist, John and Odersky, Martin and Turner, David N. and Wadler, Philip},
   year = {1995},
   month = jan,
+  journal = {Electronic Notes in Theoretical Computer Science},
+  series = {{{MFPS XI}}, {{Mathematical Foundations}} of {{Programming Semantics}}, {{Eleventh Annual Conference}}},
   volume = {1},
   pages = {370--392},
   issn = {1571-0661},
@@ -689,9 +691,7 @@
   url = {http://www.sciencedirect.com/science/article/pii/S1571066104000222},
   urldate = {2020-08-23},
   abstract = {Girard described two translations of intuitionistic logic into linear logic, one where A → B maps to (!A) –○ B, and another where it maps to !(A –○ B). We detail the action of these translations on terms, and show that the first corresponds to a call-by-name calculus, while the second corresponds to call-by-value. We further show that if the target of the translation is taken to be an affine calculus, where ! controls contraction but weakening is allowed everywhere, then the second translation corresponds to a call-by-need calculus, as recently defined by Ariola, Felleisen, Maraist, Odersky and Wadler. Thus the different calling mechanisms can be explained in terms of logical translations, bringing them into the scope of the Curry-Howard isomorphism.},
-  journal = {Electronic Notes in Theoretical Computer Science},
-  language = {en},
-  series = {{{MFPS XI}}, {{Mathematical Foundations}} of {{Programming Semantics}}, {{Eleventh Annual Conference}}}
+  language = {en}
 }
 
 @inproceedings{marlowDesugaringHaskellDonotation2016a,
@@ -701,6 +701,7 @@
   author = {Marlow, Simon and Peyton Jones, Simon and Kmett, Edward and Mokhov, Andrey},
   year = {2016},
   month = sep,
+  series = {Haskell 2016},
   pages = {92--104},
   publisher = {{Association for Computing Machinery}},
   address = {{New York, NY, USA}},
@@ -709,9 +710,8 @@
   urldate = {2021-07-16},
   abstract = {Monads have taken the world by storm, and are supported by do-notation (at least in Haskell). Programmers are increasingly waking up to the usefulness and ubiquity of Applicatives, but they have so far been hampered by the absence of supporting notation. In this paper we show how to re-use the very same do-notation to work for Applicatives as well, providing efficiency benefits for some types that are both Monad and Applicative, and syntactic convenience for those that are merely Applicative. The result is fully implemented as an optional extension in GHC, and is in use at Facebook to make it easy to write highly-parallel queries in a distributed system.},
   isbn = {978-1-4503-4434-0},
-  keywords = {Applicative Functors,concurrency,Monads,parallelism},
   language = {en-US},
-  series = {Haskell 2016}
+  keywords = {Applicative Functors,concurrency,Monads,parallelism}
 }
 
 @incollection{martiniFineStructureExponential1995,
@@ -737,8 +737,8 @@
   author = {Mauborgne, Laurent},
   year = {1999},
   month = nov,
-  url = {http://software.imdea.org/~mauborgn/publi/t.pdf},
   journal = {PhD Thesis},
+  url = {http://software.imdea.org/~mauborgn/publi/t.pdf},
   school = {Ecole Polytechnique}
 }
 
@@ -748,6 +748,7 @@
   shorttitle = {Build Systems à La Carte},
   author = {Mokhov, Andrey and Mitchell, Neil and Peyton Jones, Simon},
   year = {2020},
+  journal = {Journal of Functional Programming},
   volume = {30},
   pages = {e11},
   issn = {0956-7968, 1469-7653},
@@ -755,7 +756,6 @@
   url = {https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf},
   urldate = {2020-06-11},
   abstract = {Build systems are awesome, terrifying – and unloved. They are used by every developer around the world, but are rarely the object of study. In this paper, we offer a systematic, and executable, framework for developing and comparing build systems, viewing them as related points in a landscape rather than as isolated phenomena. By teasing apart existing build systems, we can recombine their components, allowing us to prototype new build systems with desired properties.},
-  journal = {Journal of Functional Programming},
   language = {en}
 }
 
@@ -764,16 +764,16 @@
   author = {Naik, Mayur and Palsberg, Jens},
   year = {2008},
   month = aug,
+  journal = {ACM Transactions on Programming Languages and Systems},
   volume = {30},
+  number = {5},
   pages = {1--24},
   issn = {0164-0925, 1558-4593},
   doi = {10.1145/1387673.1387678},
   url = {https://dl.acm.org/doi/10.1145/1387673.1387678},
   urldate = {2021-07-15},
   abstract = {Type systems and model checking are two prevalent approaches to program verification. A prominent difference between them is that type systems are typically defined in a syntactic and modular style whereas model checking is usually performed in a semantic and whole-program style. This difference between the two approaches makes them complementary to each other: type systems are good at explaining why a program was accepted while model checkers are good at explaining why a program was rejected.             We present a type system that is equivalent to a model checker for verifying temporal safety properties of imperative programs. The model checker is natural and may be instantiated with any finite-state abstraction scheme such as predicate abstraction. The type system, which is also parametric, type checks exactly those programs that are accepted by the model checker. It uses a variant of function types to capture flow sensitivity and intersection and union types to capture context sensitivity. Our result sheds light on the relationship between type systems and model checking, provides a methodology for studying their relative expressiveness, is a step towards sharing results between the two approaches, and motivates synergistic program analyses involving interplay between them.},
-  journal = {ACM Transactions on Programming Languages and Systems},
-  language = {en},
-  number = {5}
+  language = {en}
 }
 
 @inproceedings{najafiBisectingCommitsModeling2019,
@@ -819,16 +819,16 @@
   author = {Peyton Jones, Simon and Marlow, Simon},
   year = {2002},
   month = jul,
+  journal = {Journal of Functional Programming},
   volume = {12},
+  number = {4},
   pages = {393--434},
   issn = {0956-7968, 1469-7653},
   doi = {10.1017/S0956796802004331},
   url = {https://www.microsoft.com/en-us/research/wp-content/uploads/2002/07/inline.pdf},
   urldate = {2020-07-01},
   abstract = {Higher-order languages, such as Haskell, encourage the programmer to build abstractions by composing functions. A good compiler must inline many of these calls to recover an e ciently executable program.},
-  journal = {Journal of Functional Programming},
-  language = {en},
-  number = {4}
+  language = {en}
 }
 
 @techreport{proustASAPStaticPossible2017,
@@ -836,29 +836,30 @@
   author = {Proust, Raphaël L},
   year = {2017},
   month = jul,
+  number = {UCAM-CL-TR-908},
   pages = {145},
   institution = {{University of Cambridge Computer Laboratory}},
   url = {https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf},
-  language = {en},
-  number = {UCAM-CL-TR-908}
+  language = {en}
 }
 
-@article{sewellX86TSORigorousUsable2010,
+@article{sewellX86TSORigorousUsable2010a,
+  ids = {sewellX86TSORigorousUsable2010},
   title = {X86-{{TSO}}: A Rigorous and Usable Programmer's Model for X86 Multiprocessors},
   shorttitle = {X86-{{TSO}}},
   author = {Sewell, Peter and Sarkar, Susmit and Owens, Scott and Nardelli, Francesco Zappa and Myreen, Magnus O.},
   year = {2010},
   month = jul,
+  journal = {Communications of the ACM},
   volume = {53},
+  number = {7},
   pages = {89--97},
   issn = {0001-0782, 1557-7317},
   doi = {10.1145/1785414.1785443},
   url = {https://dl.acm.org/doi/10.1145/1785414.1785443},
-  urldate = {2021-07-07},
+  urldate = {2021-07-09},
   abstract = {Exploiting the multiprocessors that have recently become ubiquitous requires high-performance and reliable concurrent systems code, for concurrent data structures, operating system kernels, synchronisation libraries, compilers, and so on. However, concurrent programming, which is always challenging, is made much more so by two problems. First, real multiprocessors typically do not provide the sequentially consistent memory that is assumed by most work on semantics and verification. Instead, they have relaxed memory models, varying in subtle ways between processor families, in which different hardware threads may have only loosely consistent views of a shared memory. Second, the public vendor architectures, supposedly specifying what programmers can rely on, are often in ambiguous informal prose (a particularly poor medium for loose specifications), leading to widespread confusion.},
-  journal = {Communications of the ACM},
-  language = {en},
-  number = {7}
+  language = {en}
 }
 
 @misc{shalBuildSystemRules2009,
@@ -888,16 +889,16 @@
   author = {Shirahata, Masaru},
   year = {1996},
   month = may,
+  journal = {Studia Logica},
   volume = {56},
+  number = {3},
   pages = {361--392},
   issn = {0039-3215, 1572-8730},
   doi = {10.1007/BF00372772},
   url = {http://link.springer.com/10.1007/BF00372772},
   urldate = {2021-03-06},
   abstract = {In this paper, we develop the system LZF of set theory with the unrestricted comprehension in full linear logic and show that LZF is a conservative extension of ZFi.e., the Zermelo-Fraenkel set theory without the axiom of regularity. We formulate LZF as a sequent calculus with abstraction terms and prove the partial cut-elimination theorem for it. The cut-elimination result ensures the subterm property for those formulas which contain only terms corresponding to sets in ZF-. This implies that LZF is a conservative extension of ZF- and therefore the former is consistent relative to the latter.},
-  journal = {Studia Logica},
-  language = {en},
-  number = {3}
+  language = {en}
 }
 
 @inproceedings{shirahataLinearSetTheory1998,
@@ -925,6 +926,7 @@
   author = {Shi, Yunhe and Gregg, David and Beatty, Andrew and Ertl, M. Anton},
   year = {2005},
   month = jun,
+  series = {{{VEE}} '05},
   pages = {153--163},
   publisher = {{Association for Computing Machinery}},
   address = {{New York, NY, USA}},
@@ -933,8 +935,7 @@
   urldate = {2021-06-29},
   abstract = {Virtual machines (VMs) are commonly used to distribute programs in an architecture-neutral format, which can easily be interpreted or compiled. A long-running question in the design of VMs is whether stack architecture or register architecture can be implemented more efficiently with an interpreter. We extend existing work on comparing virtual stack and virtual register architectures in two ways. Firstly, our translation from stack to register code is much more sophisticated. The result is that we eliminate an average of more than 47\% of executed VM instructions, with the register machine bytecode size only 25\% larger than that of the corresponding stack bytecode. Secondly we present an implementation of a register machine in a fully standard-compliant implementation of the Java VM. We find that, on the Pentium 4, the register architecture requires an average of 32.3\% less time to execute standard benchmarks if dispatch is performed using a C switch statement. Even if more efficient threaded dispatch is available (which requires labels as first class values), the reduction in running time is still approximately 26.5\% for the register architecture.},
   isbn = {978-1-59593-047-7},
-  keywords = {interpreter,Interpreter,register architecture,stack architecture,virtual machine},
-  series = {{{VEE}} '05}
+  keywords = {interpreter,Interpreter,register architecture,stack architecture,virtual machine}
 }
 % == BibTeX quality report for shiVirtualMachineShowdown2005:
 % ? Unsure about the formatting of the booktitle
@@ -945,15 +946,15 @@
   author = {Shulman, Michael},
   year = {2018},
   month = may,
+  journal = {arXiv:1805.07518 [math]},
+  eprint = {1805.07518},
+  eprinttype = {arxiv},
+  primaryclass = {math},
   url = {http://arxiv.org/abs/1805.07518},
   urldate = {2021-03-04},
   abstract = {We show that numerous distinctive concepts of constructive mathematics arise automatically from an interpretation of "linear higher-order logic" into intuitionistic higher-order logic via a Chu construction. This includes apartness relations, complemented subsets, anti-subgroups and anti-ideals, strict and non-strict order pairs, cut-valued metrics, and apartness spaces. We also explain the constructive bifurcation of classical concepts using the choice between multiplicative and additive linear connectives. Linear logic thus systematically "constructivizes" classical definitions and deals automatically with the resulting bookkeeping, and could potentially be used directly as a basis for constructive mathematics in place of intuitionistic logic.},
   archiveprefix = {arXiv},
-  eprint = {1805.07518},
-  eprinttype = {arxiv},
-  journal = {arXiv:1805.07518 [math]},
-  keywords = {Mathematics - Logic},
-  primaryclass = {math}
+  keywords = {Mathematics - Logic}
 }
 % == BibTeX quality report for shulmanLinearLogicConstructive2018:
 % ? Possibly abbreviated journal title arXiv:1805.07518 [math]
@@ -963,15 +964,15 @@
   author = {Sperber, Michael and Thiemann, Peter},
   year = {2000},
   month = mar,
+  journal = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
   volume = {22},
+  number = {2},
   pages = {224--264},
   issn = {0164-0925, 1558-4593},
   doi = {10.1145/349214.349219},
   url = {http://dl.acm.org/doi/10.1145/349214.349219},
   urldate = {2020-06-15},
-  journal = {ACM Transactions on Programming Languages and Systems (TOPLAS)},
-  language = {en},
-  number = {2}
+  language = {en}
 }
 
 @article{trinderAlgorithmStrategyParallelism1998,
@@ -979,11 +980,11 @@
   author = {Trinder, P. W. and Hammond, K. and Loidl, H.-W. and Jones, Simon Peyton},
   year = {1998},
   month = jan,
+  journal = {Journal of Functional Programming},
   volume = {8},
   url = {https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/},
   urldate = {2020-08-02},
   abstract = {The process of writing large parallel programs is complicated by the eed to specify both the parallel behaviour of the program and the algorithm that is to be used to compute its result. This paper introduces evaluation strategies: lazy higher-order functions that control the parallel evaluation of non-strict functional languages. Using evaluation strategies, it is […]},
-  journal = {Journal of Functional Programming},
   language = {en-US}
 }
 % == BibTeX quality report for trinderAlgorithmStrategyParallelism1998:
@@ -997,6 +998,7 @@
   author = {Wadler, Philip},
   year = {2003},
   month = aug,
+  series = {{{ICFP}} '03},
   pages = {189--201},
   publisher = {{Association for Computing Machinery}},
   address = {{Uppsala, Sweden}},
@@ -1005,8 +1007,7 @@
   urldate = {2020-06-17},
   abstract = {The rules of classical logic may be formulated in pairs corresponding to De Morgan duals: rules about \& are dual to rules about V. A line of work, including that of Filinski (1989), Griffin (1990), Parigot (1992), Danos, Joinet, and Schellinx (1995), Selinger (1998,2001), and Curien and Herbelin (2000), has led to the startling conclusion that call-by-value is the de Morgan dual of call-by-name.This paper presents a dual calculus that corresponds to the classical sequent calculus of Gentzen (1935) in the same way that the lambda calculus of Church (1932,1940) corresponds to the intuitionistic natural deduction of Gentzen (1935). The paper includes crisp formulations of call-by-value and call-by-name that are obviously dual; no similar formulations appear in the literature. The paper gives a CPS translation and its inverse, and shows that the translation is both sound and complete, strengthening a result in Curien and Herbelin (2000).},
   isbn = {978-1-58113-756-9},
-  keywords = {Curry-Howard correspondence,De Morgan dual,lambda calculus,lambda mu calculus,logic,natural deduction,sequent calculus},
-  series = {{{ICFP}} '03}
+  keywords = {Curry-Howard correspondence,De Morgan dual,lambda calculus,lambda mu calculus,logic,natural deduction,sequent calculus}
 }
 % == BibTeX quality report for wadlerCallbyvalueDualCallbyname2003:
 % ? Unsure about the formatting of the booktitle
@@ -1018,15 +1019,15 @@
   author = {Wheeler, David A.},
   year = {2010},
   month = apr,
+  journal = {arXiv:1004.5534 [cs]},
+  eprint = {1004.5534},
+  eprinttype = {arxiv},
+  primaryclass = {cs},
   url = {http://arxiv.org/abs/1004.5534},
   urldate = {2020-09-13},
   abstract = {An Air Force evaluation of Multics, and Ken Thompson's Turing award lecture ("Reflections on Trusting Trust"), showed that compilers can be subverted to insert malicious Trojan horses into critical software, including themselves. If this "trusting trust" attack goes undetected, even complete analysis of a system's source code will not find the malicious code that is running. Previously-known countermeasures have been grossly inadequate. If this attack cannot be countered, attackers can quietly subvert entire classes of computer systems, gaining complete control over financial, infrastructure, military, and/or business systems worldwide. This dissertation's thesis is that the trusting trust attack can be detected and effectively countered using the "Diverse Double-Compiling" (DDC) technique, as demonstrated by (1) a formal proof that DDC can determine if source code and generated executable code correspond, (2) a demonstration of DDC with four compilers (a small C compiler, a small Lisp compiler, a small maliciously corrupted Lisp compiler, and a large industrial-strength C compiler, GCC), and (3) a description of approaches for applying DDC in various real-world scenarios. In the DDC technique, source code is compiled twice: the source code of the compiler's parent is compiled using a trusted compiler, and then the putative compiler source code is compiled using the result of the first compilation. If the DDC result is bit-for-bit identical with the original compiler-under-test's executable, and certain other assumptions hold, then the compiler-under-test's executable corresponds with its putative source code.},
   archiveprefix = {arXiv},
-  eprint = {1004.5534},
-  eprinttype = {arxiv},
-  journal = {arXiv:1004.5534 [cs]},
-  keywords = {Computer Science - Cryptography and Security,Computer Science - Programming Languages},
-  primaryclass = {cs}
+  keywords = {Computer Science - Cryptography and Security,Computer Science - Programming Languages}
 }
 % == BibTeX quality report for wheelerFullyCounteringTrusting2010:
 % ? Possibly abbreviated journal title arXiv:1004.5534 [cs]
@@ -1036,13 +1037,13 @@
   author = {{Wikipedia}},
   year = {2020},
   month = jul,
+  journal = {Wikipedia},
   url = {https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&oldid=966683884},
   urldate = {2020-07-08},
   abstract = {The forward–backward algorithm is an  inference algorithm for hidden Markov models which computes the posterior marginals of all hidden state variables given a sequence of observations/emissions                                    o                        1             :             T                             :=                    o                        1                             ,         …         ,                    o                        T                                     \{\textbackslash displaystyle o\_\{1:T\}:=o\_\{1\},\textbackslash dots ,o\_\{T\}\}   , i.e. it computes, for all hidden state variables                                    X                        t                             ∈         \{                    X                        1                             ,         …         ,                    X                        T                             \}                 \{\textbackslash displaystyle X\_\{t\}\textbackslash in \textbackslash\{X\_\{1\},\textbackslash dots ,X\_\{T\}\textbackslash\}\}   , the distribution                         P         (                    X                        t                                                  |                                       o                        1             :             T                             )                 \{\textbackslash displaystyle P(X\_\{t\}\textbackslash{} |\textbackslash{} o\_\{1:T\})\}   . This inference task is usually called smoothing. The algorithm makes use of the principle of dynamic programming to efficiently compute the values that are required to obtain the posterior marginal distributions in two passes. The first pass goes forward in time while the second goes backward in time; hence the name forward–backward algorithm. The term forward–backward algorithm is also used to refer to any algorithm belonging to the general class of algorithms that operate on sequence models in a forward–backward manner. In this sense, the descriptions in the remainder of this article refer but to one specific instance of this class.},
-  annotation = {Page Version ID: 966683884},
   copyright = {Creative Commons Attribution-ShareAlike License},
-  journal = {Wikipedia},
-  language = {en}
+  language = {en},
+  annotation = {Page Version ID: 966683884}
 }
 
 @article{wikipediaLogit2020,
@@ -1050,13 +1051,13 @@
   author = {{Wikipedia}},
   year = {2020},
   month = jun,
+  journal = {Wikipedia},
   url = {https://en.wikipedia.org/w/index.php?title=Logit&oldid=964387041},
   urldate = {2020-07-07},
   abstract = {In statistics, the logit ( LOH-jit) function or the log-odds is the logarithm of the odds                                                 p                            1               −               p                                                  \{\textbackslash displaystyle \{\textbackslash frac \{p\}\{1-p\}\}\}    where p is probability. It is a type of function that creates a map of probability values from                         (         0         ,         1         )                 \{\textbackslash displaystyle (0,1)\}    to                         (         −         ∞         ,         +         ∞         )                 \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}   . It is the inverse of the sigmoidal "logistic" function or logistic transform used in mathematics, especially in statistics. In deep learning, the term logits layer is popularly used for the last neuron layer of neural networks used for classification tasks, which produce raw prediction values as real numbers ranging from                         (         −         ∞         ,         +         ∞         )                 \{\textbackslash displaystyle (-\textbackslash infty ,+\textbackslash infty )\}   .},
-  annotation = {Page Version ID: 964387041},
   copyright = {Creative Commons Attribution-ShareAlike License},
-  journal = {Wikipedia},
-  language = {en}
+  language = {en},
+  annotation = {Page Version ID: 964387041}
 }
 
 @phdthesis{zeilbergerLogicalBasisEvaluation2009,

@@ -231,7 +231,7 @@ EBB argument
 
 A basic block is a mixture of jump and non-jump instructions that is complete, in the sense that any execution of the program will take one of the jumps. Any arbitrary sequence of instructions can be turned into a basic block by adding an unconditional jump at the end.
 
-Although phi nodes were an interesting idea all the cool kids are now using block arguments. Blocks arguments fit better into various analysis passes.
+Although phi nodes were an interesting idea all the `cool kids <https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes>`__ are now using block arguments. Blocks arguments fit better into various analysis passes.
 
 Symbols
 =======

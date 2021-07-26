@@ -16,6 +16,5 @@ Stroscot is an imperative programming language designed for modern processors.
   HowTo/index
   Reference/index
   Explanation/index
-  TODO/index
   zzreferences
 

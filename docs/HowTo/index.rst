@@ -5,3 +5,6 @@ How to
   :maxdepth: 2
 
   Install
+  Types
+  Destructors
+  Transactions

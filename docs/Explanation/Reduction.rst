@@ -53,7 +53,7 @@ Derivation tree
 
 See the connectives :math:`\text{B} = \text{Bool}` and :math:`\multimap` defined :ref:`above <connectives>`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function, expand out the identity, etc.).
 
-.. image:: _static/Stroscot_AND_Proof_Tree.svg
+.. image:: /_static/Stroscot_AND_Proof_Tree.svg
 
 The derivation tree representation suffers from what Girard calls "bureaucratic problems of transposing rules" (:cite:`girardGeometryInteraction1989`, page 30 / 98). Girard's example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on :math:`\Sigma_{F R}` and "Use and" can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like :math:`A, A \vdash B` are ambiguous as to which proposition :math:`A` is used - this isn't resolved by using the exchange rule as then exchange on :math:`A, A, A \vdash B` is ambiguous as to which pair of formulas was swapped.
 
@@ -62,9 +62,9 @@ Nets
 
 We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.
 
-.. image:: _static/AND_net.svg
+.. image:: /_static/AND_net.svg
 
-.. image:: _static/AND_net_r.svg
+.. image:: /_static/AND_net_r.svg
 
 To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition's introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.
 
@@ -390,7 +390,7 @@ For example, the term ``F2 G2 = (\x. x (\w. w) x x) (\y. (\x. x x) (y z))`` from
 
    G2 &: \, !T \to S
 
-.. image:: _static/Stroscot_F2G2_Proof_Tree.svg
+.. image:: /_static/Stroscot_F2G2_Proof_Tree.svg
 
 ::
 
@@ -2686,3 +2686,6 @@ Add the last duplication node and reduce, for consistency with figure 2.17 (7)
 Anyway, for the pair on the right, if we scroll up a bit we can see that we were duplicating a single PiR-!d-I loop, the identity function. So the duplication of the I must resolve to another identity function, with the two connecting.
 
 stack machines: waste of time. the stack manipulation takes up more resources than register allocation.
+
+The implementation of overloading is similar to that used for checking equality of dependent types, i.e. it does a lot of normalization but isn't omniscient. The optimizer decides which case is dead code and will be dropped.
+The ``lub`` operation is implemented as a primitive that desugars in the middle of compilation, in a deterministic manner based on termination checking.

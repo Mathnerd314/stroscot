@@ -129,14 +129,14 @@ Values
 
 Most errors behave by producing a `poison value <https://llvm.org/devmtg/2020-09/slides/Lee-UndefPoison.pdf>`__. For example ``{}.x`` produces like ``NoSuchAttributeError {} "x"``. Similarly invalid pointer reads return ``InvalidPointer``, rather than crashing the program. Division by zero is handled in the same way, producing ``DivisionByZeroError``. There's also standard poison values like ``undefined`` and ``panic "string"``.
 
-Behind the scenes this requires some work to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal "Segmentation fault" (SIGSEGV). C/C++ `can't handle these easukt <https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux>`__ because they are `synchronous signals <https://lwn.net/Articles/414618/>`__ and signal behavior is mostly left undefined, but in fact signals are `fairly well-behaved <https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/>`__ (`OpenSSL <https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48>`__'s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go `allows <https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover>`__ turning (synchronous) signals into "panics" that can be caught with recover.
+Behind the scenes this requires some work to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal "Segmentation fault" (SIGSEGV). C/C++ `can't handle these easily <https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux>`__ because they are `synchronous signals <https://lwn.net/Articles/414618/>`__ and signal behavior is mostly left undefined, but in fact signals are `fairly well-behaved <https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/>`__ (`OpenSSL <https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48>`__'s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go `allows <https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover>`__ turning (synchronous) signals into "panics" that can be caught with recover.
 
-Similarly DIV by 0 produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. We could instead insert a check for 0; it'll require testing to see which is faster in typical programs (likely the handler, since crashing is the default). UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error definitely requires checking if the argument is zero beforehand - the people that really can't afford this check will have to use the division instruction in the assembly module.
+Similarly DIV by 0 on produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. OTOH, UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error definitely requires checking if the argument is zero beforehand - the people that really can't afford this check will have to use the division instruction in the assembly module. But on x86 we can decide between inserting a check and handling the SIGFPE; it'll require testing to see which is faster in typical programs - my guess is the handler, since division by zero is rare.
 
 Traces
 ------
 
-Most operations on an error will produce another error, e.g. ``case {}.x of 1 -> ...`` produces ``MissingCaseError (NoSuchAttributeError ...)``. So the errors bubble up until we get something that handles the error, e.g. the main program handler that prints the error and exits. With fancy formatting the nested errors will look like a stacktrace. The semantics are a little different because it's demand-driven, but close enough. TODO: make sure the stack trace is syntax-based and isn't infinite.
+Most operations on an error will produce another error, e.g. ``case {}.x of 1 -> ...`` produces ``MissingCaseError (NoSuchAttributeError ...)``. So the errors bubble up until we get something that handles the error, e.g. the main program handler that prints the error and exits. With fancy formatting the nested errors will look like a stacktrace. The semantics are a little different because it's demand-driven, but close enough. TODO: make sure the stack trace can't become infinite.
 
 We can redefine this error value to be something else, e.g. add a definition ``NoSuchAttributeError {} "x" = 3``. Then ``{}.x == 3`` and the error is silenced. Similarly we can do ``case {}.x of NoSuchAttributeError {} "x" -> 3``, or pass the error to a function that does such error-handling. We can also match on generic errors, ``case {}.x of e | isError e -> 3``. The alternative to ``isError`` is a single standard error constructor, IDK.
 
@@ -156,92 +156,8 @@ asynchronous exceptions: this instruments every memory allocation and I/O operat
 Concurrency
 ===========
 
-Synchronization operations impose constraints on execution order. For example, acquiring a lock blocks until the lock is released. They introduce the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders.
+High-level concurrency is implemented with transactions. The syntax is ``atomically { if x { retry }; y := z }``. Transactions nested inside another transaction are elided, so that one big transaction forms.
 
-In practice the synchronization primitives one can use are dictated by the scheduler.
+The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn't retry all the time.
 
-Various synchronization primitives:
-
-* Linux kernel internal operations: `model <https://github.com/torvalds/linux/blob/3d5c70329b910ab583673a33e3a615873c5d4115/tools/memory-model/linux-kernel.def>`__ `atomic x86 operations <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/include/asm/atomic64_64.h>`__ `lock types <https://www.infradead.org/~mchehab/kernel_docs/locking/locktypes.html>`__
-* atomic operations
-* memory barrier
-* spin lock
-* mutex
-* condition variable
-* threads:
-  * the kernel scheduler has fairness, SMP balancing, RT scheduling, preemption, execution statistics, credentials, virtual memory, etc.
-  * Userspace scheduler will always lose in functionality. Only has a performance advantage - kernel call is expensive. But so is cache miss - small memory footprint. Requires changes to debuggers, tracers.
-* wait-free data types
-* Haskell's MVar
-* goroutines, channels
-* global variables
-* shared memory
-* message passing (queues)
-
-All of these generate happens-before relationships on the various operations. We could track this with vector clocks, IDK why - the posets are easier to reason about directly.
-
-Condition variables
-===================
-
-A condition variable is a unique symbolic value type ``c : Cv a`` with equality and hashing. For each condition variable the scheduler maintains ``v : Ref a``, the current value of the condition variable. Condition variables are usually specified as multiple operations but I found it clearer to combine all of these into a single operation:
-
-* ``Cond (c : Cv a) (p : a -> Bool) (update : a -> a) (continuation : a -> Task) : Task``
-
-The event loop looks like:
-
-::
-
-  newRequests = queue []
-  for(r in requests_in_nondet_order)
-    case r of
-      ...
-      Cond c p update t =
-        v = lookup map c
-        if p v && (executeThisCycle = nonDetBool)
-          oldV = read v
-          v := update v
-          newRequests.push(t oldV)
-        else
-          newRequests.push(r)
-
-
-For a traditional condition variable we have:
-
-::
-
-  wait = Cond { update = id }
-  signal t = Cond { p = const True, continuation = \_ -> t }
-
-A lock looks like:
-
-::
-
-  acquire l t = Cond { c = l, p = \held -> held == False, update = \False -> True, continuation = \_ -> t }
-  release l t = Cond { c = l, p = const True, update = \True -> False, continuation = \_ -> t }
-    -- crashes the program if release can be called with v == False
-  isHeld l t = Cond { c = l, p = const True, update = id, continuation = t }
-    -- explodes the state graph, practically unusable
-
-Similarly a semaphore:
-
-::
-
-  wait s t = Cond { c = s, p = v != 0, update = \n -> n - 1, continuation = \_ -> t }
-  signal s t = Cond { c = s, p = const True, update = \n -> n+1, continuation = \_ -> t }
-  read s t = Cond { c = s, p = const True, update = id, continuation = t }
-    -- again: explodes the state graph, practically unusable
-
-A `bounded semaphore <https://docs.python.org/3/library/threading.html#threading.BoundedSemaphore>`__ is similar:
-
-::
-
-  signal_Bounded =
-    Cond {
-      c = s, p = const True, update = \n -> let n' = n+1 in if n' > bound then crash else n',
-      continuation = \_ -> t
-    }
-
-As far as implementation, the basic implementation choices are atomic instructions on shared memory and OS-provided mutexes. Spinlocks are hard to use (`1 <https://matklad.github.io/2020/01/02/spinlocks-considered-harmful.html>`__ `2 <https://mjtsai.com/blog/2020/01/06/beware-spinlocks-in-user-space/>`__), they will waste power and the scheduler will run the busy wait a lot instead of doing real work. But `WebKit <https://webkit.org/blog/6161/locking-in-webkit/>`__ implements locks and condition variables using a byte-size reference and some global queues. There's still a spinning loop, the number of times to spin before giving up and parking should be optimized for each lock operation.
-
-Q: are there schedulers that have a deterministic-enough scheduling pattern that there are no race conditions?
-the relaxed-consistency model allows implementing private memory that is then mapped back to shared on synchronization
+Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics. Mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered.

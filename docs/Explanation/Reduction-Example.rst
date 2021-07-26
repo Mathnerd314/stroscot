@@ -3,7 +3,7 @@ Reduction example
 
 To show how optimal reduction works, we step through the example term ``M = o $ \h. o (h I)`` from pages 26-35 of :cite:`aspertiOptimalImplementationFunctional1999`. To write the derivation tree we must define the recursive type :math:`\Omega = \, !\Omega \to \Omega`.
 
-.. image:: _static/Stroscot_M_Proof_Tree.svg
+.. image:: /_static/Stroscot_M_Proof_Tree.svg
 
 ::
 
