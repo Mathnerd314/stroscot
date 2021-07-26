@@ -1,0 +1,21 @@
++=+
+*=*
+/=/
+math:=+ * /
+and= and 
+or= or 
+lowlogic:=and or
+,=,
+.=.
+$=$
+functions:=. $ ,
+&&=&&
+||=||
+highlogic:=&& ||
+binaryoperators:=functions highlogic lowlogic math
+--constraints--
+math:binaryoperators
+binaryoperators:lowlogic
+math:+
+lowlogic:or
+highlogic:functions

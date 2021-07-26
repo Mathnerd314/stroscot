@@ -1,0 +1,18 @@
+coin=a gold coin
+HopeDiamond=the Hope Diamond
+StarOfIndia=the Star of India
+treasures:=coin HopeDiamond StarOfIndia
+tissue=a used tissue
+bat=a broken baseball bat
+trash:=tissue bat
+rope=some rope
+map=a treasure map
+icecream=delicious ice cream
+things:=rope map icecream treasures trash
+--constraints--
+treasures:things
+things:trash
+rope:map
+map:things
+HopeDiamond:treasures
+trash:StarOfIndia
