@@ -124,8 +124,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#compiler-ways">Compiler ways</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#documentation-generator">Documentation generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#language-server">Language server</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dynamic-code">Dynamic code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-loading">Dynamic loading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
@@ -222,6 +223,7 @@
 <div class="section" id="flags">
 <h2>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h2>
 <p>In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.</p>
+<p>There is also the value ‘default’ to set it to the default.</p>
 </div>
 <div class="section" id="error-messages">
 <h2>Error messages<a class="headerlink" href="#error-messages" title="Permalink to this headline">¶</a></h2>
@@ -410,6 +412,10 @@ The compiler itself and its boot libraries must be built for the target way.</p>
 <h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this headline">¶</a></h2>
 <p>The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There’s regex-based search, and special searches for identifiers.</p>
 </div>
+<div class="section" id="language-server">
+<h2>Language server<a class="headerlink" href="#language-server" title="Permalink to this headline">¶</a></h2>
+<p>For integration with VSCode and other editors.</p>
+</div>
 <div class="section" id="notebooks">
 <h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h2>
 <p>Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.</p>
@@ -418,12 +424,12 @@ So we would have to hack jupyter to get this to work.</p>
 <p>The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a “soft_reset” message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it’s the same as the previous execution - I don’t know if sending all the code is much of a bottleneck.</p>
 <p>For now the imperative approach seems fine.</p>
 </div>
-<div class="section" id="dynamic-code">
-<h2>Dynamic code<a class="headerlink" href="#dynamic-code" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dynamic-loading">
+<h2>Dynamic loading<a class="headerlink" href="#dynamic-loading" title="Permalink to this headline">¶</a></h2>
 <p>loading code at runtime
 - typecheck, JIT, etc.
 - return function pointer
-the function pointer doesn’t have to be machine code, it can be bytecode- then running is is running the interpreter</p>
+the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through the interpreter</p>
 </div>
 </div>
 

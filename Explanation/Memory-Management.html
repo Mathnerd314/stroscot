@@ -199,19 +199,18 @@
   <div class="section" id="memory-management">
 <h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this headline">¶</a></h1>
 <p>The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory leaks are a pervasive problem, in general there is no real solution besides profiling and buying more RAM. Stroscot can prove memory will not be accessed in the future and hence free it, with a more precise analysis than traditional GC. On the other hand use-after-free and double free can be statically checked for pointers, and aren’t a problem at all for the rest of the language because Stroscot frees automatically.</p>
-<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data.</p>
-<p>A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to just be a reference to an array plus metadata. They don’t require any special support AFAICT.</p>
+<p>A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to be an array variable plus metadata. They don’t require any special support AFAICT.</p>
 <p>Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
 * A loop that allocates and deallocates a scratch buffer is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)</p>
-<p>Garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id54" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id15" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and partially evaluating it at compile time. It’s a whole program undecidable analysis, but Stroscot already has 3 or 4 of those planned.</p>
+<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id54" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id15" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It’s whole program and undecidable, but Stroscot already has 3 or 4 of those planned.</p>
+<p>Why hasn’t anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it’s slow but there is a conceptual leap in going from program verification to program synthesis. It could be faster but I can see why it isn’t.</p>
 <ul class="simple">
 <li><p>The newly-dead set for a state transition <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code> is all objects that are accessed before but not accessed later, <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{z</span> <span class="pre">|</span> <span class="pre">Access(s,z)</span> <span class="pre">=</span> <span class="pre">yes</span> <span class="pre">&amp;&amp;</span> <span class="pre">Access(t,z)</span> <span class="pre">=</span> <span class="pre">no}</span> <span class="pre">=</span> <span class="pre">L(s)</span> <span class="pre">intersect</span> <span class="pre">D(t)</span></code>.</p></li>
 </ul>
 <p>We deallocate the newly-dead set after each operation. This doesn’t necessarily reclaim the memory, but ensures freeing is timely if needed. We also can compact the live set by removing dead fields.</p>
-<p>a copying incremental collector</p>
-<p>Quad-color incremental marking</p>
+<p>Quad-color marking</p>
 <p>The GC status of an object is set by two bits, the mark bit and the gray bit. The mark bit is stored in a bitmap, can be white or black. The gray bit is stored in a boxed_value object, determining whether an object has been fully marked. Only traversable objects have a gray bit and hence quad colors. Non-traversable (flat) objects have very simple state transitions (just white-&gt;black-&gt;white).</p>
 <div class="graphviz"><object data="../_images/graphviz-7f2ca21b2f6ecc209a4430ce511dca39779c7cce.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph G {
@@ -240,7 +239,7 @@
   &quot;Pop&quot; -&gt; &quot;Add Referenced Objects To Gray Stack&quot;
   &quot;Add Referenced Objects To Gray Stack&quot; -&gt; &quot;Object Fully Traversed&quot;
 }</p></object></div>
-<p>local (“arena”) allocators is that, besides speeding up short-running programs, as demonstrated in the previous benchmark, they keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference.”
+<p>local (“arena”) allocators speed up short-running programs, keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference.”
 diffusion should not be confused with fragmentation–an entirely different phenomenon pertaining solely to (“coalescing”) allocators (not covered in this paper) where initially large chunks of contiguous memory decay into many smaller (non-adjacent) ones, thereby precluding larger ones from subsequently being allocated –even though there is sufficient total memory available to accommodate the request. Substituting a pooling allocator, such as theone used in this benchmark (AS7), is a well-known solution to the fragmentationproblems that might otherwise threaten long-running mission-critical systems.”</p>
 <p>Newly allocated traversable objects are light-gray. Writing only changes the state of non-gray objects.</p>
 <p>When the object is marked during the mark phase, it’s turned dark-gray (mark bit turned black) and pushed onto the gray stack. In case it’s unreachable, the sweep phase can free a light-gray object like any other object marked white.</p>
@@ -364,6 +363,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <li><p>allocate - reserves the underlying memory storage for an object</p></li>
 <li><p>free - returns that storage to the allocator for subsequent re-use</p></li>
 </ul>
+<p>free list, buddy system, bump pointer, mmap/munmap</p>
 <p>garbage collection</p>
 <ul class="simple">
 <li><p>pauses</p></li>
@@ -371,12 +371,54 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <li><p>design complexity</p></li>
 <li><p>simple user code</p></li>
 </ul>
-<p>does static memory management subsume manual management?
-- standard malloc/free pattern
-- destructor pattern, no lastUse on operations, free calls lastUse (checked free)
-- destructor pattern, lastUse on everything, free is replaced with touch
-- finalizer pattern, guaranteed promptness on destructor-like patterns</p>
-<p>TL;DR yes if it lives up to what it says on the tin</p>
+<dl class="simple">
+<dt>Root set</dt><dd><p>Any object references in the local variables and stack of any stack frame and any object references in the global object.</p>
+</dd>
+</dl>
+<p>RC: count for reference</p>
+<p>The count is changed when:</p>
+<blockquote>
+<div><p>When object first created it has one reference count
+When any other variable is assigned a reference to that object, the object’s count is incremented.
+When object reference does exit the current scope or assigned to the new value its reference count is decreased by one
+when some object has zero reference count it is considered dead and object is instantly freed.
+When an object is garbage collected, any objects that it refers to have their reference counts decremented.</p>
+<p>does not detect cycles: two or more objects that refer to each other. An simple example of cycle in JS code:</p>
+</div></blockquote>
+<p>o = ref {} // count of object is 1
+f := unpack o; // count of object is 2
+o = null; // reference count of object is 1</p>
+<p>mark &amp; sweep - reachable/unreachable objects</p>
+<p>moving - move reachable object, updating all references to object</p>
+<p>semi-space: objects are allocated in “to space” until it becomes full, then “to space” becomes the “from space”, and vice versa. reachable objects moved from the “from space” to the “to space”. new objects are once again allocated in the “to space” until it is once again full and the process is repeated.</p>
+<p>requires 2x address space, lots of copying</p>
+<p>Mark-compact: relocates reachable objects towards the beginning of the heap area. can be sliding, arbitrary, or optimize for locality</p>
+<p>lazy sweep: when allocate memory and free list is empty, allocator
+sweeps unsweeped chunk of memory.</p>
+<p>generations: two or more sub-heaps, “generations” of objects. objects allocated to youngest, swept often. promoted to the next generation once sufficient sweep count. Each progressively older generation is swept less often than the next younger generation.</p>
+<ol class="arabic simple">
+<li><p>Write barrier: catch writes of new objects to already marked objects.</p></li>
+</ol>
+<dl class="simple">
+<dt>function writeBarrier(object,field) {</dt><dd><dl class="simple">
+<dt>if (isMarked(object) &amp;&amp; isNotMarked(field))</dt><dd><p>gcMark(field); // mark new field</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>}</p>
+<ol class="arabic simple" start="2">
+<li><p>Read barriers: Read barriers are used when collector is moving. They help to get correct reference to the object when collection is running:</p></li>
+</ol>
+<dl class="simple">
+<dt>function readBarrier(object) {</dt><dd><p>// if gc moved object we return new location of it
+if (moved(object)) return newLocationOf(object);
+return object;</p>
+</dd>
+</dl>
+<p>}</p>
+<p>Concurrent/incremental GC:
+interleave program and GC, GC on separate thread</p>
 </div>
 </div>
 </div>

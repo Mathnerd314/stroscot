@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Overloading &mdash; Stroscot  documentation</title>
+  <title>Dispatch &mdash; Stroscot  documentation</title>
   
 
   
@@ -44,9 +44,7 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Memory" href="Memory.html" />
-    <link rel="prev" title="Modules" href="Modules.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -94,31 +92,10 @@
               
             
             
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Overloading</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#sequential-matches">Sequential matches</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#priorities">Priorities</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#method-qualifiers">Method qualifiers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#semantics">Semantics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#patterns">Patterns</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#overrides">Overrides</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implicit-conversion">Implicit conversion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#equality">Equality</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Language Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Discussion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
 </ul>
@@ -169,16 +146,14 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-        
-      <li>Overloading</li>
+      <li>Dispatch</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
             
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Overloading.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Dispatch.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -192,8 +167,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="overloading">
-<h1>Overloading<a class="headerlink" href="#overloading" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="dispatch">
+<h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this headline">¶</a></h1>
 <p>Stroscot supports pattern matching as well as predicate dispatch:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
 <span class="nf">f</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
@@ -209,7 +184,7 @@
 <span class="o">#</span> <span class="kt">Error:</span> <span class="n">rule</span> <span class="n">conflict</span>
 </pre></div>
 </div>
-<p>But <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">2</span></code> would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
+<p>But if the first clause was <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">1</span> <span class="pre">=</span> <span class="pre">2</span></code> it would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">=</span> <span class="mi">0</span>
 <span class="nf">fib</span> <span class="mi">0</span> <span class="ow">=</span> <span class="mi">1</span>
 <span class="nf">fib</span> <span class="n">n</span> <span class="ow">=</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
@@ -218,29 +193,11 @@
 <span class="nf">fib</span> <span class="mi">5</span> <span class="ow">=</span> <span class="mi">5</span>
 </pre></div>
 </div>
-<div class="section" id="sequential-matches">
-<h2>Sequential matches<a class="headerlink" href="#sequential-matches" title="Permalink to this headline">¶</a></h2>
-<p>The pipe syntax matches cases from top to bottom:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span>
-<span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">3</span>
-</pre></div>
-</div>
-<p>Maybe you will also be able to use <code class="docutils literal notranslate"><span class="pre">match</span></code> within a function, if the syntax details work out:</p>
-<blockquote>
-<div><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="ow">=</span> <span class="n">match</span> <span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">2</span>
-                      <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">2</span>
-</pre></div>
-</div>
-</div></blockquote>
-</div>
+<p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
 <div class="section" id="priorities">
 <h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this headline">¶</a></h2>
-<p>The way this expands is that there is a poset of priorities.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioDef</span> <span class="n">p1</span> <span class="o">&gt;</span> <span class="n">p2</span> <span class="o">&gt;</span> <span class="n">p3</span>
-
-<span class="nf">prio</span> <span class="n">p1</span>
+<p>The way sequential matching expands is that there is a chain of priorities.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prio</span> <span class="n">p1</span>
 <span class="nf">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">1</span>
 
 <span class="nf">prio</span> <span class="n">p2</span>
@@ -248,21 +205,65 @@
 
 <span class="nf">prio</span> <span class="n">p3</span>
 <span class="nf">f</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">3</span>
+
+<span class="nf">prioConstrain</span> <span class="n">prioHigh</span> <span class="o">&gt;</span> <span class="n">p1</span> <span class="o">&gt;</span> <span class="n">p2</span> <span class="o">&gt;</span> <span class="n">p3</span> <span class="o">&gt;</span> <span class="n">prioLow</span>
 </pre></div>
 </div>
-<p>Clauses with lower priority are ignored if there are clauses with higher priorities. Clauses with incomparable priorities are combined with lub. Clauses with equal priorities have their priorities disambiguated by adding specificity (lexicographical order). Specificity is another poset relation defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is less specific than <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">SAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">UNSAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. If the priorities + specificity are still equal then a warning is given and they are combined with lub.</p>
-<p>If a priority is not specified it uses a fresh priority incomparable with all others.</p>
+<p>Each clause has its own priority. Clauses with lower priority are ignored if there are clauses with higher priorities. Clauses with incomparable priorities are combined with lub. Clauses with equal priorities have their priorities disambiguated by adding specificity overriding (i.e., the actual priority is the tuple (priority, specificity) ordered by lexicographical order). Specificity is another poset relation defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> overrides <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">UNSAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">SAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. If the priorities + specificity are still equal then a warning is given and they are combined with lub.</p>
+<p>If a priority is not specified it uses a fresh priority with <code class="docutils literal notranslate"><span class="pre">prioLow</span> <span class="pre">&lt;</span> <span class="pre">fresh</span> <span class="pre">&lt;</span> <span class="pre">prioHigh</span></code>.</p>
+<p>There is a macro to give all clauses in a region the same priority, which makes the specificity implementation more useful.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span> <span class="n">p</span> <span class="p">{</span>
+   <span class="n">isDoor</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
+   <span class="n">isDoor</span> <span class="s">&quot;garden gate&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
+<span class="p">}</span>
+<span class="c1">-- the second clause is more specific than the first, hence overrides it</span>
+
+<span class="nf">prioAll</span> <span class="n">p2</span> <span class="p">{</span>
+   <span class="n">isPerson</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
+   <span class="n">isPerson</span> <span class="n">m</span> <span class="o">|</span> <span class="n">isMan</span> <span class="n">m</span> <span class="ow">=</span> <span class="n">yes</span>
+
+   <span class="n">isMan</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
+   <span class="n">isMan</span> <span class="s">&quot;Steve&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
+
+   <span class="n">isDoor</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
+   <span class="n">isDoor</span> <span class="s">&quot;Steve&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
+
+   <span class="n">describe</span> <span class="n">p</span> <span class="o">|</span> <span class="n">isPerson</span> <span class="n">p</span> <span class="ow">=</span> <span class="s">&quot;Humanoid&quot;</span>
+   <span class="n">describe</span> <span class="n">m</span> <span class="o">|</span> <span class="n">isMan</span> <span class="n">m</span> <span class="ow">=</span> <span class="s">&quot;Masculine&quot;</span>
+   <span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span>
+<span class="p">}</span> <span class="c1">-- again each clause overrides the second</span>
+</pre></div>
+</div>
+<p>I thought about making all clauses the same priority by default, but concluded that specificity was too confusing.</p>
+<p>You can get the priority of a clause with <code class="docutils literal notranslate"><span class="pre">prioOf</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">condition</span> <span class="pre">}</span></code>, so as to constrain a clause that has an anonymous priority. The AST must match exactly.</p>
+<p>There is also <code class="docutils literal notranslate"><span class="pre">prioBound</span> <span class="pre">{}</span></code>, similar in syntax to <code class="docutils literal notranslate"><span class="pre">prioAll</span></code> but puts a top/bottom constraint on fresh priorities.</p>
+<p>You can also define sets of priorities, either by listing or with <code class="docutils literal notranslate"><span class="pre">prioSet</span> <span class="pre">{</span> <span class="pre">}</span></code>, and use <code class="docutils literal notranslate"><span class="pre">prioSetDef</span></code> to define large-scale orderings. You can resolve conflicts in the priority ordering definitions by declaring the priorities (meta-priorities) of the definitions. See Posets.</p>
 </div>
 <div class="section" id="method-qualifiers">
 <h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline">¶</a></h2>
 <p>Stroscot also supports Common Lisp’s method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>, as well as a custom qualifier <code class="docutils literal notranslate"><span class="pre">list</span></code>. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code> are simply <code class="docutils literal notranslate"><span class="pre">around</span></code> methods with the fixed priority <code class="docutils literal notranslate"><span class="pre">around</span> <span class="pre">&gt;</span> <span class="pre">before</span> <span class="pre">&gt;</span> <span class="pre">after</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">around</span> <span class="p">{</span> <span class="n">f</span><span class="p">;</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span> <span class="p">}</span>
+<span class="nf">after</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">around</span> <span class="p">{</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="p">;</span> <span class="n">f</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Guards on around clauses are handled by unconditionally calling next-method:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">around</span> <span class="p">{</span><span class="n">f</span> <span class="o">|</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">d</span><span class="p">}</span>  <span class="ow">=</span> <span class="kr">if</span> <span class="n">c</span> <span class="kr">then</span> <span class="n">d</span> <span class="kr">else</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span>
+</pre></div>
+</div>
 <p>The basic idea of method combination can be seen in this <a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a></p>
 <p><code class="docutils literal notranslate"><span class="pre">list</span></code> simply produces the list of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).</p>
 </div>
+<div class="section" id="next-method">
+<h2>Next method<a class="headerlink" href="#next-method" title="Permalink to this headline">¶</a></h2>
+<p>High priority methods shadow lower-priority methods, rather than entirely replacing them. <code class="docutils literal notranslate"><span class="pre">next-method</span></code> allows access to these shadowed methods.</p>
+<p>You can run the methods with different parameters, <code class="docutils literal notranslate"><span class="pre">next-method</span> <span class="pre">{</span> <span class="pre">silently=true</span> <span class="pre">}</span></code>.</p>
+<p>You can also call a specific clause, <code class="docutils literal notranslate"><span class="pre">callClause</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">guard,</span> <span class="pre">module</span> <span class="pre">=</span> <span class="pre">...,</span> <span class="pre">priority</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">}</span></code>, or its <code class="docutils literal notranslate"><span class="pre">next-method</span></code>, <code class="docutils literal notranslate"><span class="pre">callClauseNext</span></code>.</p>
+</div>
 <div class="section" id="semantics">
 <h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline">¶</a></h2>
-<p>The exact semantics is that all cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a> (or maybe its less powerful cousin <code class="docutils literal notranslate"><span class="pre">unamb</span></code>). Predicate failure, failed assertions, and nontermination are all treated as bottom.</p>
-<p>In fact the semantics is even more complicated, because return values that are not accepted by the surrounding context are also discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
+<p>The semantics is that all cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a>. Predicate failure, failed assertions, and nontermination are all treated as bottom.</p>
+<p>The semantics of <code class="docutils literal notranslate"><span class="pre">lub</span></code> is complicated, because it’s the whole program that is analyzed - return values that are not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
 </div>
 <div class="section" id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
@@ -284,44 +285,11 @@
 <span class="nf">call</span> <span class="n">binds</span> <span class="n">args</span> <span class="ow">=</span> <span class="n">fold</span> <span class="n">lub</span> <span class="kt">DispatchError</span> <span class="p">(</span><span class="n">map</span> <span class="p">(</span><span class="o">$</span> <span class="n">args</span><span class="p">)</span> <span class="n">binds</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="patterns">
-<h2>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline">¶</a></h2>
-<p>Patterns all compile to guard conditions on <code class="docutils literal notranslate"><span class="pre">$args</span></code>. They also check that the arity of <code class="docutils literal notranslate"><span class="pre">$args</span></code> is the number of patterns.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span> <span class="o">--&gt;</span> <span class="kt">True</span>
-<span class="nf">a</span> <span class="o">--&gt;</span> <span class="kt">True</span>
-<span class="o">^</span><span class="n">a</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span>
-<span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span> <span class="ow">-&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span>
-<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="p">{</span><span class="n">a</span><span class="kt">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">...:</span> <span class="n">rest</span><span class="p">}</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="nf">pat1</span> <span class="kt">AND</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">and</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span>
-<span class="nf">pat1</span> <span class="kt">OR</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">or</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span>
-<span class="o">~</span><span class="n">pat</span> <span class="o">--&gt;</span> <span class="kt">True</span>
-<span class="nf">a</span> <span class="n">with</span> <span class="n">f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="n">f</span> <span class="n">a</span>
-<span class="p">(</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="p">(</span><span class="n">f</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="n">a</span>
-<span class="kt">Int</span> <span class="n">z</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="kt">Int</span>
-<span class="nf">_f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="kt">True</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="overrides">
-<h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this headline">¶</a></h2>
-<p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement prevents creating a new identifier, so that instead a base identifer can be extended.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># module 1</span>
-<span class="n">foo</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="c1"># module 2</span>
-<span class="kn">import</span> <span class="mi">1</span>
-<span class="n">override</span> <span class="n">foo</span>
-<span class="n">foo</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="c1"># module 3</span>
-<span class="kn">import</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-<span class="n">foo</span> <span class="mi">1</span> <span class="c1"># 1</span>
-<span class="n">foo</span> <span class="mi">2</span> <span class="c1"># 3</span>
-</pre></div>
-</div>
-<p>If the override statement was not in module 2, then using <code class="docutils literal notranslate"><span class="pre">foo</span></code> in module 3 would result in an ambiguous name resolution error.</p>
+<p>The way Stroscot optimizes dispatch is:
+* eliminate all the statically impossible cases (cases that fail)
+* use profiling data to identify the hot paths
+* build a hot-biased dispatch tree
+* use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)</p>
 </div>
 <div class="section" id="implicit-conversion">
 <h2>Implicit conversion<a class="headerlink" href="#implicit-conversion" title="Permalink to this headline">¶</a></h2>
@@ -353,10 +321,6 @@
            
           </div>
           <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
 
   <hr/>
 

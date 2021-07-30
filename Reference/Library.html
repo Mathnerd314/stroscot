@@ -122,7 +122,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -271,6 +270,12 @@
 <p>lazy iterators - aren’t these just linked lists?</p>
 <p>Haskell Foldable / Traversable</p>
 <p>some way to get imperative for-in loops.</p>
+<p>Rust: <a class="reference external" href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">https://doc.rust-lang.org/std/iter/trait.Iterator.html</a></p>
+<p>Clojure transducers:
+<a class="reference external" href="https://clojure.org/news/2012/05/15/anatomy-of-reducer">https://clojure.org/news/2012/05/15/anatomy-of-reducer</a>
+<a class="reference external" href="https://cognitect.com/blog/2014/8/6/transducers-are-coming">https://cognitect.com/blog/2014/8/6/transducers-are-coming</a>
+<a class="reference external" href="https://clojure.org/reference/transducers">https://clojure.org/reference/transducers</a>
+<a class="reference external" href="https://juliafolds.github.io/Transducers.jl/dev/">https://juliafolds.github.io/Transducers.jl/dev/</a></p>
 </div>
 <div class="section" id="strings">
 <h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline">¶</a></h2>
@@ -322,8 +327,9 @@ We also need datatypes for dealing with streaming I/O, but continuations work fo
 <div class="section" id="concurrency">
 <span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this headline">¶</a></h2>
 <p>High-level concurrency is implemented with transactions. The syntax is <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">retry</span> <span class="pre">};</span> <span class="pre">y</span> <span class="pre">:=</span> <span class="pre">z</span> <span class="pre">}</span></code>. Transactions nested inside another transaction are elided, so that one big transaction forms.</p>
-<p>The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn’t retry all the time.</p>
-<p>Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics. Mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered.</p>
+<p>The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn’t retry all the time. Also transactions are serializable.</p>
+<p>Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics.</p>
+<p>Mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered. Generally transactions are preferred, because they compose. Transactions matching atomic instructions should compile to the atomic instructions if Stroscot can prove there are no waiting threads to wake up.</p>
 </div>
 </div>
 

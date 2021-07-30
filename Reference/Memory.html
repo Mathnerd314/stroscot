@@ -46,7 +46,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Logic" href="Logic.html" />
-    <link rel="prev" title="Overloading" href="Overloading.html" /> 
+    <link rel="prev" title="Modules" href="Modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -102,7 +102,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Overloading.html">Overloading</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Memory</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a><ul>
@@ -300,7 +299,12 @@
 </pre></div>
 </div>
 <p>Instead of erroring, Stroscot will insert a call to <code class="docutils literal notranslate"><span class="pre">free</span></code> before the <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;B&quot;</span></code> statement in the else branch.</p>
-<p>Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error.</p>
+<p>Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard <code class="docutils literal notranslate"><span class="pre">malloc/free</span></code>, we can change it:
+* <code class="docutils literal notranslate"><span class="pre">malloc</span></code> is wrapped to return a tuple with <code class="docutils literal notranslate"><span class="pre">newPromptFinalizer</span></code>, <code class="docutils literal notranslate"><span class="pre">free</span></code> is replaced with <code class="docutils literal notranslate"><span class="pre">use</span></code>
+* every operation is modified to call <code class="docutils literal notranslate"><span class="pre">use</span></code>
+* the prompt finalizer is replaced with a finalizer</p>
+<p>The finalizer program compiles identically to the original, but is more robust to changes.</p>
+<p>Finalizers run in the order of creation, first created first.</p>
 </div>
 <div class="section" id="references">
 <h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
@@ -350,6 +354,14 @@
 </div>
 <p>Each word is its own reference; this uses the word sized load-store operations of the ISA.</p>
 </div>
+<div class="section" id="thread-local-storage">
+<h4>Thread-local storage<a class="headerlink" href="#thread-local-storage" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span> <span class="ow">=</span> <span class="n">tls</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage">https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage</a></p>
+<p>Essentially it’s a shared memory variable that stores <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">ThreadId</span> <span class="pre">Word</span></code>, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.</p>
+</div>
 <div class="section" id="wrapper">
 <h4>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this headline">¶</a></h4>
 <p>A wrapper reference is a custom implementation of the basic allocate/get/set operations. There’s no special support needed in the language for this beyond overloading.</p>
@@ -370,7 +382,7 @@
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="Logic.html" class="btn btn-neutral float-right" title="Logic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="Overloading.html" class="btn btn-neutral float-left" title="Overloading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
