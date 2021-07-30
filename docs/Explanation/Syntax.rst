@@ -14,6 +14,8 @@ Haskell/Idris syntax is mostly awesome, use it.
 
 TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
 
+Natural language like Inform 7, while interesting, is quite wordy. It's also hard to scan through.
+
 
 Legibility
 ----------
@@ -23,6 +25,8 @@ The main factor improving readability is consistency; reading is disrupted when 
 Spacing is important to identify word boundaries (intra-letter spacing significantly smaller than inter-word spacing) and sentence boundaries (two spaces after the period, although the period's whitespace itself is distinctive). Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking. Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line. The default line spacing seems fine.
 
 Line length is a good question. Programming uses fixed-width characters so it's measured in characters. 80 characters is standard, but monitors are wider now, so 100 is plausible. Diff programs are often the limiting factor, but on my monitor I can fit 2 108-character texts side-by-side along with a space in the middle and the taskbar. 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt (24px) I can fit 97 characters, while 23px fits 102 characters.
+
+Layout improves legibility, Python syntax is often said to be "clean", hence why Stroscot has layout
 
 Values
 ------
@@ -189,3 +193,39 @@ Specificity
 ===========
 
 This might seem overly complicated, but it's based on Zarf's rule-based programming. When you're defining lots of rules for a IF game then specifying priorities by hand is tedious.
+
+Whitespace
+==========
+
+Whitespace in identifiers... this doesn't work well with Haskell syntax. With whitespace ``do something = ...``` would define the identifier ``do something``, but in Haskell it's a clause ``do _`` that binds ``something``.
+
+OTOH using a string works fine: ``"do something" = ...``
+
+You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
+
+Arguments
+=========
+
+Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
+the shorter the code will be.
+
+Functions operate on values and produce the same outputs given the same inputs.
+
+Conceptually, term rewriting is the underlying model of computation.
+
+Clauses are applied as rewriting rules, reading them from left to right. A clause is applicable if its left-hand side matches the term to be evaluated, in which case we bind the variables in the left-hand side to the corresponding subterms in the target term.
+
+Equations are tried in the order in which they are written; as soon as the left-hand side of an equation matches (and the condition part of the equation, if any, is satisfied), it can be applied to reduce the target term to the corresponding right-hand side. The term is rewritten until no more equations are applicable.
+
+any function symbol or operator can be used anywhere on the left-hand side of an equation, and may act as a constructor symbol if it happens to occur in a normal form term. This enables you to work with algebraic rules like associativity and distributivity in a direct fashion:
+
+> (x+y)*z = x*z+y*z; x*(y+z) = x*y+x*z;
+> x*(y*z) = (x*y)*z; x+(y+z) = (x+y)+z;
+> square (a+b);
+a*a+a*b+b*a+b*b
+
+The above isn’t possible in languages like Haskell and ML which always enforce that only “pure” constructor symbols (without any defining equations) may occur as a subterm on the left-hand side of a definition
+
+constructor discipline: Haskell has a rule that identifiers starting with uppercase letters are constructors and cannot be defined to be functions, but this rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction.
+
+The semantics of functions are defined by pattern-matching rules a la `Pure <https://agraef.github.io/pure-docs/pure.html#definitions-and-expression-evaluation>`__.

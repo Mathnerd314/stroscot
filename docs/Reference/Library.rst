@@ -88,6 +88,14 @@ Haskell Foldable / Traversable
 
 some way to get imperative for-in loops.
 
+Rust: https://doc.rust-lang.org/std/iter/trait.Iterator.html
+
+Clojure transducers:
+https://clojure.org/news/2012/05/15/anatomy-of-reducer
+https://cognitect.com/blog/2014/8/6/transducers-are-coming
+https://clojure.org/reference/transducers
+https://juliafolds.github.io/Transducers.jl/dev/
+
 Strings
 =======
 
@@ -158,6 +166,8 @@ Concurrency
 
 High-level concurrency is implemented with transactions. The syntax is ``atomically { if x { retry }; y := z }``. Transactions nested inside another transaction are elided, so that one big transaction forms.
 
-The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn't retry all the time.
+The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn't retry all the time. Also transactions are serializable.
 
-Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics. Mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered.
+Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics.
+
+Mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered. Generally transactions are preferred, because they compose. Transactions matching atomic instructions should compile to the atomic instructions if Stroscot can prove there are no waiting threads to wake up.

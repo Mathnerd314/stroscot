@@ -1,11 +1,13 @@
 Types
 #####
 
-Programmers can use types to annotate syntactic constructs. Types restrict the possible range of values an identifier may take, allowing the compiler to optimize to a specific runtime representation. Without any type annotations, programs follow a dynamically typed semantics. But the compiler still tries to prove properties about execution, so you can get type mismatch errors if a function is not defined on a value, and the whole-program analysis narrows the storage class of values.
+Programmers can use types to annotate syntactic constructs. Types restrict the possible range of values an identifier may take, allowing the compiler to optimize to a specific runtime representation.
+
+Stroscot mainly follows a dynamically typed semantics, allowing ad-hoc polymorphism and other nice dynamic features that a static semantics would make difficult. But the compiler still tries to prove properties about execution, so you can get errors if a function is not defined on a value, and the whole-program analysis narrows the storage class of values.
 
 Type inference is undecidable in general, and the reduction is to weird problems like `semi-unification <https://www.quora.com/Why-is-type-inference-in-System-F-undecidable>`__, so Stroscot doesn't deal with types internally. Instead it uses model checking / automata theory, which better encodes undecidable properties. :cite:`naikTypeSystemEquivalent2008` provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types; maybe this can be used as type inference. But the types will be complex and precise, e.g. ``length : (Nil-->0) & (Cons a b-->1+(length b))``. OTOH when there's a type error, model checking produces a concrete program trace of a failing path, which should be easy to turn into a good error message.
 
-In particular type annotations are translated to assertions, and these assertions are statically checked. ``assert`` is deeply special, since it has to work with descriptions of executable properties, so unfortunately not all programs/properties will produce an answer.
+Although types are not first-class, sets are. Type annotations are translated to assertions, and these assertions are statically checked. ``assert`` is deeply special, since it has to work with descriptions of executable properties, so unfortunately not all programs/properties will produce an answer.
 
 We don't have substructural types because the language itself is substructural (based on linear logic).
 

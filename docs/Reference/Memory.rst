@@ -133,7 +133,14 @@ However, a prompt finalizer would give an error on programs such as the followin
 
 Instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
 
-Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error.
+Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
+* ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
+* every operation is modified to call ``use``
+* the prompt finalizer is replaced with a finalizer
+
+The finalizer program compiles identically to the original, but is more robust to changes.
+
+Finalizers run in the order of creation, first created first.
 
 References
 ==========
@@ -197,6 +204,17 @@ Reading always copies (into a register, usually).
   x[1] # 3 or the value from some other thread
 
 Each word is its own reference; this uses the word sized load-store operations of the ISA.
+
+Thread-local storage
+____________________
+
+::
+
+  x = tls 0
+
+See https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage
+
+Essentially it's a shared memory variable that stores ``Map ThreadId Word``, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.
 
 Wrapper
 _______

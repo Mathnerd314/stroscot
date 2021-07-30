@@ -17,6 +17,8 @@ Some combination of the following algorithms to do lexical analysis:
 * `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
 * `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters
 
+Stroscot is case-sensitive.
+
 Layout
 ======
 
@@ -25,8 +27,8 @@ The most obvious is the initial declaration list, but other constructs introduce
 ::
 
   a
-   b
-   c
+    b
+    c
   d
 
   # becomes
@@ -142,8 +144,6 @@ Chained Comparison
   1 <= 2 < 3
   9 > 2 < 3
 
-
-
 Values
 ======
 
@@ -156,9 +156,11 @@ Numbers
 
 ::
 
-  (0[a-z])?[0-9a-fA-F_]+(\.[0-9a-fA-F_]+)?([eEpP][+-]?[0-9_]+)?
+  (0[a-z])?[0-9a-fA-F_]+(\.[0-9a-fA-F_]+)?([a-zA-Z][+-]?[0-9_]+)?[A-Z]?
 
-Number literals are parsed into records like ``NumberLiteral { string = "123e24" }``. Leadings 0's could be significant, e.g. ``010`` could be different from ``10``. Defined ``0x`` sequences allow ``x`` to be ``x`` (hexadecimal), ``o`` (octal), and ``b`` (binary). ``p/P`` is a binary exponent.
+Number literals are parsed into records like ``NumberLiteral { string = "123e24" }``. Leadings 0's could be significant, e.g. ``010`` could be different from ``10``. Defined ``0x`` sequences allow ``x`` to be ``x`` (hexadecimal), ``o`` (octal), and ``b`` (binary). ``p10/P10`` is a binary exponent, ``e10`` is a decimal exponent.
+
+Then there is an optional suffix (usually interpreted as a type).
 
 Strings
 -------
@@ -173,6 +175,8 @@ Strings
   string"""
 
 There is no explicit syntax for characters, instead characters are Unicode strings of length 1.
+
+Escape sequences are defined; the main ones are ``\"`` to escape a quote and ``\\`` to escape a backslash, the others aren't relevant to parsing the literal.
 
 String concatenation is ``++``.
 
@@ -264,88 +268,46 @@ Mutable assignment (``:=``) is completely distinct from name binding (``=``). Th
 Functions
 =========
 
-Functions operate on values and produce the same outputs given the same inputs.
+::
 
-The semantics of functions are defined by pattern-matching rules a la `Pure <https://agraef.github.io/pure-docs/pure.html#definitions-and-expression-evaluation>`__.
-
-Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
-the shorter the code will be.
-
-Haskell has a rule that identifiers starting with uppercase letters are constructors and cannot be defined to be functions, but this rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction.
-
-Stroscot supports pattern matching as well as predicate dispatch - these cases are unordered:
+  f 1 = 1
+  f 2 = 2
+  f y | y != 1 && y != 2 = 3
 
 ::
 
-   f 1 = 1
-   f 2 = 2
-   f y | y != 1 && y != 2 = 3
-
-The pipe syntax matches cases from top to bottom:
-
-   ::
-
-      f
-      | 1 y = 1
-      | x 2 = 2
-      | x y = 3
+  f
+  | 1 y = 1
+  | x 2 = 2
+  | x y = 3
 
 Patterns
 --------
 
-::
-
-   _ # matches anything
-   a # matches anything and binds a
-   ^a # matches the atom a
-   [(1, "x"), {c: 'a'}] # literal matching itself
-   [1, ...] # matches any list starting with 1
-   {a: 1, ...: rest} # matches a and the rest of the record
-   pat AND pat # matches both patterns simultaneously
-   pat OR pat # matches either pattern
-   ~pat # desugars to u_ = let pat = u_ in ..., where u_ is a unique name
-
-Guards allow arbitrary functions:
+Patterns all compile to guard conditions on ``$args``. They also check that the arity of ``$args`` is the number of patterns.
 
 ::
 
-   a with a > 0
-
-View patterns
-
-::
-
-   (f -> a)
-
-Functions patterns
-
-::
-
-   Int z = toInteger z
-
-   Int a
+   _ --> True
+   a --> True -- binds a
+   [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}] -- literal match
+   [1, ...] --> $args[i][0] == 1 -- matches any list starting with 1
+   {a: 1, ...: rest} --> $args[a] == 1 # matches a and the rest of the record
+   pat1 AND pat2 --> match $args pat1 and match $args pat2 # matches both patterns simultaneously
+   pat1 OR pat2 --> match $args pat1 or match $args pat2 # matches either pattern
+   ~pat --> True # desugars to f u_ ... = let pat = u_ in ..., where u_ is a unique name
+   (a : b) --> a elemOf b # type tag
+   a | f a --> f a # guard, arbitrary function
+   (f -> a) --> match (f $args[i]) a # view pattern
+   ^a --> $args[i] == a -- matches the atom a
+   ^f a b c --> $args[0] == f # matches the symbol tree with atom f
+   f a --> $args.length >= 2 # matches any symbol tree besides a single atom
 
 Pattern synonyms
 
 ::
 
    pattern F a b = ["f",a,b]
-
-Arbitrary patterns
-
-::
-
-   _f a # matches any function application
-
-This will produce ``4`` if ``foo`` is a symbol:
-
-   ::
-
-     f (foo x) = x + 2
-
-     f (foo 2)
-
-
 
 Inline definitions
 ------------------
@@ -579,24 +541,29 @@ Stroscot uses multimethods, so the standard vtable implementation of Java/C++ is
     }
   }
 
-Implementation
---------------
-
-The way Stroscot implements dispatch is:
-* eliminate all the statically impossible cases (cases that fail)
-* use profiling data to identify the hot paths
-* build a hot-biased dispatch tree
-* use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)
-
 Lambdas
 =======
 
+::
+
+  \a b -> stuff
+  \a b. stuff
+  lambda {
+    a 1 = stuff
+    a 2 = other
+  }
+
+Pattern-matching
+----------------
+
+``match`` is an expression:
 
 ::
 
-  { a b = stuff }
-  \a b -> stuff
-  \a b. stuff
+  f = match (2+2) (5+5) | x y = 2
+                        | 1 y = 2
+
+It desugars to a lambda applied to the arguments.
 
 Blocks
 ======
@@ -617,7 +584,7 @@ Blocks
      build_folder
      http_server.serve(folder)
 
-A program is a block. The translation rules are based on the continuation monad:
+The translation rules are based on the continuation monad:
 
 ::
 
@@ -666,6 +633,21 @@ These are things that can show up in blocks.
 
 More here: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
 
+Programs
+========
+
+A program is a block, and every declaration is a macro or control structure.
+
+So for example you can implement a conditional definition:
+
+::
+
+   if condition
+      a = 1
+   else
+      a = 2
+
+
 Comments
 ========
 
@@ -676,6 +658,7 @@ Comments
       comment */
    {- nesting {- comment -} -}
    if(false) { code_comment - lexed but not parsed except for start/end }
+   #! shebang at beginning of file
 
 Type declarations
 =================

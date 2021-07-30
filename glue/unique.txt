@@ -1,0 +1,10 @@
+-- https://github.com/ocaml-multicore/ocaml-multicore/blob/9d772afdaedca851148ca3a8431955668c60440b/runtime/obj.c
+
+chunk = 1024 -- each thread gets a chunk of ids, to avoid contention
+next_id = mem (0 : UInt)
+next_id_local = tls (0 : UInt)
+
+fresh_id =
+  if (next_id_local % chunk == 0)
+    next_id_local = atomic_fetch_add next_id chunk
+  next_id_local++

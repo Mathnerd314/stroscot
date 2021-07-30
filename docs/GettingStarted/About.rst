@@ -26,12 +26,13 @@ The roadmap at the moment is, in no particular order:
 Statistics
 ==========
 
-* `Bus factor <https://en.wikipedia.org/wiki/Bus_factor>`__: 1
-* 10k lines of code
-* |activity|
 * `First commit <https://github.com/Mathnerd314/stroscot/tree/a5264d6697f3e4a4034c4acc87c2a2022070a2bc>`__: December 2018
+* `Bus factor <https://en.wikipedia.org/wiki/Bus_factor>`__: 1
+* |activity|
+* |loc| (includes documentation)
 
 .. |activity| image:: https://img.shields.io/github/commit-activity/m/Mathnerd314/stroscot
+.. |loc| image:: https://img.shields.io/tokei/lines/github/Mathnerd314/stroscot
 
 Code of Conduct
 ===============

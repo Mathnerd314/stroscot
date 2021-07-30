@@ -22,6 +22,8 @@ Flags
 
 In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.
 
+There is also the value 'default' to set it to the default.
+
 Error messages
 ==============
 
@@ -249,6 +251,10 @@ Documentation generator
 
 The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There's regex-based search, and special searches for identifiers.
 
+Language server
+===============
+
+For integration with VSCode and other editors.
 
 Notebooks
 =========
@@ -262,10 +268,10 @@ The simplest hack is concatenate all the cells to be executed into a string, and
 
 For now the imperative approach seems fine.
 
-Dynamic code
-============
+Dynamic loading
+===============
 
 loading code at runtime
 - typecheck, JIT, etc.
 - return function pointer
-the function pointer doesn't have to be machine code, it can be bytecode- then running is is running the interpreter
+the function pointer doesn't have to be machine code, it can be bytecode, so the function runs through the interpreter

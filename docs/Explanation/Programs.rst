@@ -9,10 +9,15 @@ Social network
 
 A social network is a large program for any web development / app development framework to cut its teeth on. For example, the Hack programming language was closely associated with Facebook.
 
-Basic features copied from Reddit
-- creating a post
-- replying to a post (creates its own post)
-- reacting to a post (upvote, downvote, save, hide)
+Basic features (a la Reddit clone)
+* creating a post
+* replying - can reply to multiple posts at once, creates its own post - nested view, falls back to linear view when too deep
+* reacting to a post (emoji, save, remove - hide/report)
+* ranking a post (adjusting rating to be between two other posts)
+
+Accounts:
+* invite system, one account per person
+* "shells", multiple usernames per account. Some way to share shells between accounts.
 
 As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.
 

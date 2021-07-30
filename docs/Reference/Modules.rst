@@ -15,7 +15,7 @@ Modules from the programming perspective are records; they contain a list of bin
 Access
 ======
 
-To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``.
+To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``. The uniform notation with records seems cleaner than notation like ``A::B::C::a.b``.
 
 Later in the pipeline:
 * A similarly-named identifiers warning based on `confusables <http://www.unicode.org/reports/tr39/#Confusable_Detection>`_
@@ -56,7 +56,7 @@ Module exports can similarly be limited:
   C = (a) { a = "x"; b = "y" }
   # only a is accessible
 
-Sometimes it is still necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
+Sometimes it is necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
 
 Parameters
 ==========
@@ -80,6 +80,28 @@ Imports
 The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import "bar", the compiler will look for dir1/dir2/bar, and import "../bar" would be dir1/bar.
 
 Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.
+
+Overrides
+=========
+
+By default, methods are scoped to their module. Every definition ``foo = a`` binds the identifier ``Module.foo``, and each module creates a new identifier. The ``override`` statement prevents creating a new identifier, so that instead a base identifer can be extended.
+
+.. code-block:: python3
+
+  # module 1
+  foo 1 = 1
+
+  # module 2
+  import 1
+  override foo
+  foo 2 = 3
+
+  # module 3
+  import 1, 2
+  foo 1 # 1
+  foo 2 # 3
+
+If the override statement was not in module 2, then using ``foo`` in module 3 would result in an ambiguous name resolution error.
 
 1ML
 ===

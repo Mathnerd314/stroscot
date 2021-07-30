@@ -6,32 +6,54 @@ Posets are used in a few places in Stroscot (operator precedence, method combina
 Sets
 ====
 
-Sets are defined by a method ``(:) : Any -> Set -> Bool``.
+Sets are defined by a declaration and overriding a method ``(:) : Any -> Set -> Bool``.
 
 ::
 
+  set A
   1 : A = true
   2 : A = false
   a : A = (a : B) and not (a : C)
 
 The usual method combination mechanisms apply.
 
-You can also define sets with set-builder notation, set literals, and set operations (union intersection difference complement).
+You can also define sets with set-builder notation, set literals, and set operations (union, intersection, complement, difference, symmetric difference).
+
+Relations
+=========
+
+There are various types of relations: https://en.wikipedia.org/wiki/Binary_relation#Special_types_of_binary_relations
+
+The question is, what data types do we need for relations?
+
+Function: we need functions, obviously.
+Functional: This is a function too, just add a "no clause defined" element.
+One-to-one: a function with an assertion, ``assume(x y; if f x == f y { assert x == y}``
+Many-to-one: A function, no constraints
+Injective: This is the converse of a function, just use the function.
+One-to-many: the converse of a function, again just use the function.
+
+So the only relation that can't be represented by a one-argument function is a many-to-many relation. Here we really do have a set of tuples. There are choices of how to implement sets.
+
+We could use a function of two arguments returning a boolean, if the domain/codomain are infinite. Or if both domain and codomain are finite, a set data structure containing tuples. Or a boolean matrix, if there are lots of tuples. Or a map of sets if one of the elements is sparse. Or a directed simple graph if we have a graph library.
+
+Then we have the reflexive, symmetric, transitive closures for many-to-many relations.
 
 Posets
 ======
 
 A poset is a set with a comparison operation where exactly one of these holds: x < y, x > y, x = y, x ~ y (~ is incomparable).
 
-To specify a poset, we specify a subset of these relations. The relations are then checked/extended to satisfy the properties of transitivity, antisymmetry, reflexivity, and duality. If there is ambiguity in the definition, ~ is preferred, otherwise it's an error.
+To specify a poset, we specify a subset of these relations. The relations are then checked/extended to satisfy the properties of transitivity, antisymmetry, reflexivity, and that > is the dual of <. If there is ambiguity in the definition, ~ is preferred, otherwise it's an error.
 
-Relations
----------
+Constraints
+-----------
 
-The simplest relation is specifying the results of comparison. For flexibility one can specify any set of the 4 outcomes (2^4 possibilities, minus the trivial none/all). The syntax is to combine characters in the order ``<>=~``:
+The simplest relation is specifying the results of comparison. For flexibility one can specify any set of the 4 outcomes (2^4 possibilities, minus the trivial none/all, so 14). The syntax is to combine characters in the order ``<>=~``:
 
 ::
 
+  symbol x y
   elemR P x <=~ y
   elemR P x >= y
   elemR P x < y
@@ -40,101 +62,67 @@ Specifying each of the elements individually is tedious, so you can also define 
 
 ::
 
+  symbol z
   setR P {x,y} < {z}
 
-Priorities
-----------
-
-Similar to overloading you can specify priorities for the rules:
+We can specify some common properties this way:
 
 ::
 
-  prioDef plow < phigh
-
-  prio plow
-  setR P {x,y} < {z}
-
-  prio phigh
-  elemR P x > y
-
-
-
+  -- C total order/chain
+  setR P C <>= C
+  -- C antichain
+  setR P C ~= C
+  -- g upper bound of A
+  setR P A <= {g}
+  -- m lower bound of A
+  setR P A >= {m}
+  -- g max of A
+  setR P A <=~ {g}
+  -- m min of A
+  setR P A >=~ {m}
 
 There's also Zarf's Precedes thing:
 
-::
+  ::
 
-  precedes P A B =
-    if A subsetOf B
-      setR P A (B \ A)
-    else if B subsetOf A
-      setR P (A \ B) B
-
+    precedes P A B =
+      if A subsetOf B
+        setR P A (B \ A)
+      else if B subsetOf A
+        setR P (A \ B) B
+      else if A disjoint B
+        setR P A B
+      else
+        error "no idea what to do here"
 
 b covers a: no element c exists such that a < c < b
-checkable assertion, not sure if useful
 
-defining a relation on all elements of 2 sets is automatic:
-{a} <> {b}
+a right above b: a > b and forall c > b, c >= a
 
-chain C: C <>= C
-antichain C: C ~= C
+Pseudo-elements
+---------------
 
-upper bound of A:
-  element g s.t. A ≤ g
-lower bound of A:
-  element m s.t. A ≥ m
-max of A:
-  element g s.t. A ≤~ g
-min of A:
-  element m s.t. A ≥~ m
-meet of A: upper bound of lower bounds of A
-join of A: lower bound of upper bounds of A
+Although they might not exist in the set, you can always talk about:
+
+meet A: upper bound of lower bounds of A
+join A: lower bound of upper bounds of A
+
+To put the meet/join in the set use something like
+
+::
+
+  prio P x
+  elemR P x = meet A
+
 greatest element: join/upper bound of universal set
 least element: meet/lower bound of universal set
 
-combinations of posets
+Combinations
+------------
+
 - lexicographical order
 - product order
 - direct product
 - ordinal sum
 - disjoint union
-
-Total order
-===========
-
-Making the above generate a total order is fairly easy, just pick a linearization or error if it's ambiguous.
-
-price (obj : Treasure) = 10
-
-hit (obj : MingVase) =
-  print "it cracks"
-  price obj := 0
-
-main =
-  mv = MingVase
-  print (price mv)
-  hit mv
-  print (price mv)
-
-This is defining a rule at runtime to override the static rule. := is an fexpr; otherwise price obj would be resolved to 10. Similarly all the price calls are dynamic. So translated this looks like:
-
-static_price (obj : Treasure) = 10
-
-hit (obj : MingVase) =
-  print "it cracks"
-  set_dynamic "price" obj 0
-
-price obj | has_dynamic state "price" obj = run_dynamic state "price" obj
-          | otherwise = static_price obj
-
-main =
-  state = ...
-  mv = MingVase
-  print (price mv)
-  hit mv
-  print (price mv)
-
-With a uniform translation everything will be wrapped in this dynamic override. Since dynamic overrides static, nothing from static needs to carry over - the rule system can be completely different. In particular the dynamic system does not need to implement priorities, method combination, or specificity overriding. (Although, it could, with enough work).
-
-As far as rulesets go, set theory seems sufficient. Exceptions are just setminus {x} and then there's a macro for defining a group of rules all in a set.

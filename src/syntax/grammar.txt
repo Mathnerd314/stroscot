@@ -61,6 +61,9 @@ wordSegmentation =
   , ("WB16", [^ri] (ri ri)* ri 	× 	ri)
   , ("WB999", any 	÷ 	any)
   ]
+varid  LETTER  ×  (LETTER <|> DIGIT <|> SINGLE_QUOTE <|> uniidchar)
+symbol  SYMBOL  ×  SYMBOL
+
 
 source =
   imports
@@ -1474,16 +1477,13 @@ reservedOp name = token $
 
 Haskell
 
-special = oneOf "(),;[]`{}"
+special = oneOf "()[]{},;`"
+pureSpecial = oneOf "()[]{}@=\|;"
 LETTER = Unicode category Ll,Lt,Lu,Lo <|> '_'
 SYMBOL = Unicode category Pc,Pd,Po,Sc,Sm,Sk,So
 other_graphic = Unicode category Mc,Me,Nl,Ps,Pe,Pi,Pf
 Numeric = Unicode category Nd,No
 uniidchar = Lm, Mn
-
-varid  LETTER  ×  (LETTER <|> DIGIT <|> SINGLE_QUOTE <|> uniidchar)
-symbol  SYMBOL  ×  SYMBOL
-
 
 whitechar -> newline <|> '\v' <|> space <|> tab (should include all Unicode whitespace)
 program -> { lexeme <|> whitespace }
@@ -2720,4 +2720,10 @@ extension ns rules =
 impossible = PImpossible <$ keyword "impossible"
 
 
+   symbol : `identifier` | `special`
+   identifier : `letter` (`letter` | `digit`)*
+   special : `punct`+
+   letter : "A"|...|"Z"|"a"|...|"z"|"_"|unicode character not punctuation or digit
+   digit : "0"|...|"9"
+   punct : "!"|"#"|"$"|"%"|"&"|ASCII punctuation|U+00A1 through U+00BF, U+00D7, U+00F7, and U+20D0 through U+2BFF
 

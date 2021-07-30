@@ -591,9 +591,9 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             -- make dup/dupinv nodes
             let t_ports = filter (\(_,gd) -> eid gd /= dup_out) $ ports dup_target
             let tr_edges = transpose newedges
-            let f (v,gd) out_edges = traceShow (v,gd,out_edges) $ case v of {
-              Top -> Dup l (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
-            ; Bottom -> DupInv l (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+            let f (v,gd) out_edges = case v of {
+              Top -> Dup (maybe l id $ level gd) (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+            ; Bottom -> DupInv (maybe l id $ level gd) (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
             }
             let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
             pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
@@ -615,8 +615,8 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             let t_ports = filter (\(_,gd) -> eid gd /= dup_out) $ ports dup_target
             let tr_edges = transpose newedges
             let f (v,gd) out_edges = traceShow (v,gd,out_edges) $ case v of {
-              Top -> Dup l (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
-            ; Bottom -> DupInv l (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+              Top -> Dup (maybe l id $ level gd) (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+            ; Bottom -> DupInv (maybe l id $ level gd) (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
             }
             let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
             pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
@@ -709,8 +709,8 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                       = foldr f ([],[],[],[],[],[],[],[]) bangs
 
                 let dup_seq = Dup (fst b_tseq) Turnstile (Rule (snd b_tseq) (map snd bangs_tseq))
-                let dup_l = zipWith3 (\a b c -> Dup a Left (Rule b c)) (map fst b_tl) (map snd b_tl) (map (map snd) bangs_tl)
-                let dup_r = zipWith3 (\a b c -> Dup a Right (Rule b c)) (map fst b_tr) (map snd b_tr) (map (map snd) bangs_tr)
+                let dup_l = zipWith3 (\a b c -> Dup a Left (Rule b c)) (map fst b_tl) (map snd b_tl) (transpose $ map (map snd) bangs_tl)
+                let dup_r = zipWith3 (\a b c -> Dup a Right (Rule b c)) (map fst b_tr) (map snd b_tr) (transpose $ map (map snd) bangs_tr)
                 let dup_main = Dup (fst b_tmain) Right (Rule (snd b_tmain) (map snd bangs_tmain))
 
                 cutseq <- replicateM (length bc_t - 1) (mkEID "seqBC")
@@ -722,9 +722,9 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                       Cut (Rule (Sequent bangs_bseq () bangs_bmain, Sequent tseq bc_t ()) (Sequent bseq () ()))
                 let cuts = zipWith3 mkCut (map snd bangs_bseq) (map snd bangs_bmain) bc_t
                 let mkBangC b_bl bangs_bl tseq bseq = BangC (Rule (Sequent tseq bangs_bl ()) (Sequent bseq b_bl ()))
-                let bangcs = zipWith mkBangC (map snd b_bl) (map (map snd) bangs_bl)
+                let bangcs = zipWith mkBangC (map snd b_bl) (transpose $ map (map snd) bangs_bl)
                 let mkWhimC b_br bangs_br tseq bseq = WhimC (Rule (Sequent tseq () bangs_br) (Sequent bseq () b_br))
-                let whimcs = zipWith mkWhimC (map snd b_br) (map (map snd) bangs_br)
+                let whimcs = zipWith mkWhimC (map snd b_br) (transpose $ map (map snd) bangs_br)
 
                 let spine = zipWith3 id (cuts ++ whimcs ++ bangcs) seqs (tail seqs)
 
@@ -847,7 +847,20 @@ writeGraphs graph name limit = do
             Nothing,
             Just (EID "c_bseq87", Down), -- 7
             Nothing,
-            Just (EID "seqDS96",Down) -- 9
+            Just (EID "seqDS96",Down), -- 9
+            Nothing,
+            Just (EID "rval71", Up), -- 11
+            Nothing,
+            Just (EID "lret62", Up), -- 13
+            Just (EID "rval49", Up), -- 14
+            Nothing,
+            Nothing,
+            Just (EID "y41", Up), -- 17
+            Just (EID "yA43", Up), -- 18
+            Just (EID "hf120", Down), -- 19
+            Just (EID "c_bseq119", Down), -- 20
+            Just (EID "lval138", Down), -- 21
+            Nothing
             ] ++ repeat Nothing
   let graphs = fst $ flip runState 0 $ do
                 g <- graph
