@@ -8,7 +8,7 @@ Language Reference
   Library
   Fexprs
   Modules
-  Overloading
+  Dispatch
   Memory
   Logic
   BuildSystem

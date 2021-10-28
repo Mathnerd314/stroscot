@@ -1,47 +1,110 @@
 Reduction
 #########
 
-Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. Based on :cite:`downenSequentCalculusCompiler2016a`, we use the full two-sided sequent calculus with cuts instead of an intuitionistic or one-sided calculus. Based on optimal reduction, mostly :cite:`guerriniTheoreticalPracticalIssues1996`, we use linear logic. But we make modifications to the rules.
 
-Infinite structures
-===================
+Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. But the core is the jumbo two-sided linear logic sequent calculus. Reduction of this core corresponds to cut elimination - the normal forms (values) are cut-free terms.
 
-When we compile following GHC's model, the use/assign variables nodes are all known statically, and we start from one distinguished assignment (the root). As we manipulate the graph, we only ever copy in parts of other assignments. So there's a "working graph" where reduction is performed and then the rest is static data. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-assign indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
+Reduction order
+===============
 
-Levels
-======
+Lazy evaluation doesn't introduce more than a constant factor more of CPU overhead over similar strict runtime systems. (`ref <https://stackoverflow.com/questions/63698539/how-is-lazy-evaluation-implemented-in-a-way-that-doesnt-require-more-overhead-t>`__ `2 <https://apfelmus.nfshost.com/blog/2013/08/21-space-invariants.html>`__) The overhead of creating a thunk and forcing its evaluation replaces the overhead of creating a stack frame, calling the function, and returning. The function call is shifted in time but the cost is not significantly increased. Optimal reduction is similar - ignoring bookkeeping, the number of graph reduction steps is linearly related to the number of beta reductions, except for fan-fan duplication, which is quadratic. :ref:`guerriniOptimalImplementationInefficient2017` But my implementation avoids bookkeeping and fan-fan duplication and hence is linear (TODO: prove this).
 
-For the reduction implementation of contraction we add level indices to the terms in the promotion and dereliction rules of :math:`\bangc/\whimc`, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. Conceptually all terms have indices, but we can recover the indices in a proof tree by propagating the indices from the promotion/dereliction rules up/down according to the criteria that the indices involved in all non-:math:`\bangc/\whimc` promotion/dereliction rules must be the same.
+Lazy evaluation only helps timewise if a box is weakened. The top-level instruction evaluation loop can be written strictly, using a code pointer for conditional nodes.
 
-To handle level indices in infinite trees, we store the difference function ``\a -> a + (j-i)`` and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.
+However memory is a different story. The attraction of non-strict evaluation is the possibility for evaluating modular programs with memory-efficient evaluation orders. For example, consider a data processor, where one wants to parse and process input *in constant memory*, i.e. the memory consumption is not allowed to depend on the size of the input file. With non-strict evaluation, the task can be split up into logical function (lexer, parser, and emitter), each producing a full data structure. When these are composed with non-strict evaluation the intermediate data structures will be evaluated away, hence using constant memory. With strict evaluation the data structures would instead be evaluated fully at each step, giving terrible performance. In a strict language, one would have to use a streaming abstraction and manage the control flow explicitly to obtain constant memory.
 
-The level of a context is the maximum of the levels of its terms, 0 if it is empty.
+Lazy evaluation only partially addresses this. With the definition ``sum = foldl (+) 0``, unevaluated addition thunks pile up and are only forced at the end, hence the sum operation takes O(n) memory instead of running in a streaming fashion over the list. Haskell has introduced the ``seq`` command, but this is by no means a solution - it means every basic function must come in several strictness variants.
 
-.. math::
+What we need is a "smart" reduction order, that reduces so as to minimize memory usage. Optimal would be nice, but is probably impossible - really it just has to be better than strict evaluation, because strict evaluation has a "reasonable" cost model. So rather than GHC's strictness analysis or demand analysis which proves usage and falls back to lazy, we want a laziness analysis which identifies nontermination and opportunities for optimization and falls back to strict.
 
-    \begin{array}{ccc}
-      \rule{\bangc\Gamma^i \vdash A^j, \whimc\Delta^i }{\bangc\Gamma^i \vdash \bangc A^i, \whimc\Delta^i}{\bangc}_{j = i+1}
-      & \rule{\sk{\Gamma^i}, A^i \vdash \sk{\Delta^i} }{\sk{\Gamma^i}, \bangc A^j \vdash \sk{\Delta^i}}{\bangc d}_{j\leq i}
-      & \rule{\sk{\Gamma}, \overrightarrow{\bangc A, \bangc A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bangc A \vdash \sk{\Delta}}{\bangc c_n}
-    \end{array}
+``avg xs = sum xs / length xs`` keeps the whole list in memory because it does the sum and then the length (`ref <https://donsbot.wordpress.com/2008/05/06/write-haskell-as-fast-as-c-exploiting-strictness-laziness-and-recursion/>__`) - an optimal strategy would have to switch evaluation back and forth between the sum and the length. With the sequent calculus IR this might actually be solved, because cuts get pushed down continually and the natural strategy is to reduce the topmost cut. So in the average calculation we cycle through the redexes for each list element and can discard the beginning of the list once it is processed.
 
-.. math::
+for efficient graph reduction we want to reduce a term completely, if we are able to.
 
-    \begin{array}{ccc}
-      \rule{\bangc\Gamma^i, A^j \vdash \whimc\Delta^i }{\bangc\Gamma^i, \whimc A^i \vdash \whimc\Delta^i}{\whimc}_{j = i+1}
-      & \rule{\sk{\Gamma^i} \vdash A^i, \sk{\Delta^i} }{\sk{\Gamma^i} \vdash \whimc A^j, \sk{\Delta^i}}{\whimc d}_{j \leq i}
-      & \rule{\sk{\Gamma} \vdash \overrightarrow{\whimc A, \whimc A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whimc A, \sk{\Delta}}{\whimc c_n}
-    \end{array}
+Reduction of our linear logic trees is not confluent, but only because of commuting cuts. If we drop the black edges and only consider proof nets, then the system is confluent. A cut only interacts with other cuts at identity rules, but with a cut-identity-cut pattern it doesn't matter which cut reduces with the identity.
+
+Since reduction is confluent, it does not change anything to reduce in non-normal order for a time. The reduction will still terminate when going back to normal order. So terminating reductions can always be performed and even non-terminating reductions can be reduced somewhat. Hence during compilation we want to reduce the program as much as possible - ideally the compiled core should be cut-free. We can detect diverging terms and replace them with error terms. But the way to handle complex recursion isn't clear. For example the Fibonacci list ``let fibs = 0 :: 1 :: zipWith (+) fibs (tail fibs) in { repeat forever { n <- readInt; print (fibs !! n) } }``, this needs some kind of reduction graph or memo stack involved.
+
+Compressed graphs
+=================
+
+64-bit integers are represented as a sigma type with 2^64 possibilities. So addition is represented as a case expression, where each case contains another case expression, and then each case constructs the integer corresponding to the addition. There is a lot of fan-out at each step, which would require 2^128 values to represent, clearly infeasible. So although this is the conceptual representation, the actual representation has no fan-out for the cases - instead the case nodes create symbolic variables ``a`` and ``b``, and the constructed value has the tag ``a+b``.
+
+
+the value representation is optimized for the platform, and redundant checks are optimized out
+
+
+The Implementation of Functional Programming Languages
+Implementing functional languages: a tutorial
+Implementing Lazy Functional Languages on Stock Hardware: The Spineless Tagless G-Machine
+How to make a fast curry: push/enter vs eval/apply
+
+a program is a dependency graph which is evaluated through a series of local reductions
+the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says "return the result."
+
+The short answer is "because it was designed to do exactly that." GHC uses the spineless tagless g-machine (STG). You can read a paper about it here (it's quite complex). GHC does a lot of other things as well, such as strictness analysis and optimistic evaluation.
+
+    The reason I say C and other imperative languages are somewhat similar to Turing Machines (but not to the extent that Haskell is similar to Lambda Calculus) is that in an imperative language, you have a finite number of states (a.k.a. line number), along with a Tape (the ram), such that the state and the current tape determine what to do to the tape.
+
+Is the point of confusion then that mutability should lead to slower code? Haskell's laziness actually means that mutability doesn't matter as much as you think it would, plus it's high-level so there are many optimizations the compiler can apply. Thus, modifying a record in-place will rarely be slower than it would in a language such as C.
+
+
+In this answer I provide a somewhat detailed comparison of function calls in the GHC RTS and a typical Java VM implementation. That answer is focused on memory usage (because the question was about garbage collection), but much of the discussion applies to performance more generally.
+
+Summarizing the relevant bits, if you are trying to determine the overhead in calling a function to multiply two numbers:
+
+bar :: Int -> Int -> Int
+bar a b = a * b
+
+as invoked by some other function:
+
+foo :: Int -> Int -> Int -> Int
+foo x y z = let u = bar y z in x + u
+
+then in a typical strict implementation, like the Java JVM, the byte code would probably look something like:
+
+The overhead of the bar function call (i.e., the difference between the above and if bar was inlined) looks like it's two argument pushes, the call itself, and the return.
+
+For the lazy version, GHC (without optimization) compiles this code as something like the following pseudocode:
+
+foo [x, y, z] =
+    u = new THUNK(sat_u)                   // thunk, 32 bytes on heap
+    jump: (+) x u
+
+sat_u [] =                                 // saturated closure for "bar y z"
+    push UPDATE(sat_u)                     // update frame, 16 bytes on stack
+    jump: bar y z
+
+bar [a, b] =
+    jump: (*) a b
+
+The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there's no "cost" for this), and a "call" (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.)
+
+The bottom line is that, at least to a first approximation, lazy evaluation as implemented in GHC is roughly as fast as strict evaluation, even when everything is actually evaluated.
+
+
+Recursion
+=========
+
+Following :cite:`jonesImplementationFunctionalProgramming1987` chapter 12 we give each definition node a static integer. Then the root is a distinguished definition. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-def indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
+
+The optimal fixedpoint algorithm outlined in :cite:`shamirFixedpointsRecursiveDefinitions1976` (10.18, PDF pages 240-242) is a variation of Tarjan's strongly connected component algorithm. Cuts between two definitions ``f x`` are memoized in a list, and if the SCC algorithm finds a component ``f x -> let g = ... in g (f x)`` then this component is solved. If it has a unique solution then that's the answer, otherwise ``f x`` diverges and is replaced with a ``RecursionError`` or ``AmbiguousError``. We assume the solver allows uninterpreted "holes", so that the SCC can be solved before its sub-computations.
+
+For comparison, to compute the least fixed point we would maintain a "working graph" and incrementally unfold the definition when encountered. But with the optimal fixed point we first reduce the definition to a value while copying other definitions in.
+
+The solver is an SMT solver on the predicate ``SAT(y == g y)``, and for uniqueness ``UNSAT(y == g y && y != y0)`` where ``y0`` is the first solution found. We exclude error values as possible solutions since the recursion error will be more informative.
+
+The posets the paper uses appear to be pointed directed-complete partial orders `(cppo's) <https://en.wikipedia.org/wiki/Complete_partial_order>`__.
 
 Syntax
 ======
 
-Proofs are programs by the Curry-Howard correspondence. So we can use all these logical rules as a programming language. But we need a syntax for it.
+Proofs are programs by the Curry-Howard correspondence. So we can use all these logical rules as a programming language. But we need a syntax for all the proofs.
 
 Example
 ~~~~~~~
 
-We use a simple program, boolean "and":
+We use a simple program, boolean "and", presented in a Haskell-ish language:
 
 ::
 
@@ -143,14 +206,13 @@ If we drop the syntactic inclusion relationship, reverse the directions of the b
 
 The identity nodes function like thunk identifiers; the stuff in between the identity and the cut is what will get pushed on the stack to execute the thunk. So the I - Cut connections for True and False can be squinched together. Then the path from the assignment node to the use node reads "push !True to stack, push False to stack, reduce with and" (recall the original expression was ``and False True``).
 
-Concrete syntax
-~~~~~~~~~~~~~~~
+Bad syntax
+~~~~~~~~~~
 
-The concrete syntax serializes the non-simplified net into a textual form. Each edge is assigned a unique identifier, then all the nodes are written out. The order of the nodes is not important, but the pretty-printer can choose something for readability.
+The bad syntax serializes the non-simplified net into a textual form. Each edge is assigned a unique identifier, then all the nodes are written out. The order of the nodes is not important, but the pretty-printer can choose something for readability. The syntax for each node is just Haskell's datatype syntax. You can see how it looks in `Core.hs <https://github.com/Mathnerd314/stroscot/blob/fb648be1ecc3e5c062dbb000d6887a2ce7ac7eb0/src/Core.hs#L50>`__. We should also write out the types of the formulas, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.
 
-We should also write out the types of the formulas, so they can be used to get back the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.
-
-Currently the core syntax is just Haskell's datatype syntax. You can see how it looks in `Core.hs <https://github.com/Mathnerd314/stroscot/blob/fb648be1ecc3e5c062dbb000d6887a2ce7ac7eb0/src/Core.hs#L50>`__.
+Real syntax
+~~~~~~~~~~~
 
 An idea of how a real syntax might look:
 
@@ -360,6 +422,32 @@ For multiplexers the situation is a little more complicated. A multiplexer also 
 
 Random old junk
 ###############
+
+Levels
+======
+
+For the reduction implementation of contraction we add level indices to the terms in the promotion and dereliction rules of :math:`\bangc/\whimc`, as in :cite:`martiniFineStructureExponential1995` and :cite:`guerriniTheoreticalPracticalIssues1996`. Conceptually all terms have indices, but we can recover the indices in a proof tree by propagating the indices from the promotion/dereliction rules up/down according to the criteria that the indices involved in all non-:math:`\bangc/\whimc` promotion/dereliction rules must be the same.
+
+To handle level indices in infinite trees, we store the difference function ``\a -> a + (j-i)`` and recover the levels by tracing from the root of the derivation tree (which is always level 0) and applying the difference function when encountered.
+
+The level of a context is the maximum of the levels of its terms, 0 if it is empty.
+
+.. math::
+
+    \begin{array}{ccc}
+      \rule{\bangc\Gamma^i \vdash A^j, \whimc\Delta^i }{\bangc\Gamma^i \vdash \bangc A^i, \whimc\Delta^i}{\bangc}_{j = i+1}
+      & \rule{\sk{\Gamma^i}, A^i \vdash \sk{\Delta^i} }{\sk{\Gamma^i}, \bangc A^j \vdash \sk{\Delta^i}}{\bangc d}_{j\leq i}
+      & \rule{\sk{\Gamma}, \overrightarrow{\bangc A, \bangc A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bangc A \vdash \sk{\Delta}}{\bangc c_n}
+    \end{array}
+
+.. math::
+
+    \begin{array}{ccc}
+      \rule{\bangc\Gamma^i, A^j \vdash \whimc\Delta^i }{\bangc\Gamma^i, \whimc A^i \vdash \whimc\Delta^i}{\whimc}_{j = i+1}
+      & \rule{\sk{\Gamma^i} \vdash A^i, \sk{\Delta^i} }{\sk{\Gamma^i} \vdash \whimc A^j, \sk{\Delta^i}}{\whimc d}_{j \leq i}
+      & \rule{\sk{\Gamma} \vdash \overrightarrow{\whimc A, \whimc A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whimc A, \sk{\Delta}}{\whimc c_n}
+    \end{array}
+
 
 To handle level mismatches we might also need lifting operators. The conditions are unclear.
 

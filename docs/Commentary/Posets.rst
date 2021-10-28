@@ -33,11 +33,11 @@ Many-to-one: A function, no constraints
 Injective: This is the converse of a function, just use the function.
 One-to-many: the converse of a function, again just use the function.
 
-So the only relation that can't be represented by a one-argument function is a many-to-many relation. Here we really do have a set of tuples. There are choices of how to implement sets.
+So the only relation that can't be represented by a one-argument function is a many-to-many relation. Here we really do have a set of tuples. There are choices of how to implement this set.
 
 We could use a function of two arguments returning a boolean, if the domain/codomain are infinite. Or if both domain and codomain are finite, a set data structure containing tuples. Or a boolean matrix, if there are lots of tuples. Or a map of sets if one of the elements is sparse. Or a directed simple graph if we have a graph library.
 
-Then we have the reflexive, symmetric, transitive closures for many-to-many relations.
+Then we have the reflexive, symmetric, transitive closures for many-to-many relations. With a finite relation these are straightforward to compute. For infinite sets we have to work harder.
 
 Posets
 ======

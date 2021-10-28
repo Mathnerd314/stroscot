@@ -26,13 +26,14 @@ The most obvious is the initial declaration list, but other constructs introduce
 
 ::
 
-  a
-    b
-    c
-  d
-
-  # becomes
-  { a {b; c}; d}
+  assertEqual
+    {
+      a
+        b
+        c
+      d
+    }
+    { a {b; c}; d}
 
 Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:
 
@@ -46,13 +47,12 @@ Layout handling is complicated by the presence of grammar rules without layout t
 
 ::
 
-  a
-    + b
-    + c
-  # equal to
-  a {+ b; + c}
-  # should be equivalent to
-  a + (b + c)
+  assertEqual
+    a
+      + b
+      + c
+    a {+ b; + c}
+    a + (b + c)
 
 It should be possible to handle these with a fixup phase.
 
@@ -60,9 +60,9 @@ Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skippi
 
 ::
 
-  let a = b in c
-  # equivalent to
-  let { a = b } in c
+  assertEqual
+    let a = b in c
+    let { a = b } in c
 
 Parsing
 =======
@@ -102,20 +102,24 @@ Stroscot supports your typical PEMDAS:
 
 ::
 
-  1 + 2 * 3^2
-  --> 19
-  3+1/(7+1/(15+1/1))
-  --> 355/113 = 3.14159292035...
+  assertEqual
+    1 + 2 * 3^2
+    19
+  assertEqual
+    3+1/(7+1/(15+1/1))
+    355/113
+    3.14159292035...
 
 Most other operators are textual:
 
 ::
 
-   true and false = false
-   true or false = true
-   true xor true = false
-   5 div 2 = 2
-   5 mod 2 = 1
+  assert
+    true and false == false
+    true or false == true
+    true xor true == false
+    5 div 2 == 2
+    5 mod 2 == 1
 
 New operators can be declared with `mix <http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf>`__ `fix <http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf>`__ semantics, e.g.
 
@@ -130,10 +134,11 @@ For brevity, trailing parentheses can be omitted:
 
 ::
 
-   3+1/(7+1/(15+1/1
-   --> 355/113
+  assertEqual
+    3+1/(7+1/(15+1/1
+    355/113
 
-If you don't like this, you can set Stroscot to warn or error on
+Although it parses, you can set Stroscot to warn or error on
 unmatched parentheses, or run the code formatter which will add them.
 
 Chained Comparison
@@ -141,8 +146,9 @@ Chained Comparison
 
 ::
 
-  1 <= 2 < 3
-  9 > 2 < 3
+  assert
+    1 <= 2 < 3
+    9 > 2 < 3
 
 Values
 ======
@@ -186,16 +192,19 @@ Arrays
 Immutable arrays are also called tuples or lists.
 
 ::
+
   arr = [a, b, c]
-  arr[0] # a
-  length arr # 3
+  assert $ arr[0] == a
+  assert $ length arr == 3
 
 Mutable arrays (arrays stored in a variable) are what people usually call arrays
 
-   arr = mut [1,2,3]
-   arr[0] # 1
-   arr[1] := 4
-   length arr # 3
+::
+
+  arr = mut [1,2,3]
+  assert $ arr[1] == 2
+  arr[1] := 4
+  assert $ arr[1] == 4
 
 Sequences and slices:
 
@@ -207,10 +216,6 @@ Sequences and slices:
   [minBound,minBound+1..maxBound]
   slice(list, 0, 2)
   slice(list, a, length list - b)
-
-Monad comprehensions
-
-All arrays are immutable and can contain arbitrary types of data, so we could also call them tuples or lists.
 
 Records
 -------
@@ -288,20 +293,21 @@ Patterns all compile to guard conditions on ``$args``. They also check that the 
 
 ::
 
-   _ --> True
-   a --> True -- binds a
-   [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}] -- literal match
-   [1, ...] --> $args[i][0] == 1 -- matches any list starting with 1
-   {a: 1, ...: rest} --> $args[a] == 1 # matches a and the rest of the record
+  _ --> True -- wildcard
+  a --> if a then $arga[0] == a else True -- matches symbol a, or binds a if a is not defined
+   _a --> True -- hole, binds a even if a is an existing symbol
+  ^a --> $args[i] == a -- matches the atom a
+  ^f a b c --> $args[0] == f && $args.length >= 4 # matches the symbol tree with atom f
+   _f a --> $args.length >= 2 # matches any symbol tree besides a single atom
+  [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}] -- literal match
+  [1, ..., 2] --> $args[i][0] == 1 && $args[i][-1] == 2 -- matches any list starting with 1 and ending with 2
+  {a: 1, ...} --> $args[a] == 1 # matches a and the rest of the record
    pat1 AND pat2 --> match $args pat1 and match $args pat2 # matches both patterns simultaneously
    pat1 OR pat2 --> match $args pat1 or match $args pat2 # matches either pattern
-   ~pat --> True # desugars to f u_ ... = let pat = u_ in ..., where u_ is a unique name
-   (a : b) --> a elemOf b # type tag
-   a | f a --> f a # guard, arbitrary function
-   (f -> a) --> match (f $args[i]) a # view pattern
-   ^a --> $args[i] == a -- matches the atom a
-   ^f a b c --> $args[0] == f # matches the symbol tree with atom f
-   f a --> $args.length >= 2 # matches any symbol tree besides a single atom
+  ~pat --> True # desugars to f u_ ... = let pat = u_ in ..., where u_ is a unique name
+  (a : b) --> a elemOf b # type tag
+  a | f a --> f a # guard, arbitrary function
+  (f -> a) --> match (f $args[i]) a # view pattern
 
 Pattern synonyms
 
@@ -318,7 +324,7 @@ Patterns can be made inline; they are lifted to the closest scope that allows de
 
    range = sqrt((dx=x1-x0)*dx + (dy=y1-y0)*dy)
 
-   -- translates to
+  -- translates to
    dx=x1-x0
    dy=y1-y0
    range = sqrt(dx*dx + dy*dy)
@@ -331,36 +337,36 @@ Keyword arguments
 
    foo w x y z = z - x / y * w
 
-   v = foo (y:2) (x:4) (w:1) (z:0)
-   # 0-4/2*1
-   v == foo {x:4,y:2,w:1,z:0}
-   # true
+  v = foo (y:2) (x:4) (w:1) (z:0)
+  # 0-4/2*1
+  v == foo {x:4,y:2,w:1,z:0}
+  # true
 
 Positional arguments
 --------------------
 
 ::
 
-   v == foo 1 4 2 0
-   # true
+  v == foo 1 4 2 0
+  # true
 
 You can mix positional and keyword arguments freely; positions are
 assigned to whatever is not a keyword argument.
 
 ::
 
-   v == foo {z:0} {w:1} 4 2
-   # true
+  v == foo {z:0} {w:1} 4 2
+  # true
 
 Arguments are curried:
 
 ::
 
-   c y = y+10
-   b x = c
+  c y = y+10
+  b x = c
 
-   b 2 1
-   # 11
+  b 2 1
+  # 11
 
 Implicit arguments
 ------------------
@@ -369,82 +375,68 @@ These behave similarly to arguments in languages with dynamical scoping.
 
 ::
 
-   -- standard library
+  -- standard library
    log s = if (priority > loglevel) { logPrint s }
 
-   -- components of an application
+  -- components of an application
    foo = log "foo" { priority = DEBUG }
    bar = log "bar" { priority = WARNING }
+   baz =
+    foo
+    bar
 
-   -- main file
+  -- main file
    logPrint x = writeFile file x
    file = "a"
-   loglevel = DEBUG
+   loglevel = WARNING
 
    main =
-     foo
-     bar
-     foo {file="b"}
+     baz
+     foo {loglevel=DEBUG}
 
-``loglevel`` is defined close to the top level, but each use
-site is scattered in the code. The implicit argument replaces
-the global variable that is often used.
-Similarly ``logPrint`` is passed implicitly instead of being a member of a global Logger instance.
-
-Because
-
-Claim: Explicit argument passing cannot replace our implicit variable example
-
-The file variable does not exist in the standard
-library; it is part of the user's code. To use explicit argument passing
-would require adding new arguments to log, or modifying main to store print partially-applied, but this would break anyone
-else using the library. Not to mention that just one intervening
-function is rare and we'd probably need to modify 20 or 30 functions in
-a bad case.
-
-
-Using positional arguments inhibits passing positional arguments
-implicitly:
+Positional arguments can be passed implicitly, but this is inhibited by using positional arguments:
 
 ::
 
+   foo w x y z = z - x / y * w
    bar = foo + 2
    baz a = bar {x:4,y:2} - a
 
-   v + 2 == baz 0 {z:0,w:1}
-   # true
-   v + 2 == baz 1 _ _ 0
-   # Error: too many arguments to baz
+  ((0-4/2*1)+2)-5 == baz 5 {z:0,w:1}
+  # true
+   baz 1 2 3 4 5
+  # Error: too many arguments to baz, expected [a]
 
 Similarly keyword arguments inhibit passing down that keyword
 implicitly:
 
 ::
 
-   a k = 1
-   b k = k + a
+  a k = 1
+  b k = k + a
 
-   b {k:2}
-   # Error: no definition for k given to a
+  b {k:2}
+  # Error: no definition for k given to a
 
-A proper definition for b would simply omit k:
+A proper definition for b would either omit k or pass it explicitly to a:
 
 ::
 
-   a k = 1
-   b = k + a
+  a k = 1
+  b = k + a
+  b' k = k + a k
 
-   b {k:2}
-   # 3
+  b {k:2} == b' {k:2}
+  # true
 
 For functions with no positional arguments, positions are assigned
 implicitly left-to-right:
 
 ::
 
-   a = x / y + y
-   a 4 1
-   # 5
+  a = x / y + y
+  a 4 1
+  # 5
 
 Atoms that are in lexical scope are not assigned positions, hence (/)
 and (+) are not implicit positional arguments for a in the example
@@ -452,33 +444,22 @@ above. But they are implicit keyword arguments:
 
 ::
 
-   a = x / y + y
-   a {(+):(-)} 4 1
-   # 4/1-1=3
+  a = x / y + y
+  assert
+    a {(+):(-)} 4 1
+    == 4/1-1
+    == 3
 
 The namespace scoping mechanism protects against accidental use in large
 projects.
 
-Other types of arguments
-------------------------
-
-Default arguments, output arguments, and variadic arguments are
-supported:
+Default arguments
+-----------------
 
 ::
 
-   a {k:1} = k + 1
-   a # 2
-
-   b = out {a:3}; 2
-   b + a
-   # 5
-
-   c = sum $arguments
-   c 1 2 3
-   # 6
-   c *([1 2])
-   # 3
+  a {k:1} = k + 1
+  a # 2
 
 Modula-3 added keyword arguments and default arguments to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying. If ``foo`` is a function with two positional arguments, the second of them having a default value, then ``foo a b`` is either passing ``b`` to the result of ``f a`` or overriding the default value of the second argument. So specifying/overriding default arguments always requires the use of keyword syntax.
 
@@ -486,10 +467,19 @@ Implicit arguments use keywords as well, so they override default arguments:
 
 ::
 
-   a {k:1} = k
-   b = a
-   c = b {k:2}
-   c # 2
+  a {k:1} = k
+  b = a
+  c = b {k:2}
+  c # 2
+
+Output arguments
+----------------
+
+::
+
+  b = out {a:3}; 2
+  b + a
+  # 5
 
 Output arguments can chain into implicit arguments, so you get something like the state monad:
 
@@ -497,9 +487,39 @@ Output arguments can chain into implicit arguments, so you get something like th
 
    inc {x} = out {x:x+1}
 
-   x = 1
+  x = 1
    inc
-   x # 2
+  x # 2
+
+It might be worth having a special keyword ``inout`` for this.
+
+Variadic arguments
+------------------
+
+Positional variadic arguments:
+
+::
+
+  c = sum $arguments
+  c 1 2 3
+  # 6
+  c *([1 2])
+  # 3
+
+Only syntactically adjacent arguments are passed, e.g.
+
+::
+
+  (c 1 2) 3
+  # error: 3 3 is not reducible
+
+There are also variadic keyword arguments:
+
+::
+
+  s = print $kwargs
+  s {a:1,b:2}
+  # {a:1,b:2}
 
 Concatenative arguments
 -----------------------
@@ -508,19 +528,19 @@ Results not assigned to a variable are pushed to a stack:
 
 ::
 
-   1
-   2
-   3
+  1
+  2
+  3
 
-   %stack
-   # 1 2 3
+  %stack
+  # 1 2 3
 
 ``%`` is the most recent result, with ``%2`` ``%3`` etc. referring to
 less recent results:
 
 ::
 
-   {a = 1}
+  {a = 1}
    extend % {b=2}
    extend % {c=3}
    shuffle
@@ -570,7 +590,7 @@ Blocks
 
 ::
 
-   x = input number
+  x = input number
    display x
 
    foo =
@@ -597,16 +617,72 @@ Bang notation
 
 ::
 
-  apply! { f !(g !(print y) !x) }
+  { f !(g !(print y) !x) }
 
-Idris defines `!-notation <http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation>`__, "implicitly bound application".
+  // desugars to
+  {
+    t1 <- print y
+    t2 <- x
+    t3 <- g t1 t2
+    f t3
+  }
 
-TODO: define the exact translation rules
+The notation ``!expr`` within a block means that the expression ``expr`` should be bound in the block to a temporary before computing the surrounding expression. The expression is bound in the nearest enclosing block.
+Expressions are lifted leftmost innermost.
+
+Monad comprehensions
+--------------------
+
+::
+
+  Expressions: e
+  Declarations: d
+  Lists of qualifiers: Q,R,S
+  Qv is the tuple of variables bound by Q (and used subsequently)
+  selQvi is a selector mapping Qv to the ith component of Qv
+
+  -- Basic forms
+  D[ e | ] = return e
+  D[ e | p <- e, Q ]  =
+    p <- e
+    D[ e | Q ]
+  D[ e | e, Q ] =
+    p <- guard e
+    D[ e | Q ]
+  D[ e | let d, Q ] =
+    let d
+    D[ e | Q ]
+
+  -- Parallel comprehensions (iterate for multiple parallel branches)
+  D[ e | (Q | R), S ] =
+    (Qv,Rv) <- mzip D[ Qv | Q ] D[ Rv | R ]
+    D[ e | S ]
+
+  -- Transform comprehensions
+  D[ e | Q then f, R ] =
+    Qv <- f D[ Qv | Q ]
+    D[ e | R ]
+
+  D[ e | Q then f by b, R ] =
+    Qv <- f (\Qv -> b) D[ Qv | Q ]
+    D[ e | R ]
+
+  D[ e | Q then group using f, R ] =\
+    ys <- f D[ Qv | Q ]
+    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
+    D[ e | R ]
+
+  D[ e | Q then group by b using f, R ] =
+    ys <- f (\Qv -> b) D[ Qv | Q ]
+    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
+    D[ e | R ]
+
+
 
 Control structures
 ==================
 
-These are things that can show up in blocks.
+These are things that can show up in blocks and have blocks as arguments.
 
 ::
 
@@ -623,13 +699,13 @@ These are things that can show up in blocks.
 
 ::
 
-   check {
+  check {
      risky_procedure
-   } error {
+  } error {
      fix(error) or error("wtf")
-   } regardless {
+  } regardless {
      save_logs
-   }
+  }
 
 More here: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
 
@@ -653,12 +729,12 @@ Comments
 
 ::
 
-   // comment
-   /* multiline
+  // comment
+  /* multiline
       comment */
-   {- nesting {- comment -} -}
+  {- nesting {- comment -} -}
    if(false) { code_comment - lexed but not parsed except for start/end }
-   #! shebang at beginning of file
+  #! shebang at beginning of file
 
 Type declarations
 =================

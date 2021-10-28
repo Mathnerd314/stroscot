@@ -38,10 +38,6 @@ Blocks
 
 Blocks are inspired by Haskell's do notation, but have a twist, based on the observation that the continuation monad is `the mother of all monads <https://www.schoolofhaskell.com/school/to-infinity-and-beyond/pick-of-the-week/the-mother-of-all-monads>`__. Since it's the mother, we don't lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations. That link gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
 
-Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value).
-
-Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, operations which don't return a value are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations whose value is used are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying monads from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar. Take that, monads. And also we can easily use indexed monads, just change ``r -> r`` to ``r -> s``.
-
 It's worth noting that even though monads can be implemented easily, monads are overrated to begin with:
 
 * ReaderT is handled by implicit parameters
@@ -49,12 +45,22 @@ It's worth noting that even though monads can be implemented easily, monads are 
 * WriterT is a StateT that's not read
 * Error/Except are handled by poison values
 
-To see how I/O works, consider printing hello world: ``print "Hi"``. As a task this looks like ``Print "Hi" exit``, where ``exit`` is what happens after (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``\cont -> Read ref (\v -> Print v cont)``, which is just ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation.
+I/O
+---
+
+Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying monads from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar. Take that, monads. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
+
+To see how I/O works, consider printing hello world: ``print "Hi"``. As a task this looks like ``Print "Hi" exit``, where ``exit`` is what happens after (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation, which expands to ``\cont -> Read ref (\v -> Print v cont)``.
+
+Delimited continuations
+-----------------------
+
+These are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These do have more expressiveness than undelimited continuations. But delimited continuations can be implemented on top like any other monad, so I think the simplicity of the undelimited continuations wins out. With the delimited continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas undelimited continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
 
 ApplicativeDo
 -------------
 
-ApplicativeDo :cite:`marlowDesugaringHaskellDonotation2016` has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form ``{a <- ax; b <- bx; return (f a b)} = apply f a b``. Idiom brackets are shorter, so the value this provides is minimal.
+ApplicativeDo :cite:`marlowDesugaringHaskellDonotation2016` has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form ``{a <- ax; b <- bx; return (f a b)} = return (f !a !b)``. Idiom brackets are shorter, so the value this provides is minimal.
 
 The second function is to use applicative operations instead of monadic operations because in "some" monads the applicative operation is more efficient. Their example is the Haxl DSL:
 
@@ -148,7 +154,7 @@ While do notation is defined for monads, idiom brackets are defined for applicat
 
 The issue with translating to ``<*>`` is that it assumes left-to-right evaluation. You can see this in the `translation <https://hackage.haskell.org/package/base-4.15.0.0/docs/Control-Applicative.html#t:Applicative>`__ for Monads: ``m1 <*> m2`` binds ``m1`` before ``m2``. In Stroscot the program is required to be equivalent under all evaluation orders. So to enforce this we need a function ``parallel : [m a] -> m [a]`` that checks there is no issue with evaluating in parallel. Then using parallel the translation of ``apply { f a b x }`` looks like ``{ (av,bv,cv) = parallel (a,b,c); return (f av bv cv) }``
 
-Idris defines `!-notation <http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation>`__, "implicitly bound application". The scoping is `unintuitive <https://github.com/idris-lang/Idris-dev/issues/4395>`__, but the notation itself is powerful. As a DSL ``apply! { f !(g !(print y) !x) }`` the scoping issue is resolved. TODO: define the exact translation rules
+Idris defines `!-notation <http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation>`__, "implicitly bound application". The scoping is `unintuitive <https://github.com/idris-lang/Idris-dev/issues/4395>`__, but the notation itself is powerful. Binding it to a syntactic block seems reasonable. And it can easily express idiom brackets, ``[[ f a b ]]`` becomes ``{ f !a !b }``. Idiom brackets save characters with more arguments, but bang notation looks natural if there are multiple bindings in the block.
 
 C-like reference access
 -----------------------
@@ -192,7 +198,7 @@ The parser parses as much of the input as possible, but in general only a prefix
 Specificity
 ===========
 
-This might seem overly complicated, but it's based on Zarf's rule-based programming. When you're defining lots of rules for a IF game then specifying priorities by hand is tedious.
+This might seem overly complicated, but it's based on Zarf's `rule-based programming <https://eblong.com/zarf/rule-language.html>`__. When you're defining lots of rules for a IF game then specifying priorities by hand is tedious.
 
 Whitespace
 ==========
@@ -202,6 +208,15 @@ Whitespace in identifiers... this doesn't work well with Haskell syntax. With wh
 OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
+
+Function syntax
+===============
+
+Lambdas are defined using whatever syntax. The ``\x.y`` style is closest to the mathematical notation (barring Unicode), Haskell uses ``\x -> y``, Cliff likes ``{x => y}``.
+
+Haskell style arguments ``f a`` are preferred over C style ``f(a)`` due to being shorter for arguments that are identifiers. The only place they lose in character count is complex arguments ``f (a+1) (b+2)`` vs ``f(a+1,b+2)``, but there you can use a tuple to match the syntax or the record ``f{x=a+1,y=b+2}`` which will most likely be clearer.
+
+APL-style functions/operators ``(~R∊R∘.×R)/R←1↓⍳R`` are not preferred due to Unicode overuse, preferring operators written with words instead, but one could create them if desired.
 
 Arguments
 =========
@@ -229,3 +244,22 @@ The above isn’t possible in languages like Haskell and ML which always enforce
 constructor discipline: Haskell has a rule that identifiers starting with uppercase letters are constructors and cannot be defined to be functions, but this rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction.
 
 The semantics of functions are defined by pattern-matching rules a la `Pure <https://agraef.github.io/pure-docs/pure.html#definitions-and-expression-evaluation>`__.
+
+Implicit arguments
+------------------
+
+``loglevel`` is defined close to the top level, but each use
+site is scattered in the code. The implicit argument replaces
+the global variable that is often used.
+Similarly ``logPrint`` is passed implicitly instead of being a member of a global Logger instance.
+
+Claim: Explicit argument passing cannot replace our implicit variable example
+
+The file variable does not exist in the standard
+library; it is part of the user's code. To use explicit argument passing
+would require adding new arguments to log, or modifying main to store print partially-applied, but this would break anyone
+else using the library. Not to mention that just one intervening
+function is rare and we'd probably need to modify 20 or 30 functions in
+a bad case.
+
+

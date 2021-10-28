@@ -15,7 +15,7 @@ The main feature is a macro dynamicF. dynamicF adds an implicit high-priority cl
   prio high
   description T | Just X <- overrides ["description",T] = X.
 
-The high priority is because dynamic changes take precedence over static conditions. For example with "occupied kitchen := true", it's an excellent guess that this should override a static check that goes through the list of people.
+The high priority is because dynamic changes take precedence over static conditions. For example with "occupied "kitchen" := true", it's an excellent guess that this should override a static check that goes through the list of people.
 
 Then later in the code we can write
 

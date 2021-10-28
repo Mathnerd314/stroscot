@@ -117,6 +117,11 @@ Invalid characters can be handled different ways according to a mode parameter: 
 * hierarchical streams/generators.
 * https://juliastrings.github.io/utf8proc/
 
+Time
+====
+
+The JSR-310 `ThreeTen <https://www.threeten.org/>`__ library in `Java 8 <https://docs.oracle.com/javase/16/docs/api/java/time/package-summary.html>`__ seems to have undergone the most peer review.
+
 I/O
 ===
 
@@ -158,6 +163,29 @@ For a stateful function, the ``RealWorld`` token also is replaced with an error 
 try-catch-else-finally: we can handle the try-catch part with continuations and the error-redefining trick, ``case reset (Left (foo {e | isDesiredError e = shift (const e)}) of e | isDesiredError e -> handle e``. We can also use the bubbling: ``case x of e | isError e and isDesiredError (firstError e) -> ...``. For finally we want a state field to extract the token, ``case x of e -> e { state = cleanup (state e) }``. Python also supports an else clause - it is executed if control flows normally off the end of the try clause and is not protected by the catch clauses of the try.
 
 asynchronous exceptions: this instruments every memory allocation and I/O operation to check for calls to ``throwTo ThreadId`` and if so return ``Interrupted``, ``ThreadKilled`` (``PleaseStop``), etc. But every operation is also given a parameter ``Masked`` (for memory and nonblocking I/O operations) or ``Interruptible`` (for blocking I/O operations) that disables this behavior. Then there's the mask function, ``mask io = if Masked then io {unmask = id} else io {Masked = True, unmask io = io {Masked = False} }`` and similarly ``uninterruptibleMask`` which also checks/sets ``Interruptible``.
+
+IMO GHC's `asynchronous exception system <https://www.fpcomplete.com/blog/2018/04/async-exception-handling-haskell/>`__ is broken. The system is so complicated that nobody can agree on the desired behavior / correct form of even simple examples. The prototypical example of using it is `bracket <https://hackage.haskell.org/package/unliftio-0.2.13.1/docs/UnliftIO-Exception.html#v:bracket>`__:
+
+::
+
+  bracket :: MonadUnliftIO m => m a -> (a -> m b) -> (a -> m c) -> m c
+  bracket before after thing = withRunInIO $ \run -> EUnsafe.mask $ \restore -> do
+    x <- run before
+    res1 <- EUnsafe.try $ restore $ run $ thing x
+    case res1 of
+      Left (e1 :: SomeException) -> do
+        _ :: Either SomeException b <- EUnsafe.try $ EUnsafe.uninterruptibleMask_ $ run $ after x
+        EUnsafe.throwIO e1
+      Right y -> do
+        _ <- EUnsafe.uninterruptibleMask_ $ run $ after x
+        return y
+
+Here we use 4 operations: mask, try, ``uninterruptibleMask_``, throwIO. mask shields the cleanup action from being attacked by asynchronous exceptions, allowing exceptions inside restore. try catches exceptions and allows cleanup to occur. ``uninterruptibleMask_`` blocks interrupts from interrupting the after handler. Finally throwIO rethrows the exception, so that any exception inside the after handler will be swallowed.
+
+Apparently, though, nobody can agree on whether the after handle should run with an uninterruptible mask.
+
+Another issue with exceptions is handling them. The top-level can throw exceptions, or it can catch them, printing them and exiting with an error code. Usually people write their own handlers, hence making it uncomposable.
+
 
 .. _concurrency-library:
 

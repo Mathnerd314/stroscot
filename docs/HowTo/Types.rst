@@ -99,7 +99,7 @@ The recursive appearance of ``Cxt Ty`` is interpreted using the least pre-fixed 
 Records
 =======
 
-You can pass ``{a: undefined, b: 2}`` to a function ``f rec = rec.b``. This is similar to structural subtyping. If the function used ``a``, it would give an error.
+You can pass ``{a: undefined, b: 2}`` to a function ``f rec = rec.b``. This is similar to structural subtyping but is really a form of laziness. If the function used ``a``, it would give an error.
 
 Type synthesis
 ==============

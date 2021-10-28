@@ -4,8 +4,14 @@ About
 Motivation
 ==========
 
-Why another programming language, you may ask? Why does a painter paint?
-When there is beauty to be found in programming languages, it is our duty to discover it and spread it far and wide. To paraphrase `XKCD <https://xkcd.com/927/>`__:
+Why another programming language, you may ask?  Why does a painter paint? To paraphrase Chapter 1 of The Mythical Man Month, there is the joy of: [#tractable]_
+* designing and making complex and intricate things
+* making things that create real results and are useful to other people
+* constantly learning due to the nonrepeating nature of the task
+
+It is the duty of a programming language to spread this joy far and wide.
+
+Another line of motivation comes from `XKCD <https://xkcd.com/927/>`__ (paraphrased):
 
 .. code-block:: RST
 
@@ -20,6 +26,8 @@ When there is beauty to be found in programming languages, it is our duty to dis
 
 Stroscot aims to be that universal language. The shackles of languages past are no more, and
 programs are freed to be idealized to their purest form. Abstractions reach their highest level and coding is automated as far as possible.
+
+.. [#tractable] Notably omitted here is Brooks's assertion that programming is a "tractable medium". It is not tractable. Programming is hard. :cite:`beckerWhatDoesSaying2021` questions this, but IMO fails quite badly - although incomplete, all the evidence available shows that programming is hard. The only positive contribution of the article is a reminder to focus on computer education and usability.
 
 Principles
 ==========
@@ -39,7 +47,14 @@ Paradigms are vague and only express common patterns; they cannot be used to des
 * Better depends on your goodness metric (`Jim Waldo <http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807>`__)
 * The shorter the [edit-test] cycle, the happier the programmer. (`Yue Yao <https://tripack45.github.io/2018/11/03/edit-compile-run/>`__)
 * Do all things without grumbling or complaining (Philippians 2:14)
+* Secure by default: The default level of access should have the least privilege and the most number of checks. (OpenBSD)
+* Organize functions by functionality into expressive components. (`Uli Weltersbach <https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/>`__)
+* When two elements of an interface conflict, or are ambiguous, the behavior should be that which will least surprise the user; in particular a programmer should try to think of the behavior that will least surprise someone who uses the program, rather than that behavior that is natural from knowing the inner workings of the program. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
 
+
+Readability is a function of the program, not so much the programming language. Liberal comments can make even Brainfuck programs quite readable. So it is only a consideration for the compiler - but even there, the extensive documentation means that few people will actually read the compiler code. So readability isn't a principle here. But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__).
+
+"Turtles all the way down" only makes sense in the context of a directional layout, such as inheritance. But Java rules out an infinite inheritance tree - it would require infinite space. Even cyclic inheritance trees are out.
 
 Goals
 =====
@@ -47,7 +62,13 @@ Goals
 The ultimate
 ------------
 
-Stroscot aims to be the ultimate programming language rather than something just alright. A lot of programming features overlap, so I'll pick the best and most expressive version I can find. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there should be clear.
+Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. The question of which gun is strongest is quite subjective and a matter of debate. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
+
+Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real.
+
+ A lot of programming features overlap, so I'll pick the best and most expressive version I can find. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there should be clear.
+
+Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. This is due to a shallow intellectual base. No idea is original, and these new ideas are based on old ones. With sufficient research these old ideas can be uncovered and incorporated.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms for the compiler then people will refer to Stroscot just for the algorithms. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
 
@@ -140,3 +161,14 @@ Quotes before commas
 --------------------
 
 The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this.
+
+Forbidden words
+---------------
+
+A fair number of words in programming seem to be meaningless gibberish. So don't use them:
+* structured
+* paradigm
+* impure
+* object oriented
+* static
+

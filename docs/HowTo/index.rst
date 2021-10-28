@@ -3,8 +3,6 @@ How to
 
 .. toctree::
   :maxdepth: 2
+  :glob:
 
-  Install
-  Types
-  Destructors
-  Transactions
+  *

@@ -1,0 +1,61 @@
+rules with no subderivations:
+
+id : Sequent A A
+use var : Sequent Gamma Delta
+ ^tag : Sequent (Pi [(tag,[],[]),...]) ()
+ #tag : Sequent () (Sigma [(tag,[],[]),...])
+T : Sequent Gamma (Pi [], Delta)
+F : Sequent (Gamma, Sigma []) Delta
+
+rules with one subderivation:
+
+!w : Sequent Gamma Delta -> Sequent (Gamma, !A) Delta
+!p : Sequent Gamma (A, Delta) -> Sequent Gamma (!A, Delta)
+!d : Sequent (Gamma, A) Delta -> Sequent (Gamma, !A) Delta
+!c : Sequent (Gamma, [!A]) Delta -> Sequent (Gamma, !A) Delta
+
+
+Whim I J (Rule
+  (Sequent (Gamma, A) Delta)
+  (Sequent (Gamma, T) Delta)
+  )
+WhimD I J (Rule
+  (Sequent Gamma (A, Delta))
+  (Sequent Gamma (T, Delta))
+  )
+WhimC (Rule
+  (Sequent Gamma ([T], Delta))
+  (Sequent Gamma (T, Delta))
+  )
+WhimW (Rule
+  (Sequent Gamma Delta)
+  (Sequent Gamma (T, Delta))
+  )
+
+
+
+ignore : Sequent () (?A)
+
+PiR (Rule
+  [(Tag, Sequent (Gamma, [A]) ([B], Delta))]
+  (Sequent Gamma (T, Delta))
+  )
+PiL Tag (Rule
+  ([Sequent Gamma (A,Delta)], [Sequent (Theta, B) Lambda])
+  (Sequent ([Gamma], [Theta], T) ([Delta], [Lambda]))
+  )
+SigmaR Tag (Rule
+  ([Sequent (Gamma, B) Delta], [Sequent Theta (A, Lambda)])
+  (Sequent ([Gamma], [Theta]) (T, [Delta], [Lambda]))
+  )
+SigmaL (Rule
+  [(Tag, Sequent (Gamma, [A]) ([B], Delta))]
+  (Sequent (Gamma, T) Delta)
+  )
+Identity (Rule () (Sequent A A))
+Cut (Rule
+  (Sequent Gamma (A, Delta), Sequent (Theta, A) Lambda)
+  (Sequent (Gamma, Theta) (Delta, Lambda))
+  )
+Use Var (Rule () (Sequent Gamma Delta))
+Assign Var (Rule (Sequent Gamma Delta) ())

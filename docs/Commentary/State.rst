@@ -21,6 +21,16 @@ Task isn't really a monad, but we can compose operations that return values usin
 
 The datatype is similar to the "fudgets" mentioned in :cite:`erkokValueRecursionMonadic2002`, except we don't have a pure constructor. Or `this <http://comonad.com/reader/2011/free-monads-for-less-3/>`__ type ``FFI o i``, but with control flow represented explicitly instead of using ``o`` or ``i`` parameters.
 
+Continuations
+=============
+
+Why does Stroscot use continuations for its I/O model?
+
+First of all, continuations are simple. They're the supercharged typed equivalent of a goto. A continuation is a function that takes as argument "the rest of the program", or "its future". Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.
+
+Second, they're universal. Continuations are the basis in formal denotational semantics for all control flow, from goto statements to exception handling, subsuming vanilla call flow, recursion, generators, coroutines,
+backtracking, and even loops along the way. They are "the mother of all monads" as all other monads can be encoded in the continuation type. This allows a uniform and consistent interface.
+
 Concurrency
 ===========
 
@@ -36,7 +46,7 @@ The smallest examples runtimewise just have memory access. For example this prog
   t2 = fork {B := 1; return A}
   (x,u) = join (t1, t2)
 
-So in Stroscot concurrency is impure fork/join. In this case, the impurity is load/store instructions, but there could be anything.
+Here the threads are provided by fork/join. In this case, the tasks use load/store instructions, but there could be anything.
 
 At an API level, ``fork`` takes a ``Task`` but allowing an extra "finish execution gracefully" value ``Die``. In the above example we've used an overloading of ``fork`` for ``Operation a`` using an IVar:
 
@@ -62,7 +72,26 @@ Scheduler
 
 Somewhere we have to use OS threads. The behavior of the OS scheduler is complicated and hard to abstract.
 
-http://www.kegel.com/c10k.html#1:1 says to use 1:1 threading. OS threads have tid, TLS, nice, and works with existing code/tools. But threads also use relatively expensive stacks. And there is no way to have one thread switch execution to another without stopping (discussed `here <https://www.youtube.com/watch?v=KXuZi9aeGTw>`__), you have to depend on the scheduler. Whereas when we have one thread per processor and they're bound, there's no CPU shuffling, and running through a task queue does no context switching of any kind, the only overhead is that the queue is concurrent.
+What we want is an I/O model that allows writing web servers to handle as many clients as possible simultaneously.
+
+Choices:
+blocking I/O and one client per OS thread (read/write) - requires stack for each thread
+blocking I/O with userspace fibers (M:N threading model) - complex. A M:N scheduler must have a userspace component. This doubles the icache/dcache footprint. Fairness, nice, SMP balancing, memory allocation, TLS, RT scheduling, preemption, tid, debugging, security in userspace is hard - little control and only indirect access to statistics. Kernel events must trigger upcalls to activate context switches in the userspace component, but e.g. for memory there is no way to do async and a kernel context is blocked. M:N makes userspace<->userspace context switching faster, but slows down kernel<->userspace interaction. And kernel interaction is by default cheap on modern systems. For RT scheduling you would have to either set the priority every context switch, eliminating any performance advantage, or fall back to 1:1 scheduling for those threads.
+
+OTOH as Go shows (Go HTTP servers are reasonably fast), you can have cooperative coroutines with tiny userspace stacks. You start with one thread per processor (possibly bound so there's no CPU shuffling?) and have this pool of homogeneous threads run through a task queue. This does no context switching of any kind, the only overhead is that the queue is concurrent (Go has per-thread queues too to mitigate this).
+
+nonblocking I/O and level-triggered readiness notification (select/poll/kqueue) - requires fd for each connection
+nonblocking I/O and readiness change notification (kqueue, epoll, realtime signals)
+asynchronous I/O and completion notification (AIO, io_uring, IOCP)
+server code in kernel (kttpd, TUX Threaded linUX webserver)
+Bring the TCP stack into userspace - netmap, Sandstorm
+
+
+
+
+
+
+ Third is to depend on special features of the scheduler such as UMS to have one thread switch execution to another without stopping (discussed `here <https://www.youtube.com/watch?v=KXuZi9aeGTw>`__).
 
 
 Stroscot uses a mixed cooperative/preemptive model. Context switching is only possible at specific yielding points, but every action visible to another thread is a yield point. So memory access is divided into shared and non-shared.
@@ -299,8 +328,6 @@ In practice the synchronization primitives one can use are a combination of thos
 
 Various synchronization primitives:
 
-
-
 * Linux kernel internal operations:
 * `atomic x86 operations <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/include/asm/atomic64_64.h>`__ `lock types <https://www.infradead.org/~mchehab/kernel_docs/locking/locktypes.html>`__
 * atomic operations
@@ -350,4 +377,21 @@ There's no explicit syntax for parallelism - pure computations have inherent par
 
 Stroscot schedules the instructions to maximize instruction-level parallelism, where appropriate.
 
-With large (>1000 width) matrices we might want to multiply sub-matrices on multiple threads. That requires concurrency, so is handled by writing the synchronization operations explicitly. You can use a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits in small" model. Stroscot doesn't parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OS thread, green thread) influences what granularity to split up the computation at.
+With large (>1000 width) matrices we might want to multiply sub-matrices on multiple threads. That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn't parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OS thread, green thread) influences what granularity to split up the computation at.
+
+But still, for complex data science type computations we might want automatic parallelization. So a library can provide a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits into small" model. But the implementation won't necessarily support all of Stroscot, e.g. lambdas are hard to support in parallel.
+
+OS Model
+========
+
+An application consists of one or more processes. A process, in the simplest terms, is an executing program.
+
+A job object allows groups of processes to be managed as a unit. Job objects are namable, securable, sharable objects that control attributes of the processes associated with them. Operations performed on the job object affect all processes associated with the job object.
+
+One or more threads run in the context of the process. A thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread.
+
+UMS threads are lightweight threads that applications schedule. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context instead of sharing the thread context of a single thread. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
+
+A fiber consists of a stack and a small storage space for registers. A fiber runs in the context of a thread and does not have its own thread context. Fiber switching is fewer OS calls than a full-on thread context switch, but in general, fibers do not provide advantages over a well-designed multithreaded application. However, using fibers can make it easier to port applications that were designed to schedule their own threads.
+
+A task represents an asynchronous operation. A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core. Tasks are queued. They run in fibers which run in the thread pool, but are relatively lightweight compared to fibers. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling.

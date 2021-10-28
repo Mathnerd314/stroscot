@@ -183,7 +183,7 @@ ________
   x[1] := 3
   x[1] # 3
 
-A variable is a thread-local reference that can store arbitrary packable values. Thread local means that reading/writing from a different thread than the one that created it returns an error.
+A variable is a thread-local reference that can store arbitrary packable values. Thread local means that reading/writing from a different thread than the owning thread returns an error. You can get/set the owner with ``getOwner/setOwner``. Initially the thread that allocates the variable owns it.
 
 Reading elides the copy if the reference is dead after the read, otherwise copies.
 
@@ -215,6 +215,11 @@ ____________________
 See https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage
 
 Essentially it's a shared memory variable that stores ``Map ThreadId Word``, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.
+
+Symbol
+______
+
+A symbol can be thought of as a type of reference. It supports neither reading nor writing, but has an identity.
 
 Wrapper
 _______

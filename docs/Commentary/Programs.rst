@@ -33,6 +33,25 @@ A more complex algorithm treats the text as a giant table, so "a bit of text" ge
 
 Yet more complex is to treat it as a constraint problem. The constraints consist of minimum width constraints from the width of the tokens and order constraints that specify which chunks of text are before/after/line up with other chunks. The goal is to minimize the width of the table (sum of column widths), and as a secondary objective make the widths as uniform as possible (lowest standard deviation or absolute deviation). The Cassowary algorithm might work.
 
+High performance
+----------------
+
+High-performance programming in a systems programming language aims to get the most out of hardware. It tackles large problems on (relatively) slow hardware, such as wind tunnel simulations. Small efficiencies add up.
+
+Necessities:
+* ahead-of-time compilation to machine code (bare metal)
+* multithreaded execution. (Spawning new processes does not count.)
+* composable (assembly is simply not practical)
+* some amount of users / libraries
+
+Features:
+* call C functions with minimal overhead
+* manual memory management (reference counting/GC has overhead)
+* good benchmarking/profiling tools
+* SIMD instructions readily available
+* standard, cross-platform way to build programs, run tests and add dependencies.
+
+
 Other ideas
 -----------
 
@@ -41,7 +60,6 @@ Game engine
 UI toolkit
 Raytracer
 Vector graphics library (bonus points for supporting SVG drawings and OpenType fonts)
-HPC simulation (wind tunnel, nukes, ...)
 abstract assembly (like High Level Assembly)
 expression problem (compiler)
 inventory tracker for android (like todo-mvc but better)

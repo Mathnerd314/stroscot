@@ -17,10 +17,18 @@ Others:
 * z/Architecture: really expensive, weird OS. Verdict: C backend.
 * SPARC: It's end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
 * 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
+* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems better to have a backend targeting C.
 
 From a design perspective supporting 2 architectures is not much different from supporting 10, it's just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
 
 In addition to the basic ISAs, there are also extensions and `microarchitectures <https://en.wikipedia.org/wiki/Microarchitecture>`__ to consider. `PassMark <https://www.cpubenchmark.net/share30.html>`__ has a list of CPU shares, it's probably wildly skewed to gaming but it's better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I'll use my own CPU (AMD A6-3650 APU).
+
+Operating systems
+=================
+
+Linux for AMD64, Android for ARM, and later on Windows for AMD64.
+
+We'll exclude Apple for now because its developer documentation sucks and its anti-competitive practices mean that getting Stroscot to work would require starting a war with Swift.
 
 Instruction database
 ====================
@@ -126,12 +134,12 @@ There are a lot of instructions. We can classify them based on their affected st
 * data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions
 * call: reads the program counter
 * jump: sets the program counter to something other than the next instruction
-* branch: jump that can go to multiple addresses depending on the state of various flags/registers
+* branch: conditional jump depending on the state of various flags/registers
 * interrupt: unconditionally throws an exception
 * privileged: requires privileged processor state to execute successfully (e.g. ring 0)
 * nop: does nothing
 
-For code layout knowing the possible execution paths is important. branch, jump, call, return have to be handled specifically.
+For code layout knowing the possible execution paths is important. non-data instructions have to be handled specifically.
 
 Performance
 -----------

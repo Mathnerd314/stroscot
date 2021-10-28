@@ -1,0 +1,46 @@
+  algorithm tarjan is
+    input: graph G = (V, E)
+    output: set of strongly connected components (sets of vertices)
+
+    sccdetect = {} : V -> {NotYetVisited | OnStack {index : Int, lowlink : Int} | Popped { lowlink : Int } }
+    history = {} : V -> {Symbol | Value}
+    components = []
+    index = var 0
+
+    function strongconnect(v)
+        // Set the depth index for v to the smallest unused index
+        sccdetect v = OnStack {index = index, lowlink = index}
+        index := index + 1
+        S.push(v)
+
+        reduce v according to the definition
+
+        // Consider subcomputations of v
+        for each (v, w) in E do
+          case sccdetect w of
+            NotYetVisited ->
+                // recurse on it
+                strongconnect(w)
+                v.lowlink := min(v.lowlink, w.lowlink)
+            OnStack index _ ->
+                // Successor w is in stack S and hence in the current SCC
+                v.lowlink := min(v.lowlink, w.index)
+            Popped _ ->
+                // If w is popped, then (v, w) is an edge pointing to an SCC already found and resolved
+        end for
+
+
+        if v.lowlink = v.index then
+            # v is the root, pop the stack and generate an SCC 'res'
+            (S, res) = splitAt v.index S
+            solution = solve res - either diverges or gives value
+            for w in res:
+              sccdetect w := Popped
+              history w := solution w
+        else
+          generate symbolic expression to give to SCC solver
+        end if
+    end function
+
+    S := empty stack
+    strongconnect(f x0)

@@ -6,14 +6,20 @@ import Prelude (Monad, Integer, IO, fromInteger, ($), (.), (+), print, const)
 import qualified Prelude
 import Data.Coerce
 
-type Cont r a = (a -> r) -> r
-type Op r = r -> r
+type ICont r o a = (a -> o) -> r
+type IOp r o = o -> r
+
+type Cont r a = ICont r r a
+type Op r = IOp r r
 
 unUnit :: Cont r () -> Op r
 unUnit f r = f (const r)
 
+(>>=) :: ICont r o a -> (a -> IOp o b) -> IOp r b
 e >>= stmts = \c -> e (\x -> stmts x c)
-(>>) = (Prelude..)
+(>>) :: IOp c b -> IOp b a -> IOp c a
+(>>) = (.)
+return :: a -> Cont b a
 return x = ($x)
 
 type StateT s m a = Cont (s -> m (a, s)) a

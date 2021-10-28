@@ -17,6 +17,8 @@ Currying is handled by a pass that creates partially-applied functions using the
 
 Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.
 
+Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.
+
 Flags
 =====
 
@@ -31,10 +33,17 @@ Since Stroscot uses model checking, most failures will end up producing a counte
 
 For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. But it isn't clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash, byte offset) as a 64-bit code, since then we can compare before/after within files and quickly check if two locations are equal.
 
+Werror
+======
+
+Werror is an option, as usual. If you want a hard dependency on the compiler version, then feel free to use it, otherwise it's best to leave it unset so that users can use different compiler versions that emit different warnings.
+
 Fuel
 ====
 
 A technique for testing the compiler and systems in general is to use a "fuel" counter that decrements every time a certain operation is performed, and do something interesting when the counter reaches 0 such as finishing the optimizations or throwing an exception.
+
+For example instead of testing for stack overflow we can test for running out of fuel. Stroscot's execution context doesn't involve a stack.
 
 Optimization
 ============
@@ -275,3 +284,6 @@ loading code at runtime
 - typecheck, JIT, etc.
 - return function pointer
 the function pointer doesn't have to be machine code, it can be bytecode, so the function runs through the interpreter
+
+
+Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.
