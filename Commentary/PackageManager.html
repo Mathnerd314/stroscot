@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Package manager &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Posets" href="Posets.html" />
+    <link rel="prev" title="About" href="Meta.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Package manager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#upgrade-cycle">Upgrade cycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#versioning">Versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#side-by-side-c-libraries">Side-by-side C libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updates">Updates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automation-system">Automation system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#release-monitoring">Release monitoring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-scripts">Build scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automation">Automation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#marking">Marking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#backouts">Backouts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Package manager</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/PackageManager.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="package-manager">
+<h1>Package manager<a class="headerlink" href="#package-manager" title="Permalink to this headline"></a></h1>
+<p>A language also needs a package manager. When a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so all of the task’s provided keys (files) are downloaded instead of the task being built, verifying their cryptographic hashes/signatures. We also need a way to create packages from a build tree.</p>
+<p>The list of files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn’t exist on the target system.</p>
+<p>There are also some filesystem convention/naming issues, in particular different layouts on different systems and allowing per-user installs, but Conda has worked out reasonable solutions for these, relative pathhs and so on.</p>
+<p>A useful feature not implemented in most package managers is P2P distribution, over Bittorrent or IPFS. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is <a class="reference external" href="https://wiki.debian.org/DebTorrent#line-42">not too great</a>). There are some notes <a class="reference external" href="https://github.com/ipfs-inactive/package-managers">from IPFS</a> and various half-baked package managers like <code class="docutils literal notranslate"><span class="pre">npm-on-ipfs</span></code>.</p>
+<p>In a long-running system, the number of prebuilt packages could grow without bound. We need a mechanism to clean out the archives when space becomes limited.</p>
+<p>Edges are bidirectional. To fix the GC problem, we use weak references for back edges, but strong references for memo table entries, so that from the GC’s point of view, all DCG nodes are always reachable. To implement safe space reclamation, we also implement reference counting of DCG nodes, where the counts reflect the number of strong edges reaching a node. When DCG edgesare deleted, the reference counts of target nodes are decremented. Nodes that reach zero are not immediately collected; thisallows thunks to be “resurrected” by the swapping pattern. Instead, we provide aflushoperation for memo tables that deletesthe strong mapping edge for all nodes with a count of zero, which means they are no longer reachable by the main program.Deletion is transitive: removing the node decrements the counts of nodes it points to, which may cause them to be deleted.An interesting question is how to decide when to invokeflush; this is the system’seviction policy. One obvious choice is toflush when the system starts to run short of memory (based on a signal from the GC), which matches the intended effect of theunsound weak reference-based approach. But placing the eviction policy under the program’s control opens other possibilities,e.g., the programmer could invokeflushwhen it is semantically clear that thunks cannot be restored. We leave to future work further exploration of sensible eviction policies</p>
+<section id="linux-distribution">
+<h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this headline"></a></h2>
+<p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways as few people use it.</p>
+<p>The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
+</section>
+<section id="upgrade-cycle">
+<h2>Upgrade cycle<a class="headerlink" href="#upgrade-cycle" title="Permalink to this headline"></a></h2>
+<p>A package has various versions. It also depends on other packages which can themselves be various versions.</p>
+<p>In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form “breakage: A-2 B-2 C-2”.</p>
+<p>There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.</p>
+<p>Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.</p>
+</section>
+<section id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline"></a></h2>
+<p>Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
+For a basic path like <code class="docutils literal notranslate"><span class="pre">/usr/share/foo/img.jpg</span></code>, we can put a hash <code class="docutils literal notranslate"><span class="pre">HASH</span></code> in various places:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.HASH.1</span></code> or <code class="docutils literal notranslate"><span class="pre">/usr/lib/libfoo.so.1.HASH</span></code> (filename version)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/HASH/libfoo.so.1</span></code> (“multiarch” layout similar to Debian)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/usr/HASH/lib/libfoo.so.1</span></code> (NixOS layout)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/HASH/usr/lib/libfoo.so.1</span></code> (“multisystem” layout)</p></li>
+</ol>
+<p>The multisystem layout isn’t useful, as the point of <code class="docutils literal notranslate"><span class="pre">/usr</span></code> is to allow putting system files on a separate partition. Also the root directory would become cluttered with all the hashed files.</p>
+<p>The filename solution breaks down with data files. Maintaining hashed file versions like  would require patching every application to look things up in the right place. We can move it up to the package directory, <code class="docutils literal notranslate"><span class="pre">/usr/share/foo-HASH/foo.jpg</span></code>. But autoconf only has the option <code class="docutils literal notranslate"><span class="pre">--datarootdir</span></code> to change <code class="docutils literal notranslate"><span class="pre">/usr/share</span></code>; it doesn’t have a standard option to rename the subdirectory. So once again we’d have to manually patch every package. The only feasible option is to move it up more, <code class="docutils literal notranslate"><span class="pre">/usr/share/HASH/foo/foo.jpg</span></code>. But that’s the multiarch layout. So for data files only the multiarch and NixOS layouts are feasible. Comparing them, the NixOS layout has the advantage of putting every package in its own directory, so for example we can find the documentation for a package as <code class="docutils literal notranslate"><span class="pre">&lt;path</span> <span class="pre">of</span> <span class="pre">executable&gt;/../share/something</span></code>. With split outputs, this is not as much a benefit to the user, because the documentation will be in a separate package and hence not findable by just browsing the package directory. Here the multiarch layout shows promise as the different sub-packages match up with the directory they unpack to. We can change the various <a class="reference external" href="https://www.gnu.org/prep/standards/html_node/Directory-Variables.html">autoconf directories</a> by appending <code class="docutils literal notranslate"><span class="pre">/HASH</span></code> and leave the rest up to the package; it may install things to <code class="docutils literal notranslate"><span class="pre">/usr/$hash/</span></code> if it’s not well-written, but everything respects <code class="docutils literal notranslate"><span class="pre">$PREFIX</span></code>.</p>
+<p>For multiarch/NixOS the hash can be put in the SONAME by linking with absolute paths (or relative paths, they would work too). There is <a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/24844">some work</a> in NixOS to do so. The rpath solution that NixOS uses currently is slow and doesn’t solve the diamond problem.</p>
+<p>We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn’t possible,  allowing dynamic resolving of binary names <code class="docutils literal notranslate"><span class="pre">foo</span></code> to paths <code class="docutils literal notranslate"><span class="pre">/usr/bin/12345/foo</span></code> is not trivial. A global view doesn’t work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or <code class="docutils literal notranslate"><span class="pre">/proc</span></code> but for the system path; this can provide the necessary pid-dependent view as a symlink tree <code class="docutils literal notranslate"><span class="pre">/system-path/foo</span> <span class="pre">-&gt;</span> <span class="pre">/usr/bin/foo-12345</span></code>; even FUSE should be sufficiently fast since it is just one <code class="docutils literal notranslate"><span class="pre">open()</span></code> call and it doesn’t have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in <cite>/run/current-system/</cite>, and chroot containers.</p>
+</section>
+<section id="side-by-side-c-libraries">
+<h2>Side-by-side C libraries<a class="headerlink" href="#side-by-side-c-libraries" title="Permalink to this headline"></a></h2>
+<div class="graphviz"><object data="../_images/graphviz-9d3c05f684f9108889f9ccd04858e12f7e4bba51.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph foo {
+  rankdir=LR;
+  A -&gt; B;
+  A -&gt; C;
+  B -&gt; L [label=&quot;v1&quot;];
+  C -&gt; L [label=&quot;v2&quot;];
+}</p></object></div>
+<p>Solving the diamond dependency problem is tricky but possible. Shared libraries support symbol versioning, which essentially changes the name of each symbol so they don’t conflict. The <code class="docutils literal notranslate"><span class="pre">--default-symver</span></code> option sets the version string of each symbol to the SONAME of the library it is exported from. So if we include a hash in the SONAME and build with <code class="docutils literal notranslate"><span class="pre">--default-symver</span></code> then the libraries won’t conflict. Versions aren’t linear in general so it has to be a hash instead of a sequential number. The SONAME can be set with a linker / libtool wrapper.</p>
+<p>There are two symlinks, the library symlink <code class="docutils literal notranslate"><span class="pre">libfoo.HASH</span> <span class="pre">-&gt;</span> <span class="pre">libfoo.HASH.1</span></code> and the development symlink <code class="docutils literal notranslate"><span class="pre">libfoo.so</span> <span class="pre">-&gt;</span> <span class="pre">libfoo.HASH</span></code> which tells which version to link. ldconfig should create these normally. Prebuilt binaries can be patchelf’d using <code class="docutils literal notranslate"><span class="pre">--replace-needed</span></code>.</p>
+<p>Another solution is to create a manifest that specifies where to load libraries from, but this is basically the same as specifying absolute paths.</p>
+</section>
+<section id="updates">
+<h2>Updates<a class="headerlink" href="#updates" title="Permalink to this headline"></a></h2>
+<p>For seamless updates it seems worthwhile to use an <a class="reference external" href="https://source.android.com/devices/tech/ota/ab">A/B partition scheme</a>. There are roughly 3 types of updates:
+* small updates that just update a user-level application
+* large updates that affect components such as the desktop manager, WiFi, etc.
+* kernel / initrd updates</p>
+<p>For small updates we want fast rebootless updates in-place and an easy way to rollback the application. But the update won’t break the system so providing the rollback functionality via the package manager doing another update is fine. We do need some way to store/manage reproducible configurations though.</p>
+<p>For large updates the user’s ability to access the package manager may be impaired, so we do need to make the last-known-good-configuration snapshot. In particular there needs to be a boot entry that the user can select to rollback after they hard-reset their computer.</p>
+<p>Kernel updates require a reboot or [kexec](<a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/10726">https://github.com/NixOS/nixpkgs/issues/10726</a>), but they are otherwise large updates.</p>
+</section>
+<section id="automation-system">
+<h2>Automation system<a class="headerlink" href="#automation-system" title="Permalink to this headline"></a></h2>
+<p>Although a distribution is sufficient for setting up a single computer, to set up multiple computers it is more complicated. Salt provides a command-execution agent, but the commands are not idempotent. We want a map from packages to their latest versions or pinned versions. The ‘autoremove’ option is on by default because packages being secretly installed is a bad idea. But with autoremove off, packages are left installed on the system if they aren’t explicitly specified for removal.</p>
+</section>
+<section id="release-monitoring">
+<h2>Release monitoring<a class="headerlink" href="#release-monitoring" title="Permalink to this headline"></a></h2>
+<p>Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is <a class="reference external" href="https://fedoraproject.org/wiki/Upstream_release_monitoring">Anitya</a>, which solves some of this, and also <a class="reference external" href="https://github.com/DataDrake/cuppa">cuppa</a>. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.</p>
+<p>Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version.</p>
+<p>We can write our own project scraper:</p>
+<ul class="simple">
+<li><p>KDE, Debian: There is a <code class="docutils literal notranslate"><span class="pre">ls-lR.bz2</span></code> / <code class="docutils literal notranslate"><span class="pre">ls-lR.gz</span></code> file in the top level with a directory listing with timestamps and filesizes.</p></li>
+<li><p>GNU, <a class="reference external" href="http://www.gnu.org/server/mirror.html">Savannah</a>, GNOME, Kernel.org, X.org: We can get a directory listing from an Rsync mirror with a command like <code class="docutils literal notranslate"><span class="pre">rsync</span> <span class="pre">--no-h</span> <span class="pre">--no-motd</span> <span class="pre">--list-only</span> <span class="pre">-r</span> <span class="pre">--exclude-from=rsync-excludes-gnome</span> <span class="pre">rsync://mirror.umd.edu/gnome/</span></code>.</p></li>
+<li><p>RubyGems: There is a <a class="reference external" href="https://rubygems.org/versions">version index</a> that lists all the gems and their versions. Or there is an API to get versions for each gem individually.</p></li>
+<li><p>Hackage: There is a <a class="reference external" href="https://hackage.haskell.org/api#core">package index</a>. Also an RSS feed (I’m guessing it needs to set the accept header). Or there is a per-project “preferred versions” list in JSON. It is probably more efficient to use the <a class="reference external" href="https://github.com/commercialhaskell/all-cabal-hashes">Git mirror</a> though. For Stackage there are YAML files with version/build info <a class="reference external" href="https://github.com/commercialhaskell/stackage-snapshots/">here</a>.</p></li>
+<li><p>PyPI: There are <a class="reference external" href="https://warehouse.readthedocs.io/api-reference/#available-apis">APIs</a>. The RSS feed works if we can regularly check it every 20 minutes. Otherwise, besides the XML-RPC changelog API that isn’t supposed to be used, the only way is to download the list of projects from the simple API and then go through and fetch the JSON data for each project. Since the requests are cached this is not too much overhead, but it can take a while for lots of projects. There is <a class="reference external" href="https://github.com/pypa/warehouse/issues/347">an issue</a> filed for a bulk API / <a class="reference external" href="https://github.com/pypa/warehouse/issues/1478">dump</a>.</p></li>
+<li><p>CPAN: There is an RSS feed and a per-package API to get the latest version. Probably one to get all versions too.</p></li>
+<li><p>CRAN: There is an RSS feed and a per-package API to get all versions.</p></li>
+<li><p>Crates.io: There is an <a class="reference external" href="https://github.com/rust-lang/crates.io-index">index repository</a>, or we could <a class="reference external" href="https://crates.io/data-access">crawl</a>.</p></li>
+<li><p>SourceForge: There is no useful global list, but we can check each project’s RSS feed to find new releases. If there are not enough files returned we can <a class="reference external" href="https://stackoverflow.com/questions/30885561/programmatically-querying-downloadable-files-from-sourceforge">increase the limit</a>.</p></li>
+<li><p>LaunchPad, JetBrains, Drupal, Maven: There is an API to list versions for each project.</p></li>
+<li><p>GitHub: There is a per-project <a class="reference external" href="https://developer.github.com/v4/object/release/">releases API</a>. The API is ratelimited heavily.</p></li>
+<li><p>GitLab, Bitbucket: There is a tags endpoint.</p></li>
+<li><p>Folder: We can scrape the standard default Apache directory listing</p></li>
+<li><p>Git/Hg/other VCS: We can fetch the tags with git/hg/etc.</p></li>
+<li><p>Projects not using any of the above: If there is a version number in the URL, we can scrape the download page. Otherwise, we can use HTTP caching to poll the URL. Although, for such isolated files, there is the issue of the license changing suddenly, so the download page is worth watching too.</p></li>
+</ul>
+<p>Overall, there are only a few mechanisms:</p>
+<ul class="simple">
+<li><p>Feed: A way to efficiently get a list of package updates since some time (RSS feed, Git repo)</p></li>
+<li><p>Index: A compressed list of all the packages and their versions (Git repo, <code class="docutils literal notranslate"><span class="pre">ls-lR</span></code>, rsync)</p></li>
+<li><p>Versions: For a package, a list of its available versions</p></li>
+</ul>
+<p>For each top-level project, figuring out when/if there will be a new update is a machine learning problem. The simplest algorithm is to poll everything at a fixed interval, say daily. But most projects release a lot less frequently, and some projects (software collection, main development branches) release more frequently. If there is a push service like email we can use that, otherwise we need some sort of adaptive polling. We can model it as a homogeneous Poisson point process; then the estimate for the rate is simply the number of updates divided by the time interval we have observed. Then the time between two updates is an exponential distribution with parameter the rate, so we can poll if the probability of an update is &gt; 50%, adjusting the 50% so we poll an average of once a day. To get even more complex, we can build a feature vector classifier to predict the time between events.</p>
+</section>
+<section id="build-scripts">
+<h2>Build scripts<a class="headerlink" href="#build-scripts" title="Permalink to this headline"></a></h2>
+<p>To obtain an initial build script set we can do the following:</p>
+<p>1. Evaluate Nixpkgs (nix-instantiate) in a fresh Nix store
+1. Change all .drv from ATerm to JSON for ease of processing
+1. Assemble a mega pseudo-JSON of all the properties and values in the .drv
+1. Rename .drv according to a non-hashed scheme
+1. Change fetchurl to a flat list
+1. Create a set of builders which covers the rest of the mega-JSON</p>
+</section>
+<section id="automation">
+<h2>Automation<a class="headerlink" href="#automation" title="Permalink to this headline"></a></h2>
+<p>Along with a Linux distribution (or any large software collection) comes the need to continuously test and update packages. An automation system (tentatively titled “Flux99”) handles several tasks:
+* Pulling together new changes
+* Testing changes and identifying breakages
+* Generating reports
+* Uploading a nightly release</p>
+<p>Since our goal is automation, we want the detection of breakages to be automated as well. Detecting breakages is an imperfect science: there are exponentially many combinations of different changes, and tests can be flaky. So in general we can only identify updates that have a high probability of causing a breakage. The problem falls under “stochastic scheduling”, in particular determining which subset of changes to schedule a build for, given uncertain information about build successes/failures.</p>
+<p>The general goal is to minimize the time/build resources needed for identifying breakages, i.e. to maximize the information gained from each build. Incremental building means that the most efficient strategy is often building in sequence, but this does not hold for larger projects where changes are almost independent.</p>
+<p>Regarding the ordering of changes, oftentimes they are technically unordered and could be merged in any order. But an optimized order like “least likely to fail” could lead to arbitrarily long merge times for risky changes. It is simpler to do chronological order. This could be customized to prioritize hotfixes before other changes, but it is easier to set up a dedicated code path for those.</p>
+<p>To handle breakages, there are two main strategies: marking and backouts. Both are useful; a test failure may be unimportant or outdated, suggesting the marking strategy, while backouts reject bad changes from the mainline and keep it green. Backouts are harder to compute: for <span class="math notranslate nohighlight">\(n\)</span> changes, there are <span class="math notranslate nohighlight">\(2^n\)</span> possible combinations to test, giving a state space of size <span class="math notranslate nohighlight">\(2^{2^n}\)</span>. Meanwhile marking only has <span class="math notranslate nohighlight">\(2^n\)</span> states for <span class="math notranslate nohighlight">\(n\)</span> commits. Marking is run over the entire commit history, while backouts are for pending changes and only need to consider the relevant subsets of commits.</p>
+<section id="marking">
+<h3>Marking<a class="headerlink" href="#marking" title="Permalink to this headline"></a></h3>
+<p>For marking, we can model the test process as follows:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">broken</span> <span class="ow">=</span> <span class="n">false</span>
+<span class="nf">for</span> <span class="n">commit</span> <span class="kr">in</span> <span class="n">commits</span><span class="kt">:</span>
+  <span class="n">commit_type</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="n">broken</span> <span class="o">?</span> <span class="kt">FIXING</span> <span class="kt">:</span> <span class="kt">BREAKING</span><span class="p">,</span> <span class="kt">NONE</span><span class="p">],</span> <span class="n">broken</span><span class="p">,</span> <span class="n">commit</span><span class="p">)</span>
+  <span class="kr">if</span> <span class="n">commit_type</span> <span class="ow">=</span> <span class="kt">BREAKING:</span>
+    <span class="n">broken</span> <span class="ow">=</span> <span class="n">true</span>
+  <span class="kr">else</span> <span class="kr">if</span> <span class="n">commit_type</span> <span class="ow">=</span> <span class="kt">FIXING:</span>
+    <span class="n">broken</span> <span class="ow">=</span> <span class="n">false</span>
+
+  <span class="n">for</span> <span class="n">run</span> <span class="kr">in</span> <span class="n">runs</span><span class="kt">:</span>
+    <span class="n">flaky</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">broken</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">flaky</span> <span class="ow">=</span> <span class="kt">YES:</span>
+      <span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span>
+    <span class="kr">else</span><span class="kt">:</span>
+      <span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id58" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
+<p>For observations, if we assume that the probability of false positive / false success <span class="math notranslate nohighlight">\(P(p_k)\)</span> and false negative / false failure <span class="math notranslate nohighlight">\(P(n_k)\)</span> are fixed per commit, then the probability of observing <span class="math notranslate nohighlight">\(i\)</span> test failures and <span class="math notranslate nohighlight">\(j\)</span> test successes (in a given/fixed order) given that the build is broken / not broken is</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
+<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id79" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id78" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Change #</p></th>
+<th class="head"><p>P(Broken)</p></th>
+<th class="head"><p>P(Type)</p></th>
+<th class="head"><p>Run #</p></th>
+<th class="head"><p>P(Flaky)</p></th>
+<th class="head"><p>Result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>101</p></td>
+<td><p>0.02</p></td>
+<td><p>Breaking 0.1, Fixing 0.2</p></td>
+<td><p>1</p></td>
+<td><p>0.01</p></td>
+<td><p>Success</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td></td>
+<td></td>
+<td><p>2</p></td>
+<td><p>0.01</p></td>
+<td><p>Success</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+<td><p>3</p></td>
+<td><p>0.03</p></td>
+<td><p>Failure</p></td>
+</tr>
+<tr class="row-odd"><td><p>102</p></td>
+<td><p>0.01</p></td>
+<td><p>Breaking 0.1, Fixing 0.5</p></td>
+<td><p>1</p></td>
+<td><p>0.02</p></td>
+<td><p>Success</p></td>
+</tr>
+</tbody>
+</table>
+<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id81" title="Celal Ziftci and Jim Reardon. Who broke the build? automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
+The table treats the build as a unit; for added precision we should make one table for each failing test and a UI to aggregate them somehow. From this table, we can make decisions: reporting breakages, hiding flaky runs, blacklisting broken builds, blessing working revisions, etc. once a certainty threshold is reached.</p>
+<p>For deciding the next build, a simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; but this ignores flakiness. What we want is to maximize the expected <a class="reference external" href="https://en.wikipedia.org/wiki/Information_gain_in_decision_trees">information gain</a> from a run <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<p>, i.e. something like</p>
+<div class="math notranslate nohighlight">
+\[H(X) = - P(x_s) \log(P(x_s)) - P(x_f) \log(P(x_f))\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_s = 1 - x_f\)</span> is the probability that the run will succeed. To accommodate differing build costs we can simply divide by the cost; it works for Bayesian search of boxes so it probably works here.</p>
+<p>Overall, the idea is similar to <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code>’s <code class="docutils literal notranslate"><span class="pre">min(ancestors,N-ancestors)</span></code>, but with more advanced models and using expectation instead of <code class="docutils literal notranslate"><span class="pre">min</span></code>. To implement a full regression tool we also need to mark and handle untestable revisions, where the test is not observable due to the build being broken etc. This is fairly straightforward and amounts to doubling the state space and adding some more probability models.</p>
+</section>
+<section id="backouts">
+<h3>Backouts<a class="headerlink" href="#backouts" title="Permalink to this headline"></a></h3>
+<p>For backouts, we must first decide a backout strategy. The paper <span id="id5">[<a class="reference internal" href="../zzreferences.html#id7" title="Sundaram Ananthanarayanan, Masoud Saeida Ardekani, Denis Haenikel, Balaji Varadarajan, Simon Soriano, Dhaval Patel, and Ali-Reza Adl-Tabatabai. Keeping master green at scale. In Proceedings of the Fourteenth EuroSys Conference 2019, EuroSys '19, 1–15. Dresden, Germany, March 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3302424.3303970 (visited on 2020-07-06), doi:10.1145/3302424.3303970.">AAH+19</a>]</span> provides a real-world case study. We should maximize the number of changes included, respecting chronological order. So for <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">A,C</span></code> we should prefer the earlier change <code class="docutils literal notranslate"><span class="pre">B</span></code>. Also, for <code class="docutils literal notranslate"><span class="pre">A</span></code> vs <code class="docutils literal notranslate"><span class="pre">B,C</span></code>, to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them, and the higher is the chosen result.</p>
+<p>We assume that if a build fails that adding more patches to that build will still result in a failing build; this rules out “fixing” changes where <code class="docutils literal notranslate"><span class="pre">A</span></code> fails but <code class="docutils literal notranslate"><span class="pre">A,B</span></code> succeeds because <code class="docutils literal notranslate"><span class="pre">B</span></code> fixed <code class="docutils literal notranslate"><span class="pre">A</span></code>. Detecting fixing changes would require speculatively building extra changes on top of failed builds. Instead, the fixing patchset must include the broken commits as well, so we would have <code class="docutils literal notranslate"><span class="pre">A</span></code> failing, <code class="docutils literal notranslate"><span class="pre">B</span></code> succeeding, and <code class="docutils literal notranslate"><span class="pre">A,B</span></code> resulting in a merge conflict (because <code class="docutils literal notranslate"><span class="pre">B</span></code> includes the changes from <code class="docutils literal notranslate"><span class="pre">A</span></code>). Merge conflicts can often be detected immediately without running tests, but complex failures can arise from code interactions.</p>
+<p>We need a more complex model accounting for breakages, dependencies, conflicts, and flakiness. But we’ll assume no higher-order phenomena, e.g. fixes to conflicts.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">breaking</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">is_breaking</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">)</span>
+  <span class="kr">if</span> <span class="n">is_breaking</span><span class="kt">:</span>
+    <span class="n">breaking</span> <span class="o">+=</span> <span class="n">c</span>
+
+<span class="nf">dependencies</span> <span class="ow">=</span> <span class="p">{};</span> <span class="n">dependencies</span><span class="o">.</span><span class="kr">default</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="n">c2</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="kt">:</span>
+      <span class="n">continue</span>
+    <span class="n">is_dependency</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">is_dependency</span><span class="kt">:</span>
+      <span class="n">dependencies</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c</span>
+
+<span class="nf">conflicts</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">changes</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="n">c2</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="kt">:</span>
+      <span class="n">continue</span>
+    <span class="n">is_conflict</span> <span class="ow">&lt;-</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">c</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+    <span class="kr">if</span> <span class="n">is_conflict</span><span class="kt">:</span>
+      <span class="n">conflicts</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c</span>
+
+<span class="nf">function</span> <span class="n">query_run</span><span class="p">(</span><span class="n">set</span><span class="p">)</span><span class="kt">:</span>
+  <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">NONE</span>
+
+  <span class="n">for</span> <span class="n">b</span> <span class="kr">in</span> <span class="n">breaking</span><span class="kt">:</span>
+    <span class="kr">if</span> <span class="o">!</span><span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+      <span class="n">continue</span>
+    <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">BREAKAGE</span>
+
+  <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">set</span><span class="kt">:</span>
+    <span class="n">for</span> <span class="n">d</span> <span class="kr">in</span> <span class="n">dependencies</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="kt">:</span>
+      <span class="kr">if</span> <span class="o">!</span><span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">DEPENDENCY</span>
+
+  <span class="n">for</span> <span class="n">c2</span> <span class="kr">in</span> <span class="n">conflicts</span><span class="kt">:</span>
+    <span class="n">for</span> <span class="n">c</span> <span class="kr">in</span> <span class="n">conflicts</span><span class="p">[</span><span class="n">c2</span><span class="p">]</span><span class="kt">:</span>
+      <span class="kr">if</span> <span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">set</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
+        <span class="n">fail_type</span> <span class="ow">=</span> <span class="kt">CONFLICT</span>
+
+  <span class="n">flaky</span> <span class="ow">=</span> <span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span> <span class="kt">NO</span><span class="p">],</span> <span class="n">fail_type</span><span class="p">)</span>
+  <span class="n">broken</span> <span class="ow">=</span> <span class="n">fail_type</span> <span class="o">==</span> <span class="kt">NONE</span>
+  <span class="kr">if</span> <span class="n">flaky</span> <span class="ow">=</span> <span class="kt">YES:</span>
+    <span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span>
+  <span class="kr">else</span><span class="kt">:</span>
+    <span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The size and complexity presents a challenge, but at the end of the day it’s just a large Bayesian network, and we want to determine the highest-ranking success, based on the (unobserved/hidden) brokenness properties.</p>
+<p>We can work it out for 4 commits. There are <code class="docutils literal notranslate"><span class="pre">4+(4*3)/2*2=16</span></code> hidden variables:</p>
+<ul class="simple">
+<li><p>Breaking b1, b2, b3, b4</p></li>
+<li><p>Conflicts c12, c13, c14, c23, c24, c34</p></li>
+<li><p>Dependencies d12, d13, d14, d23, d24, d34</p></li>
+</ul>
+<p>We can work out the failure conditions for each build candidate:</p>
+<p>1234: b1 || b2 || b3 || b4 || c12 || c13 || c14 || c23 || c24 || c34
+123: b1 || b2 || b3 || c12 || c13 || c23
+124: b1 || b2 || b4 || c12 || c14 || c24 || d34
+12: b1 || b2 || c12
+134: b1 || b3 || b4 || c13 || c14 || c34 || d23 || d24
+13: b1 || b3 || c13 || d23
+14: b1 || b4 || c14 || d24 || d34
+1: b1
+234: b2 || b3 || b4 || c23 || c24 || c34 || d12 || d13 || d14
+23: b2 || b3 || c23 || d12 || d13
+24: b2 || b4 || c24 || d12 || d14 || d34
+2: b2 || d12
+34: b3 || b4 || c34 || d13 || d14 || d23 || d24
+3: b3 || d13 || d23
+4: b4 || d14 || d24 || d34
+empty: true</p>
+<p>Now we write down the conditions for each set to be the best set, i.e. that it does not fail and that all higher sets do fail:</p>
+<p>1234: !b1 &amp;&amp; !b2 &amp;&amp; !c12 &amp;&amp; !b3 &amp;&amp; !c13 &amp;&amp; !c23 &amp;&amp; !b4 &amp;&amp; !c14 &amp;&amp; !c24 &amp;&amp; !c34
+123: !b1 &amp;&amp; !b2 &amp;&amp; !c12 &amp;&amp; !b3 &amp;&amp; !c13 &amp;&amp; !c23 &amp;&amp; (b4 || c14 || c24 || c34)
+124: !b1 &amp;&amp; !b2 &amp;&amp; !c12 &amp;&amp; (b3 || c13 || c23) &amp;&amp; !b4 &amp;&amp; !c14 &amp;&amp; !c24 &amp;&amp; !d34
+12: !b1 &amp;&amp; !b2 &amp;&amp; !c12 &amp;&amp; (b3 || c13 || c23) &amp;&amp; (b4 || c14 || c24 || d34)
+134: !b1 &amp;&amp; (b2 || c12) &amp;&amp; !b3 &amp;&amp; !c13 &amp;&amp; !d23 &amp;&amp; !b4 &amp;&amp; !c14 &amp;&amp; !d24 &amp;&amp; !c34
+13: !b1 &amp;&amp; (b2 || c12) &amp;&amp; !b3 &amp;&amp; !c13 &amp;&amp; !d23 &amp;&amp; (b4 || c14 || d24 || c34)
+14: !b1 &amp;&amp; (b2 || c12) &amp;&amp; (b3 || c13 || d23) &amp;&amp; !b4 &amp;&amp; !c14 &amp;&amp; !d24 &amp;&amp; !d34
+1: !b1 &amp;&amp; (b2 || c12) &amp;&amp; (b3 || c13 || d23) &amp;&amp; (b4 || c14 || d24 || d34)
+234: b1 &amp;&amp; !b2 &amp;&amp; !d12 &amp;&amp; !b3 &amp;&amp; !d13 &amp;&amp; !c23 &amp;&amp; !b4 &amp;&amp; !d14 &amp;&amp; !c24 &amp;&amp; !c34
+23: b1 &amp;&amp; !b2 &amp;&amp; !d12 &amp;&amp; !b3 &amp;&amp; !c23 &amp;&amp; !d13 &amp;&amp; (b4 || d14 || c24 || c34)
+24: b1 &amp;&amp; !b2 &amp;&amp; !d12 &amp;&amp; (b3 || d13 || c23) &amp;&amp; !b4 &amp;&amp; !d14 &amp;&amp; !c24 &amp;&amp; !d34
+2: b1 &amp;&amp; !b2 &amp;&amp; !d12 &amp;&amp; (b3 || d13 || c23) &amp;&amp; (b4 || d14 || c24 || d34)
+34: b1 &amp;&amp; (b2 || d12) &amp;&amp; !b3 &amp;&amp; !d13 &amp;&amp; !d23 &amp;&amp; !b4 &amp;&amp; !d14 &amp;&amp; !d24 &amp;&amp; !c34
+3: b1 &amp;&amp; (b2 || d12) &amp;&amp; !b3 &amp;&amp; !d13 &amp;&amp; !d23 &amp;&amp; (b4 || c34 || d14 || d24)
+4: b1 &amp;&amp; (b2 || d12) &amp;&amp; (b3 || d13 || d23) &amp;&amp; !b4 &amp;&amp; !d14 &amp;&amp; !d24 &amp;&amp; !d34
+empty: b1 &amp;&amp; (b2 || d12) &amp;&amp; (b3 || d13 || d23) &amp;&amp; (b4 || d14 || d24 || d34)</p>
+<p>Each formula is in CNF and has 10 variables, 4 b variables and 6 c or d. So it is a “nice” structure.</p>
+<p>compilation is special because incremental compilation. I compile each patch in the series one after another in the same directory, and after each compilation I zip up the files needed for testing.</p>
+<p>I run the test that had not passed for the longest time, to increase confidence in more patches. If a test fails, I bisect to find the patch that broke it, reject the patch, and throw it out of the candidate.</p>
+<dl class="simple">
+<dt>When bisecting, I have to compile at lots of prefixes of the candidate, the cost of which varies significantly based on the directory it starts from. I’m regularly throwing patches out of the candidate, which requires a significant amount of compilation, as it has to recompile all patches that were after the rejected patch.</dt><dd><p>I’m regularly adding patches to the candidate, each of which requires an incremental compilation.</p>
+</dd>
+</dl>
+<p>unzipping only needs to be done when bisecting is required; zipping is cheap. And the testing fileset is smaller than the building fileset.</p>
+<p>When testing a candidate, I run all tests without extending the candidate. If all the tests pass I update the state and create a new candidate containing all the new patches.</p>
+<p>If any test fails I bisect to figure out who should be rejected, but don’t reject until I’ve completed all tests. After identifying all failing tests, and the patch that caused each of them to fail, I throw those patches out of the candidate. I then rebuild with the revised candidate and run only those tests that failed last time around, trying to seek out tests where two patches in a candidate both broke them. I keep repeating with only the tests that failed last time, until no tests fail. Once there are no failing tests, I extend the candidate with all new patches, but do not update the state.</p>
+<p>As a small tweak, if there are two patches in the queue from the same person, where one is a superset of the other, I ignore the subset. The idea is that if the base commit has an error I don’t want to track it down twice, once to the first failing commit and then again to the second one.
+Using this approach in Bake</p>
+<p>If there is a failure when compiling, it caches that failure, and reports it to each step in the bisection, so Bake tracks down the correct root cause.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Meta.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Posets.html" class="btn btn-neutral float-right" title="Posets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

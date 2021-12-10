@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assembly &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Build system" href="BuildSystem.html" />
+    <link rel="prev" title="Commentary" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#architectures">Architectures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operating-systems">Operating systems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#instruction-database">Instruction database</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-sources">Data sources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#templates">Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#affected-state">Affected state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#classification">Classification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#performance">Performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attributes-metadata">Attributes / metadata</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Assembly</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Assembly.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="assembly">
+<h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this headline"></a></h1>
+<p>A lot of languages aim for “no runtime overhead”. But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which in some sense limits Stroscot to C’s abstractions. But it would be nice to do assembly directly as well so Stroscot can be even faster in some cases.</p>
+<section id="architectures">
+<h2>Architectures<a class="headerlink" href="#architectures" title="Permalink to this headline"></a></h2>
+<p>The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn’t find a list of processor architectures by popularity, but from <a class="reference external" href="https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use">this quora answer</a> and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARMv8-A A64 (mobile devices).</p>
+<p>Others:
+* ARMv9-A A64: It’s released, devices expected in 2022. Very similar to v8 so should be able to share the code. Verdict: on the roadmap
+* 32-bit ARM: Old phones, the Raspberry Pi Zero. The XML database is similar. Verdict: Contributor.
+* RISC-V: There are $100-ish dev boards listed at <a class="reference external" href="https://riscv.org/exchange/boards/">https://riscv.org/exchange/boards/</a>. No non-dev systems yet. It’s a relatively simple ISA, similar to ARM. Verdict: Contributor
+* POWER: <a class="reference external" href="https://secure.raptorcs.com/content/base/products.html">Raptor</a> sells expensive systems. Even more niche than RISC-V. Verdict: C backend.
+* MIPS: the company that develops it went bankrupt and is now doing RISC-V. There are consumer systems available in China (Loongson), but the rumor is that they too are moving to RISC-V or else to their own architecture LoongArch. Verdict: C backend.
+* z/Architecture: really expensive, weird OS. Verdict: C backend.
+* SPARC: It’s end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
+* 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
+* WASM: it still doesn’t support <a class="reference external" href="https://github.com/WebAssembly/proposals/issues/17">tail calls</a>. Given the lack of progress it seems better to have a backend targeting C.</p>
+<p>From a design perspective supporting 2 architectures is not much different from supporting 10, it’s just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.</p>
+<p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
+</section>
+<section id="operating-systems">
+<h2>Operating systems<a class="headerlink" href="#operating-systems" title="Permalink to this headline"></a></h2>
+<p>Linux for AMD64, Android for ARM, and later on Windows for AMD64.</p>
+<p>We’ll exclude Apple for now because its developer documentation sucks and its anti-competitive practices mean that getting Stroscot to work would require starting a war with Swift.</p>
+</section>
+<section id="instruction-database">
+<h2>Instruction database<a class="headerlink" href="#instruction-database" title="Permalink to this headline"></a></h2>
+<p>An instruction is a sequence of bytes. Beyond that it’s hard to define exactly. <a class="reference external" href="https://github.com/xoreaxeaxeax/sandsifter">sandsifter</a> defines an instruction as a sequence <code class="docutils literal notranslate"><span class="pre">seq</span></code> for which <code class="docutils literal notranslate"><span class="pre">seq|000</span></code> does not trigger a page fault, but <code class="docutils literal notranslate"><span class="pre">se|q00</span></code> does (where <code class="docutils literal notranslate"><span class="pre">|</span></code> is a page boundary), and which does not trigger an undefined instruction (#UD) trap. <a class="reference external" href="https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/">haruspex</a> is even more tricky and defines it as a sequence that fills the microcode speculation buffer with a number of micro-ops not matching the undefined instruction.</p>
+<p>There are usually at least a few undocumented instructions on a processor, and we won’t know what they are. So we need a syntax for writing instructions directly, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code>. It’s basically a <code class="docutils literal notranslate"><span class="pre">.db</span></code> statement, but whereas <code class="docutils literal notranslate"><span class="pre">.db</span></code> is used for file headers or data in the <code class="docutils literal notranslate"><span class="pre">.data</span></code> section, this is meant specifically for executable data.</p>
+<p>But for a random byte sequence there is nothing the compiler can do besides pass it through. Normally we want to run a lot of pipelining optimizations. So for an optimizing compiler we need instruction metadata.</p>
+<section id="data-sources">
+<h3>Data sources<a class="headerlink" href="#data-sources" title="Permalink to this headline"></a></h3>
+<p>In terms of data sources for ISAs, for x86 the official sources are <a class="reference external" href="https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html">Intel’s SDM</a> / <a class="reference external" href="https://developer.amd.com/resources/developer-guides-manuals/">AMD’s Architecture Programmer’s Manual</a>, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. <a class="reference external" href="https://github.com/google/EXEgesis">EXEgesis</a> uses a hacky Xpdf parser but has some amount of effort invested by Google. <a class="reference external" href="https://github.com/HJLebbink/x86doc/tree/master/Python">x86doc</a> uses pdfminer to generate HTML which seems like a more friendly starting point.</p>
+<p>More structured are x86 instruction databases:
+* <cite>Intel XED &lt;https://intelxed.github.io/&gt;</cite> (<a class="reference external" href="https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt">file</a>).
+* LLVM <a class="reference external" href="https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/X86/X86.td">x86 tables</a>
+* NASM <a class="reference external" href="https://github.com/netwide-assembler/nasm/blob/master/x86/insns.dat">instruction table</a>
+* <a class="reference external" href="https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/i386-opc.tbl;h=b0530e5fb82f4f4cd85d67f7ebf6ce6ebf9b45b5;hb=HEAD">GNU Assembler (gas)</a>
+* <a class="reference external" href="https://github.com/icedland/iced/blob/65d1f49584247a09dcc2559727936a53014268f5/src/csharp/Intel/Generator/Tables/InstructionDefs.txt">iced</a>
+* The K Framework <a class="reference external" href="https://github.com/kframework/X86-64-semantics">formal X86 semantics</a> contains most of the Haswell instructions. It was manually written, but checked with fuzzing. It probably could generate good data, but it requires parsing the K syntax.
+* <a class="reference external" href="https://github.com/RRZE-HPC/OSACA/tree/master/osaca/data/isa">OSACA</a> is AGPL licensed and very incomplete
+* <a class="reference external" href="https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Processors/x86/data/languages/ia.sinc#L1594">Ghidra</a>, seems to have semantics
+* emulators: <a class="reference external" href="https://github.com/colejohnson66/rbx86">https://github.com/colejohnson66/rbx86</a>, <a class="reference external" href="https://bochs.sourceforge.io/">https://bochs.sourceforge.io/</a>
+* <a class="reference external" href="https://github.com/asmjit/asmjit">https://github.com/asmjit/asmjit</a>, <a class="reference external" href="https://github.com/bitdefender/bddisasm">https://github.com/bitdefender/bddisasm</a>, <a class="reference external" href="https://github.com/dyninst/dyninst">https://github.com/dyninst/dyninst</a>, <a class="reference external" href="https://github.com/herumi/xbyak">https://github.com/herumi/xbyak</a>, qemu/capstone, <a class="reference external" href="https://github.com/diegocarba99/bagheera">https://github.com/diegocarba99/bagheera</a>, <a class="reference external" href="https://github.com/mongodb-labs/disasm">https://github.com/mongodb-labs/disasm</a>, zydis, <a class="reference external" href="https://github.com/MahdiSafsafi/AMED">https://github.com/MahdiSafsafi/AMED</a>, <a class="reference external" href="https://github.com/nidud/asmc">https://github.com/nidud/asmc</a>
+* Go assembler <a class="reference external" href="https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go">https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go</a>
+* <a class="reference external" href="https://github.com/Barebit/x86reference/blob/master/x86reference.xml">https://github.com/Barebit/x86reference/blob/master/x86reference.xml</a></p>
+<p>For ARM we have XML <a class="reference external" href="https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools">Machine Readable Architecture instruction tables</a>, which is nice-ish XML, and the code has been validated against ARM’s conformance suite. There is a toy disassembler <a class="reference external" href="https://github.com/nspin/hs-arm">hs-arm</a> using the tables. EXEgesis also parses the XML. <a class="reference external" href="https://github.com/alastairreid/asl-interpreter">asl-interpreter</a> runs the descriptions.</p>
+<p>Timing:
+* <a class="reference external" href="https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions">https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions</a>
+* ARM: ?</p>
+<p>The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly.</p>
+</section>
+<section id="templates">
+<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this headline"></a></h3>
+<p>The most basic data is an instruction list. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addressing modes / addresses, and immediate values.</p>
+<p>The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.</p>
+<p>Intel has variable-length instructions and the docs seem to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think dumping Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed directly for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates.</p>
+<p>ARM has fixed length instructions and uses a bit-based format, for example A64 ADDS is <code class="docutils literal notranslate"><span class="pre">sf</span> <span class="pre">0101011</span> <span class="pre">shift*</span> <span class="pre">0</span> <span class="pre">Rm****</span> <span class="pre">imm6*****</span> <span class="pre">Rn****</span> <span class="pre">Rd****</span></code>. Here each name is an operand and the stars represent extra bits of the operand - the operand is a fixed-length bitstring. hs-arm <a class="reference external" href="https://github.com/nspin/hs-arm/blob/8f10870a4afbbba010e78bd98e452ba67adc34e0/nix-results/harm.harm-tables-src/gen/Harm/Tables/Gen/Insn.hs">seems</a> to pull out this information just fine, although its operand names are a little weird.</p>
+<p>So the information for each template is:</p>
+<ul class="simple">
+<li><p>form name (string)</p></li>
+<li><p>explicit operands (list)</p>
+<ul>
+<li><p>name (dest, src1, xmm1, etc.) - optional</p></li>
+<li><p>type:</p>
+<ul>
+<li><p>immediate (range/size b, z, etc.)</p></li>
+<li><p>register class (class GPR8, GPRv, XMM, etc.)</p></li>
+<li><p>memory (size b, v, etc.)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>encoding function <code class="docutils literal notranslate"><span class="pre">[Operands]</span> <span class="pre">-&gt;</span> <span class="pre">Bits</span></code></p></li>
+</ul>
+<p>We also want to store Xed’s isa_set field, the condition on CPUID for this instruction to work, and the valid modes (32-bit, 64-bit, real, protected, etc.). There are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.</p>
+</section>
+<section id="affected-state">
+<h3>Affected state<a class="headerlink" href="#affected-state" title="Permalink to this headline"></a></h3>
+<p>Another important piece of data is the affected state, i.e. the list of read/written flags/registers/etc. This is used in instruction reordering/scheduling and register allocation to minimize <a class="reference external" href="https://en.wikipedia.org/wiki/Hazard_(computer_architecture)#Data_hazards">data hazards</a>.</p>
+<p>The affected things depend on the instruction (and the operands). Where can we get this info?</p>
+<p>It seems possible to automatically determine by fuzzing (weighted towards special cases like 0 and 1). But it’s probably really slow and the result is somewhat suspect - it can’t determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.</p>
+<p>From the Intel docs there is a little <code class="docutils literal notranslate"><span class="pre">(r,w)</span></code> or <code class="docutils literal notranslate"><span class="pre">(r)</span></code> after the operands. But this doesn’t include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info.</p>
+<p>Xed has info on read/written flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR.</p>
+<p>For ARM modifying asl-interpreter should give info on flags etc.</p>
+<p>The schema:</p>
+<ul>
+<li><p>form name</p></li>
+<li><p>affected things (list)
+* type:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>explicit operand (+ index)</p></li>
+<li><p>fixed register</p></li>
+<li><p>pseudo resource</p></li>
+<li><p>flag bit</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>read: read / not read / conditionally read / unknown</p></li>
+<li><p>written:
+* value: constant,  copied from input, read + constant, complex computation, undefined, …
+* not written, conditionally written, unknown</p></li>
+</ul>
+</li>
+<li><p>possible exceptions</p></li>
+</ul>
+<p>Instructions with no data have all possible affected things present, with read/write unknown.</p>
+<p>Pseudo-resource includes things like load-link/store-conditional. LDXR sets monitors (write) and STXR checks monitors (read). A second LL clears the monitor so LL is actually read/write. Anyway the monitor is a pseudo resource, because it’s not a register.</p>
+</section>
+<section id="classification">
+<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline"></a></h3>
+<p>There are a lot of instructions. We can classify them based on their affected state:
+* data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions
+* call: reads the program counter
+* jump: sets the program counter to something other than the next instruction
+* branch: conditional jump depending on the state of various flags/registers
+* interrupt: unconditionally throws an exception
+* privileged: requires privileged processor state to execute successfully (e.g. ring 0)
+* nop: does nothing</p>
+<p>For code layout knowing the possible execution paths is important. non-data instructions have to be handled specifically.</p>
+</section>
+<section id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this headline"></a></h3>
+<p>the data present in LLVM for instruction scheduling (such as uops, execution ports/units, and latencies),</p>
+<p>If PSTATE.DIT is 1 the execution time is independent of the values.</p>
+</section>
+<section id="attributes-metadata">
+<h3>Attributes / metadata<a class="headerlink" href="#attributes-metadata" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>concurrency / memory model</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Commentary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

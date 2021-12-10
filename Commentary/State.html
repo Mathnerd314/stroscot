@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imperative programming &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Syntax" href="Syntax.html" />
+    <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Imperative programming</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tasks">Tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#continuations">Continuations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concurrency">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler">Scheduler</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10">}</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">}</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#parallelism">Parallelism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#os-model">OS Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Imperative programming</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/State.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="imperative-programming">
+<h1>Imperative programming<a class="headerlink" href="#imperative-programming" title="Permalink to this headline"></a></h1>
+<section id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline"></a></h2>
+<p>Haskell uses a state monad <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">(#</span> <span class="pre">s,</span> <span class="pre">a</span> <span class="pre">#))</span></code> for implementing I/O, where <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">State#</span> <span class="pre">RealWorld</span></code> is a special zero-sized token type. It seems awkward, and is not really a safe abstraction due <code class="docutils literal notranslate"><span class="pre">unsafePerformIO</span></code> that constructs state tokens out of thin air. We compile pure functions to imperative programs, not the reverse.</p>
+<p>Tasks are a more direct approach to I/O - sequences of I/O operations are values of type <code class="docutils literal notranslate"><span class="pre">Task</span></code>, similar to a <a class="reference external" href="https://www.reddit.com/r/haskell/comments/swffy/why_do_we_not_define_io_as_a_free_monad/">free monad</a>. Statements that don’t return are directly of the Task type, like <code class="docutils literal notranslate"><span class="pre">Exit</span> <span class="pre">{</span> <span class="pre">code</span> <span class="pre">:</span> <span class="pre">Int}</span></code>. Statements that continue in a sequential fashion have a <code class="docutils literal notranslate"><span class="pre">continuation</span></code> argument, like <code class="docutils literal notranslate"><span class="pre">Print</span> <span class="pre">{</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">String,</span> <span class="pre">continuation</span> <span class="pre">:</span> <span class="pre">Task</span> <span class="pre">}</span></code>, so are of type <code class="docutils literal notranslate"><span class="pre">Command</span> <span class="pre">=</span> <span class="pre">Task</span> <span class="pre">-&gt;</span> <span class="pre">Task</span></code>. Statements that return a value use a continuation of type <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Task</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">ReadFile</span> <span class="pre">{</span> <span class="pre">path</span> <span class="pre">:</span> <span class="pre">Fd,</span> <span class="pre">continuation</span> <span class="pre">:</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">Task}</span></code>, so are of type <code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">Task)</span> <span class="pre">-&gt;</span> <span class="pre">Task</span></code>. And since tasks are values we can also use them as arguments, like the <code class="docutils literal notranslate"><span class="pre">delayed_task</span></code> in <code class="docutils literal notranslate"><span class="pre">SetTimeout</span> <span class="pre">{</span> <span class="pre">delay</span> <span class="pre">:</span> <span class="pre">Int,</span> <span class="pre">delayed_task</span> <span class="pre">:</span> <span class="pre">Task,</span> <span class="pre">continuation</span> <span class="pre">:</span> <span class="pre">Task}</span></code>.</p>
+<p>So conceptually the “Hello World” program is simply the value <code class="docutils literal notranslate"><span class="pre">Print</span> <span class="pre">&quot;Hello</span> <span class="pre">World&quot;</span> <span class="pre">(Exit</span> <span class="pre">0)</span></code>. Except print isn’t a primitive operation, it’s more like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Data</span> <span class="s">&quot;Hello, world!</span><span class="se">\n</span><span class="s">&quot;</span> <span class="p">(</span><span class="nf">\</span><span class="n">msg</span> <span class="ow">-&gt;</span>
+  <span class="kt">Block</span> <span class="s">&quot;_start&quot;</span> <span class="p">[</span><span class="kt">Sys_write</span> <span class="n">stdout</span> <span class="p">(</span><span class="n">addr</span> <span class="n">msg</span><span class="p">)</span> <span class="p">(</span><span class="n">length</span> <span class="n">msg</span><span class="p">)</span> <span class="p">(</span><span class="kt">Sys_exit</span> <span class="mi">0</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>with Stroscot’s internal assembler language.</p>
+<p>Task isn’t really a monad, but we can compose operations that return values using the continuation monad’s bind operation.</p>
+<p>The datatype is similar to the “fudgets” mentioned in <span id="id1">[<a class="reference internal" href="../zzreferences.html#id31" title="Levent Erkok. Value Recursion in Monadic Computations. PhD thesis, Oregon Health and Science University, October 2002. URL: http://leventerkok.github.io/papers/erkok-thesis.pdf.">Erk02</a>]</span>, except we don’t have a pure constructor. Or <a class="reference external" href="http://comonad.com/reader/2011/free-monads-for-less-3/">this</a> type <code class="docutils literal notranslate"><span class="pre">FFI</span> <span class="pre">o</span> <span class="pre">i</span></code>, but with control flow represented explicitly instead of using <code class="docutils literal notranslate"><span class="pre">o</span></code> or <code class="docutils literal notranslate"><span class="pre">i</span></code> parameters.</p>
+</section>
+<section id="continuations">
+<h2>Continuations<a class="headerlink" href="#continuations" title="Permalink to this headline"></a></h2>
+<p>Why does Stroscot use continuations for its I/O model?</p>
+<p>First of all, continuations are simple. They’re the supercharged typed equivalent of a goto. A continuation is a function that takes as argument “the rest of the program”, or “its future”. Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.</p>
+<p>Second, they’re universal. Continuations are the basis in formal denotational semantics for all control flow, from goto statements to exception handling, subsuming vanilla call flow, recursion, generators, coroutines,
+backtracking, and even loops along the way. They are “the mother of all monads” as all other monads can be encoded in the continuation type. This allows a uniform and consistent interface.</p>
+</section>
+<section id="concurrency">
+<h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this headline"></a></h2>
+<p>The general idea with concurrency is there are multiple threads of execution, each thread composed of (imperative) operations, and the combination of various operations may have various semantics.</p>
+<p>The smallest examples runtimewise just have memory access. For example this program SB: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id62" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span> <span class="ow">=</span> <span class="n">mem</span> <span class="mi">0</span>
+<span class="kt">B</span> <span class="ow">=</span> <span class="n">mem</span> <span class="mi">0</span>
+<span class="nf">t1</span> <span class="ow">=</span> <span class="n">fork</span> <span class="p">{</span><span class="kt">A</span> <span class="kt">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">return</span> <span class="kt">B</span><span class="p">}</span>
+<span class="nf">t2</span> <span class="ow">=</span> <span class="n">fork</span> <span class="p">{</span><span class="kt">B</span> <span class="kt">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">return</span> <span class="kt">A</span><span class="p">}</span>
+<span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">u</span><span class="p">)</span> <span class="ow">=</span> <span class="n">join</span> <span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here the threads are provided by fork/join. In this case, the tasks use load/store instructions, but there could be anything.</p>
+<p>At an API level, <code class="docutils literal notranslate"><span class="pre">fork</span></code> takes a <code class="docutils literal notranslate"><span class="pre">Task</span></code> but allowing an extra “finish execution gracefully” value <code class="docutils literal notranslate"><span class="pre">Die</span></code>. In the above example we’ve used an overloading of <code class="docutils literal notranslate"><span class="pre">fork</span></code> for <code class="docutils literal notranslate"><span class="pre">Operation</span> <span class="pre">a</span></code> using an IVar:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fork</span> <span class="n">t</span> <span class="ow">=</span>
+  <span class="n">i</span> <span class="ow">=</span> <span class="n">emptyIVar</span>
+  <span class="n">fork</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">t</span><span class="p">;</span> <span class="n">writeIVar</span> <span class="n">i</span> <span class="n">a</span><span class="p">;</span> <span class="kt">Die</span> <span class="p">}</span>
+  <span class="n">i</span>
+
+<span class="nf">join</span> <span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="n">xs</span><span class="p">)</span> <span class="ow">=</span> <span class="p">{</span> <span class="n">v</span> <span class="ow">=</span> <span class="n">readIVar</span> <span class="n">x</span><span class="p">;</span> <span class="n">vs</span> <span class="ow">=</span> <span class="n">join</span> <span class="n">xs</span><span class="p">;</span> <span class="n">return</span> <span class="p">(</span><span class="n">v</span> <span class="kt">:</span><span class="n">vs</span><span class="p">)</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>IVar is blocking so with mfix it’s possible to obtain a deadlock.</p>
+<p>We also want forkOn, for specifying the affinity (CPU / processor / whatever).</p>
+<p>This program has a race condition - on x86 the output may be any combination of 0’s and 1’s. On a low level, race conditions are fine and an expected part of concurrent programming. No undefined behavior here. But on a program level Stroscot simulates the program’s (concurrent) execution, and will give a warning if it’s not consistent.</p>
+<p>Concurrency allows various synchronization mechanisms (discussed in the <a class="reference internal" href="../Reference/Library.html#concurrency-library"><span class="std std-ref">standard library</span></a>) that block running a task until a given condition is met or communicate information between tasks. We only get the possibility of deadlock when we use blocking primitives. With wait-free data structures we never need to block.</p>
+</section>
+<section id="scheduler">
+<h2>Scheduler<a class="headerlink" href="#scheduler" title="Permalink to this headline"></a></h2>
+<p>Somewhere we have to use OS threads. The behavior of the OS scheduler is complicated and hard to abstract.</p>
+<p>What we want is an I/O model that allows writing web servers to handle as many clients as possible simultaneously.</p>
+<p>Choices:
+blocking I/O and one client per OS thread (read/write) - requires stack for each thread
+blocking I/O with userspace fibers (M:N threading model) - complex. A M:N scheduler must have a userspace component. This doubles the icache/dcache footprint. Fairness, nice, SMP balancing, memory allocation, TLS, RT scheduling, preemption, tid, debugging, security in userspace is hard - little control and only indirect access to statistics. Kernel events must trigger upcalls to activate context switches in the userspace component, but e.g. for memory there is no way to do async and a kernel context is blocked. M:N makes userspace&lt;-&gt;userspace context switching faster, but slows down kernel&lt;-&gt;userspace interaction. And kernel interaction is by default cheap on modern systems. For RT scheduling you would have to either set the priority every context switch, eliminating any performance advantage, or fall back to 1:1 scheduling for those threads.</p>
+<p>OTOH as Go shows (Go HTTP servers are reasonably fast), you can have cooperative coroutines with tiny userspace stacks. You start with one thread per processor (possibly bound so there’s no CPU shuffling?) and have this pool of homogeneous threads run through a task queue. This does no context switching of any kind, the only overhead is that the queue is concurrent (Go has per-thread queues too to mitigate this).</p>
+<p>nonblocking I/O and level-triggered readiness notification (select/poll/kqueue) - requires fd for each connection
+nonblocking I/O and readiness change notification (kqueue, epoll, realtime signals)
+asynchronous I/O and completion notification (AIO, io_uring, IOCP)
+server code in kernel (kttpd, TUX Threaded linUX webserver)
+Bring the TCP stack into userspace - netmap, Sandstorm</p>
+<blockquote>
+<div><p>Third is to depend on special features of the scheduler such as UMS to have one thread switch execution to another without stopping (discussed <a class="reference external" href="https://www.youtube.com/watch?v=KXuZi9aeGTw">here</a>).</p>
+</div></blockquote>
+<p>Stroscot uses a mixed cooperative/preemptive model. Context switching is only possible at specific yielding points, but every action visible to another thread is a yield point. So memory access is divided into shared and non-shared.</p>
+<p>Of these the most relevant is the “current” or most recent state; most functions do not need the stream of history.</p>
+<p>state is passed/returned in an implicit parameter / out parameter <code class="docutils literal notranslate"><span class="pre">realWorld</span></code>. There is a special syntax inout for this.</p>
+<blockquote>
+<div><p>So we can start from the end of the program and compute a DAG of causality then run the program forward. Some things can be linearized because they are commutative, like allocating references, while others like I/O cannot and will cause errors if multiple states are used.</p>
+</div></blockquote>
+<p>A mutex is a synchronization primitive that will make the thread go to sleep if it’s blocked. Mutexes are only useful if threads spend a significant amount of time sleeping. C++ std::mutex is a good cross-platform mutex.</p>
+<p>Fairness guarantees progress for all threads. It excludes the situation where some threads keep on getting the lock and a loser thread is always just a bit too late and is left out for a very long time.</p>
+<p>Adaptive mutexes use a spinlock for some number of iterations and fall back to a mutex. A spinlock should use “test and test-and-set” because the initial test avoids invalidating the cache line.</p>
+<p>A ticket spinlock, FIFO fairness: when you enter lock() you read and increment “in” and you spin until the “out” variable has the same value. To unlock you increment “out”.</p>
+<p>FIFO/ticket mutex: no OS API to wake up the right sleeper. So every time that you increment you have to wake all sleepers and all but one will immediately go back to sleep. Lock Convoy, or realtime SCHED_FIFO.</p>
+<p>The Linux scheduler might take an unreasonably long time to schedule you again even if every other thread is sleeping or calls yield().</p>
+<p>FIO (FFI o i) o (i -&gt; FIO a)</p>
+<p>Stroscot’s running model is based on an event loop with a task queue. Each loop iteration takes some arbitrary non-zero number of arbitrarily-chosen tasks off the queue and runs them in parallel. Tasks are requests to the scheduler,</p>
+<p>The tasks operate on a shared state, so the semantics of satisfying the requests in parallel must be defined. We want to error when things clearly conflict. Samples:</p>
+<ul class="simple">
+<li><p>Variable: Two writes with different values conflict. But if only one task writes the variable or all writes are equal then no conflict.</p></li>
+<li><p>Mutex: Two acquires, mutex available, a winner is nondeterministically chosen to be scheduled. The loser is blocked on the mutex or scheduled in a failure branch if it was try_acquire. No mutex available, block.</p></li>
+<li><p>Append-style file writing: Conflicts if same file descriptor</p></li>
+<li><p>Exiting: conflicts with anything but an identical exit</p></li>
+</ul>
+<p>Etc. It’s a bit twisty to define, but it’s easy to err on the side of erroring, so it should be maintainable.</p>
+<p>The program is required to have the same result regardless of the order the tasks are run. This is checked by the verification system.</p>
+<p>Consider a single-threaded Javascipt-esque event loop - it has a FIFO queue of tasks, and the loop pops off tasks and runs them one by one. By itself this is not really concurrent - it’s <a class="reference external" href="https://en.wikipedia.org/wiki/Cooperative_multitasking">cooperative multitasking</a>. We can use an asynchronous programming style or a monad to get a “thread” of execution, but this breaks down for tasks that finish and have no continuation.</p>
+<p>Stroscot sees all programs as functional manipulations of immutable values. So a state or snapshot is a value. Conceptually a state could include a lot of things, including the state of the CPU, details of other running threads, the stock market, etc. - all as long as it is within the chronological past</p>
+<p>But a program will only observe a portion of the entire universe, hence the state is localized to some world line where all the information has been collected.</p>
+<p>Mutation creates a new snapshot from an old snapshot by adding, removing, or changing the values attached to various places. As the program runs it builds up a history of snapshots. A history from the beginning of the program to some point in time is an execution.</p>
+<p>Stroscot is concurrent and parallel.</p>
+<p>The implementation uses work stealing FIFO queues <span id="id3">[<a class="reference internal" href="../zzreferences.html#id49" title="Doug Lea. A Java fork/join framework. In Proceedings of the ACM 2000 Conference on Java Grande, JAVA '00, 36–43. New York, NY, USA, June 2000. Association for Computing Machinery. URL: https://doi.org/10.1145/337449.337465 (visited on 2021-07-09), doi:10.1145/337449.337465.">Lea00</a>]</span>. In practice these queues combine pure and imperative/concurrent sparks, so there’s one per processor and not much overhead besides cache pollution, the need to use memory locations instead of registers, and synchronization.</p>
+<p>Then there are concurrent operations. These are just load/store and the various architecture-specific fence instructions.</p>
+<p>For store buffering the outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>. But under the relaxed memory model used by X86 (Total Store Order or TSO) <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code> is also possible. But under any model values other than 0 or 1 are not possible.</p>
+<p>Also possible is independent reads of independent writes (IRIW):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span> <span class="ow">=</span> <span class="kt">X</span><span class="p">;</span> <span class="n">b</span> <span class="ow">=</span> <span class="kt">Y</span><span class="p">}</span>
+<span class="p">{</span><span class="kt">X</span> <span class="kt">:=</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="kt">Y</span> <span class="kt">:=</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="n">c</span> <span class="ow">=</span> <span class="kt">Y</span><span class="p">;</span> <span class="n">d</span> <span class="ow">=</span> <span class="kt">X</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Here the initial state is <code class="docutils literal notranslate"><span class="pre">(X,Y)=(0,0)</span></code>, and the final state can be <code class="docutils literal notranslate"><span class="pre">(a,b,c,d)=(1,0,1,0)</span></code>.</p>
+<p>Conditionals are a little hard to schedule because you have to make sure both sides can be speculated or discard the untaken branch promptly.
+The simplest and main model of parallelism is parallel reduction or dataflow. So one would write out the above graph as bindings like <code class="docutils literal notranslate"><span class="pre">c11</span> <span class="pre">=</span> <span class="pre">a11</span> <span class="pre">*</span> <span class="pre">b11</span></code> (one can always find an ordering, using topological sort) and then Stroscot would read it back into the DAG. More complicated is allowing functions, for example <code class="docutils literal notranslate"><span class="pre">foldMap</span> <span class="pre">f</span> <span class="pre">g</span> <span class="pre">(x:xs)</span> <span class="pre">=</span> <span class="pre">g</span> <span class="pre">(f</span> <span class="pre">x)</span> <span class="pre">xs</span></code> generates a DAG of f’s and g’s if the list layout is known. Even with general recursion it should still be possible to identify data dependencies and assign DAG cells to temporary values in some fashion.</p>
+<p>Sparks run in separate threads, so they require synchronization. Also moving cores thrashes the cache. Hence we need a cost model: run long parallelizable computations in sparks, but keep short computations in the same spark. The GC has to be concurrent. But the values are all pure so mutation isn’t a big issue, just avoid using in-place update that crosses spark boundaries.</p>
+<p>join is a “block until task complete” operation. The synchronization is like a <a class="reference external" href="https://hackage.haskell.org/package/extra-1.7.8/docs/Control-Concurrent-Extra.html#t:Barrier">barrier</a> or <a class="reference external" href="https://hackage.haskell.org/package/data-ivar-0.30/docs/Data-IVar.html">IVar</a>.</p>
+<p>Before getting right into the gritty details about why I think we should think
+about a path away from M:N scheduling, I’ll go over the details of the
+concurrency model we currently use.</p>
+<p>Rust uses a user-mode scheduler to cooperatively schedule many tasks onto OS
+threads. Due to the lack of preemption, tasks need to manually yield control
+back to the scheduler. Performing I/O with the standard library will block the
+<em>task</em>, but yield control back to the scheduler until the I/O is completed.</p>
+<p>The scheduler manages a thread pool where the unit of work is a task rather
+than a queue of closures to be executed or data to be pass to a function. A
+task consists of a stack, register context and task-local storage much like an
+OS thread.</p>
+<p>In the world of high-performance computing, this is a proven model for
+maximizing throughput for CPU-bound tasks. By abandoning preemption, there’s
+zero overhead from context switches. For socket servers with only negligible
+server-side computations the avoidance of context switching is a boon for
+scalability and predictable performance.</p>
+<p># Lightweight?</p>
+<p>Rust’s tasks are often called <em>lightweight</em> but at least on Linux the only
+optimization is the lack of preemption. Since segmented stacks have been
+dropped, the resident/virtual memory usage will be identical.</p>
+<p># Spawning performance</p>
+<p>An OS thread can actually spawn nearly as fast as a Rust task on a system with
+one CPU. On a multi-core system, there’s a high chance of the new thread being
+spawned on a different CPU resulting in a performance loss.</p>
+<p>Sample C program, if you need to see it to believe it:</p>
+<p><a href="#id4"><span class="problematic" id="id5">``</span></a>`
+#include &lt;pthread.h&gt;
+#include &lt;err.h&gt;</p>
+<p>static const size_t n_thread = 100000;</p>
+<dl class="simple">
+<dt>static void <a href="#id6"><span class="problematic" id="id7">*</span></a>foo(void <a href="#id8"><span class="problematic" id="id9">*</span></a>arg) {</dt><dd><p>return arg;</p>
+</dd>
+</dl>
+<p>}</p>
+<dl>
+<dt>int main(void) {</dt><dd><dl>
+<dt>for (size_t i = 0; i &lt; n_thread; i++) {</dt><dd><p>pthread_attr_t attr;
+if (pthread_attr_init(&amp;attr) &lt; 0) {</p>
+<blockquote>
+<div><p>return 1;</p>
+</div></blockquote>
+<p>}
+if (pthread_attr_setdetachstate(&amp;attr, PTHREAD_CREATE_DETACHED) &lt; 0) {</p>
+<blockquote>
+<div><p>return 1;</p>
+</div></blockquote>
+<p>}
+pthread_t thread;
+if (pthread_create(&amp;thread, &amp;attr, foo, NULL) &lt; 0) {</p>
+<blockquote>
+<div><p>return 1;</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}
+pthread_exit(NULL);</p>
+</dd>
+</dl>
+<section id="id10">
+<h3>}<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
+<p>Sample Rust program:</p>
+<p><a href="#id11"><span class="problematic" id="id12">``</span></a>`
+fn main() {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>for _ in range(0, 100000) {</dt><dd><p>do spawn {
+}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</section>
+<section id="id13">
+<h3>}<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h3>
+<p>For both programs, I get around 0.9s consistently when pinned to a core. The
+Rust version drops to 1.1s when not pinned and the OS thread one to about 2s.
+It drops further when asked to allocate 8MiB stacks like C is doing, and will
+drop more when it has to do <cite>mmap</cite> and <cite>mprotect</cite> calls like the pthread API.</p>
+<p># Asynchronous I/O</p>
+<p>Rust’s requirements for asynchronous I/O would be filled well by direct usage
+of IOCP on Windows. However, Linux only has solid support for non-blocking
+sockets because file operations usually just retrieve a result from cache and
+do not truly have to block. This results in libuv being significantly slower
+than blocking I/O for most common cases for the sake of scalable socket
+servers.</p>
+<p>On modern systems with flash memory, including mobile, there is a <em>consistent</em>
+and relatively small worst-case latency for accessing data on the disk so
+blocking is essentially a non-issue. Memory mapped I/O is also an incredibly
+important feature for I/O performance, and there’s almost no reason to use
+traditional I/O on 64-bit. However, it’s a no-go with M:N scheduling because
+the page faults block the thread.</p>
+<p># Overview</p>
+<p>Advantages:</p>
+<ul class="simple">
+<li><p>lack of preemptive/fair scheduling, leading to higher throughput</p></li>
+<li><p>very fast context switches to other tasks on the same scheduler thread</p></li>
+</ul>
+<p>Disadvantages:</p>
+<ul class="simple">
+<li><p>lack of preemptive/fair scheduling (lower-level model)</p></li>
+<li><p>poor profiler/debugger support</p></li>
+<li><p>async I/O stack is much slower for the common case; for example stat is 35x
+slower when run in a loop for an mlocate-like utility</p></li>
+<li><p>true blocking code will still block a scheduler thread</p></li>
+<li><p>most existing libraries use blocking I/O and OS threads</p></li>
+<li><p>cannot directly use fast and easy to use linker-supported thread-local data</p></li>
+<li><p>many existing libraries rely on thread-local storage, so there’s a need to be
+wary of hidden yields in Rust function calls and it’s very difficult to
+expose a safe interface to these libraries</p></li>
+<li><p>every level of a CPU architecture adding registers needs explicit support
+from Rust, and it must be selected at runtime when not targeting a specific
+CPU (this is currently not done correctly)</p></li>
+</ul>
+<p># User-mode scheduling</p>
+<p>Windows 7 introduced user-mode scheduling[1] to replace fibers on 64-bit.
+Google implemented the same thing for Linux (perhaps even before Windows 7 was
+released), and plans on pushing for it upstream.[2] The linked video does a
+better job of covering this than I can.</p>
+<p>User-mode scheduling provides a 1:1 threading model including full support for
+normal thread-local data and existing debuggers/profilers. It can yield to the
+scheduler on system calls and page faults. The operating system is responsible
+for details like context switching, so a large maintenance/portability burden
+is dealt with. It narrows down the above disadvantage list to just the point
+about not having preemptive/fair scheduling and doesn’t introduce any new ones.</p>
+<p>I hope this is where concurrency is headed, and I hope Rust doesn’t miss this
+boat by concentrating too much on libuv. I think it would allow us to simply
+drop support for pseudo-blocking I/O in the Go style and ignore asynchronous
+I/O and non-blocking sockets in the standard library. It may be useful to have
+the scheduler use them, but it wouldn’t be essential.</p>
+<p>[1] <a class="reference external" href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd627187(v=vs.85).aspx">http://msdn.microsoft.com/en-us/library/windows/desktop/dd627187(v=vs.85).aspx</a>
+[2] <a class="reference external" href="http://www.youtube.com/watch?v=KXuZi9aeGTw">http://www.youtube.com/watch?v=KXuZi9aeGTw</a></p>
+<p>Then you schedule this graph on the processors by breaking it into “sparks” <span id="id14">[<a class="reference internal" href="../zzreferences.html#id75" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> and running the sparks in a compatible order.
+The compiler should be able to do a pretty good job of separating computations into sparks. Plus breaking recursive functions into sparking and non-sparking versions is tedious.</p>
+<p>But, as the compile target, we also want explicit parallelism.</p>
+<p>As far as implementation, the basic implementation choices are atomic instructions on shared memory and OS-provided mutexes. Spinlocks are hard to use (<a class="reference external" href="https://matklad.github.io/2020/01/02/spinlocks-considered-harmful.html">1</a> <a class="reference external" href="https://mjtsai.com/blog/2020/01/06/beware-spinlocks-in-user-space/">2</a>), they will waste power and the scheduler will run the busy wait a lot instead of doing real work. But <a class="reference external" href="https://webkit.org/blog/6161/locking-in-webkit/">WebKit</a> implements locks and condition variables using a byte-size reference and some global queues. There’s still a spinning loop, the number of times to spin before giving up and parking should be optimized for each lock operation.</p>
+<section id="memory-model">
+<h4>Memory model<a class="headerlink" href="#memory-model" title="Permalink to this headline"></a></h4>
+<p>The Linux memory <a class="reference external" href="https://github.com/torvalds/linux/blob/3d5c70329b910ab583673a33e3a615873c5d4115/tools/memory-model/linux-kernel.def">model</a></p>
+<p>In practice the synchronization primitives one can use are a combination of those provided by the scheduler and the atomic operations provided by the OS.</p>
+<p>Various synchronization primitives:</p>
+<ul class="simple">
+<li><p>Linux kernel internal operations:</p></li>
+<li><p><a class="reference external" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/include/asm/atomic64_64.h">atomic x86 operations</a> <a class="reference external" href="https://www.infradead.org/~mchehab/kernel_docs/locking/locktypes.html">lock types</a></p></li>
+<li><p>atomic operations</p></li>
+<li><p>memory barrier</p></li>
+<li><p>threads:
+* the kernel scheduler has fairness, SMP balancing, RT scheduling, preemption, execution statistics, credentials, virtual memory, etc.
+* Userspace scheduler will always lose in functionality. Only has a performance advantage - kernel call is expensive. But so is cache miss - small memory footprint. Requires changes to debuggers, tracers.</p></li>
+<li><p>wait-free data types</p></li>
+</ul>
+<p>MVar = Full value | Empty (Queue Process)</p>
+<ul class="simple">
+<li><p>Haskell’s MVar</p></li>
+<li><p>goroutines, channels</p></li>
+<li><p>global variables</p></li>
+<li><p>shared memory</p></li>
+<li><p>message passing (queues)</p></li>
+</ul>
+<p>All of these generate happens-before relationships on the various operations. We could track this with vector clocks, IDK why - the posets are easier to reason about directly.</p>
+<p>The single-threaded event loop is a deterministic enough scheduling pattern that there are no race conditions, it’s not really concurrent. But more complex schedulers easily create race conditions with shared memory.
+the relaxed-consistency model allows implementing private memory that is then mapped back to shared on synchronization</p>
+<p>Synchronization operations impose constraints on execution order. For example, acquiring a lock blocks until the lock is released. They introduce the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders.</p>
+</section>
+</section>
+</section>
+<section id="parallelism">
+<h2>Parallelism<a class="headerlink" href="#parallelism" title="Permalink to this headline"></a></h2>
+<p>Parallelism - the root is “parallel” or “happening at the same time”. But with <a class="reference external" href="https://en.wikipedia.org/wiki/Relativity_of_simultaneity">relativity</a>, simultaneity is not absolute. We instead consider <a class="reference external" href="https://en.wikipedia.org/wiki/Causal_structure">causal structure</a> - event separation can be timelike or spacelike. Timelike separation communicates information from past to future, while no dependency is possible with spacelike separation. Hence we define an execution as a directed graph of information flow, where a node is a value and an edge is read “can casually influence” (we could also use the reverse “reads data from”). Since there is no time travel the graph is acyclic and its transitive closure forms a partial order or poset. Then things happen “in parallel” if neither causally influences the other.</p>
+<p>For example, <a class="reference external" href="https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm#Parallel_and_distributed_algorithms">multiplying</a> two 2x2 matrices:</p>
+<img alt="Commentary/_static/matrix-multiply.svg" src="Commentary/_static/matrix-multiply.svg" /><p>The multiplications all happen in parallel and the additions in parallel.</p>
+<p>There’s no explicit syntax for parallelism - pure computations have inherent parallelism. Writing it out looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multiply</span> <span class="p">([[</span><span class="n">a11</span> <span class="n">a12</span><span class="p">]</span> <span class="p">[</span><span class="n">a21</span> <span class="n">a22</span><span class="p">]])</span> <span class="p">([[</span><span class="n">b11</span> <span class="n">b12</span><span class="p">]</span> <span class="p">[</span><span class="n">b21</span> <span class="n">b22</span><span class="p">]])</span> <span class="ow">=</span> <span class="p">[[</span><span class="n">t11</span> <span class="n">t12</span><span class="p">]</span> <span class="p">[</span><span class="n">t21</span> <span class="n">t22</span><span class="p">]]</span>
+  <span class="kr">where</span>
+      <span class="n">c11</span> <span class="ow">=</span> <span class="n">a11</span> <span class="o">*</span> <span class="n">b11</span>
+      <span class="n">d11</span> <span class="ow">=</span> <span class="n">a12</span> <span class="o">*</span> <span class="n">b21</span>
+      <span class="c1">-- 6 more multiplications defining cNN and dNN</span>
+      <span class="n">t11</span> <span class="ow">=</span> <span class="n">c11</span> <span class="o">+</span> <span class="n">d11</span>
+      <span class="c1">-- 3 more additions defining tNN</span>
+</pre></div>
+</div>
+<p>Stroscot schedules the instructions to maximize instruction-level parallelism, where appropriate.</p>
+<p>With large (&gt;1000 width) matrices we might want to multiply sub-matrices on multiple threads. That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn’t parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OS thread, green thread) influences what granularity to split up the computation at.</p>
+<p>But still, for complex data science type computations we might want automatic parallelization. So a library can provide a DSL function <code class="docutils literal notranslate"><span class="pre">parallelize</span></code> to automatically rewrite pure computations to concurrent ones, implementing the “small on single thread, big splits into small” model. But the implementation won’t necessarily support all of Stroscot, e.g. lambdas are hard to support in parallel.</p>
+</section>
+<section id="os-model">
+<h2>OS Model<a class="headerlink" href="#os-model" title="Permalink to this headline"></a></h2>
+<p>An application consists of one or more processes. A process, in the simplest terms, is an executing program.</p>
+<p>A job object allows groups of processes to be managed as a unit. Job objects are namable, securable, sharable objects that control attributes of the processes associated with them. Operations performed on the job object affect all processes associated with the job object.</p>
+<p>One or more threads run in the context of the process. A thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread.</p>
+<p>UMS threads are lightweight threads that applications schedule. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context instead of sharing the thread context of a single thread. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.</p>
+<p>A fiber consists of a stack and a small storage space for registers. A fiber runs in the context of a thread and does not have its own thread context. Fiber switching is fewer OS calls than a full-on thread context switch, but in general, fibers do not provide advantages over a well-designed multithreaded application. However, using fibers can make it easier to port applications that were designed to schedule their own threads.</p>
+<p>A task represents an asynchronous operation. A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core. Tasks are queued. They run in fibers which run in the thread pool, but are relatively lightweight compared to fibers. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

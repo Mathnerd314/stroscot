@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; Stroscot  documentation</title>
+  <title>Build system tricks &mdash; Stroscot  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="About" href="About.html" />
-    <link rel="prev" title="The Stroscot Programming Language" href="../index.html" /> 
+    <link rel="next" title="Using destructors" href="Destructors.html" />
+    <link rel="prev" title="How to" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,12 +42,20 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">How to</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Build system tricks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ignore-a-change">Ignore a change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#find-dependencies">Find dependencies</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Destructors.html">Using destructors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DynamicOverriding.html">Dynamically override functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">How to install Stroscot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Transactions.html">Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
@@ -67,9 +75,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Getting started</li>
+          <li><a href="index.html">How to</a> &raquo;</li>
+      <li>Build system tricks</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/GettingStarted/index.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/HowTo/BuildSystem.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -77,35 +86,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="getting-started">
-<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="About.html">About</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="About.html#executive-summary">Executive summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="About.html#roadmap">Roadmap</a></li>
-<li class="toctree-l2"><a class="reference internal" href="About.html#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="About.html#code-of-conduct">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="About.html#license">License</a></li>
+  <section id="build-system-tricks">
+<h1>Build system tricks<a class="headerlink" href="#build-system-tricks" title="Permalink to this headline"></a></h1>
+<section id="ignore-a-change">
+<h2>Ignore a change<a class="headerlink" href="#ignore-a-change" title="Permalink to this headline"></a></h2>
+<p>Suppose you add a new function to a header file that many other files depend on. Most files that include it do not need to be recompiled. Solution:</p>
+<ul class="simple">
+<li><p>Make the changes in the header file</p></li>
+<li><p>Compile the files that depend on the new function</p></li>
+<li><p>Do a full build with <code class="docutils literal notranslate"><span class="pre">--assume-old-touch</span> <span class="pre">$header</span></code>.</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#does-it-run">Does it run?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#what-language-is-the-compiler-written-in">What language is the compiler written in?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#where-can-i-ask-questions">Where can I ask questions?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-do-i-contribute">How do I contribute?</a></li>
-</ul>
-</li>
-</ul>
-</div>
+</section>
+<section id="find-dependencies">
+<h2>Find dependencies<a class="headerlink" href="#find-dependencies" title="Permalink to this headline"></a></h2>
+<p>The assume new and dry run flags in combination show you what would rebuild if you were to modify that file.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="The Stroscot Programming Language" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="About.html" class="btn btn-neutral float-right" title="About" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="How to" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Destructors.html" class="btn btn-neutral float-right" title="Using destructors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

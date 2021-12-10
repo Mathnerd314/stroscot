@@ -1,78 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Dispatch &mdash; Stroscot  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Memory" href="Memory.html" />
+    <link rel="prev" title="Modules" href="Modules.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -80,95 +40,61 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <ul>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
-<li class="toctree-l1"><a class="reference internal" href="index.html">Language Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Explanation/index.html">Discussion</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dispatch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#priorities">Priorities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-qualifiers">Method qualifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#next-method">Next method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#semantics">Semantics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implicit-conversion">Implicit conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#equality">Equality</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Stroscot</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
+          <li><a href="index.html">Language Reference</a> &raquo;</li>
       <li>Dispatch</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-            
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Dispatch.rst" class="fa fa-github"> Edit on GitHub</a>
-            
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="dispatch">
-<h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="dispatch">
+<h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this headline"></a></h1>
 <p>Stroscot supports pattern matching as well as predicate dispatch:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
 <span class="nf">f</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
@@ -194,8 +120,8 @@
 </pre></div>
 </div>
 <p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
-<div class="section" id="priorities">
-<h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this headline">¶</a></h2>
+<section id="priorities">
+<h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this headline"></a></h2>
 <p>The way sequential matching expands is that there is a chain of priorities.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prio</span> <span class="n">p1</span>
 <span class="nf">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">1</span>
@@ -238,9 +164,9 @@
 <p>You can get the priority of a clause with <code class="docutils literal notranslate"><span class="pre">prioOf</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">condition</span> <span class="pre">}</span></code>, so as to constrain a clause that has an anonymous priority. The AST must match exactly.</p>
 <p>There is also <code class="docutils literal notranslate"><span class="pre">prioBound</span> <span class="pre">{}</span></code>, similar in syntax to <code class="docutils literal notranslate"><span class="pre">prioAll</span></code> but puts a top/bottom constraint on fresh priorities.</p>
 <p>You can also define sets of priorities, either by listing or with <code class="docutils literal notranslate"><span class="pre">prioSet</span> <span class="pre">{</span> <span class="pre">}</span></code>, and use <code class="docutils literal notranslate"><span class="pre">prioSetDef</span></code> to define large-scale orderings. You can resolve conflicts in the priority ordering definitions by declaring the priorities (meta-priorities) of the definitions. See Posets.</p>
-</div>
-<div class="section" id="method-qualifiers">
-<h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="method-qualifiers">
+<h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline"></a></h2>
 <p>Stroscot also supports Common Lisp’s method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>, as well as a custom qualifier <code class="docutils literal notranslate"><span class="pre">list</span></code>. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code> are simply <code class="docutils literal notranslate"><span class="pre">around</span></code> methods with the fixed priority <code class="docutils literal notranslate"><span class="pre">around</span> <span class="pre">&gt;</span> <span class="pre">before</span> <span class="pre">&gt;</span> <span class="pre">after</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">around</span> <span class="p">{</span> <span class="n">f</span><span class="p">;</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span> <span class="p">}</span>
@@ -253,20 +179,20 @@
 </div>
 <p>The basic idea of method combination can be seen in this <a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a></p>
 <p><code class="docutils literal notranslate"><span class="pre">list</span></code> simply produces the list of applicable methods, that can then be applied or manipulated as needed. It is an error to define a list method if there are any other types of methods (primary, before, after, or around).</p>
-</div>
-<div class="section" id="next-method">
-<h2>Next method<a class="headerlink" href="#next-method" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="next-method">
+<h2>Next method<a class="headerlink" href="#next-method" title="Permalink to this headline"></a></h2>
 <p>High priority methods shadow lower-priority methods, rather than entirely replacing them. <code class="docutils literal notranslate"><span class="pre">next-method</span></code> allows access to these shadowed methods.</p>
 <p>You can run the methods with different parameters, <code class="docutils literal notranslate"><span class="pre">next-method</span> <span class="pre">{</span> <span class="pre">silently=true</span> <span class="pre">}</span></code>.</p>
 <p>You can also call a specific clause, <code class="docutils literal notranslate"><span class="pre">callClause</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">guard,</span> <span class="pre">module</span> <span class="pre">=</span> <span class="pre">...,</span> <span class="pre">priority</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">}</span></code>, or its <code class="docutils literal notranslate"><span class="pre">next-method</span></code>, <code class="docutils literal notranslate"><span class="pre">callClauseNext</span></code>.</p>
-</div>
-<div class="section" id="semantics">
-<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="semantics">
+<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline"></a></h2>
 <p>The semantics is that all cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a>. Predicate failure, failed assertions, and nontermination are all treated as bottom.</p>
 <p>The semantics of <code class="docutils literal notranslate"><span class="pre">lub</span></code> is complicated, because it’s the whole program that is analyzed - return values that are not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
-</div>
-<div class="section" id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h2>
 <p>The full dispatch mechanism is as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span> <span class="n">methods</span> <span class="n">args</span> <span class="ow">=</span> <span class="kr">do</span>
   <span class="p">[</span><span class="n">arounds</span><span class="p">,</span> <span class="n">befores</span><span class="p">,</span> <span class="n">afters</span><span class="p">,</span> <span class="n">primaries</span><span class="p">]</span> <span class="ow">=</span> <span class="n">map</span> <span class="n">topological_sort</span> <span class="o">$</span> <span class="n">partition</span> <span class="n">methods</span>
@@ -290,9 +216,9 @@
 * use profiling data to identify the hot paths
 * build a hot-biased dispatch tree
 * use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)</p>
-</div>
-<div class="section" id="implicit-conversion">
-<h2>Implicit conversion<a class="headerlink" href="#implicit-conversion" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="implicit-conversion">
+<h2>Implicit conversion<a class="headerlink" href="#implicit-conversion" title="Permalink to this headline"></a></h2>
 <p>There is a function <code class="docutils literal notranslate"><span class="pre">convert</span></code> in a module in the core library. It includes as cases / requirements:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">a))</span></code> (transitivity)</p></li>
@@ -309,55 +235,42 @@
 * Conversions should be total, otherwise they are simply replacing one error with another error.
 * Also they should be injective, e.g. int32 <a class="reference external" href="https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double">can</a> be converted to float64, but int64 cannot.</p>
 <p>Without these rules it is easy to get into trouble where the overloading is ambiguous.</p>
-</div>
-<div class="section" id="equality">
-<h2>Equality<a class="headerlink" href="#equality" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="equality">
+<h2>Equality<a class="headerlink" href="#equality" title="Permalink to this headline"></a></h2>
 <p>Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019-2020 Mathnerd314.
-
-    </p>
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

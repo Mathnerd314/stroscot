@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compiler design &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="Continuations.html" />
+    <link rel="prev" title="Code generation" href="Code-Generation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Compiler design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scale">Scale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline">Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flags">Flags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-messages">Error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#werror">Werror</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fuel">Fuel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optimization">Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output">Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compilation-models">Compilation models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-compilation">Cross compilation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bootstrapping">Bootstrapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complex-bootstrap">Complex bootstrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-time-code-execution">Compile-time code execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compiler-ways">Compiler ways</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation-generator">Documentation generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#language-server">Language server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-loading">Dynamic loading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Compiler design</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Compiler.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="compiler-design">
+<h1>Compiler design<a class="headerlink" href="#compiler-design" title="Permalink to this headline"></a></h1>
+<section id="scale">
+<h2>Scale<a class="headerlink" href="#scale" title="Permalink to this headline"></a></h2>
+<p>As of 2016, The Google repo has 1 billion files, of which 9 million are code</p>
+</section>
+<section id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h2>
+<p>The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.</p>
+<p>Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.</p>
+<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id24" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
+<p>Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.</p>
+<p>Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.</p>
+</section>
+<section id="flags">
+<h2>Flags<a class="headerlink" href="#flags" title="Permalink to this headline"></a></h2>
+<p>In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.</p>
+<p>There is also the value ‘default’ to set it to the default.</p>
+</section>
+<section id="error-messages">
+<h2>Error messages<a class="headerlink" href="#error-messages" title="Permalink to this headline"></a></h2>
+<p>Since Stroscot uses model checking, most failures will end up producing a counterexample. The counterexample may not be minimal, but it is much easier to debug a concrete instance than to try to figure one out from contextual information.</p>
+<p>For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. But it isn’t clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash, byte offset) as a 64-bit code, since then we can compare before/after within files and quickly check if two locations are equal.</p>
+</section>
+<section id="werror">
+<h2>Werror<a class="headerlink" href="#werror" title="Permalink to this headline"></a></h2>
+<p>Werror is an option, as usual. If you want a hard dependency on the compiler version, then feel free to use it, otherwise it’s best to leave it unset so that users can use different compiler versions that emit different warnings.</p>
+</section>
+<section id="fuel">
+<h2>Fuel<a class="headerlink" href="#fuel" title="Permalink to this headline"></a></h2>
+<p>A technique for testing the compiler and systems in general is to use a “fuel” counter that decrements every time a certain operation is performed, and do something interesting when the counter reaches 0 such as finishing the optimizations or throwing an exception.</p>
+<p>For example instead of testing for stack overflow we can test for running out of fuel. Stroscot’s execution context doesn’t involve a stack.</p>
+</section>
+<section id="optimization">
+<h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline"></a></h2>
+<p>The path from cloud to CPU is long, so there is a lot of caching in between:</p>
+<ul class="simple">
+<li><p>Physical registers (0.3 ns): managed by the CPU</p></li>
+<li><p>Logical registers (0.3 ns): assembly</p></li>
+<li><p>Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU</p></li>
+<li><p>Main Memory (0.1us-4us): assembly</p></li>
+<li><p>SSD (16us-62us): file APIs</p></li>
+<li><p>LAN (0.5-500ms): network stack</p></li>
+<li><p>HDD (3 ms): file APIs</p></li>
+<li><p>WAN (150ms): network stack</p></li>
+</ul>
+<p>Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application.</p>
+<p>For a lot of compilation decisions we don’t have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guide optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don’t use a code path very often, then we can de-optimize it and use a slow version. But if it’s a hot path then we want to streamline that path as much as possible.</p>
+<p>With respect to optimization we have various criteria to minimize.
+* O0 - Compile time - when we are just running static verification
+* On - Run time - faster programs are more useful
+* Og - Execute time (compile + run) - the edit-compile-test cycle for debug builds, and similarly REPL loops
+* Os/Oz - Output size - as binaries are often transferred across a network
+* O? - Other statistics for Compile/Run/Execute - memory usage, power usage</p>
+<p>Profiles themselves introduce a “Heisenbug” problem: we cannot measure the detailed performance of an unprofiled program. The solution is to build with profiling support for almost all of the compilation pipeline. We should only omit profiling instructions for non-profiled builds at the assembly level. And if we use hardware-assisted sampling profiling then we don’t even need profiling instructions, in many cases.</p>
+<p>General purpose use
+Prepackaged software is very often expected to be executed on a variety of machines and CPUs that may share the same instruction set, but have different timing, cache or memory characteristics. As a result, the code may not be tuned to any particular CPU, or may be tuned to work best on the most popular CPU and yet still work acceptably well on other CPUs.
+Special-purpose use
+If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
+Embedded systems
+These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code’s speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code’s timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.</p>
+<ul>
+<li><p>Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.
+* Peephole optimizations / strength reduction - like <code class="docutils literal notranslate"><span class="pre">x*2</span></code> by <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">x+x</span></code>, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.
+* Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Partial evaluation</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>common subexpression elimination, global value numbering - tricky with blocks
+* code factoring - CSE but for control flow</p></li>
+<li><p>Test reordering - do simpler tests first - treat control flow as data</p></li>
+<li><p>Removing conditional branch cases if can prove won’t be taken</p></li>
+<li><p>Inlining</p></li>
+<li><p>Space optimizations - anti-inlining
+* Trampolines allow placing code at low addresses
+* Macro compression compresses common sequences of code</p></li>
+</ul>
+</li>
+<li><p>Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.</p></li>
+<li><p>Scheduling / reordering / pipelining
+* minimize pipeline stalls, when an instruction in one stage of the pipeline depends on the result of another instruction ahead of it in the pipeline but not yet completed.
+* ensure the various functional units are fully fed with instructions to execute.
+* avoid cache misses by grouping accesses
+* clear out unconditional jumps (inlining). Avoid inlining so much that it cannot fit in the cache.
+* splitting/combining recursive calls / basic blocks
+* Bias conditional jumps towards the common case</p></li>
+<li><p>Recursion
+* induction variable analysis to replace multiplication by a loop index with addition
+* loop reversal - changing condition to zero comparison
+* loop unswitching - moving conditional outside loop
+* hoisting invariants, partial/total redundancy elimination
+* parallelization - multi-threaded or vectorized code</p></li>
+<li><p>Alias analysis - changing memory references into values</p></li>
+<li><p>tail call optimization, Stack height reduction - stack optimizations</p></li>
+<li><p>deforestation - remove data structure</p></li>
+</ul>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h2>
+<p>The simplest compiler writes out a file like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- This is generated code - see &lt;file&gt; for source</span>
+<span class="nf">interpret</span> <span class="ow">=</span> <span class="o">&lt;</span><span class="n">boilerplate</span> <span class="n">code</span> <span class="n">for</span> <span class="n">interpreter</span><span class="o">&gt;</span>
+<span class="kr">data</span> <span class="ow">=</span> <span class="s">&quot;&lt;contents of source file&gt;&quot;</span>
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">interpret</span> <span class="kr">data</span>
+</pre></div>
+</div>
+<p>This amounts to using a no-op specializer. But we can use a more intelligent specializer to produce more efficient code.</p>
+<p>versioning of time/date
+identifier minimization/translation
+unit test
+random input testing
+quasiquotation
+typechecking</p>
+<p>RTS flags should be stored into ABI hashes in installed libraries to avoid mismatching incompatible code objects.</p>
+</section>
+<section id="compilation-models">
+<h2>Compilation models<a class="headerlink" href="#compilation-models" title="Permalink to this headline"></a></h2>
+<p>Separate compilation is really incremental compilation - avoiding re-doing work that doesn’t depend on other files. The <code class="docutils literal notranslate"><span class="pre">.o</span></code> files are not useful by themselves, so the compile-link process can be replaced with an incremental compilation database and a command that directly produces an executable or DLL (assembly). If memory is a concern then results can be unloaded/loaded from the database.</p>
+<p>Executables and DLLs are defined by a stable ABI / set of entry points. Inlining depends on the content of the code, so we cannot inline, or in general do any optimizations across the ABI boundary.</p>
+</section>
+<section id="cross-compilation">
+<h2>Cross compilation<a class="headerlink" href="#cross-compilation" title="Permalink to this headline"></a></h2>
+<p>In cross compilation we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. When the host and target systems are the same, it’s a native build; otherwise it’s a cross build.</p>
+<p>The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” there is really a configuration option, namely the supported target of the compiler that will run on the host. Only compilers need to specify supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.</p>
+<p>the toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
+the package set is also target-dependent</p>
+</section>
+<section id="bootstrapping">
+<h2>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this headline"></a></h2>
+<p>Bootstrapping is a 2-stage process. We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build:</p>
+<ul class="simple">
+<li><p>stage 1: New compiler on old ABI <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code></p></li>
+<li><p>stage 2: New compiler on new ABI <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code></p></li>
+</ul>
+<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id77" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
+<p>For cross-compiling, we build stage 1 for the host and stage 2 for the target.</p>
+<p>The compiler depends on libraries. The bootstrap compiler does not provide updated libraries, so we must build the libraries for the Stage 1 compiler.</p>
+<p>build stage 2 compiler with the stage 1 compiler using the stage 1 package database ship with the stage 2 compiler). As such, the compiler is built with the identical libraries that it ships with. When running / interpreting byte code, we need to dynamically link packages and this way we can guarantee that the packages we link are identical to the ones the compiler was built with. This it is also the reason why we don’t have GHCi or Template Haskell support in the stage 1 compiler.</p>
+</section>
+<section id="complex-bootstrap">
+<h2>Complex bootstrap<a class="headerlink" href="#complex-bootstrap" title="Permalink to this headline"></a></h2>
+<p>Actually bootstrapping is more complex. The compiler is really two components, an interpreter and a specializer. The input program can take arguments. The interpreter can take arguments (dialects, libraries). The specializer can take arguments (bytecode, optimization instructions, plugins). The output program can take arguments (compiled objects, runtime components such as libc or a garbage collector). All of these arguments and options aren’t handled easily.</p>
+<p>We can think about this using the Futamura projections. We assume a primitive</p>
+<div class="math notranslate nohighlight">
+\[\newcommand{\run}[1]{⟦#1⟧}
+\run{\cdot} : \text{program} \to \text{data} \to \text{result}\]</div>
+<p>that can run programs written in any language, given input data, and produce an output result. We use a denotational notion of result where erroring / not halting is itself a result. Two programs are equal if <span class="math notranslate nohighlight">\(\run{p} d = \run{q} d\)</span> for all <span class="math notranslate nohighlight">\(d\)</span>; equivalence of results depends on context and ranges from literal comparison to more advanced semantics.</p>
+<p>Definitions:</p>
+<ul class="simple">
+<li><p>An interpreter <span class="math notranslate nohighlight">\(i\)</span> has <span class="math notranslate nohighlight">\(\run{i} (p,d) = \run{p} d\)</span>.</p></li>
+<li><p>A compiler <span class="math notranslate nohighlight">\(c\)</span> has <span class="math notranslate nohighlight">\(\run{\run{c} p} d = \run{p} d\)</span>.</p></li>
+<li><p>A specializer <span class="math notranslate nohighlight">\(s\)</span> has <span class="math notranslate nohighlight">\(\run{\run{s} (p,x)} y = \run{p} (x,y)\)</span>.</p></li>
+<li><p>A residual program is a program <span class="math notranslate nohighlight">\(p_x\)</span> such that <span class="math notranslate nohighlight">\(\run{p_x} y = \run{p} (x,y)\)</span>.</p></li>
+<li><p>A generating extension <span class="math notranslate nohighlight">\(g_p\)</span> of a program <span class="math notranslate nohighlight">\(p\)</span> has <span class="math notranslate nohighlight">\(\run{g_p} x = p_x\)</span>, i.e. it produces residual programs of <span class="math notranslate nohighlight">\(p\)</span>.</p></li>
+<li><p>A compiler generator <span class="math notranslate nohighlight">\(c\)</span> has <span class="math notranslate nohighlight">\(\run{\run{\run{c} p} x} y = \run{p} (x,y)\)</span>.</p></li>
+<li><p>A runner <span class="math notranslate nohighlight">\(r\)</span> has <span class="math notranslate nohighlight">\(\run{\run{r} c} (p,x) = \run{\run{c} p} x\)</span></p></li>
+</ul>
+<p>1 specializer generates residual programs, <span class="math notranslate nohighlight">\(p_x = \run{s} (p,x)\)</span>.
+2 specializers produces generating extensions, <span class="math notranslate nohighlight">\(g_p = \run{s_1} (s_2,p)\)</span>.
+3 specializers produces a compiler generator, <span class="math notranslate nohighlight">\(c_{123} = \run{s_1} (s_2,s_3)\)</span>.
+Similarly we can use a compiler generator: <span class="math notranslate nohighlight">\(\run{\run{c} p} x\)</span> for residual programs, <span class="math notranslate nohighlight">\(\run{c} p\)</span> for generating extensions, <span class="math notranslate nohighlight">\(c_{123} = \run{\run{\run{c} s_1} s_2} s_3\)</span> to obtain the same compiler generator as formed by applying the specializers.</p>
+<p>A generating extension of an interpreter is a compiler; similarly passing an interpreter <span class="math notranslate nohighlight">\(i\)</span> to a compiler generator <span class="math notranslate nohighlight">\(c\)</span> produces a compiler <span class="math notranslate nohighlight">\(\run{c} i\)</span>. A generating extension of a string matcher is a matcher generator and a generating extension of a universal parser is a parser generator. Hence we should call a compiler generator a “generating extension generator”.</p>
+<p>A generating extension of a specializer is a compiler generator. <span class="math notranslate nohighlight">\(\run{\run{\run{g_s}p}x}y = \run{\run{s}(p,x)} y = \run{p}(x,y)\)</span></p>
+<p>In particular, assuming <span class="math notranslate nohighlight">\(c\)</span> is a compiler generator, <span class="math notranslate nohighlight">\(c' = \run{c} s\)</span> is a compiler generator iff <span class="math notranslate nohighlight">\(s\)</span> is a specializer. Proof: <span class="math notranslate nohighlight">\(run (\run{s} (p,x)) y = \run{\run{\run{\run{c} s} p} x} y = \run{\run{\run{c}' p} x} y = \run{p} (x,y)\)</span> to show <span class="math notranslate nohighlight">\(s\)</span> is a specializer, <span class="math notranslate nohighlight">\(\run{\run{\run{c'} p} x} y = run (\run{s} (p,x)) y = \run{p} (x,y)\)</span> to show <span class="math notranslate nohighlight">\(c'\)</span> is a compiler generator.</p>
+<p>If <span class="math notranslate nohighlight">\(\run{c} s = c\)</span>, <span class="math notranslate nohighlight">\(c\)</span> is termed a self-generating compiler generator. <span class="math notranslate nohighlight">\(\run{s} (s,s) = \run{\run{\run{c} s} s} s = c\)</span>. Furthermore <span class="math notranslate nohighlight">\(s\)</span> is a specializer. OTOH if <span class="math notranslate nohighlight">\(s\)</span> is a specializer then <span class="math notranslate nohighlight">\(\run{s} (s,s)\)</span> is a compiler generator self-generating with <span class="math notranslate nohighlight">\(s\)</span>.</p>
+<p>With a runner <span class="math notranslate nohighlight">\(r\)</span> we can turn a compiler generator <span class="math notranslate nohighlight">\(c\)</span> into a specializer <span class="math notranslate nohighlight">\(\run{r}c\)</span>. Self-applying this specializer gives a compiler generator with equivalent output to <span class="math notranslate nohighlight">\(c\)</span> after two arguments have been applied:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\run{\run{\run{\run{r}c}(\run{r}c,\run{r}c)}p}x &amp; = \run{\run{\run{\run{c}(\run{r}c)}(\run{r}c)}p}x \\
+&amp; = \run{\run{\run{r}c}(\run{r}c,p)}x \\
+&amp; = \run{\run{\run{c}\run{r}c}p}x \\
+&amp; = \run{\run{r}c}(p,x) \\
+&amp; = \run{\run{c}p}x\end{split}\]</div>
+</section>
+<section id="compile-time-code-execution">
+<h2>Compile-time code execution<a class="headerlink" href="#compile-time-code-execution" title="Permalink to this headline"></a></h2>
+<p>We want to execute code that runs at compile time, e.g. reading a blob of data to be included as a literal. Clearly this code executes on the host, with the same filesystem as the rest of the source code.</p>
+<p>We may also want to read configuration, e.g. the target platform properties (word size, endianness, etc.).</p>
+<p>Also we want to do computations with no runtime inputs, like 1+2.</p>
+</section>
+<section id="compiler-ways">
+<h2>Compiler ways<a class="headerlink" href="#compiler-ways" title="Permalink to this headline"></a></h2>
+<p>Some options are called “compiler ways”. They can be combined (e.g.
+threaded + debugging). The main issue is they affect the ABI.</p>
+<ul class="simple">
+<li><p>use the multi-threaded runtime system or not</p></li>
+<li><p>support profiling or not</p></li>
+<li><p>use additional debug assertions or not</p></li>
+<li><p>use different heap object representation (e.g. <code class="docutils literal notranslate"><span class="pre">tables_next_to_code</span></code>)</p></li>
+<li><p>support dynamic linking or not</p></li>
+</ul>
+<p>Depending on the selected way, the compiler produces and links appropriate
+objects together. These objects are identified by a suffix: e.g. <code class="docutils literal notranslate"><span class="pre">*.p_o</span></code> for an
+object built with profiling enabled; <code class="docutils literal notranslate"><span class="pre">*.thr_debug_p.a</span></code> for an archive built with
+multi-threading, debugging, and profiling enabled. See the gory details on the
+<a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/compiler-ways">wiki</a>.</p>
+<p>Installed packages usually don’t provide objects for all the possible ways as it
+would make compilation times and disk space explode for features rarely used.
+The compiler itself and its boot libraries must be built for the target way.</p>
+</section>
+<section id="compiler-memory-management">
+<h2>Compiler memory management<a class="headerlink" href="#compiler-memory-management" title="Permalink to this headline"></a></h2>
+<p>For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
+<p>Overall I don’t see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
+</section>
+<section id="documentation-generator">
+<h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this headline"></a></h2>
+<p>The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There’s regex-based search, and special searches for identifiers.</p>
+</section>
+<section id="language-server">
+<h2>Language server<a class="headerlink" href="#language-server" title="Permalink to this headline"></a></h2>
+<p>For integration with VSCode and other editors.</p>
+</section>
+<section id="notebooks">
+<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline"></a></h2>
+<p>Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.</p>
+<p>But, jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code”, no information on what cell it’s from.
+So we would have to hack jupyter to get this to work.</p>
+<p>The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a “soft_reset” message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it’s the same as the previous execution - I don’t know if sending all the code is much of a bottleneck.</p>
+<p>For now the imperative approach seems fine.</p>
+</section>
+<section id="dynamic-loading">
+<h2>Dynamic loading<a class="headerlink" href="#dynamic-loading" title="Permalink to this headline"></a></h2>
+<p>loading code at runtime
+- typecheck, JIT, etc.
+- return function pointer
+the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through the interpreter</p>
+<p>Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Code-Generation.html" class="btn btn-neutral float-left" title="Code generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Continuations.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
