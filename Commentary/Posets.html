@@ -62,6 +62,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#constraints">Constraints</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pseudo-elements">Pseudo-elements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#combinations">Combinations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sets-as-posets">Sets as posets</a></li>
 </ul>
 </li>
 </ul>
@@ -167,8 +168,7 @@ One-to-many: the converse of a function, again just use the function.</p>
 </pre></div>
 </div>
 <p>There’s also Zarf’s Precedes thing:</p>
-<blockquote>
-<div><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span> <span class="kt">P</span> <span class="kt">A</span> <span class="kt">B</span> <span class="ow">=</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span> <span class="kt">P</span> <span class="kt">A</span> <span class="kt">B</span> <span class="ow">=</span>
   <span class="kr">if</span> <span class="kt">A</span> <span class="n">subsetOf</span> <span class="kt">B</span>
     <span class="n">setR</span> <span class="kt">P</span> <span class="kt">A</span> <span class="p">(</span><span class="kt">B</span> <span class="nf">\</span> <span class="kt">A</span><span class="p">)</span>
   <span class="kr">else</span> <span class="kr">if</span> <span class="kt">B</span> <span class="n">subsetOf</span> <span class="kt">A</span>
@@ -179,22 +179,21 @@ One-to-many: the converse of a function, again just use the function.</p>
     <span class="ne">error</span> <span class="s">&quot;no idea what to do here&quot;</span>
 </pre></div>
 </div>
-</div></blockquote>
 <p>b covers a: no element c exists such that a &lt; c &lt; b</p>
 <p>a right above b: a &gt; b and forall c &gt; b, c &gt;= a</p>
 </section>
 <section id="pseudo-elements">
 <h3>Pseudo-elements<a class="headerlink" href="#pseudo-elements" title="Permalink to this headline"></a></h3>
-<p>Although they might not exist in the set, you can always talk about:</p>
+<p>Although they might not exist in the poset, you can always talk about:</p>
 <p>meet A: upper bound of lower bounds of A
 join A: lower bound of upper bounds of A</p>
-<p>To put the meet/join in the set use something like</p>
+<p>To put the meet/join in the poset use something like</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prio</span> <span class="kt">P</span> <span class="n">x</span>
 <span class="nf">elemR</span> <span class="kt">P</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">meet</span> <span class="kt">A</span>
 </pre></div>
 </div>
-<p>greatest element: join/upper bound of universal set
-least element: meet/lower bound of universal set</p>
+<p>greatest element: join/upper bound of all elements
+least element: meet/lower bound of all elements</p>
 </section>
 <section id="combinations">
 <h3>Combinations<a class="headerlink" href="#combinations" title="Permalink to this headline"></a></h3>
@@ -205,6 +204,10 @@ least element: meet/lower bound of universal set</p>
 <li><p>ordinal sum</p></li>
 <li><p>disjoint union</p></li>
 </ul>
+</section>
+<section id="sets-as-posets">
+<h3>Sets as posets<a class="headerlink" href="#sets-as-posets" title="Permalink to this headline"></a></h3>
+<p>Sets form a poset under the subset relation, so should be possible to use all the poset operations.</p>
 </section>
 </section>
 </section>

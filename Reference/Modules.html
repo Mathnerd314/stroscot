@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
@@ -139,6 +140,12 @@ with D { with C { a } }
 </pre></div>
 </div>
 <p>Sometimes it is necessary to access internal members, so they are actually still accessible with <code class="docutils literal notranslate"><span class="pre">C.__internal.b</span></code> .</p>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">with</span></code> on an argument with the dot syntax: <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">.</span> <span class="pre">=</span> <span class="pre">...</span></code> translates to <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">with</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>. This is an abbreviation:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="o">.</span> <span class="ow">-&gt;</span>  <span class="n">ary</span>  <span class="o">//</span> <span class="n">syntax</span>
+<span class="nf">f</span> <span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="o">.</span><span class="p">}</span><span class="ow">=</span><span class="n">x</span><span class="p">;</span> <span class="n">ary</span><span class="p">}</span> <span class="o">//</span> <span class="n">namespace</span> <span class="n">unpack</span>
+<span class="nf">f</span> <span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">ary</span><span class="p">}</span>       <span class="o">//</span> <span class="n">plan</span> <span class="n">old</span> <span class="n">symbol</span>
+</pre></div>
+</div>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline"></a></h2>
@@ -154,6 +161,15 @@ with D { with C { a } }
 <h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline"></a></h3>
 <p>The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>
 <p>Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>{a, b, c} = import &quot;Alphabet&quot;          # import a, b, c from Alphabet
+{a, b, c=d} = import &quot;Alphabet&quot;  # import a, b, c from Alphabet, import ‘c’ as ‘d’
+
+( . ) = import &quot;Alphabet&quot;     # import * from Alphabet
+{ . } = import &quot;Alphabet&quot; # import * from Alphabet
+
+Alphabet = import &quot;Alphabet&quot; # import Alphabet, Alphabet.X
+</pre></div>
+</div>
 </section>
 </section>
 <section id="overrides">

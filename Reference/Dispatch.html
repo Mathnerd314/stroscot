@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
@@ -235,10 +236,11 @@
 * Conversions should be total, otherwise they are simply replacing one error with another error.
 * Also they should be injective, e.g. int32 <a class="reference external" href="https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double">can</a> be converted to float64, but int64 cannot.</p>
 <p>Without these rules it is easy to get into trouble where the overloading is ambiguous.</p>
+<p>TODO: or maybe Julia promotion/conversion <a class="reference external" href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#conversion-and-promotion">design</a> is sufficient.</p>
 </section>
 <section id="equality">
 <h2>Equality<a class="headerlink" href="#equality" title="Permalink to this headline"></a></h2>
-<p>Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual.</p>
+<p>Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.</p>
 </section>
 </section>
 
