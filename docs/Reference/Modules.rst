@@ -58,6 +58,14 @@ Module exports can similarly be limited:
 
 Sometimes it is necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
 
+You can use ``with`` on an argument with the dot syntax: ``f . = ...`` translates to ``f x = with x { ... }``. This is an abbreviation:
+
+::
+
+  f . ->  ary  // syntax
+  f x -> {.}=x; ary} // namespace unpack
+  f x -> x.ary}       // plan old symbol
+
 Parameters
 ==========
 
@@ -80,6 +88,17 @@ Imports
 The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import "bar", the compiler will look for dir1/dir2/bar, and import "../bar" would be dir1/bar.
 
 Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.
+
+
+::
+
+  {a, b, c} = import "Alphabet"          # import a, b, c from Alphabet
+  {a, b, c=d} = import "Alphabet"  # import a, b, c from Alphabet, import ‘c’ as ‘d’
+
+  ( . ) = import "Alphabet"     # import * from Alphabet
+  { . } = import "Alphabet" # import * from Alphabet
+
+  Alphabet = import "Alphabet" # import Alphabet, Alphabet.X
 
 Overrides
 =========

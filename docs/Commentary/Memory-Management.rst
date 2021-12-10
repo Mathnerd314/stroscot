@@ -1,6 +1,11 @@
 Memory management
 #################
 
+static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong. Stroscot is not conservative by default - it will simply output a warning. This can be treated as an error like any other warning.
+
+Another reason Rust has an unsafe alter ego is that the underlying computer hardware is inherently unsafe. If Rust didn’t let you do unsafe operations, you couldn’t do certain tasks. Rust needs to allow you to do low-level systems programming, such as directly interacting with the operating system or even writing your own operating system. Working with low-level systems programming is one of the goals of the language. Let’s explore what we can do with unsafe Rust and how to do it.
+
+
 The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory leaks are a pervasive problem, in general there is no real solution besides profiling and buying more RAM. Stroscot can prove memory will not be accessed in the future and hence free it, with a more precise analysis than traditional GC. On the other hand use-after-free and double free can be statically checked for pointers, and aren't a problem at all for the rest of the language because Stroscot frees automatically.
 
 

@@ -1,10 +1,40 @@
 Term rewriting
 ##############
 
+Down with functions
+===================
+
+Haskell and other functional programming languages have had great success. But there's a dirty secret: the programs you can write with these languages are restricted. In particular the evaluation strategy doesn't have flexible semantics.
+
+For example see the program from `this old Usenet post <https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ>`):
+
+::
+
+  myand False x = False
+  myand x False = False
+  myand True True = True
+
+Ideally ``myand`` should be defined with parallel semantics, so that ``myand undefined False = False``. But Haskell defines evaluation as trying the rules in order, so the first equation evaluates ``undefined`` and evaluation results in an error.
+
+In Stroscot we have both parallel and sequential matching. The sequential matching is straightforward to implement as it is simply copying the implementation from Haskell and friends. The parallel matching is more difficult - for a proper explanation of the semantics we have to shift the paradigm from functions to term rewrites.
+
+Menagerie
+=========
+
+There are various types of behavior which show up in a TRS, which require different handling.
+
+* convergent (confluent and terminating) - These include typed systems such as the simply typed lambda calculus. For these, the result is the same no matter how they are reduced. So the focus is on do the reduction efficiently, compiling to fast assembly and/or doing optimal reduction to reduce in the smallest number of steps.
+* cycles - The untyped lambda calculus has cycles, e.g. ``Omega = let w=\x.x x in w w`` reduces to itself and :cite:`venturiniReductionGraphsLambda1983` shows a 6-cycle ``M M I``. Similarly commutativity ``a + b = b + a`` generates cycles. If we are able to detect these then the solution is to collapse the SCC into a single term. The literature for commutativity uses a (congruence-)class-rewriting system - it is split into rules R and (reversible) equations S, and computes R/S (R mod S). The term at the end is considered a normal form because only S rules apply. So ``<Omega>`` and ``<a + b>`` would be normal forms.
+* infinitely expanding terms - for example ``x = 1 :: x`` or ``let t = \x. x x x in t t``. If reduction does not end in a normal form SCC, then the sequence of terms must be expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s (otherwise since there are only finitely many terms of size < s, there would be a cycle and it would be a normal form SCC). Here the idea is to first extend the computation to the limit, if it exists - an infinite normal form defined as a solution to a recurrence equation. So ``x = 1 :: x`` is already in a normal form, the second might resolve to ``x = x t``. Then this infinite term is computed in chunks and fed to the surrounding context (laziness).
+
+   focus is on trying all reductions of terms and finding a normal form if it exists.
+
 Normal forms
 ============
 
-In a general TRS the notion of "value" is not well-defined: random evaluation strategies will give different results. We want there to be no privileged evaluation strategy - we always reach the same result. The weakest property that guarantees this is unique normal forms with respect to reduction (UN→), which is that if a term reduces to two normal forms then the normal forms are identical. A program naturally falls into error terms - these can be modeled by making errors reduce to themselves (hence they are not normal forms but omega normal forms - the class of terms including normal forms and terms which reduce to themselves).
+In a general TRS the notion of "value" is not well-defined: random evaluation strategies will give different results. We want there to be no privileged evaluation strategy - we always reach the same result. The weakest property that guarantees this is unique normal forms with respect to reduction (UN→), which is that if a term reduces to two normal forms then the normal forms are identical.
+
+But a program naturally falls into error terms - these can be modeled by making errors reduce to themselves (hence they are not normal forms but omega normal forms - the class of terms including normal forms and terms which reduce to themselves). However UN→ is not sufficient for this, because error terms are not normal forms.
 
 Since we model the program as generating an infinite data structure for I/O we extend this to uniqueness of infinite normal forms. Bohm reductions reduce all terms without head normal forms (i.e. those that perpetually have a redex in the head position, i.e. are root-active) to a bottom. :cite:`kennawayTransfiniteReductionsOrthogonal1991` Really we want uniqueness of the Bohm tree and not just uniqueness of normal forms.
 
@@ -137,7 +167,7 @@ Q: can normalizing be as efficient as strict
 profiling, other optimization tricks
 
 
-A list List[Nat]. In a strict language ADTs are finite. In lazy, we might accept infinite lists (generators). We want precise types: the finite data structure and its infinite counterpart ARE DIFFERENT DATATYPES. Only discardable (weakenable) boxes can contain infinite structures, so uList. (Nat + !w List) is an infinite list, while uList. (Nat + List) is a strict list. Extends in the obvious manner to more complicated data structures. With subtyping you can use a finite list with an infinite list transformer.
+A list List[Nat]. In a strict language ADTs are finite. In lazy, we might accept infinite lists (generators). We want precise types: the finite data structure and its infinite counterpart ARE DIFFERENT DATATYPES. Only discardable (weakenable) boxes can contain infinite structures, so uList. (Nat + !w List) is an infinite list, while uList. (Nat + List) is a strict list. Extends to more complicated data structures. With subtyping you can use a finite list with an infinite list transformer.
 
 UNIX pipes. "yes fred | less" works fine, but "yes fred | sort | less" is an infinite loop, because yes fred is infinite and sort is strict. For finite streams the simple semantics of pipes, namely
 1) First program generates output
@@ -162,3 +192,21 @@ Given a set V of variable symbols, a set C of constant symbols and sets Fn of n-
 Using an intuitive, pseudo-grammatical notation, this is sometimes written as: t ::= x | c | f(t1, ..., tn). Usually, only the first few function symbol sets Fn are inhabited. Well-known examples are the unary function symbols sin, cos ∈ F1, and the binary function symbols +, −, ⋅, / ∈ F2, while ternary operations are less known, let alone higher-arity functions. Many authors consider constant symbols as 0-ary function symbols F0, thus needing no special syntactic class for them.
 
 A term denotes a mathematical object from the domain of discourse. A constant c denotes a named object from that domain, a variable x ranges over the objects in that domain, and an n-ary function f maps n-tuples of objects to objects. For example, if n ∈ V is a variable symbol, 1 ∈ C is a constant symbol, and add ∈ F2 is a binary function symbol, then n ∈ T, 1 ∈ T, and (hence) add(n, 1) ∈ T by the first, second, and third term building rule, respectively. The latter term is usually written as n+1, using infix notation and the more common operator symbol + for convenience.
+
+Higher-order matching
+=====================
+
+Handling lambdas in RHSs is fairly straightforward, just reduce them away when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction. Executing a rule ``l -> r`` on a term ``t`` solves the equation ``t = C[lθ]`` and replaces it with ``C[rθ]``.
+
+Finding the contexts ``C`` is fairly straightforward, just enumerate all the subterms of ``t``. But solving the equation ``s = lθ`` is an instance of higher-order unification (specifically higher-order matching).
+
+Higher order matching is decidable for the simply typed lambda calculus. But the proof is of the form "the minimal solution is of size at most 2^2^2^2..., the number of 2's proportional to the size of the problem". There are 3 transformations presented in the proof which reduce a larger solution to a smaller solution. These might be usable to prune the search tree. But at the end of the day it's mostly brute-force.
+
+The proof relies on some properties of the STLC, namely normalization and that terms have a defined eta long form (canonical form).
+
+Dispatch
+========
+
+The standard vtable implementation of Java/C++ is out. TODO: check out pattern dispatch paper
+
+

@@ -5,6 +5,7 @@ Language Reference
   :maxdepth: 2
 
   Syntax
+  Values
   Library
   Fexprs
   Modules

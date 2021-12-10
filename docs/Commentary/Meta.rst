@@ -147,14 +147,14 @@ The four functions:
 * Getting started  (system calls these "tutorials") - overview information for newcomers, learning oriented
 * how-to guides - specific tasks / goals, e.g. solve specific error messages
 * technical reference - describe the machinery, with as little fluff as possible
-* explanation - understanding, explain the possible alternatives and why a choice was made
+* commentary/explanation - understanding, explain the possible alternatives and why a choice was made
 
 The categorization procedure:
 * Does it describe specific actions the reader should take (1), or is it theoretical (2)?
 * Is it an exploratory piece of art (A), or is it a descriptive quick-reference (B)?
 * 1A: getting started
 * 1B: how-to guide
-* 2A: rationale
+* 2A: commentary
 * 2B: reference
 
 Quotes before commas

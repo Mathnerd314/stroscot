@@ -15,7 +15,7 @@ Value representation
   Object = (cell : Cell, unpack : Cell -> a)
   pack : a -> Object
 
-The memory representation of a value is defined by an overloaded ``pack`` function. The result of pack is an *object*, a tuple containing a cell and a matched unpack function to read the value back from the cell. Usually ``unpack`` will be a function pointer and Stroscot can use constant propagation to optimize it out of the object.
+The memory representation of a value is defined by an overloaded ``pack`` function. The result of pack is an *object*, a tuple containing a cell and a matched unpack function to read the value back from the cell. Usually ``unpack`` will be a function pointer and Stroscot can use constant propagation to optimize it out of the object. In the worst case ``unpack`` contains a reference to the full value and Stroscot will use its default value representation.
 
 Cells are contiguous arrays of bytes. They can be reallocated and copied freely by the runtime. Cells are garbage collected, deallocated automatically when the cell is no longer used/accessible. Cells have a mask of unused bits to allow making holes. For example ``010`` masked with ``101`` produces ``0*0``, moving 3 bits. The runtime is free to use the center bit for garbage collection purposes.
 
@@ -26,7 +26,7 @@ For correctness we require ``unpack (pack x) = x``. Using this constraint we can
 Pointers
 ========
 
-Pointers provide a low-level API for interfacing with the OS or other languages (mainly C), an unavoidable task in most programs. To use them you just have to import the module, there is no unsafe block.
+Pointers provide a low-level API for interfacing with the OS or other languages (mainly C), an unavoidable task in most programs. To use them you have to import the ``Pointer`` module.
 
 Concept
 -------
@@ -36,17 +36,15 @@ A pointer is a numeric index into a global mutable array, ``Map Word (BitIdx -> 
 Operations
 ----------
 
-Various functions record different statuses for chunks of memory. Memory functions check the status of memory before operating (prevention of double free / access to undefined memory). Inaccessible memory cannot be read/written (prevention of use after free).
+Various functions record different statuses for chunks of memory. Memory functions check the status of memory before operating, hence preventing common errrors like double free, access to undefined memory, null pointer dereferencing, etc. Similarly inaccessible memory cannot be read/written, preventing use after free.
 
-Most addresses will not be allocated (status Free/Unknown), hence the array is sparse in some sense. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages.
-
-It's a little more complicated than simple sparsity because there are actually two pairs of operations, reserve/release to manage virtual address space and commit/decommit for backing pages.
+Most addresses will not be allocated (status Free/Unknown), hence the array is sparse in some sense. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It's a little more complicated than simple sparsity because there are many different statuses and the operations overlap.
 
 In practice fixed-address allocation is never used and instead there are ``mmap NULL`` and ``malloc`` which allocate memory with system-chosen location. This means that the program behavior must be observationally equivalent no matter what addresses the system picks. The limitations on the system's choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn't have to result in equivalent behavior so it can be ignored.)
 
 There is also the C library API alloc/realloc/free for non-page-sized allocations.
 
-The memory management system uses the pointer API internally, just with a special tag to avoid overlapping with user data.
+The memory management system uses the pointer API internally, just with a special status tag to avoid overlapping with user data.
 
 Optimizing access
 -----------------
@@ -60,12 +58,12 @@ Destructors
 
 Destructors allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets.  A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
 
-Stroscot checks a leak property for each destructor ``x`` that exactly one of the following holds:
+Stroscot checks a no-leak property for each destructor ``x`` that exactly one of the following holds:
 * ``lastUse x`` is called infinitely often, returning false each time
 * ``lastUse x`` returns true and is never called thereafter
 * ``useForever x`` is called
 
-If the control flow does not allow this leak property to hold, Stroscot will error.
+If the control flow does not allow this no-leak property to hold, Stroscot will error.
 
 ::
 
@@ -80,7 +78,7 @@ If the control flow does not allow this leak property to hold, Stroscot will err
     else
       error
 
-TODO: can it be shared across threads
+TODO: can it be shared. need some way to coordinate control flow analysis across threads
 
 Finalizers
 ==========
@@ -103,7 +101,7 @@ The semantics is that ``free`` will be called as soon as it is known that ``use`
     else
       reduce (free {continuation = c})
 
-Destructors are very similar to finalizers. In fact we can use them to implement *prompt* finalizers, that guarantee ``free`` is called immediately after some ``use``:
+Destructors are very similar to finalizers. In fact we can use destructors to implement *prompt* finalizers, that guarantee ``free`` is called immediately after some ``use``:
 
 ::
 
@@ -131,16 +129,16 @@ However, a prompt finalizer would give an error on programs such as the followin
   else
     print "B"
 
-Instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
+With a normal finalizer, instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
 
 Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
 * ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
 * every operation is modified to call ``use``
 * the prompt finalizer is replaced with a finalizer
 
-The finalizer program compiles identically to the original, but is more robust to changes.
+The finalizer program compiles identically to the original. Note that this transformation is a bit fragile though - if the ``use`` corresponding to the ``free`` is deleted, the lifetime of the finalizer is shortened and depending on the program structure the point at which ``free`` should be called may become hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases.
 
-Finalizers run in the order of creation, first created first.
+If multiple finalizers simultaneously become able to call ``free``, the finalizers are run in the order of creation, first created first.
 
 References
 ==========
@@ -150,7 +148,9 @@ An reference is a symbolic index into a global associative array of objects, ``M
 Pointer conversion
 ------------------
 
-A reference has a pointer associated with it, but GC can move the reference and change the address. So operations using the pointer are wrapped, ``withPointer ref { \address -> doWhatever address }``, locking the object in place for the duration of the operation. The alignment of the pointer can be specified when the reference is constructed, ``var x { alignment = ... }``. The default is no alignment, to allow packing data compactly, although the MMS may use aligned locations for speed.
+A reference has at least one pointer associated with it. There can be multiple copies of the data hence multiple pointers. GC can move/copy the reference so the set of pointers varies over time.
+
+Often operations are simpler with pointers, so you can access the pointer from a wrapped block, ``withPointer ref { \address -> doWhatever address }``, locking the object in place for the duration of the operation. The alignment of the pointer can be specified when the reference is constructed, ``var x { alignment = ... }``. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.
 
 Types
 -----
@@ -166,9 +166,9 @@ _________
   # if the value is a list
   x[0] # 1
 
-An immutable reference is fixed once created, i.e. it cannot be written. It can be freely shared across threads.
+The contents of an immutable reference are fixed once created, i.e. an immutable reference cannot be written. It can be freely shared across threads.
 
-Reading uses the memory in-place. But threads might create multiple copies of the data.
+Reading generally uses the memory in-place. It is almost a pure operation, except that the read operation prolongs the lifetime of the reference, hence for GC purposes the read operation must have a definite timestamp.
 
 Variable
 ________

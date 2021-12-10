@@ -84,7 +84,7 @@ We can specify some common properties this way:
 
 There's also Zarf's Precedes thing:
 
-  ::
+::
 
     precedes P A B =
       if A subsetOf B
@@ -103,20 +103,20 @@ a right above b: a > b and forall c > b, c >= a
 Pseudo-elements
 ---------------
 
-Although they might not exist in the set, you can always talk about:
+Although they might not exist in the poset, you can always talk about:
 
 meet A: upper bound of lower bounds of A
 join A: lower bound of upper bounds of A
 
-To put the meet/join in the set use something like
+To put the meet/join in the poset use something like
 
 ::
 
   prio P x
   elemR P x = meet A
 
-greatest element: join/upper bound of universal set
-least element: meet/lower bound of universal set
+greatest element: join/upper bound of all elements
+least element: meet/lower bound of all elements
 
 Combinations
 ------------
@@ -126,3 +126,8 @@ Combinations
 - direct product
 - ordinal sum
 - disjoint union
+
+Sets as posets
+--------------
+
+Sets form a poset under the subset relation, so should be possible to use all the poset operations.

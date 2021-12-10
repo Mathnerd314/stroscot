@@ -182,7 +182,9 @@ The default conversions are chosen follows:
 
 Without these rules it is easy to get into trouble where the overloading is ambiguous.
 
+TODO: or maybe Julia promotion/conversion `design <https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#conversion-and-promotion>`__ is sufficient.
+
 Equality
 ========
 
-Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual.
+Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.

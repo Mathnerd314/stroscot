@@ -17,7 +17,8 @@ Others:
 * z/Architecture: really expensive, weird OS. Verdict: C backend.
 * SPARC: It's end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
 * 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
-* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems better to have a backend targeting C.
+* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority.
+* LLVM: The bitcode format is worth targeting at some point.
 
 From a design perspective supporting 2 architectures is not much different from supporting 10, it's just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
 

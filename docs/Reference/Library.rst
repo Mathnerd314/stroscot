@@ -3,6 +3,39 @@ Library
 
 Stroscot will support the standard libraries of other languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination.
 
+performance
+  Java/JVM
+    profiling, dynamic compilation, speculative optimization/deoptimization, escape analysis
+  C, C++
+    close to hardware, low level
+  Julia - faster than Python, but JIT uses many slow trampolines
+  Go - scalable concurrency (although slower than C++)
+  Javascript - fast JIT
+  Objective C - faster than Swift
+  Prolog - slow constraint solver
+libraries
+  Python - machine learning, extending/embedding
+  Julia - concurrency, parallelism, C+Fortran+Python FFIs
+  R - statistics and data analysis
+  MATLAB, Mathematics - IDE, large codebase
+  Erlang - distributed, fault-tolerant, reliable, soft real-time, concurrent database
+  C - large number of libraries
+  C++ - game engines, standard methods to distribute application binaries
+  C# - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin) and embedded systems (.NET Micro Framework).
+  Javascript - browser
+  Swift - Apple
+  Prolog, Mercury - logic programming is not used anymore in artificial intelligence, generic constraint solver
+  F# - functional programming that runs on CLI
+  Rust - most loved for memory safety
+syntax
+  C# - best designed
+  Python - whitespace
+  Elixir - improved Erlang
+  TypeScript - JS with static typing
+  PHP - no design at all
+  Objective C - weirder than C++
+  Haskell - poor design
+
 Standard libraries:
 * `Rust <https://github.com/rust-lang/rust/tree/master/library>`__ (MIT + Apache 2.0)
 * `Go <https://github.com/golang/go/tree/master/src>`__ (BSD-style)
@@ -31,10 +64,13 @@ For this, the proposals of the various languages are useful, as they encapsulate
 
 TODO: go through these, unfortunately there’s a lot
 
-Numbers
-=======
 
-In the mathematical world there are integers and real numbers, which have well-defined arithmetic operations (besides division by 0). In the computer world we do not have either of these luxurious spaces, but rather various formats for numbers which represent subsets of the space.
+    Primitive types permit values to be created by writing literals. For example, 123I is a literal of type Integer.
+
+Numerics
+========
+
+In the computer world there are various ways to represent numeric spaces - we call each representation a format, a mapping from the mathematical set to a term.
 
 Integers
 --------
@@ -43,7 +79,6 @@ Integers
 
   <div style="display: none">
   \[
-  \newcommand{\seq}[1]{{\langle #1 \rangle}}
   \newcommand{\abs}[1]{{\vert #1 \rvert}}
   \newcommand{\sem}[1]{[\![ #1 ]\!]}
   \]
@@ -56,7 +91,7 @@ With these extended ranges, the key difference between "signed" and "unsigned" i
 
 Division for all of these formats is defined using the `division algorithm for Euclidean domains <https://en.wikipedia.org/wiki/Euclidean_domain>`__. For :math:`a, b \mid b \neq 0`, :math:`a divMod b` produces :math:`(q,r)` such that :math:`a = bq + r` and the norm :math:`\abs{r}` is minimized. This gives "round to nearest" behavior and is different from most other programming languages, e.g. ``11 divMod 4 = (3,-1)`` rather than ``(2,3)``. But mathematically it has nice properties. Ties are broken by choosing positive :math:`r`, this amounts to tweaking the norm function so :math:`\abs{+x} = x - 0.1`. We can also consider other variants like setting :math:`\abs{-x} = \infty`, this gives Euclidean division. For a complicated split-range number number format, the computation will probably have to use brute force to determine the result. The range of :math:`q` is another question, most likely we have to give it as an argument.
 
-This division is different from `most other programming languages <https://en.wikipedia.org/wiki/Modulo_operation#In_programming_languages>`__. In particular the C / assembly behavior of truncation is just wrong and cannot be emulated with a norm function - there is no consistent ranking giving ``1 divmod 2 = (0, 1)``, ``-1 divmod 2 = (0, -1)``. But of course C's behavior can still be defined for the relevant formats, it just is not universal.
+This division is different from `most other programming languages <https://en.wikipedia.org/wiki/Modulo_operation#In_programming_languages>`__. In particular the C / assembly behavior of truncation is just plain wrong from a mathematical standpoint, and cannot be emulated with a norm function - there is no consistent ranking giving ``1 divmod 2 = (0, 1)``, ``-1 divmod 2 = (0, -1)``. But of course C's behavior can still be defined for the relevant formats, it just is not universal.
 
 Fractions
 ---------
@@ -77,20 +112,88 @@ For compatibility with other languages we can define narrowed arithmetic operati
 
 Floating points numbers don't have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, ``(+) :: f32 -> f32 -> f32`` and so on.
 
-Literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. 0001 cannot be stored in a byte (type must be able to contain 9999).
+
+
+Arrays
+======
+
+::
+
+  assert $ arr[0] == a
+  assert $ length arr == 3
+
+Mutable arrays usually means an immutable array containing mutable values, (i.e., not resizable) but it could also mean an array stored in a variable (more similar to Java's ArrayList or C++ std::vector).
+
+::
+
+  arr = mut [1,2,3]
+  assert $ arr[1] == 2
+  arr[1] := 4
+  assert $ arr[1] == 4
+
+Slices can be constructed by indexing by an integer range, or specifying a start and length. The magic values ``start`` / ``end`` are defined:
+
+::
+
+  arr[1..7] # simple integer range
+  arr[start..end] # start=1, end=length arr
+  arr[start..] # range is clipped to end
+  slice(list, 0, 2) # list[0..1]
+  slice(list, a, length list - b)
+
+
 
 Iterators
 =========
 
-lazy iterators - aren't these just linked lists?
+Haskell has ``Foldable``, the main function being ``foldr :: (a -> b -> b) -> b -> t a -> b``, which is equivalently ``t a -> (a -> b -> b) -> b -> b``, the latter part being the `Boehm-Berarducci encoding <https://okmij.org/ftp/tagless-final/course/Boehm-Berarducci.html>`__ of ``[a]``. So really ``Foldable t`` is just a function ``toList : t a -> [a]``. ``foldMap`` has a more general type that would allow a parallel fold, but the docs say that the fold is right-associative, so it's strictly this linked list. We might as well call the class ``ListLike``.
 
-Haskell Foldable / Traversable
+Iterators are very similar to linked lists, but they have control effects - the next item requires executing a computation to extract it.
 
-some way to get imperative for-in loops.
+::
+
+  Iterator Item : type = Nil | Cons { data : Item, next : IO Iterator }
+  getIterator : IO (Iterator Int)
 
 Rust: https://doc.rust-lang.org/std/iter/trait.Iterator.html
+Java: https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
 
-Clojure transducers:
+
+Part of the issue with the interface is whether executing an iterator multiple times is allowed - i.e. something like
+
+::
+
+   Cons {next,data} <- getIterator
+   Cons {next2,data} <- next
+   Cons {next3,data} <- next
+
+In the general case the iterator cannot be reused - next should be treated as a linear value. But in other cases it's more specific.
+
+Iterators then implement a for-of loop:
+
+::
+
+  for(x : getIterator) {
+    act
+  }
+
+Haskell's ``Traversable`` has ``traverse :: Applicative f => (a -> f b) -> t a -> f (t b)`` which extends this further, to for loops which return values:
+
+::
+
+  s = for (x : t) {
+    act
+    return x'
+  }
+
+Clojure transducer is a function that takes a foldl operation and produces another one, i.e. ``transducer : ((b -> a-> b) -> b -> a -> b``
+
+::
+
+  map f = \foldr  ->
+
+ transducers:
+
 https://clojure.org/news/2012/05/15/anatomy-of-reducer
 https://cognitect.com/blog/2014/8/6/transducers-are-coming
 https://clojure.org/reference/transducers
@@ -101,7 +204,7 @@ Strings
 
 The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer of bytes together with a length. There can be different encodings: UTF8, UTF16, UTF32, or some other encodings like Shift JIS or Big5. UTF8 is the most common so it should be the default, `UTF-8 everywhere <https://utf8everywhere.org/>`__.
 
-Normalization to NFC is an operation. Refinement type for always-normalized, let operations take a parameter.
+Normalization to NFC is an operation. Refinement type for always-normalized, overloaded operations.
 
 Operations can take place through code points, graphemes, bytes (code units, but utf-8 everywhere so there’s no difference). Provide each type unless there's a good reason not to. Moving forward or backward in a text editor would use graphemes. Writing a file would use bytes.
 
@@ -117,10 +220,6 @@ Invalid characters can be handled different ways according to a mode parameter: 
 * hierarchical streams/generators.
 * https://juliastrings.github.io/utf8proc/
 
-Time
-====
-
-The JSR-310 `ThreeTen <https://www.threeten.org/>`__ library in `Java 8 <https://docs.oracle.com/javase/16/docs/api/java/time/package-summary.html>`__ seems to have undergone the most peer review.
 
 I/O
 ===
@@ -137,12 +236,12 @@ Errors
 
 Safety - errors in your program lead to error messages, as opposed to unpredictable crashes.
 
-Values
+Poison
 ------
 
-Most errors behave by producing a `poison value <https://llvm.org/devmtg/2020-09/slides/Lee-UndefPoison.pdf>`__. For example ``{}.x`` produces like ``NoSuchAttributeError {} "x"``. Similarly invalid pointer reads return ``InvalidPointer``, rather than crashing the program. Division by zero is handled in the same way, producing ``DivisionByZeroError``. There's also standard poison values like ``undefined`` and ``panic "string"``.
+Most errors behave by producing a `poison value <https://llvm.org/devmtg/2020-09/slides/Lee-UndefPoison.pdf>`__. For example ``{}.x`` produces like ``NoSuchAttributeError {} "x"``. Invalid pointer reads return ``InvalidPointer``, rather than crashing the program. Division by zero is handled in the same way, producing ``DivisionByZeroError``. There's also standard user-accessible poison values like ``undefined`` and ``panic "string"``.
 
-Behind the scenes this requires some work to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal "Segmentation fault" (SIGSEGV). C/C++ `can't handle these easily <https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux>`__ because they are `synchronous signals <https://lwn.net/Articles/414618/>`__ and signal behavior is mostly left undefined, but in fact signals are `fairly well-behaved <https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/>`__ (`OpenSSL <https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48>`__'s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go `allows <https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover>`__ turning (synchronous) signals into "panics" that can be caught with recover.
+This requires some support from the OS to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal "Segmentation fault" (SIGSEGV). C/C++ `can't handle these easily <https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux>`__ because they are `synchronous signals <https://lwn.net/Articles/414618/>`__ and signal behavior is mostly left undefined, but in fact signals are `fairly well-behaved <https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/>`__ (`OpenSSL <https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48>`__'s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go `allows <https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover>`__ turning (synchronous) signals into "panics" that can be caught with recover.
 
 Similarly DIV by 0 on produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. OTOH, UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error definitely requires checking if the argument is zero beforehand - the people that really can't afford this check will have to use the division instruction in the assembly module. But on x86 we can decide between inserting a check and handling the SIGFPE; it'll require testing to see which is faster in typical programs - my guess is the handler, since division by zero is rare.
 
@@ -192,10 +291,71 @@ Another issue with exceptions is handling them. The top-level can throw exceptio
 Concurrency
 ===========
 
-High-level concurrency is implemented with transactions. The syntax is ``atomically { if x { retry }; y := z }``. Transactions nested inside another transaction are elided, so that one big transaction forms.
+In practice the synchronization primitives one can use are a combination of those provided by the OS's scheduler and the atomic operations / memory barriers provided by the hardware. Shared memory uses the memory model of the architecture, so all synchronization methods can be implemented/used according to their semantics.
 
-The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn't retry all the time. Also transactions are serializable.
+Memory model
+------------
 
-Low-level, shared memory uses the memory model of the architecture, so all synchronization methods can be used according to their semantics.
+Implementing the C++ and Java memory models should be no sweat, just add the right fences. Also the Linux memory `model <https://github.com/torvalds/linux/blob/3d5c70329b910ab583673a33e3a615873c5d4115/tools/memory-model/linux-kernel.def>`__
+
+Mutex
+-----
+
+The interface is simple, lock/unlock and make the thread go to sleep if it’s blocked. Java's syntax ``synchronized(o) { ... }`` seems reasonable. Zig's `suggestion <https://github.com/ziglang/zig/blob/53523ef5d0413459bd2eb9d84d2338f2bc49d417/lib/std/Thread/Mutex.zig>`__ ``lock; defer unlock`` makes it harder to reason about when the lock is released. I think ``withLock l { }`` and ``ifLockAvailable l { ... } else { ... }`` seem like the right syntax.
+
+Java's ability to lock any Object is considered a misfeature (by someone, lost the reference), it should be restricted to a lock object.
+
+Mutexes are only useful if threads spend a significant amount of time sleeping. C++ std::mutex is a good cross-platform mutex. On Linux/Mac it's a C pthread mutex and on Windows the Windows mutex. Rust implementation encapsulates the C version.
+
+Rust / `WebKit <https://webkit.org/blog/6161/locking-in-webkit/>`__'s `parking_lot mutexes <https://docs.rs/parking_lot/0.11.2/parking_lot/type.Mutex.html>`__ are also notable. It implements locks and condition variables using a byte-size reference and some global queues. There's still a spinning loop, the number of times to spin before giving up and parking should be optimized for each lock operation. The implementation provides a fairness guarantee, ensuring progress for all threads. It excludes the situation where some threads keep on getting the lock and a loser thread is always just a bit too late and is left out for a very long time. It's not clear what happens if you mix parking lot and standard mutexes.
+
+Then there are Linux kernel internal `atomic x86 operations <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/include/asm/atomic64_64.h>`__ and `lock types <https://www.infradead.org/~mchehab/kernel_docs/locking/locktypes.html>`__. Linus Torvalds `says <https://www.realworldtech.com/forum/?threadid=189711&curpostid=189723>`__ "you should *never ever* think that you're clever enough to write your own locking routines." Essentially, spinlocks are hard to use (`1 <https://matklad.github.io/2020/01/02/spinlocks-considered-harmful.html>`__ `2 <https://mjtsai.com/blog/2020/01/06/beware-spinlocks-in-user-space/>`__), they will waste power and the scheduler will run the busy wait a lot instead of doing real work.
+
+Zig has an adaptive spinlock-futex mutex on Linux without pthreads, it's probably messed up in some way for exactly this reason. But messing around with adaptive mutexes and "test and test-and-set" and ticket spinlocks/mutexes and so forth is fun, as in `this blog post <https://probablydance.com/2019/12/30/measuring-mutexes-spinlocks-and-how-bad-the-linux-scheduler-really-is/>`__.
+
+Wait-free data types
+--------------------
+
+There are a few of these, standard (but complex) implementations.
+
+MVar
+----
+
+``MVar = Full value | Empty (Queue Process)``
+
+Just copy it from Haskell's RTS.
+
+Also interesting are the `barrier <https://hackage.haskell.org/package/extra-1.7.8/docs/Control-Concurrent-Extra.html#t:Barrier>`__ and `IVar <https://hackage.haskell.org/package/data-ivar-0.30/docs/Data-IVar.html>`__.
+
+Channels
+--------
+
+These are queues basically, used for message passing. Copy from Go or Erlang.
+
+Transactional memory
+--------------------
+
+The syntax is simple, ``atomically { if x { retry }; y := z }``. Transactions nested inside another transaction are elided, so that one big transaction forms. The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn't retry all the time. Also transactions are serializable. But high-performance transactions are still a research area. The latest seems to be :cite:`ramalheteEfficientAlgorithmsPersistent2021`, it might be usable. No transaction aborts though.
 
 Mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered. Generally transactions are preferred, because they compose. Transactions matching atomic instructions should compile to the atomic instructions if Stroscot can prove there are no waiting threads to wake up.
+
+Thread pool
+-----------
+
+A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core.
+
+A task represents an asynchronous operation. Tasks don't block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark :cite:`trinderAlgorithmStrategyParallelism1998` is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)
+
+Tasks are queued. They run in fibers which run in the thread pool, but are even lighter memory-wise than fibers.
+
+It's a proven model for maximizing throughput for CPU-bound tasks (high performance computing), and allows very fast context switches to other tasks on the same scheduler thread (zero overhead) - socket servers with only negligible server-side computations. There is not much overhead to start/finish a task besides cache pollution, the need to use memory locations instead of registers, and synchronization. Also tasks are unfair - on a multi-core system, tasks spawn on the same CPU, using an M:N user-mode cooperative scheduler. This improves locality.
+
+Maybe the build system is sufficient for this. Also an event loop for asynchronous network I/O. IOCP on Windows, io_uring on Linux.
+libuv is significantly slower than blocking I/O for most common cases; for example stat is 35x
+  slower when run in a loop for an mlocate-like utility. Memory mapped I/O is a no-go because the page faults block the task's thread. So will always have some blocking operations that need to be run in their own OS thread. Pool should allow specifying desired # of concurrently running tasks as well as max number of OS threads.
+
+Design questions:
+* How do threads get work - pull from single FIFO/priority queue, push to thread's individual queue, or some other approach
+* Where to store task-local data
+
+Relevant: work stealing queues :cite:`leaJavaForkJoin2000` used in Java, `A Java Fork/Joint Blunder <https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf>`__, criticizing Java's framework

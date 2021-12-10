@@ -28,11 +28,6 @@ Line length is a good question. Programming uses fixed-width characters so it's 
 
 Layout improves legibility, Python syntax is often said to be "clean", hence why Stroscot has layout
 
-Values
-------
-
-Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, but liberalized. Floating-point notation for integers. Binary exponents for decimals. Use of format characters besides xob.
-
 Blocks
 ------
 
@@ -45,17 +40,9 @@ It's worth noting that even though monads can be implemented easily, monads are 
 * WriterT is a StateT that's not read
 * Error/Except are handled by poison values
 
-I/O
----
+Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
 
-Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying monads from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar. Take that, monads. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
-
-To see how I/O works, consider printing hello world: ``print "Hi"``. As a task this looks like ``Print "Hi" exit``, where ``exit`` is what happens after (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation, which expands to ``\cont -> Read ref (\v -> Print v cont)``.
-
-Delimited continuations
------------------------
-
-These are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These do have more expressiveness than undelimited continuations. But delimited continuations can be implemented on top like any other monad, so I think the simplicity of the undelimited continuations wins out. With the delimited continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas undelimited continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
+For an example of how natural this is you can look at :ref:`how I/O works <tasks>`.
 
 ApplicativeDo
 -------------
