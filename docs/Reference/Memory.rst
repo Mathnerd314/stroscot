@@ -6,22 +6,31 @@ There are two main models of memory. The concrete model models memory as a an in
 Value representation
 ====================
 
+We don't consider memory a scarce resource, hence pure values can be created and destroyed as needed by the RTS. But the RTS allows controlling the in-memory representation with user-written code.
+
 ::
 
   Bit = 0 | 1
   MaskedBit = Bit | Masked
-  MaskedByte = [0..7] -> MaskedBit
-  Cell = [MaskedByte]
-  Object = (cell : Cell, unpack : Cell -> a)
+  Word = {0..n} -> Bit
+  Addr = Word
+  MaskedWord = {0..n} -> MaskedBit
+  Store = Map Addr MaskedWord
+  Write = Alloc (Size,Align) (Addr -> Write) | Store
+  Read = Map Addr Word
+  Unpack a = Maybe Addr -> Read -> a
+  Object = (Write, Unpack a)
   pack : a -> Object
 
-The memory representation of a value is defined by an overloaded ``pack`` function. The result of pack is an *object*, a tuple containing a cell and a matched unpack function to read the value back from the cell. Usually ``unpack`` will be a function pointer and Stroscot can use constant propagation to optimize it out of the object. In the worst case ``unpack`` contains a reference to the full value and Stroscot will use its default value representation.
+The memory representation of a value is defined by an overloaded ``pack`` function. The result of pack is an *object*, a tuple containing how to write the value to memory and a matched unpack function to read the value back. Usually ``unpack`` will be a function pointer and Stroscot can use constant propagation to optimize it out of the object. In the worst case ``unpack`` captures the full value and Stroscot will use its default representation for the closure.
 
-Cells are contiguous arrays of bytes. They can be reallocated and copied freely by the runtime. Cells are garbage collected, deallocated automatically when the cell is no longer used/accessible. Cells have a mask of unused bits to allow making holes. For example ``010`` masked with ``101`` produces ``0*0``, moving 3 bits. The runtime is free to use the center bit for garbage collection purposes.
+The write procedure may use only fixed/constant addresses or no addresses, in which case the unpack function doesn't get an address. Otherwise the first allocation is considered the base address and is passed to unpack.
+
+Allocations are finite contiguous arrays of bytes. They can be reallocated and moved/copied freely by the runtime, in which case it will run ``pack . unpack``. Allocations are garbage collected, deallocated automatically when the cell is no longer used/accessible. Allocations have a mask of unused bits to allow making holes. For example ``010`` masked with ``101`` produces ``0*0``, spanning 3 bits but only using 2. The maask allows the runtime to use the masked bits for garbage collection purposes.
 
 ``pack`` must always succeed. ``unpack`` can fail or succeed on data not produced by ``pack``, the behavior is irrelevant. ``unpack`` should not depend on the value of any bits masked by ``pack``.
 
-For correctness we require ``unpack (pack x) = x``. Using this constraint we can derive ``unpack`` from ``pack``, or vice-versa, if the format isn't too complicated.
+For correctness we require ``\x -> let (w,u) = pack x in munge u w`` to be the identity function, for a suitable munging function. Using this constraint we can derive ``unpack`` from ``pack``, or vice-versa, if the format isn't too complicated.
 
 Pointers
 ========
@@ -31,7 +40,7 @@ Pointers provide a low-level API for interfacing with the OS or other languages 
 Concept
 -------
 
-A pointer is a numeric index into a global mutable array, ``Map Word (BitIdx -> Status)``. The statuses allow storing metadata. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page. The status is `an ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs`__ .
+A pointer is a numeric index into a global mutable array, ``Map Word (BitIdx -> Status)``. The statuses allow storing metadata. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page. The status is `an ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ .
 
 Operations
 ----------
@@ -51,106 +60,66 @@ Optimizing access
 
 Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. They're both a bit tricky as they have to make assumptions about what pointers foreign code will use and analyze the possible values a dereference may take. But, should be possible.
 
-.. _destructors:
-
-Destructors
-===========
-
-Destructors allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets.  A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
-
-Stroscot checks a no-leak property for each destructor ``x`` that exactly one of the following holds:
-* ``lastUse x`` is called infinitely often, returning false each time
-* ``lastUse x`` returns true and is never called thereafter
-* ``useForever x`` is called
-
-If the control flow does not allow this no-leak property to hold, Stroscot will error.
-
-::
-
-  reduce (NewDestructor c) =
-    f = freshSymbol
-    reduce (c f)
-  reduce (Use f c) =
-    if will_call (Use f) c
-      reduce (c False)
-    else if !(could_call (Use f) c)
-      reduce (c True)
-    else
-      error
-
-TODO: can it be shared. need some way to coordinate control flow analysis across threads
+.. _finalizers:
 
 Finalizers
 ==========
 
-Finalizers are a more relaxed approach to resource management. It is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and a command ``use : Finalizer -> Command``.
+Finalizers are a relaxed approach to prompt resource management. They allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, but do not require explicit marking of the free operation. A finalizer is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and command ``use : Finalizer -> Command`` and ``useForever : Finalizer -> Op Command``.
 
-The semantics is that ``free`` will be called as soon as it is known that ``use`` will no longer be called. The general transformation:
+The semantics is that ``free`` will be called as soon as it is known that ``use`` will no longer be called, unless ``useForever`` is called. ``useForever`` undoes the finalizer and returns the free operation. The general transformation:
 
 ::
 
   reduce (NewFinalizer free c) =
     f = freshSymbol
     transform (c f) {free,f}
+  reduce (Use f c) = c
+  reduce (UseForever f c) = c free
 
   transform : Task -> Task
   transform c =
-    if could_call (Use f) c
+    if will_call (UseForever f) c
+      c
+    else if could_call (Use f) c
       let c' = continuation c
-      c { continuation = transform c' }
+      reduce (c { continuation = transform c' })
     else
       reduce (free {continuation = c})
 
-Destructors are very similar to finalizers. In fact we can use destructors to implement *prompt* finalizers, that guarantee ``free`` is called immediately after some ``use``:
+If multiple finalizers simultaneously become able to call ``free``, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.
 
 ::
 
-  newPromptFinalizer free =
-    d = newDestructor
-    let f = PromptFinalizer free d
-    use f
-    return f
-  use (PromptFinalizer free d) =
-    l = lastUse d
-    if l
-      free
+  a = newFinalizer (print "a")
+  b = newFinalizer (print "b")
 
-However, a prompt finalizer would give an error on programs such as the following:
-
-::
-
-  free = print "Freed."
-  f = newFinalizer free
-  use f
-  b = input Bool
-  if b
-    print "A"
-    use f
+  if randomBool then
+    exit
   else
-    print "B"
+    use a
+    use b
+    exit
 
-With a normal finalizer, instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
+  # when bool is false: ab
+  # when bool is true: ba
 
-Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
-* ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
-* every operation is modified to call ``use``
-* the prompt finalizer is replaced with a finalizer
+Freed on exit
+-------------
 
-The finalizer program compiles identically to the original. Note that this transformation is a bit fragile though - if the ``use`` corresponding to the ``free`` is deleted, the lifetime of the finalizer is shortened and depending on the program structure the point at which ``free`` should be called may become hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases.
-
-If multiple finalizers simultaneously become able to call ``free``, the finalizers are run in the order of creation, first created first.
+Many resources are automatically freed by the OS on exit: memory, file handles, etc. In this circumstance  ``useForever`` can mark the resource as not needing finalization. As an optimization you can call it on every allocated resource once you are on the termination path and know that no further resources will be allocated, or that there are sufficient spare resources that any further allocation can be satisfied without deallocation. But prompt deallocation is the better policy.
 
 References
 ==========
 
-An reference is a symbolic index into a global associative array of objects, ``Map Reference Object``. Operations on references are stateful and include allocation, reading, and perhaps writing. But references can be compared for equality and hashed to an integer. References can be packed to a 64-bit word and unpacked to the identical reference. The value of the word is internal to the memory system but can be assumed to be in pointer format.
+An reference is a symbolic index into a global associative array of objects, ``Map Reference Object``. Operations on references are stateful and include allocation, reading, and perhaps writing. But references can be compared for equality and hashed to an integer. Reference values can be packed to a 64-bit word and unpacked to the identical reference. The value of the word is internal to the memory system but can be assumed to be in pointer format.
 
 Pointer conversion
 ------------------
 
 A reference has at least one pointer associated with it. There can be multiple copies of the data hence multiple pointers. GC can move/copy the reference so the set of pointers varies over time.
 
-Often operations are simpler with pointers, so you can access the pointer from a wrapped block, ``withPointer ref { \address -> doWhatever address }``, locking the object in place for the duration of the operation. The alignment of the pointer can be specified when the reference is constructed, ``var x { alignment = ... }``. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.
+Often operations are simpler with pointers, so you can pin the object to a pointer, ``(address, unpinner) = getPointer ref``. ``unpinner`` is a finalizer that unpins the object after you are finished with the pointer. The alignment of the pointer can be specified when the reference is constructed, ``var x { alignment = ... }``. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.
 
 Types
 -----

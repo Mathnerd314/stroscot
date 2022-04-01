@@ -1,17 +1,41 @@
 Imperative programming
 ######################
 
+Purity
+======
+
+:cite:`pippengerPureImpureLisp1997` compares a pure CBV Lisp to one extended with mutation operators. He presents a problem, an O(n) impure solution, and a pure O(n log n) solution that simulates the impure one with a balanced binary tree. But the key result of the paper is that a pure algorithm in his system will require O(n log n) time. His proof is a combinatorial argument based on the small number of Lisp operations. :cite:`birdMoreHasteLess1997` demonstrate that Haskell can solve the problem in amortized O(n) time, via the use of infinite lazy streams. :cite:`ben-amramNotesPippengerComparison1996` says (without proof) that any problem of the form read-update-write similarly has an efficient lazy stream implemention. This seems to encompass all Haskell 1.0 programs as they use lazy streams for I/O. Generally it seems the thunk update mechanism is powerful enough to simulate imperative programming, it just requires mind-bending contortions to program efficiently as one has to pass around a large self-referential partially evaluated data/control structure. But nobody has formally proved this.
+
+Another way around Pippinger's proof is to provide an O(1) pure "array update" operation. The naive implementation of pure array update copies the array (O(n) update) or maintains a tree structure (O(log n) access time). But :cite:`hudakAggregateUpdateProblem1985` shows that the compiler can search through possible evaluation orders for an evaluation order that never accesses the old version of an array after updating, and transform the program to use O(1) destructive update ("automatic destructive update"). This works for the class of "single-threaded" FP programs, which include all the "natural translations" of imperative programs. Some of :cite:`okasakiPurelyFunctionalData1998`'s data structures can only be used single-threaded as well. Roc seems to be going down this route. For non-single-threaded FP, there is a log(log(n)) lower bound on persistent arrays :cite:`strakaFullyPersistentArrays`, which applies to both lazy and impure programs. So if we use automatic destructive update with a fallback to the log(log(n)) arrays we've gotten the best possible asymptotic performance.
+
+Haskell avoided automatic destructive update because it seemed too complicated, and instead relies on monads. Monadic style guarantees single threading, hence matching the performance of imperative languages. Ocaml does something similar by allowing programs with side effects.
+
+
+Similarly Clean has uniqueness types, but this disallows a simple example of implementing id in terms of const:
+
+::
+
+  id = const x x
+  const x y = x
+
+  a = array [1,2,3]
+  b = id a
+  b !! 10
+
+What's slow are certain kinds of operations. E.g. dynamic lookups, weak typing, variant types. See examples of what makes PHP slow in this `video <https://www.youtube.com/watch?v=p5S1K60mhQU>`__. In some cases you can replace these operations with faster ones (specialization). JIT has more information and can specialize based on the observed values. Profile-guided ahead of time optimization can do the same thing but with the JIT the profiling is built in and you don't have to do a separate build.
+
+Also speed isn't why people use languages.
+
 State
 =====
 
-Stroscot sees all programs as functional manipulations of immutable values. So a state or snapshot is a value. Conceptually a state could include a lot of things, including the state of the CPU, details of other running threads, the stock market, etc. - all as long as it is within the chronological past
+Stroscot sees all programs as functional manipulations of immutable values. So a state or snapshot is a value. Conceptually a state could include a lot of things, including the state of the CPU, details of other running threads, the stock market, quantum fluctuations, etc. - all as long as it is within the chronological past. But since we are running on hardware we only care about the hardware's state, and since the hardware is all digital it is deterministic and expressible as a long binary string.
 
-But a program will only observe a portion of the entire universe, hence the state is localized to some world line where all the information has been collected. In particular at the end of execution of the program all relevant information is concentrated. So we can start from the end of the program and compute a causality DAG of state nodes.
+This dump would include the kernel and I/O devices and other processes not related to ours. If we assume we are running as a user process then we can limit ourselves to the process state. Conveniently the CRIU project has a `list of what's in the state of a process <https://criu.org/Images>`__: file descriptors, memory mappings and contents, network state, etc.
 
+What operations are there on this state? Well, it's a data structure, so we can read all we like. We can load the state with CRIU, step it forward a bit, and save it again. But we might run into syscalls. So stepping can either return another state, or call a syscall. Furthermore there are multiple threads in the process - so we could stop when the first thread hits a syscall, or when all of them do. Also we can return from sycalls, this is a well-documented calling convention.
 
- then run the program forward. Some things can be parallelized because they are commutative, like allocating references, while others like I/O cannot and will cause errors if multiple states are used.
-
-Mutation creates a new snapshot from an old snapshot by adding, removing, or changing the values attached to various places. As the program runs it builds up a history of snapshots. A history from the beginning of the program to some point in time is an execution.
+So practically, the state can be represented by the next syscall, together with the state reached after returning from that syscall, if the syscall returns (the continuation).
 
 .. _tasks:
 
@@ -46,7 +70,9 @@ backtracking, and even loops along the way. This allows a uniform and consistent
 vs Monads
 ---------
 
-Continuations are `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type. In particular the Codensity monad ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Without the forall callcc is implementable and the type is oo large, see :cite:`wadlerEssenceFunctionalProgramming1992` section 3.4 for an example. Using ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via CPS. In the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg65857.html>`__ of the Maybe monad the non-CPS version seems to be faster with GHC's optimizations enabled, although defunctionalizing the CPS'd version gains equivalent performance. Unfortunately nobody seems to have analyzed the core to figure out what is actually going on and the code was hosted on the defunct hpaste.
+Continuations are `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type via ``m >>=`` and retrieved via ``f return``. In particular the Codensity monad ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Without the forall, callcc is implementable and the type is too large, see :cite:`wadlerEssenceFunctionalProgramming1992` section 3.4 for an example.
+
+Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" mentioned is similar to Codensity.
 
 vs Yoneda
 ---------
@@ -69,29 +95,31 @@ The instance for ``C`` is fewer characters.
 
 Finally there is :cite:`rivasNotionsComputationMonoids2014` which derives the Codensity monad from the Yoneda lemma and the assumption that ``f`` is a small functor. Whereas the Yoneda-Rec seems to have no category theory behind it.
 
-Maybe it's worth revisiting, but for now it seems that the Yoneda thing solves the wrong problem.
+Generally it seems that the Yoneda thing solves a problem Stroscot doesn't have.
 
-vs delimited continuations
---------------------------
+vs multi-prompt delimited continuations
+---------------------------------------
 
-Delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than undelimited continuations. But delimited continuations can be implemented on top of undelimited in the same way as any other monad. so the simplicity of the undelimited continuations wins out. With the delimited continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas undelimited continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
+Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations (the ``(a -> b) -> b`` type), but as the paper shows multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
 
-vs State monad
+vs world token
 --------------
 
-Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = State# RealWorld`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens cannot be forged. Regardless, this approach seems quite awkward. The fact that an I/O operation is an abstract function makes it quite difficult to inspect I/O values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__. With the task+continuation approach an I/O operation is data that can be pattern-matched over.
+Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens cannot be forged. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse the world are broken and have to be forbidden. Ensuring this holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
 
-Haskell also has ``runST`` and ``unsafePerformIO`` that allow turning impure computation into pure computations. These can still be implemented as special functions. ``runST`` scrutinizes its computation for impure behavior such as printing or returning allocated references, while ``unsafePerformIO`` does not and exposes the internal evaluation order.
+With the task+continuation approach an I/O operation is data that can be pattern-matched over. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
 
 vs algebraic effects
 --------------------
 
 The two approaches are quite similar, both using a data type to represent operations. But continuations are much simpler syntactically than the handler functionality. In the effect approach computations are not first-class values.
 
+OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation, I think with the lazy identity monad you can recover lazy pure code.
+
 vs Call by push value
 ---------------------
 
-CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation type is also a value type. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it doesn't seem to offer much over monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbyPushValueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
+CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation type is also a value type. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it seems to be a disguised version of monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbyPushValueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
 
 vs Applicative
 --------------
@@ -100,6 +128,12 @@ Uses of Applicative can always be rewritten using the laws to be of the form ``p
 
 The other way is to use the Cayley representation of Applicative, ``Rep f a = forall a. f a -> f (b,a)``. :cite:`rivasNotionsComputationMonoids2014` This still has a Functor constraint so actually we work with ``Rep (Yoneda f) a`` for a typeclass-free representation. (``Yoneda f a = forall b. (a -> b) -> f b``, see `here <https://fa.haskell.narkive.com/hUgYjfKJ/haskell-cafe-the-mother-of-all-functors-monads-categories#post3>`)
 
+"Unsafe" I/O
+============
+
+Haskell also has ``runST`` and ``unsafePerformIO`` that allow turning impure computation into pure computations. These can still be implemented as special functions. ``runST`` scrutinizes its computation for impure behavior such as printing or returning allocated references, while ``unsafePerformIO`` does not and exposes the internal evaluation order.
+
+If one wants to understand the evaluation order or is dealing with commutative operations, these functions are quite useful, e.g. Debug.Trace.trace looks like a non-I/O function but actually outputs something on the console, and allocation can be done in any order.
 
 Concurrency
 ===========
@@ -118,7 +152,7 @@ The smallest examples runtimewise just have memory access. For example this prog
   t1 = fork {A := 1; x := !(read B) }
   t2 = fork {B := 1; u := !(read A) }
   join (t1, t2)
-  print (! (read x), !(read u))
+  print (!(read x), !(read u))
 
 Here the threads are provided by the C stdlib's pthreads, and the operations are hardware load/store instructions.
 This program has a race condition - the outcome may be ``(1,1)``, ``(1,0)``, or ``(0,1)`` under sequential consistency. But under the relaxed memory model used by X86 (Total Store Order or TSO) ``(0,0)`` is also possible. But under any model values other than 0 or 1 are not possible.
@@ -161,11 +195,11 @@ the relaxed-consistency model allows implementing private memory that is then ma
 Parallelism
 ===========
 
-Parallelism - the root is "parallel" or "happening at the same time". But with `relativity <https://en.wikipedia.org/wiki/Relativity_of_simultaneity>`__, simultaneity is not absolute. We instead consider `causal structure <https://en.wikipedia.org/wiki/Causal_structure>`__ - event separation can be timelike or spacelike. Timelike separation communicates information from past to future, while no dependency is possible with spacelike separation. Hence we define an execution as a directed graph of information flow, where a node is a value and an edge is read "can casually influence" (we could also use the reverse "reads data from"). Since there is no time travel the graph is acyclic and its transitive closure forms a partial order or poset. Then things happen "in parallel" if neither causally influences the other.
+Parallelism - the root is "parallel" or "happening at the same time". But with `relativity <https://en.wikipedia.org/wiki/Relativity_of_simultaneity>`__, simultaneity is not absolute. We instead consider `causal structure <https://en.wikipedia.org/wiki/Causal_structure>`__ - event separation can be timelike or spacelike. Timelike separation communicates information from past to future, while no dependency is possible with spacelike separation. Hence we define an execution as a directed graph of information flow, where a node is a value and an edge is read "can casually influence" (we could also use the reverse "reads data from"). Assuming no time travel the graph is acyclic and its transitive closure forms a partial order or poset. Then things happen "in parallel" if neither causally influences the other.
 
 For example, `multiplying <https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm#Parallel_and_distributed_algorithms>`__ two 2x2 matrices:
 
-.. image:: _static/matrix-multiply.svg
+.. image:: /_static/matrix-multiply.svg
 
 The multiplications all happen in parallel and the additions in parallel.
 
@@ -173,22 +207,24 @@ There's no explicit syntax for parallelism - pure computations have inherent par
 
 ::
 
-  multiply ([[a11 a12] [a21 a22]]) ([[b11 b12] [b21 b22]]) = [[t11 t12] [t21 t22]]
-    where
-        c11 = a11 * b11
-        d11 = a12 * b21
-        -- ... 6 more multiplications defining cNN and dNN ...
-        t11 = c11 + d11
-        -- ... 3 more additions defining tNN ...
+  multiply a b =
+    (m,n) = dim a
+    (n' | n == n',o) = dim b
+    for [1..m] $ \i ->
+      for [1..o] $ \j ->
+        sum [ (a !! (i,k)) * (b !! (k,j)) | k <- [1 .. n] ]
+
+``for`` and ``sum`` can evaluate arguments in parallel. More complicated is allowing functions, for example ``foldMap f g (x:xs) = g (f x) (foldMap f g xs)`` generates a DAG of f's and g's if the list spine is known. Even with general recursion it should still be possible to identify data dependencies and assign DAG cells to temporary values in some fashion. Conditionals are a little hard to schedule because you have to make sure both sides can be speculated or discard the untaken branch promptly.
 
 Stroscot schedules the instructions to maximize instruction-level parallelism, where appropriate. This takes advantage of the design of modern CPUs, where there are multiple "ports" and each port can execute an instruction simultaneously.
 
-Conditionals are a little hard to schedule because you have to make sure both sides can be speculated or discard the untaken branch promptly.
-More complicated is allowing functions, for example ``foldMap f g (x:xs) = g (f x) (foldMap f g xs)`` generates a DAG of f's and g's if the list layout is known. Even with general recursion it should still be possible to identify data dependencies and assign DAG cells to temporary values in some fashion.
+With large (>1000 width) matrices we might want to multiply sub-matrices on multiple threads (cores). That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn't parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OpenMP, OS thread, green thread) influences what granularity to split up the computation at.
 
-With large (>1000 width) matrices we might want to multiply sub-matrices on multiple threads (cores). That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn't parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OS thread, green thread) influences what granularity to split up the computation at.
+But still, for complex data science type computations we might want automatic parallelization. So we can provide a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits into small" operations on top of fork/join model and taking the thread / task queue implementation as a parameter. Doug Lea's work stealing task queues can be very efficient given the correct task granularity.
 
-But still, for complex data science type computations we might want automatic parallelization. So a library can provide a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits into small" fork/join task queue model. But the implementation won't necessarily find all parallelism, e.g. accumulating over a list doesn't necessarily parallelize.
+Haskell's "par" is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It's just as clear to use explicit fork/join operations, and indeed the ``rpar/rpar/rseq/rseq`` pattern proposed in `the Parallel Haskell book <https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html>`__ is just fork/join with different naming.
+
+As far as the actual task granularity, Cliff says somewhere around the middle of the microsecond range is the break-even point, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress.
 
 OS Model
 ========
@@ -202,3 +238,5 @@ One or more threads run in the context of the process. A thread is the basic uni
 Windows has a special thread type "UMS thread" which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
 
 A fiber / green thread / virtual thread consists of a stack, a small storage space for registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer OS calls than a full-on thread context switch. When fibers are integrated into the runtime they can be more memory efficient than threads, otherwise they do not provide many advantages over threads.
+
+async marking makes core library functions more painful to call and requires a special annotation on the whole call chain. Avoid it by making everything async.

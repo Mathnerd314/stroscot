@@ -3,9 +3,7 @@ Package manager
 
 A language also needs a package manager. When a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so all of the task's provided keys (files) are downloaded instead of the task being built, verifying their cryptographic hashes/signatures. We also need a way to create packages from a build tree.
 
-The list of files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn't exist on the target system.
-
-There are also some filesystem convention/naming issues, in particular different layouts on different systems and allowing per-user installs, but Conda has worked out reasonable solutions for these, relative pathhs and so on.
+The list of provided files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn't exist on the target system. Or we can ensure the build script places all of its provided files in a specific location.
 
 A useful feature not implemented in most package managers is P2P distribution, over Bittorrent or IPFS. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is `not too great <https://wiki.debian.org/DebTorrent#line-42>`__). There are some notes `from IPFS <https://github.com/ipfs-inactive/package-managers>`__ and various half-baked package managers like ``npm-on-ipfs``.
 
@@ -31,10 +29,10 @@ There are in general two ways to resolve a breakage: either release new package 
 
 Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.
 
-Versioning
-==========
+Versioned paths
+===============
 
-Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
+There are some filesystem convention/naming issues. Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
 For a basic path like ``/usr/share/foo/img.jpg``, we can put a hash ``HASH`` in various places:
 
 1. ``/usr/lib/libfoo.so.HASH.1`` or ``/usr/lib/libfoo.so.1.HASH`` (filename version)
@@ -48,8 +46,10 @@ The filename solution breaks down with data files. Maintaining hashed file versi
 
 For multiarch/NixOS the hash can be put in the SONAME by linking with absolute paths (or relative paths, they would work too). There is `some work <https://github.com/NixOS/nixpkgs/issues/24844>`__ in NixOS to do so. The rpath solution that NixOS uses currently is slow and doesn't solve the diamond problem.
 
-We want to hardcode the paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn't possible,  allowing dynamic resolving of binary names ``foo`` to paths ``/usr/bin/12345/foo`` is not trivial. A global view doesn't work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or ``/proc`` but for the system path; this can provide the necessary pid-dependent view as a symlink tree ``/system-path/foo -> /usr/bin/foo-12345``; even FUSE should be sufficiently fast since it is just one ``open()`` call and it doesn't have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in `/run/current-system/`, and chroot containers.
+Since the package manager controls all versioning, we want to hardcode the versions and paths of binaries if possible, for minor sanity and efficiency gains. For the cases where this isn't possible,  allowing dynamic resolving of binary names ``foo`` to paths ``/usr/bin/12345/foo`` is not trivial. A global view doesn't work because we could have two binaries who call different versions of a binary. Instead we could make a pseudo-filesystem like devfs or ``/proc`` but for the system path; this can provide the necessary pid-dependent view as a symlink tree ``/system-path/foo -> /usr/bin/foo-12345``; even FUSE should be sufficiently fast since it is just one ``open()`` call and it doesn't have to handle the actual I/O. Currently NixOS uses environment variables, global symlinks in `/run/current-system/`, and chroot containers.
 
+
+per-user installs: Conda has worked out reasonable solutions for these, relative paths and so on.
 
 Side-by-side C libraries
 ========================
@@ -93,9 +93,9 @@ Although a distribution is sufficient for setting up a single computer, to set u
 Release monitoring
 ==================
 
-Automating package updates requires finding new releases and then testing it. For the first part, unfortunately there is no standardized API. There is `Anitya <https://fedoraproject.org/wiki/Upstream_release_monitoring>`__, which solves some of this, and also `cuppa <https://github.com/DataDrake/cuppa>`__. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.
+Automating package updates requires finding new releases and then testing it. For the first part, there is almost a standardized API. There is `Anitya <https://fedoraproject.org/wiki/Upstream_release_monitoring>`__, which solves some of this, and also `cuppa <https://github.com/DataDrake/cuppa>`__. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.
 
-Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version.
+Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version. This requires some per-package version handling logic.
 
 We can write our own project scraper:
 
@@ -111,15 +111,16 @@ We can write our own project scraper:
 * LaunchPad, JetBrains, Drupal, Maven: There is an API to list versions for each project.
 * GitHub: There is a per-project `releases API <https://developer.github.com/v4/object/release/>`__. The API is ratelimited heavily.
 * GitLab, Bitbucket: There is a tags endpoint.
-* Folder: We can scrape the standard default Apache directory listing
 * Git/Hg/other VCS: We can fetch the tags with git/hg/etc.
-* Projects not using any of the above: If there is a version number in the URL, we can scrape the download page. Otherwise, we can use HTTP caching to poll the URL. Although, for such isolated files, there is the issue of the license changing suddenly, so the download page is worth watching too.
+* Folder: We can scrape the standard default Apache directory listing
+* Projects with version number: scrape the download page
+* Projects without versioning: Use HTTP caching to poll the URL. Although, for such isolated files, there is the issue of the license changing suddenly, so the download page is worth watching too.
 
 Overall, there are only a few mechanisms:
 
-* Feed: A way to efficiently get a list of package updates since some time (RSS feed, Git repo)
-* Index: A compressed list of all the packages and their versions (Git repo, ``ls-lR``, rsync)
-* Versions: For a package, a list of its available versions
+* A list of package updates since some time (RSS feed, Git repo)
+* A list of all the packages and their versions (Git repo, ``ls-lR``, rsync)
+* A list of a single package's available versions (scraping, some package repositories)
 
 For each top-level project, figuring out when/if there will be a new update is a machine learning problem. The simplest algorithm is to poll everything at a fixed interval, say daily. But most projects release a lot less frequently, and some projects (software collection, main development branches) release more frequently. If there is a push service like email we can use that, otherwise we need some sort of adaptive polling. We can model it as a homogeneous Poisson point process; then the estimate for the rate is simply the number of updates divided by the time interval we have observed. Then the time between two updates is an exponential distribution with parameter the rate, so we can poll if the probability of an update is > 50%, adjusting the 50% so we poll an average of once a day. To get even more complex, we can build a feature vector classifier to predict the time between events.
 
@@ -149,9 +150,9 @@ Since our goal is automation, we want the detection of breakages to be automated
 
 The general goal is to minimize the time/build resources needed for identifying breakages, i.e. to maximize the information gained from each build. Incremental building means that the most efficient strategy is often building in sequence, but this does not hold for larger projects where changes are almost independent.
 
-Regarding the ordering of changes, oftentimes they are technically unordered and could be merged in any order. But an optimized order like "least likely to fail" could lead to arbitrarily long merge times for risky changes. It is simpler to do chronological order. This could be customized to prioritize hotfixes before other changes, but it is easier to set up a dedicated code path for those.
+Changes are discovered in an arbitrary order and similarly could be merged in any order. But an optimized order like "least likely to fail" could lead to arbitrarily long merge times for risky changes. It is simpler to do chronological order w.r.t. discovery. This could be customized to prioritize hotfixes before other changes, but it is easier to set up a dedicated code path for those.
 
-To handle breakages, there are two main strategies: marking and backouts. Both are useful; a test failure may be unimportant or outdated, suggesting the marking strategy, while backouts reject bad changes from the mainline and keep it green. Backouts are harder to compute: for :math:`n` changes, there are :math:`2^n` possible combinations to test, giving a state space of size :math:`2^{2^n}`. Meanwhile marking only has :math:`2^n` states for :math:`n` commits. Marking is run over the entire commit history, while backouts are for pending changes and only need to consider the relevant subsets of commits.
+To handle breakages, there are two main strategies: marking and backouts. Both are useful; a test failure may be unimportant or outdated, suggesting the marking strategy, while backouts reject bad changes from the mainline and keep it green. Backouts are harder to compute: for :math:`n` changes, there are :math:`2^n` possible combinations to test, giving a state space of size :math:`2^{2^n}`. Meanwhile marking only has :math:`2^n` states for :math:`n` commits. But marking is run over the entire commit history, hence has a huge commit list, while backouts are for pending changes and only need to consider the relevant set of new commits.
 
 Marking
 -------
@@ -240,62 +241,16 @@ Overall, the idea is similar to ``git bisect``'s ``min(ancestors,N-ancestors)``,
 Backouts
 --------
 
-For backouts, we must first decide a backout strategy. The paper :cite:`ananthanarayananKeepingMasterGreen2019` provides a real-world case study. We should maximize the number of changes included, respecting chronological order. So for ``A,B`` and ``A,C`` we should prefer the earlier change ``B``. Also, for ``A`` vs ``B,C``, to get ``B,C`` we would have to decide to test without ``A`` even though it succeeds. Since ``A`` could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write ``A,B`` and ``B,C`` as binary numbers ``110`` and ``011`` and compare them, and the higher is the chosen result.
+For backouts, we must first decide a backout strategy - given two sets of commits that both succeed, which set is preferred as the "green" mainline? The paper :cite:`ananthanarayananKeepingMasterGreen2019` provides a real-world case study. We should maximize the number of changes included and exclude later commits if the earlier ones succeed. So we prefer ``A,B`` to ``A,C`` because it has the earlier change ``B``. Similar we prefer ``A`` over ``B,C`` - to see why this makes sense, imagine ``A`` succeeds by itself and ``A,B,C`` is a failure - then to get ``B,C`` we would have to decide to test without ``A`` even though it succeeds. Since ``A`` could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write ``A,B`` and ``B,C`` as binary numbers ``110`` and ``011`` and compare them, and the higher is the chosen result.
 
-We assume that if a build fails that adding more patches to that build will still result in a failing build; this rules out "fixing" changes where ``A`` fails but ``A,B`` succeeds because ``B`` fixed ``A``. Detecting fixing changes would require speculatively building extra changes on top of failed builds. Instead, the fixing patchset must include the broken commits as well, so we would have ``A`` failing, ``B`` succeeding, and ``A,B`` resulting in a merge conflict (because ``B`` includes the changes from ``A``). Merge conflicts can often be detected immediately without running tests, but complex failures can arise from code interactions.
+Next we need a model predicting the success of a build. We assume that the build fails if it contains a failing configuration of certain commits left in or out. To avoid combinatorial explosion we assume that configurations are limited to 2 commits. This gives us 5 failing configurations:
+* A left in - we say A is a breaking change
+* A left out - we say A is a fixing change
+* A left in, B left in - we say A and B conflict. Merge conflicts can often be detected immediately without running tests, but this also accounts for complex failures that arise from code interactions.
+* A left in, B left out - we say A depends on B
+* A left out, B left out - in this case both A and B fix the build. we say A and B are independent fixes
 
-We need a more complex model accounting for breakages, dependencies, conflicts, and flakiness. But we'll assume no higher-order phenomena, e.g. fixes to conflicts.
-
-::
-
-  breaking = []
-  for c in changes:
-    is_breaking <- choice([YES, NO], c)
-    if is_breaking:
-      breaking += c
-
-  dependencies = {}; dependencies.default = []
-  for c2 in changes:
-    for c in changes:
-      if c2 <= c:
-        continue
-      is_dependency <- choice([YES, NO], c, c2)
-      if is_dependency:
-        dependencies[c2] += c
-
-  conflicts = []
-  for c2 in changes:
-    for c in changes:
-      if c2 <= c:
-        continue
-      is_conflict <- choice([YES, NO], c, c2)
-      if is_conflict:
-        conflicts[c2] += c
-
-  function query_run(set):
-    fail_type = NONE
-
-    for b in breaking:
-      if !set.contains(b)
-        continue
-      fail_type = BREAKAGE
-
-    for c in set:
-      for d in dependencies[c]:
-        if !set.contains(d)
-          fail_type = DEPENDENCY
-
-    for c2 in conflicts:
-      for c in conflicts[c2]:
-        if set.contains(c) && set.contains(c2)
-          fail_type = CONFLICT
-
-    flaky = choice([YES, NO], fail_type)
-    broken = fail_type == NONE
-    if flaky = YES:
-      report(!broken)
-    else:
-      report(broken)
+We use a probabilistic model to account for flakiness. Flakiness means that tests fail randomly even if everything ostensibly works and likewise can succeed even if something is broken.
 
 The size and complexity presents a challenge, but at the end of the day it's just a large Bayesian network, and we want to determine the highest-ranking success, based on the (unobserved/hidden) brokenness properties.
 
@@ -345,21 +300,21 @@ empty: b1 && (b2 || d12) && (b3 || d13 || d23) && (b4 || d14 || d24 || d34)
 
 Each formula is in CNF and has 10 variables, 4 b variables and 6 c or d. So it is a "nice" structure.
 
-compilation is special because incremental compilation. I compile each patch in the series one after another in the same directory, and after each compilation I zip up the files needed for testing.
+The cost of compiling varies significantly based on the incremental state.
+
+zipping is cheap. the testing fileset is smaller than the building fileset.
 
 
-I run the test that had not passed for the longest time, to increase confidence in more patches. If a test fails, I bisect to find the patch that broke it, reject the patch, and throw it out of the candidate.
+I compile each patch in the series one after another in the same directory, and after each compilation I zip up the files needed for testing. unzipping only needs to be done when bisecting is required.
 
-When bisecting, I have to compile at lots of prefixes of the candidate, the cost of which varies significantly based on the directory it starts from. I'm regularly throwing patches out of the candidate, which requires a significant amount of compilation, as it has to recompile all patches that were after the rejected patch.
-    I'm regularly adding patches to the candidate, each of which requires an incremental compilation.
 
-unzipping only needs to be done when bisecting is required; zipping is cheap. And the testing fileset is smaller than the building fileset.
+Throwing patches out of the candidate requires recompiling all patches that were after the rejected patch. Adding patches requires an incremental compilation.
 
-When testing a candidate, I run all tests without extending the candidate. If all the tests pass I update the state and create a new candidate containing all the new patches.
 
+
+When testing a candidate, I run all tests without extending the candidate. I run the test that had not passed for the longest time, to increase confidence in more patches. If all the tests pass I update the state and create a new candidate containing all the new patches.
 If any test fails I bisect to figure out who should be rejected, but don't reject until I've completed all tests. After identifying all failing tests, and the patch that caused each of them to fail, I throw those patches out of the candidate. I then rebuild with the revised candidate and run only those tests that failed last time around, trying to seek out tests where two patches in a candidate both broke them. I keep repeating with only the tests that failed last time, until no tests fail. Once there are no failing tests, I extend the candidate with all new patches, but do not update the state.
 
 As a small tweak, if there are two patches in the queue from the same person, where one is a superset of the other, I ignore the subset. The idea is that if the base commit has an error I don't want to track it down twice, once to the first failing commit and then again to the second one.
-Using this approach in Bake
 
 If there is a failure when compiling, it caches that failure, and reports it to each step in the bisection, so Bake tracks down the correct root cause.

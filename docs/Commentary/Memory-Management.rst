@@ -1,10 +1,12 @@
 Memory management
 #################
 
-static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong. Stroscot is not conservative by default - it will simply output a warning. This can be treated as an error like any other warning.
-
-Another reason Rust has an unsafe alter ego is that the underlying computer hardware is inherently unsafe. If Rust didn’t let you do unsafe operations, you couldn’t do certain tasks. Rust needs to allow you to do low-level systems programming, such as directly interacting with the operating system or even writing your own operating system. Working with low-level systems programming is one of the goals of the language. Let’s explore what we can do with unsafe Rust and how to do it.
-
+Rust has an unsafe alter ego
+the underlying computer hardware is inherently unsafe.
+certain tasks are unsafe.
+low-level systems programming
+directly interacting with the operating system
+writing your own operating system
 
 The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory leaks are a pervasive problem, in general there is no real solution besides profiling and buying more RAM. Stroscot can prove memory will not be accessed in the future and hence free it, with a more precise analysis than traditional GC. On the other hand use-after-free and double free can be statically checked for pointers, and aren't a problem at all for the rest of the language because Stroscot frees automatically.
 
@@ -160,7 +162,7 @@ Since writing these serialization functions all the time would be tedious, we ca
 
 The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple ``(cell,unpack)``, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn't be an issue.
 
-A derived pointer is a reference plus an offset. When the address and layout of the object is known we can store the derived pointer as the value address plus offset. But we could also just store the offset, so it's only useful if computing the sum is necessary and expensive.
+A derived pointer is a reference plus an offset. When the address and layout of the object is known we can store the derived pointer as the sum of the value address and offset, allowing direct pointer dereferencing. But since the address is known we could also just store the derived pointer as the offset, so it's only useful if computing the sum is necessary and expensive.
 
 An object can be treated as an array, N[i] and N.length.
 
@@ -278,19 +280,156 @@ generations: two or more sub-heaps, “generations” of objects. objects alloca
 
 1. Write barrier: catch writes of new objects to already marked objects.
 
-function writeBarrier(object,field) {
-      if (isMarked(object) && isNotMarked(field))
-         gcMark(field); // mark new field
+::
 
-}
+  function writeBarrier(object,field) {
+        if (isMarked(object) && isNotMarked(field))
+          gcMark(field); // mark new field
+
+  }
 
 2. Read barriers: Read barriers are used when collector is moving. They help to get correct reference to the object when collection is running:
 
-function readBarrier(object) {
-      // if gc moved object we return new location of it
-      if (moved(object)) return newLocationOf(object);
-      return object;
-}
+::
+
+  function readBarrier(object) {
+        // if gc moved object we return new location of it
+        if (moved(object)) return newLocationOf(object);
+        return object;
+  }
 
 Concurrent/incremental GC:
 interleave program and GC, GC on separate thread
+
+write barriers or RC increases make every assigment with a heap object on the right hand side a bit more costly. In this case copying the live set can be faster. (related: Appel's Garbage Collection Can Be Faster Than Stack Allocation)
+but this introduces memory churn from allocation, and the dominant portion of the execution time is waiting for the cache lines to be loaded or pre-loaded.
+You can actually see this exact behavior when profiling Java applications with high allocation rates, for example. You get weird stats that show that allocation is taking no significant time and GC is taking no significant time, but throughput still sucks. By eliminating the in-the-hot-loop allocations, you can see the throughput go up by a significant factor, sometimes by over an order of magnitude, because it avoids stalling.
+
+The issue is latency for a single request and that can be as little as 150 clocks. In managed GC every allocation manipulates some internal data structure. In JVM it's a bump of a top of “thread local allocation block” (TLAB) pointer. In cases of high allocation rates, it is very likely that this pointer will have been evicted thus forcing a round trip to main memory. The factor here is rate of allocations, as opposed to rate of bytes allocated which is reported by typical tools.
+
+Measuring memory performance is tricky. The same workload on the same binary can give 2x changes in performance. It's very sensitive to load order and memory layout. E.g. showing slides during a talk caused the JVM to load in a different memory segment, which changed the results of a timing sensitive calculation which in turn prevented the JVM from doing a memory adaptation that would drop CPU from 100% to 20% and improve latency dramatically.
+
+Generational GC with a tiny live set can win on microbenchmarks, but real programs have large live sets that don't fit in cache and the data will overflow the young generation before it dies. It's been tried repeatedly at Sun and failed miserably. You're better off with the largest young-gen you can get and sucking on the cache misses, OR doing the allocation "by hand" to force rapid (L1-cache-sized) reuse.
+
+    Functions means making closures, new scopes, copy/pass parameters, do indirections on returns, memory allocations, etc
+
+In Rust, this: let x = Vec::with_capacity(10000); for i in 0..10000 {c.push(x)}
+avoids resizing/reallocating the vec x because with_capacity specifies the size.
+for a_iter_source.iter().collect() there is an optional .size_hint function on the iter that tells how many items it has
+
+in practice asymptotics are BS, and performance depends strongly on memory management. Modeling memory access as O(1) is not correct, due to cache hierarchies - :cite:`jurkiewiczCostAddressTranslation2014` ends up with a log(n) overhead for random access, and similarly `this thread <https://news.ycombinator.com/item?id=12388244>`__ says it's more like O(N^{1/3}) (3D memory architecture), until you near the Bekenstein bound at which point it's O(N^{1/2}) by the holographic principle. Which of these approximations is right? Who knows, power law fitting is `hard <http://bactra.org//weblog/491.html>`__, none of the articles does a convincing job with the empirical data. But generally, the point is that the effects of memory hierarchies can outweigh the asymptotics. Empirically trees are terrible for caches, indirect lookups hit memory hard.
+
+For pointers, can optimize Maybe<T> to still fit into a pointer (null). Then converting T[] to Maybe<T>[] is a no-op.
+
+The GC can use several pages of stack once it is triggered. It needs a separate stack. Similarly crawling the stack allocates on the stack. Again, use a separate stack, tighten up invariants, and add stack probes.
+
+
+stack is reserved when the thread is created, and can be committed as well. It's inadequate to only reserve because Windows has the unfortunate behavior that committing a page of stack can fail even if plenty of memory is available. If the swap file needs to be extended on disk, the attempt to commit can actually time out during this period, giving you a spurious fault.  If you want a robust application, you should always commit your stack reservations eagerly.
+
+The end of the stack reservation consists of an unmapped page that's a trap for runaway processes, a 1-page buffer for executing stack-overflow backout, and a normal page that generates stack overflow exception when it is allocated past, which will only have a few free bits in an SO condition. So you can really only rely on 1 page to handle SO, which is inadequate. Conclusion: reserve/commit an alternate stack at the beginning to handle SO conditions.
+
+There is a guard bit set on all reserved but uncommitted stack pages.  The stack allocation/deallocation routines must touch/restore stack pages a page at a time, so that these uncommitted pages can be committed and de-committed in order.
+
+getPointer is like C#'s ``fixed`` block but it allows interleaving. Pinned blocks remain where they are during GC, forcing GC generations to start at awkward locations and causing fragmentation. Pinned objects can be moved to a separate GC area before pinning but this could make fragmentation worse if the pin lifetimes are unpredictable. Efficient patterns are:
+- pin for a time shorter than a GC cycle, then GC is unaffected
+- pin an old object, then it can be stored statically or in a mature generation
+- pin a bunch of objects as a group, then you can use an arena
+- pin in a LIFO manner, then you can use a stack in an arena
+- pin same-sized objects, then you can use a free list in an arena
+
+A very inefficient pattern is to randomly allocate and pin a large number of randomly-sized objects.
+
+
+Java's finalizers have inherent problems because they are associated with GC. In particular, because the GC may not run, Java's finalizers have no guarantee of timeliness, and hence cannot be used to free resources. In contrast Stroscot's finalizers free as soon as it is statically known that they are no longer used. Java's finalizers have no ordering; Stroscot's run in the order defined. Java's finalizers do not report exceptions; Stroscot's finalizer methods are inserted into the program at the point the finalizer is run and can report exceptions. But like Java, the finalizer is considered done regardless of whether it throws an exception. Stroscot's finalizers are functions and are not directly associated with objects, so there is no possibility of resurrection like in Java.
+
+I concluded after looking at it again that sharing parts of data structures should be pure, so my plan to use immutable references wasn't going to work because allocating a reference would be impure. So instead there is an allocation interface.
+
+Destructors
+===========
+
+Destructors A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
+
+Stroscot checks a no-leak property for each destructor ``x`` that exactly one of the following holds:
+* ``lastUse x`` is called infinitely often, returning false each time
+* ``lastUse x`` returns true and is never called thereafter
+* ``useForever x`` is called
+
+If the control flow does not allow this no-leak property to hold, Stroscot will error.
+
+::
+
+  reduce (NewDestructor c) =
+    f = freshSymbol
+    reduce (c f)
+  reduce (Use f c) =
+    if will_call (Use f) c
+      reduce (c False)
+    else if !(could_call (Use f) c)
+      reduce (c True)
+    else
+      error
+
+TODO: can it be shared. need some way to coordinate control flow analysis across threads
+
+Destructors are very similar to finalizers. In fact we can use destructors to implement *prompt* finalizers, that guarantee ``free`` is called immediately after some ``use``:
+
+::
+
+  newPromptFinalizer free =
+    d = newDestructor
+    let f = PromptFinalizer free d
+    use f
+    return f
+  use (PromptFinalizer free d) =
+    l = lastUse d
+    if l
+      free
+
+However, a prompt finalizer would give an error on programs such as the following:
+
+::
+
+  free = print "Freed."
+  f = newFinalizer free
+  use f
+  b = input Bool
+  if b
+    print "A"
+    use f
+  else
+    print "B"
+
+With a normal finalizer, instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
+
+Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
+1. ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
+2. every operation is modified to call ``use``
+3. the prompt finalizer is replaced with a finalizer
+
+The finalizer program compiles identically to the original. Note that this transformation is a bit fragile though - if the uses corresponding to the frees are deleted, the lifetime of the finalizer is shortened and depending on the program structure the point at which ``free`` should be called may become hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases.
+
+
+Copying, quad-color incremental, generational garbage collector
+Arena-based bump allocator for heap-allocated values
+Memory allocator API
+Virtual memory API
+* POSIX mmap+posix_madvise
+* Windows VirtualAlloc
+
+File and network APIs are generally managed by user-level code. So the point of the memory system is to assign a storage location for every value, insert moves / frees where necessary, and overall minimize the amount of resources consumed.
+
+For more advanced programming there is the need to avoid the use of slow storage mechanisms as much as possible by addressing the fast storage mechanisms directly. (Really?)
+
+Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.
+
+Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf). There is room for optimization but many algorithms work.
+
+Polymorphism requires a uniform representation for types (pointer/box), or templates like C++. Functional languages use a uniform representation so pay an overhead for accessing via the indirection. Unboxing analysis reduces this cost for primitive types - it works pretty well. GHC doesn't have a particularly good data layout though, because it's all uniform.
+
+* Alias analysis - changing memory references into values
+* tail call optimization, Stack height reduction - stack optimizations
+* deforestation - remove data structure
+
+can you request memory in an async fashion? memory starvation is often the result of contention, so waiting could get you the memory back. Or if you request more than is physically on the system, barring hot-swapping RAM, memory will never become available. Also, excessive paging occurs before actual memory exhaustion. performance completely tanks and the user kills the process.
+
+

@@ -8,6 +8,9 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Control.Monad hiding (join)
 import System.Random
+import Data.Typeable
+
+unsafeCoerce a = fromJust $ cast a
 
 -- data Word = Word { value :: Integer } -- value < some fixed max
 
@@ -101,7 +104,7 @@ shift adr start r = M.mapKeys (+(adr-start)) r
 
 end :: Pack a => Addr -> a -> Addr
 end adr a = do
-  let FreshAddr frb = writeBounds (pack a)
+  let FreshAddr frb = writeBounds (fst $ pack a)
   let Write (Just (_,end)) = frb adr
   end
 
@@ -116,22 +119,28 @@ instance (Pack a, Pack b) => Pack (a,b) where
   pack (a,b) = do
     let (pa, upa) = pack a
     let (pb, upb) = pack b
-    (j pa pb, unpack)
+    (j pa pb, unpack upa upb)
       where
-        unpack adr r = do
+        unpack upa upb adr r = do
           let a = upa adr r :: a
           let b = upb adr (shift adr (end adr a) r)
           (a,b)
 
-instance (Pack a, Pack b) => Pack (Either a b) where
-  pack (Left a) = (,unpackE) $ j (pack (0 :: Word)) (pack a)
-  pack (Right b) = (,unpackE) $ j (pack (1 :: Word)) (pack b)
+instance (Pack a, Pack b, Typeable a, Typeable b) => Pack (Either a b) where
+  pack (Left a) = do
+    let (xw,xunp) = pack (0 :: Word)
+    let (yw,yunp) = pack a
+    (j xw yw,unpackE xunp yunp)
+  pack (Right b) = do
+    let (xw,xunp) = pack (1 :: Word)
+    let (yw,yunp) = pack b
+    (j xw yw,unpackE xunp yunp)
 
-unpackE adr r = do
-    let s = unpack adr r :: Word
+unpackE xunp yunp adr r = do
+    let s = xunp adr r :: Word
     case s of
-      0 -> Left (unpack adr (shift adr (end adr s) r))
-      1 -> Right (unpack adr (shift adr (end adr s) r))
+      0 -> Left (unsafeCoerce $ yunp adr (shift adr (end adr s) r))
+      1 -> Right (unsafeCoerce $ yunp adr (shift adr (end adr s) r))
       _ -> undefined
 
 -- We can encode a list in a number of ways:
@@ -142,28 +151,29 @@ newtype FlatL a = FlatL [a]
 -- flat list, stored like [2,"a","b"]
 
 instance Pack a => Pack (FlatL a) where
-  pack (FlatL ls) = (,unpack) $ do
-    let l = pack (fromIntegral (length ls) :: Word)
-    foldl j l (map pack ls)
-    where
-      unpack adr r = do
-        let l = unpack adr r :: Word
-        let unp 0 _ = []
-            unp n r = do
-              let x = unpack adr r :: a
-              x : unp (n-1) (shift adr (end adr x) r)
-        FlatL $ unp l (shift adr (end adr l) r)
+  pack (FlatL ls) = do
+    let (lf,lunp) = pack (fromIntegral (length ls) :: Word)
+    let (xf,xunp) = unzip $ map pack ls
+    (foldl j lf xf, unpack lunp xunp) where
+      unpack lunp xunp adr r = do
+        let l = lunp adr r :: Word
+        let unp 0 _ [] = []
+            unp n r (xunp:xs) = do
+              let x = xunp adr r :: a
+              x : unp (n-1) (shift adr (end adr x) r) xs
+        FlatL $ unp l (shift adr (end adr l) r) xunp
+
+{-
 
 newtype Flat2 a = Flat2 [a]
   deriving (Show,Eq,Ord)
 -- flat list, stored like [1,"a",1,"b",0]
 
 instance Pack a => Pack (Flat2 a) where
-  pack (Flat2 []) = pack (0 :: Word)
-  pack (Flat2 (x:xs)) = pack (1 :: Word) `j` pack x `j` pack (Flat2 xs)
+  pack (Flat2 []) = (,unpackF2) $ pack (0 :: Word)
+  pack (Flat2 (x:xs)) = (,unpackF2) $ pack (1 :: Word) `j` pack x `j` pack (Flat2 xs)
 
-instance (Unpack a, Pack a) => Unpack (Flat2 a) where
-  unpack adr r = do
+unpackF2 adr r = do
     let unp adr r = do
           let x = unpack adr r :: Word
           case x of
@@ -180,16 +190,15 @@ newtype IntL a = IntL [a]
 -- intrusive list, stored like x=[1,"a",&y], y=[1,"b",&z], z=[0]
 
 instance Pack a => Pack (IntL a) where
-  pack (IntL []) = pack (0 :: Word)
-  pack (IntL (x:xs)) =
+  pack (IntL []) = (,unpackIL) $ pack (0 :: Word)
+  pack (IntL (x:xs)) = (,unpackIL) $
     FreshAddr $ \base ->
     FreshAddr $ \addr -> do
     let sub = pack (IntL xs)
     moveBase base (pack (1 :: Word) `j` pack x `j` pack addr)
      `togetherWith` moveBase addr sub
 
-instance (Unpack a, Pack a) => Unpack (IntL a) where
-  unpack adr r = do
+unpackIL adr r = do
     let unp adr r = do
           let x = unpack adr r :: Word
           case x of
@@ -208,8 +217,8 @@ newtype UnifL a = UnifL [a]
 -- uniform list, stored like x=[1,&x1,&y],x1="a",y = [1,&y1,&z],y1="b", z=[0]
 
 instance Pack a => Pack (UnifL a) where
-  pack (UnifL []) = pack (0 :: Word)
-  pack (UnifL (x:xs)) =
+  pack (UnifL []) = (,unpackUL) $ pack (0 :: Word)
+  pack (UnifL (x:xs)) = (,unpackUL) $
     FreshAddr $ \base ->
     FreshAddr $ \next ->
     FreshAddr $ \elem -> do
@@ -218,8 +227,7 @@ instance Pack a => Pack (UnifL a) where
     let sub = pack (UnifL xs)
     moveBase base (part `j` pack elem `j` pack next) `togetherWith` moveBase elem e `togetherWith` moveBase next sub
 
-instance (Unpack a, Pack a) => Unpack (UnifL a) where
-  unpack adr r = do
+unpackUL adr r = do
     let unp adr r = do
           let x = unpack adr r :: Word
           case x of
@@ -233,11 +241,13 @@ instance (Unpack a, Pack a) => Unpack (UnifL a) where
             _ -> undefined
     UnifL $ unp adr r
 
+-}
 
-repack :: (Pack a, Unpack a, Eq a, Show a) => a -> IO Read
+repack :: (Pack a, Eq a, Show a) => a -> IO Read
 repack a = do
-  (as, x) <- runFresh (pack a)
-  let a' = unpack (head as) (toRead x)
+  let (xf, xunp) = pack a
+  (as, x) <- runFresh xf
+  let a' = xunp (head as) (toRead x)
   case a == a' of
     True -> pure (toRead x)
     False -> do
@@ -248,6 +258,9 @@ tuple = (1,2) :: (Word,Word)
 eith = Left 1 :: Either Word Word
 list = [1,2] :: [Word]
 flatl = FlatL list
+
+{-
+
 flat2 = Flat2 list
 intl = IntL list
 unifl = UnifL list
@@ -260,3 +273,5 @@ test = do
   repack intl
   repack unifl
   pure ()
+
+-}

@@ -1,68 +1,25 @@
 optional pattern
 many pattern -- zero or more repetitions
-(pattern) -- grouping
+some pattern -- one or more repetitions
+(pattern) -- grouping, no semantic meaning
 pat_1 <|> pat_2 -- nondeterministic choice
 not pat -- all sequences not matching PAT
 pat1 &&& pat2 - elements matching pat1 and pat2
 char "f" -- literal character
 oneOf "abc" -- A character set. Matches any one of the characters.
-(>*<) = liftA2 (,)
+(>*<) = liftA2 (,) -- parses left, then right, and returns both
+{ a; b } = a >*< b
 
-wbc c = unicodeCharacterWhere "Word_Break" c
+allowImp syn = out { implicitAllowed = True, constraintAllowed = False }
 
-cr = wbc "CR"
-lf = wbc "LF"
-newline = wbc "Newline"
-extend = wbc "Extend"
-zwj = wbc "ZWJ"
-ri = wbc "Regional_Indicator"
-format = wbc "Format"
-katakana = wbc "Katakana"
-hebrew_letter = wbc "Hebrew_Letter"
-aletter = wbc "ALetter"
-single_quote = wbc "Single_Quote"
-double_quote = wbc "Double_Quote"
-midnumlet = wbc "MidNumLet"
-midletter = wbc "MidLetter"
-midnum = wbc "MidNum"
-numeric = wbc "Numeric"
-extendnumlet = wbc "ExtendNumLet"
-wsegspace = wbc "WSegSpace"
+-- | Disallow implicit type declarations
+disallowImp = scopedImp
 
-any = unicodeCharacter
+-- | Implicits hare are scoped rather than top level
+scopedImp syn = out { implicitAllowed = False, constraintAllowed = False }
 
-ahletter = aletter <|> hebrew_letter
-midnumletq = midnumlet <|> single_quote
-
-wordSegmentation =
-  [ ("WB1", sot 	÷ 	any)
-  , ("WB2", any 	÷ 	eot)
-  , ("WB3", cr 	× 	lf)
-  , ("WB3a", (newline <|> cr <|> lf) 	÷)
-  , ("WB3b",   	÷ 	(newline <|> cr <|> lf))
-  , ("WB3c", zwj 	× unicodeCharacterWhere "Extended_Pictographic" "Yes")
-  , ("WB3d", wsegspace 	× 	wsegspace)
-  , ("WB4", replace (x (extend <|> format <|> zwj)*) x)
-  , ("WB5", ahletter 	× 	ahletter)
-  , ("WB6", ahletter 	× 	(midletter <|> midnumletq) ahletter)
-  , ("WB7", ahletter (midletter <|> midnumletq) 	× 	ahletter)
-  , ("WB7a", hebrew_letter 	× 	single_quote)
-  , ("WB7b", hebrew_letter 	× 	double_quote hebrew_letter)
-  , ("WB7c", hebrew_letter double_quote 	× 	hebrew_letter)
-  , ("WB8", numeric 	× 	numeric)
-  , ("WB9", ahletter 	× 	numeric)
-  , ("WB10", numeric 	× 	ahletter)
-  , ("WB11", numeric (midnum <|> midnumletq) 	× 	numeric)
-  , ("WB12", numeric 	× 	(midnum <|> midnumletq) numeric)
-  , ("WB13", katakana 	× 	katakana)
-  , ("WB13a", (ahletter <|> numeric <|> katakana <|> extendnumlet) 	× 	extendnumlet)
-  , ("WB13b", extendnumlet 	× 	(ahletter <|> numeric <|> katakana))
-  , ("WB15", sot (ri ri)* ri 	× 	ri)
-  , ("WB16", [^ri] (ri ri)* ri 	× 	ri)
-  , ("WB999", any 	÷ 	any)
-  ]
-varid  LETTER  ×  (LETTER <|> DIGIT <|> SINGLE_QUOTE <|> uniidchar)
-symbol  SYMBOL  ×  SYMBOL
+-- | Allow scoped constraint arguments
+allowConstr = out { constraintAllowed = True }
 
 
 source =
@@ -139,7 +96,7 @@ fnDecl =
 
 clause =
   choice
-    -- unnamed with or function clause (inside a with)
+    Unnamed -- unnamed with or function clause (inside a with)
       some (wExpr)
       rhs
       choice
@@ -197,8 +154,6 @@ rhs =
       fnName
       symbol "}"
       expr
-    Impossible
-      keyword "impossible"
 
 
 terminator =
@@ -211,28 +166,65 @@ terminator =
 fullExpr =
   expr
   eof
+
+constraintExpr = expr { constraintAllowed = True }
+
 expr = pi
+
+pi =
+  choice
+    explicitPi
+    { lchar '{'; implicitPi }
+    unboundPi
+    if constraintAllowed then constraintPi else fail
+
+unboundPi =
+  opExpr
+  optional (bindsymbol; expr)
+  -- This is used when we need to disambiguate from a constraint list
+  when constraintAllowed $
+    notFollowedBy $ reservedOp "=>"
+
 opExpr = makeExprParser expr' operator_table
+
+-- example:
+-- _+_ binary op
+-- +_ prefix op
+-- _+ postfix op
+-- [[_]] around op
+opExpr = choice
+  { expr';  binary_op; expr' }
+  { lchar "("; partial_binary_op; expr'; lchar ")" }
+  { lchar "("; expr'; partial_binary_op; lchar ")" }
+  { prefix_op; expr' }
+  { expr'; postfix_op }
+  { lchar "("; expr'; lchar ")" }
+  { around_op_left; expr'; around_op_right }
+  { lchar "("; around_op_left; around_op_right; lchar ")" } -- partial around op
+  expr'
 
 expr' = externalExpr <|> internalExpr
 externalExpr = withextensions (syntaxRulesList $ syntax_rules i)
 
-internalExpr =
-         unifyLog
-     <|> runElab
-     <|> disamb
-     <|> noImplicits
-     <|> recordType
-     <|> if_
-     <|> lambda
-     <|> quoteGoal
-     <|> let_
-     <|> rewriteTerm
-     <|> doBlock
-     <|> caseExpr
-     <|> app
+internalExpr = choice
+  unifyLog
+  runElab
+  disamb
+  noImplicits
+  recordType
+  quoteGoal
+  let_
+  rewriteTerm
+  doBlock
+  lambda
+  caseExpr
+  whenRulesExpr
+  withRulesExpr
+  if_
+  app
 
-
+whenRulesExpr = { expr; keyword "when"; indentedBlock1 simple_rules }
+withRulesExpr = { expr; keyword "with"; indentedBlock1 rules }
 
 caseExpr =
   keyword "case"
@@ -242,23 +234,39 @@ caseExpr =
 
 caseOption =
   expr { inPattern = True, implicitAllowed = False  }
-  impossible <|> (symbol "=>" >*< expr)
+  symbol "=>"
+  expr
 
 app =
   simpleExpr
-  choice
-    A
-      reservedOp "<=="
-      fnName
-    B
-      many (notEndApp >*< arg)
-      if withAppAllowed && not inPattern
-        then many (notEndApp >*< reservedOp "|" >*< expr')
-        else empty
+  many arg
+  if withAppAllowed && not inPattern
+    then many {reservedOp "|"; expr'}
+    else empty
 
-simpleExpr =
+arg = label "function argument" $ choice
+  implicitArg
+  constraintArg
+  simpleExpr
+
+implicitArg = label "implicit function argument" $
+  lchar '{'
+  name
+  option {lchar '='; expr}
+  lchar '}'
+
+
+constraintArg = label "constraint argument" $
+  symbol "@{"
+  expr
+  symbol "}"
+
+simplePattern = simpleExpr { inPattern = True }
+
+simpleExpr = label "expression" $
   choice
     simpleExternalExpr
+    bracketed {implicitAllowed = False}
     PMetavar
       lchar '?' >*<  name
     PResolveTC
@@ -271,6 +279,7 @@ simpleExpr =
     reserved "Type"
     reserved "UniqueType"
     reserved "NullType"
+    keyword "impossible"
     constant
     symbol "'" >*< name
     PRef
@@ -282,41 +291,37 @@ simpleExpr =
     listExpr
     alt
     reservedOp "!" >*< withsimpleExpr
-    bracketed {implicitAllowed = False}
     quasiquote
     namequote
     unquote
-    do lchar '_'; return Placeholder
-    "expression"
+    placeholder
 
+placeholder = lchar '_'
 
+bracketed = label "parenthesized expression" $
+  lchar '('
+  bracketed' { withAppAllowed = True }
 
-bracketed = do (FC fn (sl, sc) _) <-  (lchar '(') <?> "parenthesized expression"
-                   bracketed' (FC fn (sl, sc) (sl, sc+1)) (syn { withAppAllowed = True })
-
-
-
-bracketed' open =
-            do fc <-  ( open >*< lchar ')')
-               return $ PTrue fc TypeOrTerm
-        <|>       (dependentPair TypeOrTerm [] open)
-        <|>       (do (opName, fc) <-  operatorName
-                      guardNotPrefix opName
-
-                      e <- expr
-                      lchar ')'
-                      return $ PLam fc (sMN 1000 "ARG") NoFC Placeholder
-                        (PApp fc (PRef fc [] opName) [pexp (PRef fc [] (sMN 1000 "ARG")),
-                                                      pexp e]))
-        <|>       (simpleExpr >>= \l ->
-                           (do (opName, fc) <-  operatorName
-                               lchar ')'
-                               return $ PLam fc (sMN 1000 "ARG") NoFC Placeholder
-                                 (PApp fc (PRef fc [] opName) [pexp l,
-                                                               pexp (PRef fc [] (sMN 1000 "ARG"))]))
-                 <|> bracketedExpr open l)
-        <|> do l <- expr (allowConstr)
-               bracketedExpr (allowConstr) open l
+bracketed' =
+  choice
+    lchar ')'
+    dependentPair
+    (
+      opName <- operatorName
+      guardNotPrefix opName
+      expr
+      lchar ')'
+    )
+    (
+      simpleExpr
+      operatorName
+      lchar ')'
+    )
+    bracketedExpr
+    (
+      constraintExpr
+      bracketedconstraintExpr
+    )
   where
 
     guardNotPrefix opName =
@@ -365,9 +370,10 @@ dependentPair pun prev openFC =
         mergePDPairs pun starsFC' ((e, cfclty, starsFC):bnds) r =
            PDPair starsFC' [] pun e (maybe Placeholder snd cfclty) (mergePDPairs pun starsFC bnds r)
 
+bracketedConstraintExpr = bracketExpr { constraintAllowed = True }
 
+bracketedExpr openParenFC e = label "end of bracketed expression" $
 
-bracketedExpr openParenFC e =
              do lchar ')'; return e
         <|>  do exprs <- some (do comma <-  (lchar ',')
                                   r <- expr
@@ -377,7 +383,7 @@ bracketedExpr openParenFC e =
                 return $ PPair openParenFC hilite TypeOrTerm e (mergePairs exprs)
         <|>  do starsFC <- reservedOp "**"
                 dependentPair IsTerm [(e, Nothing, starsFC)] openParenFC
-        <?> "end of bracketed expression"
+        <?>
 
 
 alt = do symbol "(|"; alts <-   sepBy1 (expr' (syn { withAppAllowed = False })) (lchar ','); symbol "|)"
@@ -420,32 +426,6 @@ noImplicits = do       (lchar '%' >*< reserved "noImplicits")
                      tm <- simpleExpr
                      return (PNoImplicits tm)
                  <?> "no implicits expression"
-
-
-
-arg =  implicitArg
-       <|> constraintArg
-       <|> do e <- simpleExpr
-              return (pexp e)
-       <?> "function argument"
-
-
-implicitArg = do lchar '{'
-                     (n, nfc) <-  name
-                     v <-   option (PRef nfc [nfc] n) (do lchar '='
-                                                          expr)
-                     lchar '}'
-                     return (pimp n v True)
-                  <?> "implicit function argument"
-
-
-constraintArg = do symbol "@{"
-                       e <- expr
-                       symbol "}"
-                       return (pconst e)
-                    <?> "constraint argument"
-
-
 
 quasiquote =        symbol "`("
                     e <- expr { syn_in_quasiquote = (syn_in_quasiquote) + 1 ,
@@ -524,27 +504,24 @@ recordType =
 
 
 typeExpr = do cs <- if implicitAllowed then constraintList else return []
-                  sc <- expr (allowConstr)
+                  sc <- constraintExpr
                   return (bindList (\r -> PPi (constraint { pcount = r })) cs sc)
                <?> "type signature"
 
 
 
-lambda = do lchar '\\' <?> "lambda expression"
-                ((do xt <-       $ tyOptDeclList (disallowImp)
-                     (sc, fc) <-  lambdaTail
-                     return (bindList (\r -> PLam fc) xt sc))
-                 <|>
-                 (do ps <-   sepBy (do (e, fc) <- withsimpleExpr (disallowImp (syn { inPattern = True }))
-                                       return (fc, e))
-                                   (lchar ',')
-                     sc <- lambdaTail
-                     return (pmList (zip [0..] ps) sc)))
-                  <?> "lambda expression"
+lambda = label "lambda expression" $
+  lchar '\\'
+  let implicitAllowed = false
+  choice
+    TypedLambda
+      tyOptDeclList
+      lambdaTail
+    UntypedLambda
+      sepBy simplePattern (lchar ',')
+      lambdaTail
 
-          lambdaTail = impossible <|> symbol "=>" >*< expr
-
-
+lambdaTail = symbol "->" >*< expr
 
 rewriteTerm = do keyword "rewrite"
                      (prf, fc) <- withexpr
@@ -614,7 +591,7 @@ bindsymbol
 explicitPi
    = do xt <-       (lchar '(' >*< typeDeclList <* lchar ')')
         binder <- bindsymbol
-        sc <- expr (allowConstr)
+        sc <- constraintExpr
         return (bindList (\r -> PPi (binder { pcount = r })) xt sc)
 
 autoImplicit
@@ -623,7 +600,7 @@ autoImplicit
         xt <- typeDeclList
         lchar '}'
         symbol "->"
-        sc <- expr (allowConstr)
+        sc <- constraintExpr
         return (bindList (\r -> PPi
           (TacImp [] Dynamic (PTactics [ProofSearch True True 100 Nothing [] []]) r)) xt sc)
 
@@ -636,7 +613,7 @@ defaultImplicit =
    xt <- typeDeclList
    lchar '}'
    symbol "->"
-   sc <- expr (allowConstr)
+   sc <- constraintExpr
    return (bindList (\r -> PPi (TacImp [] Dynamic script r)) xt sc)
 
 normalImplicit =
@@ -666,24 +643,6 @@ implicitPi =
     autoImplicit
     defaultImplicit
     normalImplicit
-
-unboundPi =
-  opExpr
-  optional (bindsymbol; expr)
-
--- This is used when we need to disambiguate from a constraint list
-unboundPiNoConstraint =
-  opExpr
-  optional (bindsymbol; expr)
-  notFollowedBy $ reservedOp "=>"
-
-pi =
-  choice
-    explicitPi
-    { lchar '{'; implicitPi }
-    if constraintAllowed
-      then unboundPiNoConstraint <|> constraintPi
-      else unboundPi
 
 piOpts | implicitAllowed = optional (lchar '.')
 piOpts = empty
@@ -1477,14 +1436,6 @@ reservedOp name = token $
 
 Haskell
 
-special = oneOf "()[]{},;`"
-pureSpecial = oneOf "()[]{}@=\|;"
-LETTER = Unicode category Ll,Lt,Lu,Lo <|> '_'
-SYMBOL = Unicode category Pc,Pd,Po,Sc,Sm,Sk,So
-other_graphic = Unicode category Mc,Me,Nl,Ps,Pe,Pi,Pf
-Numeric = Unicode category Nd,No
-uniidchar = Lm, Mn
-
 whitechar -> newline <|> '\v' <|> space <|> tab (should include all Unicode whitespace)
 program -> { lexeme <|> whitespace }
 lexeme -> qvarid <|> qvarsym <|> literal <|> special <|> reservedop <|> reservedid
@@ -1502,7 +1453,6 @@ opencom -> '{-'
 closecom -> '-}'
 ncomment -> opencom ANYseq {ncomment ANYseq} closecom
 ANYseq -> {ANY &&& not (opencom <|> closecom)}
-symbol -> (/[!#$%&*+./<=>?@\'^<|>-~:]/ <|> any Unicode symbol or punctuation) &&& not special <|> '_' <|> '"' <|> '\''
 
 varsym -> ( symbol {symbol} ) &&& not (reservedop <|> dashes)
 
@@ -2525,9 +2475,7 @@ data_ = (checkDeclFixity $
                      return $ PData doc argDocs nfc dataOpts (PDatadecl tyn nfc ty cons))
                    terminator
                    return d) <|> (do
-                    args <- many (do notEndApp
-                                     x <- name
-                                     return x)
+                    args <- many name
                     let ty = bindArgs (map (const (PType nfc)) args) (PType nfc)
                     let tyn = expandNS tyn_in
                     d <-   option (PData doc argDocs nfc dataOpts (PLaterdecl tyn nfc ty)) (do
@@ -2579,8 +2527,7 @@ simpleConstructor
           let doc' = annotCode (tryFullExpr ist) doc
           (cn_in, nfc) <-  fnName
           let cn = expandNS cn_in
-          args <- many (do notEndApp
-                           simpleExpr)
+          args <- many simpleExpr
           checkNameFixity cn
           return $ \fc -> (doc', [], cn, nfc, args, fc, []))
         <?> "constructor"

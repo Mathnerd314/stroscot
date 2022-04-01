@@ -805,6 +805,9 @@ example_m = do
   tr <- translate retseq Map.empty (Level 0, ret) m
   return $ tr ++ [ Assign (VID "m") (Rule (Sequent retseq [] [ret]) ())]
 
+print_m :: IO ()
+print_m = mapM_ print $ fst $ runState example_m 0
+
 writeFirst :: IO ()
 writeFirst = do
   let graph = fst $ runState example_m 0

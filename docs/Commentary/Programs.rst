@@ -3,7 +3,6 @@ Exemplary programs
 
 A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged, but there is also a "halo effect" of "I like program X, therefore I like programming language L that X is written in". Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.
 
-
 Social network
 --------------
 
@@ -69,7 +68,10 @@ server code in kernel (kttpd, TUX Threaded linUX webserver)
 Bring the TCP stack into userspace - netmap, Sandstorm
 Windows UMS - one thread can switch execution to another without stopping (discussed `here <https://www.youtube.com/watch?v=KXuZi9aeGTw>`__).
 
+CDCL Prolog
+-----------
 
+Just a fun experiment, what would Prolog look like if you replaced its backtracking SLD resolution algorithm with the algorithm from a modern SAT solver? CDCL (Conflict-driven clause learning) is the newest and fastest algorithm and seems like the one to use.
 
 Other ideas
 -----------

@@ -1,0 +1,44 @@
+Comparing two elements of a poset produces one of LT GT EQ or INC. We say x < y, x > y, x = y, or x ~ y (x and y are incomparable).
+
+compare a a = EQ
+compare x y = converse (compare y x) where
+  converse EQ = EQ
+  converse LT = GT
+  converse GT = LT
+  converse INC = INC
+
+We exclude compare x y = INC, compare y x = EQ/GT/LT, because < is the dual of >, and similarly = is symmetric.
+
+compare x z = trans (compare x y, compare y z) where
+  trans s EQ = s
+  trans EQ t = t
+  trans LT LT = LT
+  trans GT GT = GT
+  trans _ _ = anything
+
+We can define the relations <= and >= using this.
+
+a <= b = compare a b elemOf {EQ,LT}
+a >= b = compare a b elemOf {EQ,GT}
+
+
+
+
+
+ Given two posets A and B the lexicographical order on the Cartesian product A times B is defined as
+
+  (a,b)≤(a',b') if and only if a<a' or (a<=~a' and b≤b')
+
+  a ~ c, c ~ e, a > e
+  b < d < f
+
+  ⟨a,b⟩⪯⟨c,d⟩⪯⟨e,f⟩
+
+  a <=~ c <=~ e
+  if a < c and c <= e, or a <= c and c < e then a < e and ⟨a,b⟩⪯⟨e,f⟩.
+  Otherwise we have
+    a < c ~ e, d<=f
+    a ~= c =~ e, b <= d <= f - so b<=f
+    a ~ c < e, b <=d
+
+  we have b≤Bd and d≤Bf, so b≤Bf, and again ⟨a,b⟩⪯⟨e,f⟩.+

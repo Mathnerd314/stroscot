@@ -1,0 +1,21 @@
+f x = if x > 100 then x - 10 else f (f (x+11))
+-- goal: optimize f to
+f x = if x > 100 then x - 10 else 91
+
+
+f x = if x > 100 then x - 10 else
+      if x == 100 then 91 else
+      if x > 89 then
+        f (x+2)
+      else
+        f (f (x+22))
+
+
+f x = if x > 100 then x - 10 else
+      if x == 100 then 91 else
+      if x > 89 then f (x+2) else
+      if x > 78 then f(x + 12) else
+      if x == 78 then f 91 else
+      if x > 67 then f (f (x + 24)) else
+      f (f(f (x + 44)))
+

@@ -80,37 +80,6 @@ If the software is compiled to be used on one or a few very similar machines, wi
 Embedded systems
 These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code's speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code's timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.
 
-* Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.
-  * Peephole optimizations / strength reduction - like ``x*2`` by ``x << 1``/``x+x``, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.
-  * Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation
-    * Partial evaluation
-  * common subexpression elimination, global value numbering - tricky with blocks
-    * code factoring - CSE but for control flow
-  * Test reordering - do simpler tests first - treat control flow as data
-  * Removing conditional branch cases if can prove won't be taken
-  * Inlining
-  * Space optimizations - anti-inlining
-    * Trampolines allow placing code at low addresses
-    * Macro compression compresses common sequences of code
-* Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.
-* Scheduling / reordering / pipelining
-  * minimize pipeline stalls, when an instruction in one stage of the pipeline depends on the result of another instruction ahead of it in the pipeline but not yet completed.
-  * ensure the various functional units are fully fed with instructions to execute.
-  * avoid cache misses by grouping accesses
-  * clear out unconditional jumps (inlining). Avoid inlining so much that it cannot fit in the cache.
-  * splitting/combining recursive calls / basic blocks
-  * Bias conditional jumps towards the common case
-* Recursion
-  * induction variable analysis to replace multiplication by a loop index with addition
-  * loop reversal - changing condition to zero comparison
-  * loop unswitching - moving conditional outside loop
-  * hoisting invariants, partial/total redundancy elimination
-  * parallelization - multi-threaded or vectorized code
-* Alias analysis - changing memory references into values
-* tail call optimization, Stack height reduction - stack optimizations
-* deforestation - remove data structure
-
-
 Output
 ======
 
@@ -258,32 +227,101 @@ Overall I don't see much of an opportunity, SSD and network speeds are sufficien
 Documentation generator
 =======================
 
-The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There's regex-based search, and special searches for identifiers.
+The documentation generator provides a nice way to browse through a large codebase. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There's regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.
+
+As far as targets, only HTML seems particularly important.
+
+Refactorer / reformatter
+========================
+
+The refactoring tool reduces the amount of effort it takes to maintain code. It reads a program from a source file, rewrites the code according to specified rules, and writes the program back to the file. It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert ``TODO: check rule XXX`` comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms.
+
+Theoretically we should provide both forward and backward compatibility for language versions via the refactoring tool, but practically I think only backwards compatibility (v1 -> v2) is relevant.
+
+With no rules, the refactoring tool functions as a reformatter. Python's Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that's used for the compiler.
+
+Inspired by gofix / `gofmt <https://go.dev/blog/gofmt>`__ .
 
 Language server
 ===============
 
-For integration with VSCode and other editors.
+For integration with VSCode and other IDEs.
+
+Shell
+=====
+
+A simple REPL loop based on eval.
 
 Notebooks
 =========
 
 Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.
 
-But, jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code", no information on what cell it's from.
+But, jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code" REPL, no information on what cell it's from.
 So we would have to hack jupyter to get this to work.
 
 The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a "soft_reset" message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it's the same as the previous execution - I don't know if sending all the code is much of a bottleneck.
 
-For now the imperative approach seems fine.
+For now living with REPLs seems fine.
 
-Dynamic loading
-===============
+Dynamic execution
+=================
 
 loading code at runtime
-- typecheck, JIT, etc.
-- return function pointer
-the function pointer doesn't have to be machine code, it can be bytecode, so the function runs through the interpreter
+- typecheck, JIT compile, return function pointer
+the function pointer doesn't have to be machine code, it can be bytecode, so the function runs through an interpreter
+Compiler from IR to bytecode
+Saving snapshots of the VM state (images)
+Tracing JIT compiler
+Use libgccjit for code generation?
+Optimized assembly interpreter a la LuaJIT and JavaScriptCore
+
+
+everyone had two entry points.
+if you came from the
+interpreter you had to call the
+interpreter entry point and you
+came from JITed code you entered the
+JITed code favorite entry point
+
+the goal here was JITed calling JITed had minimal overhead
+so an x86 call instruction with the JITed entry point's address
+
+so if a JITed calls interpreted there's a
+JITed entry point that shuffles the
+arguments and jumps to the interpreter
+
+and if the interpreter makes
+a call, it's a slow procedure that looks
+up the interpreter endpoint or else
+jumps to a trampoline that jumped to the JITed code
+
+then there's deopt
+it's tricky to stop running processors
+from running code
+if you try to
+edit the method call buffers processors have
+them cached
+you
+can't actually stop it
+so first you change the vtable to the interpreter
+then you change the head of the method to jump to the interpreter
+
 
 
 Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.
+
+Logic
+=====
+
+Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).
+
+Debugger
+========
+
+Need this. Reversible debugging.
+
+Profiler
+========
+
+Should profile both time and memory usage.

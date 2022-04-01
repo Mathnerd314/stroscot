@@ -1,17 +1,30 @@
+.. _Verification:
+
 Verification
 ############
 
-Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, "state space explosion". To get around this there are various tricks:
+Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a fairly natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazing programs to emerge.
+
+Still, static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong, with an error. Stroscot is not conservative by default - it will simply output a warning, even if it discovers a definite bug in the program. But bugs and incomplete analyses can be treated as errors with ``-Werror``, or conversely completely suppressed.
+
+Scalability
+===========
+
+Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, "state space explosion". Reports Midori: "The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!"
+
+To get around this there are various tricks:
 
 * combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
 * optimize checking individual states, so larger state spaces can be checked in a given amount of time (brute force proof)
 * change the order states are explored, so that the failure mode is found earlier, before we run out of time or memory. But here we are not exploring the full state space (smart fuzzing)
+* simplify the property being checked to an approximation
 
-These techniques combine to form a much more powerful toolkit than conventional unit testing. Furthermore since they are built into the language there is a standardized API and UX for understanding tracebacks.
+In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And meanwhile we can check "shallow" properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and this will likely be an area of development after Stroscot gets popular.
 
-In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And then properties can be "shallow" and not result in a state space explosion.
+Implementation
+==============
 
-Model checking requires annotations only for marking the specific states that should be unreachable. A model checker rejects a program by providing a program trace counterexample. The counterexample can then be fed into a debugger to determine what changes to make to the program.
+The implementation in Stroscot will be "from scratch" - custom SAT/SMT solver, custom state space explorer, etc. The main reason is to avoid the overhead present in existing tools of translating to/from the constraint specification languages such as SMTLIB or specialized XML formats. But it will use the techniques from various existing implementations.
 
 model checkers:
 [CBMC](https://www.cprover.org/cbmc/)
@@ -114,20 +127,44 @@ The halting problem merely prevents a program from evaluating a nontrivial prope
 Reachability
 ------------
 
-A reachability (safety) task consists of a program and a set of error states, with the goal to show that the error states are unreachable, or otherwise to find a feasible program path to an error state. This can be used to verify assertions and check for type errors.
+A reachability (safety) task consists of a program annotated with a set of error states, with the goal to show that the error states are unreachable, or otherwise to find a feasible program path to an error state. This can be used to verify assertions and check for type errors.
 
-To prove unreachability we exhibit a covering domain with no concrete error states in any of the abstract states. To prove reachability we produce a concrete feasible path ending in an error state.
+To prove unreachability we exhibit a covering domain with no concrete error states in any of the abstract states. To prove reachability we produce a concrete feasible path ending in an error state. The counterexample can then be fed into a debugger to determine what changes to make to the program.
+
+Assertions
+~~~~~~~~~~
+
+Side-effect free.
+
+Assertions written inline, for sanity-checking. Not documented.
+
+assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
+assume expr - prunes traces where expression is false. backtracking implementation at runtime.
+
+Regarding debug-only assertions that are only checked in debug builds, in practice the unconditional "release" assertions are more useful/common than debug. Policies like “checked in debug” versus “checked in release” don't belong in a programming language. If you really want a debug-only check, you can say ``if(DEBUG) { requires X }``.
+
+Imagine you're designing a car and put in air bags. You test the car and the air bags in all sorts of configurations and they work great and are much safer. But just as you're getting ready to go into production to send the car out to consumers, you take out all the airbags. That's what debug-only assertions are like.
+
+``assert`` is deeply special, since it has to work with descriptions of executable properties, so unfortunately not all programs/properties will be statically resolvable.
+
+Assertions are strongly recommended for reliability and defensive coding.
+
+Invariants are just assertions in loop bodies.
+
+Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``.
+
+Java's complex form ``assert expr : exception`` that throws ``exception`` on failure seems pointless
 
 Termination
 -----------
 
-Termination checking verifies properties like "A function call must eventually return" or "A program execution that calls malloc() must eventually call free()". A counterexample can be an infinite state transition sequence that doesn't call free, so it is a liveness property. Note that it's different from a safety property "A call to free must be preceded by a call to malloc". It's also different from "If the program ends gracefully then all memory has been freed". A lot of programs look like ``repeat { handleCommand{} }`` and for those we can prove termination of ``handleCommand`` but not the loop. But we can prove graceful exit.
+Termination checking verifies properties like "A function call must eventually return" or "A program execution that calls malloc() must eventually call free()". An infinite state transition sequence that doesn't call free is a counterexample. Termination is a liveness property - it's different from a safety property "A call to free must be preceded by a call to malloc". It's also different from "If the program ends gracefully then all memory has been freed". A lot of programs look like ``repeat { handleCommand{} }`` and for those we can prove termination of ``handleCommand`` but not the loop. But we can prove graceful exit.
 
 Proving termination is of undecidable complexity, but in practice we can prove termination and nontermination in many cases. We can reduce liveness to fair termination constraints ``<A, B>``, in each trace either ``A`` is true for only finitely many states or ``B`` is true for infinitely many states.
 
 To prove termination we construct an abstract state graph of reachable states and a ranking function mapping states to some well-ordered set such that every cycle in the state graph has a transition that decreases the rank.
 
-To prove nontermination we need an infinite path of concrete states. This can be simplified to an initial path of concrete states leading to a strongly connected component of abstract states with no exits.
+To prove nontermination we need an infinite path of concrete states. If the abstract state graph is finite this can be simplified to an initial path of concrete states leading to a strongly connected component of abstract states with no exits.
 
 There's also some interesting `work <http://mmjb.github.io/T2/>`__ on termination checking by Microsoft. There's a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy.
 
@@ -144,6 +181,8 @@ Equivalence of pure programs is based on comparing results over all possible inp
 Equivalence of I/O programs is based on comparing events: we represent all I/O actions in a datatype and then compare as for pure programs.
 
 In the literature there is a notion of bisimulation. But here our state transition graph includes computation transitions, while the amount of computation is not relevant for equivalence. But of course bisimulation implies equivalence.
+
+One use for equivalence is finding dead or redundant code. For example, if the program is equivalent when commenting out a line of code, or if a boolean expression is reversed.
 
 Supercompilation
 ----------------

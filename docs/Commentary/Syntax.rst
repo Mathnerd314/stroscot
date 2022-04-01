@@ -10,12 +10,22 @@ Quorum and its associated set of syntax studies provide useful datapoints on key
 
 Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
 
-Haskell/Idris syntax is mostly awesome, use it.
+Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird parentheses style may lose too many users)
 
 TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
 
 Natural language like Inform 7, while interesting, is quite wordy. It's also hard to scan through.
 
+Fortress has "mathematical syntax", with an ASCII form and typeset form. They used LaTeX but HTML / MathML output should be possible too. And juxtaposition was overloaded. Probably worth emulating.
+
+A language encourages certain expressions of thought. If the syntax is awkward then the feature will be used less and a bias will be introduced. But the styles of programming people come up with after a language is released are often completely different to what was intended by the language (e.g. Java and its design patterns). It's not clear that anything can be done about this, besides capturing as many existing patterns as cleanly as possible.
+
+Textual
+-------
+
+There are some people who, when confronted with the complexity of syntax, think "It's better to use a binary format and store everything in a database." Now they have two problems. Math is textual, English is textual, the only stuff that isn't textual are flowcharts and tables. Flowcharts might be OK but graph layout is hard - graphviz barely works, and IDA Pro's graph layout when it decompiles stuff is quite lacking. Tables lead into spreadsheet programming which is generally not expressive as a language - and the formulas and cell values are textual. If you show me a way to write 123.6 that doesn't involve text maybe I'll think about this more.
+
+There's also structural editing, `lamdu <http://www.lamdu.org/>`__ and so on, but they are designing an IDE alongside a programming language. I'm not too interested in IDEs and given that half the IDEs are for languages that also have a textual syntax, syntax doesn't seem to be a big factor in writing such an IDE.
 
 Legibility
 ----------
@@ -26,10 +36,40 @@ Spacing is important to identify word boundaries (intra-letter spacing significa
 
 Line length is a good question. Programming uses fixed-width characters so it's measured in characters. 80 characters is standard, but monitors are wider now, so 100 is plausible. Diff programs are often the limiting factor, but on my monitor I can fit 2 108-character texts side-by-side along with a space in the middle and the taskbar. 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt (24px) I can fit 97 characters, while 23px fits 102 characters.
 
-Layout improves legibility, Python syntax is often said to be "clean", hence why Stroscot has layout
+Layout improves legibility, Python syntax is often said to be "clean", hence why Stroscot has layout.
+
+Reading code top-to-bottom, left-to-right makes sense. So definitions should be on the left, blocks indented in, and lines themselves should read left to right. So Ruby's statement modifiers ``X if Y`` are a bad idea because the ``if Y`` is easy to miss when scanning control flow.  But operators like ``a = b xor c`` are fine because at the point where the expression matters you're reading the whole line anyway and can parse it in your head.
+
+Parsing
+=======
+
+I've got a basic Earley algorithm working for now. But eventually I'm extending it with BSRs and layout and other fun things. There's also `Yakker <https://github.com/attresearch/yakker>`__, which is the most developed parser I've seen feature-wise. It's only missing incremental parsing.
+
+  A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.
+
+I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on the set of parse tree generated by a nondeterministic automaton. The alternatives involve restricting parsers to be deterministic, for example PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
+
+Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.
+
+Revisiting this, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation :cite:`sperberGenerationLRParsers2000` and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.
+
+In particular the parser should be written as a nondeterministic finite state transducer that builds up trees (outputs a list in the style of start-children-end or S-expressions or something).
+
+Formally:
+
+    Q is a finite set, the set of states;
+    I is a subset of Q, the set of initial states;
+    F is a subset of Q, the set of final states; and
+    Σ is a finite set, called the input alphabet;
+    Γ is a finite set, called the output alphabet;
+    The transition function is of type :math:`Q \times (\Sigma \cup \{\epsilon \})\to P(Q \times (\Gamma \cup \{\epsilon \}))`, where ε is the empty string and P(Q) denotes the power set of Q.
+
+TODO: match this up with Parsec, attoparsec, trifecta, etc. the syntax should be similar except with nondeterministic choice ``|``.
+
+
 
 Blocks
-------
+======
 
 Blocks are inspired by Haskell's do notation, but have a twist, based on the observation that the continuation monad is `the mother of all monads <https://www.schoolofhaskell.com/school/to-infinity-and-beyond/pick-of-the-week/the-mother-of-all-monads>`__. Since it's the mother, we don't lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations. That link gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
 
@@ -53,10 +93,10 @@ The second function is to use applicative operations instead of monadic operatio
 
 ::
 
-   numCommonFriends :: Id → Id → Haxl Int
+   numCommonFriends :: Id -> Id -> Haxl Int
    numCommonFriends x y = do
-      fx ← friendsOf x
-      fy ← friendsOf y
+      fx <- friendsOf x
+      fy <- friendsOf y
       return (length (intersect fx fy))
 
 Well, sorry to burst the bubble, but if you're writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It's exactly these kinds of details that *are* accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the `use/def analysis <https://en.wikipedia.org/wiki/Use-define_chain>`__ that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.
@@ -187,6 +227,15 @@ Specificity
 
 This might seem overly complicated, but it's based on Zarf's `rule-based programming <https://eblong.com/zarf/rule-language.html>`__. When you're defining lots of rules for a IF game then specifying priorities by hand is tedious.
 
+Comments
+========
+
+Analysis of languages showed C-style comments ``/* */`` and C++ style comments ``//`` are very common. In addition Pascal-style nesting multiline comments ``(* *)`` seem useful. Supporting shebang comments at the beginning of a file complicates the syntax a bit but makes the language easier to use for scripting. But the frequency of ``#`` is still less than ``//`` so it's not usable for normal comments.
+
+Javadoc-style comments ``/** */`` are used in very clear stylized ways, so there seems to be no reason to forbid them.
+
+People put comments in random places and they can be attached to whatever and indented strangely. The reformatter will mangle them, but hopefully this will become accepted behavior.
+
 Whitespace
 ==========
 
@@ -196,57 +245,115 @@ OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
 
+Indentation-sensitivty like Python seems great. It is readable and when copy-pasting code you only have to fix up the indentation (supported by all modern code editors) instead of messing with braces.
+
 Function syntax
 ===============
 
-Lambdas are defined using whatever syntax. The ``\x.y`` style is closest to the mathematical notation (barring Unicode), Haskell uses ``\x -> y``, Cliff likes ``{x => y}``.
+Stroscot has first-class functions with lexically scoped name binding.
 
-Haskell style arguments ``f a`` are preferred over C style ``f(a)`` due to being shorter for arguments that are identifiers. The only place they lose in character count is complex arguments ``f (a+1) (b+2)`` vs ``f(a+1,b+2)``, but there you can use a tuple to match the syntax or the record ``f{x=a+1,y=b+2}`` which will most likely be clearer.
+Lambdas are defined using whatever syntax. The ``\x.y`` style is closest to the mathematical notation (barring Unicode), Haskell uses ``\x -> y``, Cliff likes ``{x => y}``.
 
 APL-style functions/operators ``(~R∊R∘.×R)/R←1↓⍳R`` are not preferred due to Unicode overuse, preferring operators written with words instead, but one could create them if desired.
 
+Conceptually, term rewriting is the underlying model of computation.
+
 Arguments
-=========
+---------
 
 Stroscot supports many types of arguments. Functions are extremely common, so the more styles supported,
 the shorter the code will be.
 
-Functions operate on values and produce the same outputs given the same inputs.
-
-Conceptually, term rewriting is the underlying model of computation.
-
-Clauses are applied as rewriting rules, reading them from left to right. A clause is applicable if its left-hand side matches the term to be evaluated, in which case we bind the variables in the left-hand side to the corresponding subterms in the target term.
-
 Equations are tried in the order in which they are written; as soon as the left-hand side of an equation matches (and the condition part of the equation, if any, is satisfied), it can be applied to reduce the target term to the corresponding right-hand side. The term is rewritten until no more equations are applicable.
 
-any function symbol or operator can be used anywhere on the left-hand side of an equation, and may act as a constructor symbol if it happens to occur in a normal form term. This enables you to work with algebraic rules like associativity and distributivity in a direct fashion:
+Currying
+--------
 
-> (x+y)*z = x*z+y*z; x*(y+z) = x*y+x*z;
-> x*(y*z) = (x*y)*z; x+(y+z) = (x+y)+z;
-> square (a+b);
-a*a+a*b+b*a+b*b
+Currying makes all functions symbols of order 0 and allows easy partial function application.
+Partial function application allows reusing functions more easily, e.g. as the argument to map.
+Function symbols also become first-class, because they can be passed around without being applied, ``f`` vs ``\x. f x``
 
-The above isn’t possible in languages like Haskell and ML which always enforce that only “pure” constructor symbols (without any defining equations) may occur as a subterm on the left-hand side of a definition
+Haskell style arguments ``f a`` are preferred over C style ``f(a)`` due to being shorter for arguments that are identifiers. The only place they lose in character count is complex arguments ``f (a+1) (b+2)`` vs ``f(a+1,b+2)``, but there you can use a tuple to match the syntax or the record ``f{x=a+1,y=b+2}`` which will most likely be clearer.
 
-constructor discipline: Haskell has a rule that identifiers starting with uppercase letters are constructors and cannot be defined to be functions, but this rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction.
+Constructor discipline
+----------------------
 
-The semantics of functions are defined by pattern-matching rules a la `Pure <https://agraef.github.io/pure-docs/pure.html#definitions-and-expression-evaluation>`__.
+Haskell has a division between constructors and functions:
+* identifiers starting with lowercase letters are functions, and can only be used with rules of the form ``f x = ...``
+* identifiers starting with uppercase letters are constructors and no rules of the form ``X a b = ...`` can be defined. But constructors are the only symbols allowed in sub-terms, e.g. ``f (X a b) = ...``
+
+This rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction. In fact in :cite:`kahrsNonOmegaOverlappingTRSsAre2016` there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating ``foo`` into a constructor ``Foo`` and a function ``foo``, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example ``k x y = x; s x y z = (x z) (y z)`` turns into:
+
+::
+
+  app (App K x) y = x
+  app K x = App K x
+  k = K
+
+  app (App (App S x) y) z = app (app x z) (app y z)
+  app S x = App S x
+  app (App S x) y = App (App S x) y
+  s = S
+
+This is pretty verbose but the constructors besides app are nullary so it isn't as bad as it could be. For rules like associativity ``x*(y*z) = (x*y)*z`` and distributivity ``x*(y+z) = x*y+x*z`` handling all the stuck pattern rules for symbols ``+`` and ``*`` is a nightmare, and you also have to come up with alternative operator names for the constructors.
+
+So Stroscot follows Pure in not having a constructor discipline. Any symbol can be used anywhere on the left-hand side of an equation. Any symbol may act as a constructor symbol if it happens to occur in head position in a normal form term.
+
+There is a general convention for the standard library to use lowercase for potentially reducible expressions and uppercase for inert data. This is to vaguely follow Haskell.
 
 Implicit arguments
 ------------------
 
-``loglevel`` is defined close to the top level, but each use
-site is scattered in the code. The implicit argument replaces
-the global variable that is often used.
-Similarly ``logPrint`` is passed implicitly instead of being a member of a global Logger instance.
+Claim: Explicit argument passing cannot replace implicit arguments
 
-Claim: Explicit argument passing cannot replace our implicit variable example
+See example: (copied from reference)
 
-The file variable does not exist in the standard
-library; it is part of the user's code. To use explicit argument passing
-would require adding new arguments to log, or modifying main to store print partially-applied, but this would break anyone
-else using the library. Not to mention that just one intervening
-function is rare and we'd probably need to modify 20 or 30 functions in
-a bad case.
+::
 
+  -- standard library
+   log s = if (priority > loglevel) { logPrint s }
 
+  -- components of an application
+   foo = log "foo" { priority = DEBUG }
+   bar = log "bar" { priority = WARNING }
+   baz =
+    foo
+    bar
+
+  -- main file
+   logPrint x = writeFile file x
+   file = "a"
+   loglevel = WARNING
+
+   main =
+     baz
+     foo {loglevel=DEBUG}
+     bar { file = "b"}
+
+``loglevel`` is defined at the top level, but each use site is scattered in the code. The implicit argument replaces the global variable that is often used. Similarly ``logPrint`` is passed implicitly instead of being a member of a global Logger instance. The ``file`` variable does not exist in the standard library; it is part of the user's code.
+
+To use explicit argument passing, we'd have to add explicit ``loglevel`` and ``logPrint`` arguments to ``log`` and all its callers. To minimize callers we could partially apply it in ``main`` and pass around just the ``log : String -> Cmd`` function. But still, we have to modify every caller of ``log`` and its callers and so on to pass around the ``log`` function.
+
+Chained assignment
+==================
+
+This is mainly the expression ``a = b = 2`` but also the variant ``a := b := 2``. The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution. C++'s "the assignment returns the lvalue" seems contrived. With ``=`` the assignments are all pure hence simultaneous; for ``:=`` doing assignments RTL to match C++ is probably better than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>`.
+
+OTOH using ``=`` for equality comparison might break this.
+
+Unless
+======
+
+Ruby's ``unless-else`` is unintuitive. Only support ``if-else``. Also ``if not`` is a possible replacement for ``unless``.
+
+Tuples and records
+==================
+
+In `Maybe Not <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/MaybeNot.md>`__ Rich Hickey  says records/fields, and product types are "place oriented programming". Well, in `The Value of Values <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/ValueOfValuesLong.md>`__ he says place-oriented programming is when you use in-place update. But maps (his proposed alternative) also support in-place update and are place-oriented. The difference between maps and records seems to be that records have ordered fields.
+
+So he seems have a different definition in mind, in particular that place-oriented means accessors are not first class - even when the fields are named, you cannot say ``object["name"]`` for an arbitrary object or an arbitrary name. But this is easily solved by adding such functionality. It also doesn't get into the mutable/immutable distinction that the values talk made.
+
+His second point is that product types "complects" the meaning of things with their position in a list. "Complect" is from `Simple Made Easy <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/SimpleMadeEasy-mostly-text.md>`__ and is a pejorative version of "braid together".
+Essentially he's saying that if you have ``(String, String)`` there is no way to know how the second string is different from the first string. Well, for commutative operations like addition the order literally doesn't matter. Adding any sort of information to ``(+) : (Int, Int) -> Int`` is complicating the picture. Similarly for Strings `coming up <https://gemma.msl.ubc.ca/resources/baseCode/apidocs/ubic/basecode/util/StringUtil.html#append-java.lang.String-java.lang.String-java.lang.String->`__ with names "appendee" and "appendant" for an  append operation is almost as bad as digging up "complect". Using numerical names ``s1`` and ``s2`` makes more sense. It still gives a record with named fields, but it makes sense to use positional arguments.
+
+And if the types are different there's no ambiguity: ``(FirstName, LastName``, ``(Int,Bool)``, etc.

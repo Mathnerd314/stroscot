@@ -35,7 +35,7 @@ Principles
 Paradigms are vague and only express common patterns; they cannot be used to design a programming language. So instead we have principles.
 
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
-* Make the irreducible basic elements as simple and as few as possible without [surrendering] the adequate representation of a single datum of experience. (Albert Einstein)
+* Make the irreducible basic elements as simple and as few as possible without having to surrender the adequate representation of a single datum of experience. (Albert Einstein)
 * Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (`Branch and bound <https://en.wikipedia.org/wiki/Branch_and_bound>`__)
 * Never finished, never complete, but tracking the progress of technology (Lennart Poettering)
 * Code can be used as data, data can be used as code (Lisp)
@@ -51,10 +51,25 @@ Paradigms are vague and only express common patterns; they cannot be used to des
 * Organize functions by functionality into expressive components. (`Uli Weltersbach <https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/>`__)
 * When two elements of an interface conflict, or are ambiguous, the behavior should be that which will least surprise the user; in particular a programmer should try to think of the behavior that will least surprise someone who uses the program, rather than that behavior that is natural from knowing the inner workings of the program. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
 
+Non-principles
+--------------
 
-Readability is a function of the program, not so much the programming language. Liberal comments can make even Brainfuck programs quite readable. So it is only a consideration for the compiler - but even there, the extensive documentation means that few people will actually read the compiler code. So readability isn't a principle here. But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__).
+Readability
+~~~~~~~~~~~
 
-"Turtles all the way down" only makes sense in the context of a directional layout, such as inheritance. But Java rules out an infinite inheritance tree - it would require infinite space. Even cyclic inheritance trees are out.
+Readability is a function of the program, not so much the programming language. Liberal comments can make even Brainfuck programs quite readable. So readability is only a consideration for the compiler - but even there, the extensive documentation means that few people will actually read the compiler code. So readability isn't a principle for Stroscot.
+
+ But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__).
+
+Turtles all the way down
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+"Turtles all the way down" only makes sense in the context of a directional layout, such as inheritance or composition. Stroscot has :ref:`no inheritance`, so it must be composition. But an infinite object tree would require infinite space - there has to be a trick, e.g. that the objects at some point repeat in a cycle. This trick is itself a useful programming tool, much more useful than the idea that all objects "look the same".
+
+The Vasa
+~~~~~~~~
+
+Bjarne Stroustrup seems fond of the phrase "Remember the Vasa" to warn against large last-minute changes. According to `Wikipedia <https://en.wikipedia.org/wiki/Vasa_(ship)>`, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship "didn't have enough belly". So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot's principle to steal from great poets.
 
 Goals
 =====
@@ -64,11 +79,11 @@ The ultimate
 
 Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. The question of which gun is strongest is quite subjective and a matter of debate. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
 
-Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real.
+Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and mainly affect the design of the compiler. Syntax and features all have global optima.
 
- A lot of programming features overlap, so I'll pick the best and most expressive version I can find. Anything from low-level systems programming to high-level CAS manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there should be clear.
+The main reason is that a lot of programming features overlap. By picking the best and most expressive version, there is only one syntax and feature to consider. This applies to anything from low-level systems programming to high-level computer algebra system manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there for a consistent, powerful interace should be clear.
 
-Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. This is due to a shallow intellectual base. No idea is original, and these new ideas are based on old ones. With sufficient research these old ideas can be uncovered and incorporated.
+Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. For example C++ and Java have added lambdas. This is due to a shallow intellectual base. No idea is original, and lambdas are quite old. With sufficient research these old ideas can be uncovered and incorporated.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms for the compiler then people will refer to Stroscot just for the algorithms. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
 
@@ -84,7 +99,7 @@ In the near term, since there is no compiler or interpreter fully implemented, p
 World domination
 ----------------
 
-Long term, Stroscot aims to replace all the programming languages in use today. Initially this involves improving FFI support and interoperability with other languages. In particular we need to be able to parse files from other languages and use data from them with Stroscot. Next we want to fully compile other languages, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). Once the implementation is stable enough for production use, focus will shift to developing automated conversion tools, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK. No language I know of has developed decent two-way linkage - you can export specific C-style constructs back to C, but C can't use any of the more advanced features.
+Long term, Stroscot aims to replace all the programming languages in use today. Initially this involves improving FFI support and interoperability with C and C++. In particular we need to be able to parse headers and use data from them with Stroscot. Next we want to fully compile other languages, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). Once the implementation is stable enough for production use, focus will shift to developing automated conversion tools, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK. No language I know of has developed decent two-way linkage - you can export specific C-style constructs back to C, but C can't use any of the more advanced features.
 
 Standardization doesn't seem necessary, a popular language builds its own standard. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new best language every 3-5 years
 
@@ -130,7 +145,7 @@ Choices
 Documentation first
 -------------------
 
-It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, "if it isn't documented, it doesn't exist". Looking at HN submissions of programming languages, the best docs win - it's only "famous" languages that can submit a Github repo full of files but without a README. To do well we need at least a README. But I'm going with a wiki style so I can write down every last detail. And there are code scraps for the places where writing code is simpler than explaining, but none of them really work yet.
+It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, "if it isn't documented, it doesn't exist". Looking at HN submissions of programming languages, the best docs win - it's only "famous" languages that can submit a Github repo full of files but without a README and still get discussion. To do well we need at least a README. But I'm going with a wiki style so I can write down every last detail. And there are code snippets for the places where writing code is clearer than explaining in English.
 
 Sphinx
 ------
@@ -140,11 +155,11 @@ GH Pages/Jekyll can't do forward/back links. Checking out various options, Sphin
 Organization
 ------------
 
-The documentation is organized according to `this system <https://diataxis.fr/>`_, mostly because I couldn't find anything better.
+The documentation is organized according to `this system <https://diataxis.fr/>`_, because it shows up when you google "documentation system" and I couldn't find anything better.
 
 The four functions:
 
-* Getting started  (system calls these "tutorials") - overview information for newcomers, learning oriented
+* Getting started  (system calls these "tutorials") - overview information for newcomers, learning oriented (aim for a 1-week course)
 * how-to guides - specific tasks / goals, e.g. solve specific error messages
 * technical reference - describe the machinery, with as little fluff as possible
 * commentary/explanation - understanding, explain the possible alternatives and why a choice was made
@@ -160,7 +175,7 @@ The categorization procedure:
 Quotes before commas
 --------------------
 
-The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this.
+The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this. And it's the `official style on Wikipedia <https://en.wikipedia.org/wiki/MOS:LQUOTE>`__.
 
 Forbidden words
 ---------------
@@ -172,3 +187,13 @@ A fair number of words in programming seem to be meaningless gibberish. So don't
 * object oriented
 * static
 
+
+It's often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used.
+
+Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly.
+
+Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible.
+
+convenient to use
+good first language to teach a new programmer
+intuitive

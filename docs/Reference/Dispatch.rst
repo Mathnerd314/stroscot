@@ -34,6 +34,14 @@ But if the first clause was ``f 1 = 2`` it would be allowed. This behavior is us
 
 Although writing ``assert (fib 5 == 5)`` might be clearer.
 
+Local functions are applied in the same way as
+global ones, i.e., the argument patterns of each rule are matched against
+the actual function arguments and the evaluation is parallel outermost.
+
+If none of the rules match then the function
+application remains unevaluated (it becomes a normal form) and no exception
+is raised.
+
 Priorities
 ==========
 
@@ -41,16 +49,16 @@ The way sequential matching expands is that there is a chain of priorities.
 
 ::
 
-   prio p1
+   clause c1
    f 1 y = 1
 
-   prio p2
+   clause c2
    f x 2 = 2
 
-   prio p3
+   clause c3
    f x y = 3
 
-   prioConstrain prioHigh > p1 > p2 > p3 > prioLow
+   prioConstrain prioHigh > c1 > c2 > c3 > prioLow
 
 Each clause has its own priority. Clauses with lower priority are ignored if there are clauses with higher priorities. Clauses with incomparable priorities are combined with lub. Clauses with equal priorities have their priorities disambiguated by adding specificity overriding (i.e., the actual priority is the tuple (priority, specificity) ordered by lexicographical order). Specificity is another poset relation defined by an SMT solver: ``a`` overrides ``b`` if ``UNSAT(a & not b)`` and ``SAT (not a & b)``. If the priorities + specificity are still equal then a warning is given and they are combined with lub.
 
@@ -121,13 +129,6 @@ You can run the methods with different parameters, ``next-method { silently=true
 
 You can also call a specific clause, ``callClause { clause | guard, module = ..., priority = ... }``, or its ``next-method``, ``callClauseNext``.
 
-Semantics
-=========
-
-The semantics is that all cases are run in parallel using the `lub operation <http://conal.net/blog/posts/merging-partial-values>`__. Predicate failure, failed assertions, and nontermination are all treated as bottom.
-
-The semantics of ``lub`` is complicated, because it's the whole program that is analyzed - return values that are not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.
-
 Implementation
 ==============
 
@@ -188,3 +189,20 @@ Equality
 ========
 
 Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.
+
+Return type overloading
+=======================
+
+With return type overloading the context determines the resolution of method calls. Resolution could potentially use all information from as wide a context as possible to resolve overloading. This requires arbitrarily complex inferences on arbitrarily large pieces of text. Each method instance may do something different.
+
+One example is a lattice, the top element is ``top : a``. The overloading here means that the top element may resolve to several different types, e.g. ``top : Float`` is ``float Infinity`` while ``top : Double`` is ``double Infinity``. Now in practice, according to a Github search of ``read`` (another return type overloaded function), the type is almost always specified very close to the overloading, in a few ways:
+* ``top : Float`` directly
+* as part of the name, ``topFloat``, defined as ``topFloat = top : Float`` or similar
+* using visible type parameters ``top @Float``
+
+In all cases, the type appears very close to the overloaded term, so it is just as usable to pass the type directly as a parameter, ``top Double`` or ``top Float``, using normal overloading and not return type overloading.
+
+But still, there is the extra typing when you are just writing some throwaway code. For this you can use a generic version, e.g. ``top`` can just be a symbol and ``read a`` can return whatever value it likes.
+
+The remaining case is where you really want nonlocal inference to determine the behavior of the return overloading. For example ``readLn >>= \n -> print (sqrt n)`` reads a Double from standard input and prints its square root. This resolves ``readLn : IO Double`` in Haskell because sqrt can only accept floating point numbers as inputs and there is a default declaration to choose Double. Often the overloading is ambiguous and it is simply an error. For example it is ambiguous when you have subtyping or non-disjoint types, e.g. with two instances ``top : A`` and ``top : B`` either one can satisfy a demand for ``top : (A|B)``. But there is still a semantics to ``read s : Float`` as "parse unityped, if produced float then use that, otherwise try float implementation, otherwise fail". Is this useful? IDK
+

@@ -19,6 +19,7 @@ Others:
 * 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
 * WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority.
 * LLVM: The bitcode format is worth targeting at some point.
+* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures
 
 From a design perspective supporting 2 architectures is not much different from supporting 10, it's just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
 
@@ -113,20 +114,27 @@ The schema:
 
 * form name
 * affected things (list)
+
   * type:
+
     * explicit operand (+ index)
     * fixed register
     * pseudo resource
     * flag bit
+
   * read: read / not read / conditionally read / unknown
   * written:
+
     * value: constant,  copied from input, read + constant, complex computation, undefined, ...
     * not written, conditionally written, unknown
+
 * possible exceptions
 
 Instructions with no data have all possible affected things present, with read/write unknown.
 
 Pseudo-resource includes things like load-link/store-conditional. LDXR sets monitors (write) and STXR checks monitors (read). A second LL clears the monitor so LL is actually read/write. Anyway the monitor is a pseudo resource, because it's not a register.
+
+"undefined" in the context of Intel means "arbitrary bit-pattern may be returned". This is distinct from C's UB but matches LLVM's "undef".
 
 Classification
 --------------

@@ -13,7 +13,6 @@ Correctness
 
 To correctly build software, we assume for each task that the recorded read operations uniquely determine the execution behavior of the task, specifically its write and synchronization operations.
 
-
 Overview
 ========
 
@@ -52,14 +51,14 @@ For incremental builds (builds that aren't clean), we also have reference to the
 
 Determining the input keystate for an incremental build is a bit tricky, because the output files from a clean build may become input files for the incremental build. Generally we don't want to mix in artifacts produced from previous builds. Hence we define the inputs of the incremental build as the inputs of the clean build plus any other files so long as those files are not the outputs of the clean build. But we may include some output files as well, as exceptions.
 
-Another issue is "time travel", a thunk reading a file from the previous build that hasn't yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.
+Another issue is "time travel", a task reading a file from the previous build that hasn't yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.
 
 Tasks
 =====
 
 The design is based on iThreads :cite:`bhatotiaIThreadsThreadingLibrary2015`, which out of a half dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build.
 
-They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value as it modifies global state. So I went with "task" in the sense of a task queue.
+They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value as it modifies global state. So I'm using the term "task" in the sense of a task queue.
 
 
  It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``; the only constraint is that they are executed on every build and rebuild.
@@ -68,18 +67,18 @@ If the build is not data race free different execution orders won't produce the 
 
 If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don't care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.
 
-Thunk names
+Task names
 ===========
 
-Thunk naming adds some complexity to the implementation of a build system, as the thunk names also affect the way computations can be re-used. iThreads uses a simple "thread # thunk #" scheme, which assumes a fixed number of long-running threads and invalidates all of the thunks in a thread after a modified thunk. A scheme similar to ``make`` uses filenames; for each file f there are two thunks "run f" and "exec f". The "run f" just does ``Sequence [subtargets,["exec f"]]`` while "exec f" runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use thunk names like "exec f step #" but this leads to invalidating later thunks. Using names like "exec f step cmd" requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.
+Task naming adds some complexity to the implementation of a build system, as the task names also affect the way computations can be re-used. iThreads uses a simple "thread # task #" scheme, which assumes a fixed number of long-running threads and invalidates all of the tasks in a thread after a modified task. A scheme similar to ``make`` uses filenames; for each file f there are two tasks "run f" and "exec f". The "run f" just does ``Sequence [subtargets,["exec f"]]`` while "exec f" runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use task names like "exec f step #" but this leads to invalidating later tasks. Using names like "exec f step cmd" requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.
 
-Also, in a dynamic build, a direct file action map like this is not always available, and so the naming scheme must be relaxed to allow dependencies on things that aren't files. For example, we may have one command that generates two files; so long as we use a consistent thunk name for this command there is no issue. For another example, we may have include headers that are picked up in a search path directory listing. To deal with this directly, we would need to introduce build logic into the search mechanism and run dependencies when seeing ``#include``. But a phase separation handles it fine with minimal changes - we generate the files first and then call the compiler, filling in the build dependencies from an output list of used headers. In this case we would need thunks for each phase.
+Also, in a dynamic build, a direct file action map like this is not always available, and so the naming scheme must be relaxed to allow dependencies on things that aren't files. For example, we may have one command that generates two files; so long as we use a consistent task name for this command there is no issue. For another example, we may have include headers that are picked up in a search path directory listing. To deal with this directly, we would need to introduce build logic into the search mechanism and run dependencies when seeing ``#include``. But a phase separation handles it fine with minimal changes - we generate the files first and then call the compiler, filling in the build dependencies from an output list of used headers. In this case we would need tasks for each phase.
 
 
 Model
 =====
 
-To reason about the behavior we need a pencil-and-paper model of how it works. First we have thunk IDs (``tid`` s); these come from the program and are quoted strings "abc". For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a "machine" column, but this is the same for all rows in a single trace so it is omitted. An example database based on the example in :cite:`shalBuildSystemRules2009` might be
+To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (``tid`` s); these come from the program and are quoted strings "abc". For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a "machine" column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in :cite:`shalBuildSystemRules2009` might be
 
 .. raw:: html
 
@@ -159,7 +158,7 @@ One way to understand the database is to draw it in a graph:
 
     }
 
-Circular nodes represent thunks while rectangular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto's two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.
+Circular nodes represent tasks while rectangular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto's two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.
 
 Then during an incremental run we start with a list of changed keys and their values; this is allowed to contain unmodified keys, so generating this list may be as simple as calculating the state of all keys and saying they all might be modified, or it may be a more precise list from a filesystem watcher or similar API. The keys can also include volatile information such as FTP server listings or stdin.
 
@@ -171,66 +170,71 @@ Then during an incremental run we start with a list of changed keys and their va
   parse.y,1
   main.c,5
 
-Here main.c's modification time has been updated. We start from the top and load "run prog"; there are no changed inputs (or indeed any inputs), so we skip execution of the thunk, perform the record write operations to the key state, and execute the synchronization operation, which loads "run main". "run main" loads "yacc" which has not changed, so control returns to "run main" and "cc main" is loaded. "cc main"'s inputs have changed, so we run it, producing an updated main.o. Meanwhile "run parse" and "cc parse" have been loaded with no changes. Control returns to "run prog" and "ld" is executed as its inputs have changed, building the final executable "prog".
+Here main.c's modification time has been updated. We start from the top and load "run prog"; there are no changed inputs (or indeed any inputs), so we skip execution of the task, perform the record write operations to the key state, and execute the synchronization operation, which loads "run main". "run main" loads "yacc" which has not changed, so control returns to "run main" and "cc main" is loaded. "cc main"'s inputs have changed, so we run it, producing an updated main.o. Meanwhile "run parse" and "cc parse" have been loaded with no changes. Control returns to "run prog" and "ld" is executed as its inputs have changed, building the final executable "prog".
 
-Thunk state
+Task state
 ===========
 
-Thunk state is a bit tricky to define precisely. So let's work it out.
+Task state is a bit tricky to define precisely. So let's work it out.
 
-First we define execution state. A thunk is enabled once a synchronization operation requests to execute the thunk. A thunk is resolved once it is enabled and its synchronization operation has begun execution. So a thunk starts out disabled, becomes enabled, and then is resolved.
+First we define execution state. A task is enabled once a synchronization operation requests to execute the task. A task is resolved once it is enabled and its synchronization operation has begun execution. So a task starts out disabled, becomes enabled, and then is resolved.
 
-If a thunk is never enabled, then in a clean build the thunk would not be executed at all. There are two possibilities:
+If a task is never enabled, then in a clean build the task would not be executed at all. There are two possibilities:
 
-* unused: The thunk is not referenced by any trace or by the current build. Example: almost any arbitrary thunk id
-* stale: The thunk is referenced by some trace but is not enabled anytime in the current build. Example: control flow change
+* unused: The task is not referenced by any trace or by the current build. Example: almost any arbitrary task id
+* stale: The task is referenced by some trace but is not enabled anytime in the current build. Example: control flow change
 
-If a thunk is enabled, then we can consider the available traces and compare them with the keystate at the point the thunk is enabled. There is one trivial possibility:
+Otherwise, the task is enabled. All enabled tasks will eventually be resolved - even if the task errors this is considered resolution. But all resolved tasks have local traces and can be considered in the resolved state. Similarly if it is decided to run the task then it's just in the running state.
 
-* new: The thunk is not referenced by any trace but has been enabled in the current build. Examples: control flow change, clean build
+* resolved: The task has been run, substituted, etc. and its synchronization operation was set up. Can be clean or damaged.
+* running: The task is currently in progress
+
+The interesting task state is if the task hasn't started running yet and we're thinking about running it. If a task is enabled, then we can consider the available traces and compare them with the keystate at the point the task is enabled. There is one trivial possibility:
+
+* new: The task is not referenced by any trace but has been enabled in the current build. Examples: control flow change, clean build
 
 When we have at least one trace, things get more interesting. A trace is valid if all of its recorded reads match the state of the build. The state on disk also becomes relevant.
 
 * dirty: There are traces but no valid trace. Example: input change
-* clean: There is a valid trace where all recorded writes match the state on disk. Example: A thunk is always clean immediately after it is executed, since running a thunk records its trace.
+* clean: There is a valid trace where all recorded writes match the state on disk. Example: A task is always clean immediately after it is executed, since running a task records its trace.
 * damaged: There is at least one valid trace but no valid trace has its recorded writes matching the state on disk. Examples: shallow build, external modification, overwritten output
 
-After resolving the thunk, it can only be clean or damaged; the clean state may have been achieved by substitution, reuse, or rebuilding, while the damaged state can only be from a damaged thunk passing the no-future-use check.
+After resolving the task, it can only be clean or damaged; the clean state may have been achieved by substitution, reuse, or rebuilding, while the damaged state can only be from a damaged task passing the no-future-use check.
 
 In a cloud build setting we have one more state to handle constructive traces. A constructive trace stores the full value for each key and allows fetching the output files without running the build.
 
 * substitutable: There is a valid constructive trace.
 
-A substitutable thunk can be clean or damaged but not dirty. So in total we have 8 states: unused, stale, new, dirty, clean-nonsubstitutable, clean-substitutable, damaged-nonsubstitutable, and damaged-substitutable. It's a lot, but Cot deals with a lot of functionality.
+A substitutable task can be clean or damaged but not dirty. So in total we have 8 states: unused, stale, new, dirty, clean-nonsubstitutable, clean-substitutable, damaged-nonsubstitutable, and damaged-substitutable. It's a lot, but Cot deals with a lot of functionality.
 
 Simulation
 ==========
 
-It's possible for a thunk to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged thunks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding thunk reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce `randomized symbols names <https://gitlab.haskell.org/ghc/ghc/-/issues/4012>`__), so picking the version influences the substitutability of other thunks.
+It's possible for a task to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged tasks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding task reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce `randomized symbols names <https://gitlab.haskell.org/ghc/ghc/-/issues/4012>`__), so picking the version influences the substitutability of other tasks.
 
 The problem is NP-hard since we can encode 3-SAT in the substitution versions :cite:`coxVersionSAT2016`. Since it's that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:
 
-* each thunk can be left alone, substituted, or built, and we can only do one: ``t_leave + t_rebuild + t_v1 + ... + t_vn = 1`` (this is a pseudo-Boolean constraint that be easily encoded)
+* each task can be left alone, substituted, or built, and we can only do one: ``t_leave + t_rebuild + t_v1 + ... + t_vn = 1`` (this is a pseudo-Boolean constraint that be easily encoded)
 * For substitution, compatibility on the read/write values, ``t_vj -> (s_vx or s_vy or ...)``, where t reads a value that s writes and vx,vy, etc. are the versions of s that are compatible with version vj of t.
 * For rebuilding, a conservative assumption that all outputs will be changed, ``s_rebuild -> t_rebuild`` where t reads from what s writes, and a requirement that rebuilds not use damaged data, ``t_rebuild -> not s_leave``, where s is damaged and t reads from s.
 
 Then we have soft constraints for each variable weighted with the cost of using that option.
 
-To generate these constraints, Cot walks through the build graph and maintains a multi-valued state. So it would look like ``Key i -> [Value 1 S_1, Value 1 S_2, Value 2 S_3, Damaged S_leave]``. Then for each thunk (visited in normal traversal order) Cot generates the constraints for each possibility. Then Cot updates the possible values for the keys it writes.
+To generate these constraints, Cot walks through the build graph and maintains a multi-valued state. So it would look like ``Key i -> [Value 1 S_1, Value 1 S_2, Value 2 S_3, Damaged S_leave]``. Then for each task (visited in normal traversal order) Cot generates the constraints for each possibility. Then Cot updates the possible values for the keys it writes.
 
 To deal with these constraints we need a MaxSAT solver - we can write a custom one or interface with an existing one. Using an off-the-shelf solver might save some effort, but there is significant overhead in serializing the constraints to an external solver, and this overhead can be avoided by using a native solver. The native solver will probably be naive and not have the finely tuned optimizations or heuristics of the off-the-shelf solvers, but most package version problems are very simple to solve. It'll be easier to build the project with a native solver because all of the code will be in the same language (Haskell or Stroscot). In Cox's list of package managers (at the end of :cite:`coxVersionSAT2016`), the split is 9-5 in favor of a native solver (although 3 of the native-solver package managers allow using an external solver with an option, so more like 9-8). Overall it seems writing a native solver is the best course of action. But we don't have to start from scratch as there is a Haskell MaxSAT solver in toysolver on Hackage.
 
 Wanted files
 ------------
 
-When using Cot as a package manager rather than a build system, we have lots of produced files that aren't used by anything. Since Cot doesn't see any users of the files it'll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we'd run special thunks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These thunks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special thunks are actually the packages.
+When using Cot as a package manager rather than a build system, we have lots of produced files that aren't used by anything. Since Cot doesn't see any users of the files it'll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we'd run special tasks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These tasks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special tasks are actually the packages.
 
-We could also add functionality to force realizing specific damaged thunks.
+We could also add functionality to force realizing specific damaged tasks.
 
 Restarting
 ----------
 
-The constraint model is only an approximation of the truth, in particular it doesn't cover a newly-executed thunk that adds a dependency on damaged data. The restarting strategy restarts build execution from the damaged thunk on detection of a read, which allows the build to continue if there is an unexpected dependency on damaged data. It requires traversal of the build graph to reconstruct the keystate at the point of re-execution, and all the work done after the point of re-execution is thrown away, so its efficiency isn't optimal. In particular it is possible to re-execute a unit several times, in the case where we execute a unit B, then go back and re-execute a unit A due to damage, then have to execute B another time due to A changing C changing input to B.
+The constraint model is only an approximation of the truth, in particular it doesn't cover a newly-executed task that adds a dependency on damaged data. The restarting strategy restarts build execution from the damaged task on detection of a read, which allows the build to continue if there is an unexpected dependency on damaged data. It requires traversal of the build graph to reconstruct the keystate at the point of re-execution, and all the work done after the point of re-execution is thrown away, so its efficiency isn't optimal. In particular it is possible to re-execute a unit several times, in the case where we execute a unit B, then go back and re-execute a unit A due to damage, then have to execute B another time due to A changing C changing input to B.
 
 Graph pruning
 =============
@@ -239,23 +243,23 @@ Pruning the build graph as pioneered by Tup can result in a big speedup, only ha
 
 We start with a change list, i.e. things that might have changed since our last build. The prototypical example is a list of changed files from a file-watching daemon. The alternative is scanning all the files for changes on startup. This can take several minutes with a hashing algorithm or a few seconds with modtimes.
 
-First we process the change list into a list of possibly-changed keys. There are many various options (digest, modtime, etc.), so we need a hash table that maps key writes to all the thunks with key reads, really a filename->(set of thunk) table.
+First we process the change list into a list of possibly-changed keys. There are many various options (digest, modtime, etc.), so we need a hash table that maps key writes to all the tasks with key reads, really a filename->(set of task) table.
 
-So in our build example, we would go from "main.c" to "cc main". Next we want load the other thunks "run main", "run prog", "ld". The first two are the ancestors of the thunk; we have to load the parent to see its synchronization operation and thus the order of execution. But we don't have to load any children of the parents.  So we just need a thunk->(thunk parents) map to find all the parents.
+So in our build example, we would go from "main.c" to "cc main". Next we want load the other tasks "run main", "run prog", "ld". The first two are the ancestors of the task; we have to load the parent to see its synchronization operation and thus the order of execution. But we don't have to load any children of the parents.  So we just need a task->(task parents) map to find all the parents.
 
-We also have to load "ld"; this is done by looking up the writes of "cc main" in the filename->thunk table. We need to load thunks that read from the writes during execution, in case they are different from the recorded writes.
+We also have to load "ld"; this is done by looking up the writes of "cc main" in the filename->task table. We need to load tasks that read from the writes during execution, in case they are different from the recorded writes.
 
-Note that we'll always load the initial thunk, because we load the chain of parents. So after everything is loaded, execution can start from the initial thunk as normal, no need for a topological sort like in Tup. The difference is that we may have unloaded thunks as children; we do not want to execute these. But to keep the keystate consistent we need to be able to modify the keystate as though they were executed. In particular for each thunk we need the list of all the writes performed by the thunk and its children. But the thunk itself already stores the writes in its ThunkRecord; so computing the total writes is a matter of combination, ``Total = Thunk // Union(Children)``, where ``//`` is record update. These write lists can be precomputed during the initial run. Storing them efficiently with fast access is a little tricky since there is a lot of copying in the lists. For now I'll store the full write list for each thunk, compressed, but there is probably a persistent data structure (`tree <https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree>`__\ ?) that can efficiently re-use the data from other thunks while maintaining performance. At the other extreme we can just regenerate all the write lists by walking the thunk records, so these write lists can be cached and expired using LRU or something.
+Note that we'll always load the initial task, because we load the chain of parents. So after everything is loaded, execution can start from the initial task as normal, no need for a topological sort like in Tup. The difference is that we may have unloaded tasks as children; we do not want to execute these. But to keep the keystate consistent we need to be able to modify the keystate as though they were executed. In particular for each task we need the list of all the writes performed by the task and its children. But the task itself already stores the writes in its TaskRecord; so computing the total writes is a matter of combination, ``Total = Task // Union(Children)``, where ``//`` is record update. These write lists can be precomputed during the initial run. Storing them efficiently with fast access is a little tricky since there is a lot of copying in the lists. For now I'll store the full write list for each task, compressed, but there is probably a persistent data structure (`tree <https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree>`__\ ?) that can efficiently re-use the data from other tasks while maintaining performance. At the other extreme we can just regenerate all the write lists by walking the task records, so these write lists can be cached and expired using LRU or something.
 We also need to store the list of acquire/release lock operations, but most programs don't use locks so this will be small.
 
-The write lists can also be used as an incomplete check for data races; if after executing a thunk A, A has read a key from the global/shared keystate with a value different from the local keystate passed into the thunk (state passed into the parent thunk P // modifications of P // modifications synced in from synchronization operation of P), then a thunk not in the execution history of A must have modified the key - since this execution could have been delayed by the scheduler, it is a read-write data race. Similarly in the union of the children, if there are differing values among the children then there is a write-write data race.
+The write lists can also be used as an incomplete check for data races; if after executing a task A, A has read a key from the global/shared keystate with a value different from the local keystate passed into the task (state passed into the parent task P // modifications of P // modifications synced in from synchronization operation of P), then a task not in the execution history of A must have modified the key - since this execution could have been delayed by the scheduler, it is a read-write data race. Similarly in the union of the children, if there are differing values among the children then there is a write-write data race.
 
-Anyway, the recorded state also records if the key is damaged and the thunk that regenerates it. So we can use this during our damage simulation to load in damaged thunks when referenced and re-run them if necessary.
+Anyway, the recorded state also records if the key is damaged and the task that regenerates it. So we can use this during our damage simulation to load in damaged tasks when referenced and re-run them if necessary.
 
 Cleaning
 ========
 
-When we re-execute a thunk, it is a good idea to restore the state of the outputs of the thunk to their original state (typically deleting them). Also at the end of the run we should garbage collect any unused thunks from the old run by deleting their outputs. Also in (hopefully rare) cases we want to delete all the outputs regardless of status.
+When we re-execute a task, it is a good idea to restore the state of the outputs of the task to their original state (typically deleting them). Also at the end of the run we should garbage collect any unused tasks from the old run by deleting their outputs. Also in (hopefully rare) cases we want to delete all the outputs regardless of status.
 
 -c, --clean, --remove
 
@@ -268,27 +272,7 @@ When we re-execute a thunk, it is a good idea to restore the state of the output
 Exceptions
 ==========
 
-Shake tries to be exception-safe, handling GHC's broken `asynchronous exception system <https://www.fpcomplete.com/blog/2018/04/async-exception-handling-haskell/>`__. The system is broken because it is so complicated that nobody can agree on the desired behavior / correct form of even simple examples. The prototypical example of using it is `bracket <https://hackage.haskell.org/package/unliftio-0.2.13.1/docs/UnliftIO-Exception.html#v:bracket>`__:
-
-::
-
-  bracket :: MonadUnliftIO m => m a -> (a -> m b) -> (a -> m c) -> m c
-  bracket before after thing = withRunInIO $ \run -> EUnsafe.mask $ \restore -> do
-    x <- run before
-    res1 <- EUnsafe.try $ restore $ run $ thing x
-    case res1 of
-      Left (e1 :: SomeException) -> do
-        _ :: Either SomeException b <- EUnsafe.try $ EUnsafe.uninterruptibleMask_ $ run $ after x
-        EUnsafe.throwIO e1
-      Right y -> do
-        _ <- EUnsafe.uninterruptibleMask_ $ run $ after x
-        return y
-
-Here we use 4 operations: mask, try, ``uninterruptibleMask_``, throwIO. mask shields the cleanup action from being attacked by asynchronous exceptions, allowing exceptions inside restore. try catches exceptions and allows cleanup to occur. ``uninterruptibleMask_`` blocks interrupts from interrupting the after handler. Finally throwIO rethrows the exception, so that any exception inside the after handler will be swallowed.
-
-Apparently, though, nobody can agree on whether the after handle should run with an uninterruptible mask.
-
-Another issue with exceptions is handling them. The top-level build function can throw exceptions, or it can catch them, printing them and exiting with an error code.
+Shake tries to be exception-safe, but it's not clear what to do with exceptions besides passing them along. The top-level build function can throw exceptions, or it can catch them, printing them and exiting with an error code.
 
 Trace database
 ==============
@@ -325,7 +309,7 @@ In-memory keys are the simplest to handle, because they're small and we can simp
 
 If the key contents are large, we can intern it - journal an association "#5 = x", then writes as "write key xyz is interned to #5 = ...", and reads as "read key xyz from intern #5". We can't use the key itself as #n because there might be multiple writes to the key.
 
-The simplest example of an in-memory key is the command line arguments; we can store the full initial command line, and then have a thunk that parses the command line and writes various option keys. Another example is versioning keys. The initial thunk writes a key for each thunk with the compiled-in version, ``write (Version abc) v2.3``. Then each thunk reads its version and this read is stored in the thunk record, causing rebuilds when the version is changed.
+The simplest example of an in-memory key is the command line arguments; we can store the full initial command line, and then have a task that parses the command line and writes various option keys. Another example is versioning keys. The initial task writes a key for each task with the compiled-in version, ``write (Version abc) v2.3``. Then each task reads its version and this read is stored in the task record, causing rebuilds when the version is changed.
 
 --ignore-rule-versions
   Ignore versions in the build rules.
@@ -336,10 +320,10 @@ Files
 Files are a little trickier because storing the whole contents of the file in the journal is infeasible. Instead we journal a proxy of the contents, stored in-memory. So writes look like "write file f with proxy p" and reads are "read file f with proxy p". We assume that there aren't any untracked writes during the build so the reads can be recorded using the in-memory value of p calculated from the writes.
 
 trivial proxy
-  Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, "always rebuild" and "never rebuild". In the never case, a thunk's rebuild can still be triggered by a different file.
+  Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, "always rebuild" and "never rebuild". In the never case, a task's rebuild can still be triggered by a different file.
 
 dirty bit
-   The idea of a dirty bit is to have one piece of information per key, saying whether the key is dirty or clean. In the initial state all keys are clean. If a thunk executes, all its writes set the keys to dirty. A thunk that reads a dirty key must also execute. But if all read keys are clean, the thunk does not need to be rerun.
+   The idea of a dirty bit is to have one piece of information per key, saying whether the key is dirty or clean. In the initial state all keys are clean. If a task executes, all its writes set the keys to dirty. A task that reads a dirty key must also execute. But if all read keys are clean, the task does not need to be rerun.
 
 version number/custom detector
   For toolchains in small projects, the version number from running ``gcc -V`` etc. is often sufficient. Although modtime is more robust, it's worth listing this as an example of a custom file modification detector.
@@ -408,7 +392,7 @@ If there are multiple containers that depend on each other, we have to encode th
 Damage
 ------
 
-Cot allows writing to a file more than once, e.g. training a neural net with iterative optimization. The behavior is that changed inputs always rerun all affected thunks, but changed outputs only rerun the thunks if the simulation predicts that the output is needed. If a build cache is not used then thunks that generate files needed for the build will rerun as well.
+Cot allows writing to a file more than once, e.g. training a neural net with iterative optimization. The behavior is that changed inputs always rerun all affected tasks, but changed outputs only rerun the tasks if the simulation predicts that the output is needed. If a build cache is not used then tasks that generate files needed for the build will rerun as well.
 
 Options
 =======
@@ -419,7 +403,7 @@ Options
 Cached build
 ------------
 
-A build cache records the outputs of each thunk in a reproducible manner, i.e. the trace is constructive in the sense of :cite:`mokhovBuildSystemsCarte2020`. A build can be made reproducible by forcing every non-reproducible thunk to be loaded from the cache.
+A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of :cite:`mokhovBuildSystemsCarte2020`. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.
 
 --cache-create PATH
   Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.
@@ -428,7 +412,7 @@ A build cache records the outputs of each thunk in a reproducible manner, i.e. t
   The disable option can be used to temporarily disable the cache without modifying the cache, while the delete option deletes it.
 
 --cache-links PATHS
-  For files matching listed path patterns, make files in the cache read-only to avoid inadvertently poisoning the shared cache. Use hard links or reflinks to replay thunks, instead of copying files.
+  For files matching listed path patterns, make files in the cache read-only to avoid inadvertently poisoning the shared cache. Use hard links or reflinks to replay tasks, instead of copying files.
 
 --cache-readonly
   Use the cache, if enabled, to retrieve files, but do not not update the cache with any files actually built during this invocation.
@@ -442,11 +426,129 @@ A build cache records the outputs of each thunk in a reproducible manner, i.e. t
 --cache-cloud URL
   HTTP server providing a (read-only) cache in the cloud.
 
+Dune has the ability to cache built files for later retrieval. This
+can greatly speedup subsequent builds when some dependencies are
+rebuilt in different workspaces, switching branches or iterating on
+code back and forth.
+
+
+Configuration
+=============
+
+The cache is, for now, an opt-in feature. Add `(cache enabled)` to
+your dune configuration file (default `~/.config/dune/config`) to
+activate it. When turned on, built files will automatically be
+promoted to the cache, and subsequent builds will automatically check
+the cache for hits.
+
+The cached files are stored inside you `XDG_CACHE_HOME` directory on
+\*nix systems, and `"HOME\\Local Settings\\Cache"` on Windows.
+
+
+Daemon
+======
+
+By default, most cache operations go through the dune cache daemon, a
+separate process that dune instances connect to. This enables
+promotions to happen asynchronously and not slow the build
+process. The daemon is automatically started if needed when dune needs
+accessing the cache, and lives on for further use.
+
+Although the daemon concept is totally transparent, one can control it
+via the `dune cache` subcommand.
+
+Starting the daemon
+-------------------
+
+Use `dune cache start` to start the caching daemon if not running and
+print its endpoint, or retrieve the endpoint of the currently running
+daemon otherwise. A notable option is `--foreground` to not detach the
+daemon, which can help inspecting its log output.
+
+Stopping the daemon
+-------------------
+
+Use `dune cache stop` to stop the caching daemon. Although the daemon,
+when idle, should consume zero resources, you may want to get rid of
+the process. Also useful to restart the daemon with `--foreground`.
+
+
+Filesystem implementation
+=======================================
+
+Hardlink mode
+-------------
+
+By default the cache works by creating hardlinks to built files inside
+the cache directory when promoted, and in other build trees when
+retrieved. This has the great advantage of having zero disk space
+overhead for files still living in a build directory. This has two
+main constraints:
+
+* The cache root must be on the same partition as the build tree.
+* Produced files will be stripped from write permissions, as they are
+  shared between build trees. Note that modifying built files is bad
+  practice in any case.
+
+Copy mode
+---------
+
+If one specifies `(cache-duplication copy)` in the configuration file,
+dune will copy files to and from the cache instead of using hardlinks.
+This can be useful if the build cache is on a different partition.
+
+On-disk size
+============
+
+The cache daemon will perform periodic trimming to limit the overhead.
+Every 10 minutes, it will purge the least recently used files so the
+cache overhead does not exceed 10G. This is configurable through the
+`(cache-trim-period SECONDS)` and `(cache-trim-size BYTES)`
+configuration entries. Note that this operation will only consider the
+cache overhead, i.e. files not currently hard-linked in a build
+directory, as removing files currently used would not free any disk
+space.
+
+On can run `dune cache trim --size=BYTES` to manually trigger trimming
+in the cache daemon.
+
+Reproducibility
+===============
+
+Reproducibility check
+---------------------
+
+While default mode of operation of the cache is to speedup build times
+by not re-running some rules, it can also be used to check build
+reproducibility. If `(cache-check-probability FLOAT)` or
+`--cache-check-probability=FLOAT` is specified either respectively in
+the configuration file or the command line, in case of a cache hit
+dune will rerun the rule anyway with the given probability and compare
+the resulting files against a potential cache hit. If the files
+differ, the rule is not reproducible and a warning will be emitted.
+
+Non-reproducible rules
+----------------------
+
+If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.
+
+Daemon-less mode
+================
+
+While the cache daemon provides asynchronous promotions to speedup
+builds and background trimming amongst other things, in some
+situations direct access can be preferable. This can be the case when
+running in an isolated environment like Docker or OPAM sandboxes,
+where only one instance of dune will ever be running at a time, and
+access to external cache is prohibited. Direct filesystem access can
+be obtained by specifying `(cache-transport direct)` in the
+configuration file or passing `--cache-transport=direct` on the
+command line.
 
 Remote Builds
 -------------
 
-A remote build consists of a local build setup forwarding thunk invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.
+A remote build consists of a local build setup forwarding task invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.
 
 cot ping-builders
   Test whether connecting to each remote instance works. To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Cot installed. If you get the error ``cot: command not found`` then you need to ensure that the PATH of non-interactive login shells contains Cot.
@@ -496,7 +598,7 @@ restats all outputs in the build log
   Write a message to ``storage.log`` whenever a storage event happens which may impact on the current stored progress. Examples include database version number changes, database compaction or corrupt files.
 
 --no-build
-  Load all the database files but stop before executing the initial thunk and don't build anything.
+  Load all the database files but stop before executing the initial task and don't build anything.
 
     "l" ["lint"] (noArg $ \s -> s{shakeLint=Just LintBasic}) "Perform limited validation after the run."
     ""  ["lint-watch"] (reqArg "PATTERN" $ \x s -> s{shakeLintWatch=shakeLintWatch s ++ [x]}) "Error if any of the patterns are created (expensive)."
@@ -884,11 +986,9 @@ Parallel Execution
 ‘-j [jobs]’
 ‘--jobs[=jobs]’
 
-  Specifies the number of recipes (jobs) to run simultaneously. With no argument, make runs as many recipes simultaneously as possible. If there is more than one ‘-j’ option, the last one is effective. See Parallel Execution, for more information on how recipes are run. Note that this option is ignored on MS-DOS.
-  Defaults to ``1``. Maximum number of rules to run in parallel, similar to ``make --jobs=/N/``.
+  Specifies the capacity of the CPU resource, which limits the maximum number of tasks that can run simultaneously. If there is more than one ‘-j’ option, the last one is effective.  Defaults to ``1``.
   For many build systems, a number equal to or slightly less than the number of physical processors
-  works well. Use ``0`` to match the detected number of processors (when ``0``, 'getShakeOptions' will
-  return the number of threads used).
+  works well. Use ``auto`` to use the detected number of processors.
 
 ‘-l [load]’
 ‘--load-average[=load]’
@@ -900,7 +1000,9 @@ Cot can execute several recipes at once. This is implemented using a resource sy
 
 Numerical priorities with random tie-breaking seems enough to implement things like "schedule this long job first" or "prioritize this set of tasks that's related to a modified file". Automatically determining these things when build times are noisy and dependencies change frequently seems hard, and the usual case is lots of cheap tasks where scheduling is easy, so it doesn't seem worthwhile to implement a more complicated scheduler.
 
-GNU Make allows defining a load limit instead of a thread limit, basically "pause new executions if the load is above some number". The hard part is that the load average is too coarse, so it needs to be mixed with the number of jobs started recently, and also the load can never exceed the number of cores, so load limits above a certain level are invalid. In practice it seems nobody uses the load limit. Builds generally run on unloaded systems and predicting the load by counting threads and resources is more accurate. The useful feature seems to be measuring the system load on startup and subtracting that number from the number of cores to get a lower maximum thread count.
+GNU Make allows defining a load limit instead of a thread limit, basically "pause new executions if the load is above some number". The hard part is that the load average isn't instantaneous, so it needs to be mixed with the number of jobs started recently, and also the load can never exceed the number of cores, so load limits above a certain level are invalid. In practice it seems nobody uses the load limit. Builds generally run on unloaded systems and predicting the load by counting threads and resources is more accurate. The useful feature seems to be measuring the system load on startup and subtracting that number from the number of cores to get a lower maximum thread count.
+
+When finishing a task it wakes up all the pending tasks, this is implemented with callbacks.
 
 Output control
 --------------
@@ -1033,7 +1135,7 @@ CommandOptions :: [CmdOption]
 Cwd FilePath -- Change the current directory of the spawned process. By default uses the parent process's current directory. If multiple options are specified, each is interpreted relative to the previous one: ``[Cwd "/", Cwd "etc"]`` is equivalent to ``[Cwd "/etc"]``.
 
 ‘-C dir’ ‘--directory=dir’
-  A global version of Cwd that runs at the beginning. You should never change the current directory of the parent process after the build starts as multiple thunks running at the same time share the current directory.
+  A global version of Cwd that runs at the beginning. You should never change the current directory of the parent process after the build starts as multiple tasks running at the same time share the current directory.
 
 Env [(String,String)] -- ^ Replace the environment block in the spawned process. By default uses this processes environment.
 AddEnv String String -- ^ Add an environment variable in the child process.
@@ -1122,7 +1224,7 @@ EchoCommand Bool -- ^ Print each command to stdout before it is executed. We cal
 ‘-s’ ‘--quiet’
     Quiet operation; do not print the commands as they are executed, as if all recipes had EchoCommand False.
 
-IgnoreExitStatus Bool -- ^ when false: If there is an error (the exit status is nonzero), throw an error and stop executing the thunk.when True: print exit status if non-zero and continue execution.
+IgnoreExitStatus Bool -- ^ when false: If there is an error (the exit status is nonzero), throw an error and stop executing the task.when True: print exit status if non-zero and continue execution.
 
 ‘-i’ ‘--ignore-errors’
     Ignore all errors in commands, as if all recipes had IgnoreExitStatus True.
@@ -1133,17 +1235,17 @@ IgnoreExitStatus Bool -- ^ when false: If there is an error (the exit status is 
 Querying the build graph
 ------------------------
 
-The build graph defines how to tell whether a thunk needs recompilation, and the entry point to update the thunk. But running the thunk is not always what you want; sometimes you only want to know what would be run.
+The build graph defines how to tell whether a task needs recompilation, and the entry point to update the task. But running the task is not always what you want; sometimes you only want to know what would be run.
 
 ‘-n’
 ‘--dry-run’
 
-    “No-exec”. Print the thunks that would normally execute to make the targets up to date, but don't actually execute them or modify the filesystem. This is implemented by processing the output from the simulation; certain to execute, likely to execute, certain to substitute, likely to execute but possible to substitute, likely to be skipped. This flag is useful for finding out which thunks Cot thinks are necessary without actually doing them.
+    “No-exec”. Print the tasks that would normally execute to make the targets up to date, but don't actually execute them or modify the filesystem. This is implemented by processing the output from the simulation; certain to execute, likely to execute, certain to substitute, likely to execute but possible to substitute, likely to be skipped. This flag is useful for finding out which tasks Cot thinks are necessary without actually doing them.
 
 ‘-q’
 ‘--question’
 
-    “Question mode”. Silently check whether the targets are up to date. Do not run any recipes, or print anything; just return an exit status code that is zero if the specified targets are already up to date, one if any updating is required, or two if an error is encountered. This is implemented by running as normal but aborting if a thunk is actually executed.
+    “Question mode”. Silently check whether the targets are up to date. Do not run any recipes, or print anything; just return an exit status code that is zero if the specified targets are already up to date, one if any updating is required, or two if an error is encountered. This is implemented by running as normal but aborting if a task is actually executed.
 
 Forcing/avoiding recompilation
 ------------------------------
@@ -1153,7 +1255,7 @@ if your build system is broken then you can't fix it with the ``touch`` utility.
 ‘-t’
 ‘--touch’
 
-    Touch files - mark the build as up to date without actually running it, pretending that the build was done but no output files changed, in order to fool future invocations of make. make walks through the build graph and modifies each initial filesystem input recorded in a thunk record to match the state from the filesystem. The name of the modified thunk is also printed, ``touch $thunk``, unless ‘-s’ or .SILENT is used. Note that intermediate or output files are not recorded, so they will still appear as damaged if they are modified and touch is run.
+    Touch files - mark the build as up to date without actually running it, pretending that the build was done but no output files changed, in order to fool future invocations of make. make walks through the build graph and modifies each initial filesystem input recorded in a task record to match the state from the filesystem. The name of the modified task is also printed, ``touch $task``, unless ‘-s’ or .SILENT is used. Note that intermediate or output files are not recorded, so they will still appear as damaged if they are modified and touch is run.
 
 Sometimes you may have changed a source file but you do not want to recompile all the files that depend on it. For example, suppose you add a macro or a declaration to a header file that many other files depend on. Being conservative, make assumes that any change in the header file requires recompilation of all dependent files, but you know that they do not need to be recompiled and you would rather not waste the time waiting for them to compile.
 
@@ -1237,7 +1339,7 @@ Error handling
 "S" ["no-keep-going","stop"] (noArg $ \s -> s{shakeStaunch=False}) "Turns off -k."
 shake staunch mode: if an error is encountered during the middle of a build, unless --keep-going is specified we want to stop the build. we can stop all the threads immediately by sending cancel commands, or we can wait until each command finishes to interrupt.
 
-When an error happens that propagates out of the thunk, it implies that the current thunk cannot be correctly remade, and neither can any other thunk that is chronologically after. No further thunks will be executed after the thunk, since the preconditions have not been achieved.
+When an error happens that propagates out of the task, it implies that the current task cannot be correctly remade, and neither can any other task that is chronologically after. No further tasks will be executed after the task, since the preconditions have not been achieved.
 
 If a recipe fails (is killed by a signal or exits with a nonzero status), and errors are not ignored for that recipe (see Errors in Recipes), the remaining recipe lines to remake the same target will not be run. If a recipe fails and the ‘-k’ or ‘--keep-going’ option was not given (see Summary of Options), make aborts execution. If make terminates for any reason (including a signal) with child processes running, it waits for them to finish before actually exiting.
 
@@ -1277,128 +1379,7 @@ Usually when a recipe line fails, if it has changed the target file at all, the 
 Creating a build system
 =======================
 
-Initially a build system starts out as a list of commands. Then when we trace the commands, the list becomes a partially ordered set of commands because we can relax the ordering to write-read constraints. Then we abstract the commands, adding in-memory keys for configuration changes such as the command line, thunk arguments to share command handling logic, and a nesting relation for which thunks call which other thunks.
+Initially a build system starts out as a list of commands. Then when we trace the commands, the list becomes a partially ordered set of commands because we can relax the ordering to write-read constraints. Then we abstract the commands, adding in-memory keys for configuration changes such as the command line, task arguments to share command handling logic, and a nesting relation for which tasks call which other tasks.
 
+To make using a self-hosting build system installable, there should also be a way to output a list of commands that implement the system.
 
-
-Dune has the ability to cache built files for later retrieval. This
-can greatly speedup subsequent builds when some dependencies are
-rebuilt in different workspaces, switching branches or iterating on
-code back and forth.
-
-
-Configuration
-=============
-
-The cache is, for now, an opt-in feature. Add `(cache enabled)` to
-your dune configuration file (default `~/.config/dune/config`) to
-activate it. When turned on, built files will automatically be
-promoted to the cache, and subsequent builds will automatically check
-the cache for hits.
-
-The cached files are stored inside you `XDG_CACHE_HOME` directory on
-\*nix systems, and `"HOME\\Local Settings\\Cache"` on Windows.
-
-
-Daemon
-======
-
-By default, most cache operations go through the dune cache daemon, a
-separate process that dune instances connect to. This enables
-promotions to happen asynchronously and not slow the build
-process. The daemon is automatically started if needed when dune needs
-accessing the cache, and lives on for further use.
-
-Although the daemon concept is totally transparent, one can control it
-via the `dune cache` subcommand.
-
-Starting the daemon
--------------------
-
-Use `dune cache start` to start the caching daemon if not running and
-print its endpoint, or retrieve the endpoint of the currently running
-daemon otherwise. A notable option is `--foreground` to not detach the
-daemon, which can help inspecting its log output.
-
-Stopping the daemon
--------------------
-
-Use `dune cache stop` to stop the caching daemon. Although the daemon,
-when idle, should consume zero resources, you may want to get rid of
-the process. Also useful to restart the daemon with `--foreground`.
-
-
-Filesystem implementation
-=======================================
-
-Hardlink mode
--------------
-
-By default the cache works by creating hardlinks to built files inside
-the cache directory when promoted, and in other build trees when
-retrieved. This has the great advantage of having zero disk space
-overhead for files still living in a build directory. This has two
-main constraints:
-
-* The cache root must be on the same partition as the build tree.
-* Produced files will be stripped from write permissions, as they are
-  shared between build trees. Note that modifying built files is bad
-  practice in any case.
-
-Copy mode
----------
-
-If one specifies `(cache-duplication copy)` in the configuration file,
-dune will copy files to and from the cache instead of using hardlinks.
-This can be useful if the build cache is on a different partition.
-
-On-disk size
-============
-
-The cache daemon will perform periodic trimming to limit the overhead.
-Every 10 minutes, it will purge the least recently used files so the
-cache overhead does not exceed 10G. This is configurable through the
-`(cache-trim-period SECONDS)` and `(cache-trim-size BYTES)`
-configuration entries. Note that this operation will only consider the
-cache overhead, i.e. files not currently hard-linked in a build
-directory, as removing files currently used would not free any disk
-space.
-
-On can run `dune cache trim --size=BYTES` to manually trigger trimming
-in the cache daemon.
-
-Reproducibility
-===============
-
-Reproducibility check
----------------------
-
-While default mode of operation of the cache is to speedup build times
-by not re-running some rules, it can also be used to check build
-reproducibility. If `(cache-check-probability FLOAT)` or
-`--cache-check-probability=FLOAT` is specified either respectively in
-the configuration file or the command line, in case of a cache hit
-dune will rerun the rule anyway with the given probability and compare
-the resulting files against a potential cache hit. If the files
-differ, the rule is not reproducible and a warning will be emitted.
-
-Non-reproducible rules
-----------------------
-
-If you know that some rule is not reproducible (e.g. because it
-downloads a non-fixed file from the internet) and should never be
-cached, then you can mark it as such by using `(deps (universe))`.
-See :ref:`deps-field`.
-
-Daemon-less mode
-================
-
-While the cache daemon provides asynchronous promotions to speedup
-builds and background trimming amongst other things, in some
-situations direct access can be preferable. This can be the case when
-running in an isolated environment like Docker or OPAM sandboxes,
-where only one instance of dune will ever be running at a time, and
-access to external cache is prohibited. Direct filesystem access can
-be obtained by specifying `(cache-transport direct)` in the
-configuration file or passing `--cache-transport=direct` on the
-command line.

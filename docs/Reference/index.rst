@@ -4,6 +4,7 @@ Language Reference
 .. toctree::
   :maxdepth: 2
 
+  Logic
   Syntax
   Values
   Library
@@ -11,5 +12,5 @@ Language Reference
   Modules
   Dispatch
   Memory
-  Logic
+  Posets
   BuildSystem

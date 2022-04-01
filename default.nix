@@ -1,10 +1,13 @@
 { nixpkgs ? import <nixpkgs> {} }:
 let
   inherit (nixpkgs) pkgs;
-  ghc = (pkgs.haskellPackages.ghcWithPackages (ps: with ps; [
+  ghc = pkgs.haskellPackages.ghcWithPackages.override {
+          useLLVM = true;
+        } (ps: with ps; [
           persistent-sqlite persistent-template
           ioref-stable concurrent-extra unliftio
           extra heaps unordered-containers
+          exceptions kan-extensions
           cabal-install
           quickcheck-instances tasty tasty-hunit tasty-quickcheck
             # for mutable interaction-net style graphs
@@ -21,9 +24,7 @@ let
             # this will get replaced by the custom C file-hashing code, but for now it's a good reference.
           memory
             # FNV1/1a and siphash. also a dependency of cryptonite providing unpinned byte array methods.
-        ])).override {
-          withLLVM = true;
-        };
+        ]);
   tex = pkgs.texlive.combine {
     inherit (pkgs.texlive) scheme-small pgf bussproofs preview varwidth standalone geometry amsmath;
   };

@@ -1,0 +1,43 @@
+function fail_set_matches(c,f):
+  for (fc, left_in) in f:
+    cont = c.contains(fc)
+    if !cont && left_in || cont && !left_in
+      return false
+  return true
+
+function build_status(change_set, fail_set):
+  for f in fail_set:
+    fail = fail_set_matches(change_set, f)
+    flaky = choice([YES, NO], fail, f)
+    if flaky && !fail || !flaky && fail
+      return FAIL
+  return SUCCESS
+
+function make_fail_set(all_changes):
+  fail_set = []
+  num_fails = int_choice(poisson)
+  for i in 1..num_fails
+    size = int_choice([1,length(all_changes)],exponential)
+    f = []
+    for j in 1..size
+      c = choice(all_changes)
+      left_in = choice([YES,NO],c)
+      f.push((c,left_in))
+    fail_set.push(f)
+
+
+function best_build(all_changes):
+  fs = make_fail_set(all_changes)
+  for candidate in sort_lexicographic_descending(powerset(all_changes)):
+    if(build_status(candidate, fs) == SUCCESS)
+      return candidate
+  return NO_SUCCESSFUL_BUILDS
+
+function choose_next_build:
+  prob_dist = simulate(best_build(all_changes))
+  highest_info_build = NO_SUCCESSFUL_BUILDS
+  for candidate in powerset(all_changes):
+    prob_dist = simulate(best_build(all_changes))
+      if(build_status(candidate, fs) == SUCCESS)
+        return candidate
+    return

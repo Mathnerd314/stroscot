@@ -1,4 +1,5 @@
 {-# LANGUAGE RebindableSyntax #-}
+module Continuations.Tasks where
 import Control.Monad.Cont hiding ((>>=),(>>))
 import Prelude hiding ((>>=),(>>))
 

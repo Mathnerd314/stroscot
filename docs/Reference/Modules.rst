@@ -1,30 +1,27 @@
 Modules
 #######
 
-Modules from the programming perspective are records; they contain a list of bindings. They use the same brace syntax as statements.
+Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax.
 
 ::
 
-  C = {
+  module C
+
   a = 1
   b = 2
-  }
 
-  C = { a = "x"; b = "y" }
+  # C = { a = 1; b = 2 }
+
 
 Access
 ======
 
 To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``. The uniform notation with records seems cleaner than notation like ``A::B::C::a.b``.
 
-Later in the pipeline:
-* A similarly-named identifiers warning based on `confusables <http://www.unicode.org/reports/tr39/#Confusable_Detection>`_
-
-
 With statement
 ==============
 
-To save on typing there is the `dreaded <https://2ality.com/2011/06/with-statement.html>`__ ``with`` statement.
+To save on typing there is the ``with`` statement.
 
 ::
 
@@ -49,15 +46,6 @@ To avoid ambiguity, ``with`` statements can be restricted by hiding identifiers 
   with C hiding (b,c)
   with D (a,b,c)
 
-Module exports can similarly be limited:
-
-::
-
-  C = (a) { a = "x"; b = "y" }
-  # only a is accessible
-
-Sometimes it is necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
-
 You can use ``with`` on an argument with the dot syntax: ``f . = ...`` translates to ``f x = with x { ... }``. This is an abbreviation:
 
 ::
@@ -65,6 +53,37 @@ You can use ``with`` on an argument with the dot syntax: ``f . = ...`` translate
   f . ->  ary  // syntax
   f x -> {.}=x; ary} // namespace unpack
   f x -> x.ary}       // plan old symbol
+
+Exports
+=======
+
+Module exports can similarly be limited:
+
+::
+
+  module C (a)
+
+  a = "x"
+  b = "y"
+  # only a is accessible
+
+Sometimes it is necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
+
+You can also limit the exports to exclude named clauses of reduction rules (by default all reduction rules are exported regardless of limiting exported symbols):
+
+::
+
+  module C (f) hiding c2
+
+  symbol f
+
+  clause c1
+  f 1 = 2
+
+  clause c2
+  f 2 = 0
+
+  # f 2 does not reduce outside the module
 
 Parameters
 ==========
@@ -90,7 +109,7 @@ The primitive underlying the project file is the import; this reads a file path 
 Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.
 
 
-::
+.. code-block:: python3
 
   {a, b, c} = import "Alphabet"          # import a, b, c from Alphabet
   {a, b, c=d} = import "Alphabet"  # import a, b, c from Alphabet, import ‘c’ as ‘d’
@@ -121,8 +140,3 @@ By default, methods are scoped to their module. Every definition ``foo = a`` bin
   foo 2 # 3
 
 If the override statement was not in module 2, then using ``foo`` in module 3 would result in an ambiguous name resolution error.
-
-1ML
-===
-
-The above module system is a superset of 1ML, MixML, Backpack, and Newspeak's module system, so those don't need to be considered further. (TODO: reread the papers to check this. but they're mostly type systems, rather than functionality)

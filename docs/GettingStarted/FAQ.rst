@@ -4,7 +4,7 @@ FAQ
 Does it run?
 ~~~~~~~~~~~~
 
-No, it's in the design stage.
+No, it's in the design stage. But there are Haskell experiments in the ``src/`` and ``test/`` directories that can be run.
 
 What language is the compiler written in?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,6 +21,7 @@ Since then, development has shifted to Haskell, for other reasons:
 
 * The compiler/type system prevents a lot of common errors (particularly typos, which JS doesn't detect until late)
 * A lot of other type-system-heavy projects are written in Haskell
+* I'm most familiar with Haskell.
 
 Where can I ask questions?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,9 +31,8 @@ See the :ref:`links <links>`
 How do I contribute?
 ~~~~~~~~~~~~~~~~~~~~
 
-Any and all input will be taken into consideration. Commit access is
-available for anyone with 2 or more commits to the project.
+Mainly by reading the documentation and making comments. Stroscot is in "slow-burn" mode while the language is designed so any and all input will be taken into consideration. If you want to write docs yourself commit access is available for anyone with 2 or more accepted pull requests.
 
-The license isn't set yet so for now use CC0.
+The license isn't set yet (WTFPL is just a placeholder) so for now please license your contributions under CC0.
 
-While I am far from a documentation expert I believe that open source projects—and their supporting documentation—can and should be inviting to people of all skill levels. Documenting items like how to get started, where to find key files, expectations, etc are easy wins that positively impact how people interact or contribute to your project.
+The documentation is supposed to be inviting to people of all skill levels, so documenting items like how to get started, where to find key files, expectations, etc. are all contributions that will be accepted.

@@ -12,7 +12,7 @@ Stroscot targets unoccupied programming enthusiasts. Feel free to improve the de
 Roadmap
 =======
 
-The roadmap at the moment is, in no particular order:
+The roadmap at the moment is, in vaguely the expected order of finishing:
 
 * build system
 * static analysis/optimization (includes memory management)
@@ -44,4 +44,4 @@ Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I have
 License
 =======
 
-Currently the license is WTFPL, because I haven't gotten around to picking a real license. It might switch back to Apache 2, IDK.
+Currently the license is WTFPL, because I haven't gotten around to picking a real license. It might switch back to Apache 2, IDK. License for contributing is CC0.

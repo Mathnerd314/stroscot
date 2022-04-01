@@ -4,7 +4,7 @@ Term rewriting
 Down with functions
 ===================
 
-Haskell and other functional programming languages have had great success. But there's a dirty secret: the programs you can write with these languages are restricted. In particular the evaluation strategy doesn't have flexible semantics.
+Haskell and other functional programming languages have had great success. But there's a dirty secret: the programs you can write with these languages are restricted. In particular the evaluation of clauses is fixed to top-to-bottom order.
 
 For example see the program from `this old Usenet post <https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ>`):
 
@@ -16,36 +16,73 @@ For example see the program from `this old Usenet post <https://groups.google.co
 
 Ideally ``myand`` should be defined with parallel semantics, so that ``myand undefined False = False``. But Haskell defines evaluation as trying the rules in order, so the first equation evaluates ``undefined`` and evaluation results in an error.
 
-In Stroscot we have both parallel and sequential matching. The sequential matching is straightforward to implement as it is simply copying the implementation from Haskell and friends. The parallel matching is more difficult - for a proper explanation of the semantics we have to shift the paradigm from functions to term rewrites.
+In Stroscot we have both parallel and sequential matching. The sequential matching is straightforward to implement and mimics the implementation from Haskell. The parallel matching is more difficult - for a proper explanation of the semantics we have to shift the paradigm from functions to term rewrites.
 
-Menagerie
-=========
+Rewrite rules
+=============
 
-There are various types of behavior which show up in a TRS, which require different handling.
+A rewrite rule or clause is applied by matching the left hand side to the term or one of its subterms and applying the resulting substitution to the right hand side. Rewrite rules also have conditions - the rewrite rule can only be applied if its condition holds. For example, with the rules ``fact n | n > 0 = n * fact (n-1)`` and ``fact 0 = 1``, we get the reduction sequence
 
-* convergent (confluent and terminating) - These include typed systems such as the simply typed lambda calculus. For these, the result is the same no matter how they are reduced. So the focus is on do the reduction efficiently, compiling to fast assembly and/or doing optimal reduction to reduce in the smallest number of steps.
-* cycles - The untyped lambda calculus has cycles, e.g. ``Omega = let w=\x.x x in w w`` reduces to itself and :cite:`venturiniReductionGraphsLambda1983` shows a 6-cycle ``M M I``. Similarly commutativity ``a + b = b + a`` generates cycles. If we are able to detect these then the solution is to collapse the SCC into a single term. The literature for commutativity uses a (congruence-)class-rewriting system - it is split into rules R and (reversible) equations S, and computes R/S (R mod S). The term at the end is considered a normal form because only S rules apply. So ``<Omega>`` and ``<a + b>`` would be normal forms.
-* infinitely expanding terms - for example ``x = 1 :: x`` or ``let t = \x. x x x in t t``. If reduction does not end in a normal form SCC, then the sequence of terms must be expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s (otherwise since there are only finitely many terms of size < s, there would be a cycle and it would be a normal form SCC). Here the idea is to first extend the computation to the limit, if it exists - an infinite normal form defined as a solution to a recurrence equation. So ``x = 1 :: x`` is already in a normal form, the second might resolve to ``x = x t``. Then this infinite term is computed in chunks and fed to the surrounding context (laziness).
+::
 
-   focus is on trying all reductions of terms and finding a normal form if it exists.
+  fact 3
+  3 * fact (3-1)
+  3 * fact 2
+  3 * (2 * fact (2-1))
+  3 * (2 * fact 1)
+  3 * (2 * (1 * fact (1-1)))
+  3 * (2 * (1 * fact 0))
+  3 * (2 * (1 * 1))
+  3 * (2 * 1)
+  3 * 2
+  6
+
+We say that ``fact 3`` reduces to ``6``, written more concisely as the rewrite rule ``fact 3 = 6``.
+
+Note that a reduction sequence is not necessarily unique, e.g. we could have used an associative law ``3 * (2 * fact 1) = (3 * 2) * fact 1`` and reduced from there to ``6 * fact 1``. Different reduction sequences can be more efficient; this can optimize stack usage.
+
+Higher-order matching
+---------------------
+
+Handling lambdas in RHSs is fairly straightforward, just reduce them away when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction. Executing a rule ``l -> r`` on a term ``t`` solves the equation ``t = C[lθ]`` and replaces it with ``C[rθ]``.
+
+Finding the contexts ``C`` is fairly straightforward, just enumerate all the subterms of ``t``. But solving the equation ``s = lθ`` is an instance of higher-order unification (specifically higher-order matching).  The λ-superposition calculus relies on complete sets of unifiers (CSUs). The
+CSU for s and t, with respect to a set of variables V , denoted by CSUV (s, t), is a
+set of unifiers such that for any unifier % of s and t, there exists a σ ∈ CSUV (s, t)
+and θ such that %(X) = (σ◦θ)(X) for all X ∈ V . The set X is used to distinguish
+between important and auxiliary variables. We can normally leave it implicit
+
+Higher order matching is decidable for the simply typed lambda calculus. But the proof is of the form "the minimal solution is of size at most 2^2^2^2..., the number of 2's proportional to the size of the problem". There are 3 transformations presented in the proof which reduce a larger solution to a smaller solution. These might be usable to prune the search tree. But at the end of the day it's mostly brute-force.
+
+The proof relies on some properties of the STLC, namely normalization and that terms have a defined eta long form (canonical form).
+
+It is not clear if there is a way to do untyped higher order matching for general lambda patterns.
 
 Normal forms
 ============
 
-In a general TRS the notion of "value" is not well-defined: random evaluation strategies will give different results. We want there to be no privileged evaluation strategy - we always reach the same result. The weakest property that guarantees this is unique normal forms with respect to reduction (UN→), which is that if a term reduces to two normal forms then the normal forms are identical.
+The execution of a Stroscot program is modeled as applying rewrite rules successively until no more can be applied.
 
-But a program naturally falls into error terms - these can be modeled by making errors reduce to themselves (hence they are not normal forms but omega normal forms - the class of terms including normal forms and terms which reduce to themselves). However UN→ is not sufficient for this, because error terms are not normal forms.
+A "value" in a TRS refers to a normal form, a term that cannot be reduced further.
+We model the program as generating an infinite normal form for I/O, so we extend values to infinite normal forms. Then a term's values are the set of infinite normal forms produced as the limits of reduction sequences. If there are multiple such normal forms then the term is nondeterministic and has multiple values, or we could say it's undefined.
 
-Since we model the program as generating an infinite data structure for I/O we extend this to uniqueness of infinite normal forms. Bohm reductions reduce all terms without head normal forms (i.e. those that perpetually have a redex in the head position, i.e. are root-active) to a bottom. :cite:`kennawayTransfiniteReductionsOrthogonal1991` Really we want uniqueness of the Bohm tree and not just uniqueness of normal forms.
+To find the value the normal form must be computable - if the head normal form can't be found in a reasonable amount of time then the value is uncomputable.
 
-Normalizing strategies find the normal form if it exists, i.e. if any strategy succeeds, a normalizing strategy succeeds. A normalizing strategy avoids getting stuck evaluating nonterminating arguments (time efficient in the large). With a normalizing strategy one can reason unconditionally about program fragments and the semantics are cleaner, allowing aggressive optimization and program transforms (substituting expression for value, removing unused expressions). A normalizing strategy handles if-then-else and short-circuit functions gracefully. It also allows infinite data structures.
+Classification
+==============
 
-So for correctness and expressiveness, the TRS part of the program should have unique normal forms and a normalizing strategy.
+There are various behaviors which show up in a TRS, which require different handling.
 
-Other properties
-================
+* convergent (confluent and terminating) - These include typed systems such as the simply typed lambda calculus. For these, the result is the same no matter how they are reduced. So the focus is on do the reduction efficiently, compiling to fast assembly via a state machine and data format analysis and/or doing optimal reduction to reduce in the smallest number of steps.
+* cycles - The untyped lambda calculus has cycles, e.g. ``Omega = let w=\x.x x in w w`` reduces to itself and :cite:`venturiniReductionGraphsLambda1983` shows a 6-cycle ``M M I``. Similarly commutativity ``a + b = b + a`` generates cycles. If we are able to detect these then the solution is to collapse the SCC into a single term. :cite:`dershowitzRewriteSystems1991`'s notion of a (congruence-)class-rewriting system is helpful - the rewrite rules are split into rules R and (reversible) equations S, and we consider the system R/S (R mod S). A term where only S rules apply (no R rules apply) is considered a normal form in the class-rewriting system. So similarly terms with no reductions in the `condensation <https://en.wikipedia.org/wiki/Strongly_connected_component#Definitions>`__ of the rewrite graph are normal forms. Hence ``<Omega>``,  ``<M M I>`` and ``<a + b>`` would be SCC normal forms since they do not reduce out of the SCC. In  The way we handle this in the rewrite engine is something like "detect cyclic term via cycle detection or presence of AC operator -> wrap in scc node to prevent normal reduction -> use specialized matching (eg AC matching or Tarjan SCC + memo hash table) to reduce to a term not in the SCC -> end with SCC normal form if no reduction"
+* infinitely expanding terms - for example ``x = 1 :: x`` or ``fib = 1 :: 2 :: zipWith (+) fib (head fib)`` or ``foo = let t = \x. x x x in t t``. If reduction does not end in a SCC normal form, then the sequence of terms must be expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s (otherwise since there are only finitely many terms of size < s, there would be a cycle and it would be a SCC normal form). Here the idea is to find the limit of the computation, if it exists - an infinite normal form defined as a solution to a recurrence equation. So ``x = 1 :: x`` and ``fib`` are already in a (head) normal form. Then this infinite term is computed in chunks and fed to the surrounding context on demand (laziness), ensuring that a normal form is reached if possible and otherwise implementing an infinite stream of commands. ``foo`` might resolve to ``foo = foo t``, but this isn't necessarily a normal form, so hard to say if it's useful.
+* nondeterminism - if a term reduces to two normal forms, it's hard to say immediately if this is an error - the program might ignore the term or give the same behavior on the different values. Errors/exceptions are by design non-deterministic. In a parsing context the desired behavior is to collect all possible parses and use a disambiguating handler to choose among them. But if at the top-level a program is reducing to two distinct non-error terms, this is probably an error. But this is a global property and at the local level we have to handle nondeterminism.
+* diverging - if a term infinitely expands and doesn't converge even to a head-normal limit, i.e. it has no head normal form, then there's not much semantic meaning in it. It perpetually has a redex in the head position, i.e. is root-active, so it can't even be safely pattern matched on. So since its value is unobservable it can be replaced with an error term, just like Bohm reduction :cite:`kennawayTransfiniteReductionsOrthogonal1991`.
 
-Unfortunately these properties are not well studied in the literature. In general the properties are undecidable, so there is no simple and precise condition. Researchers have mostly focused on stronger properties, i.e. conditions sufficient for the properties to hold, as opposed to equivalent or weaker conditions.
+Determinism
+===========
+
+In general the precise guarantees of determinism are undecidable, so there is no simple and precise condition. The most precise property is "unique normal forms with respect to reduction" (UN→), but this hasn't been well-studied. Researchers have mostly focused on stronger properties, i.e. conditions sufficient for the properties to hold, as opposed to equivalent or weaker conditions. The simplest guarantee of determinism is for there to only be one matching rule (orthogonality). Confluence has gotten a lot of attention as well and has automated provers.
 
 Confluence
 ----------
@@ -60,8 +97,17 @@ A necessary condition for confluence is weak/local confluence, i.e. each critica
 
 We say → has random descent (RD), if for each R:a ↔∗b with b in normal form, all maximal reductions from a have length d(R) and end in b. Systems with random descent are confluent.
 
-Termination
------------
+Normalization
+-------------
+
+Normalizing strategies find the normal form if it exists, i.e. if any reduction sequence/strategy produces a normal form, a normalizing strategy does too. A normalizing strategy avoids getting stuck infinitely evaluating nonterminating arguments (time efficient in the large). Basically, a normalizing strategy provides all the benefits of "lazy evaluation":
+* One can reason unconditionally about the termination behavior of program fragments (substituting expression for value, removing unused expressions)
+* The semantics of nontermination are cleaner - a normalizing strategy handles if-then-else and short-circuit functions gracefully.
+* Infinite data structures can be used without allocating infinite memory
+
+A hypernormalizing strategy is a strategy that is normalizing even if arbitrary reduction steps are taken before and after steps of the strategy. This allows the compiler to make optimizations without changing the behavior of the program. A hypernormalizing strategy allows aggressive optimizations and program transforms.
+
+Leftmost outermost reduction is the basis of lazy evaluation and is hypernormalizing for the lambda calculus. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated - the simplest example is parallel outermost) - it's hypernormalizing for critical pair TRSs (decreasingly confluent TRSs), in particular weakly orthogonal TRSs. :cite:`hirokawaStrategiesDecreasinglyConfluent2011`
 
 There are also stronger properties than normalization. A Church-Rosser strategy is one with common reducts, i.e. there exist m and n, such that :math:`F^m(t)=F^n(u)` for every t and u equal via forward/backward evaluation. A normalizing strategy is Church-Rosser if the system is confluent and weakly normalizing (i.e. all objects have a normal form). In general a many-step CR strategy exists for effective ARS's, i.e. countable (in a computable fashion) and with a computable reduction relation. But the strategy is quite hard to compute, as it has to synchronize reducing subterms so that all components are reduced the same amount. And it's not clear that this synchronization offers anything to the programmer.
 
@@ -72,7 +118,7 @@ To ensure that term rewriting halts we probably also want a property like strong
 
 A perpetual strategy is the opposite of normalizing - if any strategy diverges, then perpetual strategy diverges. Leftmost-innermost is close to the strategies commonly used in strict languages and is perpetual. With a perpetual strategy inlining etc. hold only if reduction of the expression terminates, i.e. one must keep track of termination properties. A perpetual strategy gives the wrong behavior for if-then-else and short-circuit functions, so strict languages special-case these to ensure they don't cause nontermination. Perpetual strategies are antagonistic, "I'll crash your program if I can".
 
-A hypernormalizing strategy is a strategy that is normalizing even if arbitrary reduction steps are taken before and after steps of the strategy. Leftmost outermost for lambda calculus (the basis of lazy evaluation) is hypernormalizing. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated- the simplest example is parallel outermost) - it's (hyper)normalizing for critical pair TRSs,, which include weakly orthogonal TRSs. :cite:`hirokawaStrategiesDecreasinglyConfluent`
+
 
 Equality and left-linearity
 ===========================
@@ -151,21 +197,15 @@ We could do user-specified strategies like Stratego, but then how would we know 
 The optimal reduction stuff is defined for match sequential TRSs.
 
 non-strict strategies:
-- Lenient evaluation - computation rule [Traub, FPCA 89], where all redexes are evaluated in parallel except inside the arms of conditionals and inside lambdas.
-- extra memory overhead for parameter passing (inefficient)
-  - strictness analysis to optimize to eager (which has identical semantics to lazy 99% of the time)
+* Lenient evaluation - computation rule [Traub, FPCA 89], where all redexes are evaluated in parallel except inside the arms of conditionals and inside lambdas.
+* extra memory overhead for parameter passing (inefficient)
+* strictness analysis to optimize to eager (which has identical semantics to lazy 99% of the time)
 
-Now, one can argue about which computational strategy is ``better'' (time, space, parallelism, ...)
-IMO: aim for most efficient normalizing strategy.
-
-
-Stroscot aims to be accepting of programs so it uses a normalizing strategy.
-
-
+Now, one can argue about which computational strategy is better (time, space, parallelism, ...)
+Stroscot: be accepting of programs, ensure a normalizing strategy. But after that aim for most efficient in time/space for strict programs.
 
 Q: can normalizing be as efficient as strict
 profiling, other optimization tricks
-
 
 A list List[Nat]. In a strict language ADTs are finite. In lazy, we might accept infinite lists (generators). We want precise types: the finite data structure and its infinite counterpart ARE DIFFERENT DATATYPES. Only discardable (weakenable) boxes can contain infinite structures, so uList. (Nat + !w List) is an infinite list, while uList. (Nat + List) is a strict list. Extends to more complicated data structures. With subtyping you can use a finite list with an infinite list transformer.
 
@@ -192,17 +232,6 @@ Given a set V of variable symbols, a set C of constant symbols and sets Fn of n-
 Using an intuitive, pseudo-grammatical notation, this is sometimes written as: t ::= x | c | f(t1, ..., tn). Usually, only the first few function symbol sets Fn are inhabited. Well-known examples are the unary function symbols sin, cos ∈ F1, and the binary function symbols +, −, ⋅, / ∈ F2, while ternary operations are less known, let alone higher-arity functions. Many authors consider constant symbols as 0-ary function symbols F0, thus needing no special syntactic class for them.
 
 A term denotes a mathematical object from the domain of discourse. A constant c denotes a named object from that domain, a variable x ranges over the objects in that domain, and an n-ary function f maps n-tuples of objects to objects. For example, if n ∈ V is a variable symbol, 1 ∈ C is a constant symbol, and add ∈ F2 is a binary function symbol, then n ∈ T, 1 ∈ T, and (hence) add(n, 1) ∈ T by the first, second, and third term building rule, respectively. The latter term is usually written as n+1, using infix notation and the more common operator symbol + for convenience.
-
-Higher-order matching
-=====================
-
-Handling lambdas in RHSs is fairly straightforward, just reduce them away when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction. Executing a rule ``l -> r`` on a term ``t`` solves the equation ``t = C[lθ]`` and replaces it with ``C[rθ]``.
-
-Finding the contexts ``C`` is fairly straightforward, just enumerate all the subterms of ``t``. But solving the equation ``s = lθ`` is an instance of higher-order unification (specifically higher-order matching).
-
-Higher order matching is decidable for the simply typed lambda calculus. But the proof is of the form "the minimal solution is of size at most 2^2^2^2..., the number of 2's proportional to the size of the problem". There are 3 transformations presented in the proof which reduce a larger solution to a smaller solution. These might be usable to prune the search tree. But at the end of the day it's mostly brute-force.
-
-The proof relies on some properties of the STLC, namely normalization and that terms have a defined eta long form (canonical form).
 
 Dispatch
 ========
