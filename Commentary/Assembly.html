@@ -63,16 +63,23 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -123,7 +130,8 @@
 * SPARC: It’s end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
 * 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
 * WASM: it still doesn’t support <a class="reference external" href="https://github.com/WebAssembly/proposals/issues/17">tail calls</a>. Given the lack of progress it seems like a low priority.
-* LLVM: The bitcode format is worth targeting at some point.</p>
+* LLVM: The bitcode format is worth targeting at some point.
+* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures</p>
 <p>From a design perspective supporting 2 architectures is not much different from supporting 10, it’s just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.</p>
 <p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
 </section>
@@ -193,29 +201,32 @@
 <p>Xed has info on read/written flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR.</p>
 <p>For ARM modifying asl-interpreter should give info on flags etc.</p>
 <p>The schema:</p>
-<ul>
+<ul class="simple">
 <li><p>form name</p></li>
-<li><p>affected things (list)
-* type:</p>
-<blockquote>
-<div><ul class="simple">
+<li><p>affected things (list)</p>
+<ul>
+<li><p>type:</p>
+<ul>
 <li><p>explicit operand (+ index)</p></li>
 <li><p>fixed register</p></li>
 <li><p>pseudo resource</p></li>
 <li><p>flag bit</p></li>
 </ul>
-</div></blockquote>
-<ul class="simple">
+</li>
 <li><p>read: read / not read / conditionally read / unknown</p></li>
-<li><p>written:
-* value: constant,  copied from input, read + constant, complex computation, undefined, …
-* not written, conditionally written, unknown</p></li>
+<li><p>written:</p>
+<ul>
+<li><p>value: constant,  copied from input, read + constant, complex computation, undefined, …</p></li>
+<li><p>not written, conditionally written, unknown</p></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>possible exceptions</p></li>
 </ul>
 <p>Instructions with no data have all possible affected things present, with read/write unknown.</p>
 <p>Pseudo-resource includes things like load-link/store-conditional. LDXR sets monitors (write) and STXR checks monitors (read). A second LL clears the monitor so LL is actually read/write. Anyway the monitor is a pseudo resource, because it’s not a register.</p>
+<p>“undefined” in the context of Intel means “arbitrary bit-pattern may be returned”. This is distinct from C’s UB but matches LLVM’s “undef”.</p>
 </section>
 <section id="classification">
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline"></a></h3>

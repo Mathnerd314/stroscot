@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Objects &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Package manager" href="PackageManager.html" />
+    <link rel="prev" title="Modules" href="Modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#minimal-oo">Minimal OO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-constructors">No constructors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-inheritance">No inheritance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-traits-or-methods">No traits or methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Objects</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Objects.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="objects">
+<h1>Objects<a class="headerlink" href="#objects" title="Permalink to this headline"></a></h1>
+<p>Many people like to use the phrase “object-oriented”. As far as I can tell this has no standard meaning - OO can refer to any of many concepts, principles, techniques, patterns, and philosophies used in software development. So for that reason the phrase is not used in the rest of the documentation. But as discussed here, by Bob’s minimal definition, Stroscot is OO. But it leaves out many typical OO features.</p>
+<section id="minimal-oo">
+<h2>Minimal OO<a class="headerlink" href="#minimal-oo" title="Permalink to this headline"></a></h2>
+<p>Uncle Bob <a class="reference external" href="https://blog.cleancoder.com/uncle-bob/2018/04/13/FPvsOO.html">defines</a> OO by distinguishing <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">o</span></code> from <code class="docutils literal notranslate"><span class="pre">o.f()</span></code>. With Uniform Function Call Syntax there is no difference. But, he argues, in an OO language <code class="docutils literal notranslate"><span class="pre">o.f()</span></code> is overloaded - it does dynamic dispatch based on the type of <code class="docutils literal notranslate"><span class="pre">o</span></code>. Whereas with <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">o</span></code> there is usually only one group of clauses for <code class="docutils literal notranslate"><span class="pre">f</span></code>.</p>
+<p>Well, Stroscot has predicate dispatch and multimethods. So all functions can be overloaded and do dynamic dispatch. So in Bob’s sense Stroscot is OO.</p>
+<p>Bob also wants to exclude implementations of dynamic dispatch that work by modifying <code class="docutils literal notranslate"><span class="pre">f</span></code> to use switch statements or long if/else chains. So he excludes dynamic dispatch that creates a source code dependency from <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">o</span></code> to <code class="docutils literal notranslate"><span class="pre">f</span></code>, i.e. <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">o</span></code> “knows” <code class="docutils literal notranslate"><span class="pre">f</span></code>. Instead there must be several clauses for <code class="docutils literal notranslate"><span class="pre">f</span></code> which may be called.</p>
+<p>Well, Stroscot solves the expression problem, so there is no issue with extending <code class="docutils literal notranslate"><span class="pre">f</span></code>.</p>
+<p>Concretely, Bob says, one should be able to write <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">o</span></code> in source file A and an implementation of <code class="docutils literal notranslate"><span class="pre">f</span></code> in source file B and there should be no use/require/import declaration from A to B.</p>
+<p>This seems completely unrelated, honestly. But indeed, Stroscot uses a recursive knot so all definitions are in scope.</p>
+</section>
+<section id="no-constructors">
+<h2>No constructors<a class="headerlink" href="#no-constructors" title="Permalink to this headline"></a></h2>
+<p>A constructor is a special type of subroutine that produces an object. So what distinguishes it from a factory function? Mainly its limitations: it must allocate new memory instead of being able to memoize common values, it cannot return a subclass, and it has to be called with a noisy “new” syntax and a fixed name. Factory functions have none of these limitations. There is no reason to have constructors.</p>
+<p>For example, a boxed primitive boolean should only have two values. A constructor forces the program to produce millions of trues and millions of falses. But this just creates overhead. A factory function can construct one true and one false and then return those from then on. And with value semantics there is no construction involved at all.</p>
+<p>The only downside is that constructor-like functions can be harder to find in the documentation, because they are not automatically marked. But organizing the documentation to put methods of the form <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Foo</span></code> where <code class="docutils literal notranslate"><span class="pre">Foo</span></code> doesn’t appear in <code class="docutils literal notranslate"><span class="pre">a</span></code> first is not hard. It’s not clear though that that’s the best organization.</p>
+</section>
+<section id="no-inheritance">
+<span id="id1"></span><h2>No inheritance<a class="headerlink" href="#no-inheritance" title="Permalink to this headline"></a></h2>
+<p>Inheritance is broken. Supposing <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">extends</span> <span class="pre">B</span></code>, <code class="docutils literal notranslate"><span class="pre">\x.</span> <span class="pre">!(x</span> <span class="pre">instanceof</span> <span class="pre">A)</span></code> is satisfied by <code class="docutils literal notranslate"><span class="pre">B</span></code> but <code class="docutils literal notranslate"><span class="pre">A</span></code>. So by the <a class="reference external" href="https://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a>
+A is not substitutable for B. If this is too abstract, consider <code class="docutils literal notranslate"><span class="pre">Circle</span> <span class="pre">extends</span> <span class="pre">Ellipse</span></code>, <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Ellipse</span> <span class="pre">{</span> <span class="pre">final</span> <span class="pre">float</span> <span class="pre">x,</span> <span class="pre">y;</span> <span class="pre">}</span></code>. We must make the class immutable, otherwise one could make a circle non-circular. But even this is not enough, because <code class="docutils literal notranslate"><span class="pre">Ellipse</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">}</span></code> is a circle but is not a member of the Circle class. The real solution is to give up on inheritance, make them disjoint classes, and use a factory function which returns either a circle or an ellipse.</p>
+<p>Inheritance is not composable; composition is better. Consider a list with add and addAll methods. Suppose you want a “counting list” that tracks the total number of objects added (the length plus the number of objects removed). With composition you can count what’s passed to addAll and add and update a counter. With inheritance and the counting list as a subclass it doesn’t work as expected because, the list’s addAll method calls the subclass’s add, and the added objects are double counted.</p>
+<p>Functions define common interfaces but not common behaviors; they should be overloaded but not overridden. Overriding only works when you know what is calling the function and its context and invariants.</p>
+<p>One pain point might be when there are lots of function to pass through to a subobject. But here you can use macros, something like <code class="docutils literal notranslate"><span class="pre">wrap</span> <span class="pre">delete,replace,find</span> <span class="pre">of</span> <span class="pre">List</span> <span class="pre">with</span> <span class="pre">CountingList</span> <span class="pre">using</span> <span class="pre">getList</span></code> which expands to lots of declarations like <code class="docutils literal notranslate"><span class="pre">delete</span> <span class="pre">a</span> <span class="pre">(x</span> <span class="pre">:</span> <span class="pre">CountingList)</span> <span class="pre">=</span> <span class="pre">delete</span> <span class="pre">a</span> <span class="pre">(getList</span> <span class="pre">x)</span></code>. It has to look up the clauses for the named symbols that apply to <code class="docutils literal notranslate"><span class="pre">List</span></code>, then replace <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">:</span> <span class="pre">List</span></code> with <code class="docutils literal notranslate"><span class="pre">getList</span> <span class="pre">cl</span> <span class="pre">:</span> <span class="pre">CountingList</span></code>, then write out a new clause for <code class="docutils literal notranslate"><span class="pre">CountingList</span></code> that preserves the other types involved. Not impossible but the kind of thing that needs to be in the standard library to make sure it works. The symbols list could also be automated by taking all symbols from a module, with munging like hiding symbols, to reduce maintenance.</p>
+</section>
+<section id="no-traits-or-methods">
+<h2>No traits or methods<a class="headerlink" href="#no-traits-or-methods" title="Permalink to this headline"></a></h2>
+<p>Traits (Scala/Rust terminology, also called Java/Idris interfaces, Haskell typeclasses, etc.) are collections of methods. They are a morass of complexity. The trait could declare one, two, three, four functions or more. Already, there’s an issue. It’s not particularly clear how to structure that. How many traits do you have? Do you have one trait per function or one trait with all the functions and leave some functions unimplemented? There’s no clear guidance. Without traits, each function is its own trait and there is no decision to make - you write exactly the functions you need.</p>
+<p>So, you fudged that out, and defined an trait that you think represents a good set of functions. Now, you have to implement the trait. In Java you need to inherit the trait. In Haskell you have to implement a typeclass. In both cases a big problem comes up: you can only implement the trait once for a given type. There are ways to work around this. Java has the adapter pattern to create a record of functions, and similarly Idris allows <a class="reference external" href="https://docs.idris-lang.org/en/latest/tutorial/interfaces.html#named-implementations">named implementations</a>. But it’s a big mess. Sets and maps need a comparison operator. With multiple implementations floating around the comparisons can become inconsistent, e.g. inserting with comparison A and removing with comparison B.</p>
+<p>Without traits, the functions get passed as implicit parameters, so there is no syntax needed for the default case. Multiple implementations can be accomplished using keyword parameter assignment. And to avoid inconsistent comparisons the map or set can store the comparison operator as a parameter on creation - it is simply a function after all.</p>
+<p>As a corollary of this, Stroscot has no methods defined “inside” a type - you write <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">...;</span> <span class="pre">method</span> <span class="pre">=</span> <span class="pre">...</span></code> rather than <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">...;</span> <span class="pre">method</span> <span class="pre">;</span> <span class="pre">...</span> <span class="pre">}</span></code>. They are all “free functions” or “extension methods”.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="PackageManager.html" class="btn btn-neutral float-right" title="Package manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

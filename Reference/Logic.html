@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Build system" href="BuildSystem.html" />
-    <link rel="prev" title="Memory" href="Memory.html" /> 
+    <link rel="next" title="Syntax" href="Syntax.html" />
+    <link rel="prev" title="Language Reference" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,15 +46,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Logic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#jumbo-connectives">Jumbo connectives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jumbo-connectives">Jumbo connectives</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#common-connectives">Common connectives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#programming-types">Programming types</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#exponentials">Exponentials</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#promotion">Promotion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dereliction">Dereliction</a></li>
@@ -76,10 +73,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#infinite-proof-structures">Infinite proof structures</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#common-connectives">Common connectives</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#programming-types">Programming types</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#set-theory">Set theory</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#comprehension">Comprehension</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#equality">Equality</a></li>
@@ -87,6 +80,14 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
@@ -152,116 +153,8 @@
 \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }
   {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
   {\Sigma_L}
-\end{array}</div></section>
-<section id="exponentials">
-<h2>Exponentials<a class="headerlink" href="#exponentials" title="Permalink to this headline"></a></h2>
-<section id="promotion">
-<h3>Promotion<a class="headerlink" href="#promotion" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\begin{array}{cc}
-  \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang}
-  &amp;
-  \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim}
-
-\end{array}</div></section>
-<section id="dereliction">
-<h3>Dereliction<a class="headerlink" href="#dereliction" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\begin{array}{cc}
-  \rule{\sk{\Gamma}, A \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang d}
-&amp; \rule{\sk{\Gamma} \vdash A, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim d}
-\end{array}</div></section>
-<section id="weakening">
-<h3>Weakening<a class="headerlink" href="#weakening" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\begin{array}{cc}
-    \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang w}
-  &amp; \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim w}
-  \end{array}</div></section>
-<section id="contraction">
-<h3>Contraction<a class="headerlink" href="#contraction" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\begin{array}{cc}
-    \rule{\sk{\Gamma}, \overrightarrow{\bang A, \bang A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang c_n}
-  &amp; \rule{\sk{\Gamma} \vdash \overrightarrow{\whim A, \whim A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim c_n}
-\end{array}</div></section>
-</section>
-<section id="structural-rules">
-<h2>Structural rules<a class="headerlink" href="#structural-rules" title="Permalink to this headline"></a></h2>
-<section id="exchange">
-<h3>Exchange<a class="headerlink" href="#exchange" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\[\rule{\sk{\Gamma} \vdash \sk{\Delta}}{\sk{\sigma_L(\Gamma)} \vdash \sk{\sigma_R(\Delta)}}{\text{x}}\]</div>
-</section>
-<section id="cut">
-<h3>Cut<a class="headerlink" href="#cut" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\[\rule{\sk{\Gamma} \vdash A, \sk{\Delta} \quad \sk{\Theta}, A \vdash \sk{\Lambda} }{\sk{\Gamma}, \sk{\Theta} \vdash \sk{\Delta}, \sk{\Lambda} }{\text{cut}}\]</div>
-</section>
-<section id="identity">
-<h3>Identity<a class="headerlink" href="#identity" title="Permalink to this headline"></a></h3>
-<div class="math notranslate nohighlight">
-\[\rule{}{A \vdash A}{\text{id}}\]</div>
-</section>
-</section>
-<section id="quantifiers">
-<h2>Quantifiers<a class="headerlink" href="#quantifiers" title="Permalink to this headline"></a></h2>
-<section id="terms">
-<h3>Terms<a class="headerlink" href="#terms" title="Permalink to this headline"></a></h3>
-<blockquote>
-<div><p>The set of terms consists of variables, name constants, and uninterpreted predicates <span class="math notranslate nohighlight">\(f(t_1,\ldots,t_n)\)</span> where <span class="math notranslate nohighlight">\(f\)</span> is a function symbol and <span class="math notranslate nohighlight">\(t_i\)</span> are terms.</p>
-</div></blockquote>
-<div class="math notranslate nohighlight">
-\begin{array}{ccc}
-  \rule{}{x \vdash x}{\text{id}}
-  &amp;
-  \rule{}{P(x_1,\ldots,x_n) \vdash P(x_1,\ldots,x_n)}{\text{id}}
-\end{array}</div></section>
-<section id="substitution">
-<h3>Substitution<a class="headerlink" href="#substitution" title="Permalink to this headline"></a></h3>
-<p><span class="math notranslate nohighlight">\(A[\overrightarrow{x \mapsto t}]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variables <span class="math notranslate nohighlight">\(\overrightarrow{x}\)</span> have been replaced by the propositions/terms <span class="math notranslate nohighlight">\(\overrightarrow{t}\)</span> (and bound variables have been renamed to fresh ones when necessary).</p>
-<blockquote>
-<div><div class="math notranslate nohighlight">
-\begin{array}{c}
-  \rule{\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
-\end{array}</div></div></blockquote>
-</section>
-<section id="id1">
-<h3>Quantifiers<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
-<p>For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>.</p>
-<div class="math notranslate nohighlight">
- \begin{array}{cccc}
-    \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
-    &amp;
-    \rule{t\vdash t\quad\Gamma, A[x\mapsto t] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
-    &amp;
-    \rule{t\vdash t\quad\Gamma \vdash A[x\mapsto t], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
-    &amp;
-    \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
-  \end{array}</div></section>
-</section>
-<section id="definitions">
-<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline"></a></h2>
-<p>We define the notation <span class="math notranslate nohighlight">\(A\defeq B\)</span> as a pair of rules:</p>
-<div class="math notranslate nohighlight">
-  \begin{array}{cc}
-    \rule{\Gamma \vdash B, \Delta}{\Gamma \vdash A, \Delta}{\text{def}_R}
-    &amp;
-    \rule{\Gamma, B \vdash \Delta}{\Gamma, A \vdash \Delta}{\text{def}_L}
-  \end{array}</div><p>A formula for which the expansion of the definition(s) contained proceeds indefinitely is categorized as circular, and is excluded from the syntax.</p>
-</section>
-<section id="infinite-proof-structures">
-<span id="infinite"></span><h2>Infinite proof structures<a class="headerlink" href="#infinite-proof-structures" title="Permalink to this headline"></a></h2>
-<p>These have “use” and “def” rules (“def” is short for definition). The use is a “hole” that plugs in the derivation tree from the definition. The type of the use rule can performs a substitution on the free variables of the type of the assignment.</p>
-<div class="math notranslate nohighlight">
-\[\begin{array}{cc}
-  \rule{X }{ \Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}] }{\text{Use}}
-  &amp;
-  \rule{\Gamma \vdash \Delta}{ X = }{\text{Def}}
-\end{array}\]</div>
-</section>
-<section id="common-connectives">
-<span id="connectives"></span><h2>Common connectives<a class="headerlink" href="#common-connectives" title="Permalink to this headline"></a></h2>
+\end{array}</div><section id="common-connectives">
+<h3>Common connectives<a class="headerlink" href="#common-connectives" title="Permalink to this headline"></a></h3>
 <p>All of the standard operators 01⊕⊗⊤⊥&amp;⅋⊸⧟ in linear logic can be expressed using <span class="math notranslate nohighlight">\(\Sigma\)</span> and <span class="math notranslate nohighlight">\(\Pi\)</span>. We use our notation for them.</p>
 <table class="colwidths-given docutils align-default" style="width: 100%">
 <colgroup>
@@ -361,6 +254,7 @@
 </tbody>
 </table>
 <p>The negations and shifts have identical derivation rules for each polarity, so we write <span class="math notranslate nohighlight">\(\neg A\)</span> and <span class="math notranslate nohighlight">\(\smash{\updownarrow}A\)</span> unless there is a need for the distinction.</p>
+</section>
 <section id="programming-types">
 <h3>Programming types<a class="headerlink" href="#programming-types" title="Permalink to this headline"></a></h3>
 <p>We can also write some types common from programming:</p>
@@ -377,46 +271,144 @@
 <td><p><span class="math notranslate nohighlight">\(\Sigma [(\#F,[]-[]),(\#T,[]-[])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\text{Int}\)</span></p></td>
-<td><p>Integers</p></td>
+<td><p>32-bit integers</p></td>
 <td><p><span class="math notranslate nohighlight">\(\Sigma [(\#{-2}^{31},[]-[]),\ldots,(\#0,[]-[]),\ldots,(\#2^{31}-1,[]-[])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(L_A\)</span></p></td>
 <td><p>Linked list of A</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma\{(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\Sigma [(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])]\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\Omega_N\)</span></p></td>
-<td><p>Call by name lambdas</p></td>
-<td><p><span class="math notranslate nohighlight">\(\bang \Omega_N \to \Omega_N\)</span></p></td>
-</tr>
-<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\Omega_V\)</span></p></td>
-<td><p>Call by value or optimal lambdas</p></td>
-<td><p><span class="math notranslate nohighlight">\(\bang (\Omega_V \to \Omega_V)\)</span></p></td>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Arr_A\)</span></p></td>
+<td><p>Arbitrarily-sized tuple of A</p></td>
+<td><p><span class="math notranslate nohighlight">\(\Sigma [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]\)</span></p></td>
 </tr>
 </tbody>
 </table>
 </section>
 </section>
+<section id="exponentials">
+<h2>Exponentials<a class="headerlink" href="#exponentials" title="Permalink to this headline"></a></h2>
+<section id="promotion">
+<h3>Promotion<a class="headerlink" href="#promotion" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+  \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang}
+  &amp;
+  \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim}
+
+\end{array}</div></section>
+<section id="dereliction">
+<h3>Dereliction<a class="headerlink" href="#dereliction" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+  \rule{\sk{\Gamma}, A \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang d}
+&amp; \rule{\sk{\Gamma} \vdash A, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim d}
+\end{array}</div></section>
+<section id="weakening">
+<h3>Weakening<a class="headerlink" href="#weakening" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang w}
+  &amp; \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim w}
+  \end{array}</div></section>
+<section id="contraction">
+<h3>Contraction<a class="headerlink" href="#contraction" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\sk{\Gamma}, \overrightarrow{\bang A, \bang A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang c_n}
+  &amp; \rule{\sk{\Gamma} \vdash \overrightarrow{\whim A, \whim A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim c_n}
+\end{array}</div></section>
+</section>
+<section id="structural-rules">
+<h2>Structural rules<a class="headerlink" href="#structural-rules" title="Permalink to this headline"></a></h2>
+<section id="exchange">
+<h3>Exchange<a class="headerlink" href="#exchange" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\[\rule{\sk{\Gamma} \vdash \sk{\Delta}}{\sk{\sigma_L(\Gamma)} \vdash \sk{\sigma_R(\Delta)}}{\text{x}}\]</div>
+</section>
+<section id="cut">
+<h3>Cut<a class="headerlink" href="#cut" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\[\rule{\sk{\Gamma} \vdash A, \sk{\Delta} \quad \sk{\Theta}, A \vdash \sk{\Lambda} }{\sk{\Gamma}, \sk{\Theta} \vdash \sk{\Delta}, \sk{\Lambda} }{\text{cut}}\]</div>
+</section>
+<section id="identity">
+<h3>Identity<a class="headerlink" href="#identity" title="Permalink to this headline"></a></h3>
+<div class="math notranslate nohighlight">
+\[\rule{}{A \vdash A}{\text{id}}\]</div>
+</section>
+</section>
+<section id="quantifiers">
+<h2>Quantifiers<a class="headerlink" href="#quantifiers" title="Permalink to this headline"></a></h2>
+<section id="terms">
+<h3>Terms<a class="headerlink" href="#terms" title="Permalink to this headline"></a></h3>
+<p>The set of terms consists of variables <span class="math notranslate nohighlight">\(x\)</span>, named constants <span class="math notranslate nohighlight">\(P()\)</span> (written simply as <span class="math notranslate nohighlight">\(P\)</span>), and uninterpreted predicates <span class="math notranslate nohighlight">\(P(t_1,\ldots,t_n)\)</span> where <span class="math notranslate nohighlight">\(P\)</span> is a function symbol, <span class="math notranslate nohighlight">\(n \geq 1\)</span>, and <span class="math notranslate nohighlight">\(t_i\)</span> are terms.</p>
+<div class="math notranslate nohighlight">
+\begin{array}{ccc}
+  \rule{}{x \vdash x}{\text{id}}
+  &amp;
+  \rule{}{P(x_1,\ldots,x_n) \vdash P(x_1,\ldots,x_n)}{\text{id}}
+\end{array}</div></section>
+<section id="substitution">
+<h3>Substitution<a class="headerlink" href="#substitution" title="Permalink to this headline"></a></h3>
+<p><span class="math notranslate nohighlight">\(A[\overrightarrow{x \mapsto t}]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variables <span class="math notranslate nohighlight">\(\overrightarrow{x}\)</span> have been replaced by the propositions/terms <span class="math notranslate nohighlight">\(\overrightarrow{t}\)</span> (and bound variables have been renamed to fresh ones when necessary).</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\begin{array}{c}
+  \rule{\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
+\end{array}</div></div></blockquote>
+</section>
+<section id="id1">
+<h3>Quantifiers<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>.</p>
+<div class="math notranslate nohighlight">
+ \begin{array}{cc}
+    \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
+    &amp;
+    \rule{t\vdash t\quad\Gamma, A[x\mapsto t] \vdash \Delta}{\Gamma, \forall x. A \vdash \Delta}{\forall_L}
+    \\
+    \rule{t\vdash t\quad\Gamma \vdash A[x\mapsto t], \Delta}{\Gamma \vdash \exists x. A, \Delta}{\exists_R}
+    &amp;
+    \rule{\Gamma, A \vdash \Delta}{\Gamma, \exists x. A \vdash \Delta}{\exists_L}
+  \end{array}</div></section>
+</section>
+<section id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline"></a></h2>
+<p>If we define some notation <span class="math notranslate nohighlight">\(A\defeq B\)</span>, then this means adding a pair of rules to our logic:</p>
+<div class="math notranslate nohighlight">
+  \begin{array}{cc}
+    \rule{\Gamma \vdash B, \Delta}{\Gamma \vdash A, \Delta}{\text{def}_R}
+    &amp;
+    \rule{\Gamma, B \vdash \Delta}{\Gamma, A \vdash \Delta}{\text{def}_L}
+  \end{array}</div><p>These rules can only be applied if the proposition <span class="math notranslate nohighlight">\(B\)</span> has a finite proof of its identity sequent <span class="math notranslate nohighlight">\(B \vdash B\)</span>. Propositions without such a proof are said to have a circular definition.</p>
+</section>
+<section id="infinite-proof-structures">
+<span id="infinite"></span><h2>Infinite proof structures<a class="headerlink" href="#infinite-proof-structures" title="Permalink to this headline"></a></h2>
+<p>These have “use” and “def” rules (“def” is short for definition). The use is a “hole” that plugs in the derivation tree from the definition. The type of the use rule can performs a substitution on the free variables of the type of the assignment.</p>
+<div class="math notranslate nohighlight">
+\[\begin{array}{cc}
+  \rule{X }{ \Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}] }{\text{Use}}
+  &amp;
+  \rule{\Gamma \vdash \Delta}{ X = }{\text{Def}}
+\end{array}\]</div>
+</section>
 <section id="set-theory">
-<h2>Set theory<a class="headerlink" href="#set-theory" title="Permalink to this headline"></a></h2>
+<span id="connectives"></span><h2>Set theory<a class="headerlink" href="#set-theory" title="Permalink to this headline"></a></h2>
 <p>We define <span class="math notranslate nohighlight">\(t\in \{x\mid A\} \defeq A[x\mapsto t]\)</span>. Here the elements <span class="math notranslate nohighlight">\(t\)</span> of the sets are propositions; e.g. we can prove <span class="math notranslate nohighlight">\(\bot \in \{x\mid x \leftrightarrow \bot \}\)</span>. Usually the variables in set theory range over sets. Hence we introduce new variables <span class="math notranslate nohighlight">\(x^S\)</span> which range over sets. Since all sets are of the form <span class="math notranslate nohighlight">\(\{x\mid X\}\)</span> these can be translated as follows:</p>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(x^S \defeq \{x\mid X\}\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\{x^S\mid X\} \defeq \{X\mid X\}\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\{x\mid X\} \in Y \defeq X \in Y\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\forall x^S. X \defeq \forall X. X\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\{x^S\mid X\} \subseteq \{x^S\mid Y\} \defeq X \to Y\)</span></p></li>
-</ul>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}x^S \defeq \{x\mid X\}\\\{x^S\mid X\} \defeq \{X\mid X\}\\\{x\mid X\} \in Y \defeq X \in Y\\\forall x^S. X \defeq \forall X. X\\\{x^S\mid X\} \subseteq \{x^S\mid Y\} \defeq X \to Y\end{aligned}\end{align} \]</div>
 <p>So for example <span class="math notranslate nohighlight">\(t^S\in \{x^S\mid x^S \in x^S \}\)</span> expands to <span class="math notranslate nohighlight">\(T \in \{X \mid X \in \{x\mid X\} \}\)</span></p>
 <p>We can also define set-builder notation <span class="math notranslate nohighlight">\(\{a_1,\ldots,a_n\} = \{x\mid x = a_1 \lor \ldots \lor x=a_n\}\)</span>.</p>
-<p>We define <span class="math notranslate nohighlight">\(a \ocin B = \bang(a \in B)\)</span>, <span class="math notranslate nohighlight">\(\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\)</span>, <span class="math notranslate nohighlight">\(\exists x\in A. P(x) = \exists x. \bang(x \in A) \otimes P(x)\)</span>, <span class="math notranslate nohighlight">\(\forall x\in A. P(x) = \forall x. (\bang(x\in A) \multimap P(x)\)</span>. This is similar to <span id="id2">[<a class="reference internal" href="../zzreferences.html#id70" title="Michael Shulman. Linear logic for constructive mathematics. arXiv:1805.07518 [math], May 2018. URL: http://arxiv.org/abs/1805.07518 (visited on 2021-03-04), arXiv:1805.07518.">Shu18</a>]</span> except <span class="math notranslate nohighlight">\(\in\)</span> is not affirmative.</p>
+<p>We define</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}a \ocin B = \bang(a \in B)\\\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\\\exists x\in A. P(x) = \exists x. \bang(x \in A) \otimes P(x)\\\forall x\in A. P(x) = \forall x. (\bang(x\in A) \multimap P(x)\end{aligned}\end{align} \]</div>
 <section id="comprehension">
 <h3>Comprehension<a class="headerlink" href="#comprehension" title="Permalink to this headline"></a></h3>
-<p>We can prove the axiom schema of comprehension for (non-circular) formulas <span class="math notranslate nohighlight">\(\phi\)</span>:</p>
+<p>We can prove the axiom schema of comprehension for (non-circular) formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>:</p>
 <ol class="arabic simple">
-<li><p><span class="math notranslate nohighlight">\(\vdash \phi \leftrightarrow \phi)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash x\in \{x\mid\phi\} \leftrightarrow \phi)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash \forall x. x\in \{x\mid\phi\} \leftrightarrow \phi)\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash \exists y. \forall x. x\in y \leftrightarrow \phi)\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vdash \phi \leftrightarrow \phi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vdash x\in \{x\mid\phi\} \leftrightarrow \phi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vdash \forall x. x\in \{x\mid\phi\} \leftrightarrow \phi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\vdash \exists y. \forall x. x\in y \leftrightarrow \phi\)</span></p></li>
 </ol>
 </section>
 <section id="equality">
@@ -434,8 +426,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Language Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

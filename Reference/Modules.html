@@ -45,6 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
@@ -52,18 +53,18 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#access">Access</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#with-statement">With statement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exports">Exports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linking">Linking</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#imports">Imports</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#overrides">Overrides</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ml">1ML</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
@@ -98,27 +99,25 @@
              
   <section id="modules">
 <h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline"></a></h1>
-<p>Modules from the programming perspective are records; they contain a list of bindings. They use the same brace syntax as statements.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">C</span> <span class="ow">=</span> <span class="p">{</span>
-<span class="nf">a</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">b</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="p">}</span>
+<p>Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"></span>
 
-<span class="kt">C</span> <span class="ow">=</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="s">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="ow">=</span> <span class="s">&quot;y&quot;</span> <span class="p">}</span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="access">
 <h2>Access<a class="headerlink" href="#access" title="Permalink to this headline"></a></h2>
 <p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. The uniform notation with records seems cleaner than notation like <code class="docutils literal notranslate"><span class="pre">A::B::C::a.b</span></code>.</p>
-<p>Later in the pipeline:
-* A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
 </section>
 <section id="with-statement">
 <h2>With statement<a class="headerlink" href="#with-statement" title="Permalink to this headline"></a></h2>
-<p>To save on typing there is the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">equivalent</span> <span class="n">for</span> <span class="n">most</span> <span class="n">purposes</span>
-<span class="kt">C</span><span class="o">.</span><span class="n">a</span>
-<span class="nf">with</span> <span class="kt">C</span> <span class="p">{</span> <span class="n">a</span> <span class="p">}</span>
+<p>To save on typing there is the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">most</span><span class="w"> </span><span class="n">purposes</span><span class="w"></span>
+<span class="kt">C</span><span class="o">.</span><span class="n">a</span><span class="w"></span>
+<span class="nf">with</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Without <code class="docutils literal notranslate"><span class="pre">with</span></code>, bare identifiers or the first component of a dotted name are qualified to the current module. If multiple modules are in scope through <code class="docutils literal notranslate"><span class="pre">with</span></code>, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code> were written for every identifier <code class="docutils literal notranslate"><span class="pre">a</span></code> and module <code class="docutils literal notranslate"><span class="pre">C</span></code>. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.</p>
@@ -130,20 +129,40 @@ with D { with C { a } }
 </pre></div>
 </div>
 <p>To avoid ambiguity, <code class="docutils literal notranslate"><span class="pre">with</span></code> statements can be restricted by hiding identifiers or limiting the introduced identifiers to a list.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">with</span> <span class="kt">C</span> <span class="n">hiding</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
-<span class="nf">with</span> <span class="kt">D</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">with</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="n">hiding</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span><span class="w"></span>
+<span class="nf">with</span><span class="w"> </span><span class="kt">D</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">with</span></code> on an argument with the dot syntax: <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">.</span> <span class="pre">=</span> <span class="pre">...</span></code> translates to <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">with</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>. This is an abbreviation:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w">  </span><span class="n">ary</span><span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="n">syntax</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="o">.</span><span class="p">}</span><span class="ow">=</span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="n">ary</span><span class="p">}</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">namespace</span><span class="w"> </span><span class="n">unpack</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">x</span><span class="o">.</span><span class="n">ary</span><span class="p">}</span><span class="w">       </span><span class="o">//</span><span class="w"> </span><span class="n">plan</span><span class="w"> </span><span class="n">old</span><span class="w"> </span><span class="n">symbol</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="exports">
+<h2>Exports<a class="headerlink" href="#exports" title="Permalink to this headline"></a></h2>
 <p>Module exports can similarly be limited:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">C</span> <span class="ow">=</span> <span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="s">&quot;x&quot;</span><span class="p">;</span> <span class="n">b</span> <span class="ow">=</span> <span class="s">&quot;y&quot;</span> <span class="p">}</span>
-<span class="o">#</span> <span class="n">only</span> <span class="n">a</span> <span class="n">is</span> <span class="n">accessible</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"> </span><span class="p">(</span><span class="nf">a</span><span class="p">)</span><span class="w"></span>
+
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;y&quot;</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">accessible</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Sometimes it is necessary to access internal members, so they are actually still accessible with <code class="docutils literal notranslate"><span class="pre">C.__internal.b</span></code> .</p>
-<p>You can use <code class="docutils literal notranslate"><span class="pre">with</span></code> on an argument with the dot syntax: <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">.</span> <span class="pre">=</span> <span class="pre">...</span></code> translates to <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">with</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>. This is an abbreviation:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="o">.</span> <span class="ow">-&gt;</span>  <span class="n">ary</span>  <span class="o">//</span> <span class="n">syntax</span>
-<span class="nf">f</span> <span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="o">.</span><span class="p">}</span><span class="ow">=</span><span class="n">x</span><span class="p">;</span> <span class="n">ary</span><span class="p">}</span> <span class="o">//</span> <span class="n">namespace</span> <span class="n">unpack</span>
-<span class="nf">f</span> <span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">ary</span><span class="p">}</span>       <span class="o">//</span> <span class="n">plan</span> <span class="n">old</span> <span class="n">symbol</span>
+<p>You can also limit the exports to exclude named clauses of reduction rules (by default all reduction rules are exported regardless of limiting exported symbols):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"> </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span><span class="w"> </span><span class="n">hiding</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
+
+<span class="nf">symbol</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+
+<span class="nf">clause</span><span class="w"> </span><span class="n">c1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">clause</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">reduce</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kr">module</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -154,20 +173,20 @@ with D { with C { a } }
 <section id="linking">
 <h2>Linking<a class="headerlink" href="#linking" title="Permalink to this headline"></a></h2>
 <p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary. There’s a set of convenient functions that cover common cases.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">project</span> <span class="p">[</span><span class="s">&quot;src/**.sct&quot;</span><span class="p">]</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">project</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;src/**.sct&quot;</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="imports">
 <h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline"></a></h3>
 <p>The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>
 <p>Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>{a, b, c} = import &quot;Alphabet&quot;          # import a, b, c from Alphabet
-{a, b, c=d} = import &quot;Alphabet&quot;  # import a, b, c from Alphabet, import ‘c’ as ‘d’
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">}</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span>          <span class="c1"># import a, b, c from Alphabet</span>
+<span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">d</span><span class="p">}</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span>  <span class="c1"># import a, b, c from Alphabet, import ‘c’ as ‘d’</span>
 
-( . ) = import &quot;Alphabet&quot;     # import * from Alphabet
-{ . } = import &quot;Alphabet&quot; # import * from Alphabet
+<span class="p">(</span> <span class="o">.</span> <span class="p">)</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span>     <span class="c1"># import * from Alphabet</span>
+<span class="p">{</span> <span class="o">.</span> <span class="p">}</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span> <span class="c1"># import * from Alphabet</span>
 
-Alphabet = import &quot;Alphabet&quot; # import Alphabet, Alphabet.X
+<span class="n">Alphabet</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span> <span class="c1"># import Alphabet, Alphabet.X</span>
 </pre></div>
 </div>
 </section>
@@ -190,10 +209,6 @@ Alphabet = import &quot;Alphabet&quot; # import Alphabet, Alphabet.X
 </pre></div>
 </div>
 <p>If the override statement was not in module 2, then using <code class="docutils literal notranslate"><span class="pre">foo</span></code> in module 3 would result in an ambiguous name resolution error.</p>
-</section>
-<section id="ml">
-<h2>1ML<a class="headerlink" href="#ml" title="Permalink to this headline"></a></h2>
-<p>The above module system is a superset of 1ML, MixML, Backpack, and Newspeak’s module system, so those don’t need to be considered further. (TODO: reread the papers to check this. but they’re mostly type systems, rather than functionality)</p>
 </section>
 </section>
 

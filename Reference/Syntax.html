@@ -18,12 +18,11 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Values" href="Values.html" />
-    <link rel="prev" title="Language Reference" href="index.html" /> 
+    <link rel="prev" title="Logic" href="Logic.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,19 +45,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Syntax</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#unicode">Unicode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#layout">Layout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#parsing">Parsing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#layout">Layout</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#operators">Operators</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#umatched-parentheses">Umatched Parentheses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parentheses">Parentheses</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#chained-comparison">Chained Comparison</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#variables">Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#patterns">Patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variable-bindings">Variable bindings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inline-definitions">Inline definitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#destructuring">Destructuring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#symbols">Symbols</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#keyword-arguments">Keyword arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#positional-arguments">Positional arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implicit-arguments">Implicit arguments</a></li>
@@ -67,14 +69,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#variadic-arguments">Variadic arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#concatenative-arguments">Concatenative arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inheritance">Inheritance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Operators</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pattern-matching">Pattern-matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#matching">Matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#operator-sections">Operator sections</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#blocks">Blocks</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#bang-notation">Bang notation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#local-definitions">Local definitions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#monad-comprehensions">Monad comprehensions</a></li>
 </ul>
 </li>
@@ -83,7 +88,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#comments">Comments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#type-declarations">Type declarations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dsl">DSL</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#namespacing">Namespacing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
@@ -92,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
@@ -145,97 +149,77 @@
 <section id="layout">
 <h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline"></a></h2>
 <p>The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span>
-  <span class="p">{</span>
-    <span class="n">a</span>
-      <span class="n">b</span>
-      <span class="n">c</span>
-    <span class="n">d</span>
-  <span class="p">}</span>
-  <span class="p">{</span> <span class="n">a</span> <span class="p">{</span><span class="n">b</span><span class="p">;</span> <span class="n">c</span><span class="p">};</span> <span class="n">d</span><span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">a</span><span class="w"></span>
+<span class="w">      </span><span class="n">b</span><span class="w"></span>
+<span class="w">      </span><span class="n">c</span><span class="w"></span>
+<span class="w">    </span><span class="n">d</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="p">};</span><span class="w"> </span><span class="n">d</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:</p>
 <ul class="simple">
 <li><p>if it is indented more, it’s a sequence given as an argument to the previous line, so a virtual open brace is inserted</p></li>
 <li><p>if it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted</p></li>
-<li><p>if there is a (nonempty) line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
+<li><p>if there is a line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
 </ul>
 <p>Indentation level is taken to be the sequence of whitespace characters, so “space, tab, space” is different from (incomparable to) “tab, space, space” but is less than “space, tab, space, em space” and more than “space, tab”.</p>
 <p>Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span>
-  <span class="n">a</span>
-    <span class="o">+</span> <span class="n">b</span>
-    <span class="o">+</span> <span class="n">c</span>
-  <span class="n">a</span> <span class="p">{</span><span class="o">+</span> <span class="n">b</span><span class="p">;</span> <span class="o">+</span> <span class="n">c</span><span class="p">}</span>
-  <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"></span>
+<span class="w">    </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<span class="w">    </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="p">{</span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>It should be possible to handle these with a fixup phase.</p>
 <p>Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skipping whitespace layout when inside an explicit delimiter pair. But of course constructs inside the delimiter pair can start another layout. Finally for constructs that usually use layout we still want to parse 1-line things without braces:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span>
-  <span class="kr">let</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">b</span> <span class="kr">in</span> <span class="n">c</span>
-  <span class="kr">let</span> <span class="p">{</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">b</span> <span class="p">}</span> <span class="kr">in</span> <span class="n">c</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 </pre></div>
 </div>
-</section>
-<section id="parsing">
-<h2>Parsing<a class="headerlink" href="#parsing" title="Permalink to this headline"></a></h2>
-<p>I’ve got a basic Earley algorithm working for now. But eventually I’m extending it with BSRs and layout and other fun things. There’s also <a class="reference external" href="https://github.com/attresearch/yakker">Yakker</a>, which is the most developed parser I’ve seen feature-wise. It’s only missing incremental parsing.</p>
-<blockquote>
-<div><p>A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.</p>
-</div></blockquote>
-<p>I’ve looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on the set of parse tree generated by a nondeterministic automaton. The alternatives involve restricting parsers to be deterministic, for example PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There’s just no information on what possible parses are available or what token is expected. Whereas with Earley you can do “Ruby slippers”: scan the sets for what they want next, output “warning: expected ‘;’ at end of statement”, and then add that to the parse forest and continue parsing with almost no overhead.</p>
-<p>Treesitter implements incremental LR parsing with error recovery, but since it doesn’t support ambiguity I don’t think it’s sufficient for a compiler.</p>
-<p>Revisiting this, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation <span id="id1">[<a class="reference internal" href="../zzreferences.html#id73" title="Michael Sperber and Peter Thiemann. Generation of LR parsers by partial evaluation. ACM Transactions on Programming Languages and Systems (TOPLAS), 22(2):224–264, March 2000. URL: http://dl.acm.org/doi/10.1145/349214.349219 (visited on 2020-06-15), doi:10.1145/349214.349219.">ST00</a>]</span> and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.</p>
-<p>In particular the parser should be written as a nondeterministic finite state transducer that builds up trees (outputs a list in the style of start-children-end or S-expressions or something).</p>
-<p>Formally:</p>
-<blockquote>
-<div><p>Q is a finite set, the set of states;
-I is a subset of Q, the set of initial states;
-F is a subset of Q, the set of final states; and
-Σ is a finite set, called the input alphabet;
-Γ is a finite set, called the output alphabet;
-The transition function is of type <span class="math notranslate nohighlight">\(Q \times (\Sigma \cup \{\epsilon \})\to P(Q \times (\Gamma \cup \{\epsilon \}))\)</span>, where ε is the empty string and P(Q) denotes the power set of Q.</p>
-</div></blockquote>
-<p>TODO: match this up with Parsec, attoparsec, trifecta, etc. the syntax should be similar except with nondeterministic choice <code class="docutils literal notranslate"><span class="pre">|</span></code>.</p>
 <section id="operators">
 <h3>Operators<a class="headerlink" href="#operators" title="Permalink to this headline"></a></h3>
 <p>Operator precedence will be a poset, rather than levels.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedence</span> <span class="kr">_</span><span class="o">*</span><span class="kr">_</span> <span class="n">higher</span> <span class="n">than</span> <span class="kr">_</span><span class="o">+</span><span class="kr">_</span>
-<span class="nf">precedence</span> <span class="kr">_</span><span class="o">/</span><span class="kr">_</span> <span class="n">equals</span> <span class="kr">_</span><span class="o">*</span><span class="kr">_</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedence</span><span class="w"> </span><span class="kr">_</span><span class="o">*</span><span class="kr">_</span><span class="w"> </span><span class="n">higher</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="kr">_</span><span class="o">+</span><span class="kr">_</span><span class="w"></span>
+<span class="nf">precedence</span><span class="w"> </span><span class="kr">_</span><span class="o">/</span><span class="kr">_</span><span class="w"> </span><span class="n">equals</span><span class="w"> </span><span class="kr">_</span><span class="o">*</span><span class="kr">_</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Stroscot supports your typical PEMDAS:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span>
-  <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">3</span><span class="o">^</span><span class="mi">2</span>
-  <span class="mi">19</span>
-<span class="nf">assertEqual</span>
-  <span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">))</span>
-  <span class="mi">355</span><span class="o">/</span><span class="mi">113</span>
-  <span class="mf">3.14159292035</span><span class="o">...</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="o">^</span><span class="mi">2</span><span class="w"></span>
+<span class="w">  </span><span class="mi">19</span><span class="w"></span>
+<span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="w">  </span><span class="mi">355</span><span class="o">/</span><span class="mi">113</span><span class="w"></span>
+<span class="w">  </span><span class="mf">3.14159292035</span><span class="o">...</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Most other operators are textual:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span>
-  <span class="n">true</span> <span class="n">and</span> <span class="n">false</span> <span class="o">==</span> <span class="n">false</span>
-  <span class="n">true</span> <span class="n">or</span> <span class="n">false</span> <span class="o">==</span> <span class="n">true</span>
-  <span class="n">true</span> <span class="n">xor</span> <span class="n">true</span> <span class="o">==</span> <span class="n">false</span>
-  <span class="mi">5</span> <span class="n">div</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">2</span>
-  <span class="mi">5</span> <span class="n">mod</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span><span class="w"></span>
+<span class="w">  </span><span class="n">true</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<span class="w">  </span><span class="n">true</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+<span class="w">  </span><span class="n">true</span><span class="w"> </span><span class="n">xor</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<span class="w">  </span><span class="mi">5</span><span class="w"> </span><span class="n">div</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">  </span><span class="mi">5</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
 <p>New operators can be declared with <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a> <a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> semantics, e.g.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">syntax</span> <span class="kr">_</span><span class="o">&amp;&amp;</span><span class="kr">_</span> <span class="n">associate</span> <span class="n">left</span> <span class="n">above</span> <span class="n">_and_</span> <span class="n">_or_</span> <span class="n">_not_</span> <span class="n">below</span> <span class="kr">_</span><span class="o">||</span><span class="kr">_</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">syntax</span><span class="w"> </span><span class="kr">_</span><span class="o">&amp;&amp;</span><span class="kr">_</span><span class="w"> </span><span class="n">associate</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">_and_</span><span class="w"> </span><span class="n">_or_</span><span class="w"> </span><span class="n">_not_</span><span class="w"> </span><span class="n">below</span><span class="w"> </span><span class="kr">_</span><span class="o">||</span><span class="kr">_</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
-<section id="umatched-parentheses">
-<h3>Umatched Parentheses<a class="headerlink" href="#umatched-parentheses" title="Permalink to this headline"></a></h3>
+<section id="parentheses">
+<h3>Parentheses<a class="headerlink" href="#parentheses" title="Permalink to this headline"></a></h3>
+<p>Parentheses can be used to group expressions and override parsing as usual.</p>
 <p>For brevity, trailing parentheses can be omitted:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span>
-  <span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
-  <span class="mi">355</span><span class="o">/</span><span class="mi">113</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
+<span class="w">  </span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">7</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">15</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="mi">355</span><span class="o">/</span><span class="mi">113</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Although it parses, you can set Stroscot to warn or error on
@@ -243,253 +227,315 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="chained-comparison">
 <h3>Chained Comparison<a class="headerlink" href="#chained-comparison" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span>
-  <span class="mi">1</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="mi">3</span>
-  <span class="mi">9</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span><span class="w"></span>
+<span class="w">  </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="w">  </span><span class="mi">9</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="variables">
 <h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline"></a></h2>
-<p>There is no kind of syntax or semantics for changing or redefining identifiers (besides <a class="reference internal" href="Fexprs.html#fexprs"><span class="std std-ref">fexprs</span></a>); you can shadow, with warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope. OTOH references behave pretty much like mutable variables.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="n">mut</span> <span class="mi">1</span>
-<span class="nf">a</span> <span class="kt">:=</span> <span class="mi">2</span>
-<span class="nf">raise</span> <span class="n">a</span> <span class="n">by</span> <span class="mi">1</span>
+<p>Identifiers cannot be directly reassigned; you can shadow, which optionally generates a warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">raise</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Mutable assignment (<code class="docutils literal notranslate"><span class="pre">:=</span></code>) is completely distinct from name binding (<code class="docutils literal notranslate"><span class="pre">=</span></code>). They have distinct notation.</p>
 </section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">f</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="nf">f</span> <span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span>
-<span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="o">|</span> <span class="n">x</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">3</span>
+<p>Sequential matching:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sequential</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Function application (juxtaposition) binds stronger than all operators and associates to the left, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">--&gt;</span> <span class="pre">(x</span> <span class="pre">y)</span> <span class="pre">z</span></code>.</p>
 <section id="patterns">
 <h3>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline"></a></h3>
 <p>Patterns all compile to guard conditions on <code class="docutils literal notranslate"><span class="pre">$args</span></code>. They also check that the arity of <code class="docutils literal notranslate"><span class="pre">$args</span></code> is the number of patterns.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span> <span class="o">--&gt;</span> <span class="kt">True</span> <span class="c1">-- wildcard</span>
-<span class="nf">a</span> <span class="o">--&gt;</span> <span class="kr">if</span> <span class="n">a</span> <span class="kr">then</span> <span class="o">$</span><span class="n">arga</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span> <span class="kr">else</span> <span class="kt">True</span> <span class="c1">-- matches symbol a, or binds a if a is not defined</span>
- <span class="n">_a</span> <span class="o">--&gt;</span> <span class="kt">True</span> <span class="c1">-- hole, binds a even if a is an existing symbol</span>
-<span class="o">^</span><span class="n">a</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span> <span class="c1">-- matches the atom a</span>
-<span class="o">^</span><span class="n">f</span> <span class="n">a</span> <span class="n">b</span> <span class="n">c</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span> <span class="o">&amp;&amp;</span> <span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">the</span> <span class="n">symbol</span> <span class="n">tree</span> <span class="n">with</span> <span class="n">atom</span> <span class="n">f</span>
- <span class="n">_f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">any</span> <span class="n">symbol</span> <span class="n">tree</span> <span class="n">besides</span> <span class="n">a</span> <span class="n">single</span> <span class="n">atom</span>
-<span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span> <span class="ow">-&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;x&quot;</span><span class="p">),</span> <span class="p">{</span><span class="n">c</span><span class="kt">:</span> <span class="sc">&#39;a&#39;</span><span class="p">}]</span> <span class="c1">-- literal match</span>
-<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="c1">-- matches any list starting with 1 and ending with 2</span>
-<span class="p">{</span><span class="n">a</span><span class="kt">:</span> <span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">}</span> <span class="o">--&gt;</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">a</span> <span class="n">and</span> <span class="n">the</span> <span class="n">rest</span> <span class="kr">of</span> <span class="n">the</span> <span class="n">record</span>
- <span class="n">pat1</span> <span class="kt">AND</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">and</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">both</span> <span class="n">patterns</span> <span class="n">simultaneously</span>
- <span class="n">pat1</span> <span class="kt">OR</span> <span class="n">pat2</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat1</span> <span class="n">or</span> <span class="n">match</span> <span class="o">$</span><span class="n">args</span> <span class="n">pat2</span> <span class="o">#</span> <span class="n">matches</span> <span class="n">either</span> <span class="n">pattern</span>
-<span class="o">~</span><span class="n">pat</span> <span class="o">--&gt;</span> <span class="kt">True</span> <span class="o">#</span> <span class="n">desugars</span> <span class="n">to</span> <span class="n">f</span> <span class="n">u_</span> <span class="o">...</span> <span class="ow">=</span> <span class="kr">let</span> <span class="n">pat</span> <span class="ow">=</span> <span class="n">u_</span> <span class="kr">in</span> <span class="o">...</span><span class="p">,</span> <span class="kr">where</span> <span class="n">u_</span> <span class="n">is</span> <span class="n">a</span> <span class="n">unique</span> <span class="n">name</span>
-<span class="p">(</span><span class="n">a</span> <span class="kt">:</span> <span class="n">b</span><span class="p">)</span> <span class="o">--&gt;</span> <span class="n">a</span> <span class="n">elemOf</span> <span class="n">b</span> <span class="o">#</span> <span class="kr">type</span> <span class="n">tag</span>
-<span class="nf">a</span> <span class="o">|</span> <span class="n">f</span> <span class="n">a</span> <span class="o">--&gt;</span> <span class="n">f</span> <span class="n">a</span> <span class="o">#</span> <span class="n">guard</span><span class="p">,</span> <span class="n">arbitrary</span> <span class="n">function</span>
-<span class="p">(</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="o">--&gt;</span> <span class="n">match</span> <span class="p">(</span><span class="n">f</span> <span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="n">a</span> <span class="o">#</span> <span class="n">view</span> <span class="n">pattern</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- wildcard</span><span class="w"></span>
+<span class="o">^</span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- matches the atom a</span><span class="w"></span>
+<span class="o">^</span><span class="n">f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">atom</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">_f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">any</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="n">besides</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">single</span><span class="w"> </span><span class="n">atom</span><span class="w"></span>
+<span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">),</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="kt">:</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">}]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">),</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="kt">:</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">}]</span><span class="w"> </span><span class="c1">-- literal match</span><span class="w"></span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="c1">-- matches any list starting with 1 and ending with 2</span><span class="w"></span>
+<span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">}</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">rest</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">record</span><span class="w"></span>
+<span class="w"> </span><span class="n">pat1</span><span class="w"> </span><span class="kt">AND</span><span class="w"> </span><span class="n">pat2</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="w"> </span><span class="n">pat1</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="w"> </span><span class="n">pat2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">both</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="n">simultaneously</span><span class="w"></span>
+<span class="w"> </span><span class="n">pat1</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">pat2</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="w"> </span><span class="n">pat1</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="w"> </span><span class="n">pat2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">either</span><span class="w"> </span><span class="n">pattern</span><span class="w"></span>
+<span class="o">~</span><span class="n">pat</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">desugars</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">u_</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">let</span><span class="w"> </span><span class="n">pat</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">u_</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="o">...</span><span class="p">,</span><span class="w"> </span><span class="kr">where</span><span class="w"> </span><span class="n">u_</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">unique</span><span class="w"> </span><span class="n">name</span><span class="w"></span>
+<span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">elemOf</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="n">tag</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">guard</span><span class="p">,</span><span class="w"> </span><span class="n">arbitrary</span><span class="w"> </span><span class="n">function</span><span class="w"></span>
+<span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="n">pattern</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Identifiers in head positions are taken as literal function symbols, and in other positions are taken to be variables. This is Pure’s “head = function rule”. Single identifiers are functions of no arguments, e.g. <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p>
+<p>Declaring a symbol makes it be interpreted as a literal even in variable position.</p>
+<p>To override this and force interpretation as a variable/literal you can use <code class="docutils literal notranslate"><span class="pre">_</span></code> or <code class="docutils literal notranslate"><span class="pre">^</span></code> respectively.</p>
+<p><code class="docutils literal notranslate"><span class="pre">_</span></code> occuring by itself denotes an anonymous variable which matches any value without actually binding a name.</p>
 <p>Pattern synonyms</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pattern</span> <span class="kt">F</span> <span class="n">a</span> <span class="n">b</span> <span class="ow">=</span> <span class="p">[</span><span class="s">&quot;f&quot;</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">]</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pattern</span><span class="w"> </span><span class="kt">F</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;f&quot;</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="variable-bindings">
+<h3>Variable bindings<a class="headerlink" href="#variable-bindings" title="Permalink to this headline"></a></h3>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="o">$</span><span class="n">arga</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- binds a if a is not defined as a symbol</span><span class="w"></span>
+<span class="nf">_a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- hole, binds a even if a is an existing symbol</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This defines the variables as a zero-arity function symbol. So for example you can write</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>which means the same thing as</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>i.e. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
 </section>
 <section id="inline-definitions">
 <h3>Inline definitions<a class="headerlink" href="#inline-definitions" title="Permalink to this headline"></a></h3>
-<p>Patterns can be made inline; they are lifted to the closest scope that allows definitions.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span> <span class="n">range</span> <span class="ow">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="p">(</span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span>
+<p>Definitions can be made inline; they are lifted to the closest scope that allows definitions.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
 
-<span class="c1">-- translates to</span>
- <span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span>
- <span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span>
- <span class="n">range</span> <span class="ow">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">dy</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span>
+<span class="c1">-- translates to</span><span class="w"></span>
+<span class="w"> </span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="w"></span>
+<span class="w"> </span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="w"></span>
+<span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dy</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
+<section id="destructuring">
+<h3>Destructuring<a class="headerlink" href="#destructuring" title="Permalink to this headline"></a></h3>
+<p>Certain values such as tuples are assumed not to be functions. Instead matching on them destructures the right hand hand. For example you can define functions using destructuring:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">s&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">digitsToBits</span><span class="w"> </span><span class="n">digits</span><span class="p">)</span><span class="w"> </span><span class="kr">where</span><span class="w"> </span><span class="p">(</span><span class="kt">CR</span><span class="w"> </span><span class="n">s&#39;</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This translates to:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- equivalent to</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="nf">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+
+<span class="nf">z</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">s&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">digitsToBits</span><span class="w"> </span><span class="n">digits</span><span class="p">)</span><span class="w"> </span><span class="kr">where</span><span class="w"> </span><span class="p">(</span><span class="kt">CR</span><span class="w"> </span><span class="n">s&#39;</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="w"></span>
+<span class="c1">-- z a fresh symbol</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="symbols">
+<h3>Symbols<a class="headerlink" href="#symbols" title="Permalink to this headline"></a></h3>
+<p>The default interpretation of an identifier not in a head position on the LHS is as a variable. To say that it is actually a symbol a special keyword <code class="docutils literal notranslate"><span class="pre">symbol</span></code> is used:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">foo</span><span class="w"></span>
+
+<span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="nf">bar</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">interpreted</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variable</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Furthermore you can define a function symbol with an arity. This resolves applying the function symbol to arguments for which no clauses are defined to the exception <code class="docutils literal notranslate"><span class="pre">undefined</span></code>, which often has better semantics than an unevaluated normal form.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="n">arity</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">foo</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;fine&quot;</span><span class="w"></span>
+
+<span class="nf">foo</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="s">&quot;fine&quot;</span><span class="w"></span>
+<span class="nf">foo</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">undefined</span><span class="w"></span>
+<span class="nf">foo</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">affected</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="n">form</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This just creates a low priority definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">_</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">undefined</span></code>.</p>
+</section>
 <section id="keyword-arguments">
 <h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span> <span class="n">foo</span> <span class="n">w</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="ow">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span> <span class="o">*</span> <span class="n">w</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
 
-<span class="nf">v</span> <span class="ow">=</span> <span class="n">foo</span> <span class="p">(</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">)</span> <span class="p">(</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">)</span>
-<span class="o">#</span> <span class="mi">0</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">1</span>
-<span class="nf">v</span> <span class="o">==</span> <span class="n">foo</span> <span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">,</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">}</span>
-<span class="o">#</span> <span class="n">true</span>
+<span class="nf">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">0</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">1</span><span class="w"></span>
+<span class="nf">v</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">,</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You can specify a subset of the arguments to generate a partially applied function:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">v</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="positional-arguments">
 <h3>Positional arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v</span> <span class="o">==</span> <span class="n">foo</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">2</span> <span class="mi">0</span>
-<span class="o">#</span> <span class="n">true</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
 </div>
 <p>You can mix positional and keyword arguments freely; positions are
 assigned to whatever is not a keyword argument.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v</span> <span class="o">==</span> <span class="n">foo</span> <span class="p">{</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">}</span> <span class="p">{</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span> <span class="mi">4</span> <span class="mi">2</span>
-<span class="o">#</span> <span class="n">true</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">}</span><span class="w"> </span><span class="p">{</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Arguments are curried:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">c</span> <span class="n">y</span> <span class="ow">=</span> <span class="n">y</span><span class="o">+</span><span class="mi">10</span>
-<span class="nf">b</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">c</span>
+<p>Positional arguments support currying, for example:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">c</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 
-<span class="nf">b</span> <span class="mi">2</span> <span class="mi">1</span>
-<span class="o">#</span> <span class="mi">11</span>
+<span class="nf">b</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="implicit-arguments">
 <h3>Implicit arguments<a class="headerlink" href="#implicit-arguments" title="Permalink to this headline"></a></h3>
-<p>These behave similarly to arguments in languages with dynamical scoping.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- standard library</span>
- <span class="n">log</span> <span class="n">s</span> <span class="ow">=</span> <span class="kr">if</span> <span class="p">(</span><span class="n">priority</span> <span class="o">&gt;</span> <span class="n">loglevel</span><span class="p">)</span> <span class="p">{</span> <span class="n">logPrint</span> <span class="n">s</span> <span class="p">}</span>
+<p>These behave similarly to arguments in languages with dynamical scoping. Positional arguments can be passed implicitly, but only if the function is used without applying any positional arguments. If the LHS contains positional arguments only that number of positional arguments are consumed and they are not passed implicitly.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
+<span class="nf">bar</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">baz</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
 
-<span class="c1">-- components of an application</span>
- <span class="n">foo</span> <span class="ow">=</span> <span class="n">log</span> <span class="s">&quot;foo&quot;</span> <span class="p">{</span> <span class="n">priority</span> <span class="ow">=</span> <span class="kt">DEBUG</span> <span class="p">}</span>
- <span class="n">bar</span> <span class="ow">=</span> <span class="n">log</span> <span class="s">&quot;bar&quot;</span> <span class="p">{</span> <span class="n">priority</span> <span class="ow">=</span> <span class="kt">WARNING</span> <span class="p">}</span>
- <span class="n">baz</span> <span class="ow">=</span>
-  <span class="n">foo</span>
-  <span class="n">bar</span>
+<span class="nf">bar</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="p">(</span><span class="mi">4</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 
-<span class="c1">-- main file</span>
- <span class="n">logPrint</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">writeFile</span> <span class="n">file</span> <span class="n">x</span>
- <span class="n">file</span> <span class="ow">=</span> <span class="s">&quot;a&quot;</span>
- <span class="n">loglevel</span> <span class="ow">=</span> <span class="kt">WARNING</span>
-
- <span class="n">main</span> <span class="ow">=</span>
-   <span class="n">baz</span>
-   <span class="n">foo</span> <span class="p">{</span><span class="n">loglevel</span><span class="ow">=</span><span class="kt">DEBUG</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>Positional arguments can be passed implicitly, but this is inhibited by using positional arguments:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span> <span class="n">foo</span> <span class="n">w</span> <span class="n">x</span> <span class="n">y</span> <span class="n">z</span> <span class="ow">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span> <span class="o">*</span> <span class="n">w</span>
- <span class="n">bar</span> <span class="ow">=</span> <span class="n">foo</span> <span class="o">+</span> <span class="mi">2</span>
- <span class="n">baz</span> <span class="n">a</span> <span class="ow">=</span> <span class="n">bar</span> <span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span> <span class="o">-</span> <span class="n">a</span>
-
-<span class="p">((</span><span class="mi">0</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">5</span> <span class="o">==</span> <span class="n">baz</span> <span class="mi">5</span> <span class="p">{</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">,</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span>
-<span class="o">#</span> <span class="n">true</span>
- <span class="n">baz</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span>
-<span class="o">#</span> <span class="kt">Error:</span> <span class="n">too</span> <span class="n">many</span> <span class="n">arguments</span> <span class="n">to</span> <span class="n">baz</span><span class="p">,</span> <span class="n">expected</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+<span class="p">((</span><span class="mi">0</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">5</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">baz</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">,</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+<span class="w"> </span><span class="n">baz</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">too</span><span class="w"> </span><span class="n">many</span><span class="w"> </span><span class="n">arguments</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">baz</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Similarly keyword arguments inhibit passing down that keyword
 implicitly:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="n">k</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">b</span> <span class="n">k</span> <span class="ow">=</span> <span class="n">k</span> <span class="o">+</span> <span class="n">a</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
 
-<span class="nf">b</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span>
-<span class="o">#</span> <span class="kt">Error:</span> <span class="n">no</span> <span class="n">definition</span> <span class="n">for</span> <span class="n">k</span> <span class="n">given</span> <span class="n">to</span> <span class="n">a</span>
+<span class="nf">b</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">definition</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="n">given</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
 </pre></div>
 </div>
 <p>A proper definition for b would either omit k or pass it explicitly to a:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="n">k</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">b</span> <span class="ow">=</span> <span class="n">k</span> <span class="o">+</span> <span class="n">a</span>
-<span class="nf">b&#39;</span> <span class="n">k</span> <span class="ow">=</span> <span class="n">k</span> <span class="o">+</span> <span class="n">a</span> <span class="n">k</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="nf">b&#39;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">k</span><span class="w"></span>
 
-<span class="nf">b</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span> <span class="o">==</span> <span class="n">b&#39;</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span>
-<span class="o">#</span> <span class="n">true</span>
+<span class="nf">b</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b&#39;</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For functions with no positional arguments, positions are assigned
 implicitly left-to-right:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span> <span class="o">+</span> <span class="n">y</span>
-<span class="nf">a</span> <span class="mi">4</span> <span class="mi">1</span>
-<span class="o">#</span> <span class="mi">5</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Atoms that are in lexical scope are not assigned positions, hence (/)
 and (+) are not implicit positional arguments for a in the example
 above. But they are implicit keyword arguments:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">y</span> <span class="o">+</span> <span class="n">y</span>
-<span class="nf">assert</span>
-  <span class="n">a</span> <span class="p">{(</span><span class="o">+</span><span class="p">)</span><span class="kt">:</span><span class="p">(</span><span class="o">-</span><span class="p">)}</span> <span class="mi">4</span> <span class="mi">1</span>
-  <span class="o">==</span> <span class="mi">4</span><span class="o">/</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span>
-  <span class="o">==</span> <span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">assert</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="p">{(</span><span class="o">+</span><span class="p">)</span><span class="kt">:</span><span class="p">(</span><span class="o">-</span><span class="p">)}</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="o">/</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The namespace scoping mechanism protects against accidental use in large
 projects.</p>
+<p>Infix operators can accept implicit arguments just like prefix functions:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">infix</span><span class="w"> </span><span class="p">(</span><span class="o">**</span><span class="p">)</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="o">/</span><span class="n">z</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="default-arguments">
 <h3>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span>
-<span class="nf">a</span> <span class="o">#</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Modula-3 added keyword arguments and default arguments to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying. If <code class="docutils literal notranslate"><span class="pre">foo</span></code> is a function with two positional arguments, the second of them having a default value, then <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span></code> is either passing <code class="docutils literal notranslate"><span class="pre">b</span></code> to the result of <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code> or overriding the default value of the second argument. So specifying/overriding default arguments always requires the use of keyword syntax.</p>
-<p>Implicit arguments use keywords as well, so they override default arguments:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span> <span class="ow">=</span> <span class="n">k</span>
-<span class="nf">b</span> <span class="ow">=</span> <span class="n">a</span>
-<span class="nf">c</span> <span class="ow">=</span> <span class="n">b</span> <span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span>
-<span class="nf">c</span> <span class="o">#</span> <span class="mi">2</span>
+<p>Modula-3 added keyword arguments and default arguments to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying. If <code class="docutils literal notranslate"><span class="pre">foo</span></code> is a function with two positional arguments, the second of them having a default value, then <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span></code> is ambiguous as to whether the second argument is overriden.</p>
+<p>We can resolve this by requiring parentheses: <code class="docutils literal notranslate"><span class="pre">(foo</span> <span class="pre">a)</span> <span class="pre">b</span></code> passes <code class="docutils literal notranslate"><span class="pre">b</span></code> to the result of <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">{_2=default}</span></code>, while <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span></code> is overriding the second argument. But it’s somewhat fragile, a more robust method is to require specifying/overriding default arguments to use keyword syntax.</p>
+<p>Implicit arguments use keyword syntax as well, so they override default arguments:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="nf">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="nf">c</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="output-arguments">
 <h3>Output arguments<a class="headerlink" href="#output-arguments" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">b</span> <span class="ow">=</span> <span class="n">out</span> <span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">3</span><span class="p">};</span> <span class="mi">2</span>
-<span class="nf">b</span> <span class="o">+</span> <span class="n">a</span>
-<span class="o">#</span> <span class="mi">5</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">3</span><span class="p">};</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Output arguments can chain into implicit arguments, so you get something like the state monad:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span> <span class="n">inc</span> <span class="p">{</span><span class="n">x</span><span class="p">}</span> <span class="ow">=</span> <span class="n">out</span> <span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inc</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="kt">:</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
 
-<span class="nf">x</span> <span class="ow">=</span> <span class="mi">1</span>
- <span class="n">inc</span>
-<span class="nf">x</span> <span class="o">#</span> <span class="mi">2</span>
+<span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">inc</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 <p>It might be worth having a special keyword <code class="docutils literal notranslate"><span class="pre">inout</span></code> for this.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inc</span><span class="w"> </span><span class="p">{</span><span class="n">inout</span><span class="w"> </span><span class="n">x</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="variadic-arguments">
 <h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Permalink to this headline"></a></h3>
 <p>Positional variadic arguments:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">c</span> <span class="ow">=</span> <span class="n">sum</span> <span class="o">$</span><span class="n">arguments</span>
-<span class="nf">c</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
-<span class="o">#</span> <span class="mi">6</span>
-<span class="nf">c</span> <span class="p">{</span><span class="o">$</span><span class="n">arguments</span><span class="ow">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]}</span>
-<span class="o">#</span> <span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">$</span><span class="n">arguments</span><span class="w"></span>
+<span class="nf">c</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
+<span class="nf">c</span><span class="w"> </span><span class="p">{</span><span class="o">$</span><span class="n">arguments</span><span class="ow">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Only syntactically adjacent arguments are passed, e.g.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">c</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span> <span class="mi">3</span>
-<span class="o">#</span> <span class="ne">error</span><span class="kt">:</span> <span class="mi">3</span> <span class="mi">3</span> <span class="n">is</span> <span class="n">not</span> <span class="n">reducible</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="ne">error</span><span class="kt">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">reducible</span><span class="w"></span>
 
-<span class="nf">a</span> <span class="ow">=</span> <span class="n">c</span> <span class="mi">1</span>
-<span class="nf">b</span> <span class="ow">=</span> <span class="n">a</span> <span class="mi">2</span>
-<span class="o">#</span> <span class="ne">error</span><span class="kt">:</span> <span class="mi">1</span> <span class="mi">2</span> <span class="n">is</span> <span class="n">not</span> <span class="n">reducible</span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="ne">error</span><span class="kt">:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">reducible</span><span class="w"></span>
 </pre></div>
 </div>
 <p>There are also variadic keyword arguments:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span> <span class="ow">=</span> <span class="n">print</span> <span class="o">$</span><span class="n">kwargs</span>
-<span class="nf">s</span> <span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span>
-<span class="o">#</span> <span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="o">$</span><span class="n">kwargs</span><span class="w"></span>
+<span class="nf">s</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">1</span><span class="p">,</span><span class="n">b</span><span class="kt">:</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="concatenative-arguments">
 <h3>Concatenative arguments<a class="headerlink" href="#concatenative-arguments" title="Permalink to this headline"></a></h3>
 <p>Results not assigned to a variable are pushed to a stack:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>
-<span class="mi">2</span>
-<span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="w"></span>
+<span class="mi">2</span><span class="w"></span>
+<span class="mi">3</span><span class="w"></span>
 
-<span class="o">%</span><span class="n">stack</span>
-<span class="o">#</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
+<span class="o">%</span><span class="n">stack</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">%</span></code> is the most recent result, with <code class="docutils literal notranslate"><span class="pre">%2</span></code> <code class="docutils literal notranslate"><span class="pre">%3</span></code> etc. referring to
 less recent results:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span> <span class="ow">=</span> <span class="mi">1</span><span class="p">}</span>
- <span class="n">extend</span> <span class="o">%</span> <span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">}</span>
- <span class="n">extend</span> <span class="o">%</span> <span class="p">{</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span>
- <span class="n">shuffle</span>
- <span class="o">#</span> <span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="n">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="n">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+<span class="w"> </span><span class="n">shuffle</span><span class="w"></span>
+<span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>These stack arguments are used for positional arguments when not
@@ -498,124 +544,182 @@ supplied.</p>
 <section id="inheritance">
 <h3>Inheritance<a class="headerlink" href="#inheritance" title="Permalink to this headline"></a></h3>
 <p>The general idea of inheritance is, for <code class="docutils literal notranslate"><span class="pre">Foo</span></code> a child of <code class="docutils literal notranslate"><span class="pre">Bar</span></code> to rewrite calls <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">(Foo</span> <span class="pre">...)</span> <span class="pre">a</span> <span class="pre">b</span></code> to calls <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">(Bar</span> <span class="pre">...)</span> <span class="pre">a</span> <span class="pre">b</span></code>, and this can be automated with a macro:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inherit</span> <span class="n">foopat</span> <span class="n">barpat</span> <span class="n">barmethodlist</span> <span class="ow">=</span> <span class="p">{</span>
-  <span class="n">for</span> <span class="p">(</span><span class="n">m</span> <span class="kt">:</span> <span class="n">barmethodlist</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">m</span> <span class="n">foopat</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">barpat</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inherit</span><span class="w"> </span><span class="n">foopat</span><span class="w"> </span><span class="n">barpat</span><span class="w"> </span><span class="n">barmethodlist</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">barmethodlist</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">m</span><span class="w"> </span><span class="n">foopat</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="n">barpat</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="id1">
+<h3>Operators<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>Operators are syntactic sugar for functions. Enclosing an operator
+in parentheses turns it into an ordinary function symbol, thus <code class="docutils literal notranslate"><span class="pre">x+y</span></code> is
+exactly the same as <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">x</span> <span class="pre">y</span></code>.</p>
 </section>
 </section>
 <section id="lambdas">
 <h2>Lambdas<a class="headerlink" href="#lambdas" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">\</span><span class="n">a</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">stuff</span>
-<span class="nf">\</span><span class="n">a</span> <span class="n">b</span><span class="o">.</span> <span class="n">stuff</span>
-<span class="nf">lambda</span> <span class="p">{</span>
-  <span class="n">a</span> <span class="mi">1</span> <span class="ow">=</span> <span class="n">stuff</span>
-  <span class="n">a</span> <span class="mi">2</span> <span class="ow">=</span> <span class="n">other</span>
-<span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">\</span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">stuff</span><span class="w"></span>
+<span class="nf">\</span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="o">.</span><span class="w"> </span><span class="n">stuff</span><span class="w"></span>
+<span class="nf">lambda</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">stuff</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">other</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<section id="pattern-matching">
-<h3>Pattern-matching<a class="headerlink" href="#pattern-matching" title="Permalink to this headline"></a></h3>
+<p>A lambda raises an exception if no pattern matches (defined function), but otherwise is
+a nameless local function. With the <code class="docutils literal notranslate"><span class="pre">lambda{}</span></code> syntax multiple clauses can be defined - they are matched sequentially. Multiple-argument lambdas are curried.</p>
+<p>Because they’re nameless lambdas aren’t sufficient to define recursive function - use (named) local functions, or the function <code class="docutils literal notranslate"><span class="pre">fix</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">a)</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>.</p>
+<p>Destructuring works in the arguments of lambdas as with named functions.</p>
+<section id="matching">
+<h3>Matching<a class="headerlink" href="#matching" title="Permalink to this headline"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">match</span></code> is an expression:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="ow">=</span> <span class="n">match</span> <span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">2</span>
-                      <span class="o">|</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">                      </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 <p>It desugars to a lambda applied to the arguments.</p>
-<p>Reduce similarly reduces an expression to normal form using some rules:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span> <span class="n">x</span>
-  <span class="n">x</span> <span class="ow">=</span> <span class="n">y</span>
-  <span class="n">y</span> <span class="ow">=</span> <span class="n">z</span>
-<span class="o">#</span> <span class="n">z</span>
+<p><code class="docutils literal notranslate"><span class="pre">impossible</span></code> is a special RHS used to help the verification analysis:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="o">|</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">impossible</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Reduce similarly reduces an expression to normal form using some rules:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kr">where</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="operator-sections">
+<h3>Operator sections<a class="headerlink" href="#operator-sections" title="Permalink to this headline"></a></h3>
+<p>Operator sections allow writing partial applications of infix operators.
+A left section <code class="docutils literal notranslate"><span class="pre">(x+)</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">x</span></code>. A right section <code class="docutils literal notranslate"><span class="pre">(+y)</span></code> is
+equivalent to <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span></code>.</p>
+<p>In contrast, <code class="docutils literal notranslate"><span class="pre">(-x)</span></code> denotes an application of unary minus; the
+section <code class="docutils literal notranslate"><span class="pre">(+-x)</span></code> can be used to indicate a function which subtracts <code class="docutils literal notranslate"><span class="pre">x</span></code>
+from its argument.</p>
 </section>
 </section>
 <section id="blocks">
 <h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span> <span class="ow">=</span> <span class="n">input</span> <span class="n">number</span>
- <span class="n">display</span> <span class="n">x</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">number</span><span class="w"></span>
+<span class="w"> </span><span class="n">display</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 
- <span class="n">foo</span> <span class="ow">=</span>
-   <span class="n">x</span> <span class="ow">=</span> <span class="mi">0</span>
-   <span class="n">x</span> <span class="o">+=</span> <span class="mi">1</span>
-   <span class="n">provide</span> <span class="n">x</span>
+<span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">   </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">   </span><span class="n">x</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">   </span><span class="n">provide</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 
- <span class="n">obtain</span> <span class="n">http_server</span>
- <span class="n">main</span> <span class="ow">=</span>
-   <span class="n">parse_args</span>
-   <span class="n">build_folder</span>
-   <span class="n">http_server</span><span class="o">.</span><span class="n">serve</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+<span class="w"> </span><span class="n">obtain</span><span class="w"> </span><span class="n">http_server</span><span class="w"></span>
+<span class="w"> </span><span class="n">main</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">   </span><span class="n">parse_args</span><span class="w"></span>
+<span class="w">   </span><span class="n">build_folder</span><span class="w"></span>
+<span class="w">   </span><span class="n">http_server</span><span class="o">.</span><span class="n">serve</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The translation rules are based on the continuation monad:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">e</span><span class="p">}</span> <span class="ow">=</span> <span class="n">e</span>
-<span class="p">{</span><span class="n">e</span><span class="p">;</span><span class="n">stmts</span><span class="p">}</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">c</span> <span class="ow">-&gt;</span> <span class="n">e</span> <span class="p">({</span><span class="n">stmts</span><span class="p">}</span> <span class="n">c</span><span class="p">)</span> <span class="ow">=</span> <span class="n">e</span> <span class="o">.</span> <span class="p">{</span><span class="n">stmts</span><span class="p">}</span>
-<span class="p">{</span><span class="n">p</span> <span class="ow">&lt;-</span> <span class="n">e</span><span class="p">;</span> <span class="n">stmts</span><span class="p">}</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">c</span> <span class="ow">-&gt;</span> <span class="n">e</span> <span class="p">(</span><span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="nf">\</span><span class="n">p</span> <span class="ow">-&gt;</span> <span class="p">{</span><span class="n">stmts</span><span class="p">})</span> <span class="n">x</span> <span class="n">c</span><span class="p">)</span> <span class="ow">=</span> <span class="n">e</span> <span class="o">&gt;&gt;=</span> <span class="p">{</span><span class="n">stmts</span><span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">e</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="p">{</span><span class="n">e</span><span class="p">;</span><span class="n">stmts</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">c</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="p">({</span><span class="n">stmts</span><span class="p">}</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="p">{</span><span class="n">stmts</span><span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="n">p</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">e</span><span class="p">;</span><span class="w"> </span><span class="n">stmts</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">c</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">p</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="n">stmts</span><span class="p">})</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">&gt;&gt;=</span><span class="w"> </span><span class="p">{</span><span class="n">stmts</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="bang-notation">
 <h3>Bang notation<a class="headerlink" href="#bang-notation" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span> <span class="n">f</span> <span class="o">!</span><span class="p">(</span><span class="n">g</span> <span class="o">!</span><span class="p">(</span><span class="n">print</span> <span class="n">y</span><span class="p">)</span> <span class="o">!</span><span class="n">x</span><span class="p">)</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">g</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">!</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 
-<span class="o">//</span> <span class="n">desugars</span> <span class="n">to</span>
-<span class="p">{</span>
-  <span class="n">t1</span> <span class="ow">&lt;-</span> <span class="n">print</span> <span class="n">y</span>
-  <span class="n">t2</span> <span class="ow">&lt;-</span> <span class="n">x</span>
-  <span class="n">t3</span> <span class="ow">&lt;-</span> <span class="n">g</span> <span class="n">t1</span> <span class="n">t2</span>
-  <span class="n">f</span> <span class="n">t3</span>
-<span class="p">}</span>
+<span class="o">//</span><span class="w"> </span><span class="n">desugars</span><span class="w"> </span><span class="n">to</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">t1</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="w">  </span><span class="n">t2</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="w">  </span><span class="n">t3</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="n">t2</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">t3</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The notation <code class="docutils literal notranslate"><span class="pre">!expr</span></code> within a block means that the expression <code class="docutils literal notranslate"><span class="pre">expr</span></code> should be bound in the block to a temporary before computing the surrounding expression. The expression is bound in the nearest enclosing block.
 Expressions are lifted leftmost innermost.</p>
 </section>
+<section id="local-definitions">
+<h3>Local definitions<a class="headerlink" href="#local-definitions" title="Permalink to this headline"></a></h3>
+<p>You can define variables and function locally to a block, clause, or clause group with let and where. These are in a new scope and only apply to the block where they are defined. This avoids cluttering up the program. All local definitions are substituted away before the block is evaluated in the ambient context.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="c1">-- block definition</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="kr">where</span><span class="w"></span>
+<span class="w">    </span><span class="n">g</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- clause definition</span><span class="w"></span>
+<span class="nf">foo</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">impossible</span><span class="w"></span>
+<span class="w">  </span><span class="kr">where</span><span class="w"></span>
+<span class="w">    </span><span class="n">h</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="c1">-- last clause, hence a clause group definition, but uses &quot;a&quot; which is only defined for first clause</span><span class="w"></span>
+</pre></div>
+</div>
+<p>A local definition shadows an ambient one, so for example you can write:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="kr">where</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">4</span></code> and <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(x-1)</span></code> both refer to the local definition. But you will get a shadowing warning as it is bad style.</p>
+<p><code class="docutils literal notranslate"><span class="pre">let</span></code> allows recursive definitions, bare definitions are not recursive:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">defines</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">shadowing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">old</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="kr">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">defines</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">unique</span><span class="w"> </span><span class="n">solution</span><span class="w"> </span><span class="n">x</span><span class="ow">=</span><span class="mi">0</span><span class="w"></span>
+
+<span class="nf">fact</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">x</span><span class="o">==</span><span class="mi">0</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">fails</span><span class="w"> </span><span class="n">due</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="n">being</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">unbound</span><span class="w"> </span><span class="n">symbol</span><span class="w"></span>
+<span class="kr">let</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">proper</span><span class="w"> </span><span class="n">definition</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
 <section id="monad-comprehensions">
 <h3>Monad comprehensions<a class="headerlink" href="#monad-comprehensions" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Expressions:</span> <span class="n">e</span>
-<span class="kt">Declarations:</span> <span class="n">d</span>
-<span class="kt">Lists</span> <span class="kr">of</span> <span class="n">qualifiers</span><span class="kt">:</span> <span class="kt">Q</span><span class="p">,</span><span class="kt">R</span><span class="p">,</span><span class="kt">S</span>
-<span class="kt">Qv</span> <span class="n">is</span> <span class="n">the</span> <span class="n">tuple</span> <span class="kr">of</span> <span class="n">variables</span> <span class="n">bound</span> <span class="n">by</span> <span class="kt">Q</span> <span class="p">(</span><span class="n">and</span> <span class="n">used</span> <span class="n">subsequently</span><span class="p">)</span>
-<span class="nf">selQvi</span> <span class="n">is</span> <span class="n">a</span> <span class="n">selector</span> <span class="n">mapping</span> <span class="kt">Qv</span> <span class="n">to</span> <span class="n">the</span> <span class="n">ith</span> <span class="n">component</span> <span class="kr">of</span> <span class="kt">Qv</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="ow">=</span><span class="mi">1</span><span class="o">..</span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="ow">=</span><span class="mi">1</span><span class="o">..</span><span class="n">m</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">&lt;</span><span class="n">y</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>A convenient means to construct lists and to write blocks compactly. There is a template expression, generator clauses which bind the result of continuation to a pattern, and filter clauses which allow skipping results.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Expressions:</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="kt">Declarations:</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+<span class="kt">Lists</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">qualifiers</span><span class="kt">:</span><span class="w"> </span><span class="kt">Q</span><span class="p">,</span><span class="kt">R</span><span class="p">,</span><span class="kt">S</span><span class="w"></span>
+<span class="kt">Qv</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">tuple</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">variables</span><span class="w"> </span><span class="n">bound</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">(</span><span class="n">and</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">subsequently</span><span class="p">)</span><span class="w"></span>
+<span class="nf">selQvi</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">selector</span><span class="w"> </span><span class="n">mapping</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">ith</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="kt">Qv</span><span class="w"></span>
 
-<span class="c1">-- Basic forms</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="p">]</span> <span class="ow">=</span> <span class="n">return</span> <span class="n">e</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="n">p</span> <span class="ow">&lt;-</span> <span class="n">e</span><span class="p">,</span> <span class="kt">Q</span> <span class="p">]</span>  <span class="ow">=</span>
-  <span class="n">p</span> <span class="ow">&lt;-</span> <span class="n">e</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="n">e</span><span class="p">,</span> <span class="kt">Q</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="n">p</span> <span class="ow">&lt;-</span> <span class="n">guard</span> <span class="n">e</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kr">let</span> <span class="n">d</span><span class="p">,</span> <span class="kt">Q</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="kr">let</span> <span class="n">d</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
+<span class="c1">-- Basic forms</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="p">,</span><span class="n">e3</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="p">[</span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="p">,</span><span class="n">e3</span><span class="p">]</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w">  </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">p</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">guard</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kr">let</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 
-<span class="c1">-- Parallel comprehensions (iterate for multiple parallel branches)</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="p">(</span><span class="kt">Q</span> <span class="o">|</span> <span class="kt">R</span><span class="p">),</span> <span class="kt">S</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="p">(</span><span class="kt">Qv</span><span class="p">,</span><span class="kt">Rv</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">mzip</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Qv</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Rv</span> <span class="o">|</span> <span class="kt">R</span> <span class="p">]</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">S</span> <span class="p">]</span>
+<span class="c1">-- Parallel comprehensions (iterate for multiple parallel branches)</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="kt">Q</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="p">),</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="kt">Qv</span><span class="p">,</span><span class="kt">Rv</span><span class="p">)</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">mzip</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Rv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 
-<span class="c1">-- Transform comprehensions</span>
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="kr">then</span> <span class="n">f</span><span class="p">,</span> <span class="kt">R</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="kt">Qv</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Qv</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">R</span> <span class="p">]</span>
+<span class="c1">-- Transform comprehensions</span><span class="w"></span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="kt">Qv</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="kr">then</span> <span class="n">f</span> <span class="n">by</span> <span class="n">b</span><span class="p">,</span> <span class="kt">R</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="kt">Qv</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="p">(</span><span class="nf">\</span><span class="kt">Qv</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Qv</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">R</span> <span class="p">]</span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="kt">Qv</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="kt">Qv</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="kr">then</span> <span class="n">group</span> <span class="n">using</span> <span class="n">f</span><span class="p">,</span> <span class="kt">R</span> <span class="p">]</span> <span class="o">=\</span>
-  <span class="n">ys</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Qv</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-  <span class="kr">let</span> <span class="kt">Qv</span> <span class="ow">=</span> <span class="p">(</span><span class="n">fmap</span> <span class="n">selQv1</span> <span class="n">ys</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">fmap</span> <span class="n">selQvn</span> <span class="n">ys</span><span class="p">)</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">R</span> <span class="p">]</span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="n">using</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="o">=\</span><span class="w"></span>
+<span class="w">  </span><span class="n">ys</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">fmap</span><span class="w"> </span><span class="n">selQv1</span><span class="w"> </span><span class="n">ys</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">,</span><span class="w"> </span><span class="n">fmap</span><span class="w"> </span><span class="n">selQvn</span><span class="w"> </span><span class="n">ys</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 
-<span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">Q</span> <span class="kr">then</span> <span class="n">group</span> <span class="n">by</span> <span class="n">b</span> <span class="n">using</span> <span class="n">f</span><span class="p">,</span> <span class="kt">R</span> <span class="p">]</span> <span class="ow">=</span>
-  <span class="n">ys</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="p">(</span><span class="nf">\</span><span class="kt">Qv</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="kt">D</span><span class="p">[</span> <span class="kt">Qv</span> <span class="o">|</span> <span class="kt">Q</span> <span class="p">]</span>
-  <span class="kr">let</span> <span class="kt">Qv</span> <span class="ow">=</span> <span class="p">(</span><span class="n">fmap</span> <span class="n">selQv1</span> <span class="n">ys</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="n">fmap</span> <span class="n">selQvn</span> <span class="n">ys</span><span class="p">)</span>
-  <span class="kt">D</span><span class="p">[</span> <span class="n">e</span> <span class="o">|</span> <span class="kt">R</span> <span class="p">]</span>
+<span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">using</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">ys</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="kt">Qv</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Q</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="kt">Qv</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">fmap</span><span class="w"> </span><span class="n">selQv1</span><span class="w"> </span><span class="n">ys</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">,</span><span class="w"> </span><span class="n">fmap</span><span class="w"> </span><span class="n">selQvn</span><span class="w"> </span><span class="n">ys</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kt">D</span><span class="p">[</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">R</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -623,25 +727,29 @@ Expressions are lifted leftmost innermost.</p>
 <section id="control-structures">
 <h2>Control structures<a class="headerlink" href="#control-structures" title="Permalink to this headline"></a></h2>
 <p>These are things that can show up in blocks and have blocks as arguments.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="kr">if</span> <span class="n">true</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> <span class="mi">2</span> <span class="c1">-- just a function if_then_else : Bool -&gt; a -&gt; a -&gt; a</span>
-<span class="nf">x</span> <span class="ow">=</span> <span class="n">emptyRef</span><span class="p">;</span> <span class="kr">if</span> <span class="n">true</span> <span class="p">{</span> <span class="n">x</span> <span class="kt">:=</span> <span class="mi">1</span> <span class="p">}</span> <span class="kr">else</span> <span class="p">{</span> <span class="n">x</span> <span class="kt">:=</span> <span class="mi">2</span> <span class="p">};</span> <span class="n">print</span> <span class="n">x</span> <span class="c1">-- if on blocks</span>
-<span class="nf">repeat</span> <span class="n">while</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span>
-<span class="nf">repeat</span> <span class="n">until</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span>
-<span class="nf">repeat</span> <span class="mi">10</span> <span class="n">times</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span>
-<span class="nf">repeat</span> <span class="p">{</span> <span class="n">x</span> <span class="o">-=</span> <span class="mi">1</span> <span class="p">}</span> <span class="n">while</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span>
-<span class="nf">repeat</span>
-  <span class="n">x</span> <span class="ow">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span>
-  <span class="kr">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">break</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="c1">-- just a function if_then_else_ : Bool -&gt; a -&gt; a -&gt; a</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">undefined</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">-- if on blocks</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="nf">repeat</span><span class="w"> </span><span class="n">while</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">repeat</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">repeat</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="n">times</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">repeat</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="n">while</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">repeat</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">break</span><span class="w"></span>
 </pre></div>
 </div>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">check</span> <span class="p">{</span>
-   <span class="n">risky_procedure</span>
-<span class="p">}</span> <span class="ne">error</span> <span class="p">{</span>
-   <span class="n">fix</span><span class="p">(</span><span class="ne">error</span><span class="p">)</span> <span class="n">or</span> <span class="ne">error</span><span class="p">(</span><span class="s">&quot;wtf&quot;</span><span class="p">)</span>
-<span class="p">}</span> <span class="n">regardless</span> <span class="p">{</span>
-   <span class="n">save_logs</span>
-<span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">check</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">risky_procedure</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="ne">error</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">fix</span><span class="p">(</span><span class="ne">error</span><span class="p">)</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="ne">error</span><span class="p">(</span><span class="s">&quot;wtf&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">regardless</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">save_logs</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>More here: <a class="reference external" href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions</a></p>
@@ -650,28 +758,28 @@ Expressions are lifted leftmost innermost.</p>
 <h2>Programs<a class="headerlink" href="#programs" title="Permalink to this headline"></a></h2>
 <p>A program is a block, and every declaration is a macro or control structure.</p>
 <p>So for example you can implement a conditional definition:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span> <span class="n">condition</span>
-   <span class="n">a</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="kr">else</span>
-   <span class="n">a</span> <span class="ow">=</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">condition</span><span class="w"></span>
+<span class="w">   </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="kr">else</span><span class="w"></span>
+<span class="w">   </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="comments">
 <h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">comment</span>
-<span class="o">/*</span> <span class="n">multiline</span>
-    <span class="n">comment</span> <span class="o">*/</span>
-<span class="cm">{- nesting {- comment -} -}</span>
- <span class="kr">if</span><span class="p">(</span><span class="n">false</span><span class="p">)</span> <span class="p">{</span> <span class="n">code_comment</span> <span class="o">-</span> <span class="n">lexed</span> <span class="n">but</span> <span class="n">not</span> <span class="n">parsed</span> <span class="n">except</span> <span class="n">for</span> <span class="n">start</span><span class="o">/</span><span class="n">end</span> <span class="p">}</span>
-<span class="o">#!</span> <span class="n">shebang</span> <span class="n">at</span> <span class="n">beginning</span> <span class="kr">of</span> <span class="n">file</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="w"> </span><span class="n">comment</span><span class="w"></span>
+<span class="o">/*</span><span class="w"> </span><span class="n">multiline</span><span class="w"></span>
+<span class="w">    </span><span class="n">comment</span><span class="w"> </span><span class="o">*/</span><span class="w"></span>
+<span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">nesting</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">comment</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+<span class="w"> </span><span class="kr">if</span><span class="p">(</span><span class="n">false</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">code_comment</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">lexed</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">parsed</span><span class="w"> </span><span class="n">except</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">start</span><span class="o">/</span><span class="n">end</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="o">#!</span><span class="w"> </span><span class="n">shebang</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">beginning</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">file</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="type-declarations">
 <h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span> <span class="ow">=</span> <span class="mi">2</span> <span class="kt">:</span> <span class="n">s8</span>
-<span class="nf">a</span> <span class="ow">=</span> <span class="n">s8</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">s8</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">s8</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -680,24 +788,20 @@ Expressions are lifted leftmost innermost.</p>
 <p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a DSL.
 Due to the fexpr semantics any expression can be used and pattern-matched, like <code class="docutils literal notranslate"><span class="pre">javascript</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">&quot;abc&quot;</span> <span class="pre">{</span> <span class="pre">234</span> <span class="pre">})</span></code>.</p>
 <p>E.g. we could write a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">run_sql_statement</span> <span class="p">{</span> <span class="kt">SELECT</span> <span class="o">...</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">run_sql_statement</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">SELECT</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The idea extends further, embedding lower-level and incompatible languages like assembly and C++.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">result</span> <span class="ow">=</span> <span class="n">asm</span> <span class="p">{</span> <span class="n">sumsq</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="n">toregister</span> <span class="n">y</span><span class="p">)</span> <span class="p">}</span>
-<span class="nf">my_func</span> <span class="ow">=</span> <span class="n">load</span><span class="p">(</span><span class="s">&quot;foo.cpp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s">&quot;my_func&quot;</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">result</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">asm</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">sumsq</span><span class="w"> </span><span class="p">(</span><span class="n">toregister</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="n">toregister</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">my_func</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="s">&quot;foo.cpp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s">&quot;my_func&quot;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Another useful one might be TeX / mathematical expressions:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tex</span> <span class="p">{</span> <span class="n">result</span> <span class="ow">=</span> <span class="n">ax</span><span class="o">^</span><span class="mi">4</span><span class="o">+</span><span class="n">cx</span><span class="o">^</span><span class="mi">2</span> <span class="p">}</span>
-<span class="nf">math</span> <span class="p">{</span> <span class="n">beta</span> <span class="ow">=</span> <span class="n">phi</span> <span class="n">lambda</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tex</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">ax</span><span class="o">^</span><span class="mi">4</span><span class="o">+</span><span class="n">cx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">math</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">beta</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">phi</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>These are particularly useful with functions that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.</p>
-</section>
-<section id="namespacing">
-<h2>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this headline"></a></h2>
-<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition.</p>
 </section>
 </section>
 
@@ -705,7 +809,7 @@ Due to the fexpr semantics any expression can be used and pattern-matched, like 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Language Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Logic.html" class="btn btn-neutral float-left" title="Logic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Values.html" class="btn btn-neutral float-right" title="Values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

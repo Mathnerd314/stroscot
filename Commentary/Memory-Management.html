@@ -50,7 +50,13 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Memory management</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
@@ -61,15 +67,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#id5">Allocator</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#destructors">Destructors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -106,15 +114,19 @@
              
   <section id="memory-management">
 <h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this headline"></a></h1>
-<p>static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong. Stroscot is not conservative by default - it will simply output a warning. This can be treated as an error like any other warning.</p>
-<p>Another reason Rust has an unsafe alter ego is that the underlying computer hardware is inherently unsafe. If Rust didn’t let you do unsafe operations, you couldn’t do certain tasks. Rust needs to allow you to do low-level systems programming, such as directly interacting with the operating system or even writing your own operating system. Working with low-level systems programming is one of the goals of the language. Let’s explore what we can do with unsafe Rust and how to do it.</p>
+<p>Rust has an unsafe alter ego
+the underlying computer hardware is inherently unsafe.
+certain tasks are unsafe.
+low-level systems programming
+directly interacting with the operating system
+writing your own operating system</p>
 <p>The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory leaks are a pervasive problem, in general there is no real solution besides profiling and buying more RAM. Stroscot can prove memory will not be accessed in the future and hence free it, with a more precise analysis than traditional GC. On the other hand use-after-free and double free can be statically checked for pointers, and aren’t a problem at all for the rest of the language because Stroscot frees automatically.</p>
 <p>A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to be an array variable plus metadata. They don’t require any special support AFAICT.</p>
 <p>Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
 * A loop that allocates and deallocates a scratch buffer is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)</p>
-<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id61" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id17" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It’s whole program and undecidable, but Stroscot already has 3 or 4 of those planned.</p>
+<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id80" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id19" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It’s whole program and undecidable, but Stroscot already has 3 or 4 of those planned.</p>
 <p>Why hasn’t anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it’s slow but there is a conceptual leap in going from program verification to program synthesis. It could be faster but I can see why it isn’t.</p>
 <ul class="simple">
 <li><p>The newly-dead set for a state transition <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code> is all objects that are accessed before but not accessed later, <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{z</span> <span class="pre">|</span> <span class="pre">Access(s,z)</span> <span class="pre">=</span> <span class="pre">yes</span> <span class="pre">&amp;&amp;</span> <span class="pre">Access(t,z)</span> <span class="pre">=</span> <span class="pre">no}</span> <span class="pre">=</span> <span class="pre">L(s)</span> <span class="pre">intersect</span> <span class="pre">D(t)</span></code>.</p></li>
@@ -192,17 +204,17 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>locate memory leaks - places where allocated memory is never getting freed - memory usage profiling</p>
 <p>Handling OOM gracefully - non-allocating subset of language. Should be enough to implement “Release some resources and try again” and “Save the user’s work and exit” strategies. Dumping core is trivial so doesn’t need to be considered.</p>
 <p>Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly. Finally there is the use of pointers. It complicates the memory management a bit to handle non-contiguous memory layouts, but the algorithms all deal with pointer trees anyway so I don’t think it’s intractable.</p>
-<p>The pack/unpack idea is similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a> and the encode/decode functions used by Narcissus <span id="id4">[<a class="reference internal" href="../zzreferences.html#id20" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>.</p>
+<p>The pack/unpack idea is similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a> and the encode/decode functions used by Narcissus <span id="id4">[<a class="reference internal" href="../zzreferences.html#id22" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>.</p>
 <p>Narcissus is too complex IMO:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span> <span class="ow">=</span> <span class="kt">Set</span> <span class="p">(</span><span class="kt">S</span><span class="p">,</span> <span class="kt">St</span><span class="p">,</span> <span class="kt">T</span><span class="p">,</span> <span class="kt">St</span><span class="p">)</span>
-<span class="kt">Encode</span> <span class="ow">=</span> <span class="kt">S</span> <span class="ow">-&gt;</span> <span class="kt">St</span> <span class="ow">-&gt;</span> <span class="kt">Option</span> <span class="p">(</span><span class="kt">T</span><span class="p">,</span> <span class="kt">St</span><span class="p">)</span>
-<span class="kt">Decode</span> <span class="ow">=</span> <span class="kt">T</span> <span class="ow">-&gt;</span> <span class="kt">St</span> <span class="ow">-&gt;</span> <span class="kt">Option</span> <span class="p">(</span><span class="kt">S</span><span class="p">,</span> <span class="kt">St</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The state parameter can be gotten rid of by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">(S,St),</span> <span class="pre">T</span> <span class="pre">=</span> <span class="pre">(T,St)</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span> <span class="ow">=</span> <span class="kt">Set</span> <span class="p">(</span><span class="kt">S</span><span class="p">,</span> <span class="kt">T</span><span class="p">)</span>
-<span class="kt">Encode</span> <span class="ow">=</span> <span class="kt">S</span> <span class="ow">-&gt;</span> <span class="kt">Option</span> <span class="kt">T</span>
-<span class="kt">Decode</span> <span class="ow">=</span> <span class="kt">T</span> <span class="ow">-&gt;</span> <span class="kt">Option</span> <span class="kt">S</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"></span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">T</span><span class="w"></span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">S</span><span class="w"></span>
 </pre></div>
 </div>
 <p>And we can make encode/decode total by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">{s</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">t.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>, <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">{t</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">s.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>.</p>
@@ -211,7 +223,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>A few things need to optimize away for reasonable performance.  <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code> should optimize to something like <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">20</span></code> for most values, or at least something that doesn’t allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.</p>
 <p>Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL’s will be the standard / default, it’ll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn’t be hard.</p>
 <p>The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple <code class="docutils literal notranslate"><span class="pre">(cell,unpack)</span></code>, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn’t be an issue.</p>
-<p>A derived pointer is a reference plus an offset. When the address and layout of the object is known we can store the derived pointer as the value address plus offset. But we could also just store the offset, so it’s only useful if computing the sum is necessary and expensive.</p>
+<p>A derived pointer is a reference plus an offset. When the address and layout of the object is known we can store the derived pointer as the sum of the value address and offset, allowing direct pointer dereferencing. But since the address is known we could also just store the derived pointer as the offset, so it’s only useful if computing the sum is necessary and expensive.</p>
 <p>An object can be treated as an array, N[i] and N.length.</p>
 <p>The array part of shared memory is necessary because there is a double-word CAS operation on x86 (CMPXCHG16B), and also for efficiency.</p>
 <p>Supporting persistent memory: The pointer API, assembly wrapping, and OS calls cover using persistent memory via standard file APIs or memory-mapped DAX. Memory is volatile while persistent memory is not, so persistent memory is faster storage, not weird RAM. And storage is complex enough that it seems best handled by libraries. Making the memory management system memkind-aware seems possible, like memory bound to NUMA nodes.</p>
@@ -309,27 +321,122 @@ sweeps unsweeped chunk of memory.</p>
 <ol class="arabic simple">
 <li><p>Write barrier: catch writes of new objects to already marked objects.</p></li>
 </ol>
-<dl class="simple">
-<dt>function writeBarrier(object,field) {</dt><dd><dl class="simple">
-<dt>if (isMarked(object) &amp;&amp; isNotMarked(field))</dt><dd><p>gcMark(field); // mark new field</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>}</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">writeBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">,</span><span class="n">field</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isMarked</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">isNotMarked</span><span class="p">(</span><span class="n">field</span><span class="p">))</span><span class="w"></span>
+<span class="w">        </span><span class="n">gcMark</span><span class="p">(</span><span class="n">field</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">mark</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">field</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 <ol class="arabic simple" start="2">
 <li><p>Read barriers: Read barriers are used when collector is moving. They help to get correct reference to the object when collection is running:</p></li>
 </ol>
-<dl class="simple">
-<dt>function readBarrier(object) {</dt><dd><p>// if gc moved object we return new location of it
-if (moved(object)) return newLocationOf(object);
-return object;</p>
-</dd>
-</dl>
-<p>}</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">readBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="o">//</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">gc</span><span class="w"> </span><span class="n">moved</span><span class="w"> </span><span class="n">object</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">it</span><span class="w"></span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">moved</span><span class="p">(</span><span class="n">object</span><span class="p">))</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">newLocationOf</span><span class="p">(</span><span class="n">object</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">return</span><span class="w"> </span><span class="n">object</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 <p>Concurrent/incremental GC:
 interleave program and GC, GC on separate thread</p>
+<p>write barriers or RC increases make every assigment with a heap object on the right hand side a bit more costly. In this case copying the live set can be faster. (related: Appel’s Garbage Collection Can Be Faster Than Stack Allocation)
+but this introduces memory churn from allocation, and the dominant portion of the execution time is waiting for the cache lines to be loaded or pre-loaded.
+You can actually see this exact behavior when profiling Java applications with high allocation rates, for example. You get weird stats that show that allocation is taking no significant time and GC is taking no significant time, but throughput still sucks. By eliminating the in-the-hot-loop allocations, you can see the throughput go up by a significant factor, sometimes by over an order of magnitude, because it avoids stalling.</p>
+<p>The issue is latency for a single request and that can be as little as 150 clocks. In managed GC every allocation manipulates some internal data structure. In JVM it’s a bump of a top of “thread local allocation block” (TLAB) pointer. In cases of high allocation rates, it is very likely that this pointer will have been evicted thus forcing a round trip to main memory. The factor here is rate of allocations, as opposed to rate of bytes allocated which is reported by typical tools.</p>
+<p>Measuring memory performance is tricky. The same workload on the same binary can give 2x changes in performance. It’s very sensitive to load order and memory layout. E.g. showing slides during a talk caused the JVM to load in a different memory segment, which changed the results of a timing sensitive calculation which in turn prevented the JVM from doing a memory adaptation that would drop CPU from 100% to 20% and improve latency dramatically.</p>
+<p>Generational GC with a tiny live set can win on microbenchmarks, but real programs have large live sets that don’t fit in cache and the data will overflow the young generation before it dies. It’s been tried repeatedly at Sun and failed miserably. You’re better off with the largest young-gen you can get and sucking on the cache misses, OR doing the allocation “by hand” to force rapid (L1-cache-sized) reuse.</p>
+<blockquote>
+<div><p>Functions means making closures, new scopes, copy/pass parameters, do indirections on returns, memory allocations, etc</p>
+</div></blockquote>
+<p>In Rust, this: let x = Vec::with_capacity(10000); for i in 0..10000 {c.push(x)}
+avoids resizing/reallocating the vec x because with_capacity specifies the size.
+for a_iter_source.iter().collect() there is an optional .size_hint function on the iter that tells how many items it has</p>
+<p>in practice asymptotics are BS, and performance depends strongly on memory management. Modeling memory access as O(1) is not correct, due to cache hierarchies - <span id="id6">[<a class="reference internal" href="../zzreferences.html#id55" title="Tomasz Jurkiewicz and Kurt Mehlhorn. The Cost of Address Translation. arXiv:1212.0703 [cs], April 2014. URL: http://arxiv.org/abs/1212.0703 (visited on 2022-01-04), arXiv:1212.0703.">JM14</a>]</span> ends up with a log(n) overhead for random access, and similarly <a class="reference external" href="https://news.ycombinator.com/item?id=12388244">this thread</a> says it’s more like O(N^{1/3}) (3D memory architecture), until you near the Bekenstein bound at which point it’s O(N^{1/2}) by the holographic principle. Which of these approximations is right? Who knows, power law fitting is <a class="reference external" href="http://bactra.org//weblog/491.html">hard</a>, none of the articles does a convincing job with the empirical data. But generally, the point is that the effects of memory hierarchies can outweigh the asymptotics. Empirically trees are terrible for caches, indirect lookups hit memory hard.</p>
+<p>For pointers, can optimize Maybe&lt;T&gt; to still fit into a pointer (null). Then converting T[] to Maybe&lt;T&gt;[] is a no-op.</p>
+<p>The GC can use several pages of stack once it is triggered. It needs a separate stack. Similarly crawling the stack allocates on the stack. Again, use a separate stack, tighten up invariants, and add stack probes.</p>
+<p>stack is reserved when the thread is created, and can be committed as well. It’s inadequate to only reserve because Windows has the unfortunate behavior that committing a page of stack can fail even if plenty of memory is available. If the swap file needs to be extended on disk, the attempt to commit can actually time out during this period, giving you a spurious fault.  If you want a robust application, you should always commit your stack reservations eagerly.</p>
+<p>The end of the stack reservation consists of an unmapped page that’s a trap for runaway processes, a 1-page buffer for executing stack-overflow backout, and a normal page that generates stack overflow exception when it is allocated past, which will only have a few free bits in an SO condition. So you can really only rely on 1 page to handle SO, which is inadequate. Conclusion: reserve/commit an alternate stack at the beginning to handle SO conditions.</p>
+<p>There is a guard bit set on all reserved but uncommitted stack pages.  The stack allocation/deallocation routines must touch/restore stack pages a page at a time, so that these uncommitted pages can be committed and de-committed in order.</p>
+<p>getPointer is like C#’s <code class="docutils literal notranslate"><span class="pre">fixed</span></code> block but it allows interleaving. Pinned blocks remain where they are during GC, forcing GC generations to start at awkward locations and causing fragmentation. Pinned objects can be moved to a separate GC area before pinning but this could make fragmentation worse if the pin lifetimes are unpredictable. Efficient patterns are:
+- pin for a time shorter than a GC cycle, then GC is unaffected
+- pin an old object, then it can be stored statically or in a mature generation
+- pin a bunch of objects as a group, then you can use an arena
+- pin in a LIFO manner, then you can use a stack in an arena
+- pin same-sized objects, then you can use a free list in an arena</p>
+<p>A very inefficient pattern is to randomly allocate and pin a large number of randomly-sized objects.</p>
+<p>Java’s finalizers have inherent problems because they are associated with GC. In particular, because the GC may not run, Java’s finalizers have no guarantee of timeliness, and hence cannot be used to free resources. In contrast Stroscot’s finalizers free as soon as it is statically known that they are no longer used. Java’s finalizers have no ordering; Stroscot’s run in the order defined. Java’s finalizers do not report exceptions; Stroscot’s finalizer methods are inserted into the program at the point the finalizer is run and can report exceptions. But like Java, the finalizer is considered done regardless of whether it throws an exception. Stroscot’s finalizers are functions and are not directly associated with objects, so there is no possibility of resurrection like in Java.</p>
+<p>I concluded after looking at it again that sharing parts of data structures should be pure, so my plan to use immutable references wasn’t going to work because allocating a reference would be impure. So instead there is an allocation interface.</p>
 </section>
+</section>
+<section id="destructors">
+<h2>Destructors<a class="headerlink" href="#destructors" title="Permalink to this headline"></a></h2>
+<p>Destructors A destructor is a magic value created with the operation <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">:</span> <span class="pre">Op</span> <span class="pre">Destructor</span></code>. It supports equality, hashing, and an operation <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Bool</span></code>. All calls to <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> but the last in the program return false; the last <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> returns true. There is also <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> which ensures that <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> always returns false.</p>
+<p>Stroscot checks a no-leak property for each destructor <code class="docutils literal notranslate"><span class="pre">x</span></code> that exactly one of the following holds:
+* <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">x</span></code> is called infinitely often, returning false each time
+* <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">x</span></code> returns true and is never called thereafter
+* <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">x</span></code> is called</p>
+<p>If the control flow does not allow this no-leak property to hold, Stroscot will error.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewDestructor</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span><span class="w"></span>
+<span class="w">  </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"></span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">False</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">True</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">    </span><span class="ne">error</span><span class="w"></span>
+</pre></div>
+</div>
+<p>TODO: can it be shared. need some way to coordinate control flow analysis across threads</p>
+<p>Destructors are very similar to finalizers. In fact we can use destructors to implement <em>prompt</em> finalizers, that guarantee <code class="docutils literal notranslate"><span class="pre">free</span></code> is called immediately after some <code class="docutils literal notranslate"><span class="pre">use</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newPromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"></span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
+<span class="w">    </span><span class="n">free</span><span class="w"></span>
+</pre></div>
+</div>
+<p>However, a prompt finalizer would give an error on programs such as the following:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">free</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Freed.&quot;</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"></span>
+<span class="nf">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="kt">Bool</span><span class="w"></span>
+<span class="kr">if</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="kr">else</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>With a normal finalizer, instead of erroring, Stroscot will insert a call to <code class="docutils literal notranslate"><span class="pre">free</span></code> before the <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;B&quot;</span></code> statement in the else branch.</p>
+<p>Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard <code class="docutils literal notranslate"><span class="pre">malloc/free</span></code>, we can change it:
+1. <code class="docutils literal notranslate"><span class="pre">malloc</span></code> is wrapped to return a tuple with <code class="docutils literal notranslate"><span class="pre">newPromptFinalizer</span></code>, <code class="docutils literal notranslate"><span class="pre">free</span></code> is replaced with <code class="docutils literal notranslate"><span class="pre">use</span></code>
+2. every operation is modified to call <code class="docutils literal notranslate"><span class="pre">use</span></code>
+3. the prompt finalizer is replaced with a finalizer</p>
+<p>The finalizer program compiles identically to the original. Note that this transformation is a bit fragile though - if the uses corresponding to the frees are deleted, the lifetime of the finalizer is shortened and depending on the program structure the point at which <code class="docutils literal notranslate"><span class="pre">free</span></code> should be called may become hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases.</p>
+<p>Copying, quad-color incremental, generational garbage collector
+Arena-based bump allocator for heap-allocated values
+Memory allocator API
+Virtual memory API
+* POSIX mmap+posix_madvise
+* Windows VirtualAlloc</p>
+<p>File and network APIs are generally managed by user-level code. So the point of the memory system is to assign a storage location for every value, insert moves / frees where necessary, and overall minimize the amount of resources consumed.</p>
+<p>For more advanced programming there is the need to avoid the use of slow storage mechanisms as much as possible by addressing the fast storage mechanisms directly. (Really?)</p>
+<p>Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.</p>
+<p>Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (<a class="reference external" href="https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf">https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf</a>). There is room for optimization but many algorithms work.</p>
+<p>Polymorphism requires a uniform representation for types (pointer/box), or templates like C++. Functional languages use a uniform representation so pay an overhead for accessing via the indirection. Unboxing analysis reduces this cost for primitive types - it works pretty well. GHC doesn’t have a particularly good data layout though, because it’s all uniform.</p>
+<ul class="simple">
+<li><p>Alias analysis - changing memory references into values</p></li>
+<li><p>tail call optimization, Stack height reduction - stack optimizations</p></li>
+<li><p>deforestation - remove data structure</p></li>
+</ul>
+<p>can you request memory in an async fashion? memory starvation is often the result of contention, so waiting could get you the memory back. Or if you request more than is physically on the system, barring hot-swapping RAM, memory will never become available. Also, excessive paging occurs before actual memory exhaustion. performance completely tanks and the user kills the process.</p>
 </section>
 </section>
 

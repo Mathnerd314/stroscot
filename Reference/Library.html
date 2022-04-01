@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
@@ -60,19 +61,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#iterators">Iterators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#i-o">I/O</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#errors">Errors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#poison">Poison</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#traces">Traces</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#stateful-exceptions">Stateful exceptions</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#concurrency">Concurrency</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#memory-model">Memory model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mutex">Mutex</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#wait-free-data-types">Wait-free data types</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mvar">MVar</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#channels">Channels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#transactional-memory">Transactional memory</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#thread-pool">Thread pool</a></li>
 </ul>
 </li>
@@ -82,7 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
@@ -118,42 +112,37 @@
   <section id="library">
 <h1>Library<a class="headerlink" href="#library" title="Permalink to this headline"></a></h1>
 <p>Stroscot will support the standard libraries of other languages, so e.g. if you want the C functions with C semantics you would <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">Library.C</span></code>. Compatibility is a natural step to world domination.</p>
-<dl>
-<dt>performance</dt><dd><dl class="simple">
-<dt>Java/JVM</dt><dd><p>profiling, dynamic compilation, speculative optimization/deoptimization, escape analysis</p>
-</dd>
-<dt>C, C++</dt><dd><p>close to hardware, low level</p>
-</dd>
-</dl>
-<p>Julia - faster than Python, but JIT uses many slow trampolines
-Go - scalable concurrency (although slower than C++)
-Javascript - fast JIT
-Objective C - faster than Swift
-Prolog - slow constraint solver</p>
-</dd>
-<dt>libraries</dt><dd><p>Python - machine learning, extending/embedding
-Julia - concurrency, parallelism, C+Fortran+Python FFIs
-R - statistics and data analysis
-MATLAB, Mathematics - IDE, large codebase
-Erlang - distributed, fault-tolerant, reliable, soft real-time, concurrent database
-C - large number of libraries
-C++ - game engines, standard methods to distribute application binaries
-C# - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin) and embedded systems (.NET Micro Framework).
-Javascript - browser
-Swift - Apple
-Prolog, Mercury - logic programming is not used anymore in artificial intelligence, generic constraint solver
-F# - functional programming that runs on CLI
-Rust - most loved for memory safety</p>
-</dd>
-<dt>syntax</dt><dd><p>C# - best designed
-Python - whitespace
-Elixir - improved Erlang
-TypeScript - JS with static typing
-PHP - no design at all
-Objective C - weirder than C++
-Haskell - poor design</p>
-</dd>
-</dl>
+<p>performance
+* Java/JVM - profiling, dynamic compilation, speculative optimization/deoptimization, escape analysis
+* C, C++ - close to hardware, low level (supposedly)
+* Julia - faster than Python, but JIT uses many slow trampolines
+* Go - scalable concurrency (although slower than C++)
+* Javascript - fast JIT
+* Objective C - faster than Swift
+* Prolog - slow constraint solver
+libraries
+* Python - machine learning, extending/embedding
+* Julia - concurrency, parallelism, C+Fortran+Python FFIs
+* R - statistics and data analysis
+* MATLAB, Mathematics - IDE, large codebase
+* Erlang - distributed, fault-tolerant, reliable, soft real-time, concurrent database
+* C - large number of libraries
+* C++ - game engines, standard methods to distribute application binaries
+* C# - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin) and embedded systems (.NET Micro Framework).
+* Javascript - browser
+* Swift - Apple
+* Prolog, Mercury - logic programming is not used anymore in artificial intelligence, generic constraint solver
+* F# - functional programming that runs on CLI
+* Rust - most loved for memory safety
+syntax
+* C# - best designed
+* Python - whitespace
+* Elixir - improved Erlang
+* TypeScript - JS with static typing
+* PHP - no design at all
+* Objective C - weirder than C++
+* Haskell - poor design</p>
+<p>standard library for graphics, networking, databases, telephony, and enterprise servers</p>
 <p>Standard libraries:
 * <a class="reference external" href="https://github.com/rust-lang/rust/tree/master/library">Rust</a> (MIT + Apache 2.0)
 * <a class="reference external" href="https://github.com/golang/go/tree/master/src">Go</a> (BSD-style)
@@ -204,7 +193,9 @@ Haskell - poor design</p>
 </section>
 <section id="fractions">
 <h3>Fractions<a class="headerlink" href="#fractions" title="Permalink to this headline"></a></h3>
-<p>The simplest is ratios <span class="math notranslate nohighlight">\(a / b\)</span>, using integers over some domain. Fixed-point arithmetic is a special case of this where <span class="math notranslate nohighlight">\(b\)</span> is fixed. Floating point numbers are an integer mantissa times an integer radix raised to an integer exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range. We can also include posits; these are mantissa * radix ^ exponent * useed ^ regime, where the first part is the floating point stuff, useed is 2 ^ 2 ^ maximum exponent size, and the regime is nonnegative.</p>
+<p>The simplest is ratios <span class="math notranslate nohighlight">\(a / b\)</span>, using integers over some domain. Fixed-point arithmetic is a special case of this where <span class="math notranslate nohighlight">\(b\)</span> is fixed.</p>
+<p>Floating point numbers are an integer mantissa times an integer radix raised to an integer exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range. Typical floating point formats are single, double, and x86’s 80-bit format. MFPR provides a flexible software format.</p>
+<p>We can also include posits; these are mantissa * radix ^ exponent * useed ^ regime, where the first part is the floating point stuff, useed is 2 ^ 2 ^ maximum exponent size, and the regime is nonnegative.</p>
 </section>
 <section id="actual-types">
 <h3>Actual types<a class="headerlink" href="#actual-types" title="Permalink to this headline"></a></h3>
@@ -219,62 +210,74 @@ Haskell - poor design</p>
 </section>
 <section id="arrays">
 <h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span> <span class="o">$</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span>
-<span class="nf">assert</span> <span class="o">$</span> <span class="n">length</span> <span class="n">arr</span> <span class="o">==</span> <span class="mi">3</span>
+<p>Pure arrays (lists)</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<span class="nf">assert</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="nf">assert</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Mutable arrays usually means an immutable array containing mutable values, (i.e., not resizable) but it could also mean an array stored in a variable (more similar to Java’s ArrayList or C++ std::vector).</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span> <span class="ow">=</span> <span class="n">mut</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
-<span class="nf">assert</span> <span class="o">$</span> <span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
-<span class="nf">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="kt">:=</span> <span class="mi">4</span>
-<span class="nf">assert</span> <span class="o">$</span> <span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span>
+<p>(Mutable) arrays</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<span class="nf">assert</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
+<span class="nf">assert</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Slices can be constructed by indexing by an integer range, or specifying a start and length. The magic values <code class="docutils literal notranslate"><span class="pre">start</span></code> / <code class="docutils literal notranslate"><span class="pre">end</span></code> are defined:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="mi">7</span><span class="p">]</span> <span class="o">#</span> <span class="n">simple</span> <span class="n">integer</span> <span class="n">range</span>
-<span class="nf">arr</span><span class="p">[</span><span class="n">start</span><span class="o">..</span><span class="n">end</span><span class="p">]</span> <span class="o">#</span> <span class="n">start</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="ow">=</span><span class="n">length</span> <span class="n">arr</span>
-<span class="nf">arr</span><span class="p">[</span><span class="n">start</span><span class="o">..</span><span class="p">]</span> <span class="o">#</span> <span class="n">range</span> <span class="n">is</span> <span class="n">clipped</span> <span class="n">to</span> <span class="n">end</span>
-<span class="nf">slice</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">#</span> <span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">1</span><span class="p">]</span>
-<span class="nf">slice</span><span class="p">(</span><span class="n">list</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">length</span> <span class="n">list</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="mi">7</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">simple</span><span class="w"> </span><span class="n">integer</span><span class="w"> </span><span class="n">range</span><span class="w"></span>
+<span class="nf">arr</span><span class="p">[</span><span class="n">start</span><span class="o">..</span><span class="n">end</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">start</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="ow">=</span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"></span>
+<span class="nf">arr</span><span class="p">[</span><span class="n">start</span><span class="o">..</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">clipped</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">end</span><span class="w"></span>
+<span class="nf">slice</span><span class="p">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="o">..</span><span class="mi">1</span><span class="p">]</span><span class="w"></span>
+<span class="nf">slice</span><span class="p">(</span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Slices remove the need for writing range checks in most code.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">..</span></code> is an ordinary infix operator declared and defined in the prelude. Arithmetic sequences such as <code class="docutils literal notranslate"><span class="pre">1..5</span></code> denote <code class="docutils literal notranslate"><span class="pre">[1,2,3,4,5]</span></code>. Sequences with arbitrary stepsizes can be written by denoting the</dt><dd><p>first two sequence elements using the <code class="docutils literal notranslate"><span class="pre">:</span></code> operator, as in <code class="docutils literal notranslate"><span class="pre">1.0:1.2..3.0</span></code>. To prevent unwanted artifacts due to rounding errors, the   upper bound in a floating point sequence is always rounded to the nearest
+grid point. Thus, e.g., <code class="docutils literal notranslate"><span class="pre">0.0:0.1..0.29</span></code> actually yields <code class="docutils literal notranslate"><span class="pre">[0.0,0.1,0.2,0.3]</span></code>, as does <code class="docutils literal notranslate"><span class="pre">0.0:0.1..0.31</span></code>.</p>
+</dd>
+</dl>
 </section>
 <section id="iterators">
 <h2>Iterators<a class="headerlink" href="#iterators" title="Permalink to this headline"></a></h2>
-<p>Haskell has <code class="docutils literal notranslate"><span class="pre">Foldable</span></code>, the main function being <code class="docutils literal notranslate"><span class="pre">foldr</span> <span class="pre">::</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code>, which is equivalently <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code>, the latter part being the <a class="reference external" href="https://okmij.org/ftp/tagless-final/course/Boehm-Berarducci.html">Boehm-Berarducci encoding</a> of <code class="docutils literal notranslate"><span class="pre">[a]</span></code>. So really <code class="docutils literal notranslate"><span class="pre">Foldable</span> <span class="pre">t</span></code> is just a function <code class="docutils literal notranslate"><span class="pre">toList</span> <span class="pre">:</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">[a]</span></code>. <code class="docutils literal notranslate"><span class="pre">foldMap</span></code> has a more general type that would allow a parallel fold, but the docs say that the fold is right-associative, so it’s strictly this linked list. We might as well call the class <code class="docutils literal notranslate"><span class="pre">ListLike</span></code>.</p>
 <p>Iterators are very similar to linked lists, but they have control effects - the next item requires executing a computation to extract it.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Iterator</span> <span class="kt">Item</span> <span class="kt">:</span> <span class="kr">type</span> <span class="ow">=</span> <span class="kt">Nil</span> <span class="o">|</span> <span class="kt">Cons</span> <span class="p">{</span> <span class="kr">data</span> <span class="kt">:</span> <span class="kt">Item</span><span class="p">,</span> <span class="n">next</span> <span class="kt">:</span> <span class="kt">IO</span> <span class="kt">Iterator</span> <span class="p">}</span>
-<span class="nf">getIterator</span> <span class="kt">:</span> <span class="kt">IO</span> <span class="p">(</span><span class="kt">Iterator</span> <span class="kt">Int</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Iterator</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="w"> </span><span class="kt">Int</span><span class="p">,[</span><span class="n">a</span><span class="p">])</span><span class="w"></span>
+<span class="nf">getIterator</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Iterator</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"></span>
+<span class="nf">getIterator</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">mut</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span><span class="w"></span>
+<span class="nf">next</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Iterator</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="p">(</span><span class="kt">Done</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Yield</span><span class="w"> </span><span class="p">(</span><span class="kr">data</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">a</span><span class="p">))</span><span class="w"></span>
+<span class="nf">next</span><span class="w"> </span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="n">arr</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">ref</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"></span>
+<span class="w">    </span><span class="n">e</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="n">ref</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="w"></span>
+<span class="w">    </span><span class="n">return</span><span class="w"> </span><span class="p">(</span><span class="kt">Yield</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">    </span><span class="n">return</span><span class="w"> </span><span class="kt">Done</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Rust: <a class="reference external" href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">https://doc.rust-lang.org/std/iter/trait.Iterator.html</a>
 Java: <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html">https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html</a></p>
 <p>Part of the issue with the interface is whether executing an iterator multiple times is allowed - i.e. something like</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Cons</span> <span class="p">{</span><span class="n">next</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span> <span class="ow">&lt;-</span> <span class="n">getIterator</span>
-<span class="kt">Cons</span> <span class="p">{</span><span class="n">next2</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span> <span class="ow">&lt;-</span> <span class="n">next</span>
-<span class="kt">Cons</span> <span class="p">{</span><span class="n">next3</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span> <span class="ow">&lt;-</span> <span class="n">next</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Cons</span><span class="w"> </span><span class="p">{</span><span class="n">next</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">getIterator</span><span class="w"></span>
+<span class="kt">Cons</span><span class="w"> </span><span class="p">{</span><span class="n">next2</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">next</span><span class="w"></span>
+<span class="kt">Cons</span><span class="w"> </span><span class="p">{</span><span class="n">next3</span><span class="p">,</span><span class="kr">data</span><span class="p">}</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">next</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In the general case the iterator cannot be reused - next should be treated as a linear value. But in other cases it’s more specific.</p>
 <p>Iterators then implement a for-of loop:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">for</span><span class="p">(</span><span class="n">x</span> <span class="kt">:</span> <span class="n">getIterator</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">act</span>
-<span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">getIterator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">act</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Haskell’s <code class="docutils literal notranslate"><span class="pre">Traversable</span></code> has <code class="docutils literal notranslate"><span class="pre">traverse</span> <span class="pre">::</span> <span class="pre">Applicative</span> <span class="pre">f</span> <span class="pre">=&gt;</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(t</span> <span class="pre">b)</span></code> which extends this further, to for loops which return values:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span> <span class="ow">=</span> <span class="n">for</span> <span class="p">(</span><span class="n">x</span> <span class="kt">:</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">act</span>
-  <span class="n">return</span> <span class="n">x&#39;</span>
-<span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">act</span><span class="w"></span>
+<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="n">x&#39;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Clojure transducer is a function that takes a foldl operation and produces another one, i.e. <code class="docutils literal notranslate"><span class="pre">transducer</span> <span class="pre">:</span> <span class="pre">((b</span> <span class="pre">-&gt;</span> <span class="pre">a-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code></p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span> <span class="n">map</span> <span class="n">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">foldr</span>  <span class="ow">-&gt;</span>
-
-<span class="nf">transducers</span><span class="kt">:</span>
-</pre></div>
-</div>
+<p>A transducer is a function that takes a strict foldl operation and produces another one, i.e. <code class="docutils literal notranslate"><span class="pre">transducer</span> <span class="pre">:</span> <span class="pre">((b</span> <span class="pre">-&gt;</span> <span class="pre">a-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code>. Transducers compose reductions and transformation functions (map and filter) with function composition. Mainly Clojure but picked up in other languages.</p>
 <p><a class="reference external" href="https://clojure.org/news/2012/05/15/anatomy-of-reducer">https://clojure.org/news/2012/05/15/anatomy-of-reducer</a>
 <a class="reference external" href="https://cognitect.com/blog/2014/8/6/transducers-are-coming">https://cognitect.com/blog/2014/8/6/transducers-are-coming</a>
 <a class="reference external" href="https://clojure.org/reference/transducers">https://clojure.org/reference/transducers</a>
@@ -282,7 +285,8 @@ Java: <a class="reference external" href="https://docs.oracle.com/javase/8/docs/
 </section>
 <section id="strings">
 <h2>Strings<a class="headerlink" href="#strings" title="Permalink to this headline"></a></h2>
-<p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer of bytes together with a length. There can be different encodings: UTF8, UTF16, UTF32, or some other encodings like Shift JIS or Big5. UTF8 is the most common so it should be the default, <a class="reference external" href="https://utf8everywhere.org/">UTF-8 everywhere</a>.</p>
+<p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer of bytes together with a length. There can be different encodings: UTF8, UTF16, UTF32, or some other encodings like Shift JIS or Big5. UTF8 is the most common so it should be the default, <a class="reference external" href="https://utf8everywhere.org/">UTF-8 everywhere</a>. Unicode-correct String implementation.
+Unboxed packed representation for short strings.</p>
 <p>Normalization to NFC is an operation. Refinement type for always-normalized, overloaded operations.</p>
 <p>Operations can take place through code points, graphemes, bytes (code units, but utf-8 everywhere so there’s no difference). Provide each type unless there’s a good reason not to. Moving forward or backward in a text editor would use graphemes. Writing a file would use bytes.</p>
 <p>Invalid characters can be handled different ways according to a mode parameter: delete from string, preserve, transcode to private use area, etc.</p>
@@ -303,46 +307,8 @@ Java: <a class="reference external" href="https://docs.oracle.com/javase/8/docs/
 <p>The general API for I/O follows the io_uring design, we write a bunch of operations to a buffer and then execute callbacks based on the result.
 We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
 <p>The functions themselves are written in the token-passing style <code class="docutils literal notranslate"><span class="pre">RealWorld,</span> <span class="pre">a</span> <span class="pre">-o</span> <span class="pre">RealWorld,</span> <span class="pre">b</span></code>, passing around the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token.</p>
-<p>The standard library wraps all relevant functions in <a class="reference internal" href="Memory.html#destructors"><span class="std std-ref">destructors</span></a> to ensure safety. But there is also a corresponding .Raw module which provides the unwrapped versions.</p>
-</section>
-<section id="errors">
-<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline"></a></h2>
-<p>Safety - errors in your program lead to error messages, as opposed to unpredictable crashes.</p>
-<section id="poison">
-<h3>Poison<a class="headerlink" href="#poison" title="Permalink to this headline"></a></h3>
-<p>Most errors behave by producing a <a class="reference external" href="https://llvm.org/devmtg/2020-09/slides/Lee-UndefPoison.pdf">poison value</a>. For example <code class="docutils literal notranslate"><span class="pre">{}.x</span></code> produces like <code class="docutils literal notranslate"><span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span></code>. Invalid pointer reads return <code class="docutils literal notranslate"><span class="pre">InvalidPointer</span></code>, rather than crashing the program. Division by zero is handled in the same way, producing <code class="docutils literal notranslate"><span class="pre">DivisionByZeroError</span></code>. There’s also standard user-accessible poison values like <code class="docutils literal notranslate"><span class="pre">undefined</span></code> and <code class="docutils literal notranslate"><span class="pre">panic</span> <span class="pre">&quot;string&quot;</span></code>.</p>
-<p>This requires some support from the OS to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal “Segmentation fault” (SIGSEGV). C/C++ <a class="reference external" href="https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux">can’t handle these easily</a> because they are <a class="reference external" href="https://lwn.net/Articles/414618/">synchronous signals</a> and signal behavior is mostly left undefined, but in fact signals are <a class="reference external" href="https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/">fairly well-behaved</a> (<a class="reference external" href="https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48">OpenSSL</a>’s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go <a class="reference external" href="https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover">allows</a> turning (synchronous) signals into “panics” that can be caught with recover.</p>
-<p>Similarly DIV by 0 on produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. OTOH, UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error definitely requires checking if the argument is zero beforehand - the people that really can’t afford this check will have to use the division instruction in the assembly module. But on x86 we can decide between inserting a check and handling the SIGFPE; it’ll require testing to see which is faster in typical programs - my guess is the handler, since division by zero is rare.</p>
-</section>
-<section id="traces">
-<h3>Traces<a class="headerlink" href="#traces" title="Permalink to this headline"></a></h3>
-<p>Most operations on an error will produce another error, e.g. <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code> produces <code class="docutils literal notranslate"><span class="pre">MissingCaseError</span> <span class="pre">(NoSuchAttributeError</span> <span class="pre">...)</span></code>. So the errors bubble up until we get something that handles the error, e.g. the main program handler that prints the error and exits. With fancy formatting the nested errors will look like a stacktrace. The semantics are a little different because it’s demand-driven, but close enough. TODO: make sure the stack trace can’t become infinite.</p>
-<p>We can redefine this error value to be something else, e.g. add a definition <code class="docutils literal notranslate"><span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span> <span class="pre">=</span> <span class="pre">3</span></code>. Then <code class="docutils literal notranslate"><span class="pre">{}.x</span> <span class="pre">==</span> <span class="pre">3</span></code> and the error is silenced. Similarly we can do <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">NoSuchAttributeError</span> <span class="pre">{}</span> <span class="pre">&quot;x&quot;</span> <span class="pre">-&gt;</span> <span class="pre">3</span></code>, or pass the error to a function that does such error-handling. We can also match on generic errors, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isError</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">3</span></code>. The alternative to <code class="docutils literal notranslate"><span class="pre">isError</span></code> is a single standard error constructor, IDK.</p>
-<p>The errors can also keep track of their continuation, e.g. a <code class="docutils literal notranslate"><span class="pre">MissingCaseError</span></code> can store its continuation <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">...</span></code>. These compose up the stack so that we can pass in a value at any point and resume computing.</p>
-</section>
-<section id="stateful-exceptions">
-<h3>Stateful exceptions<a class="headerlink" href="#stateful-exceptions" title="Permalink to this headline"></a></h3>
-<p>For a stateful function, the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token also is replaced with an error value. So no further states can be executed until the error is handled. But the error value itself contains a new <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token to allow resuming the computation. We can define the standard levels of safety: no-throw is that the normal state will be returned, strong exception safety of a function is the assertion that the state in the error value is no different from the state passed in, and basic safety is that all documented invariants are maintained for the state in the error value. Most operations with basic safety can be made strongly safe by copying all relevant data beforehand, besides actual I/O operations.</p>
-<p>try-catch-else-finally: we can handle the try-catch part with continuations and the error-redefining trick, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">reset</span> <span class="pre">(Left</span> <span class="pre">(foo</span> <span class="pre">{e</span> <span class="pre">|</span> <span class="pre">isDesiredError</span> <span class="pre">e</span> <span class="pre">=</span> <span class="pre">shift</span> <span class="pre">(const</span> <span class="pre">e)})</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isDesiredError</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">handle</span> <span class="pre">e</span></code>. We can also use the bubbling: <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">isError</span> <span class="pre">e</span> <span class="pre">and</span> <span class="pre">isDesiredError</span> <span class="pre">(firstError</span> <span class="pre">e)</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>. For finally we want a state field to extract the token, <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">e</span> <span class="pre">{</span> <span class="pre">state</span> <span class="pre">=</span> <span class="pre">cleanup</span> <span class="pre">(state</span> <span class="pre">e)</span> <span class="pre">}</span></code>. Python also supports an else clause - it is executed if control flows normally off the end of the try clause and is not protected by the catch clauses of the try.</p>
-<p>asynchronous exceptions: this instruments every memory allocation and I/O operation to check for calls to <code class="docutils literal notranslate"><span class="pre">throwTo</span> <span class="pre">ThreadId</span></code> and if so return <code class="docutils literal notranslate"><span class="pre">Interrupted</span></code>, <code class="docutils literal notranslate"><span class="pre">ThreadKilled</span></code> (<code class="docutils literal notranslate"><span class="pre">PleaseStop</span></code>), etc. But every operation is also given a parameter <code class="docutils literal notranslate"><span class="pre">Masked</span></code> (for memory and nonblocking I/O operations) or <code class="docutils literal notranslate"><span class="pre">Interruptible</span></code> (for blocking I/O operations) that disables this behavior. Then there’s the mask function, <code class="docutils literal notranslate"><span class="pre">mask</span> <span class="pre">io</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">Masked</span> <span class="pre">then</span> <span class="pre">io</span> <span class="pre">{unmask</span> <span class="pre">=</span> <span class="pre">id}</span> <span class="pre">else</span> <span class="pre">io</span> <span class="pre">{Masked</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">unmask</span> <span class="pre">io</span> <span class="pre">=</span> <span class="pre">io</span> <span class="pre">{Masked</span> <span class="pre">=</span> <span class="pre">False}</span> <span class="pre">}</span></code> and similarly <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask</span></code> which also checks/sets <code class="docutils literal notranslate"><span class="pre">Interruptible</span></code>.</p>
-<p>IMO GHC’s <a class="reference external" href="https://www.fpcomplete.com/blog/2018/04/async-exception-handling-haskell/">asynchronous exception system</a> is broken. The system is so complicated that nobody can agree on the desired behavior / correct form of even simple examples. The prototypical example of using it is <a class="reference external" href="https://hackage.haskell.org/package/unliftio-0.2.13.1/docs/UnliftIO-Exception.html#v:bracket">bracket</a>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bracket</span> <span class="ow">::</span> <span class="kt">MonadUnliftIO</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">c</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">c</span>
-<span class="nf">bracket</span> <span class="n">before</span> <span class="n">after</span> <span class="n">thing</span> <span class="ow">=</span> <span class="n">withRunInIO</span> <span class="o">$</span> <span class="nf">\</span><span class="n">run</span> <span class="ow">-&gt;</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">mask</span> <span class="o">$</span> <span class="nf">\</span><span class="n">restore</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
-  <span class="n">x</span> <span class="ow">&lt;-</span> <span class="n">run</span> <span class="n">before</span>
-  <span class="n">res1</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">try</span> <span class="o">$</span> <span class="n">restore</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">thing</span> <span class="n">x</span>
-  <span class="kr">case</span> <span class="n">res1</span> <span class="kr">of</span>
-    <span class="kt">Left</span> <span class="p">(</span><span class="n">e1</span> <span class="ow">::</span> <span class="kt">SomeException</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
-      <span class="kr">_</span> <span class="ow">::</span> <span class="kt">Either</span> <span class="kt">SomeException</span> <span class="n">b</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">try</span> <span class="o">$</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">uninterruptibleMask_</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">after</span> <span class="n">x</span>
-      <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">throwIO</span> <span class="n">e1</span>
-    <span class="kt">Right</span> <span class="n">y</span> <span class="ow">-&gt;</span> <span class="kr">do</span>
-      <span class="kr">_</span> <span class="ow">&lt;-</span> <span class="kt">EUnsafe</span><span class="o">.</span><span class="n">uninterruptibleMask_</span> <span class="o">$</span> <span class="n">run</span> <span class="o">$</span> <span class="n">after</span> <span class="n">x</span>
-      <span class="n">return</span> <span class="n">y</span>
-</pre></div>
-</div>
-<p>Here we use 4 operations: mask, try, <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask_</span></code>, throwIO. mask shields the cleanup action from being attacked by asynchronous exceptions, allowing exceptions inside restore. try catches exceptions and allows cleanup to occur. <code class="docutils literal notranslate"><span class="pre">uninterruptibleMask_</span></code> blocks interrupts from interrupting the after handler. Finally throwIO rethrows the exception, so that any exception inside the after handler will be swallowed.</p>
-<p>Apparently, though, nobody can agree on whether the after handle should run with an uninterruptible mask.</p>
-<p>Another issue with exceptions is handling them. The top-level can throw exceptions, or it can catch them, printing them and exiting with an error code. Usually people write their own handlers, hence making it uncomposable.</p>
-</section>
+<p>The standard library wraps all relevant functions in <a class="reference internal" href="Memory.html#finalizers"><span class="std std-ref">finalizers</span></a> to ensure safety. But there is also a corresponding .Raw module which provides the unwrapped versions.</p>
+<p>Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API should have a warning.</p>
 </section>
 <section id="concurrency">
 <span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this headline"></a></h2>
@@ -374,26 +340,18 @@ We also need datatypes for dealing with streaming I/O, but continuations work fo
 <h3>Channels<a class="headerlink" href="#channels" title="Permalink to this headline"></a></h3>
 <p>These are queues basically, used for message passing. Copy from Go or Erlang.</p>
 </section>
-<section id="transactional-memory">
-<h3>Transactional memory<a class="headerlink" href="#transactional-memory" title="Permalink to this headline"></a></h3>
-<p>The syntax is simple, <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">retry</span> <span class="pre">};</span> <span class="pre">y</span> <span class="pre">:=</span> <span class="pre">z</span> <span class="pre">}</span></code>. Transactions nested inside another transaction are elided, so that one big transaction forms. The implementation guarantees eventual fairness (maybe): A transaction will succeed and be committed eventually, provided it doesn’t retry all the time. Also transactions are serializable. But high-performance transactions are still a research area. The latest seems to be <span id="id1">[]</span>, it might be usable. No transaction aborts though.</p>
-<p>Mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered. Generally transactions are preferred, because they compose. Transactions matching atomic instructions should compile to the atomic instructions if Stroscot can prove there are no waiting threads to wake up.</p>
-</section>
 <section id="thread-pool">
 <h3>Thread pool<a class="headerlink" href="#thread-pool" title="Permalink to this headline"></a></h3>
 <p>A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core.</p>
-<p>A task represents an asynchronous operation. Tasks don’t block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark <span id="id2">[<a class="reference internal" href="../zzreferences.html#id75" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)</p>
+<p>A task represents an asynchronous operation. Tasks don’t block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark <span id="id1">[<a class="reference internal" href="../zzreferences.html#id97" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)</p>
 <p>Tasks are queued. They run in fibers which run in the thread pool, but are even lighter memory-wise than fibers.</p>
 <p>It’s a proven model for maximizing throughput for CPU-bound tasks (high performance computing), and allows very fast context switches to other tasks on the same scheduler thread (zero overhead) - socket servers with only negligible server-side computations. There is not much overhead to start/finish a task besides cache pollution, the need to use memory locations instead of registers, and synchronization. Also tasks are unfair - on a multi-core system, tasks spawn on the same CPU, using an M:N user-mode cooperative scheduler. This improves locality.</p>
 <p>Maybe the build system is sufficient for this. Also an event loop for asynchronous network I/O. IOCP on Windows, io_uring on Linux.
-libuv is significantly slower than blocking I/O for most common cases; for example stat is 35x</p>
-<blockquote>
-<div><p>slower when run in a loop for an mlocate-like utility. Memory mapped I/O is a no-go because the page faults block the task’s thread. So will always have some blocking operations that need to be run in their own OS thread. Pool should allow specifying desired # of concurrently running tasks as well as max number of OS threads.</p>
-</div></blockquote>
+libuv is significantly slower than blocking I/O for most common cases; for example stat is 35x slower when run in a loop for an mlocate-like utility. Memory mapped I/O is a no-go because the page faults block the task’s thread. So will always have some blocking operations that need to be run in their own OS thread. Pool should allow specifying desired # of concurrently running tasks as well as max number of OS threads.</p>
 <p>Design questions:
 * How do threads get work - pull from single FIFO/priority queue, push to thread’s individual queue, or some other approach
 * Where to store task-local data</p>
-<p>Relevant: work stealing queues <span id="id3">[<a class="reference internal" href="../zzreferences.html#id49" title="Doug Lea. A Java fork/join framework. In Proceedings of the ACM 2000 Conference on Java Grande, JAVA '00, 36–43. New York, NY, USA, June 2000. Association for Computing Machinery. URL: https://doi.org/10.1145/337449.337465 (visited on 2021-07-09), doi:10.1145/337449.337465.">Lea00</a>]</span> used in Java, <a class="reference external" href="https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf">A Java Fork/Joint Blunder</a>, criticizing Java’s framework</p>
+<p>Relevant: work stealing queues <span id="id2">[<a class="reference internal" href="../zzreferences.html#id63" title="Doug Lea. A Java fork/join framework. In Proceedings of the ACM 2000 Conference on Java Grande, JAVA '00, 36–43. New York, NY, USA, June 2000. Association for Computing Machinery. URL: https://doi.org/10.1145/337449.337465 (visited on 2021-07-09), doi:10.1145/337449.337465.">Lea00</a>]</span> used in Java, <a class="reference external" href="https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf">A Java Fork/Joint Blunder</a>, criticizing Java’s framework</p>
 </section>
 </section>
 </section>

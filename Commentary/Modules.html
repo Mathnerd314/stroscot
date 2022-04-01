@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Macros &mdash; Stroscot  documentation</title>
+  <title>Modules &mdash; Stroscot  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Library" href="Library.html" />
-    <link rel="prev" title="As fast as C" href="Fastest.html" /> 
+    <link rel="next" title="Objects" href="Objects.html" />
+    <link rel="prev" title="About" href="Meta.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,12 +55,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ml">1ML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dependency-hell">Dependency hell</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
@@ -91,9 +95,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Macros</li>
+      <li>Modules</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Fexprs.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Modules.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -101,20 +105,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="macros">
-<h1>Macros<a class="headerlink" href="#macros" title="Permalink to this headline"></a></h1>
-<p>macro - a syntactic extension to a programming language</p>
-<p>A macro is a function translating an AST node into an expanded AST node.</p>
-<p>defmacro is more complex. You can run <code class="docutils literal notranslate"><span class="pre">macroexpand</span> <span class="pre">&quot;(f</span> <span class="pre">a</span> <span class="pre">b)&quot;</span></code> to get the expanded AST.
-but with a raw expression <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span></code>, f is called with ASTs as arguments, namely ‘a, ‘b. The resulting AST then replaces the expression, and execution resumes as if the new piece of code had occurred in the first place. The macro form is said to expand into the new piece of code. So it behaves like <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">(macroexpand</span> <span class="pre">&quot;f</span> <span class="pre">a</span> <span class="pre">b&quot;)</span></code> where the environment is the environment of the raw expression.</p>
+  <section id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline"></a></h1>
+<p>Java has four access modes:
+private - abstract data type, structure not accessible to the outside world. use exported functions to manipulate.
+public - All data is directly accessible
+protected - a variant of public, because anybody can access a protected member if he or she wants to, without much difficulty.
+package - a variant of private, limiting access to the package rather than the file. Intended to replace C++ “friendly”</p>
+<section id="ml">
+<h2>1ML<a class="headerlink" href="#ml" title="Permalink to this headline"></a></h2>
+<p>The module system is a superset of 1ML, MixML, Backpack, and Newspeak’s module system, so those don’t need to be considered further. (TODO: reread the papers to check this. but they’re mostly type systems, rather than functionality)</p>
+<p>Later in the pipeline:
+* A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
+<p>the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement</p>
+<p>how does module import work without “with”?</p>
+</section>
+<section id="dependency-hell">
+<h2>Dependency hell<a class="headerlink" href="#dependency-hell" title="Permalink to this headline"></a></h2>
+<p>It is key to support side-by-side execution of multiple versions of the same functionality. So names also include version numbers and a cryptographic hash.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Fastest.html" class="btn btn-neutral float-left" title="As fast as C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Meta.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Objects.html" class="btn btn-neutral float-right" title="Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

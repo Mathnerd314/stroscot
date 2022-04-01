@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Macros" href="Fexprs.html" />
+    <link rel="next" title="Core syntax" href="CoreSyntax.html" />
     <link rel="prev" title="Code generation" href="Code-Generation.html" /> 
 </head>
 
@@ -67,21 +67,33 @@
 <li class="toctree-l3"><a class="reference internal" href="#compiler-ways">Compiler ways</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-memory-management">Compiler memory management</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#documentation-generator">Documentation generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#refactorer-reformatter">Refactorer / reformatter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#language-server">Language server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shell">Shell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dynamic-loading">Dynamic loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-execution">Dynamic execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logic">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debugger">Debugger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#profiler">Profiler</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Reduction.html#random-old-junk">Random old junk</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -126,7 +138,7 @@
 <h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h2>
 <p>The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.</p>
 <p>Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.</p>
-<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id24" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
+<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id27" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
 <p>Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.</p>
 <p>Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.</p>
 </section>
@@ -177,52 +189,14 @@ Special-purpose use
 If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
 Embedded systems
 These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code’s speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code’s timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.</p>
-<ul>
-<li><p>Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.
-* Peephole optimizations / strength reduction - like <code class="docutils literal notranslate"><span class="pre">x*2</span></code> by <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">x+x</span></code>, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.
-* Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Partial evaluation</p></li>
-</ul>
-</div></blockquote>
-<ul class="simple">
-<li><p>common subexpression elimination, global value numbering - tricky with blocks
-* code factoring - CSE but for control flow</p></li>
-<li><p>Test reordering - do simpler tests first - treat control flow as data</p></li>
-<li><p>Removing conditional branch cases if can prove won’t be taken</p></li>
-<li><p>Inlining</p></li>
-<li><p>Space optimizations - anti-inlining
-* Trampolines allow placing code at low addresses
-* Macro compression compresses common sequences of code</p></li>
-</ul>
-</li>
-<li><p>Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.</p></li>
-<li><p>Scheduling / reordering / pipelining
-* minimize pipeline stalls, when an instruction in one stage of the pipeline depends on the result of another instruction ahead of it in the pipeline but not yet completed.
-* ensure the various functional units are fully fed with instructions to execute.
-* avoid cache misses by grouping accesses
-* clear out unconditional jumps (inlining). Avoid inlining so much that it cannot fit in the cache.
-* splitting/combining recursive calls / basic blocks
-* Bias conditional jumps towards the common case</p></li>
-<li><p>Recursion
-* induction variable analysis to replace multiplication by a loop index with addition
-* loop reversal - changing condition to zero comparison
-* loop unswitching - moving conditional outside loop
-* hoisting invariants, partial/total redundancy elimination
-* parallelization - multi-threaded or vectorized code</p></li>
-<li><p>Alias analysis - changing memory references into values</p></li>
-<li><p>tail call optimization, Stack height reduction - stack optimizations</p></li>
-<li><p>deforestation - remove data structure</p></li>
-</ul>
 </section>
 <section id="output">
 <h2>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h2>
 <p>The simplest compiler writes out a file like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- This is generated code - see &lt;file&gt; for source</span>
-<span class="nf">interpret</span> <span class="ow">=</span> <span class="o">&lt;</span><span class="n">boilerplate</span> <span class="n">code</span> <span class="n">for</span> <span class="n">interpreter</span><span class="o">&gt;</span>
-<span class="kr">data</span> <span class="ow">=</span> <span class="s">&quot;&lt;contents of source file&gt;&quot;</span>
-<span class="nf">main</span> <span class="ow">=</span> <span class="n">interpret</span> <span class="kr">data</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- This is generated code - see &lt;file&gt; for source</span><span class="w"></span>
+<span class="nf">interpret</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">&lt;</span><span class="n">boilerplate</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">interpreter</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kr">data</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;&lt;contents of source file&gt;&quot;</span><span class="w"></span>
+<span class="nf">main</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">interpret</span><span class="w"> </span><span class="kr">data</span><span class="w"></span>
 </pre></div>
 </div>
 <p>This amounts to using a no-op specializer. But we can use a more intelligent specializer to produce more efficient code.</p>
@@ -253,7 +227,7 @@ the package set is also target-dependent</p>
 <li><p>stage 1: New compiler on old ABI <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code></p></li>
 <li><p>stage 2: New compiler on new ABI <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code></p></li>
 </ul>
-<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id79" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
+<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id102" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
 <p>For cross-compiling, we build stage 1 for the host and stage 2 for the target.</p>
 <p>The compiler depends on libraries. The bootstrap compiler does not provide updated libraries, so we must build the libraries for the Stage 1 compiler.</p>
 <p>build stage 2 compiler with the stage 1 compiler using the stage 1 package database ship with the stage 2 compiler). As such, the compiler is built with the identical libraries that it ships with. When running / interpreting byte code, we need to dynamically link packages and this way we can guarantee that the packages we link are identical to the ones the compiler was built with. This it is also the reason why we don’t have GHCi or Template Haskell support in the stage 1 compiler.</p>
@@ -325,27 +299,80 @@ The compiler itself and its boot libraries must be built for the target way.</p>
 </section>
 <section id="documentation-generator">
 <h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this headline"></a></h2>
-<p>The documentation generator provides a nice way to browse through a large codebase. The type annotations and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. There’s regex-based search, and special searches for identifiers.</p>
+<p>The documentation generator provides a nice way to browse through a large codebase. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There’s regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.</p>
+<p>As far as targets, only HTML seems particularly important.</p>
+</section>
+<section id="refactorer-reformatter">
+<h2>Refactorer / reformatter<a class="headerlink" href="#refactorer-reformatter" title="Permalink to this headline"></a></h2>
+<p>The refactoring tool reduces the amount of effort it takes to maintain code. It reads a program from a source file, rewrites the code according to specified rules, and writes the program back to the file. It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert <code class="docutils literal notranslate"><span class="pre">TODO:</span> <span class="pre">check</span> <span class="pre">rule</span> <span class="pre">XXX</span></code> comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms.</p>
+<p>Theoretically we should provide both forward and backward compatibility for language versions via the refactoring tool, but practically I think only backwards compatibility (v1 -&gt; v2) is relevant.</p>
+<p>With no rules, the refactoring tool functions as a reformatter. Python’s Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that’s used for the compiler.</p>
+<p>Inspired by gofix / <a class="reference external" href="https://go.dev/blog/gofmt">gofmt</a> .</p>
 </section>
 <section id="language-server">
 <h2>Language server<a class="headerlink" href="#language-server" title="Permalink to this headline"></a></h2>
-<p>For integration with VSCode and other editors.</p>
+<p>For integration with VSCode and other IDEs.</p>
+</section>
+<section id="shell">
+<h2>Shell<a class="headerlink" href="#shell" title="Permalink to this headline"></a></h2>
+<p>A simple REPL loop based on eval.</p>
 </section>
 <section id="notebooks">
 <h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline"></a></h2>
 <p>Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.</p>
-<p>But, jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code”, no information on what cell it’s from.
+<p>But, jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code” REPL, no information on what cell it’s from.
 So we would have to hack jupyter to get this to work.</p>
 <p>The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a “soft_reset” message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it’s the same as the previous execution - I don’t know if sending all the code is much of a bottleneck.</p>
-<p>For now the imperative approach seems fine.</p>
+<p>For now living with REPLs seems fine.</p>
 </section>
-<section id="dynamic-loading">
-<h2>Dynamic loading<a class="headerlink" href="#dynamic-loading" title="Permalink to this headline"></a></h2>
+<section id="dynamic-execution">
+<h2>Dynamic execution<a class="headerlink" href="#dynamic-execution" title="Permalink to this headline"></a></h2>
 <p>loading code at runtime
-- typecheck, JIT, etc.
-- return function pointer
-the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through the interpreter</p>
+- typecheck, JIT compile, return function pointer
+the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through an interpreter
+Compiler from IR to bytecode
+Saving snapshots of the VM state (images)
+Tracing JIT compiler
+Use libgccjit for code generation?
+Optimized assembly interpreter a la LuaJIT and JavaScriptCore</p>
+<p>everyone had two entry points.
+if you came from the
+interpreter you had to call the
+interpreter entry point and you
+came from JITed code you entered the
+JITed code favorite entry point</p>
+<p>the goal here was JITed calling JITed had minimal overhead
+so an x86 call instruction with the JITed entry point’s address</p>
+<p>so if a JITed calls interpreted there’s a
+JITed entry point that shuffles the
+arguments and jumps to the interpreter</p>
+<p>and if the interpreter makes
+a call, it’s a slow procedure that looks
+up the interpreter endpoint or else
+jumps to a trampoline that jumped to the JITed code</p>
+<p>then there’s deopt
+it’s tricky to stop running processors
+from running code
+if you try to
+edit the method call buffers processors have
+them cached
+you
+can’t actually stop it
+so first you change the vtable to the interpreter
+then you change the head of the method to jump to the interpreter</p>
 <p>Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.</p>
+</section>
+<section id="logic">
+<h2>Logic<a class="headerlink" href="#logic" title="Permalink to this headline"></a></h2>
+<p>Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).</p>
+</section>
+<section id="debugger">
+<h2>Debugger<a class="headerlink" href="#debugger" title="Permalink to this headline"></a></h2>
+<p>Need this. Reversible debugging.</p>
+</section>
+<section id="profiler">
+<h2>Profiler<a class="headerlink" href="#profiler" title="Permalink to this headline"></a></h2>
+<p>Should profile both time and memory usage.</p>
 </section>
 </section>
 
@@ -354,7 +381,7 @@ the function pointer doesn’t have to be machine code, it can be bytecode, so t
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Code-Generation.html" class="btn btn-neutral float-left" title="Code generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Macros" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="CoreSyntax.html" class="btn btn-neutral float-right" title="Core syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

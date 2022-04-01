@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Types" href="Types.html" />
+    <link rel="next" title="Language Reference" href="../Reference/index.html" />
     <link rel="prev" title="How to install Stroscot" href="Install.html" /> 
 </head>
 
@@ -55,7 +55,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#general-idea">General idea</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
@@ -93,87 +92,87 @@
 <p>With transactions we can write various common synchronization constructs.</p>
 <section id="locks">
 <h2>Locks<a class="headerlink" href="#locks" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">l</span> <span class="ow">=</span> <span class="n">mem</span> <span class="n">false</span>
-<span class="nf">acquire</span> <span class="n">l</span> <span class="ow">=</span>
-  <span class="n">atomically</span>
-    <span class="kr">if</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-      <span class="n">retry</span>
-    <span class="n">l</span> <span class="kt">:=</span> <span class="n">true</span>
-<span class="nf">release</span> <span class="n">l</span> <span class="ow">=</span>
-  <span class="n">atomically</span>
-    <span class="n">assert</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-    <span class="n">l</span> <span class="kt">:=</span> <span class="n">false</span>
-<span class="nf">isHeld</span> <span class="n">l</span> <span class="ow">=</span> <span class="n">atomically</span> <span class="p">{</span> <span class="n">l</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<span class="nf">acquire</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"></span>
+<span class="w">    </span><span class="kr">if</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">retry</span><span class="w"></span>
+<span class="w">    </span><span class="n">l</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+<span class="nf">release</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">l</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<span class="nf">isHeld</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">atomically</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="semaphore">
 <h2>Semaphore<a class="headerlink" href="#semaphore" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span> <span class="ow">=</span> <span class="n">mem</span> <span class="mi">0</span>
-<span class="nf">wait</span> <span class="n">s</span> <span class="ow">=</span>
-  <span class="n">atomically</span> <span class="p">{</span>
-    <span class="kr">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">0</span>
-      <span class="n">retry</span>
-    <span class="n">s</span> <span class="kt">:=</span> <span class="n">s</span> <span class="o">-</span> <span class="mi">1</span>
-  <span class="p">}</span>
-<span class="nf">signal</span> <span class="n">s</span> <span class="ow">=</span>
-  <span class="n">atomically</span> <span class="p">{</span>
-    <span class="n">s</span> <span class="kt">:=</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">1</span>
-  <span class="p">}</span>
-<span class="nf">read</span> <span class="n">s</span> <span class="ow">=</span>
-  <span class="n">atomically</span> <span class="p">{</span>
-    <span class="n">s</span>
-  <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">wait</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">      </span><span class="n">retry</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="nf">signal</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="nf">read</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>A <a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.BoundedSemaphore">bounded semaphore</a> is similar:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">signal_bounded</span> <span class="ow">=</span>
-  <span class="n">atomically</span> <span class="p">{</span>
-    <span class="n">s</span> <span class="kt">:=</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">assert</span><span class="p">(</span><span class="n">s</span> <span class="o">&lt;=</span> <span class="n">bound</span><span class="p">)</span>
-  <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">signal_bounded</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">bound</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="condition-variable">
 <h2>Condition variable<a class="headerlink" href="#condition-variable" title="Permalink to this headline"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">wait</span> <span class="n">p</span> <span class="n">l</span> <span class="n">action</span> <span class="ow">=</span>
-  <span class="n">atomically</span>
-    <span class="n">lock</span> <span class="n">l</span>
-    <span class="kr">if</span> <span class="n">not</span> <span class="n">p</span>
-      <span class="n">retry</span>
-    <span class="n">action</span>
-    <span class="n">unlock</span> <span class="n">l</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">wait</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="n">action</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">atomically</span><span class="w"></span>
+<span class="w">    </span><span class="n">lock</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">p</span><span class="w"></span>
+<span class="w">      </span><span class="n">retry</span><span class="w"></span>
+<span class="w">    </span><span class="n">action</span><span class="w"></span>
+<span class="w">    </span><span class="n">unlock</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="general-idea">
 <h2>General idea<a class="headerlink" href="#general-idea" title="Permalink to this headline"></a></h2>
 <p>Running transactions on an event loop looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newRequests</span> <span class="ow">=</span> <span class="n">queue</span> <span class="kt">[]</span>
-<span class="nf">allWrites</span> <span class="ow">=</span> <span class="kt">[]</span>
-<span class="nf">for</span><span class="p">(</span><span class="n">r</span> <span class="kr">in</span> <span class="n">requests_in_nondet_order</span><span class="p">)</span>
-  <span class="kr">case</span> <span class="n">r</span> <span class="kr">of</span>
-    <span class="o">...</span>
-    <span class="kt">Transaction</span> <span class="n">t</span> <span class="n">next</span> <span class="ow">=</span>
-      <span class="n">writes</span> <span class="ow">=</span> <span class="kt">[]</span>
-      <span class="n">finished</span> <span class="ow">=</span> <span class="n">run</span> <span class="p">(</span><span class="n">t</span> <span class="kt">Done</span><span class="p">)</span>
-        <span class="kr">where</span>
-          <span class="n">run</span> <span class="kt">Done</span> <span class="ow">=</span> <span class="n">return</span> <span class="n">true</span>
-          <span class="n">run</span> <span class="kt">Retry</span> <span class="ow">=</span> <span class="n">return</span> <span class="n">false</span>
-          <span class="n">run</span> <span class="p">(</span><span class="kt">Read</span> <span class="n">c</span> <span class="n">f</span><span class="p">)</span> <span class="ow">=</span>
-            <span class="n">v</span> <span class="ow">=</span> <span class="n">lookup</span> <span class="n">map</span> <span class="n">c</span>
-            <span class="n">run</span> <span class="p">(</span><span class="n">f</span> <span class="n">v</span><span class="p">)</span>
-          <span class="n">run</span> <span class="p">(</span><span class="kt">Write</span> <span class="n">c</span> <span class="n">v</span> <span class="n">f</span><span class="p">)</span> <span class="ow">=</span>
-            <span class="n">writes</span><span class="o">.</span><span class="n">push</span><span class="p">((</span><span class="n">c</span><span class="p">,</span><span class="n">v</span><span class="p">))</span>
-            <span class="n">run</span> <span class="n">f</span>
-      <span class="kr">if</span> <span class="n">finished</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">executeThisCycle</span> <span class="ow">=</span> <span class="n">nonDetBool</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">noConflicts</span><span class="p">(</span><span class="n">writes</span><span class="p">,</span><span class="n">allWrites</span><span class="p">)</span>
-        <span class="n">allWrites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">writes</span><span class="p">)</span>
-        <span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">next</span><span class="p">)</span>
-      <span class="kr">else</span>
-        <span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-<span class="nf">for</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="kr">in</span> <span class="n">allWrites</span>
-  <span class="n">c</span> <span class="kt">:=</span> <span class="n">v</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newRequests</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="kt">[]</span><span class="w"></span>
+<span class="nf">allWrites</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">[]</span><span class="w"></span>
+<span class="nf">for</span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">requests_in_nondet_order</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kr">case</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
+<span class="w">    </span><span class="o">...</span><span class="w"></span>
+<span class="w">    </span><span class="kt">Transaction</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">      </span><span class="n">writes</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">[]</span><span class="w"></span>
+<span class="w">      </span><span class="n">finished</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="kt">Done</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="kr">where</span><span class="w"></span>
+<span class="w">          </span><span class="n">run</span><span class="w"> </span><span class="kt">Done</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+<span class="w">          </span><span class="n">run</span><span class="w"> </span><span class="kt">Retry</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<span class="w">          </span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="kt">Read</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lookup</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">            </span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"></span>
+<span class="w">          </span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="kt">Write</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">            </span><span class="n">writes</span><span class="o">.</span><span class="n">push</span><span class="p">((</span><span class="n">c</span><span class="p">,</span><span class="n">v</span><span class="p">))</span><span class="w"></span>
+<span class="w">            </span><span class="n">run</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="n">finished</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">executeThisCycle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">nonDetBool</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">noConflicts</span><span class="p">(</span><span class="n">writes</span><span class="p">,</span><span class="n">allWrites</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">allWrites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">writes</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">next</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="kr">else</span><span class="w"></span>
+<span class="w">        </span><span class="n">newRequests</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"></span>
+<span class="nf">for</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">allWrites</span><span class="w"></span>
+<span class="w">  </span><span class="n">c</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">v</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -184,7 +183,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Install.html" class="btn btn-neutral float-left" title="How to install Stroscot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Reference/index.html" class="btn btn-neutral float-right" title="Language Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -45,6 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
@@ -54,14 +55,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#priorities">Priorities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#method-qualifiers">Method qualifiers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#next-method">Next method</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#semantics">Semantics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implicit-conversion">Implicit conversion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#equality">Equality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#return-type-overloading">Return type overloading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 </ul>
 </li>
@@ -97,68 +98,74 @@
   <section id="dispatch">
 <h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this headline"></a></h1>
 <p>Stroscot supports pattern matching as well as predicate dispatch:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">f</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="nf">f</span> <span class="n">y</span> <span class="o">|</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">3</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Dispatch cases are not ordered. If multiple predicates match, it is required that all matching cases produce the same result. For example if we were to modify the last case:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">f</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
-<span class="nf">f</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">2</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 
-<span class="nf">f</span> <span class="mi">1</span>
-<span class="o">#</span> <span class="kt">Error:</span> <span class="n">rule</span> <span class="n">conflict</span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="n">conflict</span><span class="w"></span>
 </pre></div>
 </div>
 <p>But if the first clause was <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">1</span> <span class="pre">=</span> <span class="pre">2</span></code> it would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">=</span> <span class="mi">0</span>
-<span class="nf">fib</span> <span class="mi">0</span> <span class="ow">=</span> <span class="mi">1</span>
-<span class="nf">fib</span> <span class="n">n</span> <span class="ow">=</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
 
-<span class="o">#</span> <span class="n">test</span>
-<span class="nf">fib</span> <span class="mi">5</span> <span class="ow">=</span> <span class="mi">5</span>
+<span class="o">#</span><span class="w"> </span><span class="n">test</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
+<p>Local functions are applied in the same way as
+global ones, i.e., the argument patterns of each rule are matched against
+the actual function arguments and the evaluation is parallel outermost.</p>
+<p>If none of the rules match then the function
+application remains unevaluated (it becomes a normal form) and no exception
+is raised.</p>
 <section id="priorities">
 <h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this headline"></a></h2>
 <p>The way sequential matching expands is that there is a chain of priorities.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prio</span> <span class="n">p1</span>
-<span class="nf">f</span> <span class="mi">1</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">1</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">clause</span><span class="w"> </span><span class="n">c1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 
-<span class="nf">prio</span> <span class="n">p2</span>
-<span class="nf">f</span> <span class="n">x</span> <span class="mi">2</span> <span class="ow">=</span> <span class="mi">2</span>
+<span class="nf">clause</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 
-<span class="nf">prio</span> <span class="n">p3</span>
-<span class="nf">f</span> <span class="n">x</span> <span class="n">y</span> <span class="ow">=</span> <span class="mi">3</span>
+<span class="nf">clause</span><span class="w"> </span><span class="n">c3</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 
-<span class="nf">prioConstrain</span> <span class="n">prioHigh</span> <span class="o">&gt;</span> <span class="n">p1</span> <span class="o">&gt;</span> <span class="n">p2</span> <span class="o">&gt;</span> <span class="n">p3</span> <span class="o">&gt;</span> <span class="n">prioLow</span>
+<span class="nf">prioConstrain</span><span class="w"> </span><span class="n">prioHigh</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">prioLow</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Each clause has its own priority. Clauses with lower priority are ignored if there are clauses with higher priorities. Clauses with incomparable priorities are combined with lub. Clauses with equal priorities have their priorities disambiguated by adding specificity overriding (i.e., the actual priority is the tuple (priority, specificity) ordered by lexicographical order). Specificity is another poset relation defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> overrides <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">UNSAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">SAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>. If the priorities + specificity are still equal then a warning is given and they are combined with lub.</p>
 <p>If a priority is not specified it uses a fresh priority with <code class="docutils literal notranslate"><span class="pre">prioLow</span> <span class="pre">&lt;</span> <span class="pre">fresh</span> <span class="pre">&lt;</span> <span class="pre">prioHigh</span></code>.</p>
 <p>There is a macro to give all clauses in a region the same priority, which makes the specificity implementation more useful.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span> <span class="n">p</span> <span class="p">{</span>
-   <span class="n">isDoor</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
-   <span class="n">isDoor</span> <span class="s">&quot;garden gate&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
-<span class="p">}</span>
-<span class="c1">-- the second clause is more specific than the first, hence overrides it</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;garden gate&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="c1">-- the second clause is more specific than the first, hence overrides it</span><span class="w"></span>
 
-<span class="nf">prioAll</span> <span class="n">p2</span> <span class="p">{</span>
-   <span class="n">isPerson</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
-   <span class="n">isPerson</span> <span class="n">m</span> <span class="o">|</span> <span class="n">isMan</span> <span class="n">m</span> <span class="ow">=</span> <span class="n">yes</span>
+<span class="nf">prioAll</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
 
-   <span class="n">isMan</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
-   <span class="n">isMan</span> <span class="s">&quot;Steve&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
 
-   <span class="n">isDoor</span> <span class="kr">_</span> <span class="ow">=</span> <span class="n">no</span>
-   <span class="n">isDoor</span> <span class="s">&quot;Steve&quot;</span> <span class="ow">=</span> <span class="n">yes</span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
 
-   <span class="n">describe</span> <span class="n">p</span> <span class="o">|</span> <span class="n">isPerson</span> <span class="n">p</span> <span class="ow">=</span> <span class="s">&quot;Humanoid&quot;</span>
-   <span class="n">describe</span> <span class="n">m</span> <span class="o">|</span> <span class="n">isMan</span> <span class="n">m</span> <span class="ow">=</span> <span class="s">&quot;Masculine&quot;</span>
-   <span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span>
-<span class="p">}</span> <span class="c1">-- again each clause overrides the second</span>
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isPerson</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Humanoid&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Masculine&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="c1">-- again each clause overrides the second</span><span class="w"></span>
 </pre></div>
 </div>
 <p>I thought about making all clauses the same priority by default, but concluded that specificity was too confusing.</p>
@@ -170,12 +177,12 @@
 <h2>Method qualifiers<a class="headerlink" href="#method-qualifiers" title="Permalink to this headline"></a></h2>
 <p>Stroscot also supports Common Lisp’s method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>, as well as a custom qualifier <code class="docutils literal notranslate"><span class="pre">list</span></code>. Although the dispatch algorithm is complex, the idea is that it is so generic that including it once in the language proper will save everyone’s time by avoiding the need to reimplement it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code> are simply <code class="docutils literal notranslate"><span class="pre">around</span></code> methods with the fixed priority <code class="docutils literal notranslate"><span class="pre">around</span> <span class="pre">&gt;</span> <span class="pre">before</span> <span class="pre">&gt;</span> <span class="pre">after</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">around</span> <span class="p">{</span> <span class="n">f</span><span class="p">;</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span> <span class="p">}</span>
-<span class="nf">after</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">around</span> <span class="p">{</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="p">;</span> <span class="n">f</span> <span class="p">}</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">after</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="p">;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Guards on around clauses are handled by unconditionally calling next-method:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">around</span> <span class="p">{</span><span class="n">f</span> <span class="o">|</span> <span class="n">c</span> <span class="ow">=</span> <span class="n">d</span><span class="p">}</span>  <span class="ow">=</span> <span class="kr">if</span> <span class="n">c</span> <span class="kr">then</span> <span class="n">d</span> <span class="kr">else</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">around</span><span class="w"> </span><span class="p">{</span><span class="n">f</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">d</span><span class="p">}</span><span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The basic idea of method combination can be seen in this <a class="reference external" href="https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Method-combination.png">illustration</a></p>
@@ -187,29 +194,24 @@
 <p>You can run the methods with different parameters, <code class="docutils literal notranslate"><span class="pre">next-method</span> <span class="pre">{</span> <span class="pre">silently=true</span> <span class="pre">}</span></code>.</p>
 <p>You can also call a specific clause, <code class="docutils literal notranslate"><span class="pre">callClause</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">guard,</span> <span class="pre">module</span> <span class="pre">=</span> <span class="pre">...,</span> <span class="pre">priority</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">}</span></code>, or its <code class="docutils literal notranslate"><span class="pre">next-method</span></code>, <code class="docutils literal notranslate"><span class="pre">callClauseNext</span></code>.</p>
 </section>
-<section id="semantics">
-<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline"></a></h2>
-<p>The semantics is that all cases are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a>. Predicate failure, failed assertions, and nontermination are all treated as bottom.</p>
-<p>The semantics of <code class="docutils literal notranslate"><span class="pre">lub</span></code> is complicated, because it’s the whole program that is analyzed - return values that are not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
-</section>
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h2>
 <p>The full dispatch mechanism is as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span> <span class="n">methods</span> <span class="n">args</span> <span class="ow">=</span> <span class="kr">do</span>
-  <span class="p">[</span><span class="n">arounds</span><span class="p">,</span> <span class="n">befores</span><span class="p">,</span> <span class="n">afters</span><span class="p">,</span> <span class="n">primaries</span><span class="p">]</span> <span class="ow">=</span> <span class="n">map</span> <span class="n">topological_sort</span> <span class="o">$</span> <span class="n">partition</span> <span class="n">methods</span>
-  <span class="n">next</span><span class="o">-</span><span class="n">method</span> <span class="ow">=</span> <span class="kt">DispatchError</span>
-  <span class="n">f</span> <span class="n">arounds</span> <span class="kr">where</span>
-     <span class="n">f</span> <span class="p">(</span><span class="n">a</span><span class="kt">:</span><span class="n">as</span><span class="p">)</span> <span class="ow">=</span> <span class="n">call</span> <span class="n">a</span> <span class="p">{</span> <span class="n">next</span><span class="o">-</span><span class="n">method</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">as</span> <span class="p">}</span>
-     <span class="n">f</span> <span class="kt">[]</span> <span class="ow">=</span> <span class="n">g</span> <span class="n">primaries</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span><span class="w"> </span><span class="n">methods</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">do</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="n">arounds</span><span class="p">,</span><span class="w"> </span><span class="n">befores</span><span class="p">,</span><span class="w"> </span><span class="n">afters</span><span class="p">,</span><span class="w"> </span><span class="n">primaries</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="n">topological_sort</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">partition</span><span class="w"> </span><span class="n">methods</span><span class="w"></span>
+<span class="w">  </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">DispatchError</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">arounds</span><span class="w"> </span><span class="kr">where</span><span class="w"></span>
+<span class="w">     </span><span class="n">f</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="kt">:</span><span class="n">as</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">     </span><span class="n">f</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="n">primaries</span><span class="w"></span>
 
-     <span class="n">g</span> <span class="kt">[]</span> <span class="ow">=</span> <span class="kt">DispatchError</span>
-     <span class="n">g</span> <span class="kr">_</span> <span class="ow">=</span>
-         <span class="n">map</span> <span class="n">call</span> <span class="n">befores</span>
-         <span class="n">x</span> <span class="ow">=</span> <span class="n">call</span> <span class="p">(</span><span class="n">concat</span> <span class="n">primaries</span><span class="p">)</span>
-         <span class="n">map</span> <span class="n">call</span> <span class="p">(</span><span class="n">reverse</span> <span class="n">afters</span><span class="p">)</span>
-         <span class="n">return</span> <span class="n">x</span>
+<span class="w">     </span><span class="n">g</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">DispatchError</span><span class="w"></span>
+<span class="w">     </span><span class="n">g</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">         </span><span class="n">map</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">befores</span><span class="w"></span>
+<span class="w">         </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="p">(</span><span class="n">concat</span><span class="w"> </span><span class="n">primaries</span><span class="p">)</span><span class="w"></span>
+<span class="w">         </span><span class="n">map</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="p">(</span><span class="n">reverse</span><span class="w"> </span><span class="n">afters</span><span class="p">)</span><span class="w"></span>
+<span class="w">         </span><span class="n">return</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 
-<span class="nf">call</span> <span class="n">binds</span> <span class="n">args</span> <span class="ow">=</span> <span class="n">fold</span> <span class="n">lub</span> <span class="kt">DispatchError</span> <span class="p">(</span><span class="n">map</span> <span class="p">(</span><span class="o">$</span> <span class="n">args</span><span class="p">)</span> <span class="n">binds</span><span class="p">)</span>
+<span class="nf">call</span><span class="w"> </span><span class="n">binds</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fold</span><span class="w"> </span><span class="n">lub</span><span class="w"> </span><span class="kt">DispatchError</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="p">(</span><span class="o">$</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="n">binds</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The way Stroscot optimizes dispatch is:
@@ -225,11 +227,11 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">(convert</span> <span class="pre">a))</span></code> (transitivity)</p></li>
 </ul>
 <p>Conversions are implicitly applied with this rule:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span> <span class="n">e</span> <span class="o">|</span> <span class="n">isError</span> <span class="p">(</span><span class="n">f</span> <span class="n">e</span><span class="p">)</span> <span class="ow">=</span> <span class="n">f</span> <span class="p">(</span><span class="n">convert</span> <span class="n">e</span><span class="p">)</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isError</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">(</span><span class="n">convert</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 <p>New cases to convert can be added; this is useful in various instances. For example we can create subtyping.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">convert</span> <span class="n">e</span> <span class="o">|</span> <span class="n">e</span> <span class="kt">:</span> <span class="kt">S</span> <span class="ow">=</span> <span class="kt">T</span> <span class="n">e</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">convert</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
 </pre></div>
 </div>
 <p>The default conversions are chosen follows:
@@ -241,6 +243,17 @@
 <section id="equality">
 <h2>Equality<a class="headerlink" href="#equality" title="Permalink to this headline"></a></h2>
 <p>Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.</p>
+</section>
+<section id="return-type-overloading">
+<h2>Return type overloading<a class="headerlink" href="#return-type-overloading" title="Permalink to this headline"></a></h2>
+<p>With return type overloading the context determines the resolution of method calls. Resolution could potentially use all information from as wide a context as possible to resolve overloading. This requires arbitrarily complex inferences on arbitrarily large pieces of text. Each method instance may do something different.</p>
+<p>One example is a lattice, the top element is <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">a</span></code>. The overloading here means that the top element may resolve to several different types, e.g. <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">Float</span></code> is <code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">Infinity</span></code> while <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">Double</span></code> is <code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">Infinity</span></code>. Now in practice, according to a Github search of <code class="docutils literal notranslate"><span class="pre">read</span></code> (another return type overloaded function), the type is almost always specified very close to the overloading, in a few ways:
+* <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">Float</span></code> directly
+* as part of the name, <code class="docutils literal notranslate"><span class="pre">topFloat</span></code>, defined as <code class="docutils literal notranslate"><span class="pre">topFloat</span> <span class="pre">=</span> <span class="pre">top</span> <span class="pre">:</span> <span class="pre">Float</span></code> or similar
+* using visible type parameters <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">&#64;Float</span></code></p>
+<p>In all cases, the type appears very close to the overloaded term, so it is just as usable to pass the type directly as a parameter, <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">Double</span></code> or <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">Float</span></code>, using normal overloading and not return type overloading.</p>
+<p>But still, there is the extra typing when you are just writing some throwaway code. For this you can use a generic version, e.g. <code class="docutils literal notranslate"><span class="pre">top</span></code> can just be a symbol and <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">a</span></code> can return whatever value it likes.</p>
+<p>The remaining case is where you really want nonlocal inference to determine the behavior of the return overloading. For example <code class="docutils literal notranslate"><span class="pre">readLn</span> <span class="pre">&gt;&gt;=</span> <span class="pre">\n</span> <span class="pre">-&gt;</span> <span class="pre">print</span> <span class="pre">(sqrt</span> <span class="pre">n)</span></code> reads a Double from standard input and prints its square root. This resolves <code class="docutils literal notranslate"><span class="pre">readLn</span> <span class="pre">:</span> <span class="pre">IO</span> <span class="pre">Double</span></code> in Haskell because sqrt can only accept floating point numbers as inputs and there is a default declaration to choose Double. Often the overloading is ambiguous and it is simply an error. For example it is ambiguous when you have subtyping or non-disjoint types, e.g. with two instances <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">B</span></code> either one can satisfy a demand for <code class="docutils literal notranslate"><span class="pre">top</span> <span class="pre">:</span> <span class="pre">(A|B)</span></code>. But there is still a semantics to <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Float</span></code> as “parse unityped, if produced float then use that, otherwise try float implementation, otherwise fail”. Is this useful? IDK</p>
 </section>
 </section>
 

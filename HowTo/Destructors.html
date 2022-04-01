@@ -48,12 +48,12 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Using destructors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#autoclosefd">AutoCloseFD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-travel">Time travel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#free-on-exit">Free on exit</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="DynamicOverriding.html">Dynamically override functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Install.html">How to install Stroscot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Transactions.html">Transactions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
@@ -88,32 +88,44 @@
              
   <section id="using-destructors">
 <h1>Using destructors<a class="headerlink" href="#using-destructors" title="Permalink to this headline"></a></h1>
+<p>General principle: Use a destructor or finalizer whenever you have an allocate-clean up pair. Use a destructor if you want the guarantee that cleanup is called immediately after an operation, otherwise use a finalizer.</p>
 <section id="autoclosefd">
 <h2>AutoCloseFD<a class="headerlink" href="#autoclosefd" title="Permalink to this headline"></a></h2>
-<p>An example usage of destructors is based on <a class="reference external" href="https://android.googlesource.com/platform/system/vold/+/android-7.1.1_r11/AutoCloseFD.h">AutoCloseFD</a>. <code class="docutils literal notranslate"><span class="pre">AutoCloseFD</span></code> is an internal symbol so as to strengthen encapsulation and avoid separating the destructor and the file descriptor.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">open</span> <span class="n">path</span> <span class="n">mode</span> <span class="n">flags</span> <span class="ow">=</span>
-  <span class="n">fd</span> <span class="ow">=</span> <span class="n">sys_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">flags</span> <span class="o">|</span> <span class="kt">O_CLOEXEC</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-  <span class="kt">AutoCloseFD</span> <span class="n">fd</span> <span class="n">newDestructor</span>
+<p>An example usage of destructors is based on <a class="reference external" href="https://android.googlesource.com/platform/system/vold/+/android-7.1.1_r11/AutoCloseFD.h">AutoCloseFD</a>. <code class="docutils literal notranslate"><span class="pre">AutoCloseFD</span></code> is not exported so as to strengthen encapsulation and in particular to avoid separating the destructor and the file descriptor.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">AutoCloseFD</span><span class="w"> </span><span class="n">hiding</span><span class="w"> </span><span class="kt">AutoCloseFD</span><span class="w"></span>
 
-<span class="nf">maybeClose</span> <span class="p">(</span><span class="kt">AutoCloseFD</span> <span class="n">fd</span> <span class="n">d</span><span class="p">)</span> <span class="ow">=</span> <span class="kr">if</span> <span class="n">lastUse</span> <span class="n">d</span> <span class="kr">then</span> <span class="n">sys_close</span> <span class="n">fd</span> <span class="kr">else</span> <span class="p">{}</span>
+<span class="nf">symbol</span><span class="w"> </span><span class="kt">AutoCloseFD</span><span class="w"></span>
 
-<span class="nf">write</span> <span class="n">t</span><span class="o">@</span><span class="p">(</span><span class="kt">AutoCloseFD</span> <span class="n">fd</span> <span class="kr">_</span><span class="p">)</span> <span class="o">...</span> <span class="ow">=</span>
-  <span class="n">sys_write</span> <span class="n">fd</span> <span class="o">...</span>
-  <span class="n">maybeClose</span> <span class="n">t</span>
+<span class="nf">open</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="n">mode</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">fd</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sys_open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">O_CLOEXEC</span><span class="p">,</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kt">AutoCloseFD</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"></span>
+
+<span class="nf">maybeClose</span><span class="w"> </span><span class="p">(</span><span class="kt">AutoCloseFD</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">sys_close</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+
+<span class="nf">write</span><span class="w"> </span><span class="n">t</span><span class="o">@</span><span class="p">(</span><span class="kt">AutoCloseFD</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="kr">_</span><span class="p">)</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">sys_write</span><span class="w"> </span><span class="n">fd</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
+<span class="w">  </span><span class="n">maybeClose</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
+
+<span class="o">...</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">operations</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">descriptors</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
 </pre></div>
 </div>
 <p>malloc/free can be similarly used.</p>
+<p>To interface code using manual management with code using destructors there are two choices. You can use the destructor version as the underlying object and make the manual methods use the destructor and <code class="docutils literal notranslate"><span class="pre">close</span></code> a no-op or a call to <code class="docutils literal notranslate"><span class="pre">use</span></code> (the latter preserves closing behavior if the destructor code does not free the resource). Or you can make the manual version the underlying object and add a variable to track if the resource has been freed, erroring in all the destructor operations if the resource is freed.</p>
 </section>
 <section id="time-travel">
 <h2>Time travel<a class="headerlink" href="#time-travel" title="Permalink to this headline"></a></h2>
 <p>The determination of which lastUse call is actually the last use is somewhat complex, but for non-branching control flow it’s easy to follow. With branches it is possible to get time-travel errors, for example</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">d</span> <span class="ow">=</span> <span class="n">newDestructor</span>
-<span class="kr">if</span> <span class="n">lastUse</span> <span class="n">d</span>
-  <span class="n">print</span> <span class="s">&quot;Contradiction!&quot;</span>
-  <span class="n">lastUse</span> <span class="n">d</span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"></span>
+<span class="kr">if</span><span class="w"> </span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Contradiction!&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
 </pre></div>
 </div>
-<p>In a lot of cases there is no observable difference in which lastUse returns true. E.g. just removing the print statement from the example we’d have nothing depending on lastUse and it can be eliminated. Similarly for <code class="docutils literal notranslate"><span class="pre">maybeClose;</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">{</span> <span class="pre">maybeClose</span> <span class="pre">}</span></code> the control flow is equivalent to having a lastUse at the end outside the conditional. So hopefully time travel errors will remain curiosities.</p>
+<p>In a lot of cases there is no observable difference in which lastUse returns true. E.g. just removing the print statement from the example we’d have nothing depending on lastUse and it can be eliminated. Similarly for <code class="docutils literal notranslate"><span class="pre">maybeClose;</span> <span class="pre">if</span> <span class="pre">...</span> <span class="pre">{</span> <span class="pre">maybeClose</span> <span class="pre">}</span></code> the control flow is equivalent to having a lastUse at the end outside the conditional. This is why using finalizers is in most cases the correct choice. The finalizer is called only once and cannot invalidate itself.</p>
+</section>
+<section id="free-on-exit">
+<h2>Free on exit<a class="headerlink" href="#free-on-exit" title="Permalink to this headline"></a></h2>
+<p>Since program resources are freed on exit by the operating system, we can speed up the program by not running destructors and finalizers before exit. This amounts to calling <code class="docutils literal notranslate"><span class="pre">use</span></code> after the exit. Not sure how this interacts with exit finishing the program.</p>
 </section>
 </section>
 
