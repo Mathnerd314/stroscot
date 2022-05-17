@@ -1,0 +1,90 @@
+dBm = 10 log_10 (power / 1 mW)
+dbW = 10 log_10 (power / 1 W)
+dBV = 20 log_10 (voltage/(1 V))
+dBu = 20 log_10 (voltage/(sqrt(0.6) V))
+dBμV = 20 log_10 (voltage/(1 μV))
+dBSPL = 20 log_10 (pressure/(20 μPa))
+dBFS = 20*log_10(abs(value)/maxValue) or 20*log10(rms(signal) * sqrt(2))
+pH = -log_10(H+ concentration / (1 molal solvent))
+Richter = log_10 ( A / (A0 microns)) or Moment magnitude scale 2/3 log_10 ( M0 / (7.5178e10 dyne⋅cm))
+
+Dimensionless:
+
+All of the following quantities are equal:
+    1 nat or neper (Np)
+    10 decineper or dNp
+    100 log point or centineper (cNp)
+    1 / (8 ln 2) byte or octet
+    1 / (ln 10) bel (power) or decade or ban
+    1 / (ln 2) bit or exposure value (EV) or stop or f-stop or octave
+    10 / (ln 10) decibel (power) or deciban
+    20 / ln(10) decibel (root power)
+
+    12 semitones = 1 octave, 100 cents = 1 semitone
+    1 decade = 1 order of magnitude
+
+
+The decibel was originally defined in terms of power ratios, but its definition has become ambiguous as root power decibels are in use (e.g. for voltage). A power ratio 10 log r dB is equivalent to a field-quantity ratio 20 log r dB_root, since power in a linear system is proportional to the square (Joule's laws) of the amplitude. The neper is almost always a root-power quantity but technically is allowed to be a power quantity as well, so it too is split into two units Np and Np_power.
+
+The decibel and the neper have a fixed ratio to each other, 20 / ln(10) dB_root = 1 Np and similarly 20 / ln(10) dB = 1 Np_power
+
+taking logarithms results in additive units rather than the more usual multiplicative ones.
+
+multiplicative:
+e.g. we say a mass is 10 grams, this means
+m = 10 * gram
+where "gram" is a variable.
+
+additive:
+When we take the log base b, we get
+log_b m = log_b 10 + log_b gram
+The units of log_b m are thus log_b gram,
+but they are added to the numerical value, rather than multiplied.
+
+The suggested notation is:
+x unitA {unitB} for x unitA + unitA ln(unitB)
+x unitA <unitB> for x unitA + unitA log_10(unitB)
+
+when unitA is 1 it is omitted
+
+example:
+pH = log_10 [H+]
+where [H+] is the hydrogen ion concentration with units of mol dm^-3
+
+Pure water at 25 degC has [H+] = 1.004 mol dm-3
+So pH = 7.00 + log_10 (mol^-1 dm^3) = 7 <mol^-1 dm^3>
+
+When the antilogarithm is taken, multiplicative units reappear quite naturally.
+
+standard free energy change, delta_G_standard, is related to the corresponding
+chemical equilibrium constant, K, by
+delta_G_standard = -R T ln K, where the gas constant is R = 8.314 J K^-1 mol^-1
+
+For water K = 1.008 X 10^-14 mol^2 dm^-6 at T = 298.15 K
+
+So the calculation is
+
+delta_G_standard
+= -8.314 * 298.15 * (-32.23 + ln(mol^2 dm^-6)) J mol^-1
+= -2.478 (-32.23 + ln(mol^2 dm^-6)) kJ mol^-1
+= 79.9 kJ mol^-1 - 2.478 ln(mol^2 dm^-6) kJ mol^-1
+= 79.9 kJ mol^-1 - 2.478 ln(mol^2 dm^-6) kJ mol^-1
+= 79.9 kJ mol^-1 + ln(mol^-4.956 dm^14.868) kJ mol^-1
+= 79.9 kJ mol^-1 + log_10(mol^-11.412 dm^34.236) kJ mol^-1
+
+So this can be written as
+79.9 kJ mol^-1 {mol^-4.956 dm^14.868}
+or
+79.9 kJ mol^-1 <mol^-11.412 dm^34.236>
+
+Molyneux says 79.9 kJ mol^-1 {mol^2 dm^-6} but this ignores the constant -2.478.
+
+standard enthalpy change from the Van 't Hoff equation is
+delta_H_standard = R T^2 d/dT (ln K)
+K= k*mol^2*dm^-6, so ln K = ln k + 2 ln mol - 6 ln dm.
+the derivative is (f(x+h)-f(x))/h so these units all cancel out and disappear, while denominator with unit of K^-1 remains.
+hence the units are the standard J mol^-1
+
+standard entropy change is given by
+delta_S_standard = R ln K + RT d(ln K) / dt
+and the ln K contributes additive units.

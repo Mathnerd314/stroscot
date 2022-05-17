@@ -247,10 +247,27 @@ Language server
 
 For integration with VSCode and other IDEs.
 
-Shell
-=====
+Interactive shell
+=================
 
-A simple REPL loop based on eval.
+A REPL loop based on eval. Available from command line as bare ``stroscot`` or ``stroscot -i files``, and from API as a library function ``replLoop env`` or similar. Supports expressions and block syntax from the main language, and commands. Commands are built-in functions to the interpreter, like ``shell clear`` which runs ``clear`` in the shell. Or maybe the syntax should be ``:shell clear`` to avoid clashing with whatever is loaded. But namespaces are a thing, ``repl.shell clear``. The syntax will have to be worked out.
+
+Full command list:
+* shell, run shell thing
+
+  * change/print current directory
+  * list files
+
+* show information about symbol
+* push/pop level of interactive environment (source files are level 0, IE starts at level 1, and more can be added)
+* clear definitions for specified symbols or current level of interactive environment
+* load file
+* dump/load interactive environment to/from text file
+* reset - clear IE, load sources file from disk
+* reload - dump IE, load sources file from disk, load IE dump
+* quit process
+* debugger commands
+* profiler commands
 
 Notebooks
 =========
@@ -262,7 +279,7 @@ So we would have to hack jupyter to get this to work.
 
 The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a "soft_reset" message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it's the same as the previous execution - I don't know if sending all the code is much of a bottleneck.
 
-For now living with REPLs seems fine.
+For now living with REPL behavior seems fine.
 
 Dynamic execution
 =================
@@ -321,7 +338,17 @@ Debugger
 
 Need this. Reversible debugging.
 
+* breakpoints: set/clear/list
+* backtrace of exception
+* stepping: single step, step out, continue until breakpoint, run ignoring breakpoints
+* evaluate pure expression
+
+
 Profiler
 ========
 
-Should profile both time and memory usage.
+* time and memory usage.
+* throughput (calls/second)
+* A/B testing of multiple implementations of a function
+
+Use statistical sampling and hardware performance counters to avoid overhead.

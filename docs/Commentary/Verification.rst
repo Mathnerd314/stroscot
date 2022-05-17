@@ -7,17 +7,17 @@ Stroscot aims to be a practical programming language, but it also aims to provid
 
 Still, static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong, with an error. Stroscot is not conservative by default - it will simply output a warning, even if it discovers a definite bug in the program. But bugs and incomplete analyses can be treated as errors with ``-Werror``, or conversely completely suppressed.
 
-Scalability
-===========
+Scalability and undecidability
+==============================
 
-Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, "state space explosion". Reports Midori: "The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!"
+Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, state space explosion. Midori says: "The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!" In general there is no fix: the properties we are interested in are non-trivial, so by Rice's theorem they are undecidable. Because of the undecidability no sound algorithm is complete - there are always programs which an algorithm will be unable to analyze.
 
 To get around this there are various tricks:
 
-* combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
-* optimize checking individual states, so larger state spaces can be checked in a given amount of time (brute force proof)
-* change the order states are explored, so that the failure mode is found earlier, before we run out of time or memory. But here we are not exploring the full state space (smart fuzzing)
-* simplify the property being checked to an approximation
+* coarsen: combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
+* brute force: check individual states really fast, so larger state spaces can be checked in a given amount of time
+* smart fuzzing: change the order states are explored, so that the failure mode is found earlier, before we run out of time or memory. But here we are not exploring the full state space
+* approximate: check a property that implies the property we interested in
 
 In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And meanwhile we can check "shallow" properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and this will likely be an area of development after Stroscot gets popular.
 
@@ -40,6 +40,7 @@ Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, 
 
 Another goal: allow creating custom optimizations with formal proofs of their correctness
 
+errors produce a concrete program trace of a failing path, which should be easy to turn into a good error message or even allow interactive debugging.
 
 Configurable Program Analysis
 =============================
@@ -122,7 +123,9 @@ CPAChecker algorithm
 Properties
 ==========
 
-The halting problem merely prevents a program from evaluating a nontrivial property of another program with perfect accuracy. It does not prevent a program from evaluating a nontrivial property (bound checks, type safety, whatever) with possible outputs Yes/No/IDK.
+Rice's theorem shows that a program cannot evaluate a nontrivial property of another program with perfect accuracy. But it does not prevent a program from evaluating a nontrivial property with possible outputs Yes/No/IDK to a reasonable level of accuracy. So all of these properties are done on a "best-effort" basis, where it is a bug in the compiler if the analysis returns IDK, but such bugs are unlikely to be fixed on a reasonable timeframe.
+
+The most common property is membership in a set (bound checks, type safety, etc.). But there are "temporal" properties which cannot be described as sets - liveness, termination etc.
 
 Reachability
 ------------
@@ -141,7 +144,7 @@ Assertions written inline, for sanity-checking. Not documented.
 assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
 assume expr - prunes traces where expression is false. backtracking implementation at runtime.
 
-Regarding debug-only assertions that are only checked in debug builds, in practice the unconditional "release" assertions are more useful/common than debug. Policies like “checked in debug” versus “checked in release” don't belong in a programming language. If you really want a debug-only check, you can say ``if(DEBUG) { requires X }``.
+Regarding debug-only assertions that are only checked in debug builds, in practice the unconditional "release" assertions are more useful/common than debug. Policies like “checked in debug” versus “checked in release” don't belong in a programming language. If you really want a debug-only check, you can say ``if(DEBUG) { assert X }``.
 
 Imagine you're designing a car and put in air bags. You test the car and the air bags in all sorts of configurations and they work great and are much safer. But just as you're getting ready to go into production to send the car out to consumers, you take out all the airbags. That's what debug-only assertions are like.
 
@@ -153,7 +156,7 @@ Invariants are just assertions in loop bodies.
 
 Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``.
 
-Java's complex form ``assert expr : exception`` that throws ``exception`` on failure seems pointless
+Java's complex form ``assert expr : exception`` that throws ``exception`` on failure seems pointless.
 
 Termination
 -----------

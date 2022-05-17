@@ -31,6 +31,6 @@ let
 in
 pkgs.stdenv.mkDerivation {
   name = "my-env-0";
-  buildInputs = [ ghc pkgs.haskellPackages.llvmPackages.clang ] ++ []; # pkgs.pdf2svg pkgs.dot2tex tex ];
+  buildInputs = [ ghc pkgs.haskellPackages.haskell-language-server pkgs.haskellPackages.llvmPackages.clang ] ++ []; # pkgs.pdf2svg pkgs.dot2tex tex ];
   shellHook = "eval $(egrep ^export ${ghc}/bin/ghc)";
 }

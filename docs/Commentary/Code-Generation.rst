@@ -367,6 +367,14 @@ FFI calls
 
 The semantics of a call are inherently system/ABI dependent, to the point of not being captured in a target triple. The semantics thus have to be described at the call site. But the data format doesn't really matter as the call instruction will most likely be wrapped / generated. Maybe libffi can help.
 
+basic FFI types: ``()``, ``bool``, ``int8``, ``int16``, ``int32``, ``int64``, ``float``, ``double``, ``pointer``
+Process C/C++ headers with clang, or inspect LLVM bitcode, to identify FFI types
+
+symbols can be statically or dynamically linked
+
+you can also just enclose foreign code in ``extern C { ... }``.
+this goes through clang to identify its FFI signature
+
 Linux syscalls
 --------------
 
@@ -524,6 +532,6 @@ LLVM IR contains:
 
 Interpreting LLVM is slow. High level abstractions are chopped up into lots of small low-level instructions. The interpreter has to execute a relatively large number of instructions to do virtual method calls. Languages built for interpretation use fewer more expensive instructions, and have lower per-instruction  overhead.
 
-JITing is fast compared to static C compilers, but it's not fast compared to real JIT compilers. It requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it's more involved than a simple template generator.
+JITing LLVM is faster than static C compilers, but it's not fast compared to real JIT compilers. It requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it's more involved than a simple template generator.
 
 LLVM IR isn't capable of representing necessary semantic information for high level languages such as Objective-C without embedding the information into it using hacky mechanisms. Existing transformations reverse-engineer Objective C out of the lowered code, which isn't guaranteed to be safe by LLVM IR rules alone and only works if the Objective C frontend generated the IR.

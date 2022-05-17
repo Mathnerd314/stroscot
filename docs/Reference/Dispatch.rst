@@ -18,7 +18,7 @@ Dispatch cases are not ordered. If multiple predicates match, it is required tha
   f y = 2
 
   f 1
-  # Error: rule conflict
+  # Error: rule conflict for `f 1`
 
 
 But if the first clause was ``f 1 = 2`` it would be allowed. This behavior is useful for creating optimized methods for specific types, and also for tests:
@@ -34,13 +34,9 @@ But if the first clause was ``f 1 = 2`` it would be allowed. This behavior is us
 
 Although writing ``assert (fib 5 == 5)`` might be clearer.
 
-Local functions are applied in the same way as
-global ones, i.e., the argument patterns of each rule are matched against
-the actual function arguments and the evaluation is parallel outermost.
+Local functions are applied in the same way as global ones, i.e., the argument patterns of each rule are matched against the actual function arguments and optimal reduction is performed.
 
-If none of the rules match then the function
-application remains unevaluated (it becomes a normal form) and no exception
-is raised.
+If none of the rules match then the function application remains unevaluated (it becomes a normal form) - by default no exception is raised.
 
 Priorities
 ==========
@@ -158,32 +154,44 @@ The way Stroscot optimizes dispatch is:
 * build a hot-biased dispatch tree
 * use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)
 
-Implicit conversion
-===================
+Conversion
+==========
 
-There is a function ``convert`` in a module in the core library. It includes as cases / requirements:
+There is a function ``convert : (T : Set) -> a -> T`` in a module in the core library.
 
-* ``convert a = convert (convert a))`` (transitivity)
+Conversion is intended for equivalent values, so it should satisfy the properties of an equivalence relation (assuming all conversions succeed):
+* Reflexive: ``convert T a = a``, if ``a : T``
+* Symmetric: ``convert T (convert T2 a) = a``, if ``a : T``
+* Transitive: ``convert T3 (convert T2 a) = convert T3 a``
 
-Conversions are implicitly applied with this rule:
+Conversion is only a partial function, hence these properties may not hold due to some of the conversions resulting in errors. For example ``convert Float32 (2^24+1)`` fails because only ``2^24`` and ``2^24+2`` are exactly representable as floats. The "exactly representable" is a requirement because of transitivity and the existence of arbitrary-precision types (``convert Exact (convert Approx a) == convert Exact a``).
 
-::
+Conversion for unions is often undefined, because if ``a : T`` converts to ``b : T2``, ``T`` disjoint from ``T2``, then by reflexivity we have ``convert (T|T2) a = a`` and by assumption and reflexivity we have ``convert (T|T2) (convert T2 a) = convert (T|T2) b = b``, violating transitivity. Hence ``convert (T|T2)`` must be undefined.
 
-  f e | isError (f e) = f (convert e)
+The conversion syntax overlaps somewhat with a constructor function, e.g. it is often the case that ``int32 x == convert Int32 x``. But conversion works "deeply" on arrays and such, and because it is an equivalence relation can be applied automatically, whereas constructors may lose information, be stateful, or lazily evaluate their argument. A constructor can call convert, but not the reverse.
 
-New cases to convert can be added; this is useful in various instances. For example we can create subtyping.
+Values could be made equivalent to their string representation. This would mainly be useful for displaying values by calling ``convert String``, as multiple decimal literals parse to floating point numbers so the other direction is unpredictable. So an explicit parse function is also needed. It seems easier to hide this functionality away in a ``NumLiteral`` type.
 
-::
+Often we prefer conversions to be total; this is accomplished by adding flags to convert describing the desired behavior. These flags may break the equivalence relation. For example ``convert Byte 1099 { narrowing = true } = 75`` whereas without the narrowing flag it would error, as it is not exactly representable. This allows re-using the promotion mechanism from the next section so is preferred to defining a new function like ``lossyConvert``. Some conversions such as `int32 to float64 <https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double>`__ do not need flags as they are already total.
 
-  convert e | e : S = T e
+Promotion
+=========
 
-The default conversions are chosen follows:
-* Conversions should be total, otherwise they are simply replacing one error with another error.
-* Also they should be injective, e.g. int32 `can <https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double>`__ be converted to float64, but int64 cannot.
+Promotion is a catch-all dispatch rule for arithmetic operators on mixed types, similar to `Julia's <https://docs.julialang.org/en/v1/manual/conversion-and-promotion/>`__. It works as follows:
 
-Without these rules it is easy to get into trouble where the overloading is ambiguous.
+1. Compute a common type using ``promote_rule``
+2. Promote all operands to common type using ``convert``
+3. Invoke the same-type implementation of the operator, if it exists
 
-TODO: or maybe Julia promotion/conversion `design <https://docs.julialang.org/en/v1/manual/conversion-and-promotion/#conversion-and-promotion>`__ is sufficient.
+For example ``(a : Int32) + (b : Float32) = (convert Float32 a + convert Float32 b) { lossy = true }`` since ``promote_rule (a : Int32) (b : Float32) = out { lossy = true}; Float32``. The system is extensible by defining new conversions and new promotion rules.
+
+Julia's promotion rules:
+* Floating-point values are promoted to the largest of the floating-point argument types.
+* Integer values are promoted to the larger of either the native machine word size or the largest integer argument type.
+* Mixtures of integers and floating-point values are promoted to a floating-point type big enough to hold all the values.
+* Integers mixed with rationals are promoted to rationals.
+* Rationals mixed with floats are promoted to floats.
+* Complex values mixed with real values are promoted to the appropriate kind of complex value.
 
 Equality
 ========
@@ -193,16 +201,19 @@ Since functions can return multiple values and comparing them can give multiple 
 Return type overloading
 =======================
 
-With return type overloading the context determines the resolution of method calls. Resolution could potentially use all information from as wide a context as possible to resolve overloading. This requires arbitrarily complex inferences on arbitrarily large pieces of text. Each method instance may do something different.
+Return-type overloading is when an expression can be interpreted as multiple types. It's generally associated with Haskell's type classes or Rust's traits, e.g. ``1 : (Num a) => a`` or ``read "1" :: (Read a) => a``.
 
-One example is a lattice, the top element is ``top : a``. The overloading here means that the top element may resolve to several different types, e.g. ``top : Float`` is ``float Infinity`` while ``top : Double`` is ``double Infinity``. Now in practice, according to a Github search of ``read`` (another return type overloaded function), the type is almost always specified very close to the overloading, in a few ways:
-* ``top : Float`` directly
-* as part of the name, ``topFloat``, defined as ``topFloat = top : Float`` or similar
-* using visible type parameters ``top @Float``
+Return-type overloading (RTO) results in nondeterminism. For example, ``readLn >>= \n -> print (n ^ 2)``, the value returned from ``readLn`` could be a float or an integer. Then for an input of ``10000`` the print call could print ``1e8`` or ``100000000``. The solution is "defaulting", returning a single value that's reasonable. For example we might default to an arbitrary-precision number type in this case.
 
-In all cases, the type appears very close to the overloaded term, so it is just as usable to pass the type directly as a parameter, ``top Double`` or ``top Float``, using normal overloading and not return type overloading.
+If the reasonable value is not clear, e.g. we want to read strings as well, we can use a function of the type, ``Blob { value : (A : Set) -> A|Invalid` }``. Then we overload operations on the blob to return blobs until it becomes clear what a reasonable value would be. So ``read s = Blob { value type = read type s }``. Then ``^`` passes it on, ``(Blob { value = a }) ^ b  = Blob { value t = (a t) ^ b, type_hint=numeric }``, and functions like ``print`` pick a type, ``print (Blob { value, type_hint=numeric }) = print (value ArbPrecisionNumber)``. Similarly type annotations ``blob : A`` pick a type. This delays the resolution of the nondeterminism until it is resolved by the context. A blob could potentially be resolved to several different types if it is used multiple times.
 
-But still, there is the extra typing when you are just writing some throwaway code. For this you can use a generic version, e.g. ``top`` can just be a symbol and ``read a`` can return whatever value it likes.
+For values like ``top`` of a lattice or a ``default`` value, you don't need this machinery, you can just use a symbol ``top`` and use promotion and conversion where necessary, like ``top = float Infinity = double Infinity``. You could take this approach with read as well, so that ``read "x"`` is a value, but it might be more work than the blob approach.
 
-The remaining case is where you really want nonlocal inference to determine the behavior of the return overloading. For example ``readLn >>= \n -> print (sqrt n)`` reads a Double from standard input and prints its square root. This resolves ``readLn : IO Double`` in Haskell because sqrt can only accept floating point numbers as inputs and there is a default declaration to choose Double. Often the overloading is ambiguous and it is simply an error. For example it is ambiguous when you have subtyping or non-disjoint types, e.g. with two instances ``top : A`` and ``top : B`` either one can satisfy a demand for ``top : (A|B)``. But there is still a semantics to ``read s : Float`` as "parse unityped, if produced float then use that, otherwise try float implementation, otherwise fail". Is this useful? IDK
+So in theory, if you actually need RTO, it is not too hard to fake it with a DSL.
 
+Now in practice, according to a Github search of ``read`` (the most common RTO function in Haskell), the type is almost always specified very close to the overloading, in a few ways:
+* ``read x : Float`` directly
+* as part of the name, by defining an auxiliary function ``readFloat x = read x : Float`` or similar
+* using visible type parameters ``read @Float``
+
+So it actually standardizes and simplifies syntax to pass the type directly as a parameter, ``read Double`` or ``read Float``, using normal overloading. Or else it can be the function itself ``Vector iterator``. Either way, RTO seems to be very rarely needed in practice.

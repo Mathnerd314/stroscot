@@ -347,7 +347,7 @@ I concluded after looking at it again that sharing parts of data structures shou
 Destructors
 ===========
 
-Destructors A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
+A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
 
 Stroscot checks a no-leak property for each destructor ``x`` that exactly one of the following holds:
 * ``lastUse x`` is called infinitely often, returning false each time
@@ -430,6 +430,11 @@ Polymorphism requires a uniform representation for types (pointer/box), or templ
 * tail call optimization, Stack height reduction - stack optimizations
 * deforestation - remove data structure
 
-can you request memory in an async fashion? memory starvation is often the result of contention, so waiting could get you the memory back. Or if you request more than is physically on the system, barring hot-swapping RAM, memory will never become available. Also, excessive paging occurs before actual memory exhaustion. performance completely tanks and the user kills the process.
+API for requesting memory in an async fashion - memory starvation is often the result of contention, so waiting could get you the memory.
+* if you request more than is physically on the system, the request will fail immediately, because that much memory will never become available, barring hot-swapping RAM.
+* the API would have to ignore swapping. Otherwise, excessive paging occurs before actual memory exhaustion. So the request succeeds but because it's backed by the disk performance completely tanks and the user ends up killing the process.
+Unfortunately, no OS APIs allow requesting memory asynchronously. The closest you get is Linux's on-demand backing allocation.
 
+Azul GC: :cite:`clickPauselessGCAlgorithm2005` :cite:`teneC4ContinuouslyConcurrent`
+Shenandoah
 

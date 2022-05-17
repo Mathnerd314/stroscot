@@ -2,7 +2,7 @@ Evaluation strategy
 ###################
 
 
-This page summarizes the arguments for strict vs lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this C-like programs have a special-cased optimization to give the expected performance.
+This page summarizes the arguments for strict vs lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this Stroscot will special-case optimization for C-like programs to give the expected performance.
 
 Strict vs lazy
 ==============
@@ -14,12 +14,14 @@ In a lazy language any subexpression can be named and "pulled out", modulo name 
 
 In a lazy language, the transformation ensures ``e`` will be evaluated exactly zero times or once, hence improving performance (although it could be a tie with the compiler de-optimizing and splitting ``e`` again if it is really cheap). In a strict language ``e`` will always be evaluated hence it is not an optimization if ``e`` could be skipped in some cases.
 
+A win for laziness.
+
 Control constructs
 ------------------
 
-Laziness allows defining new control constructs, e.g. ``and c t = if c then t else False``, similar to macros but without explicit AST manipulation. With strictness ``and false undefined`` throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``.
+Laziness allows defining new control constructs, e.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``.
 
-But this doesn't work for ``while``, because the condition and body must be evaluated multiple times. What we want is `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__.
+But this doesn't work for ``while``, because the condition and body must be evaluated multiple times. So in general we need `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__, macros, fexprs, etc. to define control constructs.
 
 ::
 
@@ -36,7 +38,7 @@ But this doesn't work for ``while``, because the condition and body must be eval
     i -= 1
   }
 
-Fexprs provide a complete solution for this.
+Hence this cannot be considered a full win for laziness.
 
 Function composition
 --------------------
@@ -49,6 +51,8 @@ Similarly there is ``within eps (improve (differentiate h0 f x))`` in :cite:`hug
 
 The related deforestation optimization removes all intermediate cons cells from the lazy definition of ``any``, making it as efficient as the expanded strict version. In a strict language deforestation can have the effect of making an undefined program defined, hence is invalid. More careful handling of termination can fix this for strict programs (says a random comment in a blog post).
 
+Win for laziness.
+
 Partial evaluation
 ------------------
 
@@ -56,20 +60,29 @@ Partial evaluation
 
 :cite:`filinskiDeclarativeContinuationsCategorical1989` says the transformation from ``if e then (1,3) else (2,3)`` to ``(if e then 1 else 2, 3)`` is valid in a strict language, but not in a lazy language, because ``e`` could diverge. The point is that some transformations are valid in a strict language but in a lazy language need a divergence analysis. But this example is rather fragile, e.g. the transformation from ``3`` to ``if e then 3 else 3`` is invalid in strict and lazy, but only if ``e`` can diverge. And as Conal `writes <http://conal.net/blog/posts/lazier-functional-programming-part-2>`__ we can define a laxer pattern match which allows the transformation in all cases, ``ifThenElse c a b = (a glb b) lub (\True -> a) c lub (\False -> b) c``.
 
+Overall, a win for laziness, and an argument for lax pattern match semantics and termination checking.
+
 Totality
 --------
 
-In a total language all evaluation strategies give the same result, so referential transparency and function composition hold. But totality gives up all the benefits of laziness w.r.t. infinite data structure expressiveness. Meanwhile the actual evaluation strategy is compiler-specified. In practice, this strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and lazy backends), so this doesn't resolve the question. The number of times an expression is evaluated is still observable via the performance.
+In a total language all evaluation strategies give the same result, so referential transparency and function composition hold. But since strict evaluation must work also, totality gives up all the benefits of laziness. Meanwhile the actual evaluation strategy is compiler-specified. In practice, this strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and lazy backends), so this doesn't resolve the question. The number of times an expression is evaluated is still observable via the performance.
 
 Arguments in a lazy language are passed as computations, so they can include non-terminating computations, whereas in a strict language arguments are evaluated values. But when we actually use a value it gets evaluated, so these computations resolve themselves. There is no way in a lazy language (barring runtime reflection or exception handling) to observe that an argument is non-termination as opposed to a real value, i.e. to make a function ``f _|_ = 0, f () = 1``. So stating that non-termination or ``undefined`` is a value in lazy languages is wrong. Similarly ``Succ undefined`` is not a value - it is WHNF but not normal form. These are programs (unevaluated expressions) that only come up when we talk about totality.
+
+Conclusion: totality is a compromise that means the worst of strict and lazy, and in practice is a Trojan horse for strictness. Some people have confused the notions of "value" and "argument" in lazy languages. The term "laziness" has a lot of baggage, perhaps it is better to market the language as "normal order".
 
 Simulation
 ----------
 
-One can implement call-by-name in a strict language by doing ``(\x -> x () + x ()) (\_ -> e)``, but if ``e`` is expensive this will evaluate ``e`` twice.
-Thunks can implement lazy computation, have ``Thunk a = Var (Evaluated a | Unevaluated (() -> a))`` and do ``(\x -> force x + force x) (delay (\() -> e))``. But there is syntactic overhead - even ignoring force/delay, ``e`` must be passed as a function to avoid evaluating it. This is too ugly to even consider. Perhaps ``{e}`` for a thunk, or Scala's call-by-name type syntax, ``(\(x : CallByName Int) -> x + x) e``.
+Running lazy code in a strict language, there are three options:
 
-Evaluating lazy code in a strict language can lead to non-termination, slowdowns, and space leaks. In contrast there is no non-termination possibility to interpreting strict programs in a lazy language. But slowdown and space leaks are still an issue.
+* unmodified: can lead to non-termination, slowdowns, and space leaks. For example anything with infinite lists will break as it tries to construct the infinite list.
+* call-by-name: To limit infinite evaluation, expressions must be passed as thunks ``\() -> e`` to avoid evaluation. Augustss has called this `"too ugly to even consider" <http://augustss.blogspot.com/2011/05/more-points-for-lazy-evaluation-in.html>`__, but fortunately many languages have introduced special support for wrapping arguments as thunks, such as Swift's lightweight closure syntax ``{e}`` and annotation ``@autoclosure``, and Scala's automatic call-by-name types, ``(\(x : CallByName Int) -> x + x) e``. Passing thunks removes nontermination but can still introduce slowdowns and space leaks as expressions are evaluated multiple times.
+* thunk data type: To fully mimic lazy semantics, a new type ``Thunk a = Var (Evaluated a | Unevaluated (() -> a))`` can be introduced with operations force/delay. Then one does ``(\x -> force x + force x) (delay {e})``. There is a lot of syntactic overhead, but it is a faithful emulation of the lazy implementation.
+
+To write a strict program in a lazy language, ignoring orthogonal aspects such as the handling of side effects, the program can simply be used unmodified. It will have the same semantics in normal conditions and possibly terminate without error in conditions where the strict version would loop infinitely. Slowdown and space leaks are possible issues, though not non-termination. Efficiency can be recovered by adding back strictness.
+
+Conclusion: Laziness wins in terms of simulation usability (use programs as-is). Performance-wise, practically, both directions of simulation can introduce slowdown and space leaks, although with invasive syntax strict can simulate lazy without overhead.
 
 Data structures
 ---------------
@@ -82,14 +95,16 @@ A strict, imperative stream (iterator) is one where reading from the stream is a
 Normal order
 ------------
 
-Laziness has the joyous property that you can write down any old cyclic rubbish and get a value out if there's any sensible way to resolve the data dependencies. Strictness is much more strict.
+Laziness has the joyous property that you can write down any old cyclic rubbish and get a value out if there's any sensible evaluation order.
+
+Strict order can evaluate unnecessarily, so it can fail needlessly if there is an expression that errors when evaluated in the wrong conditions, e.g. ``a`` in ``r where a = b / c; r = if c != 0 then a else 0``.
 
 Time complexity
 ---------------
 
 Regarding (sequential) time complexity, lazy reduction uses at most as many reduction steps as the corresponding strict reduction. Lazy corresponds to strict extended with an oracle that skips evaluation of unneeded terms. :cite:`hackettCallbyneedClairvoyantCallbyvalue2019`
 
-Consider for example this program:
+Also the cost of each reduction step is about the same. Consider for example this program:
 
 ::
 
@@ -101,20 +116,22 @@ Consider for example this program:
 In Java the overhead of the bar function call is two argument pushes, the call itself, and the return.
 GHC (without optimization) compiles this code as something like the following pseudocode:
 
-foo [x, y, z] =
-    u = new THUNK(sat_u)                   // thunk, 32 bytes on heap
-    jump: (+) x u
+::
 
-sat_u [] =                                 // saturated closure for "bar y z"
-    push UPDATE(sat_u)                     // update frame, 16 bytes on stack
-    jump: bar y z
+  foo [x, y, z] =
+      u = new THUNK(sat_u)                   // thunk, 32 bytes on heap
+      jump: (+) x u
 
-bar [a, b] =
-    jump: (*) a b
+  sat_u [] =                                 // saturated closure for "bar y z"
+      push UPDATE(sat_u)                     // update frame, 16 bytes on stack
+      jump: bar y z
 
-The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there's no "cost" for this), and a "call" (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.)
+  bar [a, b] =
+      jump: (*) a b
 
-Hence the overhead in terms of pseudo-instruction count is about the same. The function call is shifted in time but the cost is not significantly increased. However in practice cache locality and memory access times play a large role in speed and by the time the thunk is evaluated all of its references may have gone cold.
+The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there's no "cost" for this), and a "call" (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.) Hence the function call is shifted in time but the overhead in terms of pseudo-instruction count is not significantly increased.
+
+So big-O time complexity is within a constant factor. In practice the constant factor is quite important; cache locality and memory access times play a large role in speed. There is some memory fetching overhead with laziness because by the time the thunk is evaluated all of its references may have gone cold.
 
 Implementation complexity
 -------------------------
@@ -186,13 +203,13 @@ But although this case is improved, evaluating a thunk can still be delayed arbi
 Complicated
 -----------
 
-Lazy reduction can be simulated in a strict language using thunks, but the sharing graph of optimal reduction is intrusive, so one would have to represent functions via their AST. I guess it could be done. Generally, the issue is that optimal reduction is complicated. Although both lazy and optimal can be modeled as graph reduction, optimal reduction uses a more complex graph.
+Lazy reduction can be simulated in a strict language using thunks, but the sharing graph of optimal reduction is intrusive, so one would have to represent functions via their AST. I guess it could be done. Generally, the issue is that optimal reduction is complicated. Although all of strict, lazy, and optimal reduction can be modeled as graph reduction, optimal reduction uses a more complex graph.
 
-Complexity
-----------
+Time complexity
+---------------
 
-* Optimal reduction has exponential savings over lazy evaluation when evaluating Church numeral exponentiation.
+* Optimal reduction has exponential savings over lazy evaluation when evaluating Church numeral exponentiation. :cite:`aspertiBolognaOptimalHigherorder1996`
 * The optimal non-family reduction sequence is uncomputable for the lambda calculus (best known is essentially a brute force search over all reduction sequences shorter than leftmost-outermost reduction), while the optimal family reduction is simply leftmost-outermost.
 * For elementary lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. :cite:`guerriniOptimalImplementationInefficient2017` Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn't find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.
-* A simply-typed term, when beta-eta expanded to a specific form, reduces to normal form in a number of family reduction steps linearly proportional to the "size" of the term ("size" is defined in a way polynomially more than usual). Since the simply typed terms can compute functions in E4 but not E3 (i.e. strictly E4), one concludes there are terms that will take strictly E4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. :math:`2^{2^{2^n}}` for any number of 2's.
+* A simply-typed term, when beta-eta expanded to a specific form "optimal root", reduces to normal form in a number of family reduction steps linearly proportional to the "size" of the term ("size" is defined in a way polynomially more than its number of characters). Since the simply typed terms can compute functions in ℰ4\\ℰ3 of the Grzegorczyk hierarchy (Statman), one concludes there are terms that will take strictly ℰ4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. :math:`2^{2^{2^n}}` for any number of 2's. :cite:`coppolaComplexityOptimalReduction2002`
 

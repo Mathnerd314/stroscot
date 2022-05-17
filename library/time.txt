@@ -53,6 +53,61 @@ SYSTEMTIME = {
   Milliseconds : WORD,
 }
 
+Time standards
+
+We assume the observer has some knowledge of a proper time, tau (real number).
+A timescale T is a one-to-one function of the proper time.
+In Python's terminology a timescale value is "aware". But Python also considers bare times like ``10:34 AM`` with a UTC offset to be aware, which is pretty weird because you can't convert it to a proper time without the day.
+
+Seconds-based timescales:
+TT = (t : seconds - epoch chosen s.t. 599_616_000 = TAI instant 1977-01-01T00:00:00.0, matching TAI epoch)
+TAI = (t : seconds - epoch at UT2 instant 1958-01-01T00:00:00.0 )
+TAI_realization = (t : seconds - epoch of TAI, location : String)
+"GPS time", a constant offset of 19s from TAI
+TCG = (t : seconds - epoch TAI instant 1977-01-01T00:00:00.0)
+TCB = (t : seconds - epoch)
+TDB = (t : seconds - epoch)
+UT1 = (t : angular HMS seconds - epoch)
+ERA = (theta : radians - epoch)
+Apparent solar time = (t : angular HMS seconds - epoch)
+
+Day-based timescales:
+TCG/TT/TAI/GPS day-based notation uses a nominal 'day' of exactly 86400 SI seconds. The well-known point at TAI instant 1977-01-01T00:00:00.0 is assigned the label 1977-01-01T00:00:32.184 TCG, MJD 43144.0003725 TCG, and similarly for TT. The well-known point at UT2 instant 1958-01-01T00:00:00.0 is assigned the label 1958-01-01T00:00:00.0 TAI or MJD 36204.0 TAI. UTC instant 1980-01-06T00:00:00.0 (TAI instant 1980-01-06T00:00:19.0) is assigned the label 1980-01-06T00:00:00.0 GPS (MJD 44244.0 GPS).The nominal day is shorter than an actual day and it is somewhat misleading to use such day-based notations because they are not connected to the solar day.
+
+TT year-based notation uses a nominal `Julian year' of exactly 365.25 `days' of exactly 86400 SI seconds each. The TT instant 2000-01-01T12:00:00.0 (MJD 51544.5) is labelled as Julian epoch 2000.0. The year numbers correspond approximately to Gregorian calendar years within a few kiloyears of the epoch. But TT has no inherent concept of a year so the year-based notation is somewhat misleading. C
+
+Day fraction = (date : Date, fraction of day : range_real 0 1, day_start : date <-> proper_time)
+UTC = (date : Date, time : TimeWithLeapSeconds)
+UTC offsets UTC±[hh]:[mm]
+  (date : Date, time : TimeWithLeapSeconds, offset : Offset) -- date/time is offset by offset
+Civil time
+  (date : Date, time : TimeWithLeapSeconds, zone : TimeZoneId, fold : {0,1}) -- date/time in zone, fold=1 if later of ambiguous time
+  (date : Date, time : TimeWithLeapSeconds, zone : TimeZoneId, offset : Offset) -- Offset disambiguates DST
+  (date : Date, time : Time, zone : TimeZoneId, fold : {0,1,2}) -- fold=2 for if DST and leap seconds overlap
+
+Dates:
+GregorianDate = {year : i32, month : i16, day : i16} = -- e.g. 2007-12-03. Leap days are calculated using ISO-8601 proleptic Gregorian calendar
+YearDayDate = { year : int, dayNumber : range 0 366 }
+YearWeekDayDate = { year : int, weekNumber : range 0 53, day : DayOfWeek }
+JulianDate = {daysSinceEpoch : i64 }
+Possible anchors:
+* 1970-01-01, Java epoch
+* 17 November 17 1858, Modified Julian day epoch
+* 15 October 1582, start of the Gregorian calendar (Lilian date)
+* day 1=January 1, 1 of proleptic Gregorian calendar, Rata Die
+* November 24, 4714 BC in the proleptic Gregorian calendar, original Julian day numbering
+
+
+
+
+
+
+
+
+
+Offset = { hours : range_exclusive -24 24, minutes : range 0 60}
+
+
 Library types:
 
 Instant = Duration -- monotonic time
@@ -69,25 +124,23 @@ Month - enumeration January through December
 
 timedelta = { days : int, seconds : range i32 0 SECONDS_PER_DAY, microseconds : range i32 0 1e6 }
 Duration = { nanoseconds : i96 }
-Instant = Duration -- since 1970-01-01T00:00:00Z
+Duration = { days : i25, nanoOfDay : i64 | nanoOfDay >= 0 }
+Instant = Duration -- since Unix epoch 1970-01-01T00:00:00Z
 EpochSecond = i64
-date, LocalDate, GregorianDate = -- e.g. 2007-12-03. Leap days are calculated using ISO-8601 proleptic Gregorian calendar
-  {year : i32, month : i16, day : i16}
-  {daysSinceEpoch : i64 }
-  { year : int, dayNumber : range 0 366 }
-  { year : int, weekNumber : range 0 53, d : DayOfWeek }
-Possible anchors:
-* epoch 1970-01-01
-* founding of the Gregorian calendar
-* November 24, 4714 BC, Julian day numbers
-* November 17, 1858 , Modified Julian day
 LocalDateTime = (LocalDate, LocalTime)
 LocalTime = { n : i56*nanoseconds | 0 <= n < NANOS_PER_DAY }
-MonthDay = { (month, day) : (Month,i32) | 1 <= day <= maxLength month }. Can be stored as day numbers 0-365 with February 29th included.
+MonthDay = AnnualDate =
+  { (month, day) : (Month,i32) | 1 <= day <= maxLength month }
+  { dayNumber : range 0 366 } -- February 29th included
 OffsetDateTime = (LocalDateTime, ZoneOffset)
 OffsetTime = (LocalTime, ZoneOffset)
-time = { hour : range 0 24, minute : range 0 60, second : range 0 60, microsecond : range 0 1e6, fold : {0,1}, tzinfo }
-datetime = (date, time)
+time_naive = { hour : range 0 24, minute : range 0 60, second : range 0 60, microsecond : range 0 1e6 }
+time_aware = { t : time_naive, fold : {0,1}, tzinfo}
+datetime_naive = (date, time_naive)
+datetime_aware = (date, time_aware)
+
+DateInterval = { start : LocalDate, end : LocalDate} -- inclusive
+
 relativedelta =
   { years: int, months: int, days: int -- relative information
   , hours: int, minutes:int , seconds:int, microseconds:int
@@ -105,7 +158,6 @@ rrule =
 Period = { years : i32, months : i32, days : i32 } -- weeks are 7 days
 Year = { y : i32 | YEAR.checkValidValue(y) }
 YearMonth = { (y : i32, m : i32) | YEAR.checkValidValue(y) && MONTH_OF_YEAR.checkValidValue(month) }
-ZonedDateTime = (LocalDateTime, ZoneOffset, ZoneId) -- ZoneOffset disambiguates DST
 ZoneId = ZoneOffset | ZoneRegion
 ZoneOffset = {totalOffset : i32*seconds | abs totalOffset <= 18*hours}
 timezone = { name : String|none, offset : timedelta | abs timedelta < 24*hours }
@@ -263,32 +315,10 @@ Arithmetic overflows in calendars should throw exceptions
 
 The zoneinfo module provides a concrete time zone implementation to support the IANA time zone database as originally specified in PEP 615. By default, zoneinfo uses the system’s time zone data if available; if no system time zone data is available, the library will fall back to using the first-party tzdata package available on PyPI.
 
-Time standards
-
-We assume the observer has some knowledge of a proper time, tau (real number).
-A timescale T is a one-to-one function of the proper time.
-
-Timescales:
-TT = (SI second)
-TAI = (SI second)
-TCG = (SI second)
-TCB = (SI second)
-TDB = (SI second)
-UT1 = (angular HMS seconds)
-ERA = (radians)
-Apparent solar time = (angular HMS seconds)
-Day fraction = (date : Date, fraction of day : range_real 0 1, day_start : date -> proper_time one-to-one)
-UTC = (date : Date, time : TimeWithLeapSeconds)
-UTC offsets UTC±[hh]:[mm]
-  (date : Date, time : TimeWithLeapSeconds, offset : { hours : range_exclusive -24 24, minutes : range 0 60}) -- date/time is offset by offset
-Civil time
-  (date : Date, time : TimeWithLeapSeconds, zone : TimeZone, in_dst : {0,1}) -- date/time + in_dst is offset by zone offset w.r.t. date/time
-
-
-
 Dates:
-Gregorian calendar (year : int, month : range_inclusive 1 12, day : range_inclusive 1 31)
 Julian Day number
+Gregorian calendar (year : int, month : range_inclusive 1 12, day : range_inclusive 1 31)
+
 
 Time = { hours : range 0 24, minutes : range 0 60, seconds : range_real 0 60 }
 TimeWithLeapSeconds =
@@ -301,7 +331,7 @@ eraOffset (n : NTPDate)  = interpret_bits u32 seconds[bits 32:64]
 
 
 
-The UTC rounding means it is not strictly increasing: multiple UT1 instants 58-59-60 will map to the same number of seconds 59-59-0 or 59-0-0. To address this the instant can be marked as occuring during a positive leap second, 59-0!-0. A negative leap second goes 59 - 01 and does not introduce an aliasing problem.
+Leap seconds means UTC is not strictly increasing: multiple UT1 instants 58-59-60 will map to the same number of seconds 59-59-0 or 59-0-0. To address this the instant can be marked as occuring during a positive leap second, 59-60-0, where 60 is a new value. A negative leap second goes 59 - 01 and does not introduce an aliasing problem.
 
 
 UT1 and TAI are better for calculating long durations (days) as they are strictly increasing. But if you want UT1 or TAI you will have to calculate them, via converting from UTC or over the network. NTP errors can be between 2ms-100ms depending on connectivity. UTC is within 1s of UT1, and can be made better with a lookup table. TAI you just need a leap second table, and if the offset isn't important then just wait 1s until the time is definitely not a leap second.
@@ -322,4 +352,43 @@ Sidereal time or Earth rotation angle (ERA) is a linear polynomial of Julian UT1
 Terrestrial Time (TT) is TAI offset by 32.184 and revised for accuracy. Can be linearly interpolated from TAI values to accuracy of 1ns using the TT(BIPM) tables in 44 kB text files and extrapolated via a formula in the file to accuracy of within 8 nanoseconds.
 Mean solar time (UT1) is the rotation angle of the Earth as measured by various stars and radio sources corrected for location and smoothed. One mean solar revolution is 86400 UT1 seconds. Can be calculated as UTC+DUT1. DUT1 is available from https://datacenter.iers.org/eop.php to a precision of 0.05 ms daily, interpolated via an accurate IERS formula from https://hpiers.obspm.fr/iers/models/, and extrapolated to an estimated error of 25ms s at one year. The files are 3.3 MB CSV's.
 Apparent solar time: solar days plus fraction of that solar day. Calculated as UT1+equation of time+local offset. The best formula for EOT on Wikipedia is accurate to 3 seconds.
+
+Geocentric Coordinate Time (TCG) is the proper time
+experienced by an infinitely distant clock comoving with the Earth's geocentre.
+
+
+The JSR-310 `ThreeTen <https://www.threeten.org/>`__ library in `Java <https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/package-summary.html>`__ seems to have undergone the most peer review. It relies heavily on ISO 8601. Another is http://time4j.net/. For some reason these are all Java. Rust has a basic thing in `std <https://doc.rust-lang.org/std/time/index.html>`__. There is a more complete Rust library but the author is `opinionated <https://github.com/time-rs/time/issues/406#issuecomment-989753838>`__.
+
+%L - Millennium
+%C - Century
+%X - Decade
+%Y - Year
+%M - Month
+%D - Day
+%V - Week Year
+%W - Week
+%w - Week Day
+%O - Ordinal Day
+
+%h - Hour
+%m - Minute
+%s - Second
+%u - Microsecond
+
+%Z - Zone Hour including +/-
+%z - Zone Minute
+
+%[,.]3x - Value including fraction with given precision, using either comma or dot.
+%−Z     - Use U+2212 for negative timezone hours (ISO recommended)
+
+
+
+POSIX timestamp "seconds since Epoch" = {s : int*seconds}
+convertible to/from UTC { sec, min, hour, day, month, year} with leap seconds ignored by rounding up (01:60 -> 02:00). Each and every day has 86400 seconds, timestamp 0 is January 1 1970 00:00:00 UTC.
+
+Google smeared seconds
+UTS smeared seconds
+
+Note:
+    The last three terms of the expression add in a day for each year that follows a leap year starting with the first leap year since the Epoch. The first term adds a day every 4 years starting in 1973, the second subtracts a day back out every 100 years starting in 2001, and the third adds a day back in every 400 years starting in 2001. The divisions in the formula are integer divisions; that is, the remainder is discarded leaving only the integer quotient.
 

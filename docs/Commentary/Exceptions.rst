@@ -11,15 +11,15 @@ Handle
 
 Log: Set a flag or write to a log file and use another handling strategy
 
-Recovery: Execute an alternate code path that does not produce an exception or produces an exception unrelated to the original. Generally you want to recover as close to the exception's source as possible.
+Recovery: Execute an alternate code path that does not produce an exception or produces an exception unrelated to the original. Generally you want to recover as close to the exception's source as possible, but sometimes there is not enough context and it has to propagate a few levels before recovering.
 
-Retry: execute a recovery block and call the function again with modified arguments. The function is treated as a transaction, meaning that the application state is restored to its condition before the function was attempted.
+Presubstitution: don't call function again (abandon attempt), return a default value. Often the function's range is expanded to accommodate this. For example ``1 / 0`` returns ``Infinity``.  Simplest form of recovery.
 
-Resume: The exception value contains a continuation. The handler performs some work and then calls the continuation.
+Resume: The exception value contains a continuation. The handler performs some work and then calls the continuation. A more complex version of recovery.
 
-Presubstitution: don't call function again (abandon attempt), return a default value. Often the function's range is expanded to accommodate this. For example ``1 / 0`` returns ``Infinity``.
+Retry: execute a recovery block and call the block again with modified arguments. The block is treated as a transaction, meaning that the application state is not modified by the failed block. Most complex version of recovery.
 
-Containment: The exception is handled at a level boundary. It's not recovery - it doesn't fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) logs the failure. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation.
+Containment: All exceptions are caught at a level boundary (pokemon exception handling). It's not recovery - it doesn't fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) does logging, filtering, and display. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation. Another issue is that exceptions may be handled incorrectly in the middle of the call stack. Still, a common and useful pattern.
 
 Terminate (abort): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn't allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.
 
@@ -80,7 +80,9 @@ These are used in C functions with the convention that a zero or positive return
 
 In many ways these are similar to domain exceptions, but the difference is that the failure is not predictable in advance with a predicate because state may have changed between the predicate and the call.
 
-The other difference is that the set of possible exception codes is not small or fixed. The kernel is complex and a system call may return almost any exception code. And new kernels may add and use new exception codes. So in addition to exceptions for all known exception codes there also needs to be a family ``UnknownExceptionCode 123``.
+The other difference is that the set of possible exception codes is not small. The kernel is complex and a system call may return almost any exception code, hence requiring hundreds of cases. But typically there is only one way the call can succeed. Hence the argument for exceptions, to handle all the cases you don't care about in a uniform manner.
+
+Also the set of possible exception codes is not fixed. New kernels may add and use new exception codes. So in addition to exceptions for all known exception codes there also needs to be a family ``UnknownExceptionCode 123``.
 
 Examples:
 
@@ -125,29 +127,26 @@ These happen when the result doesn't fit in the specified representation, e.g. a
 Resource exhaustion
 ~~~~~~~~~~~~~~~~~~~
 
-This covers allocation failure, out of memory (OOM), stack overflow, out of file descriptors, etc. Any allocation attempt might fail, because the developer doesn't know the total resources available on the target system, and because other threads and other processes are simultaneously competing for that same unknown pool.
+This covers allocation failure due to running out of memory (OOM), stack overflow, out of file descriptors, etc. Resource exhaustion exceptions appear in the typical way, as an expression reducing to an exception rather than its expected value.
 
-While the compiler knows exactly where allocations occur, the programmer cannot generally predict whether evaluating an expression will allocate.
+OOMs are unpredictable at runtime because threads compete for memory. Any allocation attempt might fail, because the developer doesn't know the total resources available on the target system, and because other threads and other processes are simultaneously competing for that same unknown pool. But OOM locations are predictable to the compiler because it knows exactly where allocations occur and can insert the exception throw.
 
-OOM would have to consider
-
-everything that could allocate memory can throw, which includes a
-large number of implicit operations.  Such a language could not claim
-to use marked propagation.
-
-
-Here are some examples:
+But the programmer cannot generally predict whether evaluating an expression will allocate and hence potentially throw an OOM, because of implicit allocations. Here are some examples:
 * Implicit boxing, causing value types to be instantiated on the heap.
 * marshaling and unmarshaling for the FFI
 * immutable array operations
 * graph reduction
-* JITting a method or basic block, generating VTables or trampolines
+* JITing a method or basic block, generating VTables or trampolines
 
-Stack overflow is more tractable than OOM, in the sense that there is no asynchronous competition for the resource. Herb Sutter claims "a function cannot guard against [stack exhaustion]", but it is easily guarded against by switching to an alternate stack. It is fairly predictable to determine whether an expression uses the C stack: it must call a C function.
+But programming OOM-free is consistent, in the sense that if the compiler is able to eliminate all allocations and hence eliminate the possibility of OOM, then these will most likely be consistently eliminated on every compile. So asserting that a function or block can't OOM is possible. .NET had Constrained Execution Regions which implemented this, with various hacks such JITing the region at load time rather than when the region was first executed. So there's precedent.
 
-Stack overflow can leave a Windows critical section in a corrupt state. Windows user routines likely have many stack overflow bugs, this isn't something it's hardened against. On Linux the syscalls don't use a stack so should be fine.
+So then there are two ways to handle OOM: let it crash, or try to recover. Recovering from OOM is hard, since you can't allocate more memory. It is allowed to try to allocate memory, but the handler should expect this to fail. The JVM apparently has weird bugs when you catch OOM, like 2 + 3 = 7. But you can restore invariants, e.g. release locks.
 
-Resource exhaustion exceptions appear as an expression reducing to an exception rather than its expected value. Code handling resource exhaustion should restore its invariants (release locks etc.) without requiring new resources. It is allowed to try to allocate resources, but it should expect for these allocations to fail.
+Stack overflow is more tractable than OOM, in the sense that there is no asynchronous competition for the resource, hence a static analysis can show that there is sufficient stack. It is also easy to handle stack overflow by switching to an alternate stack. It is also fairly predictable to determine whether an expression uses the C stack: it must call a C function.
+
+Stack overflow can leave a Windows critical section in a corrupt state. Windows user routines likely have many stack overflow bugs, this isn't something it's hardened against. So maybe stack overflow isn't recoverable on Windows. On Linux the syscalls don't use a stack so should be fine.
+
+Out of file descriptors is pretty easy to handle. Since few operations allocate file descriptors, it is easy to avoid allocating FDs in a handler.
 
 Deadlock
 ~~~~~~~~
@@ -175,11 +174,11 @@ Of course true recovery still requires handling all exceptions inside the thread
 Aborts
 ~~~~~~
 
-An `abort <https://docs.microsoft.com/en-us/dotnet/api/system.threading.thread.abort?view=net-6.0>`__ is an exception that can't be suppressed unless you defuse it by calling ``ResetAbort`` with the correct token inside the catch handler. The abort is automatically re-raised at the end of any catch block that catches it without defusing it.
+An `abort <https://docs.microsoft.com/en-us/dotnet/api/system.threading.thread.abort?view=net-6.0>`__ is an exception that can't be suppressed unless you defuse it by calling ``ResetAbort`` with the correct token inside the catch handler. The abort is automatically re-raised at the end of any catch block that catches it without defusing it. A similar idea is an exception with a freshly defined type that can't be matched by anything but a corresponding handler.
 
-This got removed from .NET, so it's not clear that the rethrowing/defusing behavior is needed in practice. Joe Duffy gives the example of stopping a UI computation early, but you can implement that directly with callCC.
+Examples include aborting a UI computation before it finishes due to a redraw, and returning a solution directly from inside a search tree's call stack.
 
-However the idea of an "freshly-typed" exception that can't be matched by anything but a catch-all handler seems useful.
+This got removed from .NET, so it's not clear that the rethrowing/defusing behavior is needed in practice. The control flow pattern can be implemented directly with continuations.
 
 Process exit
 ~~~~~~~~~~~~
@@ -189,11 +188,11 @@ Using a ``ProcessExit`` exception for exiting ensures graceful cleanup and allow
 Serious bugs
 ~~~~~~~~~~~~
 
-ExecutionEngineException
-An Access Violation inside mscorwks.dll or mscoree.dll (except in a few specific bits of code, like the write barrier code, where AVs are converted into normal NullReferenceExceptions).
-A corrupt GC heap
+* ExecutionEngineException
+* An Access Violation inside mscorwks.dll or mscoree.dll
+* A corrupt GC heap
 
-These are serious bugs in the runtime or core standard libraries.  It's probably a security risk to continue execution under these circumstances, because it's easy to imagine cases where type safety or other invariants have been violated.
+These are thrown in the runtime or core standard libraries when safety invariants have been violated. Although it's generally a security risk to continue execution, there are cases where these exceptions can be handled, e.g. write barrier code that catches access violations and converts them into NullReferenceExceptions.
 
 Asynchronous exceptions
 -----------------------
@@ -504,21 +503,22 @@ Syntax
 
 The Swift error handling rationale classifies unwinding by the syntax required:
 
-* manual: propagation is done with normal control structures (if return code in C, NSError out parameter in Objective-C, Maybe or Either ADT in Haskell)
+* manual: propagation is done with control operators or structures (if return code in C, NSError out parameter in Objective-C, Maybe or Either ADT in Haskell)
 * automatic: propagation happens according to rules defined by the language
 
-Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manual propagation can be implemented with a few basic facilities (out parameters, conditionals) it doesn't need any special considerations and is always available. The boilerplate marks the call site and that the function can throw exceptions (e.g. an out-parameter named ``error``), so it is also marked propagation and typed propagation. Ignoring an exception that is returned through a side channel is a coding error - it does not make manual exception propagation "untyped" as the Swift document claims. Unsafe, perhaps.
+Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manually propagated exceptions can be implemented with basic language facilities (out parameters, conditionals) they don't need any special considerations and are always available. The boilerplate marks the call site and that the function can throw exceptions (e.g. an out-parameter named ``error``), so it is also marked propagation and typed propagation. Ignoring an exception that is returned through a side channel is a coding error - it does not make manual exception propagation "untyped" as the Swift document claims. Unsafe, perhaps.
 
 Automatic propagation is more succinct and efficient, and besides complicating the language there's not much reason to avoid it.
 
-``throw`` / ``catch`` have become the common keywords after C++ and Java, but it's syntactically heavyweight and we can get away without any new syntax. Exceptions aren't magic and don't need special syntax. With the types like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exceptions can be pattern-matched like any other return value:
+``throw`` / ``catch`` have become the common keywords after C++ and Java, but it's syntactically heavyweight. Exceptions aren't magic and don't need special syntax. With a variant type like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:
 
 ::
 
   foo = return AnException
 
   bar = case foo of
-    AnException -> "yay"
+    AnException -> "ohno"
+    r -> "success"
 
 The case handling syntax seems easy and clear, and it's possible to locally reason about and decide how best to react to exceptions.
 But a Quorum-style study should check on what's clearest to beginners. Limiting ``return`` to normal values and using ``throw`` for ``Exception`` values is also a possibility.
@@ -532,7 +532,6 @@ Just because there is shared syntax doesn't mean exceptions don't propagate, exc
 
 try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
 try X else Y - presubstitute Y on exception
-monadic operations (Rust's and_then, Scala's Option, https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html).
 
 NaN style propagation - ``a + b`` is either an exception or the sum. Problem: ``ExceptionA + ExceptionB``, which exception gets returned? Depends on evaluation strategy, compiler implementation detail. (SPJ says "nondeterministic")
 
@@ -567,16 +566,7 @@ With the flag/exception as an out parameter it looks like:
 The same variable is used as an out-parameter multiple times; but the exception must be checked each time to avoid later calls overwriting the variable.
 Either way it's ugly and annoying but it's better than getting magic unexpected gotos sprinkled throughout your code at unpredictable places.
 
-Go uses multiple return values for exception codes so you write:
-
-::
-
-  val, err = foo()
-  if err != nil {
-    return err
-  }
-
-You reuse err for each call:
+Go uses multiple return values for exception codes. You reuse err for each call, so you write:
 
 ::
 
@@ -593,13 +583,13 @@ You reuse err for each call:
     }
     fmt.Println("second", v2)
 
-You can forget the verbose if condition. Because `err` is used in other places it will not trigger an unused variable warning, but the errcheck linter finds missing checks every time.
+You can forget the if condition. Because `err` is used in other places it will not trigger an unused variable warning, but the errcheck linter finds missing checks every time.
 
-In functional languages there's the ``Either`` type, e.g. ``write_line : (&mut self, s: &str) -> Result<(), IoError>`` type in Rust.
+In functional languages there's the ``Either`` variant type or its less informative cousin ``Optional = Either ()``, e.g. ``write_line : (&mut self, s: &str) -> Result<(), IoError>`` in Rust, Scala's Option/Try, https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html.
 This forces the caller to deal with the exception if they want to use the
 result.  This works well unless the call does not really have a
 meaningful result (as ``write_line`` does not); then it depends on
-whether language makes it easy to accidentally ignore results.  It
+whether there is a warning for ignoring results. Variant types
 also tends to create a lot of nesting, one level for every sequential
 computation that can fail::
 
@@ -622,6 +612,13 @@ A bind operator addresses the exception handling but still requires nesting::
       )
     )
 
+To solve nesting Rust has introduced the question mark operator::
+
+  fn parse_two_ints_and_add_them() {
+    x = parse_int()?
+    y = parse_int()?
+    return OK (x+y)
+  }
 
 defining a custom exception type:
 

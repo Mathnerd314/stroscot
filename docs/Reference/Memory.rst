@@ -193,11 +193,17 @@ A symbol can be thought of as a type of reference. It supports neither reading n
 Wrapper
 _______
 
-A wrapper reference is a custom implementation of the basic allocate/get/set operations. There's no special support needed in the language for this beyond overloading.
+A wrapper reference is a custom implementation of the read/modify operations. There's no special support needed in the language for this beyond overloading ``read (Wrapper {read,modify}) = read`` and ``(Wrapper {read,modify}) := newV = modify newV``.
 
 ::
 
-  x := [3,4]
-  read x # [3,4]
+  inner = mut [3,4]
+  cell_0 := newWrapper
+    read = (read inner)[0]
+    modify newV =
+      inner := read inner // { 0 = newV }
+  read cell_0 # 3
 
 For example, there is a wrapper API around shared memory to allow load/store of non-word values; it packs and writes or reads and unpacks, erroring if the value doesn't fit in the array. Hence a 1-word shared memory reference can be used like a variable containing a word.
+
+The wrapper should satisfy ``{ modify r x; read r } = { modify r x; return x }``.

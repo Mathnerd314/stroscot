@@ -1,14 +1,29 @@
 Imperative programming
 ######################
 
-Purity
-======
+Pure arrays
+===========
 
-:cite:`pippengerPureImpureLisp1997` compares a pure CBV Lisp to one extended with mutation operators. He presents a problem, an O(n) impure solution, and a pure O(n log n) solution that simulates the impure one with a balanced binary tree. But the key result of the paper is that a pure algorithm in his system will require O(n log n) time. His proof is a combinatorial argument based on the small number of Lisp operations. :cite:`birdMoreHasteLess1997` demonstrate that Haskell can solve the problem in amortized O(n) time, via the use of infinite lazy streams. :cite:`ben-amramNotesPippengerComparison1996` says (without proof) that any problem of the form read-update-write similarly has an efficient lazy stream implemention. This seems to encompass all Haskell 1.0 programs as they use lazy streams for I/O. Generally it seems the thunk update mechanism is powerful enough to simulate imperative programming, it just requires mind-bending contortions to program efficiently as one has to pass around a large self-referential partially evaluated data/control structure. But nobody has formally proved this.
+Naively, destructive update is required to implement some algorithms efficiently. In particular :cite:`pippengerPureImpureLisp1997` compares a "pure" CBV Lisp to one extended with "impure" destructive mutation operators. He presents a problem, an O(n) impure solution, a pure O(n log n) solution that simulates the impure one with a balanced binary tree, and a proof that any solution in the pure CBV Lisp will require at least O(n log n) time. The proof depends on some key assumptions:
 
-Another way around Pippinger's proof is to provide an O(1) pure "array update" operation. The naive implementation of pure array update copies the array (O(n) update) or maintains a tree structure (O(log n) access time). But :cite:`hudakAggregateUpdateProblem1985` shows that the compiler can search through possible evaluation orders for an evaluation order that never accesses the old version of an array after updating, and transform the program to use O(1) destructive update ("automatic destructive update"). This works for the class of "single-threaded" FP programs, which include all the "natural translations" of imperative programs. Some of :cite:`okasakiPurelyFunctionalData1998`'s data structures can only be used single-threaded as well. Roc seems to be going down this route. For non-single-threaded FP, there is a log(log(n)) lower bound on persistent arrays :cite:`strakaFullyPersistentArrays`, which applies to both lazy and impure programs. So if we use automatic destructive update with a fallback to the log(log(n)) arrays we've gotten the best possible asymptotic performance.
+1. A cons cell can refer only to previously-constructed values
+2. The pure programs use a small set of primitive Lisp operations, ``ATOM EQ READ WRITE CONS CAR CDR``, and for the impure programs also ``RPLACA RPLACD``, all of which have constant cost
+
+Challenging the first assumption, :cite:`birdMoreHasteLess1997` demonstrates that Haskell can solve the problem in amortized O(n) time, via the use of infinite lazy streams. :cite:`ben-amramNotesPippengerComparison1996` says (without proof) that any problem of the form read-update-write similarly has an efficient lazy stream implementation. This seems to encompass all Haskell 1.0 programs as they use a lazy stream ``[Response] -> [Request]`` for I/O. Generally it seems the thunk update mechanism is powerful enough to simulate destructive update, one passes around a large self-referential partially evaluated data/control structure and swaps out thunks with new self-references once they have been been evaluated. But nobody has formally proved this (TODO: write a paper). Stroscot is lazy but due to the contortions required I don't think this can be the recommended style.
+
+Challenging the second assumption, :cite:`hudakAggregateUpdateProblem1985` shows a language can provide an O(1) pure "array update" operation. The naive implementation of pure array update copies the array (O(n) update) or maintains a tree structure (O(log n) access time). But Hudak shows that the compiler can search through possible evaluation orders for an evaluation order that never accesses the old version of an array after updating, and transform the program to use O(1) destructive update ("automatic destructive update"). This works for the class of "single-threaded" FP programs that don't access old versions.
+
+Single-threadedness seems like a decent restrictions for good performance. Per Hudak, all the "natural translations" of imperative programs are single-threaded. :cite:`okasakiPurelyFunctionalData1998`'s lazy data structures have amortized good performance only when used single-threaded. Roc and Koka seem to be going down this route via alias analysis and ref-counting.
+
+For non-single-threaded FP, there are log(log(n)) persistent arrays :cite:`strakaFullyPersistentArrays`. A persistent array is an abstract data type with two operations, get/set a value at an index of the array. The paper claims this is the best possible, but the proof looks sketchy and only applies to lookup operations.
+
+ So if we use automatic destructive update with a fallback to the log(log(n)) arrays we've gotten the best possible asymptotic performance.
 
 Haskell avoided automatic destructive update because it seemed too complicated, and instead relies on monads. Monadic style guarantees single threading, hence matching the performance of imperative languages. Ocaml does something similar by allowing programs with side effects.
+
+
+ The bound comes because we can answer the predecessor search problem with one lookup operation, after constructing some arrays, so the lookup must cost at least log(log(n)).
+
 
 
 Similarly Clean has uniqueness types, but this disallows a simple example of implementing id in terms of const:
@@ -64,15 +79,16 @@ Continuations
 
 Stroscot use continuations for its I/O model because continuations are simple and universal. They're the supercharged typed equivalent of a goto. A continuation is a function that takes as argument "the rest of the program", or "its future". Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.
 
-Continuations are the basis in formal denotational semantics for all control flow, from goto statements to exception handling, subsuming vanilla call flow, recursion, generators, coroutines,
-backtracking, and even loops along the way. This allows a uniform and consistent interface.
+Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface.
+
+Stroscot models I/O operations as constructor functions ('tasks') that look like continuation application. With this approach an I/O operation is data that can be pattern-matched over, allowing many metaprogramming techniques. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
 
 vs Monads
 ---------
 
 Continuations are `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type via ``m >>=`` and retrieved via ``f return``. In particular the Codensity monad ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Without the forall, callcc is implementable and the type is too large, see :cite:`wadlerEssenceFunctionalProgramming1992` section 3.4 for an example.
 
-Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" mentioned is similar to Codensity.
+Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned is similar to Codensity.
 
 vs Yoneda
 ---------
@@ -100,14 +116,12 @@ Generally it seems that the Yoneda thing solves a problem Stroscot doesn't have.
 vs multi-prompt delimited continuations
 ---------------------------------------
 
-Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations (the ``(a -> b) -> b`` type), but as the paper shows multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
+Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations ``Cont b a = (a -> b) -> b``, but as the paper shows, multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
 
 vs world token
 --------------
 
-Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens cannot be forged. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse the world are broken and have to be forbidden. Ensuring this holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
-
-With the task+continuation approach an I/O operation is data that can be pattern-matched over. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
+Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse the world are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
 
 vs algebraic effects
 --------------------
@@ -124,9 +138,46 @@ CBPV has "values" and "computations". The original presentation has these as sep
 vs Applicative
 --------------
 
-Uses of Applicative can always be rewritten using the laws to be of the form ``pure f <*> a <*> b ... <*> d`` (``<*>`` is left associative). So the idiom bracket behavior is covered by variadic functions, ``variadic f a b ... d``.
+All uses of Applicative can be rewritten using the laws to be of the form ``pure f <*> a <*> b ... <*> d`` (where ``<*>`` is left associative), hence all uses can be rewritten to the idiom bracket syntax. And the idiom bracket syntax ``([ f a b c ])`` can always be replaced with variadic function syntax, ``apply_thing f a b c``. So variadic functions are sufficient.
 
-The other way is to use the Cayley representation of Applicative, ``Rep f a = forall a. f a -> f (b,a)``. :cite:`rivasNotionsComputationMonoids2014` This still has a Functor constraint so actually we work with ``Rep (Yoneda f) a`` for a typeclass-free representation. (``Yoneda f a = forall b. (a -> b) -> f b``, see `here <https://fa.haskell.narkive.com/hUgYjfKJ/haskell-cafe-the-mother-of-all-functors-monads-categories#post3>`)
+Applicative can also be represented typeclass-free as functions using their Cayley representation and the Yoneda lemma, see :cite:`rivasNotionsComputationMonoids2014` and `this email <https://fa.haskell.narkive.com/hUgYjfKJ/haskell-cafe-the-mother-of-all-functors-monads-categories#post3>`__.
+
+::
+
+  Rep f v = forall a. f a -> f (b,a)
+  Yoneda f a = forall b. (a -> b) -> f b
+  Applicative f a = Rep (Yoneda f) a
+  pure : a -> Applicative f a
+  (<*>) : Applicative f (a -> b) -> Applicative f a -> Applicative f b
+
+  lift : (pure : a -> f a) -> ((<*>) : forall b. f (a -> b) -> f a -> f b) -> f a -> Applicative f a
+  lower : Applicative f a -> f a
+
+So every function ``Applicative f => f a -> f b -> ...`` can be replaced with ``Applicative f a -> Applicative f b -> ...`` - the normalization enabled by Cayley and Yoneda means you don't have to worry about instance coherency.
+
+vs Async
+--------
+
+In JavaScript
+
+::
+
+  async function foo() {
+    v = await f
+    return g(v)
+  }
+
+translates to
+
+::
+
+  function foo() {
+    return f().then(v => { return g(v) })
+  }
+
+The ``then`` operation is basically monadic bind, so this is another form of monad syntax. There are `inconsistencies <https://buzzdecafe.github.io/2018/04/10/no-promises-are-not-monads>`__ with the Monad laws due to Promise flattening, which are enshrined in the spec and `unfixable <https://github.com/promises-aplus/promises-spec/issues/94>`__ without creating a wrapper API. But ignoring those, the Promise type is something like ``Promise err a = Fulfilled a | Rejected err | Pending ({ resolve : a -> IO (), reject : err -> IO ()} -> IO ())`` which focusing on ``Pending`` is a double-barrelled CPS monad ``EitherT err (Cont (IO ())) a``.
+
+The issue is the syntactic burden: marking core library calls with "await" and the whole call chain with "async" is tedious. It's better to make the async behavior automatic.
 
 "Unsafe" I/O
 ============
@@ -220,11 +271,11 @@ Stroscot schedules the instructions to maximize instruction-level parallelism, w
 
 With large (>1000 width) matrices we might want to multiply sub-matrices on multiple threads (cores). That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn't parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OpenMP, OS thread, green thread) influences what granularity to split up the computation at.
 
-But still, for complex data science type computations we might want automatic parallelization. So we can provide a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits into small" operations on top of fork/join model and taking the thread / task queue implementation as a parameter. Doug Lea's work stealing task queues can be very efficient given the correct task granularity.
+But still, for complex data science computations we might want automatic parallelization that takes advantage of multicore hardware. So we can provide a DSL function ``parallelize`` to automatically rewrite pure computations to concurrent ones, implementing the "small on single thread, big splits into small" operations on top of fork/join model and taking the thread / task queue implementation as a parameter. Doug Lea's work stealing task queues can be very efficient given the correct task granularity.
 
 Haskell's "par" is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It's just as clear to use explicit fork/join operations, and indeed the ``rpar/rpar/rseq/rseq`` pattern proposed in `the Parallel Haskell book <https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html>`__ is just fork/join with different naming.
 
-As far as the actual task granularity, Cliff says somewhere around the middle of the microsecond range is the break-even point, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress.
+As far as the actual task granularity, Cliff Click says the break-even point is somewhere around the middle of the microsecond range, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress in another thread.
 
 OS Model
 ========
@@ -237,6 +288,5 @@ One or more threads run in the context of the process. A thread is the basic uni
 
 Windows has a special thread type "UMS thread" which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
 
-A fiber / green thread / virtual thread consists of a stack, a small storage space for registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer OS calls than a full-on thread context switch. When fibers are integrated into the runtime they can be more memory efficient than threads, otherwise they do not provide many advantages over threads.
+A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer OS calls than a full thread context switch. When fibers are integrated into the runtime they can be more memory efficient than threads. Per Microsoft, fibers in C do not provide many advantages over threads.
 
-async marking makes core library functions more painful to call and requires a special annotation on the whole call chain. Avoid it by making everything async.

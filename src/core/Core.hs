@@ -574,7 +574,7 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
     Nothing -> ([], pure graph)
     Just edge_n -> let (rest, g) = reduce graph edges edge_n dn in ((e,r) : rest, g)
   in case (r,s,dir) of
-  (Dup l hd (Rule dup_out dup_ins), _, Down) ->
+  (Dup l hd (Rule dup_out dup_ins), _, _) ->
     case follow dup_out Down of
       Nothing -> ([], pure graph)
       Just dup_target ->
@@ -597,30 +597,8 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             }
             let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
             pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
-  (DupInv l hd (Rule dup_ins dup_out), _, Up) ->
-    case follow dup_out Down of
-      Nothing -> ([], pure graph)
-      Just dup_target ->
-        case dup_target of
-          Dup _ _ _ | dir == Down -> expand dup_out Down
-          DupInv li hdi (Rule dupi_ins dupi_out) | l == li && hd == hdi -> replaceM $ do
-            pure . join_edges (zip dupi_ins dup_ins) . replace [r,dup_target] [] $ graph
-          _ -> replaceM $ do
-            (newnodes, newedges) <- fmap unzip . for dup_ins $ \in_edge -> runWriterT $ traverseEID (\e ->
-                if e == dup_out then pure in_edge else do
-                  e' <- lift $ e %% ""
-                  tell [(e,e')]
-                  pure e') dup_target
-            -- make dup/dupinv nodes
-            let t_ports = filter (\(_,gd) -> eid gd /= dup_out) $ ports dup_target
-            let tr_edges = transpose newedges
-            let f (v,gd) out_edges = traceShow (v,gd,out_edges) $ case v of {
-              Top -> Dup (maybe l id $ level gd) (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
-            ; Bottom -> DupInv (maybe l id $ level gd) (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
-            }
-            let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
-            pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
-  (Lift hd (Rule (i,lt) (j,lb)), _, Down) ->
+  (DupInv l hd (Rule dup_ins dup_out), _, Up) -> expand dup_out Up
+  (Lift hd (Rule (i,lt) (j,lb)), _, _) ->
     case follow lt Down of
       Nothing -> ([], pure graph)
       Just lift_target ->
@@ -642,7 +620,8 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             }
             let newliftnodes = assert (length t_ports == length newedges) $ zipWith f t_ports newedges
             pure $ replace [r,lift_target] ([newnode]++newliftnodes) graph
-  (LiftInv hdi (Rule (j,lti) (i,lbi)), _, Up) ->
+  (LiftInv hdi (Rule (j,lti) (i,lbi)), _, Up) -> expand lbi Up
+{-
     case follow lbi Up of
       Nothing -> ([], pure graph)
       Just lift_target ->
@@ -664,6 +643,7 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             }
             let newliftnodes = assert (length t_ports == length newedges) $ zipWith f t_ports newedges
             pure $ replace [r,lift_target] ([newnode]++newliftnodes) graph
+-}
   (Cut (Rule (Sequent c_rseq () c_r, Sequent c_lseq c_l ()) (Sequent c_bseq () ())), _, Up)->
     case follow c_r Down of
       Nothing -> ([], pure graph)
@@ -754,17 +734,36 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                 pure . join_edges ([(c_lseq, c_bseq), (c_rseq, snd bd_bseq)] ++ joins) $
                   replace [r,right_node,left_node] (cut:lifts) graph
 
-{-
-      (Bang (Rule (Sequent b_tseq b_tl (b_t, b_tr)) (Sequent pl_bseq pl_main (irr, ir))), BangD (Rule (Sequent db_seq f ()) (Sequent dseq ill ()))) | ill == c_l -> let
-        (del,add) = join_edges (pl_main++b_tr) (b_tl++b_tr)
-        cut = Cut b_t f
-        in replace ([r,left_node,right_node]++del) ([cut]++add)
-      (_, Bang (Rule (Sequent b_tseq b_tl (b_t, b_tr)) (Sequent pl_bseq pl_main (irr, ir)))) | Just idx <- c_l `elemIndex` pl_main -> let
-        newll = b_tl !! idx
-        cut = Cut c_r newll
-        bang = Bang i (Ctx (delete idx pl_main) ir) b_t (Ctx (delete idx b_tl) b_tr)
-        in replace [r,left_node] [cut,bang]
-        -}
+              (Bang (Rule (Sequent br_tseq br_tl (br_tmain, br_tr)) (Sequent br_bseq br_bl (br_bmain, br_br))),
+                Bang (Rule (Sequent bl_tseq bl_tl (bl_tmain, bl_tr)) (Sequent bl_bseq bl_bl (bl_bmain, bl_br)))) | c_r == snd br_bmain -> replaceM $ do
+                let n = fromJust $ findIndex (\(_,eid) -> eid == c_l) bl_bl
+                let bl_tln = bl_tl !! n
+                let
+                  notn :: [a] -> [a]
+                  notn l = let (h,t) = splitAt n l in h ++ tail t
+                let bl_tlnotn = notn bl_tl
+                let bl_blnotn = notn bl_bl
+                let ilength = length br_bl
+                let jlength = length br_br
+
+                newcut_rseq <- mkEID "newcut_rseq"
+                newcut_bseq <- mkEID "newcut_bseq"
+                brl_bl_eid <- replicateM ilength (mkEID "brl_bl")
+                brl_br_eid <- replicateM jlength (mkEID "brl_br")
+                let brl_bl = zip (map fst br_bl) brl_bl_eid
+                let brl_br = zip (map fst br_br) brl_br_eid
+
+                let bang_lower = Bang (Rule
+                                  (Sequent br_tseq br_tl (br_tmain, br_tr))
+                                  (Sequent (fst br_bseq, newcut_rseq) brl_bl (br_bmain, brl_br)))
+                let newcut = Cut (Rule (Sequent newcut_rseq () (snd br_bmain), Sequent (snd bl_tseq) (snd bl_tln) ()) (Sequent newcut_bseq () ()))
+                let bang_upper = Bang (Rule
+                                  (Sequent (fst bl_tseq, newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
+                                  (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br)))
+
+                pure . join_edges ([(c_bseq, c_rseq), (snd br_bseq, c_lseq)]) $
+                  replace [r,right_node,left_node] [bang_lower,newcut,bang_upper] graph
+
               (_,_) -> replaceM $ traceShow (r,right_node,left_node) undefined
   (Identity (Rule () (Sequent _ c_l _)),Right,Down) -> expand c_l Up
   (Identity (Rule () (Sequent _ _ c_r)),Left,Down) -> expand c_r Up
@@ -841,30 +840,55 @@ toDot graph rs = do
 writeGraphs :: State Int Graph -> String -> Integer -> IO ()
 writeGraphs graph name limit = do
   -- let Root b_t = fromJust $ find ((=="Root") . tagName) graph
-  let rs = [Nothing, -- 0
-            Nothing,
-            Nothing,
-            Just (EID "lval38", Up), -- 3
-            Nothing,
-            Nothing,
-            Nothing,
-            Just (EID "c_bseq87", Down), -- 7
-            Nothing,
-            Just (EID "seqDS96",Down), -- 9
-            Nothing,
-            Just (EID "rval71", Up), -- 11
-            Nothing,
-            Just (EID "lret62", Up), -- 13
-            Just (EID "rval49", Up), -- 14
-            Nothing,
-            Nothing,
-            Just (EID "y41", Up), -- 17
-            Just (EID "yA43", Up), -- 18
-            Just (EID "hf120", Down), -- 19
-            Just (EID "c_bseq119", Down), -- 20
-            Just (EID "lval138", Down), -- 21
-            Nothing
-            ] ++ repeat Nothing
+  let rs = map (\x -> Just (EID x, Up))
+          [ "rval71" -- 0
+          , "rval15" -- 1
+          , "rval49" -- 2
+          , "rval5" -- 3, Asperti 1
+          , "lret28" -- 4
+          , "x7" -- 5
+          , "xA9" -- 6
+          , "xB10" -- 7
+          , "xBf22" -- 8
+          , "rval39" -- 9, Asperti 2
+          , "ret42" -- 10
+          , "newrret61" -- 11
+          , "yA43" -- 12
+          ] ++ [Nothing]
+
+{-
+          , Nothing -- 10, Asperti 3
+          , Just (EID "c_bseq86", Down) -- 11
+          , Nothing -- 12
+          , Just (EID "seqDS95", Down) -- 13
+          , Nothing -- 14
+          , Nothing -- 15
+          , Nothing -- 16
+          , Nothing -- 17
+          , Just (EID "y41", Up) -- 18
+-}
+            -- Nothing, -- 0
+            -- Nothing,
+            -- Nothing,
+            -- Just (EID "lval38", Up), -- 3
+            -- Nothing,
+            -- Nothing,
+            -- Nothing,
+            -- Just (EID "c_bseq87", Down), -- 7
+            -- Nothing,
+            -- Just (EID "seqDS96",Down), -- 9
+            -- Nothing,
+            --  -- 11
+            -- Nothing,
+            -- Just (EID "lret62", Up), -- 13
+            --  -- 14
+            -- Nothing,
+            -- Nothing,
+            -- Just (EID "hf120", Down), -- 19
+            -- Just (EID "c_bseq119", Down), -- 20
+            -- Just (EID "lval138", Down), -- 21
+            -- Nothing
+
   let graphs = fst $ flip runState 0 $ do
                 g <- graph
                 toDot g rs

@@ -1,7 +1,7 @@
 Modules
 #######
 
-Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax.
+Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax. They also define namespaces for symbols.
 
 ::
 
@@ -16,7 +16,9 @@ Modules from the programming perspective are records; they contain a list of bin
 Access
 ======
 
-To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``. The uniform notation with records seems cleaner than notation like ``A::B::C::a.b``.
+By default bare symbols are interpreted as belonging to the current module. So ``a`` in module ``A`` refers to ``A.a``.
+
+To access a member of a module we use dot notation ``C.a``. Modules can be nested arbitrarily deep, ``A.B.C.a``. The uniform notation with records seems cleaner than notation like ``A::B::C::a.b``. The first component of the dotted name is still qualified to the current module, so ``C.a`` in module ``A`` refers to ``A.C.a``. The recursive knot in the linker defines ``A.C.a = <global>.C.a`` after it sees that ``A`` imports ``C``.
 
 With statement
 ==============
@@ -29,7 +31,7 @@ To save on typing there is the ``with`` statement.
   C.a
   with C { a }
 
-Without ``with``, bare identifiers or the first component of a dotted name are qualified to the current module. If multiple modules are in scope through ``with``, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if ``a = C.a`` were written for every identifier ``a`` and module ``C``. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.
+If multiple modules are in scope through ``with``, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if ``a = C.a`` were written for every identifier ``a`` and module ``C``. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.
 
 .. code-block:: none
 
@@ -54,8 +56,8 @@ You can use ``with`` on an argument with the dot syntax: ``f . = ...`` translate
   f x -> {.}=x; ary} // namespace unpack
   f x -> x.ary}       // plan old symbol
 
-Exports
-=======
+Exports and internal symbols
+============================
 
 Module exports can similarly be limited:
 
@@ -65,9 +67,9 @@ Module exports can similarly be limited:
 
   a = "x"
   b = "y"
-  # only a is accessible
+  # only a is accessible, b is termed an "internal" symbol
 
-Sometimes it is necessary to access internal members, so they are actually still accessible with ``C.__internal.b`` .
+Sometimes it is necessary to access internal symbols, so they are actually still accessible with ``C.__internal.b`` .
 
 You can also limit the exports to exclude named clauses of reduction rules (by default all reduction rules are exported regardless of limiting exported symbols):
 

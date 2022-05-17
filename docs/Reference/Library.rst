@@ -156,6 +156,41 @@ Slices remove the need for writing range checks in most code.
    first two sequence elements using the ``:`` operator, as in ``1.0:1.2..3.0``. To prevent unwanted artifacts due to rounding errors, the   upper bound in a floating point sequence is always rounded to the nearest
    grid point. Thus, e.g., ``0.0:0.1..0.29`` actually yields ``[0.0,0.1,0.2,0.3]``, as does ``0.0:0.1..0.31``.
 
+Sorting
+-------
+
+Functions, e.g. sorting ``[(1,1),(1,2),(2,1)]`` with comparison on first:
+* stable sort, return elements sorted by comparison function, then by original order - ``[(1,1),(1,2),(2,1)]``
+* arbitrary sort, return elements sorted by comparison function, then by global value order - same or ``[(1,2),(1,1),(2,1)]`` depending on global order
+* unstable sort, return elements sorted by comparison function, then in random order. In release mode, returns some order as fast as possible
+* topological sort, return elements sorted by comparison function and equal elements grouped - ``[[(1,1),(1,2)],[(2,1)]]``
+* nth element, returns nth element of stable or unstable sort, e.g. element 1 is ``(1,2)`` (stable)
+* partial sort up to nth element, returns slice 0..n-1 of stable or unstable sort, e.g. ``[(1,1),(1,2)]`` (stable)
+* partition, split array into array of elements for which function is true and array of elements for which function is false
+* min element, max element
+
+comparison functions can be either:
+* strict weak order: irreflexive, asymmetric, transitive, transitivity of incomparability meaning that x == y and y == z implies x == z, where x == y means x < y and y < x are both false.
+* total preorder: reflexive, transitive, strongly connected meaning either x <= y or y <= x
+
+They are related by ``strictwo(x,y) = !totalpo(y,x)``, i.e. ``!(x < y) <-> y >= x``.
+
+Issues:
+* pathological arrays that expose worst-case quadratic behavior
+* "golden unit tests" that compare unstable sorted arrays for equality. Solved by defaulting to stable sort.
+* comparison functions that are not actually strict weak orders or total preorders (e.g. float comparison on NaN). Solved by randomized testing of triples.
+* Memory allocation or concurrency primitives that rely on sorting algorithms and vice-versa which result in debugger loops
+
+Optimizations:
+* Profiling the comparison function to see if it is expensive or cheap
+* For cheap comparisons branch misprediction is relevant 10.1007/11841036_69
+* For expensive comparisons minimal comparison count is important.
+* SIMD vectorization of integer comparisons (BlockQuickSort https://doi.org/10.1145/3274660)
+* Tuckey's ninther or median of 3 technique for pivot selection
+* unguarded insertion sort for not leftmost ranges (pdqsort3)
+* cmov sorting networks found via brute force and reinforcement learning for small sorts (Proving 50-Year-Old Sorting Networks Optimal by Jannis Harder, Ani Kristo, Kapil Vaidya, Ugur Çetintemel, Sanchit Misra, and Tim Kraska. 2020. The Case for a Learned Sorting Algorithm. SIGMOD ’20.)
+
+
 Iterators
 =========
 
@@ -295,7 +330,7 @@ Also interesting are the `barrier <https://hackage.haskell.org/package/extra-1.7
 Channels
 --------
 
-These are queues basically, used for message passing. Copy from Go or Erlang.
+These are basically concurrency-safe queues, used for message passing. Copy from Go or Erlang.
 
 Thread pool
 -----------
@@ -316,3 +351,30 @@ Design questions:
 * Where to store task-local data
 
 Relevant: work stealing queues :cite:`leaJavaForkJoin2000` used in Java, `A Java Fork/Joint Blunder <https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf>`__, criticizing Java's framework
+
+Algorithms
+==========
+
+Inorder, Preorder, Postorder Tree Traversals
+Binary Search Algorithm
+Breadth First Search (BFS) Algorithm
+Depth First Search (DFS) Algorithm
+Kruskal’s Algorithm
+Floyd Warshall Algorithm
+Dijkstra’s Algorithm
+Bellman Ford Algorithm
+Kadane’s Algorithm
+Lee Algorithm
+Flood Fill Algorithm
+Floyd’s Cycle Detection Algorithm
+Union Find Algorithm
+Tarjan's DFS Topological Sort Algorithm
+Kahn’s Topological Sort Algorithm
+KMP Algorithm
+Insertion Sort, Selection Sort, Merge Sort, Quicksort, Counting Sort, Heap Sort
+Huffman Coding Compression Algorithm
+Quickselect Algorithm
+Boyer–Moore Majority Vote Algorithm
+Euclid’s Algorithm
+
+Backtracking, Dynamic Programming, Divide & Conquer, Greedy, Hashing

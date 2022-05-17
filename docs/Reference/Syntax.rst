@@ -13,6 +13,7 @@ Practically, most programs will use ASCII. But the Unicode algorithms are robust
 * A warning for weird scripts (listed in `TR31 <http://www.unicode.org/reports/tr31/#Table_Candidate_Characters_for_Exclusion_from_Identifiers>`__) or zero-width characters.
 
 Some combination of the following algorithms to do lexical analysis:
+
 * `line-breaking <https://www.unicode.org/reports/tr14/#BreakingRules>`__ (specifically, to determine hard / mandatory breaks)
 * `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
 * `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters
@@ -67,12 +68,17 @@ Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skippi
 Operators
 ---------
 
-Operator precedence will be a poset, rather than levels.
+New operators can be declared with `mix <http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf>`__ `fix <http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf>`__ semantics, e.g.
 
 ::
 
-  precedence _*_ higher than _+_
-  precedence _/_ equals _*_
+  syntax _&&_ associate left above _and_ _or_ _not_ below _||_ equals _&_
+  syntax [[_]]
+  syntax if_then_else_
+  syntax _postfix
+  syntax prefix_
+
+Operator precedence will be a poset, rather than levels. Infix symbols can be left or right associative.
 
 Stroscot supports your typical PEMDAS:
 
@@ -86,7 +92,7 @@ Stroscot supports your typical PEMDAS:
     355/113
     3.14159292035...
 
-Most other operators are textual:
+Most operators are textual:
 
 ::
 
@@ -97,11 +103,7 @@ Most other operators are textual:
     5 div 2 == 2
     5 mod 2 == 1
 
-New operators can be declared with `mix <http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf>`__ `fix <http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf>`__ semantics, e.g.
-
-::
-
-   syntax _&&_ associate left above _and_ _or_ _not_ below _||_
+Minus is both a unary prefix operator and a binary infix operator with special support to disambiguate the two. ``(-)`` denotes the binary minus operator and ``neg`` the unary minus operation.
 
 Parentheses
 -----------
@@ -171,7 +173,7 @@ Patterns all compile to guard conditions on ``$args``. They also check that the 
   _ --> True -- wildcard
   ^a --> $args[i] == a -- matches the atom a
   ^f a b c --> $args[0] == f && $args.length >= 4 # matches the symbol tree with atom f
-  _f a --> $args.length >= 2 # matches any symbol tree besides a single atom
+  (f@_) a --> $args.length >= 2 # matches any symbol tree besides a single atom
   [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}] -- literal match
   [1, ..., 2] --> $args[i][0] == 1 && $args[i][-1] == 2 -- matches any list starting with 1 and ending with 2
   {a: 1, ...} --> $args[a] == 1 # matches a and the rest of the record
@@ -182,20 +184,52 @@ Patterns all compile to guard conditions on ``$args``. They also check that the 
   a | f a --> f a # guard, arbitrary function
   (f -> a) --> match (f $args[i]) a # view pattern
 
-
-Identifiers in head positions are taken as literal function symbols, and in other positions are taken to be variables. This is Pure's "head = function rule". Single identifiers are functions of no arguments, e.g. ``x`` in ``x = 2``.
-
-Declaring a symbol makes it be interpreted as a literal even in variable position.
-
-To override this and force interpretation as a variable/literal you can use ``_`` or ``^`` respectively.
-
 ``_`` occuring by itself denotes an anonymous variable which matches any value without actually binding a name.
 
+Head = function
+---------------
+
+Identifiers ``f`` in head positions ``f a b c`` are taken as literal function symbols, and in other positions are taken to be variables. This is Pure's "head = function rule". Single identifiers are functions of no arguments, e.g. ``x`` in ``x = 2``.
+
+To force interpretation as a variable you can use an anonymous as pattern, ``(f@_) a b c``. Then ``f`` is a variable and will match any symbol, rather just ``f``. Example converting a function application to a list::
+
+  foo ((x@_) y) = (foo x) ++ [y]
+  foo x = [x]
+  > foo (a b c d);
+  [a,b,c,d]
+
+To force interpretation as a literal you can use ``^``. The symbol will be interpreted as a literal even in variable position::
+
+  foo ^foo = "self-application"
+
+  foo bar # does not reduce
+
+You can also declare ``foo`` to be a symbol::
+
+  symbol foo
+
+However this is a module definition and means the symbol cannot be used as a variable in the module anymore.
+
+Non-linear patterns
+-------------------
+
+Non-left-linear patterns such as ``foo a a`` are allowed, this is interpreted as ``foo a b | a == b`` - rename variables and check for equality using ``==``. See :ref:`Equality and left-linearity` for a discussion.
+
+
 Pattern synonyms
+----------------
 
 ::
 
-   pattern F a b = ["f",a,b]
+  toPolar (Point x y) = (sqrt (x^2 + y^2), atan2 x y)
+  pattern Polar r t = (toPolar -> (r,t))
+
+Pattern definitions are unidirectional in that they define matchers for syntax used only in patterns, not in expressions. To make a bidirectional pattern simply define the builder:
+
+::
+
+  Polar r t = Point (r * cos t) (r * sin t)
+
 
 Variable bindings
 -----------------
@@ -500,18 +534,16 @@ Results not assigned to a variable are pushed to a stack:
   # 1 2 3
 
 ``%`` is the most recent result, with ``%2`` ``%3`` etc. referring to
-less recent results:
+less recent results. These stack arguments are used for positional arguments when not
+supplied.
 
 ::
 
   {a = 1}
-   extend % {b=2}
-   extend % {c=3}
-   shuffle
-   # {b=2,a=1,c=3}
-
-These stack arguments are used for positional arguments when not
-supplied.
+  extend % {b=2}
+  extend % {c=3}
+  shuffle
+  # {b=2,a=1,c=3}
 
 Inheritance
 -----------

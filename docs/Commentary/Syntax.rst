@@ -57,16 +57,14 @@ In particular the parser should be written as a nondeterministic finite state tr
 
 Formally:
 
-    Q is a finite set, the set of states;
-    I is a subset of Q, the set of initial states;
-    F is a subset of Q, the set of final states; and
-    Σ is a finite set, called the input alphabet;
-    Γ is a finite set, called the output alphabet;
-    The transition function is of type :math:`Q \times (\Sigma \cup \{\epsilon \})\to P(Q \times (\Gamma \cup \{\epsilon \}))`, where ε is the empty string and P(Q) denotes the power set of Q.
+* Q is a finite set, the set of states;
+* I is a subset of Q, the set of initial states;
+* F is a subset of Q, the set of final states; and
+* Σ is a finite set, called the input alphabet;
+* Γ is a finite set, called the output alphabet;
+* The transition function is of type :math:`Q \times (\Sigma \cup \{\epsilon \})\to P(Q \times (\Gamma \cup \{\epsilon \}))`, where ε is the empty string and P(Q) denotes the power set of Q.
 
 TODO: match this up with Parsec, attoparsec, trifecta, etc. the syntax should be similar except with nondeterministic choice ``|``.
-
-
 
 Blocks
 ======
@@ -93,11 +91,11 @@ The second function is to use applicative operations instead of monadic operatio
 
 ::
 
-   numCommonFriends :: Id -> Id -> Haxl Int
-   numCommonFriends x y = do
-      fx <- friendsOf x
-      fy <- friendsOf y
-      return (length (intersect fx fy))
+  numCommonFriends :: Id -> Id -> Haxl Int
+  numCommonFriends x y = do
+    fx <- friendsOf x
+    fy <- friendsOf y
+    return (length (intersect fx fy))
 
 Well, sorry to burst the bubble, but if you're writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It's exactly these kinds of details that *are* accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the `use/def analysis <https://en.wikipedia.org/wiki/Use-define_chain>`__ that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.
 
@@ -207,6 +205,104 @@ Translated this looks like:
 
 I think the solution is another DSL. Inserting ``read a`` is not too complicated, just follow the C/C++ rules about converting lvalues to rvalues.
 
+Assignment
+==========
+
+As a syntax ambiguity, there are two different interpretations of assignment, pattern binding and clause definition. The difference:
+
+::
+
+  pair = (1,2)
+  (x,y) = pair # binding B
+
+  # B as a pattern binding - defines two clauses
+  x = case pair of (x,y) -> x
+  y = case pair of (x,y) -> y
+  --> x = 1
+  # B as a clause definition
+  (,) = \x y -> pair
+  --> x not in scope, (3,4) reduces to (1,2) reduces cyclically to itself
+
+Clearly the pattern binding is more useful here. So we have a basic convention for assignments: if the head of the LHS is a constructor symbol then it's a pattern binding. What is a constructor symbol? Well, it's up to the code, defined by the predicate ``isConstructor``. Most symbols are not constructors, so the ones that are constructors are declared with ``isConstructor sym = true``  or the macro declaration ``constructor sym``.
+
+Assignment pattern bindings are irrefutable, meaning they never fail directly and instead define unevaluated variables that will raise pattern matching exceptions when evaluated. But there is an alternative syntax that allows failure as a control operation (from Idris / Inko):
+
+::
+
+  pat = val | <alternatives>
+  p
+
+is desugared to
+
+::
+
+  case val of
+    pat -> p
+    <alternatives>
+
+
+
+If a clause does not match, the expression does not reduce - there is no error at all.
+
+In the case of a simple variable ``x = ...`` the definitions coincide - the end result is a clause definition.
+
+Another way to resolve the ambiguity is to use separate syntaxes, e.g. to use ``(x,y) <- pair`` for pattern bindings. But remembering to switch between pattern bindings and clause definitions is tedious.
+
+The explicit syntax does allow defining new reduction rules for constructors. But if overriding basic syntax is desired, ``isConstructor`` can be locally overridden, e.g. if we want a sorted pair:
+
+::
+
+  (x,y) | x > y = (y,x)
+    where
+      isConstructor (,) = false
+
+Usually it's more natural to use a new symbol, like ``sortedPair (x,y)``, so that the global definition of pairs is not affected.
+
+Constructor discipline
+----------------------
+
+Haskell has a division between constructors and functions:
+* identifiers starting with lowercase letters are functions, and can only be used with function bindings.
+* identifiers starting with uppercase letters are constructors, and assignments of the form ``X a b = ...`` are pattern bindings.
+
+This rule reduces maintainability. If the representation is changed there is no way to replace the dumb constructor with a smart constructor. So instead libraries are littered with boilerplate pseudo-constructors like ``mkThing = Thing`` to get around this syntactic restriction. In fact in :cite:`kahrsNonOmegaOverlappingTRSsAre2016` there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating ``foo`` into a constructor ``Foo`` and a function ``foo``, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example ``k x y = x; s x y z = (x z) (y z)`` turns into:
+
+::
+
+  app (App K x) y = x
+  app K x = App K x
+  k = K
+
+  app (App (App S x) y) z = app (app x z) (app y z)
+  app S x = App S x
+  app (App S x) y = App (App S x) y
+  s = S
+
+This is pretty verbose but it's curried so it isn't as bad as it could be. For rules like associativity ``x*(y*z) = (x*y)*z`` and distributivity ``x*(y+z) = x*y+x*z`` handling all the stuck pattern rules for symbols ``+`` and ``*`` is a nightmare, and you also have to come up with alternative operator names for the constructors.
+
+So Stroscot follows Pure in not having a constructor discipline. By appropriately setting ``isConstructor = true`` any symbol can be used as a constructor pattern on the left-hand side of an equation. Also any symbol may act as a constructor symbol in a value if it happens to occur in head position in a normal form term, regardless of ``isConstructor``.
+
+There is a general convention for the standard library to use lowercase for potentially reducible expressions or "smart" constructors and uppercase for dumb data constructors. This is to vaguely follow Haskell.
+
+Recursive definitions
+---------------------
+
+We want to support mutually recursive definitions, like so:
+
+::
+
+  a = 1 : b
+  b = 1 : a
+
+And also sequential execution, like so:
+
+::
+
+  a = openFile "a.txt"
+  b = openFile "b.txt"
+
+So the question is how ``b`` can be in scope in the body of ``a`` in the recursive version. Presumably it isn't in scope in the sequential version.
+
 Type declarations
 =================
 
@@ -245,7 +341,24 @@ OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
 
-Indentation-sensitivty like Python seems great. It is readable and when copy-pasting code you only have to fix up the indentation (supported by all modern code editors) instead of messing with braces.
+Indentation-sensitivty like Python seems great. It is readable and when copy-pasting code you only have to fix up the indentation by moving the block left/right (supported by all modern code editors) instead of messing with braces.
+
+
+Haskell's layout rules seem overly restrictive, for example this is not allowed:
+
+::
+
+  let bang_upper = Bang (Rule
+    (Sequent newcut_bseq (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
+    (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br))))
+
+Although the parentheses make this unambiguous, Haskell requires indenting a lot more, past the ``=``:
+
+::
+
+  let bang_upper = Bang (Rule
+                    (Sequent (fst bl_tseq, newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
+                    (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br)))
 
 Function syntax
 ===============
@@ -274,32 +387,6 @@ Partial function application allows reusing functions more easily, e.g. as the a
 Function symbols also become first-class, because they can be passed around without being applied, ``f`` vs ``\x. f x``
 
 Haskell style arguments ``f a`` are preferred over C style ``f(a)`` due to being shorter for arguments that are identifiers. The only place they lose in character count is complex arguments ``f (a+1) (b+2)`` vs ``f(a+1,b+2)``, but there you can use a tuple to match the syntax or the record ``f{x=a+1,y=b+2}`` which will most likely be clearer.
-
-Constructor discipline
-----------------------
-
-Haskell has a division between constructors and functions:
-* identifiers starting with lowercase letters are functions, and can only be used with rules of the form ``f x = ...``
-* identifiers starting with uppercase letters are constructors and no rules of the form ``X a b = ...`` can be defined. But constructors are the only symbols allowed in sub-terms, e.g. ``f (X a b) = ...``
-
-This rule reduces maintainability. If the representation is changed there is no way to replace the raw constructor with a smart constructor. So instead every library is forced to define functions like ``mkThing = Thing`` to get around this syntactic restriction. In fact in :cite:`kahrsNonOmegaOverlappingTRSsAre2016` there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating ``foo`` into a constructor ``Foo`` and a function ``foo``, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example ``k x y = x; s x y z = (x z) (y z)`` turns into:
-
-::
-
-  app (App K x) y = x
-  app K x = App K x
-  k = K
-
-  app (App (App S x) y) z = app (app x z) (app y z)
-  app S x = App S x
-  app (App S x) y = App (App S x) y
-  s = S
-
-This is pretty verbose but the constructors besides app are nullary so it isn't as bad as it could be. For rules like associativity ``x*(y*z) = (x*y)*z`` and distributivity ``x*(y+z) = x*y+x*z`` handling all the stuck pattern rules for symbols ``+`` and ``*`` is a nightmare, and you also have to come up with alternative operator names for the constructors.
-
-So Stroscot follows Pure in not having a constructor discipline. Any symbol can be used anywhere on the left-hand side of an equation. Any symbol may act as a constructor symbol if it happens to occur in head position in a normal form term.
-
-There is a general convention for the standard library to use lowercase for potentially reducible expressions and uppercase for inert data. This is to vaguely follow Haskell.
 
 Implicit arguments
 ------------------

@@ -43,59 +43,47 @@ Posets
 
 Q: Can ~ be preferred if there is ambiguity? E.g. 1 <~ 2 resolving to 1 ~ 2. Is it safe under extension?
 
+Primitive values
+================
+
+ISO/IEC 11404 has a classification of values:
+
+1. primitive - defined axiomatically or by enumeration
+2. primitive - cannot be decomposed into other values without loss of all semantics
+3. primitive - not constructed in any way from other values, has no reference to other values
+4. non-primitive - wholly or partly defined in terms of other values
+5. generated - defined by the application of a generator to one or more previously-defined values
+6. generated - specified, and partly defined, in terms of other values
+7. generated - syntactically and in some ways semantically dependent on other values used in the specification
+8. atomic - a value which is intrinsically indivisible. All primitive values are atomic, and some generated values such as pointers, procedures, and classes are as well.
+9. aggregate - generated value that is made up of component values or parametric values, in the sense that operations on all component values are meaningful
+10. aggregate - value which can be seen as an organization of specific component values with specific functionalities
+11. aggregate - organized collection of accessible component values
+
+Even ignoring the fact that the multiple definitions are all slightly different, these distinctions are also a matter of definition: we can define a 32-bit integer as one of 2^32 symbols, hence primitive and atomic, or as a list of boolean values of length 32, hence generated and aggregate. It seems easiest to avoid going down this rabbit hole and simply make a big list of all the sets of values, without attempting to create such a broad classification of the sets.
+
 Dictionaries
 ============
 
-Wikipedia calls these "associative arrays" and C++ and Haskell calls them maps. But dictionary seems to be the accepted term in the data structure textbooks, and it's about the right length as a word.
+Wikipedia calls these "associative arrays" and C++ and Haskell calls them maps. There is also the ISO/IEC 11404 "record" which only allows identifiers as keys and has a fixed key set. But dictionary seems to be the accepted term in the data structure textbooks, and it's about the right length as a word.
 
-Generics
-========
+Tables
+======
 
-Since Stroscot is dynamic the default is heterogeneous collections that can contain anything. So for example you have a clause ``cons : Any -> List -> List``. Nonetheless collections have "types", namely the set of elements of the collection. So the example in section of 9.1.1 of :cite:`dolanAlgebraicSubtyping2016` might be written as follows:
+Tables such as those found in SQL are bags of records that all have the same fields.
 
-::
+Typed collections
+=================
 
-  contents list = { e | e elementOf list }
-  TypedList t = { l : List | contents l subset t}
+Following section 9.1.1 of :cite:`dolanAlgebraicSubtyping2016`, there are two interesting sets: the read bound and the write bound.
 
-  singleton : (a : Any) -> TypedList {a}
-  singleton a = [a]
+A simple read bound of a collection is that the returned value must be one of the elements - this can just be computed from the value. For example, for a list, defining ``contents (l : List) = { e | e elementOf l }``, we have ``elemAt : (l : List) -> Int -> contents l``. We can make a refinement type, ``TypedList t = { l : List | contents l subset t}``. With modifiable arrays the restriction must be put on the state parameter, ``TypedVar t = { v : Var | read v : t}``. Then ``elemAt : (l : TypedList x) -> Int -> x``.
 
-  get : (m : TypedList x) -> int -> Op x
-  put : (m : List) -> int -> Any -> Cmd
+However, the write bound is external to the collection - straightforward implementations produce heterogeneous collections that can contain anything. So for example ``setElemAt : Any -> Int -> List -> List``. Errors will show up once you try to read and use an element of the wrong type, but maybe the error message will not be so clear on when the element was inserted, making it hard to debug.
 
-  Component = Button|Checkbox
+One solution is to write ``(setElemAt ...) : TypedList x`` around every modification operation. This will verify at compile time that all values are members of the set ``x``. Honestly this solution seems quite sufficient - the only issue is that asserting the value every time can become tedious.
 
-  disable : Component -> Cmd
-  disable Button = print "Button disabled"
-  disable Checkbox = print "Checkbox disabled"
-
-  disableAll : TypedList Component -> Cmd
-  disableAll l = mapM disable l
-
-  buttons = [Button] : List Button
-  components = [Button,Checkbox] : TypedList Component
-  assert (not (component isElemOf TypedList Button))
-
-  disableAll buttons
-  disableAll components
-
-  insertCheckbox : List -> Cmd
-  insertCheckbox l = append l Checkbox
-  disableAllAndAddCheckbox : TypedList Component -> Cmd
-  disableAllAndAddCheckbox l = { disableAll l; insertCheckbox l }
-
-  disableAllAndAddCheckbox buttons
-  assert (not (buttons isElemOf TypedList Button))
-
-It seems quite sufficient, because Stroscot finds assertion failures at compile time. But maybe the static typing people want more. In particular we want to specify a write bound, limiting the types of elements that may be added. So we define restricted lists:
-
-::
-
-  singleton : (s : Set) -> (a : s) -> RestrictedList
-  put : (l : RestrictedList) -> int -> elemType l -> Cmd
-
-All it does is give errors earlier though - the errors show up regardless once you try to use an element of the wrong type. So maybe it's not needed.
+So a more invasive solution is to define a set of restricted collections ``RestrictedList wb`` with the write bound set ``wb`` stored in the value and enforced for every write operation. For example it would be an error to do ``setElemAt b 0 (l : RestrictedList {a})``. This has the benefit of enforcing a uniform representation of elements. The write operation can even be extended by calling ``convert wb`` instead of just asserting membership.
 
 Transactional memory
 ====================
@@ -104,12 +92,7 @@ STM is a very attractive abstraction for beginners or those who can sacrifice so
 
 The syntax is a simple DSL, ``atomically { if x { retry }; y := z }``. Transactions nested inside another transaction are elided, so that one big transaction forms. The semantics is a transaction has a visible effect (commits its writes) only if all state read during the transaction is not modified by another thread. The ``retry`` command blocks the transaction until the read state has changed, then starts it over, in an endless loop until a path avoiding the ``retry`` is taken. The implementation should guarantee eventual fairness: A transaction will be committed eventually, provided it doesn't retry all the time. The latest research seems to be :cite:`ramalheteEfficientAlgorithmsPersistent2021`, it might be usable. Have to extend it to handle transaction retries though.
 
-Transactions have sequentially consistent semantics by default. But mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL would be nice. I.e. transactions matching atomic instructions should compile to the atomic instructions, plus thread wakeups but only if there are waiting threads with ``retry`` involved.
-
-Units
-=====
-
-Code with units will probably never be the default, but numeric types with dimensional units are useful for safety. The main issue is performance - checking/converting units on every operation is slow. But I tried using some Python unit libraries and they were OK for scripting purposes. Inlining should work for compiled code. Syntax is an issue, handling exponents and other dimensionless operations is an issue.
+Transactions have sequentially consistent semantics by default. But mixing transactions with low-level code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL for machine code instruction would be nice. I.e. transactions matching atomic machine code instructions should compile to the atomic machine code instructions, plus junk like thread wakeups etc. but only if there are waiting threads with ``retry`` involved.
 
 Iterators
 =========
@@ -161,11 +144,46 @@ Equality is an equivalence relation ``(==) : Any -> Any -> Bool`` built in to St
 
 For ordering though, ``(<=) : a -> a -> {LT,GT,EQ}`` seems the way to go. Many types do not have a reasonable ordering.
 
-value representation:
-  Nanboxing / nunboxing
+Value representation
+====================
 
+Nanboxing / nunboxing
+
+Terms
+=====
+
+The name "term" comes from term rewriting, where a term is recursively constructed from constant symbols, variables, and function symbols. Technically there are also "lambda terms", but in Stroscot aas in most programming languages we call them "lambda expressions", and use "expression" to refer to all syntax that evaluates to a value.
 
 Data structures
 ===============
 
 Copy Python's, they've been optimized and should be as efficient as anything I'll write.
+
+List flattening
+===============
+
+Lists don't automatically flatten, e.g. ``[a,[b,c]] != [a,b,c]``. Instead you can use a flatten function in the standard library, ``flatten [a,[b,c]] = [a,b,c]``. MATLAB's justification for flattening is that ``[A B]`` is the concatenated matrix with ``A`` left of ``B`` and ``[A;B]`` the concatenation with ``A`` above ``B``. This seems hard to remember and infix operators ``A horcat B`` and ``A vertcat B`` are just as clear.
+
+List homomorphisms
+==================
+
+List concatenation is an associative binary operation, as such we can represent repeatedly applying an associative operation (a semigroup) as applying an operation to a (nonempty) list.
+
+::
+
+  combine op list = foldl1 op list
+  sum = combine (+)
+  product = combine (*)
+
+  sum [1,2,3]
+  product [2,3,4]
+
+If the empty list is a possibility we need a monoid, i.e. specifying an identity element for the operation
+
+::
+
+  combine monoid list = foldMap monoid.op monoid.identity list
+  sum = combine { op = (+), identity = 0 }
+  product = combine { op = (*), identity = 1 }
+
+This all works because the set of lists/nonempty lists under concatenation is isomorphic to the free monoid / free semigroup.

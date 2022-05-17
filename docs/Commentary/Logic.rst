@@ -2,7 +2,6 @@ Logic
 #####
 
 .. math::
-  :nowrap:
 
   \newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#1~~ }{\displaystyle ~~#2~~ } \  (#3)}
   \newcommand{\defeq}{\overset{\text{def}}{=}}
@@ -11,6 +10,8 @@ Logic
   \newcommand{\multimapboth}{\mathbin{\mathrm{⧟}}}
   \newcommand{\bang}{{\mathrm{!}}}
   \newcommand{\whim}{{\mathrm{?}}}
+  \newcommand{\bangc}{{\mathrm{!}}}
+  \newcommand{\whimc}{{\mathrm{?}}}
   \newcommand{\ocin}{\mathrel{\raise{-1pt}{\mathrm{!}}\mathord{\in}}}
   \definecolor{mygray}{RGB}{156,156,156}
   \newcommand{\sk}[1]{{\color{mygray} #1}}
@@ -165,7 +166,7 @@ Cartesian types
 
 Certain "cartesian" types, like booleans, integers, lists, and in general ADTs of cartesian types using :math:`\Sigma`, have a "natural" proof of positivity that preserves the value. This is an extension of :cite:`filinskiLinearContinuations1992`'s observation in section 3.1 - we destruct the value, then use bang, then construct the same value. But :math:`BB` from above can't be cartesian because we cannot evaluate a function twice.
 
-There's similarly negative types with a "natural" proof using :math:`\Pi`, e.g. for :math:`D=\Pi[(#l,[]\multimap []),(#r,[]\multimap [])]`. We could call these co-cartesian types.
+There's similarly negative types with a "natural" proof using :math:`\Pi`, e.g. for :math:`D=\Pi[(\#l,[]\multimap []),(\#r,[]\multimap [])]`. We could call these co-cartesian types.
 
 The conclusion is to be generous with exponentials and use them whenever you have a cartesian / co-cartesian type, so that the proof structure identifies those operations.
 

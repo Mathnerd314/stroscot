@@ -192,8 +192,18 @@ It's often not that easy to learn a language. Google searches will often yield i
 
 Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly.
 
-Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible.
+Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.
+
 
 convenient to use
 good first language to teach a new programmer
 intuitive
+
+Suppose we are multiplying three matrices A, B, C. Since matrix multiplication is associative, (AB)C = A(BC). But one order may be much better, depending on the sizes of A, B, C. Say A,B,C are m by n, n by p, p by q respectively. Then computing (AB)C requires mp(n + q) multiplications, and computing A(BC) requires (m + p)nq multiplications. So if m = p = kn = kq, then (AB)C costs 2k^3 n^3, while A(BC) costs 2 k n^3, which if k is large means A(BC) is going to be much faster than multiplying (AB)C. The matrix chain multiplication algorithm by Hu Shing finds the most efficient parenthesization in O(n log n) time, given the sizes of the matrices. In practice the sizes must be observed through profiling. But this data must be collected at the level of the matrix chain  multiplication, as re-association optimisations are hard to recognise when the multiplication is expanded into loops.
+
+  optimizations for:
+    avoiding intermediate structures and dead or redundantly duplicated computation
+    storing arrays on the heap in the most efficient of a few straightforward ways
+    boiling away higher-order functions into tedious boilerplate
+
+Futhark does not support recursion. trees and irregular arrays have to be encoded as arrays encoded using various techniques. Terribly irrelevant!
