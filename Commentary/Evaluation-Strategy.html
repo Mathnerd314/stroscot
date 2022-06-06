@@ -17,13 +17,14 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Exceptions" href="Exceptions.html" />
-    <link rel="prev" title="Core syntax" href="CoreSyntax.html" /> 
+    <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,7 +52,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Evaluation strategy</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#strict-vs-lazy">Strict vs lazy</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#referential-transparency">Referential transparency</a></li>
@@ -74,7 +77,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#sharing">Sharing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#better-composition">Better composition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#complicated">Complicated</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#complexity">Complexity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Time complexity</a></li>
 </ul>
 </li>
 </ul>
@@ -97,6 +100,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -129,19 +134,20 @@
            <div itemprop="articleBody">
              
   <section id="evaluation-strategy">
-<h1>Evaluation strategy<a class="headerlink" href="#evaluation-strategy" title="Permalink to this headline"></a></h1>
-<p>This page summarizes the arguments for strict vs lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this C-like programs have a special-cased optimization to give the expected performance.</p>
+<h1>Evaluation strategy<a class="headerlink" href="#evaluation-strategy" title="Permalink to this heading"></a></h1>
+<p>This page summarizes the arguments for strict vs lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this Stroscot will special-case optimization for C-like programs to give the expected performance.</p>
 <section id="strict-vs-lazy">
-<h2>Strict vs lazy<a class="headerlink" href="#strict-vs-lazy" title="Permalink to this headline"></a></h2>
+<h2>Strict vs lazy<a class="headerlink" href="#strict-vs-lazy" title="Permalink to this heading"></a></h2>
 <section id="referential-transparency">
-<h3>Referential transparency<a class="headerlink" href="#referential-transparency" title="Permalink to this headline"></a></h3>
+<h3>Referential transparency<a class="headerlink" href="#referential-transparency" title="Permalink to this heading"></a></h3>
 <p>In a lazy language any subexpression can be named and “pulled out”, modulo name capture. For instance <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">+</span> <span class="pre">e</span></code> is the same as <code class="docutils literal notranslate"><span class="pre">(\x</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">x)</span> <span class="pre">e</span></code>. This gives common subexpressions a name (common subexpression elimination). In a strict language this transformation is invalid, e.g. with <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">=</span> <span class="pre">undefined</span></code> the CSE’d version throws even if <code class="docutils literal notranslate"><span class="pre">e</span></code> was not originally evaluated.</p>
 <p>In a lazy language, the transformation ensures <code class="docutils literal notranslate"><span class="pre">e</span></code> will be evaluated exactly zero times or once, hence improving performance (although it could be a tie with the compiler de-optimizing and splitting <code class="docutils literal notranslate"><span class="pre">e</span></code> again if it is really cheap). In a strict language <code class="docutils literal notranslate"><span class="pre">e</span></code> will always be evaluated hence it is not an optimization if <code class="docutils literal notranslate"><span class="pre">e</span></code> could be skipped in some cases.</p>
+<p>A win for laziness.</p>
 </section>
 <section id="control-constructs">
-<h3>Control constructs<a class="headerlink" href="#control-constructs" title="Permalink to this headline"></a></h3>
-<p>Laziness allows defining new control constructs, e.g. <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">c</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">c</span> <span class="pre">then</span> <span class="pre">t</span> <span class="pre">else</span> <span class="pre">False</span></code>, similar to macros but without explicit AST manipulation. With strictness <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">false</span> <span class="pre">undefined</span></code> throws even though its substitution does not. Another example is <code class="docutils literal notranslate"><span class="pre">fromMaybe</span> <span class="pre">(error</span> <span class="pre">&quot;BOOO&quot;)</span> <span class="pre">x</span></code>.</p>
-<p>But this doesn’t work for <code class="docutils literal notranslate"><span class="pre">while</span></code>, because the condition and body must be evaluated multiple times. What we want is <a class="reference external" href="https://docs.scala-lang.org/tour/by-name-parameters.html">call by name</a>.</p>
+<h3>Control constructs<a class="headerlink" href="#control-constructs" title="Permalink to this heading"></a></h3>
+<p>Laziness allows defining new control constructs, e.g. <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">c</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">c</span> <span class="pre">then</span> <span class="pre">t</span> <span class="pre">else</span> <span class="pre">False</span></code>. With strictness <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">false</span> <span class="pre">undefined</span></code> throws even though its substitution does not. Another example is <code class="docutils literal notranslate"><span class="pre">fromMaybe</span> <span class="pre">(error</span> <span class="pre">&quot;BOOO&quot;)</span> <span class="pre">x</span></code>.</p>
+<p>But this doesn’t work for <code class="docutils literal notranslate"><span class="pre">while</span></code>, because the condition and body must be evaluated multiple times. So in general we need <a class="reference external" href="https://docs.scala-lang.org/tour/by-name-parameters.html">call by name</a>, macros, fexprs, etc. to define control constructs.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">while</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
 <span class="w">  </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">condition</span><span class="w"></span>
 <span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
@@ -156,45 +162,54 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Fexprs provide a complete solution for this.</p>
+<p>Hence this cannot be considered a full win for laziness.</p>
 </section>
 <section id="function-composition">
-<h3>Function composition<a class="headerlink" href="#function-composition" title="Permalink to this headline"></a></h3>
+<h3>Function composition<a class="headerlink" href="#function-composition" title="Permalink to this heading"></a></h3>
 <p>Consider the <code class="docutils literal notranslate"><span class="pre">any</span></code> function, which scans the list from the head forwards and as soon as an element that fulfills the predicate is found it returns true and stops scanning the list, otherwise returns false. It’s quite natural to express the <code class="docutils literal notranslate"><span class="pre">any</span></code> function by reusing the <code class="docutils literal notranslate"><span class="pre">map</span></code> and <code class="docutils literal notranslate"><span class="pre">or</span></code> functions, <code class="docutils literal notranslate"><span class="pre">any</span> <span class="pre">p</span> <span class="pre">=</span> <span class="pre">or</span> <span class="pre">.</span> <span class="pre">map</span> <span class="pre">p</span></code>. All the functions involved need to be lazy to get the desired semantics, processing the list in constant memory.</p>
 <p>Unfortunately, it doesn’t behave like we would wish in a strict language. The predicate <code class="docutils literal notranslate"><span class="pre">p</span></code> will be applied to every element before the <code class="docutils literal notranslate"><span class="pre">or</span></code> examines the elements, creating a new fully-evaluated intermediate list the size of the entire list, using lots of memory. To address this we have to expand out <code class="docutils literal notranslate"><span class="pre">or</span></code>, <code class="docutils literal notranslate"><span class="pre">map</span></code>, and <code class="docutils literal notranslate"><span class="pre">foldr</span></code>, producing <code class="docutils literal notranslate"><span class="pre">any</span> <span class="pre">p</span> <span class="pre">=</span> <span class="pre">\case</span> <span class="pre">{</span> <span class="pre">[]</span> <span class="pre">-&gt;</span> <span class="pre">False;</span> <span class="pre">(y:ys)</span> <span class="pre">-&gt;</span> <span class="pre">y</span> <span class="pre">||</span> <span class="pre">any</span> <span class="pre">p</span> <span class="pre">ys</span> <span class="pre">}</span></code>, invent a new version of foldr that delays the recursive call, or use a streaming abstraction. Either way function reuse becomes much harder.</p>
-<p>Similarly there is <code class="docutils literal notranslate"><span class="pre">within</span> <span class="pre">eps</span> <span class="pre">(improve</span> <span class="pre">(differentiate</span> <span class="pre">h0</span> <span class="pre">f</span> <span class="pre">x))</span></code> in <span id="id1">[<a class="reference internal" href="../zzreferences.html#id49" title="J. Hughes. Why Functional Programming Matters. Computer Journal, 32(2):98–107, 1989.">Hug89</a>]</span>.</p>
+<p>Similarly there is <code class="docutils literal notranslate"><span class="pre">within</span> <span class="pre">eps</span> <span class="pre">(improve</span> <span class="pre">(differentiate</span> <span class="pre">h0</span> <span class="pre">f</span> <span class="pre">x))</span></code> in <span id="id1">[]</span>.</p>
 <p>The related deforestation optimization removes all intermediate cons cells from the lazy definition of <code class="docutils literal notranslate"><span class="pre">any</span></code>, making it as efficient as the expanded strict version. In a strict language deforestation can have the effect of making an undefined program defined, hence is invalid. More careful handling of termination can fix this for strict programs (says a random comment in a blog post).</p>
+<p>Win for laziness.</p>
 </section>
 <section id="partial-evaluation">
-<h3>Partial evaluation<a class="headerlink" href="#partial-evaluation" title="Permalink to this headline"></a></h3>
+<h3>Partial evaluation<a class="headerlink" href="#partial-evaluation" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">snd</span> <span class="pre">(undefined,3)</span></code> only works in a lazy language - <code class="docutils literal notranslate"><span class="pre">undefined</span></code> would throw in a strict language. So strict languages must do strictness analysis to discard any code as unneeded.</p>
 <p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id36" title="Andrzej Filinski. Declarative Continuations and Categorical Duality. 1989.">Fil89</a>]</span> says the transformation from <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">e</span> <span class="pre">then</span> <span class="pre">(1,3)</span> <span class="pre">else</span> <span class="pre">(2,3)</span></code> to <code class="docutils literal notranslate"><span class="pre">(if</span> <span class="pre">e</span> <span class="pre">then</span> <span class="pre">1</span> <span class="pre">else</span> <span class="pre">2,</span> <span class="pre">3)</span></code> is valid in a strict language, but not in a lazy language, because <code class="docutils literal notranslate"><span class="pre">e</span></code> could diverge. The point is that some transformations are valid in a strict language but in a lazy language need a divergence analysis. But this example is rather fragile, e.g. the transformation from <code class="docutils literal notranslate"><span class="pre">3</span></code> to <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">e</span> <span class="pre">then</span> <span class="pre">3</span> <span class="pre">else</span> <span class="pre">3</span></code> is invalid in strict and lazy, but only if <code class="docutils literal notranslate"><span class="pre">e</span></code> can diverge. And as Conal <a class="reference external" href="http://conal.net/blog/posts/lazier-functional-programming-part-2">writes</a> we can define a laxer pattern match which allows the transformation in all cases, <code class="docutils literal notranslate"><span class="pre">ifThenElse</span> <span class="pre">c</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">(a</span> <span class="pre">glb</span> <span class="pre">b)</span> <span class="pre">lub</span> <span class="pre">(\True</span> <span class="pre">-&gt;</span> <span class="pre">a)</span> <span class="pre">c</span> <span class="pre">lub</span> <span class="pre">(\False</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">c</span></code>.</p>
+<p>Overall, a win for laziness, and an argument for lax pattern match semantics and termination checking.</p>
 </section>
 <section id="totality">
-<h3>Totality<a class="headerlink" href="#totality" title="Permalink to this headline"></a></h3>
-<p>In a total language all evaluation strategies give the same result, so referential transparency and function composition hold. But totality gives up all the benefits of laziness w.r.t. infinite data structure expressiveness. Meanwhile the actual evaluation strategy is compiler-specified. In practice, this strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and lazy backends), so this doesn’t resolve the question. The number of times an expression is evaluated is still observable via the performance.</p>
+<h3>Totality<a class="headerlink" href="#totality" title="Permalink to this heading"></a></h3>
+<p>In a total language all evaluation strategies give the same result, so referential transparency and function composition hold. But since strict evaluation must work also, totality gives up all the benefits of laziness. Meanwhile the actual evaluation strategy is compiler-specified. In practice, this strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and lazy backends), so this doesn’t resolve the question. The number of times an expression is evaluated is still observable via the performance.</p>
 <p>Arguments in a lazy language are passed as computations, so they can include non-terminating computations, whereas in a strict language arguments are evaluated values. But when we actually use a value it gets evaluated, so these computations resolve themselves. There is no way in a lazy language (barring runtime reflection or exception handling) to observe that an argument is non-termination as opposed to a real value, i.e. to make a function <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">_|_</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">f</span> <span class="pre">()</span> <span class="pre">=</span> <span class="pre">1</span></code>. So stating that non-termination or <code class="docutils literal notranslate"><span class="pre">undefined</span></code> is a value in lazy languages is wrong. Similarly <code class="docutils literal notranslate"><span class="pre">Succ</span> <span class="pre">undefined</span></code> is not a value - it is WHNF but not normal form. These are programs (unevaluated expressions) that only come up when we talk about totality.</p>
+<p>Conclusion: totality is a compromise that means the worst of strict and lazy, and in practice is a Trojan horse for strictness. Some people have confused the notions of “value” and “argument” in lazy languages. The term “laziness” has a lot of baggage, perhaps it is better to market the language as “normal order”.</p>
 </section>
 <section id="simulation">
-<h3>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline"></a></h3>
-<p>One can implement call-by-name in a strict language by doing <code class="docutils literal notranslate"><span class="pre">(\x</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">()</span> <span class="pre">+</span> <span class="pre">x</span> <span class="pre">())</span> <span class="pre">(\_</span> <span class="pre">-&gt;</span> <span class="pre">e)</span></code>, but if <code class="docutils literal notranslate"><span class="pre">e</span></code> is expensive this will evaluate <code class="docutils literal notranslate"><span class="pre">e</span></code> twice.
-Thunks can implement lazy computation, have <code class="docutils literal notranslate"><span class="pre">Thunk</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Var</span> <span class="pre">(Evaluated</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">Unevaluated</span> <span class="pre">(()</span> <span class="pre">-&gt;</span> <span class="pre">a))</span></code> and do <code class="docutils literal notranslate"><span class="pre">(\x</span> <span class="pre">-&gt;</span> <span class="pre">force</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">force</span> <span class="pre">x)</span> <span class="pre">(delay</span> <span class="pre">(\()</span> <span class="pre">-&gt;</span> <span class="pre">e))</span></code>. But there is syntactic overhead - even ignoring force/delay, <code class="docutils literal notranslate"><span class="pre">e</span></code> must be passed as a function to avoid evaluating it. This is too ugly to even consider. Perhaps <code class="docutils literal notranslate"><span class="pre">{e}</span></code> for a thunk, or Scala’s call-by-name type syntax, <code class="docutils literal notranslate"><span class="pre">(\(x</span> <span class="pre">:</span> <span class="pre">CallByName</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">x)</span> <span class="pre">e</span></code>.</p>
-<p>Evaluating lazy code in a strict language can lead to non-termination, slowdowns, and space leaks. In contrast there is no non-termination possibility to interpreting strict programs in a lazy language. But slowdown and space leaks are still an issue.</p>
+<h3>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h3>
+<p>Running lazy code in a strict language, there are three options:</p>
+<ul class="simple">
+<li><p>unmodified: can lead to non-termination, slowdowns, and space leaks. For example anything with infinite lists will break as it tries to construct the infinite list.</p></li>
+<li><p>call-by-name: To limit infinite evaluation, expressions must be passed as thunks <code class="docutils literal notranslate"><span class="pre">\()</span> <span class="pre">-&gt;</span> <span class="pre">e</span></code> to avoid evaluation. Augustss has called this <a class="reference external" href="http://augustss.blogspot.com/2011/05/more-points-for-lazy-evaluation-in.html">“too ugly to even consider”</a>, but fortunately many languages have introduced special support for wrapping arguments as thunks, such as Swift’s lightweight closure syntax <code class="docutils literal notranslate"><span class="pre">{e}</span></code> and annotation <code class="docutils literal notranslate"><span class="pre">&#64;autoclosure</span></code>, and Scala’s automatic call-by-name types, <code class="docutils literal notranslate"><span class="pre">(\(x</span> <span class="pre">:</span> <span class="pre">CallByName</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">x)</span> <span class="pre">e</span></code>. Passing thunks removes nontermination but can still introduce slowdowns and space leaks as expressions are evaluated multiple times.</p></li>
+<li><p>thunk data type: To fully mimic lazy semantics, a new type <code class="docutils literal notranslate"><span class="pre">Thunk</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Var</span> <span class="pre">(Evaluated</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">Unevaluated</span> <span class="pre">(()</span> <span class="pre">-&gt;</span> <span class="pre">a))</span></code> can be introduced with operations force/delay. Then one does <code class="docutils literal notranslate"><span class="pre">(\x</span> <span class="pre">-&gt;</span> <span class="pre">force</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">force</span> <span class="pre">x)</span> <span class="pre">(delay</span> <span class="pre">{e})</span></code>. There is a lot of syntactic overhead, but it is a faithful emulation of the lazy implementation.</p></li>
+</ul>
+<p>To write a strict program in a lazy language, ignoring orthogonal aspects such as the handling of side effects, the program can simply be used unmodified. It will have the same semantics in normal conditions and possibly terminate without error in conditions where the strict version would loop infinitely. Slowdown and space leaks are possible issues, though not non-termination. Efficiency can be recovered by adding back strictness.</p>
+<p>Conclusion: Laziness wins in terms of simulation usability (use programs as-is). Performance-wise, practically, both directions of simulation can introduce slowdown and space leaks, although with invasive syntax strict can simulate lazy without overhead.</p>
 </section>
 <section id="data-structures">
-<h3>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this headline"></a></h3>
+<h3>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h3>
 <p>Laziness allows writing certain amortized data structures, as per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id76" title="Chris Okasaki. Purely Functional Data Structures. Cambridge University Press, Cambridge, U.K. ; New York, 1998. ISBN 978-0-521-63124-2.">Oka98</a>]</span>.
 It also allows defining infinite data structures, e.g. <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">=</span> <span class="pre">Succ</span> <span class="pre">omega</span></code> or the Fibonacci stream. These are hard to replicate in strict code except via simulation. Arguably the simulation makes the amortized data structures clearer and easier to analyze.</p>
 <p>A strict, imperative stream (iterator) is one where reading from the stream is an operation <code class="docutils literal notranslate"><span class="pre">next</span> <span class="pre">:</span> <span class="pre">Stream</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">(Nil</span> <span class="pre">|</span> <span class="pre">Cons</span> <span class="pre">a</span> <span class="pre">Stream)</span></code>. It is not the same as a lazy stream - accessing elements does I/O, not just pure reduction of thunks. Iterators are ephemeral data structures (objects). An iterator can be turned into a pure data structure by reading it to exhaustion, or buffered using a thunk-like data structure to create a fake-lazy abstraction that still uses I/O but allows pure access to previous elements. Regardless, iterators can be implemented in a lazy langauge as well using an I/O monad, with little overhead.</p>
 </section>
 <section id="normal-order">
-<h3>Normal order<a class="headerlink" href="#normal-order" title="Permalink to this headline"></a></h3>
-<p>Laziness has the joyous property that you can write down any old cyclic rubbish and get a value out if there’s any sensible way to resolve the data dependencies. Strictness is much more strict.</p>
+<h3>Normal order<a class="headerlink" href="#normal-order" title="Permalink to this heading"></a></h3>
+<p>Laziness has the joyous property that you can write down any old cyclic rubbish and get a value out if there’s any sensible evaluation order.</p>
+<p>Strict order can evaluate unnecessarily, so it can fail needlessly if there is an expression that errors when evaluated in the wrong conditions, e.g. <code class="docutils literal notranslate"><span class="pre">a</span></code> in <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">where</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">/</span> <span class="pre">c;</span> <span class="pre">r</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">c</span> <span class="pre">!=</span> <span class="pre">0</span> <span class="pre">then</span> <span class="pre">a</span> <span class="pre">else</span> <span class="pre">0</span></code>.</p>
 </section>
 <section id="time-complexity">
-<h3>Time complexity<a class="headerlink" href="#time-complexity" title="Permalink to this headline"></a></h3>
+<h3>Time complexity<a class="headerlink" href="#time-complexity" title="Permalink to this heading"></a></h3>
 <p>Regarding (sequential) time complexity, lazy reduction uses at most as many reduction steps as the corresponding strict reduction. Lazy corresponds to strict extended with an oracle that skips evaluation of unneeded terms. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id44" title="Jennifer Hackett and Graham Hutton. Call-by-need is clairvoyant call-by-value. Proceedings of the ACM on Programming Languages, 3(ICFP):1–23, July 2019. URL: https://dl.acm.org/doi/10.1145/3341718 (visited on 2022-01-20), doi:10.1145/3341718.">HH19</a>]</span></p>
-<p>Consider for example this program:</p>
+<p>Also the cost of each reduction step is about the same. Consider for example this program:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bar</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
 
 <span class="nf">foo</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"></span>
@@ -203,48 +218,50 @@ It also allows defining infinite data structures, e.g. <code class="docutils lit
 </div>
 <p>In Java the overhead of the bar function call is two argument pushes, the call itself, and the return.
 GHC (without optimization) compiles this code as something like the following pseudocode:</p>
-<dl class="simple">
-<dt>foo [x, y, z] =</dt><dd><p>u = new THUNK(sat_u)                   // thunk, 32 bytes on heap
-jump: (+) x u</p>
-</dd>
-<dt>sat_u [] =                                 // saturated closure for “bar y z”</dt><dd><p>push UPDATE(sat_u)                     // update frame, 16 bytes on stack
-jump: bar y z</p>
-</dd>
-<dt>bar [a, b] =</dt><dd><p>jump: (*) a b</p>
-</dd>
-</dl>
-<p>The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there’s no “cost” for this), and a “call” (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.)</p>
-<p>Hence the overhead in terms of pseudo-instruction count is about the same. The function call is shifted in time but the cost is not significantly increased. However in practice cache locality and memory access times play a large role in speed and by the time the thunk is evaluated all of its references may have gone cold.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="kt">THUNK</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                   </span><span class="o">//</span><span class="w"> </span><span class="n">thunk</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">heap</span><span class="w"></span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">u</span><span class="w"></span>
+
+<span class="nf">sat_u</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w">                                 </span><span class="o">//</span><span class="w"> </span><span class="n">saturated</span><span class="w"> </span><span class="n">closure</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="s">&quot;bar y z&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">push</span><span class="w"> </span><span class="kt">UPDATE</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                     </span><span class="o">//</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">stack</span><span class="w"></span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+
+<span class="nf">bar</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there’s no “cost” for this), and a “call” (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.) Hence the function call is shifted in time but the overhead in terms of pseudo-instruction count is not significantly increased.</p>
+<p>So big-O time complexity is within a constant factor. In practice the constant factor is quite important; cache locality and memory access times play a large role in speed. There is some memory fetching overhead with laziness because by the time the thunk is evaluated all of its references may have gone cold.</p>
 </section>
 <section id="implementation-complexity">
-<h3>Implementation complexity<a class="headerlink" href="#implementation-complexity" title="Permalink to this headline"></a></h3>
+<h3>Implementation complexity<a class="headerlink" href="#implementation-complexity" title="Permalink to this heading"></a></h3>
 <p>Compiling a subset of C is succinct, 2048 bytes for the <a class="reference external" href="https://bellard.org/otcc/">obfuscated tiny C compiler</a>. It’s essentially a macro assembler - each operation translates to an assembly sequence that uses the stack.
 I can make a similar compiler for STG (lazy functional language) with a similar macro translation - I’d just need to write a GC library as heap allocation is not built into the hardware, unlike stack allocation. Meanwhile production-quality compilers (GCC, clang/LLVM) are huge and do so many code transformations that the original code is unrecognizable. Similarly GHC is huge. So the argument that strict languages fit the hardware better than lazy is weak.</p>
 </section>
 <section id="space-complexity">
-<h3>Space complexity<a class="headerlink" href="#space-complexity" title="Permalink to this headline"></a></h3>
+<h3>Space complexity<a class="headerlink" href="#space-complexity" title="Permalink to this heading"></a></h3>
 <p>The space complexity is very messy in a lazy language, whereas the stack in a strict language is predictable. For example, lazily evaluating the definition <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">=</span> <span class="pre">foldl</span> <span class="pre">(+)</span> <span class="pre">0</span></code>, unevaluated addition thunks pile up and are only forced at the end, hence the sum operation takes O(n) memory.</p>
 <p>GHC’s demand analysis works for <code class="docutils literal notranslate"><span class="pre">sum</span></code>, but is still incomplete. Haskell has added workarounds “seq”, the Strict Haskell extension, and bang markers, so strictness can be specified as part of the program. But this is not a solution - it means every basic function must come in several strictness variants.</p>
 <p>Space leaks in particular are hard to spot. The difficulty lies in characterizing the evaluatedness of arguments being passed around.</p>
 </section>
 <section id="debugging">
-<h3>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline"></a></h3>
+<h3>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading"></a></h3>
 <p>For debugging the logic, lazy and strict debugging can both be modeled as term reduction, so it’s just a matter of tracking the term being reduced. The logic that tracks lazy reduction state is more complex, but not impossibly so.</p>
 </section>
 <section id="parallelism">
-<h3>Parallelism<a class="headerlink" href="#parallelism" title="Permalink to this headline"></a></h3>
+<h3>Parallelism<a class="headerlink" href="#parallelism" title="Permalink to this heading"></a></h3>
 <p>Parallel execution is bound up with I/O operations, which are sequential, so the evaluation strategy doesn’t have any room to play a role.</p>
 </section>
 <section id="purity">
-<h3>Purity<a class="headerlink" href="#purity" title="Permalink to this headline"></a></h3>
+<h3>Purity<a class="headerlink" href="#purity" title="Permalink to this heading"></a></h3>
 <p>Laziness offers a form of “hair shirt”, an excuse to keep the language pure. Strict languages are undisciplined in their use of effects.</p>
 </section>
 </section>
 <section id="lazy-vs-optimal">
-<h2>Lazy vs optimal<a class="headerlink" href="#lazy-vs-optimal" title="Permalink to this headline"></a></h2>
+<h2>Lazy vs optimal<a class="headerlink" href="#lazy-vs-optimal" title="Permalink to this heading"></a></h2>
 <p>Optimal reduction is similar to lazy reduction in that the evaluation loop computes a “needed” redex and reduces it. It differs in that it can share the bodies of lambda abstractions. It’s optimal in the sense that it ensures the minimal amount of family reduction steps. but this does not imply the fastest real-world performance.</p>
 <section id="sharing">
-<h3>Sharing<a class="headerlink" href="#sharing" title="Permalink to this headline"></a></h3>
+<h3>Sharing<a class="headerlink" href="#sharing" title="Permalink to this heading"></a></h3>
 <p>Although thunks prevent some forms of duplication, lazy reduction still duplicates work. An example is</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span><span class="w"> </span><span class="nn">System.IO.Unsafe</span><span class="w"></span>
 <span class="nf">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">w</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">unsafePerformIO</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;i&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">`</span><span class="n">seq</span><span class="p">`</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
@@ -264,21 +281,21 @@ I can make a similar compiler for STG (lazy functional language) with a similar 
 <p>In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for <code class="docutils literal notranslate"><span class="pre">seq</span></code>; instead there are boxes and duplicators.</p>
 </section>
 <section id="better-composition">
-<h3>Better composition<a class="headerlink" href="#better-composition" title="Permalink to this headline"></a></h3>
+<h3>Better composition<a class="headerlink" href="#better-composition" title="Permalink to this heading"></a></h3>
 <p>Lazy evaluation of <code class="docutils literal notranslate"><span class="pre">avg</span> <span class="pre">xs</span> <span class="pre">=</span> <span class="pre">sum</span> <span class="pre">xs</span> <span class="pre">/</span> <span class="pre">length</span> <span class="pre">xs</span></code> keeps the whole list in memory because it does the sum and then the length (<cite>ref &lt;https://donsbot.wordpress.com/2008/05/06/write-haskell-as-fast-as-c-exploiting-strictness-laziness-and-recursion/&gt;__</cite>). My implementation of optimal reduction switches evaluation back and forth between the sum and the length. More specifically, with the sequent calculus IR, cuts get pushed down continually and the natural strategy of reducing the topmost cut performs this alternation. So the average calculation can discard the beginning of the list once it is processed.</p>
 <p>But although this case is improved, evaluating a thunk can still be delayed arbitrarily long, in particular it can take a while to discard an unused value.</p>
 </section>
 <section id="complicated">
-<h3>Complicated<a class="headerlink" href="#complicated" title="Permalink to this headline"></a></h3>
-<p>Lazy reduction can be simulated in a strict language using thunks, but the sharing graph of optimal reduction is intrusive, so one would have to represent functions via their AST. I guess it could be done. Generally, the issue is that optimal reduction is complicated. Although both lazy and optimal can be modeled as graph reduction, optimal reduction uses a more complex graph.</p>
+<h3>Complicated<a class="headerlink" href="#complicated" title="Permalink to this heading"></a></h3>
+<p>Lazy reduction can be simulated in a strict language using thunks, but the sharing graph of optimal reduction is intrusive, so one would have to represent functions via their AST. I guess it could be done. Generally, the issue is that optimal reduction is complicated. Although all of strict, lazy, and optimal reduction can be modeled as graph reduction, optimal reduction uses a more complex graph.</p>
 </section>
-<section id="complexity">
-<h3>Complexity<a class="headerlink" href="#complexity" title="Permalink to this headline"></a></h3>
+<section id="id5">
+<h3>Time complexity<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p>Optimal reduction has exponential savings over lazy evaluation when evaluating Church numeral exponentiation.</p></li>
+<li><p>Optimal reduction has exponential savings over lazy evaluation when evaluating Church numeral exponentiation. <span id="id6">[]</span></p></li>
 <li><p>The optimal non-family reduction sequence is uncomputable for the lambda calculus (best known is essentially a brute force search over all reduction sequences shorter than leftmost-outermost reduction), while the optimal family reduction is simply leftmost-outermost.</p></li>
-<li><p>For elementary lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. <span id="id5">[<a class="reference internal" href="../zzreferences.html#id42" title="Stefano Guerrini and Marco Solieri. Is the optimal implementation inefficient? Elementarily not. In 2nd International Conference on Formal Structures for Computation and Deduction, 16 pages. Schloss Dagstuhl - Leibniz-Zentrum fuer Informatik GmbH, Wadern/Saarbruecken, Germany, September 2017. URL: http://drops.dagstuhl.de/opus/volltexte/2017/7733/ (visited on 2021-09-06), doi:10.4230/LIPICS.FSCD.2017.17.">GS17</a>]</span> Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn’t find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.</p></li>
-<li><p>A simply-typed term, when beta-eta expanded to a specific form, reduces to normal form in a number of family reduction steps linearly proportional to the “size” of the term (“size” is defined in a way polynomially more than usual). Since the simply typed terms can compute functions in E4 but not E3 (i.e. strictly E4), one concludes there are terms that will take strictly E4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. <span class="math notranslate nohighlight">\(2^{2^{2^n}}\)</span> for any number of 2’s.</p></li>
+<li><p>For elementary lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. <span id="id7">[<a class="reference internal" href="../zzreferences.html#id42" title="Stefano Guerrini and Marco Solieri. Is the optimal implementation inefficient? Elementarily not. In 2nd International Conference on Formal Structures for Computation and Deduction, 16 pages. Schloss Dagstuhl - Leibniz-Zentrum fuer Informatik GmbH, Wadern/Saarbruecken, Germany, September 2017. URL: http://drops.dagstuhl.de/opus/volltexte/2017/7733/ (visited on 2021-09-06), doi:10.4230/LIPICS.FSCD.2017.17.">GS17</a>]</span> Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn’t find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.</p></li>
+<li><p>A simply-typed term, when beta-eta expanded to a specific form “optimal root”, reduces to normal form in a number of family reduction steps linearly proportional to the “size” of the term (“size” is defined in a way polynomially more than its number of characters). Since the simply typed terms can compute functions in ℰ4\ℰ3 of the Grzegorczyk hierarchy (Statman), one concludes there are terms that will take strictly ℰ4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. <span class="math notranslate nohighlight">\(2^{2^{2^n}}\)</span> for any number of 2’s. <span id="id8">[]</span></p></li>
 </ul>
 </section>
 </section>
@@ -288,7 +305,7 @@ I can make a similar compiler for STG (lazy functional language) with a similar 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="CoreSyntax.html" class="btn btn-neutral float-left" title="Core syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Exceptions.html" class="btn btn-neutral float-right" title="Exceptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

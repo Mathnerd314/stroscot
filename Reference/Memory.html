@@ -17,12 +17,13 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Posets" href="Posets.html" />
-    <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
+    <link rel="prev" title="Modules" href="Modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,7 +52,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Memory</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a><ul>
@@ -105,10 +105,10 @@
            <div itemprop="articleBody">
              
   <section id="memory">
-<h1>Memory<a class="headerlink" href="#memory" title="Permalink to this headline"></a></h1>
+<h1>Memory<a class="headerlink" href="#memory" title="Permalink to this heading"></a></h1>
 <p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id57" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
 <section id="value-representation">
-<h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this headline"></a></h2>
+<h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
 <p>We don’t consider memory a scarce resource, hence pure values can be created and destroyed as needed by the RTS. But the RTS allows controlling the in-memory representation with user-written code.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Bit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="kt">MaskedBit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Bit</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Masked</span><span class="w"></span>
@@ -130,14 +130,14 @@
 <p>For correctness we require <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">let</span> <span class="pre">(w,u)</span> <span class="pre">=</span> <span class="pre">pack</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">munge</span> <span class="pre">u</span> <span class="pre">w</span></code> to be the identity function, for a suitable munging function. Using this constraint we can derive <code class="docutils literal notranslate"><span class="pre">unpack</span></code> from <code class="docutils literal notranslate"><span class="pre">pack</span></code>, or vice-versa, if the format isn’t too complicated.</p>
 </section>
 <section id="pointers">
-<h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this headline"></a></h2>
+<h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this heading"></a></h2>
 <p>Pointers provide a low-level API for interfacing with the OS or other languages (mainly C), an unavoidable task in most programs. To use them you have to import the <code class="docutils literal notranslate"><span class="pre">Pointer</span></code> module.</p>
 <section id="concept">
-<h3>Concept<a class="headerlink" href="#concept" title="Permalink to this headline"></a></h3>
+<h3>Concept<a class="headerlink" href="#concept" title="Permalink to this heading"></a></h3>
 <p>A pointer is a numeric index into a global mutable array, <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">Word</span> <span class="pre">(BitIdx</span> <span class="pre">-&gt;</span> <span class="pre">Status)</span></code>. The statuses allow storing metadata. The array is indexed at the bit level because that’s the granularity <a class="reference external" href="https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine">Valgrind’s Memcheck</a> uses, but most of the status will be the same for a byte or page. The status is <a class="reference external" href="https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs">an ADT</a> .</p>
 </section>
 <section id="operations">
-<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this headline"></a></h3>
+<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this heading"></a></h3>
 <p>Various functions record different statuses for chunks of memory. Memory functions check the status of memory before operating, hence preventing common errrors like double free, access to undefined memory, null pointer dereferencing, etc. Similarly inaccessible memory cannot be read/written, preventing use after free.</p>
 <p>Most addresses will not be allocated (status Free/Unknown), hence the array is sparse in some sense. It is in fact possible to implement the typical <a class="reference external" href="https://developer.android.com/reference/android/util/SparseArray">sparse array operations</a>. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from <code class="docutils literal notranslate"><span class="pre">/proc/self/maps</span></code> and <a class="reference external" href="https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299">VirtualQueryEx</a>, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it’s easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It’s a little more complicated than simple sparsity because there are many different statuses and the operations overlap.</p>
 <p>In practice fixed-address allocation is never used and instead there are <code class="docutils literal notranslate"><span class="pre">mmap</span> <span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">malloc</span></code> which allocate memory with system-chosen location. This means that the program behavior must be observationally equivalent no matter what addresses the system picks. The limitations on the system’s choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn’t have to result in equivalent behavior so it can be ignored.)</p>
@@ -145,12 +145,12 @@
 <p>The memory management system uses the pointer API internally, just with a special status tag to avoid overlapping with user data.</p>
 </section>
 <section id="optimizing-access">
-<h3>Optimizing access<a class="headerlink" href="#optimizing-access" title="Permalink to this headline"></a></h3>
+<h3>Optimizing access<a class="headerlink" href="#optimizing-access" title="Permalink to this heading"></a></h3>
 <p>Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. They’re both a bit tricky as they have to make assumptions about what pointers foreign code will use and analyze the possible values a dereference may take. But, should be possible.</p>
 </section>
 </section>
 <section id="finalizers">
-<span id="id2"></span><h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this headline"></a></h2>
+<span id="id2"></span><h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this heading"></a></h2>
 <p>Finalizers are a relaxed approach to prompt resource management. They allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, but do not require explicit marking of the free operation. A finalizer is a magic value created with the one-argument function <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">:</span> <span class="pre">(free</span> <span class="pre">:</span> <span class="pre">Command)</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Finalizer</span></code>. It supports equality, hashing, and command <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Command</span></code>.</p>
 <p>The semantics is that <code class="docutils literal notranslate"><span class="pre">free</span></code> will be called as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> will no longer be called, unless <code class="docutils literal notranslate"><span class="pre">useForever</span></code> is called. <code class="docutils literal notranslate"><span class="pre">useForever</span></code> undoes the finalizer and returns the free operation. The general transformation:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
@@ -186,22 +186,22 @@
 </pre></div>
 </div>
 <section id="freed-on-exit">
-<h3>Freed on exit<a class="headerlink" href="#freed-on-exit" title="Permalink to this headline"></a></h3>
+<h3>Freed on exit<a class="headerlink" href="#freed-on-exit" title="Permalink to this heading"></a></h3>
 <p>Many resources are automatically freed by the OS on exit: memory, file handles, etc. In this circumstance  <code class="docutils literal notranslate"><span class="pre">useForever</span></code> can mark the resource as not needing finalization. As an optimization you can call it on every allocated resource once you are on the termination path and know that no further resources will be allocated, or that there are sufficient spare resources that any further allocation can be satisfied without deallocation. But prompt deallocation is the better policy.</p>
 </section>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h2>
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
 <p>An reference is a symbolic index into a global associative array of objects, <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">Reference</span> <span class="pre">Object</span></code>. Operations on references are stateful and include allocation, reading, and perhaps writing. But references can be compared for equality and hashed to an integer. Reference values can be packed to a 64-bit word and unpacked to the identical reference. The value of the word is internal to the memory system but can be assumed to be in pointer format.</p>
 <section id="pointer-conversion">
-<h3>Pointer conversion<a class="headerlink" href="#pointer-conversion" title="Permalink to this headline"></a></h3>
+<h3>Pointer conversion<a class="headerlink" href="#pointer-conversion" title="Permalink to this heading"></a></h3>
 <p>A reference has at least one pointer associated with it. There can be multiple copies of the data hence multiple pointers. GC can move/copy the reference so the set of pointers varies over time.</p>
 <p>Often operations are simpler with pointers, so you can pin the object to a pointer, <code class="docutils literal notranslate"><span class="pre">(address,</span> <span class="pre">unpinner)</span> <span class="pre">=</span> <span class="pre">getPointer</span> <span class="pre">ref</span></code>. <code class="docutils literal notranslate"><span class="pre">unpinner</span></code> is a finalizer that unpins the object after you are finished with the pointer. The alignment of the pointer can be specified when the reference is constructed, <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">alignment</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">}</span></code>. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.</p>
 </section>
 <section id="types">
-<h3>Types<a class="headerlink" href="#types" title="Permalink to this headline"></a></h3>
+<h3>Types<a class="headerlink" href="#types" title="Permalink to this heading"></a></h3>
 <section id="immutable">
-<h4>Immutable<a class="headerlink" href="#immutable" title="Permalink to this headline"></a></h4>
+<h4>Immutable<a class="headerlink" href="#immutable" title="Permalink to this heading"></a></h4>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">imm</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
 <span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
 
@@ -213,7 +213,7 @@
 <p>Reading generally uses the memory in-place. It is almost a pure operation, except that the read operation prolongs the lifetime of the reference, hence for GC purposes the read operation must have a definite timestamp.</p>
 </section>
 <section id="variable">
-<h4>Variable<a class="headerlink" href="#variable" title="Permalink to this headline"></a></h4>
+<h4>Variable<a class="headerlink" href="#variable" title="Permalink to this heading"></a></h4>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="w"></span>
 <span class="nf">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
 <span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
@@ -227,7 +227,7 @@
 <p>Reading elides the copy if the reference is dead after the read, otherwise copies.</p>
 </section>
 <section id="shared-memory">
-<h4>Shared memory<a class="headerlink" href="#shared-memory" title="Permalink to this headline"></a></h4>
+<h4>Shared memory<a class="headerlink" href="#shared-memory" title="Permalink to this heading"></a></h4>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
@@ -240,7 +240,7 @@
 <p>Each word is its own reference; this uses the word sized load-store operations of the ISA.</p>
 </section>
 <section id="thread-local-storage">
-<h4>Thread-local storage<a class="headerlink" href="#thread-local-storage" title="Permalink to this headline"></a></h4>
+<h4>Thread-local storage<a class="headerlink" href="#thread-local-storage" title="Permalink to this heading"></a></h4>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">tls</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
 </pre></div>
 </div>
@@ -248,17 +248,22 @@
 <p>Essentially it’s a shared memory variable that stores <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">ThreadId</span> <span class="pre">Word</span></code>, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.</p>
 </section>
 <section id="symbol">
-<h4>Symbol<a class="headerlink" href="#symbol" title="Permalink to this headline"></a></h4>
+<h4>Symbol<a class="headerlink" href="#symbol" title="Permalink to this heading"></a></h4>
 <p>A symbol can be thought of as a type of reference. It supports neither reading nor writing, but has an identity.</p>
 </section>
 <section id="wrapper">
-<h4>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this headline"></a></h4>
-<p>A wrapper reference is a custom implementation of the basic allocate/get/set operations. There’s no special support needed in the language for this beyond overloading.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<h4>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this heading"></a></h4>
+<p>A wrapper reference is a custom implementation of the read/modify operations. There’s no special support needed in the language for this beyond overloading <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">(Wrapper</span> <span class="pre">{read,modify})</span> <span class="pre">=</span> <span class="pre">read</span></code> and <code class="docutils literal notranslate"><span class="pre">(Wrapper</span> <span class="pre">{read,modify})</span> <span class="pre">:=</span> <span class="pre">newV</span> <span class="pre">=</span> <span class="pre">modify</span> <span class="pre">newV</span></code>.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inner</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<span class="nf">cell_0</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">newWrapper</span><span class="w"></span>
+<span class="w">  </span><span class="n">read</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="w"></span>
+<span class="w">  </span><span class="n">modify</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">    </span><span class="n">inner</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">read</span><span class="w"> </span><span class="n">cell_0</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
 <p>For example, there is a wrapper API around shared memory to allow load/store of non-word values; it packs and writes or reads and unpacks, erroring if the value doesn’t fit in the array. Hence a 1-word shared memory reference can be used like a variable containing a word.</p>
+<p>The wrapper should satisfy <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">modify</span> <span class="pre">r</span> <span class="pre">x;</span> <span class="pre">read</span> <span class="pre">r</span> <span class="pre">}</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">modify</span> <span class="pre">r</span> <span class="pre">x;</span> <span class="pre">return</span> <span class="pre">x</span> <span class="pre">}</span></code>.</p>
 </section>
 </section>
 </section>
@@ -268,7 +273,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Posets.html" class="btn btn-neutral float-right" title="Posets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

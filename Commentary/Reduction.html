@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,7 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -68,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#linear-logic">Linear logic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#semantics">Semantics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#return-type-overloading">Return type overloading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -75,6 +79,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -107,9 +113,9 @@
            <div itemprop="articleBody">
              
   <section id="reduction">
-<h1>Reduction<a class="headerlink" href="#reduction" title="Permalink to this headline"></a></h1>
+<h1>Reduction<a class="headerlink" href="#reduction" title="Permalink to this heading"></a></h1>
 <section id="linear-logic">
-<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Permalink to this headline"></a></h2>
+<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Permalink to this heading"></a></h2>
 <p>Linear logic has boxes, The difference is not observable if we do not use duplication. e.g. <code class="docutils literal notranslate"><span class="pre">(\x.print(x+1))</span> <span class="pre">{print(&quot;x&quot;);</span> <span class="pre">2}</span></code> can only print <code class="docutils literal notranslate"><span class="pre">x3</span></code>. But if we change <code class="docutils literal notranslate"><span class="pre">x+1</span></code> to <code class="docutils literal notranslate"><span class="pre">x+x</span></code> then CBV/optimal/lazy is <code class="docutils literal notranslate"><span class="pre">x4</span></code> while CBN is <code class="docutils literal notranslate"><span class="pre">xx4</span></code>.</p>
 <p>So how do we specify the difference between the two, in linear logic?</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
@@ -127,7 +133,7 @@
 </ol>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline"></a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
 <p>Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for <code class="docutils literal notranslate"><span class="pre">case</span></code>, joining some eraser nodes. But what about duplication?</p>
 <p>Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of “environments” or “scopes”. In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope <code class="docutils literal notranslate"><span class="pre">0</span></code> and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter’s outer scope.</p>
 <p>To determine which scope becomes the outer scope, delimiters are also marked as “head”, “full”, or “empty” depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn’t duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter’s scope stays on the inside.</p>
@@ -138,7 +144,7 @@
 The <code class="docutils literal notranslate"><span class="pre">lub</span></code> operation is implemented as a primitive that desugars in the middle of compilation, in a deterministic manner based on termination checking.</p>
 </section>
 <section id="semantics">
-<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this headline"></a></h2>
+<h2>Semantics<a class="headerlink" href="#semantics" title="Permalink to this heading"></a></h2>
 <p>The dispatch semantics is that all methods are run in parallel using the <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">lub operation</a>. Predicate failure, failed assertions, exceptions, and nontermination are all treated as bottom. Furthermore <code class="docutils literal notranslate"><span class="pre">lub</span></code> is an oracle, analyzing the whole program - we want return type overloading, return values that are not accepted by the surrounding context are discarded.</p>
 <p>This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
 <ul class="simple">
@@ -150,6 +156,59 @@ The <code class="docutils literal notranslate"><span class="pre">lub</span></cod
 * hoisting invariants, partial/total redundancy elimination
 * parallelization - multi-threaded or vectorized code</p></li>
 </ul>
+</section>
+<section id="return-type-overloading">
+<h2>Return type overloading<a class="headerlink" href="#return-type-overloading" title="Permalink to this heading"></a></h2>
+<p>In Haskell, typeclasses can cause ambiguity errors. For example <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">(read</span> <span class="pre">&quot;1&quot;)</span></code> gives “Ambiguous type variable ‘a0’ arising from ‘show’ and ‘read’ prevents the constraint ‘(Show a0, Read a0)’ from being solved.” The ambiguity can be further attributed to <code class="docutils literal notranslate"><span class="pre">read</span></code>. The function <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">::</span> <span class="pre">Show</span> <span class="pre">a</span> <span class="pre">=&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">String</span></code> takes a value of type <code class="docutils literal notranslate"><span class="pre">a</span></code>, so dynamic dispatch can deduce the type <code class="docutils literal notranslate"><span class="pre">a</span></code> and there is no ambiguity. In contrast <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;1&quot;</span></code> produces a type out of nowhere and could be of type <code class="docutils literal notranslate"><span class="pre">Integer</span></code> or <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Since <code class="docutils literal notranslate"><span class="pre">read</span></code> has a constraint <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">a</span></code> and does not take a value of type <code class="docutils literal notranslate"><span class="pre">a</span></code> as argument it is said to be return type overloaded (RTOed).</p>
+<p>RTO, specifically overloaded constants such as <code class="docutils literal notranslate"><span class="pre">zero</span> <span class="pre">::</span> <span class="pre">Num</span> <span class="pre">a</span> <span class="pre">=&gt;</span> <span class="pre">a</span></code>, was mentioned in the original typeclasses paper as a desired feature. Haskell has several ways to resolve an RTOed expression:</p>
+<ul class="simple">
+<li><p>specify an inline signature <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">x</span> <span class="pre">::</span> <span class="pre">Float</span></code></p></li>
+<li><p>use type application <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&#64;Float</span></code></p></li>
+<li><p>infer the type by applying a function expression or case statement of fixed argument type, <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">id</span> <span class="pre">::</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">in</span> <span class="pre">show</span> <span class="pre">(f</span> <span class="pre">$</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;)</span></code> or <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">(case</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">-&gt;</span> <span class="pre">1)</span></code></p></li>
+<li><p>a default declaration, for the Num, Show, Eq, Ord, Foldable and Traversable classes (all but Num require -XExtendedDefaultRules)</p></li>
+</ul>
+<p>Rust traits are similar, the turbofish specifies the type explicitly, like <code class="docutils literal notranslate"><span class="pre">iterator.collect::&lt;Vec&lt;i32&gt;&gt;</span></code>, and the type inference for defaulting is local rather than global. Ada similarly can disambiguate by return type if the return type is known.</p>
+<p>Defaulting is considered by <a class="reference external" href="https://web.archive.org/web/20200107071106/https://prime.haskell.org/wiki/Defaulting">Haskell Prime Proposal 4</a> to be a wart of the language. Its specific usage is numeric types for interactive calculator style things, where it can be replaced with using computational reals by default for literals. ExtendedDefaultRules is simply a hack for Curry-style type system oddities in GHCi - since the involved classes have no RTOed functions, it is unnecessary in an untyped setting. For instance, <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">[]</span></code> is unambiguous, despite having a polymorphic Haskell type of <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">a.</span> <span class="pre">[a]</span></code> and no <code class="docutils literal notranslate"><span class="pre">Show</span></code> instance because GHC does not allow polymorphic type class instances. GHCi defaulting to <code class="docutils literal notranslate"><span class="pre">[Void]</span></code> instead of <code class="docutils literal notranslate"><span class="pre">[()]</span></code> would make this clear, but <code class="docutils literal notranslate"><span class="pre">Void</span></code> was only recently added to the base library so GHCi uses <code class="docutils literal notranslate"><span class="pre">()</span></code>.</p>
+<p>Inline signatures and type application can be replaced in a dynamic language by passing the type explicitly as a parameter, <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Double</span></code> or <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Float</span></code>, using normal overloading. Sometimes the type itself can be the function, <code class="docutils literal notranslate"><span class="pre">Vector</span> <span class="pre">i32</span> <span class="pre">iterator</span></code> or <code class="docutils literal notranslate"><span class="pre">Vector</span> <span class="pre">iterator</span></code> instead of <code class="docutils literal notranslate"><span class="pre">collect</span> <span class="pre">(Vec</span> <span class="pre">i32)</span> <span class="pre">iterator</span></code>. This actually standardizes and simplifies the observed syntax.</p>
+<p>Function expression and case inference can be mimicked similar to <a class="reference external" href="https://artificial-mind.net/blog/2020/10/10/return-type-overloading">this C++ approach</a>. We create a “blob” type that represents an RTO value of unknown type. Then we overload operations on the blob to return blobs, delaying resolution until an applied function or case makes it clear what a reasonable value would be. Furthermore the blob can store its type in a mutable reference and use <code class="docutils literal notranslate"><span class="pre">unsafePerformIO</span></code> to ensure that it resolves to the same type if it is used multiple times. Or it can be safe and evaluate at multiple types. This requires overloading every function that uses the blob, so can be some boilerplate.</p>
+<p>For nullary values like <code class="docutils literal notranslate"><span class="pre">top</span></code> of a lattice or a <code class="docutils literal notranslate"><span class="pre">default</span></code> value, you don’t need the blob machinery, you can just use a symbol. Then implement symbol conversion <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">top</span> <span class="pre">Float</span> <span class="pre">=</span> <span class="pre">float</span> <span class="pre">Infinity</span></code> and Julia’s promotion machinery will take care of the rest for numeric operations, or add manual overloading and conversion otherwise. You could take this approach with <code class="docutils literal notranslate"><span class="pre">read</span></code> as well, so that <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;x&quot;</span></code> is a term of type <code class="docutils literal notranslate"><span class="pre">Read</span></code> and you overload the function , but it might be more work than the blob approach.</p>
+<p>List of class methods in GHC’s libraries which are RTOed:</p>
+<p>toEnum :: Enum a =&gt; Int -&gt; a
+fromInteger :: Num a =&gt; Integer -&gt; a
+fromRational :: Fractional a =&gt; Rational -&gt; a
+encodeFloat :: RealFloat a =&gt; Integer -&gt; Int -&gt; a
+minBound :: Bounded a =&gt; a
+maxBound :: Bounded a =&gt; a
+mempty :: Monoid a =&gt; a
+fromExportableBuffer   :: Exportable c =&gt; ExportableCharacterSequence -&gt; c
+outputCap :: OutputCap f =&gt; ([Int] -&gt; String) -&gt; [Int] -&gt; f
+indexByteArray# :: Prim a =&gt; ByteArray# -&gt; Int# -&gt; a
+def :: Default a =&gt; a</p>
+<p>unexpected :: (Parsing m) =&gt; String -&gt; m a
+eof :: (Parsing m) =&gt; m ()
+getLine :: Interactive m =&gt; m String
+getCurrentYear :: Interactive m =&gt; m Integer
+pure :: Applicative f =&gt; a -&gt; f a
+fail :: MonadFail m =&gt; String -&gt; m a
+throwM :: (MonadThrow m, Exception e) =&gt; e -&gt; m a
+ask :: MonadReader r m =&gt; m r
+parsec :: (Parsec a, CabalParsing m) =&gt; m a
+qNewName :: Quasi m =&gt; String -&gt; m Name</p>
+<p>get :: Binary t =&gt; Get t
+readsPrec :: (Read a) =&gt; Int -&gt; ReadS a
+buildInfo :: HasBuildInfo a =&gt; Lens’ a BuildInfo
+garbitrary :: GArbitrary f =&gt; Gen (f ())
+iodataMode :: KnownIODataMode mode =&gt; IODataMode mode
+hGetIODataContents :: KnownIODataMode mode =&gt; System.IO.Handle -&gt; IO mode</p>
+<p>unsafeArray :: (IArray a e, Ix i) =&gt; (i,i) -&gt; [(Int, e)] -&gt; a i e
+unsafeAccumArray :: (IArray a e, Ix i) =&gt; (e -&gt; e’ -&gt; e) -&gt; e -&gt; (i,i) -&gt; [(Int, e’)] -&gt; a i e
+newArray:: (MArray a e m , Ix i) =&gt; (i,i) -&gt; e -&gt; m (a i e)
+basicUnsafeNew   :: PrimMonad m, MVector v a =&gt; Int -&gt; m (v (PrimState m) a)</p>
+<p>uniqueFieldAla :: (c b, Newtype a b, FieldGrammar c g) =&gt; FieldName -&gt; (a -&gt; b) -&gt; ALens’ s a -&gt; g s a
+tabulate :: Representable i f =&gt; (i -&gt; a) -&gt; f a
+unmodel :: TestData a =&gt; Model a -&gt; a – Model is a type synonym family of TestData</p>
+<p>mimicking RTO with simple overloading
+implement a DSL source transformation that infers the types using HM and adds explicit types</p>
 </section>
 </section>
 

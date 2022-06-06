@@ -17,12 +17,13 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Core syntax" href="CoreSyntax.html" />
+    <link rel="next" title="Concurrency" href="Concurrency.html" />
     <link rel="prev" title="Code generation" href="Code-Generation.html" /> 
 </head>
 
@@ -69,7 +70,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#documentation-generator">Documentation generator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#refactorer-reformatter">Refactorer / reformatter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#language-server">Language server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#shell">Shell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-shell">Interactive shell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#notebooks">Notebooks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dynamic-execution">Dynamic execution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logic">Logic</a></li>
@@ -77,7 +78,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#profiler">Profiler</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -97,6 +100,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -129,13 +134,14 @@
            <div itemprop="articleBody">
              
   <section id="compiler-design">
-<h1>Compiler design<a class="headerlink" href="#compiler-design" title="Permalink to this headline"></a></h1>
+<h1>Compiler design<a class="headerlink" href="#compiler-design" title="Permalink to this heading"></a></h1>
+<p>Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly. Currently Stroscot is aiming for AOT with profiling.</p>
 <section id="scale">
-<h2>Scale<a class="headerlink" href="#scale" title="Permalink to this headline"></a></h2>
+<h2>Scale<a class="headerlink" href="#scale" title="Permalink to this heading"></a></h2>
 <p>As of 2016, The Google repo has 1 billion files, of which 9 million are code</p>
 </section>
 <section id="pipeline">
-<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h2>
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this heading"></a></h2>
 <p>The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.</p>
 <p>Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.</p>
 <p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id27" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
@@ -143,26 +149,26 @@
 <p>Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.</p>
 </section>
 <section id="flags">
-<h2>Flags<a class="headerlink" href="#flags" title="Permalink to this headline"></a></h2>
+<h2>Flags<a class="headerlink" href="#flags" title="Permalink to this heading"></a></h2>
 <p>In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.</p>
 <p>There is also the value ‘default’ to set it to the default.</p>
 </section>
 <section id="error-messages">
-<h2>Error messages<a class="headerlink" href="#error-messages" title="Permalink to this headline"></a></h2>
+<h2>Error messages<a class="headerlink" href="#error-messages" title="Permalink to this heading"></a></h2>
 <p>Since Stroscot uses model checking, most failures will end up producing a counterexample. The counterexample may not be minimal, but it is much easier to debug a concrete instance than to try to figure one out from contextual information.</p>
 <p>For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. But it isn’t clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash, byte offset) as a 64-bit code, since then we can compare before/after within files and quickly check if two locations are equal.</p>
 </section>
 <section id="werror">
-<h2>Werror<a class="headerlink" href="#werror" title="Permalink to this headline"></a></h2>
+<h2>Werror<a class="headerlink" href="#werror" title="Permalink to this heading"></a></h2>
 <p>Werror is an option, as usual. If you want a hard dependency on the compiler version, then feel free to use it, otherwise it’s best to leave it unset so that users can use different compiler versions that emit different warnings.</p>
 </section>
 <section id="fuel">
-<h2>Fuel<a class="headerlink" href="#fuel" title="Permalink to this headline"></a></h2>
+<h2>Fuel<a class="headerlink" href="#fuel" title="Permalink to this heading"></a></h2>
 <p>A technique for testing the compiler and systems in general is to use a “fuel” counter that decrements every time a certain operation is performed, and do something interesting when the counter reaches 0 such as finishing the optimizations or throwing an exception.</p>
 <p>For example instead of testing for stack overflow we can test for running out of fuel. Stroscot’s execution context doesn’t involve a stack.</p>
 </section>
 <section id="optimization">
-<h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline"></a></h2>
+<h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading"></a></h2>
 <p>The path from cloud to CPU is long, so there is a lot of caching in between:</p>
 <ul class="simple">
 <li><p>Physical registers (0.3 ns): managed by the CPU</p></li>
@@ -189,9 +195,13 @@ Special-purpose use
 If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
 Embedded systems
 These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code’s speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code’s timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.</p>
+<p>Need optimizations for:
+* avoiding intermediate structures and dead or redundantly duplicated computation
+* storing arrays on the heap in the most efficient of a few straightforward ways
+* boiling away higher-order functions into tedious boilerplate</p>
 </section>
 <section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h2>
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this heading"></a></h2>
 <p>The simplest compiler writes out a file like:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- This is generated code - see &lt;file&gt; for source</span><span class="w"></span>
 <span class="nf">interpret</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">&lt;</span><span class="n">boilerplate</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">interpreter</span><span class="o">&gt;</span><span class="w"></span>
@@ -209,19 +219,19 @@ typechecking</p>
 <p>RTS flags should be stored into ABI hashes in installed libraries to avoid mismatching incompatible code objects.</p>
 </section>
 <section id="compilation-models">
-<h2>Compilation models<a class="headerlink" href="#compilation-models" title="Permalink to this headline"></a></h2>
+<h2>Compilation models<a class="headerlink" href="#compilation-models" title="Permalink to this heading"></a></h2>
 <p>Separate compilation is really incremental compilation - avoiding re-doing work that doesn’t depend on other files. The <code class="docutils literal notranslate"><span class="pre">.o</span></code> files are not useful by themselves, so the compile-link process can be replaced with an incremental compilation database and a command that directly produces an executable or DLL (assembly). If memory is a concern then results can be unloaded/loaded from the database.</p>
 <p>Executables and DLLs are defined by a stable ABI / set of entry points. Inlining depends on the content of the code, so we cannot inline, or in general do any optimizations across the ABI boundary.</p>
 </section>
 <section id="cross-compilation">
-<h2>Cross compilation<a class="headerlink" href="#cross-compilation" title="Permalink to this headline"></a></h2>
+<h2>Cross compilation<a class="headerlink" href="#cross-compilation" title="Permalink to this heading"></a></h2>
 <p>In cross compilation we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. When the host and target systems are the same, it’s a native build; otherwise it’s a cross build.</p>
 <p>The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” there is really a configuration option, namely the supported target of the compiler that will run on the host. Only compilers need to specify supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.</p>
 <p>the toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
 the package set is also target-dependent</p>
 </section>
 <section id="bootstrapping">
-<h2>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this headline"></a></h2>
+<h2>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this heading"></a></h2>
 <p>Bootstrapping is a 2-stage process. We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build:</p>
 <ul class="simple">
 <li><p>stage 1: New compiler on old ABI <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code></p></li>
@@ -233,7 +243,7 @@ the package set is also target-dependent</p>
 <p>build stage 2 compiler with the stage 1 compiler using the stage 1 package database ship with the stage 2 compiler). As such, the compiler is built with the identical libraries that it ships with. When running / interpreting byte code, we need to dynamically link packages and this way we can guarantee that the packages we link are identical to the ones the compiler was built with. This it is also the reason why we don’t have GHCi or Template Haskell support in the stage 1 compiler.</p>
 </section>
 <section id="complex-bootstrap">
-<h2>Complex bootstrap<a class="headerlink" href="#complex-bootstrap" title="Permalink to this headline"></a></h2>
+<h2>Complex bootstrap<a class="headerlink" href="#complex-bootstrap" title="Permalink to this heading"></a></h2>
 <p>Actually bootstrapping is more complex. The compiler is really two components, an interpreter and a specializer. The input program can take arguments. The interpreter can take arguments (dialects, libraries). The specializer can take arguments (bytecode, optimization instructions, plugins). The output program can take arguments (compiled objects, runtime components such as libc or a garbage collector). All of these arguments and options aren’t handled easily.</p>
 <p>We can think about this using the Futamura projections. We assume a primitive</p>
 <div class="math notranslate nohighlight">
@@ -267,13 +277,13 @@ Similarly we can use a compiler generator: <span class="math notranslate nohighl
 &amp; = \run{\run{c}p}x\end{split}\]</div>
 </section>
 <section id="compile-time-code-execution">
-<h2>Compile-time code execution<a class="headerlink" href="#compile-time-code-execution" title="Permalink to this headline"></a></h2>
+<h2>Compile-time code execution<a class="headerlink" href="#compile-time-code-execution" title="Permalink to this heading"></a></h2>
 <p>We want to execute code that runs at compile time, e.g. reading a blob of data to be included as a literal. Clearly this code executes on the host, with the same filesystem as the rest of the source code.</p>
 <p>We may also want to read configuration, e.g. the target platform properties (word size, endianness, etc.).</p>
 <p>Also we want to do computations with no runtime inputs, like 1+2.</p>
 </section>
 <section id="compiler-ways">
-<h2>Compiler ways<a class="headerlink" href="#compiler-ways" title="Permalink to this headline"></a></h2>
+<h2>Compiler ways<a class="headerlink" href="#compiler-ways" title="Permalink to this heading"></a></h2>
 <p>Some options are called “compiler ways”. They can be combined (e.g.
 threaded + debugging). The main issue is they affect the ABI.</p>
 <ul class="simple">
@@ -293,40 +303,60 @@ would make compilation times and disk space explode for features rarely used.
 The compiler itself and its boot libraries must be built for the target way.</p>
 </section>
 <section id="compiler-memory-management">
-<h2>Compiler memory management<a class="headerlink" href="#compiler-memory-management" title="Permalink to this headline"></a></h2>
+<h2>Compiler memory management<a class="headerlink" href="#compiler-memory-management" title="Permalink to this heading"></a></h2>
 <p>For the compiler itself, a trivial bump or arena allocator is sufficient for most purposes, as it is invoked on a single file and lasts a few seconds. With multiple files and large projects the issue is more complicated, as some amount of information must be shared between files. Optimization passes are also quite traversal-intensive and it may be more efficient to do in-place updates with a tracing GC rather than duplicating the whole AST and de-allocating the old one. Two other sources of high memory usage are macros and generics, particularly in combination with optimizations that increase code size such as inlining.</p>
 <p>Overall I don’t see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it’s clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.</p>
 </section>
 <section id="documentation-generator">
-<h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this headline"></a></h2>
+<h2>Documentation generator<a class="headerlink" href="#documentation-generator" title="Permalink to this heading"></a></h2>
 <p>The documentation generator provides a nice way to browse through a large codebase. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There’s regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.</p>
 <p>As far as targets, only HTML seems particularly important.</p>
 </section>
 <section id="refactorer-reformatter">
-<h2>Refactorer / reformatter<a class="headerlink" href="#refactorer-reformatter" title="Permalink to this headline"></a></h2>
+<h2>Refactorer / reformatter<a class="headerlink" href="#refactorer-reformatter" title="Permalink to this heading"></a></h2>
 <p>The refactoring tool reduces the amount of effort it takes to maintain code. It reads a program from a source file, rewrites the code according to specified rules, and writes the program back to the file. It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert <code class="docutils literal notranslate"><span class="pre">TODO:</span> <span class="pre">check</span> <span class="pre">rule</span> <span class="pre">XXX</span></code> comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms.</p>
 <p>Theoretically we should provide both forward and backward compatibility for language versions via the refactoring tool, but practically I think only backwards compatibility (v1 -&gt; v2) is relevant.</p>
 <p>With no rules, the refactoring tool functions as a reformatter. Python’s Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that’s used for the compiler.</p>
 <p>Inspired by gofix / <a class="reference external" href="https://go.dev/blog/gofmt">gofmt</a> .</p>
 </section>
 <section id="language-server">
-<h2>Language server<a class="headerlink" href="#language-server" title="Permalink to this headline"></a></h2>
+<h2>Language server<a class="headerlink" href="#language-server" title="Permalink to this heading"></a></h2>
 <p>For integration with VSCode and other IDEs.</p>
 </section>
-<section id="shell">
-<h2>Shell<a class="headerlink" href="#shell" title="Permalink to this headline"></a></h2>
-<p>A simple REPL loop based on eval.</p>
+<section id="interactive-shell">
+<h2>Interactive shell<a class="headerlink" href="#interactive-shell" title="Permalink to this heading"></a></h2>
+<p>A REPL loop based on eval. Available from command line as bare <code class="docutils literal notranslate"><span class="pre">stroscot</span></code> or <code class="docutils literal notranslate"><span class="pre">stroscot</span> <span class="pre">-i</span> <span class="pre">files</span></code>, and from API as a library function <code class="docutils literal notranslate"><span class="pre">replLoop</span> <span class="pre">env</span></code> or similar. Supports expressions and block syntax from the main language, and commands. Commands are built-in functions to the interpreter, like <code class="docutils literal notranslate"><span class="pre">shell</span> <span class="pre">clear</span></code> which runs <code class="docutils literal notranslate"><span class="pre">clear</span></code> in the shell. Or maybe the syntax should be <code class="docutils literal notranslate"><span class="pre">:shell</span> <span class="pre">clear</span></code> to avoid clashing with whatever is loaded. But namespaces are a thing, <code class="docutils literal notranslate"><span class="pre">repl.shell</span> <span class="pre">clear</span></code>. The syntax will have to be worked out.</p>
+<p>Full command list:
+* shell, run shell thing</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>change/print current directory</p></li>
+<li><p>list files</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>show information about symbol</p></li>
+<li><p>push/pop level of interactive environment (source files are level 0, IE starts at level 1, and more can be added)</p></li>
+<li><p>clear definitions for specified symbols or current level of interactive environment</p></li>
+<li><p>load file</p></li>
+<li><p>dump/load interactive environment to/from text file</p></li>
+<li><p>reset - clear IE, load sources file from disk</p></li>
+<li><p>reload - dump IE, load sources file from disk, load IE dump</p></li>
+<li><p>quit process</p></li>
+<li><p>debugger commands</p></li>
+<li><p>profiler commands</p></li>
+</ul>
 </section>
 <section id="notebooks">
-<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline"></a></h2>
+<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this heading"></a></h2>
 <p>Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.</p>
 <p>But, jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code” REPL, no information on what cell it’s from.
 So we would have to hack jupyter to get this to work.</p>
 <p>The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a “soft_reset” message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it’s the same as the previous execution - I don’t know if sending all the code is much of a bottleneck.</p>
-<p>For now living with REPLs seems fine.</p>
+<p>For now living with REPL behavior seems fine.</p>
 </section>
 <section id="dynamic-execution">
-<h2>Dynamic execution<a class="headerlink" href="#dynamic-execution" title="Permalink to this headline"></a></h2>
+<h2>Dynamic execution<a class="headerlink" href="#dynamic-execution" title="Permalink to this heading"></a></h2>
 <p>loading code at runtime
 - typecheck, JIT compile, return function pointer
 the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through an interpreter
@@ -350,7 +380,7 @@ arguments and jumps to the interpreter</p>
 a call, it’s a slow procedure that looks
 up the interpreter endpoint or else
 jumps to a trampoline that jumped to the JITed code</p>
-<p>then there’s deopt
+<p>then there’s deoptimization
 it’s tricky to stop running processors
 from running code
 if you try to
@@ -360,19 +390,33 @@ you
 can’t actually stop it
 so first you change the vtable to the interpreter
 then you change the head of the method to jump to the interpreter</p>
+<p>there’s also speculative optimization and escape analysis</p>
 <p>Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.</p>
+<p>Julia - faster than Python, but JIT uses many slow trampolines</p>
+<p>Javascript - V8 is a fast modern JIT</p>
 </section>
 <section id="logic">
-<h2>Logic<a class="headerlink" href="#logic" title="Permalink to this headline"></a></h2>
+<h2>Logic<a class="headerlink" href="#logic" title="Permalink to this heading"></a></h2>
 <p>Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).</p>
 </section>
 <section id="debugger">
-<h2>Debugger<a class="headerlink" href="#debugger" title="Permalink to this headline"></a></h2>
+<h2>Debugger<a class="headerlink" href="#debugger" title="Permalink to this heading"></a></h2>
 <p>Need this. Reversible debugging.</p>
+<ul class="simple">
+<li><p>breakpoints: set/clear/list</p></li>
+<li><p>backtrace of exception</p></li>
+<li><p>stepping: single step, step out, continue until breakpoint, run ignoring breakpoints</p></li>
+<li><p>evaluate pure expression</p></li>
+</ul>
 </section>
 <section id="profiler">
-<h2>Profiler<a class="headerlink" href="#profiler" title="Permalink to this headline"></a></h2>
-<p>Should profile both time and memory usage.</p>
+<h2>Profiler<a class="headerlink" href="#profiler" title="Permalink to this heading"></a></h2>
+<p>Measure
+* time and memory usage.
+* throughput (calls/second)
+* A/B testing of multiple implementations
+for functions, expressions, programs, etc.</p>
+<p>Use statistical sampling and hardware performance counters to avoid overhead.</p>
 </section>
 </section>
 
@@ -381,7 +425,7 @@ then you change the head of the method to jump to the interpreter</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Code-Generation.html" class="btn btn-neutral float-left" title="Code generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="CoreSyntax.html" class="btn btn-neutral float-right" title="Core syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Concurrency.html" class="btn btn-neutral float-right" title="Concurrency" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

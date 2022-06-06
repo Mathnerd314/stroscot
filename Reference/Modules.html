@@ -17,11 +17,12 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Dispatch" href="Dispatch.html" />
+    <link rel="next" title="Memory" href="Memory.html" />
     <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
 </head>
 
@@ -53,7 +54,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#access">Access</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#with-statement">With statement</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#exports">Exports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exports-and-internal-symbols">Exports and internal symbols</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linking">Linking</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#imports">Imports</a></li>
@@ -62,7 +63,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#overrides">Overrides</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -98,29 +98,31 @@
            <div itemprop="articleBody">
              
   <section id="modules">
-<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline"></a></h1>
-<p>Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"></span>
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h1>
+<p>Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax. They also define namespaces for symbols.</p>
+<p>A module starts with a module identifier followed by import declarations followed by other declarations.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>module
 
-<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+a = 1
+b = 2
 
-<span class="o">#</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+# C = { a = 1; b = 2 }
 </pre></div>
 </div>
 <section id="access">
-<h2>Access<a class="headerlink" href="#access" title="Permalink to this headline"></a></h2>
-<p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. The uniform notation with records seems cleaner than notation like <code class="docutils literal notranslate"><span class="pre">A::B::C::a.b</span></code>.</p>
+<h2>Access<a class="headerlink" href="#access" title="Permalink to this heading"></a></h2>
+<p>By default bare symbols are interpreted as belonging to the current module. So <code class="docutils literal notranslate"><span class="pre">a</span></code> in module <code class="docutils literal notranslate"><span class="pre">A</span></code> refers to <code class="docutils literal notranslate"><span class="pre">A.a</span></code>.</p>
+<p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. The uniform notation with records seems cleaner than notation like <code class="docutils literal notranslate"><span class="pre">A::B::C::a.b</span></code>. The first component of the dotted name is still qualified to the current module, so <code class="docutils literal notranslate"><span class="pre">C.a</span></code> in module <code class="docutils literal notranslate"><span class="pre">A</span></code> refers to <code class="docutils literal notranslate"><span class="pre">A.C.a</span></code>. The recursive knot in the linker defines <code class="docutils literal notranslate"><span class="pre">A.C.a</span> <span class="pre">=</span> <span class="pre">&lt;global&gt;.C.a</span></code> after it sees that <code class="docutils literal notranslate"><span class="pre">A</span></code> imports <code class="docutils literal notranslate"><span class="pre">C</span></code>.</p>
 </section>
 <section id="with-statement">
-<h2>With statement<a class="headerlink" href="#with-statement" title="Permalink to this headline"></a></h2>
+<h2>With statement<a class="headerlink" href="#with-statement" title="Permalink to this heading"></a></h2>
 <p>To save on typing there is the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">most</span><span class="w"> </span><span class="n">purposes</span><span class="w"></span>
 <span class="kt">C</span><span class="o">.</span><span class="n">a</span><span class="w"></span>
 <span class="nf">with</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Without <code class="docutils literal notranslate"><span class="pre">with</span></code>, bare identifiers or the first component of a dotted name are qualified to the current module. If multiple modules are in scope through <code class="docutils literal notranslate"><span class="pre">with</span></code>, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code> were written for every identifier <code class="docutils literal notranslate"><span class="pre">a</span></code> and module <code class="docutils literal notranslate"><span class="pre">C</span></code>. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.</p>
+<p>If multiple modules are in scope through <code class="docutils literal notranslate"><span class="pre">with</span></code>, then an identifier may refer to any of the modules as well. These are handled through the normal overloading mechanism, as if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code> were written for every identifier <code class="docutils literal notranslate"><span class="pre">a</span></code> and module <code class="docutils literal notranslate"><span class="pre">C</span></code>. A warning/error will be generated if the overloading cannot be resolved statically or if it is ambiguous.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>C = complex computation returning a module
 D = complex computation returning a module
 
@@ -140,17 +142,17 @@ with D { with C { a } }
 </pre></div>
 </div>
 </section>
-<section id="exports">
-<h2>Exports<a class="headerlink" href="#exports" title="Permalink to this headline"></a></h2>
+<section id="exports-and-internal-symbols">
+<h2>Exports and internal symbols<a class="headerlink" href="#exports-and-internal-symbols" title="Permalink to this heading"></a></h2>
 <p>Module exports can similarly be limited:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"> </span><span class="p">(</span><span class="nf">a</span><span class="p">)</span><span class="w"></span>
 
 <span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="w"></span>
 <span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;y&quot;</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">accessible</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">accessible</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">termed</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="s">&quot;internal&quot;</span><span class="w"> </span><span class="n">symbol</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Sometimes it is necessary to access internal members, so they are actually still accessible with <code class="docutils literal notranslate"><span class="pre">C.__internal.b</span></code> .</p>
+<p>Sometimes it is necessary to access internal symbols, so they are actually still accessible with <code class="docutils literal notranslate"><span class="pre">C.__internal.b</span></code> .</p>
 <p>You can also limit the exports to exclude named clauses of reduction rules (by default all reduction rules are exported regardless of limiting exported symbols):</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"> </span><span class="p">(</span><span class="nf">f</span><span class="p">)</span><span class="w"> </span><span class="n">hiding</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
 
@@ -167,17 +169,17 @@ with D { with C { a } }
 </div>
 </section>
 <section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline"></a></h2>
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
 <p>Modules also take parameters, passed implicitly; every undefined identifier becomes a parameter. In a working program these parameters will mostly be other modules, but macro definitions can also be passed in. Undefined values in a declaration will be part of that declaration’s parameters rather than the module’s. Technically, what we have been talking are really module definitions rather than modules, i.e. they are functions producing modules. A fully instantiated module doesn’t take any parameters and is simply a record.</p>
 </section>
 <section id="linking">
-<h2>Linking<a class="headerlink" href="#linking" title="Permalink to this headline"></a></h2>
+<h2>Linking<a class="headerlink" href="#linking" title="Permalink to this heading"></a></h2>
 <p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary. There’s a set of convenient functions that cover common cases.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">project</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;src/**.sct&quot;</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="imports">
-<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this headline"></a></h3>
+<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this heading"></a></h3>
 <p>The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>
 <p>Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">}</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span>          <span class="c1"># import a, b, c from Alphabet</span>
@@ -192,7 +194,7 @@ with D { with C { a } }
 </section>
 </section>
 <section id="overrides">
-<h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this headline"></a></h2>
+<h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this heading"></a></h2>
 <p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement prevents creating a new identifier, so that instead a base identifer can be extended.</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># module 1</span>
 <span class="n">foo</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
@@ -217,7 +219,7 @@ with D { with C { a } }
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Dispatch.html" class="btn btn-neutral float-right" title="Dispatch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,7 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -81,6 +84,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -113,7 +118,7 @@
            <div itemprop="articleBody">
              
   <section id="memory-management">
-<h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this headline"></a></h1>
+<h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this heading"></a></h1>
 <p>Rust has an unsafe alter ego
 the underlying computer hardware is inherently unsafe.
 certain tasks are unsafe.
@@ -187,7 +192,7 @@ State Transitions</p>
 * C++: <a class="reference external" href="https://github.com/mandreyel/mio">https://github.com/mandreyel/mio</a>
 * Rust: <a class="reference external" href="https://github.com/RazrFalcon/memmap2-rs">https://github.com/RazrFalcon/memmap2-rs</a></p>
 <section id="model">
-<h2>Model<a class="headerlink" href="#model" title="Permalink to this headline"></a></h2>
+<h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
 <p>For memory management we have to consider values, called objects. Pointers are manually freed and hence don’t need to be managed.</p>
 <p>An invalidate queue is more like a store buffer, but it’s part of the memory system, not the CPU. Basically it is a queue that keeps track of invalidations and ensures that they complete properly so that a cache can take ownership of a cache line so it can then write that line. A load queue is a speculative structure that keeps track of in-flight loads in the out of order processor. For example, the following can occur</p>
 <blockquote>
@@ -198,7 +203,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>A store buffer is a speculative structure that exists in the CPU, just like the load queue and is for allowing the CPU to speculate on stores. A write combining buffer is part of the memory system and essentially takes a bunch of small writes (think 8 byte writes) and packs them into a single larger transaction (a 64-byte cache line) before sending them to the memory system. These writes are not speculative and are part of the coherence protocol. The goal is to save bus bandwidth. Typically, a write combining buffer is used for uncached writes to I/O devices (often for graphics cards). It’s typical in I/O devices to do a bunch of programming of device registers by doing 8 byte writes and the write combining buffer allows those writes to be combined into larger transactions when shipping them out past the cache.</p>
 </section>
 <section id="allocator">
-<h2>Allocator<a class="headerlink" href="#allocator" title="Permalink to this headline"></a></h2>
+<h2>Allocator<a class="headerlink" href="#allocator" title="Permalink to this heading"></a></h2>
 <p>ultimate allocator - steal features from all other allocators. It’s one of those well-researched areas where a few percent lives. Substitution isn’t really an option but maybe some components could be pluggable. Thread safe but values are pure and references can be determined to be thread-local so lots of optimizations.</p>
 <p>We want to automatically determine the number of allocation regions and their size to maximize locality.</p>
 <p>locate memory leaks - places where allocated memory is never getting freed - memory usage profiling</p>
@@ -238,7 +243,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>Eliminating pointers entirely is not possible. But we can minimize the lifetime of pointers in the standard library to the duration of the call, and use values / references everywhere else.</p>
 </section>
 <section id="pieces">
-<h2>Pieces<a class="headerlink" href="#pieces" title="Permalink to this headline"></a></h2>
+<h2>Pieces<a class="headerlink" href="#pieces" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Safe - no dangling pointers (freeing object from live set)</p></li>
 <li><p>Complete - no memory leaks (never freeing object from dead set). There is also excessive memory usage, where a program continually uses ever-growing arrays, e.g. an ever-growing Game of Life configuration. But this is not something the compiler can fix. The best the compiler can do is to optimize the program to remove large objects in cases where they aren’t necessary.</p></li>
@@ -247,7 +252,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <li><p>Pause time - time spent in memory manager with all other threads locked</p></li>
 </ul>
 <section id="mutator">
-<h3>Mutator<a class="headerlink" href="#mutator" title="Permalink to this headline"></a></h3>
+<h3>Mutator<a class="headerlink" href="#mutator" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">src</span>&#160; <span class="pre">=</span> <span class="pre">New</span></code> - an explicit API in the language, adding to the set of ever-allocated objects <code class="docutils literal notranslate"><span class="pre">O</span></code> and allocated objects <code class="docutils literal notranslate"><span class="pre">A</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">val</span> <span class="pre">=</span> <span class="pre">Read</span> <span class="pre">src</span></code> - reading the value of a cell</p></li>
@@ -257,7 +262,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 </ul>
 </section>
 <section id="collector">
-<h3>Collector<a class="headerlink" href="#collector" title="Permalink to this headline"></a></h3>
+<h3>Collector<a class="headerlink" href="#collector" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Deallocation/reclamantion - removing an object <code class="docutils literal notranslate"><span class="pre">o</span> <span class="pre">in</span> <span class="pre">O</span></code> from <code class="docutils literal notranslate"><span class="pre">A</span></code></p></li>
 <li><p>A dead object is not live, <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">in</span> <span class="pre">O</span> <span class="pre">and</span> <span class="pre">(Access(s,z)</span> <span class="pre">=</span> <span class="pre">no</span> <span class="pre">or</span> <span class="pre">z</span> <span class="pre">notin</span> <span class="pre">A)</span></code>.</p></li>
@@ -280,7 +285,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 }</p></object></div>
 </section>
 <section id="id5">
-<h3>Allocator<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<h3>Allocator<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>allocate - reserves the underlying memory storage for an object</p></li>
 <li><p>free - returns that storage to the allocator for subsequent re-use</p></li>
@@ -370,8 +375,8 @@ for a_iter_source.iter().collect() there is an optional .size_hint function on t
 </section>
 </section>
 <section id="destructors">
-<h2>Destructors<a class="headerlink" href="#destructors" title="Permalink to this headline"></a></h2>
-<p>Destructors A destructor is a magic value created with the operation <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">:</span> <span class="pre">Op</span> <span class="pre">Destructor</span></code>. It supports equality, hashing, and an operation <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Bool</span></code>. All calls to <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> but the last in the program return false; the last <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> returns true. There is also <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> which ensures that <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> always returns false.</p>
+<h2>Destructors<a class="headerlink" href="#destructors" title="Permalink to this heading"></a></h2>
+<p>A destructor is a magic value created with the operation <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">:</span> <span class="pre">Op</span> <span class="pre">Destructor</span></code>. It supports equality, hashing, and an operation <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Bool</span></code>. All calls to <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> but the last in the program return false; the last <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> returns true. There is also <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> which ensures that <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> always returns false.</p>
 <p>Stroscot checks a no-leak property for each destructor <code class="docutils literal notranslate"><span class="pre">x</span></code> that exactly one of the following holds:
 * <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">x</span></code> is called infinitely often, returning false each time
 * <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">x</span></code> returns true and is never called thereafter
@@ -436,7 +441,12 @@ Virtual memory API
 <li><p>tail call optimization, Stack height reduction - stack optimizations</p></li>
 <li><p>deforestation - remove data structure</p></li>
 </ul>
-<p>can you request memory in an async fashion? memory starvation is often the result of contention, so waiting could get you the memory back. Or if you request more than is physically on the system, barring hot-swapping RAM, memory will never become available. Also, excessive paging occurs before actual memory exhaustion. performance completely tanks and the user kills the process.</p>
+<p>API for requesting memory in an async fashion - memory starvation is often the result of contention, so waiting could get you the memory.
+* if you request more than is physically on the system, the request will fail immediately, because that much memory will never become available, barring hot-swapping RAM.
+* the API would have to ignore swapping. Otherwise, excessive paging occurs before actual memory exhaustion. So the request succeeds but because it’s backed by the disk performance completely tanks and the user ends up killing the process.
+Unfortunately, no OS APIs allow requesting memory asynchronously. The closest you get is Linux’s on-demand backing allocation.</p>
+<p>Azul GC: <span id="id7">[]</span> <span id="id8">[]</span>
+Shenandoah</p>
 </section>
 </section>
 

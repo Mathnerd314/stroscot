@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -63,7 +64,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -83,6 +86,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -115,10 +120,10 @@
            <div itemprop="articleBody">
              
   <section id="assembly">
-<h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this headline"></a></h1>
+<h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this heading"></a></h1>
 <p>A lot of languages aim for “no runtime overhead”. But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which in some sense limits Stroscot to C’s abstractions. But it would be nice to do assembly directly as well so Stroscot can be even faster in some cases.</p>
 <section id="architectures">
-<h2>Architectures<a class="headerlink" href="#architectures" title="Permalink to this headline"></a></h2>
+<h2>Architectures<a class="headerlink" href="#architectures" title="Permalink to this heading"></a></h2>
 <p>The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn’t find a list of processor architectures by popularity, but from <a class="reference external" href="https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use">this quora answer</a> and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARMv8-A A64 (mobile devices).</p>
 <p>Others:
 * ARMv9-A A64: It’s released, devices expected in 2022. Very similar to v8 so should be able to share the code. Verdict: on the roadmap
@@ -136,17 +141,17 @@
 <p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
 </section>
 <section id="operating-systems">
-<h2>Operating systems<a class="headerlink" href="#operating-systems" title="Permalink to this headline"></a></h2>
+<h2>Operating systems<a class="headerlink" href="#operating-systems" title="Permalink to this heading"></a></h2>
 <p>Linux for AMD64, Android for ARM, and later on Windows for AMD64.</p>
 <p>We’ll exclude Apple for now because its developer documentation sucks and its anti-competitive practices mean that getting Stroscot to work would require starting a war with Swift.</p>
 </section>
 <section id="instruction-database">
-<h2>Instruction database<a class="headerlink" href="#instruction-database" title="Permalink to this headline"></a></h2>
+<h2>Instruction database<a class="headerlink" href="#instruction-database" title="Permalink to this heading"></a></h2>
 <p>An instruction is a sequence of bytes. Beyond that it’s hard to define exactly. <a class="reference external" href="https://github.com/xoreaxeaxeax/sandsifter">sandsifter</a> defines an instruction as a sequence <code class="docutils literal notranslate"><span class="pre">seq</span></code> for which <code class="docutils literal notranslate"><span class="pre">seq|000</span></code> does not trigger a page fault, but <code class="docutils literal notranslate"><span class="pre">se|q00</span></code> does (where <code class="docutils literal notranslate"><span class="pre">|</span></code> is a page boundary), and which does not trigger an undefined instruction (#UD) trap. <a class="reference external" href="https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/">haruspex</a> is even more tricky and defines it as a sequence that fills the microcode speculation buffer with a number of micro-ops not matching the undefined instruction.</p>
 <p>There are usually at least a few undocumented instructions on a processor, and we won’t know what they are. So we need a syntax for writing instructions directly, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code>. It’s basically a <code class="docutils literal notranslate"><span class="pre">.db</span></code> statement, but whereas <code class="docutils literal notranslate"><span class="pre">.db</span></code> is used for file headers or data in the <code class="docutils literal notranslate"><span class="pre">.data</span></code> section, this is meant specifically for executable data.</p>
 <p>But for a random byte sequence there is nothing the compiler can do besides pass it through. Normally we want to run a lot of pipelining optimizations. So for an optimizing compiler we need instruction metadata.</p>
 <section id="data-sources">
-<h3>Data sources<a class="headerlink" href="#data-sources" title="Permalink to this headline"></a></h3>
+<h3>Data sources<a class="headerlink" href="#data-sources" title="Permalink to this heading"></a></h3>
 <p>In terms of data sources for ISAs, for x86 the official sources are <a class="reference external" href="https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html">Intel’s SDM</a> / <a class="reference external" href="https://developer.amd.com/resources/developer-guides-manuals/">AMD’s Architecture Programmer’s Manual</a>, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. <a class="reference external" href="https://github.com/google/EXEgesis">EXEgesis</a> uses a hacky Xpdf parser but has some amount of effort invested by Google. <a class="reference external" href="https://github.com/HJLebbink/x86doc/tree/master/Python">x86doc</a> uses pdfminer to generate HTML which seems like a more friendly starting point.</p>
 <p>More structured are x86 instruction databases:
 * <cite>Intel XED &lt;https://intelxed.github.io/&gt;</cite> (<a class="reference external" href="https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt">file</a>).
@@ -168,7 +173,7 @@
 <p>The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly.</p>
 </section>
 <section id="templates">
-<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this headline"></a></h3>
+<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this heading"></a></h3>
 <p>The most basic data is an instruction list. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addressing modes / addresses, and immediate values.</p>
 <p>The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.</p>
 <p>Intel has variable-length instructions and the docs seem to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think dumping Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed directly for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates.</p>
@@ -193,7 +198,7 @@
 <p>We also want to store Xed’s isa_set field, the condition on CPUID for this instruction to work, and the valid modes (32-bit, 64-bit, real, protected, etc.). There are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.</p>
 </section>
 <section id="affected-state">
-<h3>Affected state<a class="headerlink" href="#affected-state" title="Permalink to this headline"></a></h3>
+<h3>Affected state<a class="headerlink" href="#affected-state" title="Permalink to this heading"></a></h3>
 <p>Another important piece of data is the affected state, i.e. the list of read/written flags/registers/etc. This is used in instruction reordering/scheduling and register allocation to minimize <a class="reference external" href="https://en.wikipedia.org/wiki/Hazard_(computer_architecture)#Data_hazards">data hazards</a>.</p>
 <p>The affected things depend on the instruction (and the operands). Where can we get this info?</p>
 <p>It seems possible to automatically determine by fuzzing (weighted towards special cases like 0 and 1). But it’s probably really slow and the result is somewhat suspect - it can’t determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.</p>
@@ -229,7 +234,7 @@
 <p>“undefined” in the context of Intel means “arbitrary bit-pattern may be returned”. This is distinct from C’s UB but matches LLVM’s “undef”.</p>
 </section>
 <section id="classification">
-<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline"></a></h3>
+<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h3>
 <p>There are a lot of instructions. We can classify them based on their affected state:
 * data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions
 * call: reads the program counter
@@ -241,12 +246,12 @@
 <p>For code layout knowing the possible execution paths is important. non-data instructions have to be handled specifically.</p>
 </section>
 <section id="performance">
-<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this headline"></a></h3>
+<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h3>
 <p>the data present in LLVM for instruction scheduling (such as uops, execution ports/units, and latencies),</p>
 <p>If PSTATE.DIT is 1 the execution time is independent of the values.</p>
 </section>
 <section id="attributes-metadata">
-<h3>Attributes / metadata<a class="headerlink" href="#attributes-metadata" title="Permalink to this headline"></a></h3>
+<h3>Attributes / metadata<a class="headerlink" href="#attributes-metadata" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>concurrency / memory model</p></li>
 </ul>

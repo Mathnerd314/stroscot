@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -48,33 +49,55 @@
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Values</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#atomic-values">Atomic values</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#symbols">Symbols</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#number-literals">Number literals</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#strings">Strings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#time">Time</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#binary-data">Binary data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#symbols">Symbols</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#namespacing">Namespacing</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#aggregate-values">Aggregate values</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#term">Term</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#lists">Lists</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#records">Records</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#term">Term</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#infinite-terms">Infinite terms</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#numbers">Numbers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#integers">Integers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rationals">Rationals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reals">Reals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#p-adics-and-surreals">p-adics and surreals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#number-formats">Number formats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#complex">Complex</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lists">Lists</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tuple">Tuple</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arrays">Arrays</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tensors">Tensors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#binary-data">Binary data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#character">Character</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#date-time">Date/time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#records">Records</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#maps">Maps</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sets">Sets</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#functions">Functions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cyclic-values">Cyclic values</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#modules">Modules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pointers">Pointers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multimap">Multimap</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#sets">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bags">Bags</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#priority-queue">Priority queue</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modules">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-structures">Data Structures</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -110,33 +133,47 @@
            <div itemprop="articleBody">
              
   <section id="values">
-<h1>Values<a class="headerlink" href="#values" title="Permalink to this headline"></a></h1>
-<p>Values are <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">immutable</a> and have standard notions of equality, comparison, literal syntax, and deconstruction. Values can be copied freely and discarded if they are no longer needed.</p>
-<p>TODO:  ISO/IEC 11404 General purpose datatypes</p>
-<p>Values are either primitive, meaning no sub-values, or composite, containing substructures (which are values as well.)</p>
-<p>Values as described here are assumed to be in normal form, meaning no reduction rules apply to them. But programs may use syntax that does not necessarily correspond to a normal form to describe values, and similarly may define reduction rules that reduce values to other expressions. Semantically a value that reduces to something else is not a value anymore, but nonetheless we still call it a value.</p>
-<section id="atomic-values">
-<h2>Atomic values<a class="headerlink" href="#atomic-values" title="Permalink to this headline"></a></h2>
-<p>The values here are primitive, meaning they are defined without reference to other datatypes, and atomic, meaning the values are intrinsically indivisible.</p>
+<h1>Values<a class="headerlink" href="#values" title="Permalink to this heading"></a></h1>
+<p>In Stroscot values are defined to be expressions that are in normal form (strongly reduced). WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value.</p>
+<p>Values are immutable (as <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">Rich Hickey says</a>) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.</p>
+<p>For convenience, “value” really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - they reduce to a value of the compiler’s preferred data structure implementation. Programs may define the syntax here to other values.</p>
 <section id="symbols">
-<h3>Symbols<a class="headerlink" href="#symbols" title="Permalink to this headline"></a></h3>
-<p>Symbols are unique values defined in modules and addressed by strings. Bare symbols consist Of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus <code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">Foo</span></code>, and <code class="docutils literal notranslate"><span class="pre">FOO</span></code> are distinct identifiers. Other strings can be turned into symbols with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>, for example <code class="docutils literal notranslate"><span class="pre">&#64;&quot;null&quot;</span></code>. In addition operator symbols can be defined with parentheses, <code class="docutils literal notranslate"><span class="pre">(+)</span></code>. There is also the empty parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code>.</p>
+<h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h2>
+<p>Symbols are unique values defined in modules and addressed by strings. Bare symbols consist of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus <code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">Foo</span></code>, and <code class="docutils literal notranslate"><span class="pre">FOO</span></code> are distinct identifiers. Other strings can be turned into symbols with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>, for example <code class="docutils literal notranslate"><span class="pre">&#64;&quot;null&quot;</span></code>. In addition operator symbols can be defined with parentheses and a sequence of punctuation characters, e.g. <code class="docutils literal notranslate"><span class="pre">(+)</span></code>. There is also the empty parentheses symbol <code class="docutils literal notranslate"><span class="pre">()</span></code>, called “unit”.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"></span>
 <span class="nf">underscore_symbol</span><span class="w"></span>
 <span class="nf">unícσdє</span><span class="o">-</span><span class="n">symβol</span><span class="w"></span>
+<span class="p">(</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="o">@</span><span class="s">&quot;a long symbol&quot;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Examples of predefined symbols include <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">false</span></code> - the latter two forming the boolean type.</p>
 <section id="namespacing">
-<h4>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this headline"></a></h4>
+<h3>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this heading"></a></h3>
 <p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition.</p>
 </section>
 </section>
-<section id="number-literals">
-<h3>Number literals<a class="headerlink" href="#number-literals" title="Permalink to this headline"></a></h3>
-<p>In the mathematical world the definition of <a class="reference external" href="https://en.wikipedia.org/wiki/Number#Main_classification">number</a> variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the “numeric tower”) But in the computer world the atomic notion of “number” is a literal that looks like a number.</p>
+<section id="term">
+<h2>Term<a class="headerlink" href="#term" title="Permalink to this heading"></a></h2>
+<p>A term is a symbol applied to other values.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tree</span><span class="w"> </span><span class="p">(</span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span><span class="w"></span>
+<span class="p">(</span><span class="o">++++</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">some</span><span class="w"> </span><span class="p">(</span><span class="n">weird</span><span class="w"> </span><span class="n">thing</span><span class="p">))</span><span class="w"> </span><span class="mi">12</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Note that if there is an appropriate syntax rule the second example could also be written as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">++++</span> <span class="pre">b</span></code>, but it would be an equivalent value.</p>
+<p>Terms subsume algebraic data types, since an ADT value is a symbol applied to other values.</p>
+<p>Terms also include the other function syntax, keyword arguments and so on.</p>
+<section id="infinite-terms">
+<h3>Infinite terms<a class="headerlink" href="#infinite-terms" title="Permalink to this heading"></a></h3>
+<p>Sometimes it is useful to deal with terms that are solutions to a system of equations, like <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x=cons</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">x</span></code>. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">fib</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">cons</span> <span class="pre">x</span> <span class="pre">(fib</span> <span class="pre">y</span> <span class="pre">(x+y))</span> <span class="pre">in</span> <span class="pre">fib</span> <span class="pre">0</span> <span class="pre">1</span></code> requires infinitely many reductions to reduce to an infinite normal form.</p>
+</section>
+</section>
+<section id="numbers">
+<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this heading"></a></h2>
+<p>In the mathematical world the definition of <a class="reference external" href="https://en.wikipedia.org/wiki/Number#Main_classification">number</a> variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the “numeric tower”) But most of these are composite structures. In the computer world the primitive notion of “number” is a literal that looks like a number.</p>
 <section id="integers">
-<h4>Integers<a class="headerlink" href="#integers" title="Permalink to this headline"></a></h4>
+<h3>Integers<a class="headerlink" href="#integers" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">4711</span><span class="w"></span>
 <span class="mi">4711</span><span class="kt">L</span><span class="w"></span>
 <span class="mf">1.2e+3</span><span class="w"></span>
@@ -154,9 +191,10 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 <span class="nf">integer</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"> </span><span class="n">pos_exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="o">?</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Really integers are just a special class of symbols.</p>
 </section>
 <section id="rationals">
-<h4>Rationals<a class="headerlink" href="#rationals" title="Permalink to this headline"></a></h4>
+<h3>Rationals<a class="headerlink" href="#rationals" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">exponent</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="p">[</span><span class="o">+-</span><span class="p">]</span><span class="o">?</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span><span class="w"></span>
 <span class="nf">float</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="p">(</span><span class="o">\.</span><span class="n">digit</span><span class="o">+</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="o">?</span><span class="w"></span>
 
@@ -164,11 +202,102 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 </pre></div>
 </div>
 <p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, but liberalized. We allow floats to be the numerator/denominator because writing out <code class="docutils literal notranslate"><span class="pre">1e99</span> <span class="pre">/</span> <span class="pre">1e-99</span></code> would be tedious.</p>
-<p>The normal form of a rational is <code class="docutils literal notranslate"><span class="pre">AeB</span> <span class="pre">/</span> <span class="pre">C</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are relatively prime and <code class="docutils literal notranslate"><span class="pre">C</span></code> is not  zero and not divisible by 10.</p>
+<p>The normal form of a rational is <code class="docutils literal notranslate"><span class="pre">AeB</span> <span class="pre">/</span> <span class="pre">C</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are relatively prime integers, <code class="docutils literal notranslate"><span class="pre">B</span></code> is an integer, and <code class="docutils literal notranslate"><span class="pre">C</span></code> is an integer that is not zero and not divisible by 10.</p>
+<p>So a rational is a term with a nested term, <code class="docutils literal notranslate"><span class="pre">(/)</span> <span class="pre">((e)</span> <span class="pre">&lt;int&gt;</span> <span class="pre">&lt;int&gt;)</span> <span class="pre">&lt;int&gt;</span></code>.</p>
 </section>
+<section id="reals">
+<h3>Reals<a class="headerlink" href="#reals" title="Permalink to this heading"></a></h3>
+<p>The real numbers and numeric spaces containing it are uncomputably large. In practice only a subset of  (computable) values is accessible. Generally we take the integers and rationals and consider the closure under operations:
+* constants (e, pi)
+* arithmetic ops (addition, subtraction multiplication, division)
+* other ops (sqrt, pow, sin, cos, abs, find root of polynomial in interval, definite integral, etc.)</p>
+<p>These operations can be written out as terms, e.g. <code class="docutils literal notranslate"><span class="pre">sin</span> <span class="pre">(7/2)</span></code>, so to support the real numbers only appropriate symbols and defined operations are needed.</p>
+</section>
+<section id="p-adics-and-surreals">
+<h3>p-adics and surreals<a class="headerlink" href="#p-adics-and-surreals" title="Permalink to this heading"></a></h3>
+<p>p-adics and surreal numbers are also represented using terms composed of integers, rationals, constants, and other terms, representing operations.</p>
+</section>
+<section id="number-formats">
+<h3>Number formats<a class="headerlink" href="#number-formats" title="Permalink to this heading"></a></h3>
+<p>Numbers can have a suffix interpreted as the format. This expand to a term that specifies the format by applying it, e.g.  <code class="docutils literal notranslate"><span class="pre">123i8</span></code> expands to <code class="docutils literal notranslate"><span class="pre">int8</span> <span class="pre">123</span></code>. Formats include IEE 754 float/double, signed and unsigned fixed bit-width integers, and fixed-point rationals.</p>
+</section>
+<section id="complex">
+<h3>Complex<a class="headerlink" href="#complex" title="Permalink to this heading"></a></h3>
+<p>These are just a term <code class="docutils literal notranslate"><span class="pre">complex</span> <span class="pre">a</span> <span class="pre">b</span></code> representing <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b*i</span></code> where <code class="docutils literal notranslate"><span class="pre">a,b</span></code> are real numbers. Maybe it is also worth having <code class="docutils literal notranslate"><span class="pre">complex_polar</span> <span class="pre">r</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">r*exp</span> <span class="pre">(i*t)</span></code>.</p>
+</section>
+</section>
+<section id="lists">
+<h2>Lists<a class="headerlink" href="#lists" title="Permalink to this heading"></a></h2>
+<p>A list represents an ordered sequence of values that is empty or finite, but not infinite (only terms can be infinite).</p>
+<p>Basic list syntax is the usual syntactic sugar for list values.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">[]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">empty</span><span class="w"> </span><span class="n">list</span><span class="w"></span>
+<span class="nf">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">arr</span></code> translates to a Lisp-like term <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span></code>, making use of the term syntax’s capability to take variadic arguments. Heterogeneous lists are possible, <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">1</span> <span class="pre">&quot;x&quot;</span> <span class="pre">(int32</span> <span class="pre">3)</span></code>.</p>
+<p>Haskell’s cons operator is abandoned in favor of concatenation:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">xs</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">ys</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">concatenation</span><span class="w"></span>
+<span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">xs</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="p">``</span><span class="n">x</span><span class="p">``</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">tail</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="p">``</span><span class="n">xs</span><span class="p">``,</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="n">cons</span><span class="w"></span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">++</span></code> is just a symbol, so you can write <code class="docutils literal notranslate"><span class="pre">[1]</span> <span class="pre">++</span> <span class="pre">2</span></code> for example, i.e. the term <code class="docutils literal notranslate"><span class="pre">(++)</span> <span class="pre">(list</span> <span class="pre">1)</span> <span class="pre">2</span></code>.</p>
+<p>A list has push and pop operations from head and tail so can be used as a stack, queue, or double-ended queue (dequeue).</p>
+<section id="tuple">
+<h3>Tuple<a class="headerlink" href="#tuple" title="Permalink to this heading"></a></h3>
+<p>In Stroscot tuple is synonymous with list - they’re both immutable. There’s not a different type with different semantics like in Python or Pure. You can use the tuple syntax <code class="docutils literal notranslate"><span class="pre">(a,b)</span></code> in place of list syntax <code class="docutils literal notranslate"><span class="pre">[a,b]</span></code> whenever convenient.</p>
+</section>
+<section id="arrays">
+<h3>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h3>
+<p>(Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code> defines a 1-based array where <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">i</span></code>. Maybe there is also an element type, <code class="docutils literal notranslate"><span class="pre">typed_array</span> <span class="pre">int32</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code></p>
+<p>Mutable arrays are a reference pointing to an immutable array. There is also an array of mutable cells but this is not used often as mutable array operations are optimized to in-place operations. Mutable arrays are not C pointers - conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> if you want the first element, as opposed to a pointer <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
+</section>
+<section id="tensors">
+<h3>Tensors<a class="headerlink" href="#tensors" title="Permalink to this heading"></a></h3>
+<p>Tensors are just nested lists, e.g. here is a (3,2,5)-sized rank 3 tensor:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">]],</span><span class="w"></span>
+<span class="w"> </span><span class="p">[[</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">]],</span><span class="w"></span>
+<span class="w"> </span><span class="p">[[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">]]]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>If you want to save a bit of bracket typing you can use <code class="docutils literal notranslate"><span class="pre">reshape</span></code> on a flat list:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reshape</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"></span>
+<span class="w">   </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Or similarly use a 3D array:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">array</span><span class="w"> </span><span class="p">(</span><span class="n">range</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">...</span><span class="p">,</span><span class="mi">29</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>There is also a <code class="docutils literal notranslate"><span class="pre">matrix</span></code> DSL which turns semicolons into rows.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">matrix</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="binary-data">
+<h2>Binary data<a class="headerlink" href="#binary-data" title="Permalink to this heading"></a></h2>
+<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. There is a binary/hex literal syntax:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span><span class="w"></span>
+<span class="nf">digit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="w"></span>
+
+<span class="kr">data</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"></span>
+</pre></div>
+</div>
+<p>We allow various base prefixes <code class="docutils literal notranslate"><span class="pre">0?</span></code> - <code class="docutils literal notranslate"><span class="pre">x</span></code> (hexadecimal), <code class="docutils literal notranslate"><span class="pre">o</span></code> (octal), <code class="docutils literal notranslate"><span class="pre">d</span></code> (decimal) and <code class="docutils literal notranslate"><span class="pre">b</span></code> (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example <code class="docutils literal notranslate"><span class="pre">0b010</span> <span class="pre">=</span> <span class="pre">bits</span> <span class="pre">[0,1,0]</span></code>.</p>
+<p>Another way to write data is as a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code> which makes use of UTF-8 characters and hexadecimal for invalid byte sequences.</p>
+<p>The normal form is just a term applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. Because of the term tagging it, the list can be stored compactly.</p>
 </section>
 <section id="strings">
-<h3>Strings<a class="headerlink" href="#strings" title="Permalink to this headline"></a></h3>
+<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;Hello world!</span><span class="se">\n</span><span class="s">&quot;</span><span class="w"></span>
 <span class="p">``</span><span class="kt">Hello</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="o">$</span><span class="p">{</span><span class="n">id</span><span class="p">}``</span><span class="w"></span>
 <span class="p">[</span><span class="kt">Enclosed</span><span class="w"> </span><span class="n">text</span><span class="p">]</span><span class="w"></span>
@@ -181,124 +310,19 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 There is no explicit syntax for characters, instead characters are strings of length 1.
 Escape sequences are defined; the main ones are <code class="docutils literal notranslate"><span class="pre">\&quot;</span></code> to escape a quote and <code class="docutils literal notranslate"><span class="pre">\\</span></code> to escape a backslash, the others aren’t relevant to parsing the literal.</p>
 <p>String concatenation is <code class="docutils literal notranslate"><span class="pre">++</span></code>.</p>
-<p>The string is raw bytes terminated with a null character, like in C.
-Often strings encoded in UTF-8.</p>
-</section>
-<section id="time">
-<h3>Time<a class="headerlink" href="#time" title="Permalink to this headline"></a></h3>
-<p>The JSR-310 <a class="reference external" href="https://www.threeten.org/">ThreeTen</a> library in <a class="reference external" href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/package-summary.html">Java</a> seems to have undergone the most peer review. It relies heavily on ISO 8601. Another is <a class="reference external" href="http://time4j.net/">http://time4j.net/</a>. For some reason these are all Java. Rust has a basic thing in <a class="reference external" href="https://doc.rust-lang.org/std/time/index.html">std</a>. There is a more complete Rust library but the author is <a class="reference external" href="https://github.com/time-rs/time/issues/406#issuecomment-989753838">opinionated</a>.</p>
-<p>%L - Millennium
-%C - Century
-%X - Decade
-%Y - Year
-%M - Month
-%D - Day
-%V - Week Year
-%W - Week
-%w - Week Day
-%O - Ordinal Day</p>
-<p>%h - Hour
-%m - Minute
-%s - Second
-%u - Microsecond</p>
-<p>%Z - Zone Hour including +/-
-%z - Zone Minute</p>
-<p>%[,.]3x - Value including fraction with given precision, using either comma or dot.
-%−Z     - Use U+2212 for negative timezone hours (ISO recommended)</p>
-<p>Generally values are represented using symbols applied to strings, e.g. <code class="docutils literal notranslate"><span class="pre">instant</span> <span class="pre">&quot;2011-12-03T10:15:30.999999999Z&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">localDate</span> <span class="pre">'2010-12-03'</span></code>, etc. This hides all internal representation details.</p>
-<p>Internally there is a more compact form, e.g. a 128-bit number.</p>
-<p>Fixed-point types are like <code class="docutils literal notranslate"><span class="pre">x*2^-5</span> <span class="pre">years</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> is an integer and <code class="docutils literal notranslate"><span class="pre">2^-5</span> <span class="pre">years</span></code> is the resolution. But you still use ISO 8601 syntax, it just gets rounded into the representation (earliest time such that the interval represented by the less precise contains the interval represented by the more precise).</p>
-</section>
-<section id="binary-data">
-<h3>Binary data<a class="headerlink" href="#binary-data" title="Permalink to this headline"></a></h3>
-<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. These are just a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>, but as a separate datatype the bits can be stored compactly.</p>
-<p>There is also a binary/hex literal syntax:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span><span class="w"></span>
-<span class="nf">digit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="w"></span>
-
-<span class="kr">data</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"></span>
-</pre></div>
-</div>
-<p>We allow various base prefixes <code class="docutils literal notranslate"><span class="pre">0?</span></code> - <code class="docutils literal notranslate"><span class="pre">x</span></code> (hexadecimal), <code class="docutils literal notranslate"><span class="pre">o</span></code> (octal), <code class="docutils literal notranslate"><span class="pre">d</span></code> (decimal) and <code class="docutils literal notranslate"><span class="pre">b</span></code> (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example <code class="docutils literal notranslate"><span class="pre">0b010</span> <span class="pre">=</span> <span class="pre">bits</span> <span class="pre">[0,1,0]</span></code>.</p>
-<p>Another way to write data is as a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code> which makes use of UTF-8 characters and hexadecimal for invalid byte sequences, but this doesn’t work for null characters.</p>
+<p>The string is raw bytes terminated with a null character, like in C, or a length plus raw bytes.
+Often strings are encoded in UTF-8.</p>
+<section id="character">
+<h3>Character<a class="headerlink" href="#character" title="Permalink to this heading"></a></h3>
+<p>A “character” is not just a single Unicode code point. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points. Unicode calls characters “grapheme clusters” and provides an algorithm for identifying them in UAX #29. The main notable feature of the algorithm is that a grapheme cluster may be arbitrarily long due to the use of combining characters/accents and ZWJs, for example in Zalgo text, hence a character must be repesented as a variable-length sequence of codepoints. Hence it is simplest and most correct to define a character as a Unicode string of grapheme length 1.</p>
 </section>
 </section>
-<section id="aggregate-values">
-<h2>Aggregate values<a class="headerlink" href="#aggregate-values" title="Permalink to this headline"></a></h2>
-<section id="term">
-<h3>Term<a class="headerlink" href="#term" title="Permalink to this headline"></a></h3>
-<p>A term is a symbol applied to other values.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tree</span><span class="w"> </span><span class="p">(</span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span><span class="w"></span>
-<span class="p">(</span><span class="o">++++</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
-<span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">some</span><span class="w"> </span><span class="p">(</span><span class="n">weird</span><span class="w"> </span><span class="n">thing</span><span class="p">))</span><span class="w"> </span><span class="mi">12</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Note that if there is an appropriate syntax rule the second example could also be written as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">++++</span> <span class="pre">b</span></code>, but it would be an equivalent value.</p>
-<p>Expressions subsume algebraic data types, since an ADT value is a symbol (constructor) applied to other values.</p>
-<section id="number-formats">
-<h4>Number formats<a class="headerlink" href="#number-formats" title="Permalink to this headline"></a></h4>
-<p>Numbers can have a suffix interpreted as the format. This expand to a term that specifies the format by applying it, e.g.  <code class="docutils literal notranslate"><span class="pre">123i8</span></code> expands to <code class="docutils literal notranslate"><span class="pre">int8</span> <span class="pre">123</span></code>.</p>
-</section>
-<section id="reals">
-<h4>Reals<a class="headerlink" href="#reals" title="Permalink to this headline"></a></h4>
-<p>The real numbers and numeric spaces containing it are uncomputably large. In practice only a subset of  (computable) values is accessible. Generally we take the integers and rationals and consider the closure under operations:
-* constants (e, pi)
-* arithmetic ops (addition, subtraction multiplication, division)
-* other ops (sqrt, pow, sin, cos, abs, find root of polynomial in interval, definite integral, etc.)</p>
-<p>These operations can be written out as terms, e.g. <code class="docutils literal notranslate"><span class="pre">sin</span> <span class="pre">(7/2)</span></code>, so to support the real numbers only appropriate symbols and defined operations are needed.</p>
-</section>
-<section id="p-adics-and-surreals">
-<h4>p-adics and surreals<a class="headerlink" href="#p-adics-and-surreals" title="Permalink to this headline"></a></h4>
-<p>Similarly to reals, p-adics and surreal numbers are represented using integers, rationals, constants, and operations on them.</p>
-</section>
-<section id="complex">
-<h4>Complex<a class="headerlink" href="#complex" title="Permalink to this headline"></a></h4>
-<p>These are just a term <code class="docutils literal notranslate"><span class="pre">complex</span> <span class="pre">a</span> <span class="pre">b</span></code> representing <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b*i</span></code> where <code class="docutils literal notranslate"><span class="pre">a,b</span></code> are real numbers. Maybe it is also worth having <code class="docutils literal notranslate"><span class="pre">complex_polar</span> <span class="pre">r</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">r*exp</span> <span class="pre">(i*t)</span></code>.</p>
-</section>
-</section>
-<section id="lists">
-<h3>Lists<a class="headerlink" href="#lists" title="Permalink to this headline"></a></h3>
-<p>Lists can represent the result of binary operations that are associative. But lists don’t automatically flatten, e.g. <code class="docutils literal notranslate"><span class="pre">[a,[b,c]]</span> <span class="pre">!=</span> <span class="pre">[a,b,c]</span></code> (although there is a flatten function in the standard library)</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">]</span><span class="w"></span>
-
-<span class="nf">sum</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
-<span class="nf">product</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Basic list syntax is the same as in Haskell, thus <code class="docutils literal notranslate"><span class="pre">[]</span></code> is the empty list, <code class="docutils literal notranslate"><span class="pre">x:xs</span></code> denotes a list with head element <code class="docutils literal notranslate"><span class="pre">x</span></code> and tail list <code class="docutils literal notranslate"><span class="pre">xs</span></code>, and the usual syntactic sugar for list values in brackets is also provided, thus <code class="docutils literal notranslate"><span class="pre">[x,y,z]</span></code> is exactly the same as <code class="docutils literal notranslate"><span class="pre">x:y:z:[]</span></code>. But <code class="docutils literal notranslate"><span class="pre">:</span></code> isn’t typed so you can write <code class="docutils literal notranslate"><span class="pre">1:2</span></code> for example, or have heterogeneous lists.</p>
-<p>Immutable arrays are lists that have a statically-known length and constant element storage size, which allows efficient (packed) storage.</p>
-<p>In Stroscot tuple is synonymous with lists. There’s not a different type with different semantics like in Python or Pure.</p>
-<section id="tensors">
-<h4>Tensors<a class="headerlink" href="#tensors" title="Permalink to this headline"></a></h4>
-<p>Tensors are just nested arrays, e.g. here is a (3,2,5)-sized rank 3 tensor:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">]],</span><span class="w"></span>
-<span class="w"> </span><span class="p">[[</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="p">[</span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">]],</span><span class="w"></span>
-<span class="w"> </span><span class="p">[[</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">],</span><span class="w"></span>
-<span class="w">  </span><span class="p">[</span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">]]]</span><span class="w"></span>
-</pre></div>
-</div>
-<p>As with lists they can be heterogeneous.</p>
-<p>If you want to save a bit of bracket typing you can use <code class="docutils literal notranslate"><span class="pre">reshape</span></code> on a flat array:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reshape</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">,</span><span class="w"></span>
-<span class="w">   </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="mi">26</span><span class="p">,</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">]</span><span class="w"></span>
-</pre></div>
-</div>
-<p>There is also a <code class="docutils literal notranslate"><span class="pre">matrix</span></code> DSL which turns semicolons into rows.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">matrix</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]</span><span class="w"></span>
-</pre></div>
-</div>
-</section>
+<section id="date-time">
+<h2>Date/time<a class="headerlink" href="#date-time" title="Permalink to this heading"></a></h2>
+<p>Date/time values are written using symbols applied to strings, lists, or records using ISO 8601 style formats, e.g. <code class="docutils literal notranslate"><span class="pre">instant</span> <span class="pre">&quot;2011-12-03T10:15:30.999999999Z&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">gregorianDate</span> <span class="pre">[2010,12,03]</span></code>, or <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">{</span> <span class="pre">hour</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">minute</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">second</span> <span class="pre">=</span> <span class="pre">12.3</span> <span class="pre">}</span></code>. This hides all internal representation details. Internally there is a more compact form, e.g. a 128-bit number.</p>
 </section>
 <section id="records">
-<h3>Records<a class="headerlink" href="#records" title="Permalink to this headline"></a></h3>
+<h2>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h2>
 <p>Records are like C structs or Python dictionaries. The order of the fields is remembered, so this data type is a list of key-value pairs.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">rec</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
 <span class="nf">rec</span><span class="o">.</span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
@@ -307,42 +331,264 @@ Often strings encoded in UTF-8.</p>
 <span class="p">{</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">rec</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="o">#</span><span class="w"> </span><span class="n">record</span><span class="w"> </span><span class="n">update</span><span class="w"></span>
 <span class="nf">rec</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">4</span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-</section>
 <section id="maps">
-<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline"></a></h3>
-<p>Maps are associative arrays, very similar to records except the fields are not ordered (commutative/sorted list).</p>
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this heading"></a></h3>
+<p>Maps are the same as records except the fields are not ordered (set of pairs).</p>
+</section>
+<section id="multimap">
+<h3>Multimap<a class="headerlink" href="#multimap" title="Permalink to this heading"></a></h3>
+<p>A multimap is a map where the values are nonempty bags.</p>
+</section>
 </section>
 <section id="sets">
-<h3>Sets<a class="headerlink" href="#sets" title="Permalink to this headline"></a></h3>
-<p>Sets are like commutative/sorted lists with no repeated values or maps where the value is always the symbol <code class="docutils literal notranslate"><span class="pre">present</span></code>.</p>
-<p>The literal syntax is just <code class="docutils literal notranslate"><span class="pre">set</span></code> applied to a list.</p>
+<h2>Sets<a class="headerlink" href="#sets" title="Permalink to this heading"></a></h2>
+<p>Sets are unordered lists with no repeated values, similar to a map whose values are all the symbol <code class="docutils literal notranslate"><span class="pre">present</span></code> or a function <code class="docutils literal notranslate"><span class="pre">isElemOf</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{Present|Absent}</span></code>.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
+<section id="bags">
+<h2>Bags<a class="headerlink" href="#bags" title="Permalink to this heading"></a></h2>
+<p>Bags are unordered multisets, similar to a map whose values are nonnegative integers.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bag</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<section id="priority-queue">
+<h3>Priority queue<a class="headerlink" href="#priority-queue" title="Permalink to this heading"></a></h3>
+<p>This is a bag plus an ordering operation.</p>
+</section>
+</section>
 <section id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline"></a></h3>
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
 <p>Functions are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare via alpha equivalence).</p>
 </section>
-<section id="cyclic-values">
-<h3>Cyclic values<a class="headerlink" href="#cyclic-values" title="Permalink to this headline"></a></h3>
-<p>Sometimes it is useful to deal with solutions to a system of equations, like <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x=cons</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">x</span></code>. These are also values - there is a way to compute the (unique) minimal graph representation.</p>
-</section>
 <section id="modules">
-<h3>Modules<a class="headerlink" href="#modules" title="Permalink to this headline"></a></h3>
+<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h2>
 <p>Modules are also first class, they are discussed in their own page.</p>
 </section>
-<section id="references">
-<h3>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h3>
-<p>References are values, we’ll go with <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">123</span></code> for syntax. They are not persistent, meaning the value can change between program runs and the details of the value is an implementation detail. Also they are unforgeable, writing <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">123</span></code> in a program will give an error. But the REPL allows writing <code class="docutils literal notranslate"><span class="pre">ref</span> <span class="pre">123</span></code> for convenience in debugging.</p>
-</section>
 <section id="pointers">
-<h3>Pointers<a class="headerlink" href="#pointers" title="Permalink to this headline"></a></h3>
-<p>Pointers are values as well, they are just particular bit patterns. <code class="docutils literal notranslate"><span class="pre">pointer</span> <span class="pre">0xdeadbeef</span></code>.</p>
+<h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this heading"></a></h2>
+<p>Pointers are just a wrapper for particular bit patterns (integers), like <code class="docutils literal notranslate"><span class="pre">pointer</span> <span class="pre">0xdeadbeef</span></code>. You can do integer arithmetic and turn it into a pointer, but at least on x86-64 not all 64-bit integers are valid pointers.</p>
 </section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+<p>References are like pointers but use symbols instead of integers, we’ll go with <code class="docutils literal notranslate"><span class="pre">Ref</span> <span class="pre">r123</span></code> for syntax where <code class="docutils literal notranslate"><span class="pre">r123</span></code> is a symbol. The main difference from a pointer is that you can’t do arithmetic on symbols. Most symbols are autogenerated inside the reference creation operation <code class="docutils literal notranslate"><span class="pre">ref</span></code>, but you can also write reference values directly. This is mainly for convenience in debugging at the REPL, since fixed symbols are tantamount to global variables and hence are bad programming practice.</p>
+<p>Postfix ++ and – are statements</p>
+</section>
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>Arrays</dt><dd><p>Array
+Bit array
+Bit field
+Bitboard
+Bitmap
+Circular buffer
+Control table
+Image
+Dope vector
+Dynamic array
+Gap buffer
+Hashed array tree
+Lookup table
+Matrix
+Parallel array
+Sorted array
+Sparse matrix
+Iliffe vector
+Variable-length array</p>
+</dd>
+</dl>
+<p>Lists</p>
+<blockquote>
+<div><p>Singly/Circular/Doubly Linked list
+Array list
+Association list
+Self-organizing list
+Skip list
+Unrolled linked list
+VList
+Conc-tree list
+Xor linked list
+Zipper
+Doubly connected edge list also known as half-edge
+Difference list
+Free list</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Trees</dt><dd><dl class="simple">
+<dt>Binary trees</dt><dd><p>AA tree
+AVL tree
+Binary search tree
+Binary tree
+Cartesian tree
+Conc-tree list
+Left-child right-sibling binary tree
+Order statistic tree
+Pagoda
+Randomized binary search tree
+Red–black tree
+Rope
+Scapegoat tree
+Self-balancing binary search tree
+Splay tree
+T-tree
+Tango tree
+Threaded binary tree
+Top tree
+Treap
+WAVL tree
+Weight-balanced tree</p>
+</dd>
+<dt>B-trees</dt><dd><p>B-tree
+B+ tree
+B*-tree
+Dancing tree
+2–3 tree
+2–3–4 tree
+Queap
+Fusion tree
+Bx-tree</p>
+</dd>
+<dt>Heaps</dt><dd><p>Heap
+Binary heap
+B-heap
+Weak heap
+Binomial heap
+Fibonacci heap
+AF-heap
+Leonardo heap
+2–3 heap
+Soft heap
+Pairing heap
+Leftist heap
+Treap
+Beap
+Skew heap
+Ternary heap
+D-ary heap
+Brodal queue</p>
+</dd>
+<dt>Bit-slice trees - each tree node compares a bit slice of key values.</dt><dd><p>Radix tree (compressed trie), Patricia tree
+Bitwise trie with bitmap
+Suffix tree
+Suffix array
+Compressed suffix array
+FM-index
+Generalised suffix tree
+B-tree
+Judy array
+X-fast trie
+Y-fast trie
+Merkle tree</p>
+</dd>
+<dt>Multi-way trees</dt><dd><p>Ternary tree
+K-ary tree
+And–or tree
+(a,b)-tree
+Link/cut tree
+SPQR-tree
+Spaghetti stack
+Disjoint-set data structure (Union-find data structure)
+Fusion tree
+Enfilade
+Exponential tree
+Fenwick tree
+Van Emde Boas tree
+Rose tree</p>
+</dd>
+<dt>Space-partitioning trees</dt><dd><p>Segment tree
+Interval tree
+Range tree
+Bin
+K-d tree
+Implicit k-d tree
+Min/max k-d tree
+Relaxed k-d tree
+Adaptive k-d tree
+Quadtree
+Octree
+Linear octree
+Z-order
+UB-tree
+R-tree
+R+ tree
+R* tree
+Hilbert R-tree
+X-tree
+Metric tree
+Cover tree
+M-tree
+VP-tree
+BK-tree
+Bounding interval hierarchy
+Bounding volume hierarchy
+BSP tree
+Rapidly exploring random tree</p>
+</dd>
+<dt>Application-specific trees</dt><dd><p>Abstract syntax tree
+Parse tree
+Decision tree
+Alternating decision tree
+Minimax tree
+Expectiminimax tree
+Finger tree
+Expression tree
+Log-structured merge-tree</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Hash-based structures</p>
+<blockquote>
+<div><p>Bloom filter
+Count–min sketch
+Distributed hash table
+Double hashing
+Dynamic perfect hash table
+Hash array mapped trie
+Hash list
+Hash table
+Hash tree
+Hash trie
+Koorde
+Prefix hash tree
+Rolling hash
+MinHash
+Quotient filter
+Ctrie</p>
+</div></blockquote>
+<dl>
+<dt>Graphs</dt><dd><p>Graph
+Adjacency list
+Adjacency matrix
+Graph-structured stack
+Scene graph
+Decision tree</p>
+<blockquote>
+<div><p>Binary decision diagram</p>
+</div></blockquote>
+<p>Zero-suppressed decision diagram
+And-inverter graph
+Directed graph
+Directed acyclic graph
+Propositional directed acyclic graph
+Multigraph
+Hypergraph</p>
+</dd>
+</dl>
+<p>Other</p>
+<blockquote>
+<div><p>Lightmap
+Winged edge
+Quad-edge
+Routing table
+Symbol table
+Piece table</p>
+</div></blockquote>
 </section>
 </section>
 

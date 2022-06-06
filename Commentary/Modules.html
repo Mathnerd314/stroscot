@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,7 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -63,6 +66,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ml">1ML</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dependency-hell">Dependency hell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lexical-scoping">Lexical scoping</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
@@ -74,6 +78,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -106,14 +112,19 @@
            <div itemprop="articleBody">
              
   <section id="modules">
-<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline"></a></h1>
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h1>
 <p>Java has four access modes:
 private - abstract data type, structure not accessible to the outside world. use exported functions to manipulate.
 public - All data is directly accessible
 protected - a variant of public, because anybody can access a protected member if he or she wants to, without much difficulty.
 package - a variant of private, limiting access to the package rather than the file. Intended to replace C++ “friendly”</p>
+<ul class="simple">
+<li><p>exports: we write: ‘export a, b, c;’ (with a, b, c, etc.  a list of
+exported names, possibly also: structure.field)</p></li>
+<li><p>the ordering of methods in interfaces is not relevant</p></li>
+</ul>
 <section id="ml">
-<h2>1ML<a class="headerlink" href="#ml" title="Permalink to this headline"></a></h2>
+<h2>1ML<a class="headerlink" href="#ml" title="Permalink to this heading"></a></h2>
 <p>The module system is a superset of 1ML, MixML, Backpack, and Newspeak’s module system, so those don’t need to be considered further. (TODO: reread the papers to check this. but they’re mostly type systems, rather than functionality)</p>
 <p>Later in the pipeline:
 * A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
@@ -121,8 +132,15 @@ package - a variant of private, limiting access to the package rather than the f
 <p>how does module import work without “with”?</p>
 </section>
 <section id="dependency-hell">
-<h2>Dependency hell<a class="headerlink" href="#dependency-hell" title="Permalink to this headline"></a></h2>
+<h2>Dependency hell<a class="headerlink" href="#dependency-hell" title="Permalink to this heading"></a></h2>
 <p>It is key to support side-by-side execution of multiple versions of the same functionality. So names also include version numbers and a cryptographic hash.</p>
+</section>
+<section id="lexical-scoping">
+<h2>Lexical scoping<a class="headerlink" href="#lexical-scoping" title="Permalink to this heading"></a></h2>
+<p>An identifier is visible from the point of its declaration to the end of the immediately surrounding block.
+Later identifiers shadow earlier identifiers with the same name; shadowing generates a warning.
+There is only one effective scope at any point in the code (for instance, variables and types are looked up in the same scope).</p>
+<p>Uniform scoping rules make programs easier to read and to understand.</p>
 </section>
 </section>
 

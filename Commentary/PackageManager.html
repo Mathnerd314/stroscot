@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -51,7 +52,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -64,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Package manager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#package-format">Package format</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upgrade-cycle">Upgrade cycle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#versioned-paths">Versioned paths</a></li>
@@ -86,6 +90,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -118,26 +124,30 @@
            <div itemprop="articleBody">
              
   <section id="package-manager">
-<h1>Package manager<a class="headerlink" href="#package-manager" title="Permalink to this headline"></a></h1>
+<h1>Package manager<a class="headerlink" href="#package-manager" title="Permalink to this heading"></a></h1>
 <p>A language also needs a package manager. When a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so all of the task’s provided keys (files) are downloaded instead of the task being built, verifying their cryptographic hashes/signatures. We also need a way to create packages from a build tree.</p>
 <p>The list of provided files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn’t exist on the target system. Or we can ensure the build script places all of its provided files in a specific location.</p>
 <p>A useful feature not implemented in most package managers is P2P distribution, over Bittorrent or IPFS. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is <a class="reference external" href="https://wiki.debian.org/DebTorrent#line-42">not too great</a>). There are some notes <a class="reference external" href="https://github.com/ipfs-inactive/package-managers">from IPFS</a> and various half-baked package managers like <code class="docutils literal notranslate"><span class="pre">npm-on-ipfs</span></code>.</p>
 <p>In a long-running system, the number of prebuilt packages could grow without bound. We need a mechanism to clean out the archives when space becomes limited.</p>
 <p>Edges are bidirectional. To fix the GC problem, we use weak references for back edges, but strong references for memo table entries, so that from the GC’s point of view, all DCG nodes are always reachable. To implement safe space reclamation, we also implement reference counting of DCG nodes, where the counts reflect the number of strong edges reaching a node. When DCG edgesare deleted, the reference counts of target nodes are decremented. Nodes that reach zero are not immediately collected; thisallows thunks to be “resurrected” by the swapping pattern. Instead, we provide aflushoperation for memo tables that deletesthe strong mapping edge for all nodes with a count of zero, which means they are no longer reachable by the main program.Deletion is transitive: removing the node decrements the counts of nodes it points to, which may cause them to be deleted.An interesting question is how to decide when to invokeflush; this is the system’seviction policy. One obvious choice is toflush when the system starts to run short of memory (based on a signal from the GC), which matches the intended effect of theunsound weak reference-based approach. But placing the eviction policy under the program’s control opens other possibilities,e.g., the programmer could invokeflushwhen it is semantically clear that thunks cannot be restored. We leave to future work further exploration of sensible eviction policies</p>
+<section id="package-format">
+<h2>Package format<a class="headerlink" href="#package-format" title="Permalink to this heading"></a></h2>
+<p>One advantage of C/C++ is that it is the de-facto standard, so everyone has a method to distribute application binaries compiled in those languages. But this is only a small advantage as there is still no common format: there are self-extracting installers and then a variety of package formats. MSI and PKG are fiat standards for Windows and Mac, but they have been superseded by the stores and practically for programming people use application-specific package managers that don’t interface with the OS level package managers.</p>
+</section>
 <section id="linux-distribution">
-<h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this headline"></a></h2>
+<h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this heading"></a></h2>
 <p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways as few people use it.</p>
 <p>The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
 </section>
 <section id="upgrade-cycle">
-<h2>Upgrade cycle<a class="headerlink" href="#upgrade-cycle" title="Permalink to this headline"></a></h2>
+<h2>Upgrade cycle<a class="headerlink" href="#upgrade-cycle" title="Permalink to this heading"></a></h2>
 <p>A package has various versions. It also depends on other packages which can themselves be various versions.</p>
 <p>In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form “breakage: A-2 B-2 C-2”.</p>
 <p>There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.</p>
 <p>Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.</p>
 </section>
 <section id="versioned-paths">
-<h2>Versioned paths<a class="headerlink" href="#versioned-paths" title="Permalink to this headline"></a></h2>
+<h2>Versioned paths<a class="headerlink" href="#versioned-paths" title="Permalink to this heading"></a></h2>
 <p>There are some filesystem convention/naming issues. Clearly the distro should package multiple versions of various libraries. The key question is where to store them.
 For a basic path like <code class="docutils literal notranslate"><span class="pre">/usr/share/foo/img.jpg</span></code>, we can put a hash <code class="docutils literal notranslate"><span class="pre">HASH</span></code> in various places:</p>
 <ol class="arabic simple">
@@ -153,7 +163,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <p>per-user installs: Conda has worked out reasonable solutions for these, relative paths and so on.</p>
 </section>
 <section id="side-by-side-c-libraries">
-<h2>Side-by-side C libraries<a class="headerlink" href="#side-by-side-c-libraries" title="Permalink to this headline"></a></h2>
+<h2>Side-by-side C libraries<a class="headerlink" href="#side-by-side-c-libraries" title="Permalink to this heading"></a></h2>
 <div class="graphviz"><object data="../_images/graphviz-9d3c05f684f9108889f9ccd04858e12f7e4bba51.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph foo {
   rankdir=LR;
@@ -167,7 +177,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <p>Another solution is to create a manifest that specifies where to load libraries from, but this is basically the same as specifying absolute paths.</p>
 </section>
 <section id="updates">
-<h2>Updates<a class="headerlink" href="#updates" title="Permalink to this headline"></a></h2>
+<h2>Updates<a class="headerlink" href="#updates" title="Permalink to this heading"></a></h2>
 <p>For seamless updates it seems worthwhile to use an <a class="reference external" href="https://source.android.com/devices/tech/ota/ab">A/B partition scheme</a>. There are roughly 3 types of updates:
 * small updates that just update a user-level application
 * large updates that affect components such as the desktop manager, WiFi, etc.
@@ -177,11 +187,11 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <p>Kernel updates require a reboot or [kexec](<a class="reference external" href="https://github.com/NixOS/nixpkgs/issues/10726">https://github.com/NixOS/nixpkgs/issues/10726</a>), but they are otherwise large updates.</p>
 </section>
 <section id="automation-system">
-<h2>Automation system<a class="headerlink" href="#automation-system" title="Permalink to this headline"></a></h2>
+<h2>Automation system<a class="headerlink" href="#automation-system" title="Permalink to this heading"></a></h2>
 <p>Although a distribution is sufficient for setting up a single computer, to set up multiple computers it is more complicated. Salt provides a command-execution agent, but the commands are not idempotent. We want a map from packages to their latest versions or pinned versions. The ‘autoremove’ option is on by default because packages being secretly installed is a bad idea. But with autoremove off, packages are left installed on the system if they aren’t explicitly specified for removal.</p>
 </section>
 <section id="release-monitoring">
-<h2>Release monitoring<a class="headerlink" href="#release-monitoring" title="Permalink to this headline"></a></h2>
+<h2>Release monitoring<a class="headerlink" href="#release-monitoring" title="Permalink to this heading"></a></h2>
 <p>Automating package updates requires finding new releases and then testing it. For the first part, there is almost a standardized API. There is <a class="reference external" href="https://fedoraproject.org/wiki/Upstream_release_monitoring">Anitya</a>, which solves some of this, and also <a class="reference external" href="https://github.com/DataDrake/cuppa">cuppa</a>. But both of them work by writing backends/providers for each major hosting site. There is also Repology which checks the various distributions for new versions.</p>
 <p>Although the most recently modified / created version is usually the latest release, and hence it is easy to identify, some projects maintain multiple versions, so that newer files might actually be security updates to old versions rather than the latest version. This requires some per-package version handling logic.</p>
 <p>We can write our own project scraper:</p>
@@ -212,7 +222,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <p>For each top-level project, figuring out when/if there will be a new update is a machine learning problem. The simplest algorithm is to poll everything at a fixed interval, say daily. But most projects release a lot less frequently, and some projects (software collection, main development branches) release more frequently. If there is a push service like email we can use that, otherwise we need some sort of adaptive polling. We can model it as a homogeneous Poisson point process; then the estimate for the rate is simply the number of updates divided by the time interval we have observed. Then the time between two updates is an exponential distribution with parameter the rate, so we can poll if the probability of an update is &gt; 50%, adjusting the 50% so we poll an average of once a day. To get even more complex, we can build a feature vector classifier to predict the time between events.</p>
 </section>
 <section id="build-scripts">
-<h2>Build scripts<a class="headerlink" href="#build-scripts" title="Permalink to this headline"></a></h2>
+<h2>Build scripts<a class="headerlink" href="#build-scripts" title="Permalink to this heading"></a></h2>
 <p>To obtain an initial build script set we can do the following:</p>
 <p>1. Evaluate Nixpkgs (nix-instantiate) in a fresh Nix store
 1. Change all .drv from ATerm to JSON for ease of processing
@@ -222,7 +232,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 1. Create a set of builders which covers the rest of the mega-JSON</p>
 </section>
 <section id="automation">
-<h2>Automation<a class="headerlink" href="#automation" title="Permalink to this headline"></a></h2>
+<h2>Automation<a class="headerlink" href="#automation" title="Permalink to this heading"></a></h2>
 <p>Along with a Linux distribution (or any large software collection) comes the need to continuously test and update packages. An automation system (tentatively titled “Flux99”) handles several tasks:
 * Pulling together new changes
 * Testing changes and identifying breakages
@@ -233,7 +243,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <p>Changes are discovered in an arbitrary order and similarly could be merged in any order. But an optimized order like “least likely to fail” could lead to arbitrarily long merge times for risky changes. It is simpler to do chronological order w.r.t. discovery. This could be customized to prioritize hotfixes before other changes, but it is easier to set up a dedicated code path for those.</p>
 <p>To handle breakages, there are two main strategies: marking and backouts. Both are useful; a test failure may be unimportant or outdated, suggesting the marking strategy, while backouts reject bad changes from the mainline and keep it green. Backouts are harder to compute: for <span class="math notranslate nohighlight">\(n\)</span> changes, there are <span class="math notranslate nohighlight">\(2^n\)</span> possible combinations to test, giving a state space of size <span class="math notranslate nohighlight">\(2^{2^n}\)</span>. Meanwhile marking only has <span class="math notranslate nohighlight">\(2^n\)</span> states for <span class="math notranslate nohighlight">\(n\)</span> commits. But marking is run over the entire commit history, hence has a huge commit list, while backouts are for pending changes and only need to consider the relevant set of new commits.</p>
 <section id="marking">
-<h3>Marking<a class="headerlink" href="#marking" title="Permalink to this headline"></a></h3>
+<h3>Marking<a class="headerlink" href="#marking" title="Permalink to this heading"></a></h3>
 <p>For marking, we can model the test process as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
 <span class="nf">for</span><span class="w"> </span><span class="n">commit</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">commits</span><span class="kt">:</span><span class="w"></span>
@@ -315,7 +325,7 @@ The table treats the build as a unit; for added precision we should make one tab
 <p>Overall, the idea is similar to <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code>’s <code class="docutils literal notranslate"><span class="pre">min(ancestors,N-ancestors)</span></code>, but with more advanced models and using expectation instead of <code class="docutils literal notranslate"><span class="pre">min</span></code>. To implement a full regression tool we also need to mark and handle untestable revisions, where the test is not observable due to the build being broken etc. This is fairly straightforward and amounts to doubling the state space and adding some more probability models.</p>
 </section>
 <section id="backouts">
-<h3>Backouts<a class="headerlink" href="#backouts" title="Permalink to this headline"></a></h3>
+<h3>Backouts<a class="headerlink" href="#backouts" title="Permalink to this heading"></a></h3>
 <p>For backouts, we must first decide a backout strategy - given two sets of commits that both succeed, which set is preferred as the “green” mainline? The paper <span id="id5">[<a class="reference internal" href="../zzreferences.html#id7" title="Sundaram Ananthanarayanan, Masoud Saeida Ardekani, Denis Haenikel, Balaji Varadarajan, Simon Soriano, Dhaval Patel, and Ali-Reza Adl-Tabatabai. Keeping master green at scale. In Proceedings of the Fourteenth EuroSys Conference 2019, EuroSys '19, 1–15. Dresden, Germany, March 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3302424.3303970 (visited on 2020-07-06), doi:10.1145/3302424.3303970.">AAH+19</a>]</span> provides a real-world case study. We should maximize the number of changes included and exclude later commits if the earlier ones succeed. So we prefer <code class="docutils literal notranslate"><span class="pre">A,B</span></code> to <code class="docutils literal notranslate"><span class="pre">A,C</span></code> because it has the earlier change <code class="docutils literal notranslate"><span class="pre">B</span></code>. Similar we prefer <code class="docutils literal notranslate"><span class="pre">A</span></code> over <code class="docutils literal notranslate"><span class="pre">B,C</span></code> - to see why this makes sense, imagine <code class="docutils literal notranslate"><span class="pre">A</span></code> succeeds by itself and <code class="docutils literal notranslate"><span class="pre">A,B,C</span></code> is a failure - then to get <code class="docutils literal notranslate"><span class="pre">B,C</span></code> we would have to decide to test without <code class="docutils literal notranslate"><span class="pre">A</span></code> even though it succeeds. Since <code class="docutils literal notranslate"><span class="pre">A</span></code> could already been pushed to mainline this is unlikely to be the desired behavior. So the backout strategy is lexicographic preference: we write <code class="docutils literal notranslate"><span class="pre">A,B</span></code> and <code class="docutils literal notranslate"><span class="pre">B,C</span></code> as binary numbers <code class="docutils literal notranslate"><span class="pre">110</span></code> and <code class="docutils literal notranslate"><span class="pre">011</span></code> and compare them, and the higher is the chosen result.</p>
 <p>Next we need a model predicting the success of a build. We assume that the build fails if it contains a failing configuration of certain commits left in or out. To avoid combinatorial explosion we assume that configurations are limited to 2 commits. This gives us 5 failing configurations:
 * A left in - we say A is a breaking change

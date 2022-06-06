@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -57,10 +58,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#variables">Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#patterns">Patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#destructuring-and-function-bindings">Destructuring and function bindings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#symbols">Symbols</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#non-linear-patterns">Non-linear patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pattern-synonyms">Pattern synonyms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#variable-bindings">Variable bindings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inline-definitions">Inline definitions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#destructuring">Destructuring</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#symbols">Symbols</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#keyword-arguments">Keyword arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#positional-arguments">Positional arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implicit-arguments">Implicit arguments</a></li>
@@ -69,7 +72,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#variadic-arguments">Variadic arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#concatenative-arguments">Concatenative arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inheritance">Inheritance</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Operators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Operators</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a><ul>
@@ -94,7 +97,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -130,25 +132,27 @@
            <div itemprop="articleBody">
              
   <section id="syntax">
-<h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline"></a></h1>
+<h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h1>
 <p>Almost everything in Stroscot is an expression. Values are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
 <section id="unicode">
-<h2>Unicode<a class="headerlink" href="#unicode" title="Permalink to this headline"></a></h2>
+<h2>Unicode<a class="headerlink" href="#unicode" title="Permalink to this heading"></a></h2>
 <p>Practically, most programs will use ASCII. But the Unicode algorithms are robust and supporting other languages isn’t too hard. <a class="reference external" href="https://rosettacode.org/wiki/Unicode_variable_names">Lots of languages</a> have support for Unicode, although the exact set of allowed characters varies.</p>
 <ul class="simple">
 <li><p>Start with bytes. Decode using UTF-8, replacing invalid bytes/characters with Unicode’s REPLACEMENT CHARACTER U+FFFD.</p></li>
 <li><p><a class="reference external" href="http://unicode.org/reports/tr15/#Norm_Forms">NFC</a> normalize the input, warning if input isn’t normalized. There is enough software that automatically normalizes to NFC (e.g. web browsers) that it seems safe to require NFC; bugs can be worked around by changing the input (inserting joiners) rather than modifying NFC.</p></li>
 <li><p>A warning for weird scripts (listed in <a class="reference external" href="http://www.unicode.org/reports/tr31/#Table_Candidate_Characters_for_Exclusion_from_Identifiers">TR31</a>) or zero-width characters.</p></li>
 </ul>
-<p>Some combination of the following algorithms to do lexical analysis:
-* <a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, to determine hard / mandatory breaks)
-* <a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
-* <a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters</p>
+<p>Some combination of the following algorithms to do lexical analysis:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, to determine hard / mandatory breaks)</p></li>
+<li><p><a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols</p></li>
+<li><p><a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters</p></li>
+</ul>
 <p>Stroscot is case-sensitive.</p>
 </section>
 <section id="layout">
-<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline"></a></h2>
-<p>The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
+<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this heading"></a></h2>
+<p>The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
 <span class="w">  </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">a</span><span class="w"></span>
@@ -159,13 +163,13 @@
 <span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="p">};</span><span class="w"> </span><span class="n">d</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:</p>
+<p>Behavior of a new line depends on its indentation level, relative to the indentation of the previous line. Indentation level is taken to be the sequence of whitespace characters related by “is prefix of”, so “space, tab, space” is different from (incomparable to) “tab, space, space” but is less than “space, tab, space, em space” and more than “space, tab”.</p>
 <ul class="simple">
-<li><p>if it is indented more, it’s a sequence given as an argument to the previous line, so a virtual open brace is inserted</p></li>
-<li><p>if it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted</p></li>
-<li><p>if there is a line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
+<li><p>If it is indented more, it’s a sequence given as an argument to the previous line, so a virtual open brace is inserted</p></li>
+<li><p>If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted</p></li>
+<li><p>If there is a line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
+<li><p>Incomparable levels are an error.</p></li>
 </ul>
-<p>Indentation level is taken to be the sequence of whitespace characters, so “space, tab, space” is different from (incomparable to) “tab, space, space” but is less than “space, tab, space, em space” and more than “space, tab”.</p>
 <p>Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
 <span class="w">  </span><span class="n">a</span><span class="w"></span>
@@ -183,12 +187,16 @@
 </pre></div>
 </div>
 <section id="operators">
-<h3>Operators<a class="headerlink" href="#operators" title="Permalink to this headline"></a></h3>
-<p>Operator precedence will be a poset, rather than levels.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedence</span><span class="w"> </span><span class="kr">_</span><span class="o">*</span><span class="kr">_</span><span class="w"> </span><span class="n">higher</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="kr">_</span><span class="o">+</span><span class="kr">_</span><span class="w"></span>
-<span class="nf">precedence</span><span class="w"> </span><span class="kr">_</span><span class="o">/</span><span class="kr">_</span><span class="w"> </span><span class="n">equals</span><span class="w"> </span><span class="kr">_</span><span class="o">*</span><span class="kr">_</span><span class="w"></span>
+<h3>Operators<a class="headerlink" href="#operators" title="Permalink to this heading"></a></h3>
+<p>New operators can be declared with <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a> <a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> semantics, e.g.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">syntax</span><span class="w"> </span><span class="kr">_</span><span class="o">&amp;&amp;</span><span class="kr">_</span><span class="w"> </span><span class="n">associate</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">_and_</span><span class="w"> </span><span class="n">_or_</span><span class="w"> </span><span class="n">_not_</span><span class="w"> </span><span class="n">below</span><span class="w"> </span><span class="kr">_</span><span class="o">||</span><span class="kr">_</span><span class="w"> </span><span class="n">equals</span><span class="w"> </span><span class="kr">_</span><span class="o">&amp;</span><span class="kr">_</span><span class="w"></span>
+<span class="nf">syntax</span><span class="w"> </span><span class="p">[[</span><span class="kr">_</span><span class="p">]]</span><span class="w"></span>
+<span class="nf">syntax</span><span class="w"> </span><span class="n">if_then_else_</span><span class="w"></span>
+<span class="nf">syntax</span><span class="w"> </span><span class="n">_postfix</span><span class="w"></span>
+<span class="nf">syntax</span><span class="w"> </span><span class="n">prefix_</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Operator precedence will be a poset, rather than levels. Infix symbols can be left or right associative.</p>
 <p>Stroscot supports your typical PEMDAS:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
 <span class="w">  </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="o">^</span><span class="mi">2</span><span class="w"></span>
@@ -199,7 +207,7 @@
 <span class="w">  </span><span class="mf">3.14159292035</span><span class="o">...</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Most other operators are textual:</p>
+<p>Most operators are textual:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span><span class="w"></span>
 <span class="w">  </span><span class="n">true</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
 <span class="w">  </span><span class="n">true</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">false</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
@@ -208,13 +216,10 @@
 <span class="w">  </span><span class="mi">5</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
-<p>New operators can be declared with <a class="reference external" href="http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf">mix</a> <a class="reference external" href="http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf">fix</a> semantics, e.g.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">syntax</span><span class="w"> </span><span class="kr">_</span><span class="o">&amp;&amp;</span><span class="kr">_</span><span class="w"> </span><span class="n">associate</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">_and_</span><span class="w"> </span><span class="n">_or_</span><span class="w"> </span><span class="n">_not_</span><span class="w"> </span><span class="n">below</span><span class="w"> </span><span class="kr">_</span><span class="o">||</span><span class="kr">_</span><span class="w"></span>
-</pre></div>
-</div>
+<p>Minus is both a unary prefix operator and a binary infix operator with special support to disambiguate the two. <code class="docutils literal notranslate"><span class="pre">(-)</span></code> denotes the binary minus operator and <code class="docutils literal notranslate"><span class="pre">neg</span></code> the unary minus operation.</p>
 </section>
 <section id="parentheses">
-<h3>Parentheses<a class="headerlink" href="#parentheses" title="Permalink to this headline"></a></h3>
+<h3>Parentheses<a class="headerlink" href="#parentheses" title="Permalink to this heading"></a></h3>
 <p>Parentheses can be used to group expressions and override parsing as usual.</p>
 <p>For brevity, trailing parentheses can be omitted:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
@@ -226,7 +231,7 @@
 unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="chained-comparison">
-<h3>Chained Comparison<a class="headerlink" href="#chained-comparison" title="Permalink to this headline"></a></h3>
+<h3>Chained Comparison<a class="headerlink" href="#chained-comparison" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assert</span><span class="w"></span>
 <span class="w">  </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 <span class="w">  </span><span class="mi">9</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
@@ -235,7 +240,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 </section>
 <section id="variables">
-<h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline"></a></h2>
+<h2>Variables<a class="headerlink" href="#variables" title="Permalink to this heading"></a></h2>
 <p>Identifiers cannot be directly reassigned; you can shadow, which optionally generates a warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="nf">a</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
@@ -245,7 +250,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <p>Mutable assignment (<code class="docutils literal notranslate"><span class="pre">:=</span></code>) is completely distinct from name binding (<code class="docutils literal notranslate"><span class="pre">=</span></code>). They have distinct notation.</p>
 </section>
 <section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline"></a></h2>
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
@@ -260,12 +265,12 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </div>
 <p>Function application (juxtaposition) binds stronger than all operators and associates to the left, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">--&gt;</span> <span class="pre">(x</span> <span class="pre">y)</span> <span class="pre">z</span></code>.</p>
 <section id="patterns">
-<h3>Patterns<a class="headerlink" href="#patterns" title="Permalink to this headline"></a></h3>
+<h3>Patterns<a class="headerlink" href="#patterns" title="Permalink to this heading"></a></h3>
 <p>Patterns all compile to guard conditions on <code class="docutils literal notranslate"><span class="pre">$args</span></code>. They also check that the arity of <code class="docutils literal notranslate"><span class="pre">$args</span></code> is the number of patterns.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">_</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- wildcard</span><span class="w"></span>
 <span class="o">^</span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- matches the atom a</span><span class="w"></span>
 <span class="o">^</span><span class="n">f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">atom</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="nf">_f</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">any</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="n">besides</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">single</span><span class="w"> </span><span class="n">atom</span><span class="w"></span>
+<span class="p">(</span><span class="n">f</span><span class="o">@</span><span class="kr">_</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="o">.</span><span class="n">length</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">any</span><span class="w"> </span><span class="n">symbol</span><span class="w"> </span><span class="n">tree</span><span class="w"> </span><span class="n">besides</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">single</span><span class="w"> </span><span class="n">atom</span><span class="w"></span>
 <span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">),</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="kt">:</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">}]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">),</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="kt">:</span><span class="w"> </span><span class="sc">&#39;a&#39;</span><span class="p">}]</span><span class="w"> </span><span class="c1">-- literal match</span><span class="w"></span>
 <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="c1">-- matches any list starting with 1 and ending with 2</span><span class="w"></span>
 <span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">}</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">matches</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">rest</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">record</span><span class="w"></span>
@@ -277,48 +282,17 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">$</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">view</span><span class="w"> </span><span class="n">pattern</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Identifiers in head positions are taken as literal function symbols, and in other positions are taken to be variables. This is Pure’s “head = function rule”. Single identifiers are functions of no arguments, e.g. <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p>
-<p>Declaring a symbol makes it be interpreted as a literal even in variable position.</p>
-<p>To override this and force interpretation as a variable/literal you can use <code class="docutils literal notranslate"><span class="pre">_</span></code> or <code class="docutils literal notranslate"><span class="pre">^</span></code> respectively.</p>
 <p><code class="docutils literal notranslate"><span class="pre">_</span></code> occuring by itself denotes an anonymous variable which matches any value without actually binding a name.</p>
-<p>Pattern synonyms</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">pattern</span><span class="w"> </span><span class="kt">F</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;f&quot;</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">]</span><span class="w"></span>
-</pre></div>
-</div>
 </section>
-<section id="variable-bindings">
-<h3>Variable bindings<a class="headerlink" href="#variable-bindings" title="Permalink to this headline"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="o">$</span><span class="n">arga</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- binds a if a is not defined as a symbol</span><span class="w"></span>
-<span class="nf">_a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- hole, binds a even if a is an existing symbol</span><span class="w"></span>
+<section id="destructuring-and-function-bindings">
+<h3>Destructuring and function bindings<a class="headerlink" href="#destructuring-and-function-bindings" title="Permalink to this heading"></a></h3>
+<p>Generally identifiers <code class="docutils literal notranslate"><span class="pre">f</span></code> in head positions of a LHS <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span></code> are taken as literal function symbols. Identifiers in head position in a sub-term are taken to be constructors, and destructure the function argument. Identifiers in non-head positions are taken to be variables. This is Pure’s “head = function rule”.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">arguments</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">argument</span><span class="p">,</span><span class="w"> </span><span class="n">binds</span><span class="w"> </span><span class="n">variable</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="p">(</span><span class="n">foo</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">argument</span><span class="p">,</span><span class="w"> </span><span class="n">destructures</span><span class="w"> </span><span class="n">term</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">binds</span><span class="w"> </span><span class="n">a</span><span class="o">/</span><span class="n">b</span><span class="w"></span>
 </pre></div>
 </div>
-<p>This defines the variables as a zero-arity function symbol. So for example you can write</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-</pre></div>
-</div>
-<p>which means the same thing as</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-</pre></div>
-</div>
-<p>i.e. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
-</section>
-<section id="inline-definitions">
-<h3>Inline definitions<a class="headerlink" href="#inline-definitions" title="Permalink to this headline"></a></h3>
-<p>Definitions can be made inline; they are lifted to the closest scope that allows definitions.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
-
-<span class="c1">-- translates to</span><span class="w"></span>
-<span class="w"> </span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="w"></span>
-<span class="w"> </span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="w"></span>
-<span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dy</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
-</pre></div>
-</div>
-</section>
-<section id="destructuring">
-<h3>Destructuring<a class="headerlink" href="#destructuring" title="Permalink to this headline"></a></h3>
-<p>Certain values such as tuples are assumed not to be functions. Instead matching on them destructures the right hand hand. For example you can define functions using destructuring:</p>
+<p>Certain symbols such as tuple heads as head of the LHS are assumed not to be function definitions. Instead matching on them destructures the right hand side. For example you can define functions using destructuring:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">s&#39;</span><span class="w"> </span><span class="p">(</span><span class="n">digitsToBits</span><span class="w"> </span><span class="n">digits</span><span class="p">)</span><span class="w"> </span><span class="kr">where</span><span class="w"> </span><span class="p">(</span><span class="kt">CR</span><span class="w"> </span><span class="n">s&#39;</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="w"></span>
 </pre></div>
 </div>
@@ -333,10 +307,31 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <span class="c1">-- z a fresh symbol</span><span class="w"></span>
 </pre></div>
 </div>
+<p>To force a function definition you can use an as pattern, <a href="#id1"><span class="problematic" id="id2">``</span></a>_&#64;(,)</p>
+<p>To force interpretation as a variable you can use an anonymous as pattern, <code class="docutils literal notranslate"><span class="pre">(f&#64;_)</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span></code>. Then <code class="docutils literal notranslate"><span class="pre">f</span></code> is a variable and will match any symbol, rather just <code class="docutils literal notranslate"><span class="pre">f</span></code>. Example converting a function application to a list:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="p">((</span><span class="n">x</span><span class="o">@</span><span class="kr">_</span><span class="p">)</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">foo</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="w"></span>
+<span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"></span>
+<span class="o">&gt;</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w"></span>
+<span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>To force interpretation as a literal you can use <code class="docutils literal notranslate"><span class="pre">^</span></code>. The symbol will be interpreted as a literal even in variable position:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="o">^</span><span class="n">foo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;self-application&quot;</span><span class="w"></span>
+
+<span class="nf">foo</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">reduce</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You can also declare <code class="docutils literal notranslate"><span class="pre">foo</span></code> to be a symbol:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">foo</span><span class="w"></span>
+</pre></div>
+</div>
+<p>However this is a module definition and means the symbol cannot be used as a variable in the module anymore.</p>
 </section>
 <section id="symbols">
-<h3>Symbols<a class="headerlink" href="#symbols" title="Permalink to this headline"></a></h3>
-<p>The default interpretation of an identifier not in a head position on the LHS is as a variable. To say that it is actually a symbol a special keyword <code class="docutils literal notranslate"><span class="pre">symbol</span></code> is used:</p>
+<h3>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h3>
+<blockquote>
+<div><p>To say that it is actually a symbol a special keyword <code class="docutils literal notranslate"><span class="pre">symbol</span></code> is used:</p>
+</div></blockquote>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">foo</span><span class="w"></span>
 
 <span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
@@ -357,8 +352,53 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </div>
 <p>This just creates a low priority definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">_</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">undefined</span></code>.</p>
 </section>
+<section id="non-linear-patterns">
+<h3>Non-linear patterns<a class="headerlink" href="#non-linear-patterns" title="Permalink to this heading"></a></h3>
+<p>Non-left-linear patterns such as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">a</span></code> are allowed, this is interpreted as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - rename variables and check for equality using <code class="docutils literal notranslate"><span class="pre">==</span></code>. See <span class="xref std std-ref">Equality and left-linearity</span> for a discussion.</p>
+</section>
+<section id="pattern-synonyms">
+<h3>Pattern synonyms<a class="headerlink" href="#pattern-synonyms" title="Permalink to this heading"></a></h3>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">toPolar</span><span class="w"> </span><span class="p">(</span><span class="kt">Point</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">sqrt</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">atan2</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"></span>
+<span class="nf">pattern</span><span class="w"> </span><span class="kt">Polar</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">toPolar</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">t</span><span class="p">))</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Pattern definitions are unidirectional in that they define matchers for syntax used only in patterns, not in expressions. To make a bidirectional pattern simply define the builder:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Polar</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Point</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="variable-bindings">
+<h3>Variable bindings<a class="headerlink" href="#variable-bindings" title="Permalink to this heading"></a></h3>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="o">$</span><span class="n">arga</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- binds a if a is not defined as a symbol</span><span class="w"></span>
+<span class="nf">_a</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="c1">-- hole, binds a even if a is an existing symbol</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This defines the variables as a zero-arity function symbol. So for example you can write</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>which means the same thing as</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>i.e. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
+</section>
+<section id="inline-definitions">
+<h3>Inline definitions<a class="headerlink" href="#inline-definitions" title="Permalink to this heading"></a></h3>
+<p>Definitions can be made inline; they are lifted to the closest scope that allows definitions.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">((</span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
+
+<span class="c1">-- translates to</span><span class="w"></span>
+<span class="w"> </span><span class="n">dx</span><span class="ow">=</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="w"></span>
+<span class="w"> </span><span class="n">dy</span><span class="ow">=</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="w"></span>
+<span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dy</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
 <section id="keyword-arguments">
-<h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this headline"></a></h3>
+<h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
 
 <span class="nf">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="kt">:</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">w</span><span class="kt">:</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="kt">:</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
@@ -376,7 +416,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </div>
 </section>
 <section id="positional-arguments">
-<h3>Positional arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this headline"></a></h3>
+<h3>Positional arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
 <span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
@@ -397,7 +437,7 @@ assigned to whatever is not a keyword argument.</p>
 </div>
 </section>
 <section id="implicit-arguments">
-<h3>Implicit arguments<a class="headerlink" href="#implicit-arguments" title="Permalink to this headline"></a></h3>
+<h3>Implicit arguments<a class="headerlink" href="#implicit-arguments" title="Permalink to this heading"></a></h3>
 <p>These behave similarly to arguments in languages with dynamical scoping. Positional arguments can be passed implicitly, but only if the function is used without applying any positional arguments. If the LHS contains positional arguments only that number of positional arguments are consumed and they are not passed implicitly.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
 <span class="nf">bar</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
@@ -456,7 +496,7 @@ projects.</p>
 </div>
 </section>
 <section id="default-arguments">
-<h3>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this headline"></a></h3>
+<h3>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="p">{</span><span class="n">k</span><span class="kt">:</span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="nf">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
@@ -472,7 +512,7 @@ projects.</p>
 </div>
 </section>
 <section id="output-arguments">
-<h3>Output arguments<a class="headerlink" href="#output-arguments" title="Permalink to this headline"></a></h3>
+<h3>Output arguments<a class="headerlink" href="#output-arguments" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="kt">:</span><span class="mi">3</span><span class="p">};</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="nf">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
 <span class="o">#</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
@@ -493,7 +533,7 @@ projects.</p>
 </div>
 </section>
 <section id="variadic-arguments">
-<h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Permalink to this headline"></a></h3>
+<h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Permalink to this heading"></a></h3>
 <p>Positional variadic arguments:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">$</span><span class="n">arguments</span><span class="w"></span>
 <span class="nf">c</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
@@ -519,7 +559,7 @@ projects.</p>
 </div>
 </section>
 <section id="concatenative-arguments">
-<h3>Concatenative arguments<a class="headerlink" href="#concatenative-arguments" title="Permalink to this headline"></a></h3>
+<h3>Concatenative arguments<a class="headerlink" href="#concatenative-arguments" title="Permalink to this heading"></a></h3>
 <p>Results not assigned to a variable are pushed to a stack:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="w"></span>
 <span class="mi">2</span><span class="w"></span>
@@ -530,19 +570,18 @@ projects.</p>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">%</span></code> is the most recent result, with <code class="docutils literal notranslate"><span class="pre">%2</span></code> <code class="docutils literal notranslate"><span class="pre">%3</span></code> etc. referring to
-less recent results:</p>
+less recent results. These stack arguments are used for positional arguments when not
+supplied.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="n">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="n">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
-<span class="w"> </span><span class="n">shuffle</span><span class="w"></span>
-<span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+<span class="nf">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">}</span><span class="w"></span>
+<span class="nf">extend</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+<span class="nf">shuffle</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">2</span><span class="p">,</span><span class="n">a</span><span class="ow">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="ow">=</span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>These stack arguments are used for positional arguments when not
-supplied.</p>
 </section>
 <section id="inheritance">
-<h3>Inheritance<a class="headerlink" href="#inheritance" title="Permalink to this headline"></a></h3>
+<h3>Inheritance<a class="headerlink" href="#inheritance" title="Permalink to this heading"></a></h3>
 <p>The general idea of inheritance is, for <code class="docutils literal notranslate"><span class="pre">Foo</span></code> a child of <code class="docutils literal notranslate"><span class="pre">Bar</span></code> to rewrite calls <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">(Foo</span> <span class="pre">...)</span> <span class="pre">a</span> <span class="pre">b</span></code> to calls <code class="docutils literal notranslate"><span class="pre">exec</span> <span class="pre">(Bar</span> <span class="pre">...)</span> <span class="pre">a</span> <span class="pre">b</span></code>, and this can be automated with a macro:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inherit</span><span class="w"> </span><span class="n">foopat</span><span class="w"> </span><span class="n">barpat</span><span class="w"> </span><span class="n">barmethodlist</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">barmethodlist</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -552,15 +591,15 @@ supplied.</p>
 </pre></div>
 </div>
 </section>
-<section id="id1">
-<h3>Operators<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<section id="id3">
+<h3>Operators<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>Operators are syntactic sugar for functions. Enclosing an operator
 in parentheses turns it into an ordinary function symbol, thus <code class="docutils literal notranslate"><span class="pre">x+y</span></code> is
 exactly the same as <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">x</span> <span class="pre">y</span></code>.</p>
 </section>
 </section>
 <section id="lambdas">
-<h2>Lambdas<a class="headerlink" href="#lambdas" title="Permalink to this headline"></a></h2>
+<h2>Lambdas<a class="headerlink" href="#lambdas" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">\</span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">stuff</span><span class="w"></span>
 <span class="nf">\</span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="o">.</span><span class="w"> </span><span class="n">stuff</span><span class="w"></span>
 <span class="nf">lambda</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -574,7 +613,7 @@ a nameless local function. With the <code class="docutils literal notranslate"><
 <p>Because they’re nameless lambdas aren’t sufficient to define recursive function - use (named) local functions, or the function <code class="docutils literal notranslate"><span class="pre">fix</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">a)</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>.</p>
 <p>Destructuring works in the arguments of lambdas as with named functions.</p>
 <section id="matching">
-<h3>Matching<a class="headerlink" href="#matching" title="Permalink to this headline"></a></h3>
+<h3>Matching<a class="headerlink" href="#matching" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">match</span></code> is an expression:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="w">                      </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
@@ -595,7 +634,7 @@ a nameless local function. With the <code class="docutils literal notranslate"><
 </div>
 </section>
 <section id="operator-sections">
-<h3>Operator sections<a class="headerlink" href="#operator-sections" title="Permalink to this headline"></a></h3>
+<h3>Operator sections<a class="headerlink" href="#operator-sections" title="Permalink to this heading"></a></h3>
 <p>Operator sections allow writing partial applications of infix operators.
 A left section <code class="docutils literal notranslate"><span class="pre">(x+)</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">x</span></code>. A right section <code class="docutils literal notranslate"><span class="pre">(+y)</span></code> is
 equivalent to <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span></code>.</p>
@@ -605,7 +644,7 @@ from its argument.</p>
 </section>
 </section>
 <section id="blocks">
-<h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this headline"></a></h2>
+<h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">number</span><span class="w"></span>
 <span class="w"> </span><span class="n">display</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 
@@ -628,7 +667,7 @@ from its argument.</p>
 </pre></div>
 </div>
 <section id="bang-notation">
-<h3>Bang notation<a class="headerlink" href="#bang-notation" title="Permalink to this headline"></a></h3>
+<h3>Bang notation<a class="headerlink" href="#bang-notation" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">g</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">!</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 
 <span class="o">//</span><span class="w"> </span><span class="n">desugars</span><span class="w"> </span><span class="n">to</span><span class="w"></span>
@@ -644,7 +683,7 @@ from its argument.</p>
 Expressions are lifted leftmost innermost.</p>
 </section>
 <section id="local-definitions">
-<h3>Local definitions<a class="headerlink" href="#local-definitions" title="Permalink to this headline"></a></h3>
+<h3>Local definitions<a class="headerlink" href="#local-definitions" title="Permalink to this heading"></a></h3>
 <p>You can define variables and function locally to a block, clause, or clause group with let and where. These are in a new scope and only apply to the block where they are defined. This avoids cluttering up the program. All local definitions are substituted away before the block is evaluated in the ambient context.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="c1">-- block definition</span><span class="w"></span>
@@ -673,7 +712,7 @@ Expressions are lifted leftmost innermost.</p>
 </div>
 </section>
 <section id="monad-comprehensions">
-<h3>Monad comprehensions<a class="headerlink" href="#monad-comprehensions" title="Permalink to this headline"></a></h3>
+<h3>Monad comprehensions<a class="headerlink" href="#monad-comprehensions" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="ow">=</span><span class="mi">1</span><span class="o">..</span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="ow">=</span><span class="mi">1</span><span class="o">..</span><span class="n">m</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">&lt;</span><span class="n">y</span><span class="p">]</span><span class="w"></span>
 </pre></div>
 </div>
@@ -725,7 +764,7 @@ Expressions are lifted leftmost innermost.</p>
 </section>
 </section>
 <section id="control-structures">
-<h2>Control structures<a class="headerlink" href="#control-structures" title="Permalink to this headline"></a></h2>
+<h2>Control structures<a class="headerlink" href="#control-structures" title="Permalink to this heading"></a></h2>
 <p>These are things that can show up in blocks and have blocks as arguments.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="c1">-- just a function if_then_else_ : Bool -&gt; a -&gt; a -&gt; a</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
@@ -755,7 +794,7 @@ Expressions are lifted leftmost innermost.</p>
 <p>More here: <a class="reference external" href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions</a></p>
 </section>
 <section id="programs">
-<h2>Programs<a class="headerlink" href="#programs" title="Permalink to this headline"></a></h2>
+<h2>Programs<a class="headerlink" href="#programs" title="Permalink to this heading"></a></h2>
 <p>A program is a block, and every declaration is a macro or control structure.</p>
 <p>So for example you can implement a conditional definition:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">condition</span><span class="w"></span>
@@ -766,7 +805,7 @@ Expressions are lifted leftmost innermost.</p>
 </div>
 </section>
 <section id="comments">
-<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline"></a></h2>
+<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="w"> </span><span class="n">comment</span><span class="w"></span>
 <span class="o">/*</span><span class="w"> </span><span class="n">multiline</span><span class="w"></span>
 <span class="w">    </span><span class="n">comment</span><span class="w"> </span><span class="o">*/</span><span class="w"></span>
@@ -777,14 +816,14 @@ Expressions are lifted leftmost innermost.</p>
 </div>
 </section>
 <section id="type-declarations">
-<h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this headline"></a></h2>
+<h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this heading"></a></h2>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">s8</span><span class="w"></span>
 <span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">s8</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="dsl">
-<h2>DSL<a class="headerlink" href="#dsl" title="Permalink to this headline"></a></h2>
+<h2>DSL<a class="headerlink" href="#dsl" title="Permalink to this heading"></a></h2>
 <p>Stroscot aims to be a “pluggable” language, where you can write syntax, type checking, etc. for a DSL.
 Due to the fexpr semantics any expression can be used and pattern-matched, like <code class="docutils literal notranslate"><span class="pre">javascript</span> <span class="pre">(1</span> <span class="pre">+</span> <span class="pre">&quot;abc&quot;</span> <span class="pre">{</span> <span class="pre">234</span> <span class="pre">})</span></code>.</p>
 <p>E.g. we could write a small DSL like SQL and then use it in a larger program with some embedding syntax.</p>

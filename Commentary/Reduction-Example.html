@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -51,7 +52,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -71,6 +74,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -103,7 +108,7 @@
            <div itemprop="articleBody">
              
   <section id="reduction-example">
-<h1>Reduction example<a class="headerlink" href="#reduction-example" title="Permalink to this headline"></a></h1>
+<h1>Reduction example<a class="headerlink" href="#reduction-example" title="Permalink to this heading"></a></h1>
 <p>To show how optimal reduction works, we step through the example term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
 <img alt="../_images/Stroscot_M_Proof_Tree.svg" src="../_images/Stroscot_M_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span><span class="w"> </span><span class="n">ret</span><span class="w"></span>
 <span class="w">  </span><span class="kt">Cut</span><span class="w"> </span><span class="n">o1</span><span class="w"> </span><span class="n">o1l</span><span class="w"></span>

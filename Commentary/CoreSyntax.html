@@ -17,13 +17,14 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Evaluation strategy" href="Evaluation-Strategy.html" />
-    <link rel="prev" title="Compiler design" href="Compiler.html" /> 
+    <link rel="next" title="Dispatch" href="Dispatch.html" />
+    <link rel="prev" title="Concurrency" href="Concurrency.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Core syntax</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example">Example</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#derivation-tree">Derivation tree</a></li>
@@ -66,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#cut-elimination">Cut elimination</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -85,6 +88,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -117,23 +122,23 @@
            <div itemprop="articleBody">
              
   <section id="core-syntax">
-<h1>Core syntax<a class="headerlink" href="#core-syntax" title="Permalink to this headline"></a></h1>
+<h1>Core syntax<a class="headerlink" href="#core-syntax" title="Permalink to this heading"></a></h1>
 <p>Stroscot takes after Haskell in that all of the language is compiled to a smallish core language. This makes it easier to implement code transformations and new backends. Proofs are programs by the Curry-Howard correspondence, so the core is the jumbo two-sided linear logic sequent calculus. Reduction of this core corresponds to cut elimination - the normal forms (values) are cut-free terms.
 But we need a syntax for all the proofs.</p>
 <section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline"></a></h2>
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
 <p>We use a simple program, boolean “and”, presented in a Haskell-ish language:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">and</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="nf">\</span><span class="kr">_</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">False</span><span class="p">;</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="nf">\</span><span class="n">y</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 <span class="nf">r</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Bool</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="derivation-tree">
-<h3>Derivation tree<a class="headerlink" href="#derivation-tree" title="Permalink to this headline"></a></h3>
+<h3>Derivation tree<a class="headerlink" href="#derivation-tree" title="Permalink to this heading"></a></h3>
 <p>See the connectives <span class="math notranslate nohighlight">\(\text{B} = \text{Bool}\)</span> and <span class="math notranslate nohighlight">\(\multimap\)</span> defined <a class="reference internal" href="../Reference/Logic.html#connectives"><span class="std std-ref">above</span></a>. <span class="math notranslate nohighlight">\(\multimap\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function instead of currying, expand out the identity, etc.).</p>
 <img alt="../_images/Stroscot_AND_Proof_Tree.svg" src="../_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id1">[<a class="reference internal" href="../zzreferences.html#id39" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
 </section>
 <section id="nets">
-<h3>Nets<a class="headerlink" href="#nets" title="Permalink to this headline"></a></h3>
+<h3>Nets<a class="headerlink" href="#nets" title="Permalink to this heading"></a></h3>
 <p>We can split up the derivation tree into a graph, where each node is a rule instance (the vertical bar in the derivation tree) and the syntactic subderivation relationship is a black edge.</p>
 <img alt="../_images/AND_net.svg" src="../_images/AND_net.svg" /><img alt="../_images/AND_net_r.svg" src="../_images/AND_net_r.svg" /><p>To solve the bureaucratic problems there is another set of connecting edges, the red/blue edges in the graph. The edges are each proposition’s introduction/elimination (highest and lowest usage). Exchange rules can be omitted because we reference the propositions directly. The color is for clarity - a proposition on the left (antecedent) is blue and likewise right (succedent) is red. In the code each edge is identified as a unique variable in a slot, so there is no coloring. But depicting n-ary ports in a visual way without ambiguity seems hard.</p>
 <p>Most rules do not modify the contexts <span class="math notranslate nohighlight">\(\Gamma, \Delta, \Theta, \Lambda\)</span> and so the proposition edge skips the node as it is not an introduction/elimination (gray in the presentation above). But there are exceptions that do need the context:</p>
@@ -146,7 +151,7 @@ But we need a syntax for all the proofs.</p>
 </div></blockquote>
 </section>
 <section id="expression-graph">
-<h3>Expression graph<a class="headerlink" href="#expression-graph" title="Permalink to this headline"></a></h3>
+<h3>Expression graph<a class="headerlink" href="#expression-graph" title="Permalink to this heading"></a></h3>
 <p>The syntactic subderivation inclusion relationship is somewhat redundant in that we can reconstruct it from the blue/red edges, at least up to cut permutation. If we drop the syntactic inclusion relationship, reverse the directions of the blue edges, and drop the sequents, then the graph looks much more like your traditional expression tree. In particular cuts and identities become straight edges rather than top/bottom. PiL is an application node, PiR is a lambda, SigmaL is case, and SigmaR is a constructor (depicted in the graph as True/False).</p>
 <div class="graphviz"><object data="../_images/graphviz-301962cf497189e907736cbef943b8ad6b2dbbd9.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph {
@@ -207,7 +212,7 @@ p [label=&quot;I&quot;]
 <p>The identity nodes function like thunk identifiers; the stuff in between the identity and the cut on the blue edges is like the stack of the thunk. An I right next to a Cut is a no-op so for example the 2 blue Cut-I edges above the True and False and the red Cut-I edge above the PiL in the <code class="docutils literal notranslate"><span class="pre">r=</span></code> expression can be squinched together. Then the path from the assignment node to the use node reads “push !True to stack, push False to stack, reduce with and” (recall the original expression was <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">False</span> <span class="pre">True</span></code>).</p>
 </section>
 <section id="bad-syntax">
-<h3>Bad syntax<a class="headerlink" href="#bad-syntax" title="Permalink to this headline"></a></h3>
+<h3>Bad syntax<a class="headerlink" href="#bad-syntax" title="Permalink to this heading"></a></h3>
 <p>The bad syntax serializes the non-simplified net into a textual form by writing each node using Haskell’s datatype syntax. You can see the datatypes in <a class="reference external" href="https://github.com/Mathnerd314/stroscot/blob/fb648be1ecc3e5c062dbb000d6887a2ce7ac7eb0/src/Core.hs#L50">Core.hs</a>. Each edge has a unique identifier, and the nodes are nameless. The order of the nodes is arbitrary. We should also write out the types of the formulas (blue/red edges), so they can be used to reconstruct the full sequent as in the presentation above. But for now Core is untyped, so there is only one universal type and the types of the edges are not written out.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Identity</span><span class="w"> </span><span class="p">(</span><span class="kt">Rule</span><span class="w"> </span><span class="p">{</span><span class="n">top</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nb">()</span><span class="p">,</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Sequent</span><span class="w"> </span><span class="p">{</span><span class="n">turnstile</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;iseq83&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;iret84&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;ret82&quot;</span><span class="p">}})</span><span class="w"></span>
 <span class="kt">BangD</span><span class="w"> </span><span class="p">(</span><span class="kt">Rule</span><span class="w"> </span><span class="p">{</span><span class="n">top</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Sequent</span><span class="w"> </span><span class="p">{</span><span class="n">turnstile</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;iseq83&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;iret84&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nb">()</span><span class="p">},</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Sequent</span><span class="w"> </span><span class="p">{</span><span class="n">turnstile</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;seq80&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="kt">EID</span><span class="w"> </span><span class="s">&quot;i81&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nb">()</span><span class="p">}}),</span><span class="w"></span>
@@ -236,7 +241,7 @@ p [label=&quot;I&quot;]
 <p>It’s still pretty bad though.</p>
 </section>
 <section id="better-syntax">
-<h3>Better syntax<a class="headerlink" href="#better-syntax" title="Permalink to this headline"></a></h3>
+<h3>Better syntax<a class="headerlink" href="#better-syntax" title="Permalink to this heading"></a></h3>
 <p>A better syntax is based on naming the nodes rather than the edges. The edges can be identified by slot numbers on the nodes. Furthermore we only have to write the edges of the source nodes (rule tops), the slots on the destination nodes (rule bottoms) can be inferred. Even the arity and levels of the rule bottoms can be inferred from the tops. Finally we drop the record field names as they are always in the same order, the empty <code class="docutils literal notranslate"><span class="pre">Rule</span> <span class="pre">{()}</span></code> of <code class="docutils literal notranslate"><span class="pre">Identity</span></code>, and empty placeholder tuples of <code class="docutils literal notranslate"><span class="pre">Sequent</span></code>. So we end up with:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span><span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kt">Identity</span><span class="p">,</span><span class="w"></span>
 <span class="mi">2</span><span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kt">BangD</span><span class="w">    </span><span class="p">{{(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="kt">Level</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span><span class="p">)}},</span><span class="w"></span>
@@ -281,7 +286,7 @@ p [label=&quot;I&quot;]
 </div>
 </section>
 <section id="real-syntax">
-<h3>Real syntax<a class="headerlink" href="#real-syntax" title="Permalink to this headline"></a></h3>
+<h3>Real syntax<a class="headerlink" href="#real-syntax" title="Permalink to this heading"></a></h3>
 <p>An idea of how a real syntax might look:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;and&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Assign</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
 <span class="w">  </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">PiR</span><span class="w"></span>
@@ -321,7 +326,7 @@ p [label=&quot;I&quot;]
 </div>
 </section>
 <section id="c2-syntax">
-<h3>C2 syntax<a class="headerlink" href="#c2-syntax" title="Permalink to this headline"></a></h3>
+<h3>C2 syntax<a class="headerlink" href="#c2-syntax" title="Permalink to this heading"></a></h3>
 <p>C2’s syntax for sea-of-nodes looks like:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">22</span><span class="w"> </span><span class="kt">ConI</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">[[</span><span class="w"> </span><span class="mi">31</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="p">]]</span><span class="w"> </span><span class="o">#</span><span class="n">int</span><span class="kt">:</span><span class="mi">1</span><span class="w"></span>
 <span class="mi">10</span><span class="w"> </span><span class="kt">Parm</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">[[</span><span class="w"> </span><span class="mi">37</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="mi">31</span><span class="w"> </span><span class="mi">31</span><span class="w"> </span><span class="p">]]</span><span class="w"> </span><span class="kt">Parm0:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">!</span><span class="n">jvms</span><span class="kt">:</span><span class="w"> </span><span class="kt">CompTest</span><span class="ow">::</span><span class="n">comp</span><span class="w"> </span><span class="o">@</span><span class="w"> </span><span class="n">bci</span><span class="kt">:-</span><span class="mi">1</span><span class="w"></span>
@@ -346,13 +351,13 @@ p [label=&quot;I&quot;]
 <p>It’s a debug syntax to output the node graph. The node names are supposed to be fixed width but as you can see they didn’t hold to it with <code class="docutils literal notranslate"><span class="pre">IfTrue</span></code>.</p>
 </section>
 <section id="normal-order-reduction">
-<h3>Normal Order Reduction<a class="headerlink" href="#normal-order-reduction" title="Permalink to this headline"></a></h3>
+<h3>Normal Order Reduction<a class="headerlink" href="#normal-order-reduction" title="Permalink to this heading"></a></h3>
 <p>Looking at the graph for our simple <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">False</span> <span class="pre">True</span></code> example we can see the general pattern for reduction, at least normal-order leftmost-outermost reduction. We start at the root and go down. The first node we encounter is not a data node SigmaRight / PiRight / etc. (we would stop with WHNF, and evaluate the children with NF), instead it is an identity node. Since there is only one root node, the highest parent of the other side of the identity must be a cut node (unless the root node has a blue input edge). We then reduce this cut node. In this case it disappears and we move up to the PiL-PiR cut node. Here we create two cut nodes, one cuts the PiL near the root and the output of the SigmaL while the other cuts Id-Cut-False and the input of the SigmaL. The cut on the output of the SigmaL is blocked, so we go up the input of the SigmaL and our reduction stack looks like Root -&gt; I -&gt; PiL -&gt; Cut -&gt; SigmaL -&gt; Cut. First we cut the Id and then we cut False-SigmaL. This selects the left PiR with !w/False for our output. We cut this with the PiL with !True, creating a disconnected cut between !True and !w (that is immediately erased) and another cut between our result and the root identity node. We erase the identity and end with our result False.</p>
 <p>So the general pattern is, go down red / go up blue until you get to a redex (cut node, dup node)</p>
 </section>
 </section>
 <section id="cut-elimination">
-<h2>Cut elimination<a class="headerlink" href="#cut-elimination" title="Permalink to this headline"></a></h2>
+<h2>Cut elimination<a class="headerlink" href="#cut-elimination" title="Permalink to this heading"></a></h2>
 <p>For all reductions:</p>
 <ul class="simple">
 <li><p>Move the two nodes of the cut next to the cut, replacing use with copy-paste</p></li>
@@ -425,8 +430,8 @@ p [label=&quot;I&quot;]
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Compiler.html" class="btn btn-neutral float-left" title="Compiler design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Evaluation-Strategy.html" class="btn btn-neutral float-right" title="Evaluation strategy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Concurrency.html" class="btn btn-neutral float-left" title="Concurrency" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Dispatch.html" class="btn btn-neutral float-right" title="Dispatch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

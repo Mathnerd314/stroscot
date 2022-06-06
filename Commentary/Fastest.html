@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,7 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
@@ -61,6 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#asymptotics">Asymptotics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tail-calls">Tail calls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#laziness">Laziness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#avoiding-slow-operations">Avoiding slow operations</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
@@ -78,6 +82,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -110,21 +116,21 @@
            <div itemprop="articleBody">
              
   <section id="as-fast-as-c">
-<h1>As fast as C<a class="headerlink" href="#as-fast-as-c" title="Permalink to this headline"></a></h1>
+<h1>As fast as C<a class="headerlink" href="#as-fast-as-c" title="Permalink to this heading"></a></h1>
 <p>How do you prove that Stroscot is “as fast as C”? Well, we must show that every C program has a natural Stroscot translation, that performs at least as fast. Since Stroscot is an expressive language there may be many natural translations, and all must perform as fast.</p>
 <p>Stroscot should also have fast performance on programs that aren’t natural translations of C programs, but this is secondary to the claim. Even the lambda calculus, after years of study, has no optimal implementation on modern machines. So long as the implementation is reasonable the actual performance doesn’t matter - worst-case, the feature becomes a footgun for people are performance sensitive.</p>
 <section id="benchmarks">
-<h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this headline"></a></h2>
+<h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this heading"></a></h2>
 <p>One aspect is benchmarks implemented in both C and Stroscot. This is the approach taken by the programming language shootout. The Stroscot programs could cheat by being “better written” than “naive” C programs, but requiring that they be “natural translations” avoids this.</p>
 <p>Controlling the computer hardware and other running processes, we can test the strength of the code generator.</p>
 <p>But writing benchmarks is tedious, and my hand-crafted code generator will take a lot of work to beat LLVM.</p>
 </section>
 <section id="c-programs">
-<h2>C programs<a class="headerlink" href="#c-programs" title="Permalink to this headline"></a></h2>
+<h2>C programs<a class="headerlink" href="#c-programs" title="Permalink to this heading"></a></h2>
 <p>C programs consist of subroutines, with parameters passed by value. Variables have lexical scope and are stored on the stack. Recursion has no TCO. Subroutines execute a series of instructions, which can be blocks, structured programming constructs (if/else, for, do/while, while, continue/break, switch), function calls, assignments or returns. Instructions contain expressions, which can be arithmetic (<code class="docutils literal notranslate"><span class="pre">*/%+-</span></code>, unary ‘-’ (negation), ‘+’, ‘!’, ‘~’), bitwise (<code class="docutils literal notranslate"><span class="pre">&gt;&gt;</span> <span class="pre">&lt;&lt;</span> <span class="pre">&amp;</span> <span class="pre">^</span> <span class="pre">|</span></code>), or logic operators ( ‘&lt;’ ‘&lt;=’ ‘&gt;’ ‘&gt;=’, ‘==’ ‘!=’, ‘&amp;&amp;’, ‘||’), or pointer reference/dereference. Types include signed/unsigned integer of various sizes, struct, union, pointer. The sizeof function is built-in. Enums are ints and arrays are pointers, so they can be ignored.</p>
 </section>
 <section id="natural-translations">
-<h2>Natural translations<a class="headerlink" href="#natural-translations" title="Permalink to this headline"></a></h2>
+<h2>Natural translations<a class="headerlink" href="#natural-translations" title="Permalink to this heading"></a></h2>
 <p>With functional programming the natural translation of a set of loops is a set of mutually recursive functions. To get the same performance as C they need to be tail-recursive (hence translatable to jumps). So we need to mark that these functions should be inlined into the main (C convention) function. Or do the reverse like Haskell and have TCO by default and C convention as marked. So then subroutines translate to functions that do I/O marked with the C calling convention. If we devise a default CC that’s just as fast but allows TCO then the C annotation can be dropped, although it’s still necessary for the FFI.</p>
 <p>Naked blocks are just a variable scoping mechanism. The equivalent is <code class="docutils literal notranslate"><span class="pre">let</span></code> or <code class="docutils literal notranslate"><span class="pre">where</span></code>.</p>
 <p>if/else and switch are case expressions. Arithmetic and bitwise operations are strict primitive functions. Logic operators are strict too except for &amp;&amp;/|| which are lazy in the second argument. That covers signed/unsigned integers and booleans.</p>
@@ -134,7 +140,7 @@
 <p>Pointer reference/dereference can be imperative or we could represent memory as an associative array and use pure operations with Hughes’s optimization.</p>
 </section>
 <section id="asymptotics">
-<h2>Asymptotics<a class="headerlink" href="#asymptotics" title="Permalink to this headline"></a></h2>
+<h2>Asymptotics<a class="headerlink" href="#asymptotics" title="Permalink to this heading"></a></h2>
 <p>A direct mapping works for small programs, but what about large programs? We must ensure that the asymptotic overhead of each of our features is not too large. In particular time and space usage.</p>
 <p>Laziness can affect space usage. But forcing at each imperative operation should avoid this, it just means the compiler has to propagate demand and see that everything is strict.</p>
 <p>Tail-recursive term rewriting compiles into a state machine just like tail-recursive functions.</p>
@@ -142,7 +148,7 @@
 <p>The verification stuff is all at compile time, so it gets cached. So not a big factor.</p>
 </section>
 <section id="tail-calls">
-<h2>Tail calls<a class="headerlink" href="#tail-calls" title="Permalink to this headline"></a></h2>
+<h2>Tail calls<a class="headerlink" href="#tail-calls" title="Permalink to this heading"></a></h2>
 <p>Recursive tail calls encode loops. Similarly non-recursive tail calls encode state machines, that can be encoded as a switch-on-enum wrapped in a loop.</p>
 <p>In general, caller cleanup is faster, while callee cleanup gives smaller code. The C calling convention uses caller cleanup; the caller pops a fixed number of arguments off the stack after returning from the callee. The C convention lets caller reuse one set of outgoing argument space for all calls.</p>
 <p>To perform tail calls in the case in which the callee has more arguments than the
@@ -163,8 +169,9 @@ C = X1 A</p>
 </div></blockquote>
 </section>
 <section id="laziness">
-<h2>Laziness<a class="headerlink" href="#laziness" title="Permalink to this headline"></a></h2>
-<p>The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded. So rather than GHC’s demand analysis which proves usage and falls back to lazy, we want a laziness analysis which identifies nontermination and opportunities for discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).</p>
+<h2>Laziness<a class="headerlink" href="#laziness" title="Permalink to this heading"></a></h2>
+<p>The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded, and otherwise hurts. And intended laziness is actually quite rare.</p>
+<p>So in addition to GHC’s demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).</p>
 <p><a class="reference external" href="http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/">http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/</a></p>
 <p>the value representation is optimized for the platform, and redundant checks are optimized out</p>
 <p>The Implementation of Functional Programming Languages
@@ -174,6 +181,10 @@ How to make a fast curry: push/enter vs eval/apply
 GHC also does strictness analysis and optimistic evaluation.</p>
 <p>a program is a dependency graph which is evaluated through a series of local reductions
 the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says “return the result.”</p>
+</section>
+<section id="avoiding-slow-operations">
+<h2>Avoiding slow operations<a class="headerlink" href="#avoiding-slow-operations" title="Permalink to this heading"></a></h2>
+<p>Another thing that slows down a language are certain kinds of operations. E.g. dynamic lookups, weak typing, variant types. See examples of what makes PHP slow in this <a class="reference external" href="https://www.youtube.com/watch?v=p5S1K60mhQU">video</a>. In some cases you can replace these operations with faster ones (specialization). JIT has more information and can specialize based on the observed values. Profile-guided ahead of time optimization can do the same thing but with the JIT the profiling is built in and you don’t have to do a separate build.</p>
 </section>
 </section>
 

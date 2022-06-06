@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concurrency &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Core syntax" href="CoreSyntax.html" />
+    <link rel="prev" title="Compiler design" href="Compiler.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Concurrency</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simulation">Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallelism">Parallelism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#os-model">OS Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Concurrency</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Concurrency.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="concurrency">
+<h1>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this heading"></a></h1>
+<p>The general idea with concurrency is there are multiple threads of execution, each thread composed of (imperative) operations, and the combination of various operations may have various semantics. Normally we run in an OS thread and use a combination of hardware and OS operations. Working in the cloud, we still run in an OS thread, but the operations use the networking stack. In an embedded environment each thread is bound to a core.
+We only get the possibility of deadlock when we use blocking operations. With wait-free / atomic operations we never need to block.</p>
+<p>The smallest examples runtimewise just have memory access. For example this program SB: <span id="id1">[<a class="reference internal" href="../zzreferences.html#id83" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">t1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">A</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">t2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">B</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">join</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span><span class="w"></span>
+<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">u</span><span class="p">))</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Here the threads are provided by the C stdlib’s pthreads, and the operations are hardware load/store instructions.
+This program has a race condition - the outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code> under sequential consistency. But under the relaxed memory model used by X86 (Total Store Order or TSO) <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code> is also possible. But under any model values other than 0 or 1 are not possible.</p>
+<p>Another example is independent reads of independent writes (IRIW):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="kt">X</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="kt">Y</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
+<span class="p">{</span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Here the initial state is <code class="docutils literal notranslate"><span class="pre">(X,Y)=(0,0)</span></code>, and the final state can be <code class="docutils literal notranslate"><span class="pre">(a,b,c,d)=(1,0,1,0)</span></code> under POWER. But both ARMv8 and x86 forbid this outcome.</p>
+<section id="simulation">
+<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h2>
+<p>On a low level, race conditions are fine and an expected part of concurrent programming. No undefined behavior here. But on a program level Stroscot simulates the program’s (concurrent) execution, and will give a warning if it’s not consistent.
+The program is required to have the same result regardless of the order the tasks are run. This is checked by the verification system. Basically the simulation maintains a list of each thread and its top-level Task value. Each loop iteration takes some arbitrary non-zero number of arbitrarily-chosen tasks and runs their operations in parallel. The tasks operate on a shared state, so the semantics of satisfying the requests in parallel must be defined. We want to error when things clearly conflict.</p>
+<p>Samples:</p>
+<ul class="simple">
+<li><p>Variable: Two writes with different values conflict. But if only one task writes the variable or all writes are equal then no conflict.</p></li>
+<li><p>Mutex: Two acquires, mutex available, a winner is nondeterministically chosen to be scheduled. The loser is blocked on the mutex or scheduled in a failure branch if it was try_acquire. No mutex available, block.</p></li>
+<li><p>Append-style file writing: Conflicts if same file descriptor</p></li>
+<li><p>Exiting: conflicts with anything but an identical exit (clean exit requirement), or else no conflicts</p></li>
+</ul>
+<p>Etc. It’s a bit lengthy to simulate the entire task interface, but operations change infrequently, so it should be maintainable.</p>
+<p>Acquiring a lock blocks until the lock is released. This introduces the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders.</p>
+<p>All of these generate happens-before relationships on the various operations. We could track this with vector clocks, IDK why - the posets are easier to reason about directly.</p>
+<p>The verification system handles the nondeterminism somehow, check out papers on concurrency verification. The behavior of the OS scheduler is complicated and hard to model except as an adversary. The Linux scheduler might take an unreasonably long time to schedule a particular thread even if every other thread is sleeping or calls yield. Or it might decide to run it immediately, or move it on another core, etc.</p>
+</section>
+<section id="parallelism">
+<h2>Parallelism<a class="headerlink" href="#parallelism" title="Permalink to this heading"></a></h2>
+<p>Parallelism - the root is “parallel” or “happening at the same time”. But with <a class="reference external" href="https://en.wikipedia.org/wiki/Relativity_of_simultaneity">relativity</a>, simultaneity is not absolute. We instead consider <a class="reference external" href="https://en.wikipedia.org/wiki/Causal_structure">causal structure</a> - event separation can be timelike or spacelike. Timelike separation communicates information from past to future, while no dependency is possible with spacelike separation. Hence we define an execution as a directed graph of information flow, where a node is a value and an edge is read “can casually influence” (we could also use the reverse “reads data from”). Assuming no time travel the graph is acyclic and its transitive closure forms a partial order or poset. Then things happen “in parallel” if neither causally influences the other.</p>
+<p>For example, <a class="reference external" href="https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm#Parallel_and_distributed_algorithms">multiplying</a> two 2x2 matrices:</p>
+<img alt="../_images/matrix-multiply.svg" src="../_images/matrix-multiply.svg" /><p>The multiplications all happen in parallel and the additions in parallel.</p>
+<p>There’s no explicit syntax for parallelism - pure computations have inherent parallelism. Writing it out looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multiply</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="n">n&#39;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">n&#39;</span><span class="p">,</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">m</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">i</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">o</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">j</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
+<span class="w">      </span><span class="n">sum</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="n">n</span><span class="p">]</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">for</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code> can evaluate arguments in parallel. More complicated is allowing functions, for example <code class="docutils literal notranslate"><span class="pre">foldMap</span> <span class="pre">f</span> <span class="pre">g</span> <span class="pre">(x:xs)</span> <span class="pre">=</span> <span class="pre">g</span> <span class="pre">(f</span> <span class="pre">x)</span> <span class="pre">(foldMap</span> <span class="pre">f</span> <span class="pre">g</span> <span class="pre">xs)</span></code> generates a DAG of f’s and g’s if the list spine is known. Even with general recursion it should still be possible to identify data dependencies and assign DAG cells to temporary values in some fashion. Conditionals are a little hard to schedule because you have to make sure both sides can be speculated or discard the untaken branch promptly.</p>
+<p>Stroscot schedules the instructions to maximize instruction-level parallelism, where appropriate. This takes advantage of the design of modern CPUs, where there are multiple “ports” and each port can execute an instruction simultaneously.</p>
+<p>With large (&gt;1000 width) matrices we might want to multiply sub-matrices on multiple threads (cores). That requires concurrency, so is handled by writing the synchronization operations explicitly.  Stroscot doesn’t parallelize on the thread level by default because automatically spawning threads would be surprising, and the choice of thread/scheduler/performance model (OpenMP, OS thread, green thread) influences what granularity to split up the computation at.</p>
+<p>But still, for complex data science computations we might want automatic parallelization that takes advantage of multicore hardware. So we can provide a DSL function <code class="docutils literal notranslate"><span class="pre">parallelize</span></code> to automatically rewrite pure computations to concurrent ones, implementing the “small on single thread, big splits into small” operations on top of fork/join model and taking the thread / task queue implementation as a parameter. Doug Lea’s work stealing task queues can be very efficient given the correct task granularity.</p>
+<p>Haskell’s “par” is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It’s just as clear to use explicit fork/join operations, and indeed the <code class="docutils literal notranslate"><span class="pre">rpar/rpar/rseq/rseq</span></code> pattern proposed in <a class="reference external" href="https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html">the Parallel Haskell book</a> is just fork/join with different naming.</p>
+<p>As far as the actual task granularity, Cliff Click says the break-even point is somewhere around the middle of the microsecond range, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress in another thread.</p>
+</section>
+<section id="os-model">
+<h2>OS Model<a class="headerlink" href="#os-model" title="Permalink to this heading"></a></h2>
+<p>An application consists of one or more processes. A process, in the simplest terms, is an executing program.</p>
+<p>A job object allows groups of processes to be managed as a unit. Job objects are namable, securable, sharable objects that control attributes of the processes associated with them. Operations performed on the job object affect all processes associated with the job object.</p>
+<p>One or more threads run in the context of the process. A thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread.</p>
+<p>Windows has a special thread type “UMS thread” which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.</p>
+<p>A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer OS calls than a full thread context switch. When fibers are integrated into the runtime they can be more memory efficient than threads. Per Microsoft, fibers in C do not provide many advantages over threads.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Compiler.html" class="btn btn-neutral float-left" title="Compiler design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CoreSyntax.html" class="btn btn-neutral float-right" title="Core syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,28 +51,39 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stealing">Stealing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesizing">Synthesizing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#minimal-definition">Minimal definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numbers">Numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#matrix-multiplication">Matrix multiplication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#poison-values">Poison values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#relations">Relations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#posets">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#primitive-values">Primitive values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dictionaries">Dictionaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#generics">Generics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tables">Tables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typed-collections">Typed collections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#transactional-memory">Transactional memory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#units">Units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iterators">Iterators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#work-stealing-task-queues">Work stealing task queues</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#properties">Properties</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#arrays">Arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#evolution">Evolution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#equality">Equality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#terms">Terms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-structures">Data structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#list-flattening">List flattening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#list-homomorphisms">List homomorphisms</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -87,6 +99,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -119,23 +133,95 @@
            <div itemprop="articleBody">
              
   <section id="library">
-<h1>Library<a class="headerlink" href="#library" title="Permalink to this headline"></a></h1>
+<h1>Library<a class="headerlink" href="#library" title="Permalink to this heading"></a></h1>
+<section id="stealing">
+<h2>Stealing<a class="headerlink" href="#stealing" title="Permalink to this heading"></a></h2>
+<p>Stroscot should support the standard libraries of popular languages, so e.g. if you want the C functions with C semantics you would <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">Library.C</span></code>. Compatibility is a natural step to world domination, and this allows an intermediate step of C semantics with Stroscot syntax. For example a function of type <code class="docutils literal notranslate"><span class="pre">C.int</span> <span class="pre">-&gt;</span> <span class="pre">C.size_t</span></code> is different from plain <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code>, and if you really need the semantics of C++’s unstable sort then it has to be included.</p>
+<p>It’s only worth supporting the biggies, in particular:
+* C, the standardized library. Quite lean so it’s the one to start with.
+* C++, the standardized library
+* Java, OpenJDK libraries (GPL but with linking exception, should be OK)</p>
+<p>Others such as the Python standard library, Glib, and Boost are probably not worth the effort of including directly, rather they can be supported via FFI or rewritten natively.</p>
+</section>
+<section id="synthesizing">
+<h2>Synthesizing<a class="headerlink" href="#synthesizing" title="Permalink to this heading"></a></h2>
+<p>Building on the work of others isn’t enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily - the goal is to eventually include everything. If a user needs a Y-fast trie, they should be able to find it in the standard library. Duplicating implementations is a waste of man‑hours that can be spent developing something new.</p>
+<blockquote>
+<div><p>But the library should be divided up into modules and the modules should be versioned so that there’s a deprecation cycle in place.</p>
+</div></blockquote>
+<p>For this, the proposals of the various languages are useful, as they encapsulate changes and include motivation as to why the change was made. A feature of a language might be historical accident but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library “smells”, areas that could use improvement.</p>
+<p>Maybe once the language is more defined it will be worth standardizing the embedding of some application-specific libraries:
+* machine learning (TensorFlow)
+* R’s statistics and data analysis
+* numerical libraries such as BLAS and SciPy
+* Erlang’s distributed, fault-tolerant, reliable, soft real-time, concurrent database
+* audio, graphics, networking, databases, telephony, enterprise servers, cryptography</p>
+<ul class="simple">
+<li><p>Julia - concurrency, parallelism, C+Fortran+Python FFIs</p></li>
+</ul>
+<p>syntax
+* C# - best designed. It’s used in desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)</p>
+<p>Standard libraries:
+* <a class="reference external" href="https://github.com/rust-lang/rust/tree/master/library">Rust</a> (MIT + Apache 2.0)
+* <a class="reference external" href="https://github.com/golang/go/tree/master/src">Go</a> (BSD-style)
+* <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries">Haskell</a> (BSD-style)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The alternate prelude <a class="reference external" href="https://github.com/haskell-foundation/foundation">Foundation</a> (BSD)</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>Julia <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/base">1</a> <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/stdlib">2</a> (MIT)</p></li>
+<li><p>C</p>
+<ul>
+<li><p><a class="reference external" href="https://sourceware.org/git/?p=glibc.git;a=tree">glibc</a> (LGPLv2.1, some files BSD/ISC/etc.)</p></li>
+<li><p><a class="reference external" href="https://git.musl-libc.org/cgit/musl/tree/">Musl</a> (MIT)</p></li>
+</ul>
+</li>
+<li><p>Python <a class="reference external" href="https://github.com/python/cpython/tree/master/Modules">1</a> <a class="reference external" href="https://github.com/python/cpython/tree/master/Lib">2</a> (PSFv2)</p></li>
+<li><p><a class="reference external" href="https://github.com/ziglang/zig/tree/master/lib/std">Zig</a> (MIT)</p></li>
+<li><p>Slate <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/core">1</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/lib">2</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/i18n">3</a></p></li>
+</ul>
+<p>Proposals:
+* <a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pulls">GHC</a>
+* <a class="reference external" href="https://github.com/python/peps">Python</a>. The repo includes almost all proposals, but there are a few stray PRs:
+<a class="reference external" href="https://github.com/python/peps/pull/2066/files">https://github.com/python/peps/pull/2066/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/609/files">https://github.com/python/peps/pull/609/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/641/files">https://github.com/python/peps/pull/641/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/671/files">https://github.com/python/peps/pull/671/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/686/files">https://github.com/python/peps/pull/686/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/690/files">https://github.com/python/peps/pull/690/files</a>
+<a class="reference external" href="https://github.com/python/peps/pull/2620/files">https://github.com/python/peps/pull/2620/files</a> (and other PEPs after Jun 1 2022)</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rust-lang/rfcs/pulls">Rust</a> (<a class="reference external" href="https://rust-lang.github.io/rfcs/">accepted</a>)</p></li>
+<li><p><a class="reference external" href="https://github.com/golang/go/labels/Proposal">Go</a></p></li>
+</ul>
+<p>TODO: go through these, unfortunately there’s a lot</p>
+</section>
 <section id="minimal-definition">
-<h2>Minimal definition<a class="headerlink" href="#minimal-definition" title="Permalink to this headline"></a></h2>
+<h2>Minimal definition<a class="headerlink" href="#minimal-definition" title="Permalink to this heading"></a></h2>
 <p>At a minimum, the standard library should provide:
-* containers, such as hash maps and binary trees
-* algorithms operating over those containers, such as sorting
+* containers, such as arrays, hash maps, and binary trees
+* algorithms operating over those containers, such as insertion, lookup, and sorting
 * basic support for multithreading
 * string tokenization
 * compiler’s API</p>
 </section>
+<section id="numbers">
+<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this heading"></a></h2>
+<p>Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.</p>
+</section>
+<section id="matrix-multiplication">
+<h2>Matrix multiplication<a class="headerlink" href="#matrix-multiplication" title="Permalink to this heading"></a></h2>
+<p>Suppose we are multiplying three matrices A, B, C. Since matrix multiplication is associative, (AB)C = A(BC). But one order may be much better, depending on the sizes of A, B, C. Say A,B,C are m by n, n by p, p by q respectively. Then computing (AB)C requires mp(n + q) multiplications, and computing A(BC) requires (m + p)nq multiplications. So if m = p = kn = kq, then (AB)C costs 2k^3 n^3, while A(BC) costs 2 k n^3, which if k is large means A(BC) is going to be much faster than multiplying (AB)C. The matrix chain multiplication algorithm by Hu Shing finds the most efficient parenthesization in O(n log n) time, given the sizes of the matrices. In practice the sizes must be observed through profiling. But this data must be collected at the level of the matrix chain  multiplication, as re-association optimisations are hard to recognise when the multiplication is expanded into loops.</p>
+</section>
 <section id="poison-values">
-<h2>Poison values<a class="headerlink" href="#poison-values" title="Permalink to this headline"></a></h2>
+<h2>Poison values<a class="headerlink" href="#poison-values" title="Permalink to this heading"></a></h2>
 <p>This requires some support from the OS to implement. Pointer reads generate page faults, which if they are invalid will be returned to the program via the signal “Segmentation fault” (SIGSEGV). C/C++ <a class="reference external" href="https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux">can’t handle these easily</a> because they are <a class="reference external" href="https://lwn.net/Articles/414618/">synchronous signals</a> and synchronous signal behavior is mostly left undefined, but in fact signals are <a class="reference external" href="https://hackaday.com/2018/11/21/creating-black-holes-division-by-zero-in-practice/">fairly well-behaved</a> (<a class="reference external" href="https://sources.debian.org/src/openssl/1.1.1k-1/crypto/s390xcap.c/?hl=48#L48">OpenSSL</a>’s method of recovering from faults even seems standards-compliant). It definitely seems possible to implement this as an error value in a new language. Go <a class="reference external" href="https://stackoverflow.com/questions/43212593/handling-sigsegv-with-recover">allows</a> turning (synchronous) signals into “panics” that can be caught with recover.</p>
 <p>UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error requires checking if the argument is zero beforehand and branching. The people that really can’t afford this check will have to use the unchecked division instruction in the assembly module, or make sure that the check is compiled out. But on x86, DIV by 0 on produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. So on x86 we can decide between inserting a check and handling the SIGFPE. It’ll require testing to see which is faster in typical programs - my guess is the handler, since division by zero is rare.</p>
 </section>
 <section id="relations">
-<h2>Relations<a class="headerlink" href="#relations" title="Permalink to this headline"></a></h2>
+<h2>Relations<a class="headerlink" href="#relations" title="Permalink to this heading"></a></h2>
 <p>There are various types of relations: <a class="reference external" href="https://en.wikipedia.org/wiki/Binary_relation#Special_types_of_binary_relations">https://en.wikipedia.org/wiki/Binary_relation#Special_types_of_binary_relations</a></p>
 <p>The question is, what data types do we need for relations?</p>
 <ul class="simple">
@@ -151,69 +237,51 @@
 <p>Then we have the reflexive, symmetric, transitive closures for many-to-many relations. With a finite relation these are straightforward to compute via matrix algorithms or their equivalent. For infinite sets we have to work harder and use some form of symbolic reasoning.</p>
 </section>
 <section id="posets">
-<h2>Posets<a class="headerlink" href="#posets" title="Permalink to this headline"></a></h2>
+<h2>Posets<a class="headerlink" href="#posets" title="Permalink to this heading"></a></h2>
 <p>Q: Can ~ be preferred if there is ambiguity? E.g. 1 &lt;~ 2 resolving to 1 ~ 2. Is it safe under extension?</p>
 </section>
-<section id="dictionaries">
-<h2>Dictionaries<a class="headerlink" href="#dictionaries" title="Permalink to this headline"></a></h2>
-<p>Wikipedia calls these “associative arrays” and C++ and Haskell calls them maps. But dictionary seems to be the accepted term in the data structure textbooks, and it’s about the right length as a word.</p>
+<section id="primitive-values">
+<h2>Primitive values<a class="headerlink" href="#primitive-values" title="Permalink to this heading"></a></h2>
+<p>ISO/IEC 11404 has a classification of values:</p>
+<ol class="arabic simple">
+<li><p>primitive - defined axiomatically or by enumeration</p></li>
+<li><p>primitive - cannot be decomposed into other values without loss of all semantics</p></li>
+<li><p>primitive - not constructed in any way from other values, has no reference to other values</p></li>
+<li><p>non-primitive - wholly or partly defined in terms of other values</p></li>
+<li><p>generated - defined by the application of a generator to one or more previously-defined values</p></li>
+<li><p>generated - specified, and partly defined, in terms of other values</p></li>
+<li><p>generated - syntactically and in some ways semantically dependent on other values used in the specification</p></li>
+<li><p>atomic - a value which is intrinsically indivisible. All primitive values are atomic, and some generated values such as pointers, procedures, and classes are as well.</p></li>
+<li><p>aggregate - generated value that is made up of component values or parametric values, in the sense that operations on all component values are meaningful</p></li>
+<li><p>aggregate - value which can be seen as an organization of specific component values with specific functionalities</p></li>
+<li><p>aggregate - organized collection of accessible component values</p></li>
+</ol>
+<p>Even ignoring the fact that the multiple definitions are all slightly different, these distinctions are also a matter of definition: we can define a 32-bit integer as one of 2^32 symbols, hence primitive and atomic, or as a list of boolean values of length 32, hence generated and aggregate. It seems easiest to avoid going down this rabbit hole and simply make a big list of all the sets of values, without attempting to create such a broad classification of the sets.</p>
 </section>
-<section id="generics">
-<h2>Generics<a class="headerlink" href="#generics" title="Permalink to this headline"></a></h2>
-<p>Since Stroscot is dynamic the default is heterogeneous collections that can contain anything. So for example you have a clause <code class="docutils literal notranslate"><span class="pre">cons</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">List</span> <span class="pre">-&gt;</span> <span class="pre">List</span></code>. Nonetheless collections have “types”, namely the set of elements of the collection. So the example in section of 9.1.1 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id25" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span> might be written as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">contents</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="n">elementOf</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="kt">TypedList</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">List</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">contents</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="n">t</span><span class="p">}</span><span class="w"></span>
-
-<span class="nf">singleton</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Any</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="p">}</span><span class="w"></span>
-<span class="nf">singleton</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"></span>
-
-<span class="nf">get</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
-<span class="nf">put</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">m</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">List</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Any</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-
-<span class="kt">Component</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Button</span><span class="o">|</span><span class="kt">Checkbox</span><span class="w"></span>
-
-<span class="nf">disable</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Component</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-<span class="nf">disable</span><span class="w"> </span><span class="kt">Button</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Button disabled&quot;</span><span class="w"></span>
-<span class="nf">disable</span><span class="w"> </span><span class="kt">Checkbox</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Checkbox disabled&quot;</span><span class="w"></span>
-
-<span class="nf">disableAll</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="kt">Component</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-<span class="nf">disableAll</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mapM</span><span class="w"> </span><span class="n">disable</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
-
-<span class="nf">buttons</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="kt">Button</span><span class="p">]</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">List</span><span class="w"> </span><span class="kt">Button</span><span class="w"></span>
-<span class="nf">components</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="kt">Button</span><span class="p">,</span><span class="kt">Checkbox</span><span class="p">]</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="kt">Component</span><span class="w"></span>
-<span class="nf">assert</span><span class="w"> </span><span class="p">(</span><span class="n">not</span><span class="w"> </span><span class="p">(</span><span class="n">component</span><span class="w"> </span><span class="n">isElemOf</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="kt">Button</span><span class="p">))</span><span class="w"></span>
-
-<span class="nf">disableAll</span><span class="w"> </span><span class="n">buttons</span><span class="w"></span>
-<span class="nf">disableAll</span><span class="w"> </span><span class="n">components</span><span class="w"></span>
-
-<span class="nf">insertCheckbox</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">List</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-<span class="nf">insertCheckbox</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">append</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="kt">Checkbox</span><span class="w"></span>
-<span class="nf">disableAllAndAddCheckbox</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="kt">Component</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-<span class="nf">disableAllAndAddCheckbox</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">disableAll</span><span class="w"> </span><span class="n">l</span><span class="p">;</span><span class="w"> </span><span class="n">insertCheckbox</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-
-<span class="nf">disableAllAndAddCheckbox</span><span class="w"> </span><span class="n">buttons</span><span class="w"></span>
-<span class="nf">assert</span><span class="w"> </span><span class="p">(</span><span class="n">not</span><span class="w"> </span><span class="p">(</span><span class="n">buttons</span><span class="w"> </span><span class="n">isElemOf</span><span class="w"> </span><span class="kt">TypedList</span><span class="w"> </span><span class="kt">Button</span><span class="p">))</span><span class="w"></span>
-</pre></div>
-</div>
-<p>It seems quite sufficient, because Stroscot finds assertion failures at compile time. But maybe the static typing people want more. In particular we want to specify a write bound, limiting the types of elements that may be added. So we define restricted lists:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">singleton</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">RestrictedList</span><span class="w"></span>
-<span class="nf">put</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">RestrictedList</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">elemType</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cmd</span><span class="w"></span>
-</pre></div>
-</div>
-<p>All it does is give errors earlier though - the errors show up regardless once you try to use an element of the wrong type. So maybe it’s not needed.</p>
+<section id="dictionaries">
+<h2>Dictionaries<a class="headerlink" href="#dictionaries" title="Permalink to this heading"></a></h2>
+<p>Wikipedia calls these “associative arrays” and C++ and Haskell calls them maps. There is also the ISO/IEC 11404 “record” which only allows identifiers as keys and has a fixed key set. But dictionary seems to be the accepted term in the data structure textbooks, and it’s about the right length as a word.</p>
+</section>
+<section id="tables">
+<h2>Tables<a class="headerlink" href="#tables" title="Permalink to this heading"></a></h2>
+<p>Tables such as those found in SQL are bags of records that all have the same fields.</p>
+</section>
+<section id="typed-collections">
+<h2>Typed collections<a class="headerlink" href="#typed-collections" title="Permalink to this heading"></a></h2>
+<p>Following section 9.1.1 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id25" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span>, there are two interesting sets: the read bound and the write bound.</p>
+<p>A simple read bound of a collection is that the returned value must be one of the elements - this can just be computed from the value. For example, for a list, defining <code class="docutils literal notranslate"><span class="pre">contents</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">List)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">e</span> <span class="pre">elementOf</span> <span class="pre">l</span> <span class="pre">}</span></code>, we have <code class="docutils literal notranslate"><span class="pre">elemAt</span> <span class="pre">:</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">List)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">contents</span> <span class="pre">l</span></code>. We can make a refinement type, <code class="docutils literal notranslate"><span class="pre">TypedList</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">l</span> <span class="pre">:</span> <span class="pre">List</span> <span class="pre">|</span> <span class="pre">contents</span> <span class="pre">l</span> <span class="pre">subset</span> <span class="pre">t}</span></code>. With modifiable arrays the restriction must be put on the state parameter, <code class="docutils literal notranslate"><span class="pre">TypedVar</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">v</span> <span class="pre">:</span> <span class="pre">Var</span> <span class="pre">|</span> <span class="pre">read</span> <span class="pre">v</span> <span class="pre">:</span> <span class="pre">t}</span></code>. Then <code class="docutils literal notranslate"><span class="pre">elemAt</span> <span class="pre">:</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">TypedList</span> <span class="pre">x)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">x</span></code>.</p>
+<p>However, the write bound is external to the collection - straightforward implementations produce heterogeneous collections that can contain anything. So for example <code class="docutils literal notranslate"><span class="pre">setElemAt</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">List</span> <span class="pre">-&gt;</span> <span class="pre">List</span></code>. Errors will show up once you try to read and use an element of the wrong type, but maybe the error message will not be so clear on when the element was inserted, making it hard to debug.</p>
+<p>One solution is to write <code class="docutils literal notranslate"><span class="pre">(setElemAt</span> <span class="pre">...)</span> <span class="pre">:</span> <span class="pre">TypedList</span> <span class="pre">x</span></code> around every modification operation. This will verify at compile time that all values are members of the set <code class="docutils literal notranslate"><span class="pre">x</span></code>. Honestly this solution seems quite sufficient - the only issue is that asserting the value every time can become tedious.</p>
+<p>So a more invasive solution is to define a set of restricted collections <code class="docutils literal notranslate"><span class="pre">RestrictedList</span> <span class="pre">wb</span></code> with the write bound set <code class="docutils literal notranslate"><span class="pre">wb</span></code> stored in the value and enforced for every write operation. For example it would be an error to do <code class="docutils literal notranslate"><span class="pre">setElemAt</span> <span class="pre">b</span> <span class="pre">0</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">RestrictedList</span> <span class="pre">{a})</span></code>. This has the benefit of enforcing a uniform representation of elements. The write operation can even be extended by calling <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">wb</span></code> instead of just asserting membership.</p>
 </section>
 <section id="transactional-memory">
-<h2>Transactional memory<a class="headerlink" href="#transactional-memory" title="Permalink to this headline"></a></h2>
+<h2>Transactional memory<a class="headerlink" href="#transactional-memory" title="Permalink to this heading"></a></h2>
 <p>STM is a very attractive abstraction for beginners or those who can sacrifice some performance to ensure correctness. But the performance in benchmarks is so-so and when it’s really slow the implementation is somewhat complex to optimize. So STM hasn’t seen much success in high-performance areas. The main primitives have to be the OS mutexes and atomic instructions. But still, providing STM as a library would be good. Haskell has STM, Fortress worked on STM. It automates the programming pattern of “read struct pointer, read members, allocate new structure, compare-and-swap struct pointer” which is really common for high-performance concurrency.</p>
 <p>The syntax is a simple DSL, <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">retry</span> <span class="pre">};</span> <span class="pre">y</span> <span class="pre">:=</span> <span class="pre">z</span> <span class="pre">}</span></code>. Transactions nested inside another transaction are elided, so that one big transaction forms. The semantics is a transaction has a visible effect (commits its writes) only if all state read during the transaction is not modified by another thread. The <code class="docutils literal notranslate"><span class="pre">retry</span></code> command blocks the transaction until the read state has changed, then starts it over, in an endless loop until a path avoiding the <code class="docutils literal notranslate"><span class="pre">retry</span></code> is taken. The implementation should guarantee eventual fairness: A transaction will be committed eventually, provided it doesn’t retry all the time. The latest research seems to be <span id="id2">[<a class="reference internal" href="../zzreferences.html#id81" title="Pedro Ramalhete, Andreia Correia, and Pascal Felber. Efficient algorithms for persistent transactional memory. In Proceedings of the 26th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming, PPoPP '21, 1–15. New York, NY, USA, February 2021. Association for Computing Machinery. URL: https://doi.org/10.1145/3437801.3441586 (visited on 2021-11-11), doi:10.1145/3437801.3441586.">RCF21</a>]</span>, it might be usable. Have to extend it to handle transaction retries though.</p>
-<p>Transactions have sequentially consistent semantics by default. But mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL would be nice. I.e. transactions matching atomic instructions should compile to the atomic instructions, plus thread wakeups but only if there are waiting threads with <code class="docutils literal notranslate"><span class="pre">retry</span></code> involved.</p>
-</section>
-<section id="units">
-<h2>Units<a class="headerlink" href="#units" title="Permalink to this headline"></a></h2>
-<p>Code with units will probably never be the default, but numeric types with dimensional units are useful for safety. The main issue is performance - checking/converting units on every operation is slow. But I tried using some Python unit libraries and they were OK for scripting purposes. Inlining should work for compiled code. Syntax is an issue, handling exponents and other dimensionless operations is an issue.</p>
+<p>Transactions have sequentially consistent semantics by default. But mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL for machine code instruction would be nice. I.e. transactions matching atomic machine code instructions should compile to the atomic machine code instructions, plus junk like thread wakeups etc. but only if there are waiting threads with <code class="docutils literal notranslate"><span class="pre">retry</span></code> involved.</p>
 </section>
 <section id="iterators">
-<h2>Iterators<a class="headerlink" href="#iterators" title="Permalink to this headline"></a></h2>
+<h2>Iterators<a class="headerlink" href="#iterators" title="Permalink to this heading"></a></h2>
 <p>Haskell has <code class="docutils literal notranslate"><span class="pre">Foldable</span></code>, the main function being <code class="docutils literal notranslate"><span class="pre">foldr</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code>, which is equivalently <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code>, the latter part being the <a class="reference external" href="https://okmij.org/ftp/tagless-final/course/Boehm-Berarducci.html">Boehm-Berarducci encoding</a> of <code class="docutils literal notranslate"><span class="pre">[a]</span></code>. So really <code class="docutils literal notranslate"><span class="pre">Foldable</span> <span class="pre">t</span></code> is just a function <code class="docutils literal notranslate"><span class="pre">toList</span> <span class="pre">:</span> <span class="pre">t</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">[a]</span></code>. <code class="docutils literal notranslate"><span class="pre">foldMap</span></code> has a more general type that would allow a parallel fold, but in Haskell it’s is required to be right-associative. So Haskell <code class="docutils literal notranslate"><span class="pre">Foldable</span></code> is strictly a linked list with <code class="docutils literal notranslate"><span class="pre">foldr</span></code> applied. We might as well call the class <code class="docutils literal notranslate"><span class="pre">ListLike</span></code>.</p>
 <p><a class="reference external" href="https://homes.luddy.indiana.edu/samth/fortress-spec.pdf#page=128">Fortress</a> has real parallel folds similar to <code class="docutils literal notranslate"><span class="pre">foldMap</span></code>. They have “reductions” which are just monoids, and then a “generator” is <code class="docutils literal notranslate"><span class="pre">generate</span> <span class="pre">:</span> <span class="pre">(Monoid</span> <span class="pre">r)</span> <span class="pre">=&gt;</span> <span class="pre">Generator</span> <span class="pre">e</span> <span class="pre">-&gt;</span> <span class="pre">(e</span> <span class="pre">-&gt;</span> <span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>. The monoid does not have to be commutative - results are combined in the natural order of the generator. Empty elements may be inserted freely by <code class="docutils literal notranslate"><span class="pre">generate</span></code>. The implementation is based on recursive subdivision to divide a blocked range into approximately equal-sized chunks of work.</p>
 <p>They also have generator comprehensions and big operator syntax, but the description is confusing.</p>
@@ -227,35 +295,62 @@
 <p>The problem with this design is you can accidentally store the <code class="docutils literal notranslate"><span class="pre">next</span></code> operation and re-use it. With <code class="docutils literal notranslate"><span class="pre">next</span> <span class="pre">:</span> <span class="pre">Iterator</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">(Done</span> <span class="pre">|</span> <span class="pre">Yield</span> <span class="pre">a)</span></code> the similar pattern <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">next</span> <span class="pre">iter</span> <span class="pre">in</span> <span class="pre">{</span> <span class="pre">y;</span> <span class="pre">y}</span></code> just results in calling <code class="docutils literal notranslate"><span class="pre">next</span></code> twice and does not corrupt the iterator state.</p>
 </section>
 <section id="work-stealing-task-queues">
-<h2>Work stealing task queues<a class="headerlink" href="#work-stealing-task-queues" title="Permalink to this headline"></a></h2>
+<h2>Work stealing task queues<a class="headerlink" href="#work-stealing-task-queues" title="Permalink to this heading"></a></h2>
 <p>Java has them, C++ has OpenMPI and libuv. Many other languages have a library for them as well. So Stroscot should too.</p>
 </section>
 <section id="properties">
-<h2>Properties<a class="headerlink" href="#properties" title="Permalink to this headline"></a></h2>
+<h2>Properties<a class="headerlink" href="#properties" title="Permalink to this heading"></a></h2>
 <p>Partial orders are good, no reason not to have them. The orders defined with posets should be usable dynamically. Similarly they should be in a set <code class="docutils literal notranslate"><span class="pre">TotalOrder</span></code> if appropriate. Similarly <code class="docutils literal notranslate"><span class="pre">Commutative</span></code>, <code class="docutils literal notranslate"><span class="pre">Associative</span></code> for binary operators.</p>
 </section>
 <section id="arrays">
-<h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this headline"></a></h2>
+<h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h2>
 <p>In Stroscot the only mutable thing is a reference. So mutable arrays could mean two things: a fixed-size immutable array containing mutable values, or a mutable variable storing an immutable array. The second seems more similar to Java’s ArrayList or C++ std::vector so is probably what is meant.</p>
 <p>The key here for efficient performance is in-place (destructive) update, so that the array re-uses its storage instead of copying on every operation. There is a paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id48" title="Paul Hudak and Adrienne Bloss. The aggregate update problem in functional programming systems. In Proceedings of the 12th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages - POPL '85, 300–314. New Orleans, Louisiana, United States, 1985. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=318593.318660 (visited on 2022-01-04), doi:10.1145/318593.318660.">HB85</a>]</span> on how to do it for lazy programming - basically you perform reads eagerly, and delay array update operations as long as possible, until it is clear if you can do in-place update or will have to copy.</p>
 </section>
 <section id="evolution">
-<h2>Evolution<a class="headerlink" href="#evolution" title="Permalink to this headline"></a></h2>
+<h2>Evolution<a class="headerlink" href="#evolution" title="Permalink to this heading"></a></h2>
 <p>If the standard library is missing something, different incompatible implementations may arise. Sharing code then becomes problematic, because code is tied to one of these implementations. The need then arises for a wrapper library that smooths over the differences and provides a portable interface.</p>
 <p>Generally something should only be in the standard library once it’s reached this “portable interface” level, or if it’s been a while and only one implementation has emerged. But otherwise, there are often 2-3 good alternatives that people need to choose from. So there should also be a “non-standard libraries” wiki or something listing alternatives and even providing comparison tables with pros/cons if people feel like writing it.</p>
 </section>
 <section id="equality">
-<h2>Equality<a class="headerlink" href="#equality" title="Permalink to this headline"></a></h2>
+<h2>Equality<a class="headerlink" href="#equality" title="Permalink to this heading"></a></h2>
 <p>Equality is an equivalence relation <code class="docutils literal notranslate"><span class="pre">(==)</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> built in to Stroscot. Or maybe it is <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> and only defined on certain types. The built-in approach seems more attractive.</p>
 <p>For ordering though, <code class="docutils literal notranslate"><span class="pre">(&lt;=)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">{LT,GT,EQ}</span></code> seems the way to go. Many types do not have a reasonable ordering.</p>
-<dl class="simple">
-<dt>value representation:</dt><dd><p>Nanboxing / nunboxing</p>
-</dd>
-</dl>
+</section>
+<section id="value-representation">
+<h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
+<p>Nanboxing / nunboxing</p>
+</section>
+<section id="terms">
+<h2>Terms<a class="headerlink" href="#terms" title="Permalink to this heading"></a></h2>
+<p>The name “term” comes from term rewriting, where a term is recursively constructed from constant symbols, variables, and function symbols. Technically there are also “lambda terms”, but in Stroscot aas in most programming languages we call them “lambda expressions”, and use “expression” to refer to all syntax that evaluates to a value.</p>
 </section>
 <section id="data-structures">
-<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this headline"></a></h2>
+<h2>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
 <p>Copy Python’s, they’ve been optimized and should be as efficient as anything I’ll write.</p>
+</section>
+<section id="list-flattening">
+<h2>List flattening<a class="headerlink" href="#list-flattening" title="Permalink to this heading"></a></h2>
+<p>Lists don’t automatically flatten, e.g. <code class="docutils literal notranslate"><span class="pre">[a,[b,c]]</span> <span class="pre">!=</span> <span class="pre">[a,b,c]</span></code>. Instead you can use a flatten function in the standard library, <code class="docutils literal notranslate"><span class="pre">flatten</span> <span class="pre">[a,[b,c]]</span> <span class="pre">=</span> <span class="pre">[a,b,c]</span></code>. MATLAB’s justification for flattening is that <code class="docutils literal notranslate"><span class="pre">[A</span> <span class="pre">B]</span></code> is the concatenated matrix with <code class="docutils literal notranslate"><span class="pre">A</span></code> left of <code class="docutils literal notranslate"><span class="pre">B</span></code> and <code class="docutils literal notranslate"><span class="pre">[A;B]</span></code> the concatenation with <code class="docutils literal notranslate"><span class="pre">A</span></code> above <code class="docutils literal notranslate"><span class="pre">B</span></code>. This seems hard to remember and infix operators <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">horcat</span> <span class="pre">B</span></code> and <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">vertcat</span> <span class="pre">B</span></code> are just as clear.</p>
+</section>
+<section id="list-homomorphisms">
+<h2>List homomorphisms<a class="headerlink" href="#list-homomorphisms" title="Permalink to this heading"></a></h2>
+<p>List concatenation is an associative binary operation, as such we can represent repeatedly applying an associative operation (a semigroup) as applying an operation to a (nonempty) list.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">combine</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foldl1</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">list</span><span class="w"></span>
+<span class="nf">sum</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"></span>
+<span class="nf">product</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"></span>
+
+<span class="nf">sum</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<span class="nf">product</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>If the empty list is a possibility we need a monoid, i.e. specifying an identity element for the operation</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">combine</span><span class="w"> </span><span class="n">monoid</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foldMap</span><span class="w"> </span><span class="n">monoid</span><span class="o">.</span><span class="n">op</span><span class="w"> </span><span class="n">monoid</span><span class="o">.</span><span class="n">identity</span><span class="w"> </span><span class="n">list</span><span class="w"></span>
+<span class="nf">sum</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">combine</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">),</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">product</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">combine</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="n">identity</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This all works because the set of lists/nonempty lists under concatenation is isomorphic to the free monoid / free semigroup.</p>
 </section>
 </section>
 

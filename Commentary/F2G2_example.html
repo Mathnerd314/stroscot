@@ -17,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -51,7 +52,9 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">F2 G2</a><ul>
@@ -75,6 +78,8 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -107,7 +112,7 @@
            <div itemprop="articleBody">
              
   <section id="f2-g2">
-<h1>F2 G2<a class="headerlink" href="#f2-g2" title="Permalink to this headline"></a></h1>
+<h1>F2 G2<a class="headerlink" href="#f2-g2" title="Permalink to this heading"></a></h1>
 <p>For an example of optimal reduction, take the term <code class="docutils literal notranslate"><span class="pre">F2</span> <span class="pre">G2</span> <span class="pre">=</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">(\w.</span> <span class="pre">w)</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(\y.</span> <span class="pre">(\x.</span> <span class="pre">x</span> <span class="pre">x)</span> <span class="pre">(y</span> <span class="pre">z))</span></code> from page 17 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define a recursive type; the simplest is <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span> (which is sufficient for the untyped call-by-name lambda calculus) but here we use the mutually recursive types <span class="math notranslate nohighlight">\(S,T,f\)</span> parametrized over <span class="math notranslate nohighlight">\(a\)</span> to obtain a finer scheme and make the derivation tree less ambiguous.</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}S &amp;= \, \left(!T \to !T \right) \to f\\T &amp;= \, !T \to f\\f &amp;= \, !S \to !S \to a\end{aligned}\end{align} \]</div>
@@ -669,7 +674,7 @@ ret_g2 [label=&quot;I&quot;]
 
 }</p></object></div>
 <section id="readback">
-<h2>Readback<a class="headerlink" href="#readback" title="Permalink to this headline"></a></h2>
+<h2>Readback<a class="headerlink" href="#readback" title="Permalink to this heading"></a></h2>
 <p>The real hard part is doing “readback”, i.e. proving that all of these transformations are either no-ops on the original lambda term or valid beta reductions. Since there is so much scope popping and pushing and varianting it is definitely a little complex. Also I decided to keep the levels from the original Lambdascope implementation for correctness verification purposes, so there is twice the work. But if you read Ian Mackie’s paper on efficient interaction nets implementation you will see that this “readback” algorithm also provides a way to directly execute the proof net / graph with call-by-value semantics at each reduction step. So it also has a close connection with how to compile the graph to machine code. Since our scopes are unique and the “stack” stores only one director index for a scope at a time, the scopes can correspond directly to machine registers or memory locations.</p>
 <p>Scopes are nested, forming a simple tree hierarchy. When an opening head delimiter of scope A encounters a closing full or empty delimiter of scope B, then A is reparented under B. In particular the one closing delimiter of scope B vanishes, and duplicates of it are propagated to the outside of all other delimiters of A.</p>
 <p>It should be possible to avoid this <code class="docutils literal notranslate"><span class="pre">O(n)</span></code> operation by keeping a depth counter in the scope and each delimiter, with the total number of scopes that the delimiter enters/exit being the sum of the scope’s depth and the delimiter’s depth. Then the interaction would decrement the A scope delimiter’s local depth counter by 1, increment A’s scope-wide depth counter by 1, and vanish B’s delimiter as before. But this hasn’t been implemented yet.</p>
@@ -2322,7 +2327,7 @@ i_ret1 [label=&quot;I&quot;]
 }</p></object></div>
 </section>
 <section id="junk">
-<h2>Junk<a class="headerlink" href="#junk" title="Permalink to this headline"></a></h2>
+<h2>Junk<a class="headerlink" href="#junk" title="Permalink to this heading"></a></h2>
 <p>Our 4th beta reduction</p>
 <p>Duplicate more</p>
 <p>Add the last duplication node and reduce, for consistency with figure 2.17 (7)</p>
