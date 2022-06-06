@@ -23,7 +23,7 @@ Stroscot is case-sensitive.
 Layout
 ======
 
-The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. Generally, this amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't match with explicit braces.
+The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't match with explicit braces.
 
 ::
 
@@ -36,13 +36,12 @@ The most obvious is the initial declaration list, but other constructs introduce
     }
     { a {b; c}; d}
 
-Generally, behavior of a new line depends on its indentation level, relative to the indentation of the previous line:
+Behavior of a new line depends on its indentation level, relative to the indentation of the previous line. Indentation level is taken to be the sequence of whitespace characters related by "is prefix of", so "space, tab, space" is different from (incomparable to) "tab, space, space" but is less than "space, tab, space, em space" and more than "space, tab".
 
-* if it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
-* if it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
-* if there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`offside rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
-
-Indentation level is taken to be the sequence of whitespace characters, so "space, tab, space" is different from (incomparable to) "tab, space, space" but is less than "space, tab, space, em space" and more than "space, tab".
+* If it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
+* If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
+* If there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`offside rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
+* Incomparable levels are an error.
 
 Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.
 
@@ -186,10 +185,37 @@ Patterns all compile to guard conditions on ``$args``. They also check that the 
 
 ``_`` occuring by itself denotes an anonymous variable which matches any value without actually binding a name.
 
-Head = function
----------------
+Destructuring and function bindings
+------------------------------------
 
-Identifiers ``f`` in head positions ``f a b c`` are taken as literal function symbols, and in other positions are taken to be variables. This is Pure's "head = function rule". Single identifiers are functions of no arguments, e.g. ``x`` in ``x = 2``.
+Generally identifiers ``f`` in head positions of a LHS ``f a b c`` are taken as literal function symbols. Identifiers in head position in a sub-term are taken to be constructors, and destructure the function argument. Identifiers in non-head positions are taken to be variables. This is Pure's "head = function rule".
+
+::
+
+  x = 2 # x is function of no arguments
+  x a = a # x is function of one argument, binds variable "a"
+  x (foo a b) # x is function of one argument, destructures term with head foo and binds a/b
+
+Certain symbols such as tuple heads as head of the LHS are assumed not to be function definitions. Instead matching on them destructures the right hand side. For example you can define functions using destructuring:
+
+::
+
+  (x < y, x > y) = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
+
+This translates to:
+
+::
+
+  x > y = case (z x y) of { (x < y, x > y) -> (x > y) }
+  -- equivalent to
+  x > y = case (z x y) of { (a,b) -> a }
+
+  x < y = case (z x y) of { (x < y, x > y) -> (x < y) }
+
+  z x y = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
+  -- z a fresh symbol
+
+To force a function definition you can use an as pattern, ``_@(,)
 
 To force interpretation as a variable you can use an anonymous as pattern, ``(f@_) a b c``. Then ``f`` is a variable and will match any symbol, rather just ``f``. Example converting a function application to a list::
 
@@ -210,11 +236,39 @@ You can also declare ``foo`` to be a symbol::
 
 However this is a module definition and means the symbol cannot be used as a variable in the module anymore.
 
+
+Symbols
+-------
+
+ To say that it is actually a symbol a special keyword ``symbol`` is used:
+
+::
+
+  symbol foo
+
+  foo x = 1
+
+  bar 2 = 2
+  # equivalent to _ 2 = 2 because bar is interpreted as a variable
+
+Furthermore you can define a function symbol with an arity. This resolves applying the function symbol to arguments for which no clauses are defined to the exception ``undefined``, which often has better semantics than an unevaluated normal form.
+
+::
+
+  function symbol foo arity 2
+
+  foo 1 2 = "fine"
+
+  foo 1 2 # "fine"
+  foo 3 4 # undefined
+  foo 1 # not affected - normal form
+
+This just creates a low priority definition ``foo _ _ = undefined``.
+
 Non-linear patterns
 -------------------
 
 Non-left-linear patterns such as ``foo a a`` are allowed, this is interpreted as ``foo a b | a == b`` - rename variables and check for equality using ``==``. See :ref:`Equality and left-linearity` for a discussion.
-
 
 Pattern synonyms
 ----------------
@@ -229,7 +283,6 @@ Pattern definitions are unidirectional in that they define matchers for syntax u
 ::
 
   Polar r t = Point (r * cos t) (r * sin t)
-
 
 Variable bindings
 -----------------
@@ -256,7 +309,6 @@ which means the same thing as
 
 i.e. ``a = 1``.
 
-
 Inline definitions
 ------------------
 
@@ -270,56 +322,6 @@ Definitions can be made inline; they are lifted to the closest scope that allows
    dx=x1-x0
    dy=y1-y0
    range = sqrt(dx*dx + dy*dy)
-
-Destructuring
--------------
-
-Certain values such as tuples are assumed not to be functions. Instead matching on them destructures the right hand hand. For example you can define functions using destructuring:
-
-::
-
-  (x < y, x > y) = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
-
-This translates to:
-
-::
-
-  x > y = case (z x y) of { (x < y, x > y) -> (x > y) }
-  -- equivalent to
-  x > y = case (z x y) of { (a,b) -> a }
-
-  x < y = case (z x y) of { (x < y, x > y) -> (x < y) }
-
-  z x y = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
-  -- z a fresh symbol
-
-Symbols
--------
-
-The default interpretation of an identifier not in a head position on the LHS is as a variable. To say that it is actually a symbol a special keyword ``symbol`` is used:
-
-::
-
-  symbol foo
-
-  foo x = 1
-
-  bar 2 = 2
-  # equivalent to _ 2 = 2 because bar is interpreted as a variable
-
-Furthermore you can define a function symbol with an arity. This resolves applying the function symbol to arguments for which no clauses are defined to the exception ``undefined``, which often has better semantics than an unevaluated normal form.
-
-::
-
-  function symbol foo arity 2
-
-  foo 1 2 = "fine"
-
-  foo 1 2 # "fine"
-  foo 3 4 # undefined
-  foo 1 # not affected - normal form
-
-This just creates a low priority definition ``foo _ _ = undefined``.
 
 Keyword arguments
 -----------------

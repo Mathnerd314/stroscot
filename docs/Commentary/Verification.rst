@@ -224,8 +224,12 @@ The conversion to CNF uses properties of classical reasoning. In the intuitionis
 
 There are definitions of resolution for fragments of linear logic, and linear logic theorem provers.
 
-CFG
-===
+Thread safety
+=============
 
-So, executing this model some amount of loops, we get a tree of executions. Going deeper in the tree extends the execution, and the tree branching is due to the nondeterministic choices at the beginning of each iteration of the loop. We can turn this tree into a graph by grouping nodes using an `equivalence relation <https://en.wikipedia.org/wiki/Equivalence_relation>`__ that determines if the behavior is the same for two executions. This forms the control flow graph that we need for verification. In particular we want to verify that observable behavior of the program is not affected by the choices of the scheduler, as defined by I/O. For example, equivalent executions must write the same files and the same contents to the files, but not necessarily in the same order. But really it is up to the user to decide, maybe writing in a different order is bad.
+Thread safety means avoiding race conditions and deadlocks. The basic model is to repeatedly execute some amount of steps of each thread in a loop. Executing this model some amount of loops, we get a tree of executions. Going deeper in the tree extends the execution, and the tree branching is due to the nondeterministic choices at the beginning of each iteration of the loop. We can turn this tree into a graph by grouping nodes using an `equivalence relation <https://en.wikipedia.org/wiki/Equivalence_relation>`__ that determines if the behavior is the same for two executions. This forms the control flow graph that we need for verification. In particular we want to verify a lack of race conditions, i.e. that observable behavior of the program is not affected by the choices of the scheduler.
+
+Observable behavior is defined by an I/O model that interprets the actions. For example, equivalent executions must write the same files and the same contents to the files, but not necessarily in the same order. But really it is up to the user to decide, maybe writing files in a different order is bad.
+
+Deadlock is when there is no runnable thread and the program has not exited.
 

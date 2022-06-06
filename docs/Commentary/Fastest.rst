@@ -81,7 +81,9 @@ Thorin impleemnts lambda mangling which makes basic blocks as fast as C.
 Laziness
 ========
 
-The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded. So rather than GHC's demand analysis which proves usage and falls back to lazy, we want a laziness analysis which identifies nontermination and opportunities for discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).
+The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded, and otherwise hurts. And intended laziness is actually quite rare.
+
+So in addition to GHC's demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).
 
 http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/
 
@@ -96,3 +98,9 @@ GHC also does strictness analysis and optimistic evaluation.
 
 a program is a dependency graph which is evaluated through a series of local reductions
 the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says "return the result."
+
+
+Avoiding slow operations
+========================
+
+Another thing that slows down a language are certain kinds of operations. E.g. dynamic lookups, weak typing, variant types. See examples of what makes PHP slow in this `video <https://www.youtube.com/watch?v=p5S1K60mhQU>`__. In some cases you can replace these operations with faster ones (specialization). JIT has more information and can specialize based on the observed values. Profile-guided ahead of time optimization can do the same thing but with the JIT the profiling is built in and you don't have to do a separate build.

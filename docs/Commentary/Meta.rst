@@ -77,7 +77,7 @@ Goals
 The ultimate
 ------------
 
-Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. The question of which gun is strongest is quite subjective and a matter of debate. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
+Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. The question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
 
 Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and mainly affect the design of the compiler. Syntax and features all have global optima.
 
@@ -86,6 +86,8 @@ The main reason is that a lot of programming features overlap. By picking the be
 Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. For example C++ and Java have added lambdas. This is due to a shallow intellectual base. No idea is original, and lambdas are quite old. With sufficient research these old ideas can be uncovered and incorporated.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms for the compiler then people will refer to Stroscot just for the algorithms. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
+
+Another focus is learnability, particularly for novices. It's often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used.
 
 Performance
 -----------
@@ -99,21 +101,13 @@ In the near term, since there is no compiler or interpreter fully implemented, p
 World domination
 ----------------
 
-Long term, Stroscot aims to replace all the programming languages in use today. Initially this involves improving FFI support and interoperability with C and C++. In particular we need to be able to parse headers and use data from them with Stroscot. Next we want to fully compile other languages, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). Once the implementation is stable enough for production use, focus will shift to developing automated conversion tools, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK. No language I know of has developed decent two-way linkage - you can export specific C-style constructs back to C, but C can't use any of the more advanced features.
+Long term, Stroscot aims to replace all the programming languages in use today. Mainly this involves improving FFI support and interoperability with C and C++. In particular we need to be able to parse headers and use data from them with Stroscot. Since headers include code we need to be able to fully compile C/C++, so that Stroscot is the sole compiler and all of its global optimizations can be used (`zig cc <https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html>`__ is an example of how this works). No language I know of has developed decent two-way linkage - you can export specific C-style constructs back to C, but C can't use any of the more advanced features.
+
+Once the C/C++ implementation is stable enough for production use, focus will shift to developing automated conversion tools for other languages like Python and Java, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK.
 
 Standardization doesn't seem necessary, a popular language builds its own standard. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new best language every 3-5 years
 
 .. _inspiring-projects:
-
-Inspiring projects
-==================
-
--  `Lever <https://github.com/cheery/lever/>`__
--  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
--  `Pinafore <https://pinafore.info/>`__
--  `Macro Lambda Calculus <http://github.com/codedot/lambda>`__
--  `Wat <https://github.com/manuel/wat-js>`__
--  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
 
 Tagline
 =======
@@ -181,29 +175,119 @@ Forbidden words
 ---------------
 
 A fair number of words in programming seem to be meaningless gibberish. So don't use them:
+
 * structured
 * paradigm
 * impure
 * object oriented
 * static
 
+Open source
+-----------
 
-It's often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used.
+The license is still undecided, so set to WTFPL.
 
-Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly.
+Real "open source" goes beyond a LICENSE file:
 
-Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.
+* open development process
+* appreciate comments or ideas from the community, benefit from other people's expertise without flatly contradicting them
+* clearly documented process for contributing in CONTRIBUTING.md file, not "Old Boy's network"
+* pull requests by community members should be merged or closed within a year
+* records of decision making, decisions should be explained with reasoning
+* development discussions should stay open for longer than 10 days
+* mailing lists, forum, chat
+* deleting posts, blocking, and locking should be reserved for spam, not civil criticism
+* communication style should be civil, friendly, and helpful, and not aggressive or controlling.
+* leadership should not be a corrupt cabal that gives special treatment to itself. They need to think of themselves as stewards and not owners. The difficulty goes up as more people are affected by decisions and more contributions received from people.
+* possible to fork or patch without being called a "hostile attack"
 
+Other programming languages
+===========================
 
-convenient to use
-good first language to teach a new programmer
-intuitive
+There are many existing programming languages to learn from. All of them have had effort put into their design so their features should be considered. But the disadvantages to a feature are not obvious and generally can only be found by examining complexities in large software projects in the language. The trick is to isolate the use case and cut the Gordian knot in a surgical manner.
 
-Suppose we are multiplying three matrices A, B, C. Since matrix multiplication is associative, (AB)C = A(BC). But one order may be much better, depending on the sizes of A, B, C. Say A,B,C are m by n, n by p, p by q respectively. Then computing (AB)C requires mp(n + q) multiplications, and computing A(BC) requires (m + p)nq multiplications. So if m = p = kn = kq, then (AB)C costs 2k^3 n^3, while A(BC) costs 2 k n^3, which if k is large means A(BC) is going to be much faster than multiplying (AB)C. The matrix chain multiplication algorithm by Hu Shing finds the most efficient parenthesization in O(n log n) time, given the sizes of the matrices. In practice the sizes must be observed through profiling. But this data must be collected at the level of the matrix chain  multiplication, as re-association optimisations are hard to recognise when the multiplication is expanded into loops.
+Inspiring projects:
+-  `Lever <https://github.com/cheery/lever/>`__
+-  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
+-  `Pinafore <https://pinafore.info/>`__
+-  `Macro Lambda Calculus <http://github.com/codedot/lambda>`__
+-  `Wat <https://github.com/manuel/wat-js>`__
+-  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
 
-  optimizations for:
-    avoiding intermediate structures and dead or redundantly duplicated computation
-    storing arrays on the heap in the most efficient of a few straightforward ways
-    boiling away higher-order functions into tedious boilerplate
+Java
+* Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top
+* Compromises between performance and expressiveness such as covariant arrays
+* The OO mantra has led to design patterns, which are a reference point for features support with explicit syntax. The class-based syntax for the patterns is not worth emulating.
+* try-finally and checked exceptions have wasted the time of many programmers.
+* Keyword soup for declarations, such as "public static void main".
+* Lack of operators such as ``+`` for ``BigInteger``
+* Every object has a 4-byte header and identity using ``==``. No value types besides primitives.
+* Requirement that the class name must match the directory name.  When moving functionality around this implies a lot of changes inside source files. Led to IDEs with extensive support for refactoring.
+* Static methods. Scoped to a class, but not related to objects. Can be very confusing.
+* JIT is probably best in the world. Startup is slow but throughput matches C performance in many cases.
+* Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, something like 15% wall clock overhead. :cite:`caiDistillingRealCost2022`
 
-Futhark does not support recursion. trees and irregular arrays have to be encoded as arrays encoded using various techniques. Terribly irrelevant!
+Python
+* Most popular besides C/C++, said to be "easy to learn for beginners", "simple and elegant syntax" "similar to English"
+* brevity, readability, developer-friendliness make it 5-10x more productive than Java
+* "Batteries included" standard library, such as lists and dictionaries
+* Mixed reference counting / tracing GC memory management
+* Significant indentation - still a point of contention, e.g. whether it makes copy pasting code harder
+* C++ interpreter CPython, low performance. Projects such as PyPy exist but haven't been widely adopted.
+
+C
+* old and widespread language. Language of most OS's, hence runs just about everywhere (portable).
+* statically compiled, compilers are very efficient.
+* unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these. Also there is the Boehm GC, used by many people who don't want to deal with memory management.
+* header files slow down compilation as they have to be read many times during compilation
+
+Scala
+* Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
+
+C++
+* many features, which interact in complex ways making C++ take a long time to learn
+* fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)
+* templates, efficient at runtime but slow at compile time
+* memory unsafe like C, although smart pointers make this a little better.
+
+D
+* C/C++ style but different. never really took off.
+* many features that have been incorporated in C++, others that haven't been
+
+Ruby
+* crazy scripting language. weird syntax.
+* expression by itself is return value, causes mistakes.
+
+Stroscot aims to be a global maximum. If the language can't do X, then people will choose to use another language that can do X. Macros make it easy to rapidly add new syntax so often "do X" is as simple as writing another library. Underneath the syntax there are multiple ways to implement X - Stroscot has to pick primitives that combine well together. There’s a combinatorial explosion in feature interactions.
+
+Another advantage of being a maximum is stability. When a programming language changes significantly, it loses its identity - for example, Python 2 and Python 3 are effectively separate programming languages, as are Perl 5 and Perl 6 (Raku). A new language needs new tools and new libraries, so minimizing the number of new languages (breaking changes) is best. Write the compiler once and then go do something else. Stroscot is based on a survey of the academic literature and uses ideas and techniques that are decades old and have been recognized to be effective for their purpose. It is actually really hard to come up with better ideas than these papers.
+
+A low-priority goal is simplicity at the syntactic and semantic level. In a lot of cases this is overridden by other goals, e.g. with learnability using ``=`` for both assignment and equality comparison complicates the syntax quite a bit. But avoiding weird syntax features such as Rust's turbofish ``::<>`` seems reasonable. And if the programming language has fewer concepts, there’s less to learn, and novices will become proficient faster. Particularly, redundant features should be avoided - although macros allow defining redundant syntax, consistency is better.
+
+erase distinction between commands and expressions
+erase distinction between compile time and execution time
+avoid implicit conversion
+
+Language design is hard because the space of possible programming languages is infinite, and so compromises have to be made. It’s hard to provide hard numbers to quantify what makes one design better than another. Some of the things that can be quantified to some degree are the complexity of the implementation of a language and also the way that a particular language implementation performs.
+
+My PhD thesis involved the implementation of a JIT compiler for JavaScript ES5. As such, I got to become intimately familiar with the semantics of the language and everything that has to go on behind the scenes to make JavaScript code run fast. At times, that was a frustrating experience. I’ve become convinced that a lot of the complexity and the hidden behaviors in JS and in many other languages are essentially bad for everyone.
+
+Unnecessary complexity in a language is bad for those learning the language, because it makes the language less intuitive and harder to learn. It’s bad for the programmers working with the language everyday, because it increases their cognitive load and makes it harder to communicate about code. It’s bad for language implementers and tool maintainers, because it makes their job harder, but at the end of the day, it’s also bad for end users, because it leads to software with more bugs and poorer performance.
+
+many object-oriented languages have this idea, borrowed from Smalltalk, that everything should be an object, including booleans and integer values. At the same time, languages implementation for these languages have to do a lot of work behind the scenes to try and represent integers efficiently (as machine integers) while presenting an interface to the user that resembles that of an object. However, the abstraction presented to the user for an integer object is typically not really the same as that of a normal OOP object, it’s a leaky abstraction, because being able to redefine integer values makes no sense, because integer values have to be singletons, and because being able to store properties/attributes on integers is both dumb and terrible for performance and so typically isn’t allowed.
+
+Ultimately, integers are not objects in the object oriented sense. They’re a distinct type of atomic value with a special meaning, and that’s okay. The mistaken idea that “everything should be an object” doesn’t actually simplify anything in practice. We’re lying to ourselves, and in doing so, we actually makes the life of both language implementers and programmers more complicated.
+Actionable Advice
+
+This blog post has turned into more of a rant than I expected it to be. It’s easy to critique the status quo, but I’ll also try to conclude with some actionable advice. My first piece of advice for aspiring language designers is that you should start small. Your language is a user interface, and an API which people use to interface with machines. The smaller the API surface, the less you risk introducing accidental complexity and subtle design mistakes.
+
+My second piece of advice is that if you can, you should try to keep your language small. Limiting yourself to a smaller feature set likely means you will want to choose features that don’t overlap and that provide the most expressiveness, the most value to programmers. If you do want to grow your language, do it slowly. Take some time to write code in your language and work through the potential implications of the design changes that you are making.
+
+It’s easy to add new features later on, but if you add new features and people begin using them, it’s going to be hard or even impossible to take these features back, so choose wisely. Remember that you don’t have to please everyone and say yes to every feature request. No language or tool can possibly satisfy every use case, and in my opinion, trying to do so is a mistake.
+
+Lastly, remember that language design is an art. It’s a delicate balance of many different constraints, just like user interface design. Brainfuck is a language that is very small and has very few concepts, but nobody would call it expressive or elegant. Lisp is regarded by many as one of the most beautiful and elegant languages in existence, but my PhD advisor, a Scheme fanatic, had the habit of writing code with single-letter variable names and very few comments. An elegant language doesn’t automatically make for elegant code, but you can encourage good coding practices if you lead by example.
+
+learnability
+tool support
+performance
+

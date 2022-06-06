@@ -55,5 +55,72 @@ This falls out naturally from doing the analysis on the CPS-transformed version 
   * hoisting invariants, partial/total redundancy elimination
   * parallelization - multi-threaded or vectorized code
 
+Return type overloading
+=======================
 
+In Haskell, typeclasses can cause ambiguity errors. For example ``show (read "1")`` gives "Ambiguous type variable ‘a0’ arising from ‘show’ and ‘read’ prevents the constraint ‘(Show a0, Read a0)’ from being solved." The ambiguity can be further attributed to ``read``. The function ``show :: Show a => a -> String`` takes a value of type ``a``, so dynamic dispatch can deduce the type ``a`` and there is no ambiguity. In contrast ``read "1"`` produces a type out of nowhere and could be of type ``Integer`` or ``Double``. Since ``read`` has a constraint ``Read a`` and does not take a value of type ``a`` as argument it is said to be return type overloaded (RTOed).
+
+RTO, specifically overloaded constants such as ``zero :: Num a => a``, was mentioned in the original typeclasses paper as a desired feature. Haskell has several ways to resolve an RTOed expression:
+
+* specify an inline signature ``read x :: Float``
+* use type application ``read @Float``
+* infer the type by applying a function expression or case statement of fixed argument type, ``let f = id :: Int -> Int in show (f $ read "1")`` or ``show (case read "1" of 1 -> 1)``
+* a default declaration, for the Num, Show, Eq, Ord, Foldable and Traversable classes (all but Num require -XExtendedDefaultRules)
+
+Rust traits are similar, the turbofish specifies the type explicitly, like ``iterator.collect::<Vec<i32>>``, and the type inference for defaulting is local rather than global. Ada similarly can disambiguate by return type if the return type is known.
+
+Defaulting is considered by `Haskell Prime Proposal 4 <https://web.archive.org/web/20200107071106/https://prime.haskell.org/wiki/Defaulting>`__ to be a wart of the language. Its specific usage is numeric types for interactive calculator style things, where it can be replaced with using computational reals by default for literals. ExtendedDefaultRules is simply a hack for Curry-style type system oddities in GHCi - since the involved classes have no RTOed functions, it is unnecessary in an untyped setting. For instance, ``show []`` is unambiguous, despite having a polymorphic Haskell type of ``forall a. [a]`` and no ``Show`` instance because GHC does not allow polymorphic type class instances. GHCi defaulting to ``[Void]`` instead of ``[()]`` would make this clear, but ``Void`` was only recently added to the base library so GHCi uses ``()``.
+
+Inline signatures and type application can be replaced in a dynamic language by passing the type explicitly as a parameter, ``read Double`` or ``read Float``, using normal overloading. Sometimes the type itself can be the function, ``Vector i32 iterator`` or ``Vector iterator`` instead of ``collect (Vec i32) iterator``. This actually standardizes and simplifies the observed syntax.
+
+Function expression and case inference can be mimicked similar to `this C++ approach <https://artificial-mind.net/blog/2020/10/10/return-type-overloading>`__. We create a "blob" type that represents an RTO value of unknown type. Then we overload operations on the blob to return blobs, delaying resolution until an applied function or case makes it clear what a reasonable value would be. Furthermore the blob can store its type in a mutable reference and use ``unsafePerformIO`` to ensure that it resolves to the same type if it is used multiple times. Or it can be safe and evaluate at multiple types. This requires overloading every function that uses the blob, so can be some boilerplate.
+
+For nullary values like ``top`` of a lattice or a ``default`` value, you don't need the blob machinery, you can just use a symbol. Then implement symbol conversion ``convert top Float = float Infinity`` and Julia's promotion machinery will take care of the rest for numeric operations, or add manual overloading and conversion otherwise. You could take this approach with ``read`` as well, so that ``read "x"`` is a term of type ``Read`` and you overload the function , but it might be more work than the blob approach.
+
+List of class methods in GHC's libraries which are RTOed:
+
+::
+
+toEnum :: Enum a => Int -> a
+fromInteger :: Num a => Integer -> a
+fromRational :: Fractional a => Rational -> a
+encodeFloat :: RealFloat a => Integer -> Int -> a
+minBound :: Bounded a => a
+maxBound :: Bounded a => a
+mempty :: Monoid a => a
+fromExportableBuffer   :: Exportable c => ExportableCharacterSequence -> c
+outputCap :: OutputCap f => ([Int] -> String) -> [Int] -> f
+indexByteArray# :: Prim a => ByteArray# -> Int# -> a
+def :: Default a => a
+
+unexpected :: (Parsing m) => String -> m a
+eof :: (Parsing m) => m ()
+getLine :: Interactive m => m String
+getCurrentYear :: Interactive m => m Integer
+pure :: Applicative f => a -> f a
+fail :: MonadFail m => String -> m a
+throwM :: (MonadThrow m, Exception e) => e -> m a
+ask :: MonadReader r m => m r
+parsec :: (Parsec a, CabalParsing m) => m a
+qNewName :: Quasi m => String -> m Name
+
+get :: Binary t => Get t
+readsPrec :: (Read a) => Int -> ReadS a
+buildInfo :: HasBuildInfo a => Lens' a BuildInfo
+garbitrary :: GArbitrary f => Gen (f ())
+iodataMode :: KnownIODataMode mode => IODataMode mode
+hGetIODataContents :: KnownIODataMode mode => System.IO.Handle -> IO mode
+
+unsafeArray :: (IArray a e, Ix i) => (i,i) -> [(Int, e)] -> a i e
+unsafeAccumArray :: (IArray a e, Ix i) => (e -> e' -> e) -> e -> (i,i) -> [(Int, e')] -> a i e
+newArray:: (MArray a e m , Ix i) => (i,i) -> e -> m (a i e)
+basicUnsafeNew   :: PrimMonad m, MVector v a => Int -> m (v (PrimState m) a)
+
+uniqueFieldAla :: (c b, Newtype a b, FieldGrammar c g) => FieldName -> (a -> b) -> ALens' s a -> g s a
+tabulate :: Representable i f => (i -> a) -> f a
+unmodel :: TestData a => Model a -> a -- Model is a type synonym family of TestData
+
+
+mimicking RTO with simple overloading
+implement a DSL source transformation that infers the types using HM and adds explicit types
 

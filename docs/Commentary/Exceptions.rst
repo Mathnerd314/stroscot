@@ -1,52 +1,10 @@
 Exceptions
 ##########
 
-Patterns
-========
-
-When calling a function that throws exceptions a programmer must decide: handle or propagate.
-
-Handle
-------
-
-Log: Set a flag or write to a log file and use another handling strategy
-
-Recovery: Execute an alternate code path that does not produce an exception or produces an exception unrelated to the original. Generally you want to recover as close to the exception's source as possible, but sometimes there is not enough context and it has to propagate a few levels before recovering.
-
-Presubstitution: don't call function again (abandon attempt), return a default value. Often the function's range is expanded to accommodate this. For example ``1 / 0`` returns ``Infinity``.  Simplest form of recovery.
-
-Resume: The exception value contains a continuation. The handler performs some work and then calls the continuation. A more complex version of recovery.
-
-Retry: execute a recovery block and call the block again with modified arguments. The block is treated as a transaction, meaning that the application state is not modified by the failed block. Most complex version of recovery.
-
-Containment: All exceptions are caught at a level boundary (pokemon exception handling). It's not recovery - it doesn't fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) does logging, filtering, and display. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation. Another issue is that exceptions may be handled incorrectly in the middle of the call stack. Still, a common and useful pattern.
-
-Terminate (abort): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn't allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.
-
-Backtrack: Try another path of execution at a previously encountered nondeterministic choice
-
-Trap: Suspend process and signal exception. Wait for another process (e.g. interactive debugger) to fix
-
-Propagate
----------
-
-Unwind: Behave as if the block immediately returned the exception
-
-Serialize: Unwinding but across a process or thread boundary. Catch action, convert to value, pass value via IPC, convert back to exception and rethrow.
-
-Cleanup: Perform some actions such as freeing resources or unlocking mutexes, then continue unwinding
-
-Wrap: As cleanup, but change the exception returned. Often this loses fidelity by replacing a very specific exception with a more generic one, making it harder to perform recovery.
-
-Frequency
----------
-
-The most common behavior is unwinding, followed by containment or termination. Recovery also occurs for some interfaces that use exceptions for common cases.
-
 Exception menagerie
 ===================
 
-Let us try to list all the types of exceptions, or everything that can use an exception-like semantic. The number of exceptions is unquestionably large.
+The first question is what an exception is. Let us try to list all the types of exceptions, or everything that can use an exception-like semantic. The number of exceptions is unquestionably large.
 
 Non-example: Process commands
 -----------------------------
@@ -72,6 +30,8 @@ Examples:
 * ``if "x" then ... else ...`` returns ``InvalidCondition``
 
 * A case statement returns ``FailedMatch`` if the argument doesn't match any of the patterns
+
+* C++ allows ``throw x`` where ``x`` can be any value. Most other languages limit ``x`` to be of a type ``Exception``.
 
 System exception
 ~~~~~~~~~~~~~~~~
@@ -129,7 +89,7 @@ Resource exhaustion
 
 This covers allocation failure due to running out of memory (OOM), stack overflow, out of file descriptors, etc. Resource exhaustion exceptions appear in the typical way, as an expression reducing to an exception rather than its expected value.
 
-OOMs are unpredictable at runtime because threads compete for memory. Any allocation attempt might fail, because the developer doesn't know the total resources available on the target system, and because other threads and other processes are simultaneously competing for that same unknown pool. But OOM locations are predictable to the compiler because it knows exactly where allocations occur and can insert the exception throw.
+OOMs are unpredictable at runtime because threads compete for memory. Any allocation attempt might fail, because the developer doesn't know the total resources available on the target system, and because other threads and other processes are simultaneously competing for that same unknown pool. But OOM locations are predictable to the compiler because it knows exactly where allocations occur and can throw an exception if the allocation fails. Hence OOM is not "asynchronous" - it originates from the allocation statement.
 
 But the programmer cannot generally predict whether evaluating an expression will allocate and hence potentially throw an OOM, because of implicit allocations. Here are some examples:
 * Implicit boxing, causing value types to be instantiated on the heap.
@@ -140,7 +100,7 @@ But the programmer cannot generally predict whether evaluating an expression wil
 
 But programming OOM-free is consistent, in the sense that if the compiler is able to eliminate all allocations and hence eliminate the possibility of OOM, then these will most likely be consistently eliminated on every compile. So asserting that a function or block can't OOM is possible. .NET had Constrained Execution Regions which implemented this, with various hacks such JITing the region at load time rather than when the region was first executed. So there's precedent.
 
-So then there are two ways to handle OOM: let it crash, or try to recover. Recovering from OOM is hard, since you can't allocate more memory. It is allowed to try to allocate memory, but the handler should expect this to fail. The JVM apparently has weird bugs when you catch OOM, like 2 + 3 = 7. But you can restore invariants, e.g. release locks.
+So then there are two ways to handle OOM: let it crash, or try to recover. Recovering from OOM is hard, since you can't allocate more memory. It is allowed to try to allocate memory, and this can succeed, e.g. if another thread freed memory since the OOM was thrown, but the handler should still be designed to expect this to fail. The JVM apparently has weird bugs when you catch OOM, like 2 + 3 = 7, so crashing is the only real option there. But you can restore invariants, e.g. release locks.
 
 Stack overflow is more tractable than OOM, in the sense that there is no asynchronous competition for the resource, hence a static analysis can show that there is sufficient stack. It is also easy to handle stack overflow by switching to an alternate stack. It is also fairly predictable to determine whether an expression uses the C stack: it must call a C function.
 
@@ -167,7 +127,7 @@ Consider a parallel map, e.g. something like ``parallel-map arr $ \(i,v) -> f i 
 
 So, since all the other threads will be killed anyway after this first exception, the exceptions these other threads may or may not have encountered can be ignored, and we can just report the first exception to the caller. But this discards information.
 
-Instead, the ``ThreadKilled`` exceptions can be reported along with the first exception and any other exceptions that manage to make it through. This is important enough that Joe Duffy `added <http://joeduffyblog.com/2009/06/23/concurrency-and-exceptions/>`__ an "AggregateException" and a Python PEP added `Exception Groups <https://www.python.org/dev/peps/pep-0654>`__. It does require a new mechanism ``try-except*``, but it provides more control over exception handling in concurrent systems.
+Instead, the ``ThreadKilled`` exceptions can be reported along with the first exception and any other exceptions that manage to make it through. This is important enough that Joe Duffy `added <http://joeduffyblog.com/2009/06/23/concurrency-and-exceptions/>`__ an "AggregateException" and a Python PEP added `Exception Groups <https://www.python.org/dev/peps/pep-0654>`__. It does require a new catch mechanism ``try-except*``, but it provides more control over exception handling in concurrent systems.
 
 Of course true recovery still requires handling all exceptions inside the thread, before they are reported to the controller.
 
@@ -241,7 +201,50 @@ Some languages try to create separate categories such as unrecoverable failures,
 
 In general, splitting exceptions into hard categories seems to be very subjective and doomed to failure because there are always special cases to the special cases - what is "rare" to one person might be another's bread and butter. There's a very clear drawback of a hard split for exceptions - it may be unclear to programmers which side to use.
 
-The sync/async split seems fine because async is distinguished by originating outside the thread, and this is a clear definition. But even here, some people say OOM is async, so it is only a loose split.
+The sync/async split seems fine because async is distinguished by originating outside the thread, and this is a clear definition.
+
+Patterns
+========
+
+When a function call throws an exception a programmer must decide: handle or propagate.
+
+Handle
+------
+
+Log: Set a flag or write to a log file and use another handling strategy
+
+Recover: Execute an alternate code path that does not produce an exception or produces an exception unrelated to the original. Generally you want to recover as close to the exception's source as possible, but sometimes there is not enough context and it has to propagate a few levels before recovering.
+
+Presubstitution: don't call function again (abandon attempt), return a default value. Often the function's range is expanded to accommodate this. For example ``1 / 0`` returns ``Infinity``.  Simplest form of recovery.
+
+Resume: The exception value contains a continuation. The handler performs some work and then calls the continuation. A more complex version of recovery.
+
+Retry: execute a recovery block and call the block again with modified arguments. The block is treated as a transaction, meaning that the application state is not modified by the failed block. Most complex version of recovery.
+
+Containment: All exceptions are caught at a level boundary (pokemon exception handling). It's not recovery - it doesn't fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) does logging, filtering, and display. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation. Another issue is that exceptions may be handled incorrectly in the middle of the call stack. Still, a common and useful pattern.
+
+Terminate (abort): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn't allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.
+
+Backtrack: Try another path of execution at a previously encountered nondeterministic choice
+
+Trap: Suspend process and signal exception. Wait for another process (e.g. interactive debugger) to fix
+
+Propagate
+---------
+
+Unwind: Behave as if the block immediately returned the exception
+
+Serialize: Unwinding but across a process or thread boundary. Catch action, convert to value, pass value via IPC, convert back to exception and rethrow.
+
+Cleanup: Perform some actions such as freeing resources or unlocking mutexes, then continue unwinding
+
+Wrap: As cleanup, but change the exception returned. Often this loses fidelity by replacing a very specific exception with a more generic one, making it harder to perform recovery.
+
+Frequency
+---------
+
+The most common behavior is unwinding, followed by containment or termination. Recovery also occurs for some interfaces that use exceptions for common cases.
+
 
 Traces
 ======
@@ -362,57 +365,34 @@ action has to be masked because there could be an async exception between the ac
 Exception safety
 ----------------
 
-An exception safe operation on a mutable data structure is an operation that preserves the invariants of the data structure even if exceptions are thrown. A bug related to exception safety works like so:
-1. A step of an operation on a mutable data structure modifies the data and breaks an invariant.
-2. An exception is thrown and control flow skips the rest of the operation's code that would restore the invariant
-3. The exception is caught and recovered from, or a cleanup block is entered
-4. The data structure with broken invariant is used by other code that assumes the invariant, resulting in a bug
-
-For example, this code is not exception safe, and has a memory exception:
+This code in Rust or C++ is not exception safe: (based on `this code <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/1995/N0623.asc>`__ and `this code <https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md#background-what-is-exception-safety-in-rust>`__)
 
 ::
 
-  RawVec = Ref { RawVec ptr cap alloc : ptr in Pointer and cap in usize and alloc in Allocator }
-  Vec = Ref {Vec buf len : buf in RawVec and len in usize }
+  push_ten_more : (v : Vec T) -> T -> Op { v : Vec (T|uninitialized) }
+  push_ten_more (this@(readRef -> Vector arr)) t =
+    new_arr = alloc (length arr + 10)
+    for (i in indexes arr)
+      copy arr[i] to new_arr[i]
+      delete arr[i]
+    this := Vector new_arr
 
-  // Tiny Vecs are dumb.
-  min_non_zero_cap
-    | elem_size == 1 = 8
-    | elem_size <= 1024 = 4
-    | otherwise = 1
-
-  reserve (read -> Vec self@(read -> RawVec ptr cap alloc) _) additional =
-    if additional > capacity - len
-      assert additional > 0
-      assert elem_size > 0
-      new_cap = max(cap * 2, len + additional, min_non_zero_cap)
-      old_layout = if elem_size * cap == 0 then None else Some (ptr, elem_size * cap, elem_align)
-      new_layout = Layout (new_cap * elem_size) elem_align
-      (new_ptr,new_size) = if let Some (ptr,old_layout) = current_memory
-        alloc.grow(ptr,old_layout,new_layout)
-      else
-        alloc.allocate(new_layout)
-      self := RawVec new_ptr (floor (new_size / elem_size)) alloc
-
-  push_ten_more : Vec -> T -> Op
-  push_ten_more v t =
-    reserve v 10
-    set_len v (len v + 10)
     for i in 0..10 {
       (ptr v) offset (len + i) := t.clone()
     }
   }
 
-The call to ``set_len`` happens when the next 10 elements are uninitialized, and ``Vec`` has an internal invariant that its first `len` elements are safe to deallocate. So if `clone` throws then this broken data will escape the function.
-Vec's destructor that assumes the invariant will then free uninitialized memory
+The update to the Vector happens when the next 10 elements are uninitialized, and ``Vec`` has an internal invariant that its elements are safe to deallocate. So if `t.clone` throws then the initialization will not be called. Vec's destructor that assumes the invariant will then free uninitialized memory.
 
-To be exception safe, code needs to identify invariants of data structures. These can be written as assertions using the pure read operations on stores. With this the static verification will identify the function and the exceptional control flow that breaks the invariant. Then to fix this the user can place cleanup handlers.
+The basic issue is that Rust and C++ confuse values with resources. Values can be copied without side effects, while resources are expensive to copy. In this code the Rust/C++ semantics require calling a destructor ``delete`` on each element of a ``vec``, and copying values with ``copy_to_`` and ``clone`` operations that can fail - almost everything is a resource. In Stroscot almost everything is a value, inert data - copy/clone is built into the language and can't fail. Similarly we wouldn't necessarily call any finalizers (``delete``) - the finalizer is called after the last use, and likely there are other copies and this is not the last use. Even if the Stroscot code was written to call an operation ``clone`` that could throw exceptions, the rest of the elements will be deallocated if needed, but otherwise not. In all cases memory is safe due to the finalizer semantics.
 
-
+A smaller issue is the uninitialized array. This means the array may be filled with ``uninitialized`` values (exceptions). The result type reflects this possibility. With careful rewriting, the code can provide the strong guarantee that the resulting vector only contains values of type T. This can be done by extending the array one element at a time or by saving the exception(s) thrown in a separate list and rethrowing at the end as an exception group.
 
 Besides explicit memory management, broken logical invariants are rarely observed. Reasoning about invariants with pure values is straightforward, and fail-fast coding styles mean that the program doesn't live long. And when writing cleanups the programmer is already thinking about exception safety and restoring invariants, so will write an exception-safe cleanup.
 
-
+To write an exception safe operation on a mutable data structure, there are two steps:
+* identify invariants of data structures. These can be written as assertions using the pure read operations on stores. With this the static verification will identify the function and the exceptional control flow that breaks the invariant.
+* place exception cleanup handlers to restore broken invariants
 
 C++ has `levels of safety <https://en.wikipedia.org/wiki/Exception_safety>`__ for stateful functions based on what invariants are preserved.
 
@@ -452,26 +432,6 @@ If add is no-throw we can fix this just by adding uninterruptibleMask. But add a
             Err e -> uninterruptibleMask (remove a l1) >> throw e
 
 Here add should have strong safety, i.e. it restores the state if an exception is thrown during the add.
-
-
-I found `this <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/1995/N0623.asc>`__:
-
-::
-
-  (this@(readRef -> vector arr)).push(e) =
-    new_arr = alloc (length arr + 1)
-    for (int i = 0; i < length arr; i++)
-      copy arr[i] to new_arr[i]
-    copy e to new_arr[length arr]
-    this := vector new_arr
-    ex = []
-    for (int i = 0; i < length arr; i++)
-      (delete arr[i]) catch \e -> ex.push(e)
-    if !ex.empty
-      throw (ExceptionGroup ex)
-
-
-The basic issue is that C++ confuses values with resources. Values can be copied without side effects, while resources are expensive to copy. In this code the C++ semantics require calling a destructor ``delete`` (which for the sake of this example can throw) during ``vec.push``. In Stroscot we wouldn't call any destructors because this is value-level copying of inert data. But let's ignore that and say we are using ``copy_to_`` and ``delete`` that can throw exceptions. AFAICT the code I wrote provides the strong guarantee that the resulting value is either the new array or the old array. To ensure all elements have been deleted we store the exception(s) thrown during deletion in a separate list, and rethrow at the end as an exception group.
 
 Poisoning
 ---------
@@ -667,17 +627,18 @@ Consider the following function:
 
 ::
 
-  foo <- lookup "foo" m
-  bar <- lookup "bar" m
-  baz <- lookup "baz" m
-  f foo bar baz
+  func =
+    foo = lookup "foo" m
+    bar = lookup "bar" m
+    baz = lookup "baz" m
+    f foo bar baz
 
-We want composability and a unified interface across Maybe, Either, and IO. Say we need to know about why a lookup failed. ``lookup k`` could throw ``KeyNotFound k``, ``lookup :: (Eq k) => k -> [(k, v)] -> (KeyNotFound k|v)``. We need to be able to ignore the precise value using Maybe, ``{KeyNotFound _ = Nothing}``. Exceptions should unwind through f, ``f Nothing = Nothing``, ``f (KeyNotFound k) = KeyNotFound k``. The type of ``f`` should not contain the key exceptions, ``f :: SomeVal -> SomeVal -> SomeVal -> (F'sExceptionType|F'sResult)``.
+We want composability and a unified interface across Maybe, Either, and IO. Say we need to know about why a lookup failed. ``lookup k`` could throw ``KeyNotFound k``, ``lookup :: (Eq k) => k -> [(k, v)] -> (KeyNotFound k|v)``. Exceptions should unwind like Either, so if any of the lookups fail then func returns the failure. We should be able to specify a default for lookup like with ``maybe``, ``lookup key m {KeyNotFound _ = Nothing}``.  The type of ``f`` should not contain the lookup exceptions, ``f :: SomeVal -> SomeVal -> SomeVal -> (F'sExceptionType|F'sResult)``.
 
 Try
 ---
 
-Swift/Rust define syntactic markers for local exception propagation points, a "try" or "?" keyword at the call site. ``try foo()`` unpacks the ValueOrError type that ``foo()`` returns. If it is an exception, ``try`` unwinds/propagates/throws/returns the exception from the function, otherwise the function continues with the value. The claim is that without ``try`` exceptions are silent or invisible.
+Swift/Rust define syntactic markers for local exception propagation points, a "try" or "?" keyword at the call site. ``try foo()`` examines the ValueOrError type that ``foo()`` returns. If it is an exception, ``try`` unwinds/propagates/throws/returns the exception from the function, otherwise the function continues with the value. The claim is that without ``try`` exceptions are silent or invisible.
 
 But in practice this is very burdensome. Every call involves an annotation, either on the function (to say it cannot generate exceptions) or on the call site (to mark propagation). It's a lot of bookkeeping. Many languages have implemented exception handling just fine without this burden.
 

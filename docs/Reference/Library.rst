@@ -1,69 +1,6 @@
 Library
 #######
 
-Stroscot will support the standard libraries of other languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination.
-
-performance
-* Java/JVM - profiling, dynamic compilation, speculative optimization/deoptimization, escape analysis
-* C, C++ - close to hardware, low level (supposedly)
-* Julia - faster than Python, but JIT uses many slow trampolines
-* Go - scalable concurrency (although slower than C++)
-* Javascript - fast JIT
-* Objective C - faster than Swift
-* Prolog - slow constraint solver
-libraries
-* Python - machine learning, extending/embedding
-* Julia - concurrency, parallelism, C+Fortran+Python FFIs
-* R - statistics and data analysis
-* MATLAB, Mathematics - IDE, large codebase
-* Erlang - distributed, fault-tolerant, reliable, soft real-time, concurrent database
-* C - large number of libraries
-* C++ - game engines, standard methods to distribute application binaries
-* C# - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin) and embedded systems (.NET Micro Framework).
-* Javascript - browser
-* Swift - Apple
-* Prolog, Mercury - logic programming is not used anymore in artificial intelligence, generic constraint solver
-* F# - functional programming that runs on CLI
-* Rust - most loved for memory safety
-syntax
-* C# - best designed
-* Python - whitespace
-* Elixir - improved Erlang
-* TypeScript - JS with static typing
-* PHP - no design at all
-* Objective C - weirder than C++
-* Haskell - poor design
-
-standard library for graphics, networking, databases, telephony, and enterprise servers
-
-
-Standard libraries:
-* `Rust <https://github.com/rust-lang/rust/tree/master/library>`__ (MIT + Apache 2.0)
-* `Go <https://github.com/golang/go/tree/master/src>`__ (BSD-style)
-* `Haskell <https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries>`__ (BSD-style)
-
-  * The alternate prelude `Foundation <https://github.com/haskell-foundation/foundation>`__ (BSD)
-
-* Julia `1 <https://github.com/JuliaLang/julia/tree/master/base>`__ `2 <https://github.com/JuliaLang/julia/tree/master/stdlib>`__ (MIT)
-* C
-
-  * `glibc <https://sourceware.org/git/?p=glibc.git;a=tree>`__ (LGPLv2.1, some files BSD/ISC/etc.)
-  * `Musl <https://git.musl-libc.org/cgit/musl/tree/>`__ (MIT)
-
-* Python `1 <https://github.com/python/cpython/tree/master/Modules>`__ `2 <https://github.com/python/cpython/tree/master/Lib>`__ (PSFv2)
-* `Zig <https://github.com/ziglang/zig/tree/master/lib/std>`__ (MIT)
-* Slate `1 <https://github.com/briantrice/slate-language/tree/master/src/core>`__ `2 <https://github.com/briantrice/slate-language/tree/master/src/lib>`__ `3 <https://github.com/briantrice/slate-language/tree/master/src/i18n>`__
-
-But building on the work of others isn't enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily but should eventually include even things like audio and graphics (and way before that — cryptography). If it’s not an unsolved mathematical problem, there’s no reason it can’t have a standard solution. The same common problems getting solved by different people is a waste of man‑hours that can be spent developing something new. But the library should be divided up into modules and the modules should be versioned so that there's a deprecation cycle in place.
-
-For this, the proposals of the various languages are useful, as they encapsulate changes and include motivation as to why the change was made. A feature of a language might be historical accident but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library "smells", areas that could use improvement.
-
-* `GHC <https://github.com/ghc-proposals/ghc-proposals/pulls>`__
-* `Python <https://github.com/python/peps>`__
-* `Rust <https://github.com/rust-lang/rfcs/pulls>`__ (`accepted <https://rust-lang.github.io/rfcs/>`__)
-* `Go <https://github.com/golang/go/labels/Proposal>`__
-
-TODO: go through these, unfortunately there’s a lot
 
 
     Primitive types permit values to be created by writing literals. For example, 123I is a literal of type Integer.
@@ -117,7 +54,13 @@ For compatibility with other languages we can define narrowed arithmetic operati
 
 Floating points numbers don't have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, ``(+) :: f32 -> f32 -> f32`` and so on.
 
+For overflow there are several semantics, so it's a keyword parameter:
+* signal error condition
+* wrap value (modular arithmetic, 1 + MAX = MIN)
+* saturation: clip(MIN, MAX, value)
+* assert value in range
 
+The default should be signaling an error - it can be turned into an assert with a type signature, and wrapping / saturation is unexpected
 
 Arrays
 ======

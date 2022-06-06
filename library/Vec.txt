@@ -1,0 +1,22 @@
+RawVec = Ref { RawVec ptr cap alloc : ptr in Pointer and cap in usize and alloc in Allocator }
+Vec = Ref {Vec buf len : buf in RawVec and len in usize }
+
+// Tiny Vecs are dumb.
+min_non_zero_cap
+  | elem_size == 1 = 8
+  | elem_size <= 1024 = 4
+  | otherwise = 1
+
+reserve (read -> Vec self@(read -> RawVec ptr cap alloc) _) additional =
+  if additional > capacity - len
+    assert additional > 0
+    assert elem_size > 0
+    new_cap = max(cap * 2, len + additional, min_non_zero_cap)
+    old_layout = if elem_size * cap == 0 then None else Some (ptr, elem_size * cap, elem_align)
+    new_layout = Layout (new_cap * elem_size) elem_align
+    (new_ptr,new_size) = if let Some (ptr,old_layout) = current_memory
+      alloc.grow(ptr,old_layout,new_layout)
+    else
+      alloc.allocate(new_layout)
+    self := RawVec new_ptr (floor (new_size / elem_size)) alloc
+

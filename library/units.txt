@@ -24,37 +24,44 @@ All of the following quantities are equal:
     1 decade = 1 order of magnitude
 
 
-The decibel was originally defined in terms of power ratios, but its definition has become ambiguous as root power decibels are in use (e.g. for voltage). A power ratio 10 log r dB is equivalent to a field-quantity ratio 20 log r dB_root, since power in a linear system is proportional to the square (Joule's laws) of the amplitude. The neper is almost always a root-power quantity but technically is allowed to be a power quantity as well, so it too is split into two units Np and Np_power.
+The decibel was originally defined in terms of power ratios, but its definition has become ambiguous as root power decibels are in use (e.g. for voltage). This can be resolve by having distinct units for decibel power and decibel root power quantities. Hence a power quantity 10 log r dB is equivalent to a root power quantity 20 log r dB_root, since power in a linear system is proportional to the square (Joule's laws) of the amplitude. The neper is almost always a root-power quantity but technically is allowed to be a power quantity as well, so it too is split into two units Np and Np_power.
 
 The decibel and the neper have a fixed ratio to each other, 20 / ln(10) dB_root = 1 Np and similarly 20 / ln(10) dB = 1 Np_power
 
-taking logarithms results in additive units rather than the more usual multiplicative ones.
+Taking logarithms results in logarithmic units. Molyneux calls them additive, but they are only partially additive.
 
-multiplicative:
-e.g. we say a mass is 10 grams, this means
-m = 10 * gram
-where "gram" is a variable.
+Say we have a quantity x*unitX
 
-additive:
-When we take the log base b, we get
-log_b m = log_b 10 + log_b gram
-The units of log_b m are thus log_b gram,
-but they are added to the numerical value, rather than multiplied.
+We take a log:
+f * log_b(x*unitX)
 
-The suggested notation is:
+Expanding we get
+f * log_b x + f log_b unitX
+
+Obviously the units here are incommensurable with anything else. So the only allowed operations are multiplying or dividing.
+Since dividing is multiplying by the inverse, WLOG we assume multiplying by a different quantity y*unitY:
+
+(f * log_b x * y) unitY + (f*y) unitY log_b unitX
+(f * log_b x * y) unitY + unitY log_b unitX^(f*y)
+
+So the most general form for a logarithmic unit is
+
+x unitA + unitA log_b unitB
+
+where unitB might have fractional powers.
+
+Molyneux's suggested notation is:
 x unitA {unitB} for x unitA + unitA ln(unitB)
 x unitA <unitB> for x unitA + unitA log_10(unitB)
 
-when unitA is 1 it is omitted
+when unitA is 1 it is omitted. When the antilogarithm is taken of a logarithmic unit with unitA = 1, multiplicative units reappear quite naturally.
 
-example:
+examples:
 pH = log_10 [H+]
 where [H+] is the hydrogen ion concentration with units of mol dm^-3
 
 Pure water at 25 degC has [H+] = 1.004 mol dm-3
 So pH = 7.00 + log_10 (mol^-1 dm^3) = 7 <mol^-1 dm^3>
-
-When the antilogarithm is taken, multiplicative units reappear quite naturally.
 
 standard free energy change, delta_G_standard, is related to the corresponding
 chemical equilibrium constant, K, by
@@ -77,14 +84,28 @@ So this can be written as
 or
 79.9 kJ mol^-1 <mol^-11.412 dm^34.236>
 
-Molyneux says 79.9 kJ mol^-1 {mol^2 dm^-6} but this ignores the constant -2.478.
+Molyneux's paper says 79.9 kJ mol^-1 {mol^2 dm^-6} but this ignores the constant -2.478.
 
 standard enthalpy change from the Van 't Hoff equation is
 delta_H_standard = R T^2 d/dT (ln K)
 K= k*mol^2*dm^-6, so ln K = ln k + 2 ln mol - 6 ln dm.
-the derivative is (f(x+h)-f(x))/h so these units all cancel out and disappear, while denominator with unit of K^-1 remains.
+the derivative is (f(x+h)-f(x))/h so the logarithmic units all cancel out and disappear, while denominator with unit of K^-1 remains.
 hence the units are the standard J mol^-1
 
 standard entropy change is given by
 delta_S_standard = R ln K + RT d(ln K) / dt
 and the ln K contributes additive units.
+
+exponential units:
+it should be possible to go the other direction and consider raising a unit to a unit
+
+if we have (a*unitA) ^ (b*unitB) * (c*unitC)
+this expands to c * (a^b) ^ unitB * (unitA^b) ^ unitB * unitC
+
+so the general form is a * b^unitExp * unitBase ^ unitExp * unitScale
+
+there is an extra unit compared to logarithmic units because the base can have a unit as well
+if the unitExp is 1, i.e. raising to a pure power, it is just a * unit
+if the unitBase is 1, similar to a logarithmic unit, it is a * b^unitExp * unitScale
+
+not clear what exponential units would be useful for though

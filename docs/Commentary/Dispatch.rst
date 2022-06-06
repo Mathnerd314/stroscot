@@ -198,22 +198,3 @@ Equality
 
 Since functions can return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.
 
-Return type overloading
-=======================
-
-Return-type overloading is when an expression can be interpreted as multiple types. It's generally associated with Haskell's type classes or Rust's traits, e.g. ``1 : (Num a) => a`` or ``read "1" :: (Read a) => a``.
-
-Return-type overloading (RTO) results in nondeterminism. For example, ``readLn >>= \n -> print (n ^ 2)``, the value returned from ``readLn`` could be a float or an integer. Then for an input of ``10000`` the print call could print ``1e8`` or ``100000000``. The solution is "defaulting", returning a single value that's reasonable. For example we might default to an arbitrary-precision number type in this case.
-
-If the reasonable value is not clear, e.g. we want to read strings as well, we can use a function of the type, ``Blob { value : (A : Set) -> A|Invalid` }``. Then we overload operations on the blob to return blobs until it becomes clear what a reasonable value would be. So ``read s = Blob { value type = read type s }``. Then ``^`` passes it on, ``(Blob { value = a }) ^ b  = Blob { value t = (a t) ^ b, type_hint=numeric }``, and functions like ``print`` pick a type, ``print (Blob { value, type_hint=numeric }) = print (value ArbPrecisionNumber)``. Similarly type annotations ``blob : A`` pick a type. This delays the resolution of the nondeterminism until it is resolved by the context. A blob could potentially be resolved to several different types if it is used multiple times.
-
-For values like ``top`` of a lattice or a ``default`` value, you don't need this machinery, you can just use a symbol ``top`` and use promotion and conversion where necessary, like ``top = float Infinity = double Infinity``. You could take this approach with read as well, so that ``read "x"`` is a value, but it might be more work than the blob approach.
-
-So in theory, if you actually need RTO, it is not too hard to fake it with a DSL.
-
-Now in practice, according to a Github search of ``read`` (the most common RTO function in Haskell), the type is almost always specified very close to the overloading, in a few ways:
-* ``read x : Float`` directly
-* as part of the name, by defining an auxiliary function ``readFloat x = read x : Float`` or similar
-* using visible type parameters ``read @Float``
-
-So it actually standardizes and simplifies syntax to pass the type directly as a parameter, ``read Double`` or ``read Float``, using normal overloading. Or else it can be the function itself ``Vector iterator``. Either way, RTO seems to be very rarely needed in practice.

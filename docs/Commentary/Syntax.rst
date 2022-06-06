@@ -12,6 +12,13 @@ Some languages offer a "simple" syntax. But simplicity is hard to define, and bo
 
 Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird parentheses style may lose too many users)
 
+* Python - whitespace
+* Elixir - improved Erlang
+* TypeScript - JS with static typing
+* PHP - no design at all
+* Objective C - weirder than C++
+* Haskell - poor library design
+
 TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
 
 Natural language like Inform 7, while interesting, is quite wordy. It's also hard to scan through.
@@ -27,18 +34,84 @@ There are some people who, when confronted with the complexity of syntax, think 
 
 There's also structural editing, `lamdu <http://www.lamdu.org/>`__ and so on, but they are designing an IDE alongside a programming language. I'm not too interested in IDEs and given that half the IDEs are for languages that also have a textual syntax, syntax doesn't seem to be a big factor in writing such an IDE.
 
-Legibility
-----------
+Legibility research
+-------------------
 
 The main factor improving readability is consistency; reading is disrupted when unconventional layouts are used.
 
-Spacing is important to identify word boundaries (intra-letter spacing significantly smaller than inter-word spacing) and sentence boundaries (two spaces after the period, although the period's whitespace itself is distinctive). Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking. Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line. The default line spacing seems fine.
+Spacing helps identify boundaries:
+* For words, intra-letter spacing should be significantly smaller than inter-word spacing.
+* For sentences, there should be extra space after the period, although the period's whitespace itself is distinctive.
+* Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking.
+* The default inter-line spacing (line height, leading) is fine for most people. Some people with disabilities need more. Longer lines can use a little bit more line height.
+* To identify paragraphs, inter-paragraph spacing should be visibly larger than inter-line spacing, or paragraph indentation should be used.
 
-Line length is a good question. Programming uses fixed-width characters so it's measured in characters. 80 characters is standard, but monitors are wider now, so 100 is plausible. Diff programs are often the limiting factor, but on my monitor I can fit 2 108-character texts side-by-side along with a space in the middle and the taskbar. 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt (24px) I can fit 97 characters, while 23px fits 102 characters.
+Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line.
 
-Layout improves legibility, Python syntax is often said to be "clean", hence why Stroscot has layout.
+Maximum line length is an open question. Diff programs seem like the limiting factor, but on my monitor I can fit 2 108-character texts at the default font size side-by-side along with a space in the middle and the taskbar. Rounding this down to 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt / 24px I can fit 97 characters, while a little less (17.25pt / 23px) fits 102 characters. The standard is 80 characters but monitors are wider now, so again 100 seems plausible. This can really only be tested by finding long lines of code and asking what line-breaking placement is most readable.
 
-Reading code top-to-bottom, left-to-right makes sense. So definitions should be on the left, blocks indented in, and lines themselves should read left to right. So Ruby's statement modifiers ``X if Y`` are a bad idea because the ``if Y`` is easy to miss when scanning control flow.  But operators like ``a = b xor c`` are fine because at the point where the expression matters you're reading the whole line anyway and can parse it in your head.
+Code legibility
+---------------
+
+IMO layout improves code legibility. There haven't been any formal studies that I can find, but Python syntax is often said to be "clean". Also layout makes arguments over where to put braces moot. Hence Stroscot has layout.
+
+Reading code top-to-bottom, left-to-right makes sense. So definitions should be on the left, blocks indented in, and lines themselves should read left to right. So Ruby's statement modifiers ``X if Y`` are a bad idea because the ``if Y`` is easy to miss when scanning control flow.  But operators like ``a = b xor c`` are fine because the assignment ``a =`` is clear and if the value of the expression matters you're reading the whole line anyway and can parse it in your head.
+
+Unicode can improve legibility when the syntax is standard (e.g. θ for angles), but generally long names like ``Optimiser(learning_rate=...)`` are more readable than ``Optimiser(η=...)``. Programmers have neither the time nor the inclination to learn a new character set and accompanying set of conventions.
+
+When the convention is established, short names are clearer than long names. Writing ``(+) { augend = 1, addend = 2 }`` is less clear than the simple ``1+2`` - the long names are not commonly used. But it is arguably still useful to include the long names, e.g. for currying.
+
+A study :cite:`dossantosImpactsCodingPractices2018` found the following:
+
+Putting opening braces in a line of their own (C# convention), as opposed to the same line of the statement, improved readability. The extra white space and matching vertical alignment of related curly braces makes blocks clearer. Closing curly braces terminating code blocks should be on their own line, except for secondary paths of execution, e.g.: closing brace of if statements followed by an else; closing braces of try statements followed by a catch.
+Line lengths must be kept within the limit of 80 characters;
+Each statement should be in a line of its own; do not separate multiple statements by a ‘‘;’’ in a single line.
+Use import clauses instead of qualified names to reference names in code.
+Frequent calls to sub-properties of class member properties should be made storing a reference to that sub-property, avoiding multiple statements containing long chains of objects and sub-properties;
+Identifier names should use dictionary words for readability.
+Grouping instructions using blank lines was inconclusive. Some thought the blanks broke the flow, others liked it.
+On indenting 2 spaces vs 4 spaces, there was no consensus.
+Nesting conditionals more than three levels deep was considered by some to be easy to read and clearer than using a complex condition. But the majority preferred refactoring to an ``else if`` chain.
+Using variables to store intermediate parts of long logical expressions is only useful if that intermedate expression has a meaningful name and purpose or the expression is repeated. Otherwise it adds clutter, and you are better off just writing the complex expression.
+
+:cite:`bauerIndentationSimplyMatter2019` studied indentation with eye tracking and found no statistically significant difference between 0,2,4,8 spaces. Looking at their graphs 4 spaces does seem to be a sweet spot though.
+
+Another study :cite:`buseMetricSoftwareReadability2008` identified factors for readability, in decreasing order of significance:
+
+* fewer identifiers per line
+* shorter lines (characters)
+* fewer '(' '{' '.' ','
+* less indentation (preceding whitespace)
+* fewer keywords
+* more blank lines
+* lower maximum occurrences of any single identifier
+* shorter maximum length of identifier
+* lower maximum occurrences of any single character
+* more comments
+* fewer '='  numbers spaces '==' '<' '>' 'if' 'for' 'while'
+* higher number of '+' '*' '%' '/' '-'
+
+They constructed several models using these factors, mainly a Bayesian classifier, all of which predicted average readability scores better than the human raters. But the model is not public.
+
+Proportional fonts
+------------------
+
+For prose, a proportional fonts is more readable than monospace because it is denser and hence less eye movement is needed for reading. Spaces between words are easier to see. :cite:`arditiReadingFixedVariable1990` But proportional fonts have not caught on in programming. The main complaint is that identifiers do not line up nicely the way they do with a monospace font.
+
+After reading about elastic tabstops I've come up with my own solution, "tablike spaces". The idea here is to use a proportional font for rendering, but to make the spaces jump to the pixel column they would use if the font was monospaced. So rendering "a bit of text" would render "a" at 0, "bit" at 2 ems, "of" at 6 ems, and "text" at 9 ems, where an em is the width of the widest character in the font.
+
+A more complex algorithm treats the text as a giant table, so "a bit of text" gets split up into 4 cells "a ", "bit ", "of ", "text" which span 2,4,3,4 columns respectively. Then the column widths are calculated using the `auto table layout algorithm <https://www.w3.org/TR/CSS2/tables.html#auto-table-layout>`__ (simplified):
+
+* Set the width of each column to 0.
+* For each cell, calculate the width as rendered by the font, and increase the widths of the columns it spans so that together, they are at least as wide as the cell. Widen all spanned columns to be approximately the same.
+
+Yet more complex is to treat it as a constraint problem. The constraints consist of minimum width constraints from the width of the tokens and order constraints that specify which chunks of text are before/after/line up with other chunks. The goal is to minimize the width of the table (sum of column widths), and as a secondary objective make the widths as uniform as possible (lowest standard deviation or absolute deviation). The Cassowary algorithm might work.
+
+The constraint algorithm allows aligning the ends of text by justifying, so e.g. ``foo =`` and ``bar =`` have the identifiers stretched to the same width. But generally it is only the start of the text that needs to be aligned.
+
+TODO: test it out by modifying https://github.com/isral/elastic_tabstops_mono.vsce
+
+The advantage of tablike spaces over elastic tabstops is that the underlying text file is just indenting with spaces in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
 
 Parsing
 =======
@@ -311,7 +384,7 @@ Type declarations
 Namespacing
 ===========
 
-``.`` is preferred to ``::`` because it's shorter and because modules are first-class.
+``.`` is preferred to ``::`` because it's shorter and because modules are first-class. And as in Go, no ``->``, always ``.``.
 
 Partial loading
 ===============
@@ -386,14 +459,40 @@ Currying makes all functions symbols of order 0 and allows easy partial function
 Partial function application allows reusing functions more easily, e.g. as the argument to map.
 Function symbols also become first-class, because they can be passed around without being applied, ``f`` vs ``\x. f x``
 
-Haskell style arguments ``f a`` are preferred over C style ``f(a)`` due to being shorter for arguments that are identifiers. The only place they lose in character count is complex arguments ``f (a+1) (b+2)`` vs ``f(a+1,b+2)``, but there you can use a tuple to match the syntax or the record ``f{x=a+1,y=b+2}`` which will most likely be clearer.
+Call syntax
+-----------
+
+There are a few ways to write function calls:
+* Curried style: ``f (g a 1) (h b 2)``
+* Lisp style: ``(f (g a 1) (h b 2))``
+* C style: ``f(g(a,1),h(b,2))``
+* C with spaces style: ``f(g(a 1) h(b 2))``
+* Coffeescript: ``f (g a 1), (h b 2)``
+* Postfix: ``2 b h 1 a g f``
+* Postfix with argument counts: ``2 b 2 h 1 a 2 g 2 f``
+* Explicit call, C: ``call(f,call(g,a,1),call(h,b,2))``
+* Explicit call, curried: ``call f (call g a 1) (call h b 2)``
+
+Comparing character counts, postfix is 13, C is 16, and curried is 17. For a simple function application ``f a b c`` curried is shorter by one character than C (more if you add a space after the comma like ``f(a, b)``, as is common) and the spaces are easier to type. Curried loses in character count only if you have a pattern like ``f (a) (b) (c)`` where all the expressions need parentheses. The curried style still allows passing a tuple and matching the C syntax.
+
+Lisp is curried with extra parentheses. Coffeescript is curried with extra commas. Explicit call C is curried style with call inserted before parentheses and commas instead of spaces. Explicit call curried is curried with call inserted before functions. Postfix is pretty much unreadable so I'm ignoring it. So the two main contenders are curried and C.
+
+The C style is incredibly common, whereas curried is only used by functional languages like Haskell and OCaml. But I'm still going with curried for now, because:
+
+Arguments: (`Reddit thread <https://www.reddit.com/r/ProgrammingLanguages/comments/jde9xp/advantages_of_currying_in_a_programming_language/>`__)
+* Curried is more readable - the spaces and parentheses have more vertical variation compared to commas
+* Curried is pretty simple, only a bit more complex than S-expressions
+* Curried is good for writing curried functions. In contrast the C style makes it inconvenient to use curried functions, you have to write lots of parentheses ``f(1)(2)(3)``. Also comparing ``any (== x) l`` and ``any(\y -> y == x,l)``, in the C style the comma is almost unnoticeable and the syntax is ambiguous as it could be grouped ``(x,l)``
+* Curried style still allows tuples as arguments, pretty much matching the C style. In contrast the C style forces a tuple even if the combination of arguments doesn't represent a meaningful idea.
+
+The main question is which style makes it easier to match parentheses - mismatching is a common novice programming error. :cite:`singerFunctionalBabyTalk2018` Also error messages for accidental partial application are important. TODO: test or survey some novice programmers later on
 
 Implicit arguments
 ------------------
 
 Claim: Explicit argument passing cannot replace implicit arguments
 
-See example: (copied from reference)
+See example:
 
 ::
 
@@ -421,12 +520,80 @@ See example: (copied from reference)
 
 To use explicit argument passing, we'd have to add explicit ``loglevel`` and ``logPrint`` arguments to ``log`` and all its callers. To minimize callers we could partially apply it in ``main`` and pass around just the ``log : String -> Cmd`` function. But still, we have to modify every caller of ``log`` and its callers and so on to pass around the ``log`` function.
 
+Default arguments and overloading
+---------------------------------
+
+`The Go FAQ <https://go.dev/doc/faq#overloading>`__ and `Rob Pike <https://talks.golang.org/2012/splash.article>`_ say Go deliberately does not support overloading or default arguments. Supposedly:
+* overloading is confusing and fragile
+* adding default arguments to a function results in interactions among arguments that are difficult to understand
+* Naming separate functions leads to a clearer API
+* Leaving these out simplifies the type system and method dispatch.
+
+While separate functions can be clearer, supporting overloading and default arguments does not prevent creating separate functions. And when you do have a constructor-like method which supports several slightly different combinations of arguments, even the Go FAQ admits overloading is "useful". Similarly Pike admits there are cases where API design flaws can be patched by adding a default argument. And Stroscot is dynamically typed, so overloading doesn't complicate the type system at all. And although it complicates method dispatch, overloading enables generic functions and solves the expression problem.
+
+Furthermore if you are trying to mimic a Java library that makes heavy use of this sort of overloading,name mangling using simple rules will give very long names. While using complicated rules will give shorter names, the names will be impossible to remember. Implementing overloading is strictly better than skipping it.
+
+So the verdict here is that Go is excluding things people want to do, with unworkable alternatives.
+
+n+k patterns
+============
+
+This is a feature removed from Haskell that simplifies writing recursive integer functions, like factorial. Basically ``case v of { x+k -> e; _ -> e' }`` translates to ``if v >= k then (\x -> e) (v-k) else e'``, where ``k`` is a literal.
+
+Arguments:
+* concise special notation, like for tuples and lists
+* unfamiliar: the symbol + is being abused
+* unnatural: not clear that residue must always be ``>= 0``, i.e. pattern matches a natural number
+* easy to change to a guard clause ``case v of { x | x >= k -> let x = v-k in e; _ -> e' }`` or a view pattern ``case v of { (dec k -> Just x) -> e; _ -> e' } where dec k v = if v >= k then Just (v-k) else Nothing``
+
+GHC-specific:
+* Pattern still applies even if ``(+)`` is rebound away from ``(Prelude.+)``.
+* only works for ``k >= 0``, as writing ``n+(-1)`` is forbidden.
+
+Pattern synonyms should allow defining this like a view pattern, but without the ugly ``Just``. Then the pattern like ``x@(dec k) -> e`` solves the main issues: dec is its own symbol, and the user has imported it so knows its semantics. And ``k`` should be evaluated so can be a negative number or constant expression.
+
 Chained assignment
 ==================
 
-This is mainly the expression ``a = b = 2`` but also the variant ``a := b := 2``. The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution. C++'s "the assignment returns the lvalue" seems contrived. With ``=`` the assignments are all pure hence simultaneous; for ``:=`` doing assignments RTL to match C++ is probably better than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>`.
+w = x = y = z
+the value of z is assigned to multiple variables w, x, and y
 
-OTOH using ``=`` for equality comparison might break this.
+the evaluation strategy differs between languages. For simple chained assignments, like initializing multiple variables, the evaluation strategy does not matter, but if the targets (l-values) in the assignment are connected in some way, the evaluation strategy affects the result.
+
+In Python, assignment statements are not expressions and thus do not have a value. Instead, chained assignments are a series of statements with multiple targets for a single expression. The assignments are executed left-to-right so that i = arr[i] = f() evaluates the expression f(), then assigns the result to the leftmost target, i, and then assigns the same result to the next target, arr[i], using the new value of i.[9] This is essentially equivalent to tmp = f(); i = tmp; arr[i] = tmp though no actual variable is produced for the temporary value.
+
+
+The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution. C's "the assignment returns the lvalue" semantics is possible too but seems contrived. C's RTL semantics is probably better than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>`.  So a chain ``a = b = 2`` expands to ``b = 2; a = b``.
+
+Using ``=`` for equality comparison conflicts with chaining ``a = b = 2``, because it can be interpreted as ``a = (b == 2)``. Really ``a = b = 2`` doesn't really seem that useful when you can just replace ``a`` with ``b`` in the rest of the expression. If you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable.
+
+
+Chained update with ``:=``, ``a := b := 2``, seems implementable. It doesn't conflict with equality and shortens some assignments.
+
+Embedded assignment
+===================
+
+This embeds assignments in expressions, like
+
+::
+
+  a = (b = 1) + (c = 2)
+
+Clearly it conflicts with equality comparison.
+
+But for chained update it is unambiguous and returning the value would be possible:
+
+::
+
+  a = (b := 1) + (c := 2)
+
+But then statements like
+
+::
+
+  b := 1
+
+would have an unused return value. Maybe this value could be marked as optional somehow.
 
 Unless
 ======

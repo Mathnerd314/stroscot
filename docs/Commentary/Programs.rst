@@ -20,18 +20,6 @@ Accounts:
 
 As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.
 
-Terminal / text editor
-----------------------
-
-After reading about elastic tabstops I've always thought that there's a better solution, "tablike spaces". The idea here is to use a normal proportional font for rendering, but to make the spaces jump to the pixel column they would use if the font was monospaced. So rendering "a bit of text" would render "a" at 0, "bit" at 2 ems, "of" at 6 ems, and "text" at 9 ems, where an em is the width of the widest character in the font.
-
-A more complex algorithm treats the text as a giant table, so "a bit of text" gets split up into 4 cells "a ", "bit ", "of ", "text" which span 2,4,3,4 columns respectively. Then the column widths are calculated using the `auto table layout algorithm <https://www.w3.org/TR/CSS2/tables.html#auto-table-layout>`__ (simplified):
-
-* Set the width of each column to 0.
-* For each cell, calculate the width as rendered by the font, and increase the widths of the columns it spans so that together, they are at least as wide as the cell. Widen all spanned columns to be approximately the same.
-
-Yet more complex is to treat it as a constraint problem. The constraints consist of minimum width constraints from the width of the tokens and order constraints that specify which chunks of text are before/after/line up with other chunks. The goal is to minimize the width of the table (sum of column widths), and as a secondary objective make the widths as uniform as possible (lowest standard deviation or absolute deviation). The Cassowary algorithm might work.
-
 High performance
 ----------------
 
@@ -77,7 +65,7 @@ Other ideas
 -----------
 
 Trading engine (Stock, options, cryptocurrency...)
-Game engine
+Game engine (based on O3DE, Godot, or Unreal)
 UI toolkit
 Raytracer
 Vector graphics library (bonus points for supporting SVG drawings and OpenType fonts)

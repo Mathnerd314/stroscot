@@ -1,14 +1,61 @@
-OS calls:
+symbol JD RJD MJD TJD DJD CNES_JD CCSDS_JD Lilian RD Unix DotNet
 
-clock_gettime : clockid_t -> Op timespec
-adjtimex : TimeX -> Modes -> Op (ClockState,timex)
-ntp_gettimex : Op (ClockState, ntptimeval)
 
-timespec = {seconds : time_t, nanoseconds : long}
-clockid_t = {Realtime, Monotonic, ProcessCPUTime, ThreadCPUTime}
-micronano = if STA_NANO then nanoseconds else microseconds
-timeval = { seconds : time_t, tv_usec : micronano }
-ClockState = {Synchronized,WillInsertLeapSecond,WillDeleteLeapSecond,LeapSecondInProgress,LeapSecondOccurred,Bad}
+julianEpochTime -- proleptic Gregorian calendar specified in ISO-8601.
+
+-- Julian date
+julianEpochTime JD = 12:00 November 24, -4714
+
+-- Reduced JD
+julianEpochTime RJD = 12:00 November 16, 1858
+
+-- Modified JD
+julianEpochTime MJD = 0:00 November 17, 1858
+
+-- Truncated JD
+julianEpochTime TJD = 0:00 May 24, 1968
+
+-- Dublin JD
+julianEpochTime DJD = 12:00 December 31, 1899
+
+-- CNES JD
+julianEpochTime CNES_JD = 0:00 January 1, 1950
+
+-- CCSDS JD
+julianEpochTime CCSDS_JD = 0:00 January 1, 1958
+
+-- Lilian date
+julianEpochTime Lilian = 0:00 October 14, 1582
+
+-- Rata Die
+julianEpochTime RD = 0:00 December 31, 0
+
+-- .NET DateTime
+julianEpochTime DotNet = 0:00 January 1, 1
+
+-- Unix epoch
+julianEpochTime Unix = 0:00 January 1, 1970
+
+
+TAI/TT Epoch
+0:00 January 1, 1977 TAI/TT
+MJD 43144.0003725 TCG
+UT2 Epoch
+0:00 January 1, 1958 UT2/TAI
+MJD 36204.0 TAI
+GPS Epoch
+0:00 January 6, 1980 UTC / GPS
+0:00:19 January 6, 1980 TAI
+MJD 44244.0 GPS
+
+J2000 epoch
+12:00 2000-01-01
+MJD 51544.5 TT
+
+J1900 epoch
+1899 DEC 31 12:00:00
+JD 2415020
+
 timex =
   { time_offset : long*micronano
   , freq_offset : long*2^-16 ppm
@@ -31,7 +78,16 @@ timex =
   }
 ntptimeval = { time : timeval, maxerror : long, esterror : long, tai_offset : long }
 
-POSIX specifies the realtime clock to be UTC seconds, via a straightforward formula assuming 86400 seconds per day and doing leaps as 59-0-0.
+clock_gettime : clockid_t -> Op timespec
+adjtimex : TimeX -> Modes -> Op (ClockState,timex)
+ntp_gettimex : Op (ClockState, ntptimeval)
+
+timespec = {seconds : time_t, nanoseconds : long}
+clockid_t = {Realtime, Monotonic, ProcessCPUTime, ThreadCPUTime}
+micronano = if STA_NANO then nanoseconds else microseconds
+timeval = { seconds : time_t, tv_usec : micronano }
+ClockState = {Synchronized,WillInsertLeapSecond,WillDeleteLeapSecond,LeapSecondInProgress,LeapSecondOccurred,Bad}
+
 Adjtimex can determine if a leap second is occuring or will occur in the near future.
 
 QueryPerformanceCounter : Op counts
@@ -52,343 +108,3 @@ SYSTEMTIME = {
   Second : WORD,
   Milliseconds : WORD,
 }
-
-Time standards
-
-We assume the observer has some knowledge of a proper time, tau (real number).
-A timescale T is a one-to-one function of the proper time.
-In Python's terminology a timescale value is "aware". But Python also considers bare times like ``10:34 AM`` with a UTC offset to be aware, which is pretty weird because you can't convert it to a proper time without the day.
-
-Seconds-based timescales:
-TT = (t : seconds - epoch chosen s.t. 599_616_000 = TAI instant 1977-01-01T00:00:00.0, matching TAI epoch)
-TAI = (t : seconds - epoch at UT2 instant 1958-01-01T00:00:00.0 )
-TAI_realization = (t : seconds - epoch of TAI, location : String)
-"GPS time", a constant offset of 19s from TAI
-TCG = (t : seconds - epoch TAI instant 1977-01-01T00:00:00.0)
-TCB = (t : seconds - epoch)
-TDB = (t : seconds - epoch)
-UT1 = (t : angular HMS seconds - epoch)
-ERA = (theta : radians - epoch)
-Apparent solar time = (t : angular HMS seconds - epoch)
-
-Day-based timescales:
-TCG/TT/TAI/GPS day-based notation uses a nominal 'day' of exactly 86400 SI seconds. The well-known point at TAI instant 1977-01-01T00:00:00.0 is assigned the label 1977-01-01T00:00:32.184 TCG, MJD 43144.0003725 TCG, and similarly for TT. The well-known point at UT2 instant 1958-01-01T00:00:00.0 is assigned the label 1958-01-01T00:00:00.0 TAI or MJD 36204.0 TAI. UTC instant 1980-01-06T00:00:00.0 (TAI instant 1980-01-06T00:00:19.0) is assigned the label 1980-01-06T00:00:00.0 GPS (MJD 44244.0 GPS).The nominal day is shorter than an actual day and it is somewhat misleading to use such day-based notations because they are not connected to the solar day.
-
-TT year-based notation uses a nominal `Julian year' of exactly 365.25 `days' of exactly 86400 SI seconds each. The TT instant 2000-01-01T12:00:00.0 (MJD 51544.5) is labelled as Julian epoch 2000.0. The year numbers correspond approximately to Gregorian calendar years within a few kiloyears of the epoch. But TT has no inherent concept of a year so the year-based notation is somewhat misleading. C
-
-Day fraction = (date : Date, fraction of day : range_real 0 1, day_start : date <-> proper_time)
-UTC = (date : Date, time : TimeWithLeapSeconds)
-UTC offsets UTC±[hh]:[mm]
-  (date : Date, time : TimeWithLeapSeconds, offset : Offset) -- date/time is offset by offset
-Civil time
-  (date : Date, time : TimeWithLeapSeconds, zone : TimeZoneId, fold : {0,1}) -- date/time in zone, fold=1 if later of ambiguous time
-  (date : Date, time : TimeWithLeapSeconds, zone : TimeZoneId, offset : Offset) -- Offset disambiguates DST
-  (date : Date, time : Time, zone : TimeZoneId, fold : {0,1,2}) -- fold=2 for if DST and leap seconds overlap
-
-Dates:
-GregorianDate = {year : i32, month : i16, day : i16} = -- e.g. 2007-12-03. Leap days are calculated using ISO-8601 proleptic Gregorian calendar
-YearDayDate = { year : int, dayNumber : range 0 366 }
-YearWeekDayDate = { year : int, weekNumber : range 0 53, day : DayOfWeek }
-JulianDate = {daysSinceEpoch : i64 }
-Possible anchors:
-* 1970-01-01, Java epoch
-* 17 November 17 1858, Modified Julian day epoch
-* 15 October 1582, start of the Gregorian calendar (Lilian date)
-* day 1=January 1, 1 of proleptic Gregorian calendar, Rata Die
-* November 24, 4714 BC in the proleptic Gregorian calendar, original Julian day numbering
-
-
-
-
-
-
-
-
-
-Offset = { hours : range_exclusive -24 24, minutes : range 0 60}
-
-
-Library types:
-
-Instant = Duration -- monotonic time
-SystemTime = timespec|FILETIME
-
-functions:
-get the current UTC time (including leap second), and time-zone of the system, which together form the date and time
-round an instant to a specified tick frequency
-durations of standard lengths (seconds, days, etc.)
-
-values:
-DayOfWeek - enumeration Monday through Sunday
-Month - enumeration January through December
-
-timedelta = { days : int, seconds : range i32 0 SECONDS_PER_DAY, microseconds : range i32 0 1e6 }
-Duration = { nanoseconds : i96 }
-Duration = { days : i25, nanoOfDay : i64 | nanoOfDay >= 0 }
-Instant = Duration -- since Unix epoch 1970-01-01T00:00:00Z
-EpochSecond = i64
-LocalDateTime = (LocalDate, LocalTime)
-LocalTime = { n : i56*nanoseconds | 0 <= n < NANOS_PER_DAY }
-MonthDay = AnnualDate =
-  { (month, day) : (Month,i32) | 1 <= day <= maxLength month }
-  { dayNumber : range 0 366 } -- February 29th included
-OffsetDateTime = (LocalDateTime, ZoneOffset)
-OffsetTime = (LocalTime, ZoneOffset)
-time_naive = { hour : range 0 24, minute : range 0 60, second : range 0 60, microsecond : range 0 1e6 }
-time_aware = { t : time_naive, fold : {0,1}, tzinfo}
-datetime_naive = (date, time_naive)
-datetime_aware = (date, time_aware)
-
-DateInterval = { start : LocalDate, end : LocalDate} -- inclusive
-
-relativedelta =
-  { years: int, months: int, days: int -- relative information
-  , hours: int, minutes:int , seconds:int, microseconds:int
-  , weekday: {weekday : DayOfWeek, n : int}, leapdays: int
-  , year: , month: , day: , hour: , minute: , second: , microsecond: -- Absolute information; REPLACES the corresponding value
-  }
-rrule =
-  { dtstart : datetime
-  , freq : {YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, SECONDLY}
-  . interval: int
-  , (count : int | until : datetime)
-  , wkst : DayOfWeek
-  , rules : Map {bysetpos, bymonth, bymonthday, byyearday, byweekno, byweekday, byhour, byminute, bysecond, byeaster} [int]
-  }
-Period = { years : i32, months : i32, days : i32 } -- weeks are 7 days
-Year = { y : i32 | YEAR.checkValidValue(y) }
-YearMonth = { (y : i32, m : i32) | YEAR.checkValidValue(y) && MONTH_OF_YEAR.checkValidValue(month) }
-ZoneId = ZoneOffset | ZoneRegion
-ZoneOffset = {totalOffset : i32*seconds | abs totalOffset <= 18*hours}
-timezone = { name : String|none, offset : timedelta | abs timedelta < 24*hours }
-ZoneRegion = { id : String | lookupZoneRules id != NotFound }
-ChronoLocalDateTimeImpl = (ChronoLocalDate, LocalTime)
-ChronoPeriodImpl = { chrono : Symbol, p : Period }
-ChronoZonedDateTimeImpl = (ChronoLocalDateTimeImpl, ZoneOffset, ZoneId)
-HijrahDate = {prolepticYear : i32, monthOfYear : i32, dayOfMonth : i32}
-HijrahEra = enum {AH}
-IsoEra = enum {BCE,CE}
-JapaneseDate = { isoDate : LocalDate, era : JapaneseEra, yearOfEra : i32 }
-  { era : JapaneseEra, yearOfEra : i32, month : i32, dayOfMonth : i32 }
-  {prolepticYear : i32, monthOfYear : i32, dayOfMonth : i32}
-  { era : JapaneseEra, yearOfEra : i32, dayOfYear : i32 }
-  { isoDate : LocalDate }
-    era = JapaneseEra.toJapaneseEra(jdate.getEra());
-    yearOfEra = jdate.getYear();
-JapaneseEra = {eraValue : JapaneseEra -> i32, -- index, from -2 to 3
-  since : JapaneseEra -> LocalDate } -- the first day of the era
-  }
-{Meiji, Taisho, Showa, Heisei, Reiwa} subseteq JapaneseEra
-MinguoDate = { isoDate : LocalDate }
-MinguoEra = enum { Before_ROC, ROC }
-ThaiBuddhistDate = { isoDate : LocalDate }
-ThaiBuddhistEra = enum { Before_BE, BE }
-
-DateTimeFormatterBuilder =
-  { active : mut DateTimeFormatterBuilder
-  , parent : DateTimeFormatterBuilder|null
-  , printerParsers : ArrayList DateTimePrinterParser
-  , optional : boolean
-  , padNextWidth : mut i32
-  , padNextChar : mut String
-  , valueParserIndex : mut i32 }
-DateTimeFormatter =
-  { printerParser : CompositePrinterParser
-  , locale : Locale
-  , decimalStyle : DecimalStyle
-  , resolverStyle : ResolverStyle
-  , resolverFields : Set TemporalField
-  , chrono : Chronology
-  , Zone : ZoneId
-  }
-toFormatter : DateTimeFormatterBuilder -> DateTimeFormatter
-DateTimePrinterParser =
-  { format : DateTimePrintContext -> StringBuilder -> Boolean
-  , parse : DateTimeParseContext -> CharSequence -> (position : i32) -> i32
-  }
-DateTimeParseContext =
-  { formatter : { locale : Locale, decimalStyle : DecimalStyle }
-  , caseSensitive : boolean
-  , strict : boolean
-  , parsed : ArrayList Parsed
-  , chronoListeners : ArrayList (Consumer Chronology)
-  }
-DateTimePrintContext =
-  { temporal : TemporalAccessor
-  , formatter : { locale : Locale, decimalStyle : DecimalStyle, chrono : Chronology, zone : ZoneId }
-  , optional : i32 }
-DayPeriod = -- https://www.unicode.org/reports/tr35/tr35-dates.html#dayPeriods
-  { from : i64 -- in minute-of-day
-  , to : i64 -- in minute-of-day
-  , index : DayPeriodIndex -- day period type index
-  }
-DayPeriodIndex = {am, pm, midnight, noon, morning1, morning2, afternoon1, afternoon2, evening1, evening2, night1, night2}
-FormatStyle = enum { Full, Long, Medium, Short }
-Parsed =
-  { fieldValues : HashMap<TemporalField, Long>
-  , zone : ZoneId|null
-  , chrono : Chronology
-  , leapSecond : boolean
-  , dayPeriod : DayPeriod
-  }
-ParsedResolved =
-  { resolverStyle : ResolverStyle
-  , date : ChronoLocalDate
-  , time : LocalTime
-  , excessDays : Period
-  }
-ResolverStyle = enum {Strict, Smart, Lenient}
- -- strict: reject invalid values
- -- smart: day-of-month 32 is clipped to day 30 or 31
- -- lenient: month 15 is treated as being 3 months after month 12.
-SignStyle = enum {Normal, Always, Never, Not_Negative, Exceeds_Pad}
- -- Normal: -1, 2
- -- Always: -1, +2
- -- Never: 1, 2
- -- Not_Negative: exception, 2
- -- Exceeds_Pad: Normal but output the sign if the value exceeds the pad width.
- -- In lenient parsing, any sign will be accepted unless the width is fixed,
- -- with the absence of a sign treated as a positive number.
-TextStyle = enum {Full, Full_Standalone, Short, Short_Standalone, Narrow, Narrow_Standalone}
- -- standalone does not apply to English, but in other languages you have "MarchX" and "MarchY 2, 2003"
-
-TemporalUnit = {Nano, Micro, Milli, Second, Minute, Hour, Half_Day, Day, Week, Month, Quarter, Year, Decade, Century, Millennium, Era, AllTime}
-ChronoField =
-  Of { baseUnit : TemporalUnit, rangeUnit : TemporalUnit | baseUnit < rangeUnit }
-  | JulianDate | ModifiedJulianDate | RataDie | WeekBasedYear_Week | WeekBasedYear_Year
-range : ChronoField -> ValueRange
-duration : TemporalUnit -> (min : Duration, max : Duration) -- minutes can very due to leap seconds. there is also DST, irregular month lengths, etc. The range is conservative.
-
-All of the TemporalUnit fields are 0-indexed.
-Hour, Day, Week, Month are normally 1-indexed - use wrappers if you need this.
-Week-based year - year starts on a Monday
-without year, day 0 must be defined. JD, MJD, Rata die
-
-ValueRange = { minSmallest : i64, maxSmallest : i64, minLargest : i64, maxLargest : i64
-  | minSmallest <= minLargest <= maxLargest && minSmallest <= maxSmallest <= maxLargest }
- -- all values are within [minSmallest, maxLargest], but values outside of [minLargest, maxSmallest] may be invalid
- -- if minLargest > maxSmallest then all values must be checked
-
-WeekFields = { firstDayOfWeek : DayOfWeek, minimalDaysInFirstWeek : i32}
-  -- first day-of-week defines the ISO {@code DayOfWeek} that is day 1 of the week.
-  -- minimal number of days in the first week defines how many days must be present
-  -- in a month or year, starting from the first day-of-week, before the week is counted
-  -- as the first week. A value of 1 will count the first day of the month or year as part
-  -- of the first week, whereas a value of 7 will require the whole seven days to be in
-  -- the new month or year.
-
-
-TzdbZoneRulesProvider = { regionIds : [String], versionId : String, regionToRule : Map String ZoneRules }
-ZoneOffsetTransition =
-  { epochSecond : EpochSecond
-  , offsetBefore : ZoneOffset
-  , offsetAfter : ZoneOffset
-  }
-transition : ZoneOffsetTransition -> LocalDateTime
-transition = LocalDateTime.ofEpochSecond(epochSecond, 0, offsetBefore)
-
-TimeDefinition = enum { UTC, Wall, Standard } -- transition relative to offsets in X
-ZoneOffsetTransitionRule =
-  { month : Month, dayOfMonth : i8, dow : DayOfWeek, time : LocalTime, timeEndOfDay : boolean
-  , timeDefinition : TimeDefinition, standardOffset : ZoneOffset
-  , offsetBefore : ZoneOffset
-  , offsetAfter : ZoneOffset
-  }
-ZoneRules =
-  { standardTransitions : [EpochSecond]
-  , standardOffsets : [ZoneOffset] | length standardOffsets = length standardTransitions + 1
-  , savingsLocalTransitions : [LocalDateTime] | length savingsLocalTransitions = length wallOffsets * 2
-  , wallOffsets : [ZoneOffset]
-  , savingsInstantTransitions : [i64] | length savingsInstantTransitions = length wallOffsets
-  , lastRules : [ZoneOffsetTransitionRule]
-  }
-
-
-NTPTimestamp = { seconds : u32, fraction: u32 } -- wrapping
-NTPShort = { seconds : u16, fraction: u16 } -- wrapping
-
-DTT+TAI+32.184 = TT
-
-
-Arithmetic overflows in calendars should throw exceptions
-
-
-The zoneinfo module provides a concrete time zone implementation to support the IANA time zone database as originally specified in PEP 615. By default, zoneinfo uses the system’s time zone data if available; if no system time zone data is available, the library will fall back to using the first-party tzdata package available on PyPI.
-
-Dates:
-Julian Day number
-Gregorian calendar (year : int, month : range_inclusive 1 12, day : range_inclusive 1 31)
-
-
-Time = { hours : range 0 24, minutes : range 0 60, seconds : range_real 0 60 }
-TimeWithLeapSeconds =
-  Time { seconds : range_real 0 61 } -- for times after 1972
-  { time : Time, in_leap_second : bool } -- for times after 1972
-  { time : Time, tai_offset : real } -- real to accommodate fractional offsets before 1972
-NTPDateTime = { seconds : i64, fraction: u64, tai_offset : int }
-eraNumber (n : NTPDate)  = interpret_bits i32 seconds[bits 0:32]
-eraOffset (n : NTPDate)  = interpret_bits u32 seconds[bits 32:64]
-
-
-
-Leap seconds means UTC is not strictly increasing: multiple UT1 instants 58-59-60 will map to the same number of seconds 59-59-0 or 59-0-0. To address this the instant can be marked as occuring during a positive leap second, 59-60-0, where 60 is a new value. A negative leap second goes 59 - 01 and does not introduce an aliasing problem.
-
-
-UT1 and TAI are better for calculating long durations (days) as they are strictly increasing. But if you want UT1 or TAI you will have to calculate them, via converting from UTC or over the network. NTP errors can be between 2ms-100ms depending on connectivity. UTC is within 1s of UT1, and can be made better with a lookup table. TAI you just need a leap second table, and if the offset isn't important then just wait 1s until the time is definitely not a leap second.
-
-For measuring short durations the system monotonic clock is best,
-
-
-(because the clock can be reset), while clock_gettime(CLOCK_MONOTONIC,...) gives you a slowly changing error which cannot tell you the date but is more appropriate for measuring intervals in time.
-
-UTC is UT1 rounded to an integer offset plus TAI so that Abs(UT1-UTC)<0.9. Obtained from NTP servers by OS's with a precision 2-100ms. Practically limited to an accuracy of 5ns-20ns by uncertainties and drift between atomic clocks, but defined accurate to measurement.
-TAI is an average of atomic clocks. It can be calculated from UTC from the leap second table in the timezone database and observation of the NTP leap second flag.
-Julian day number is a count of days elapsed since Greenwich mean noon on 1 January 4713 B.C., Julian proleptic calendar. The Julian Date is the Julian day number followed by the fraction of the day elapsed since the preceding noon. Modified Julian day (MJD) is defined as MJD = JD - 2400000.5. An MJD day thus begins at midnight, civil date. Julian dates can be expressed in UTC, UT1, TAI, etc. and so for precise applications the timescale should be specified, e.g. MJD 49135.3824 TAI.
-Civil time is UTC plus an hour offset (summer or winter). Can be calculated using the timezone database.
-Geocentric Coordinate Time (TCG) is a linear scaling of TT
-Barycentric Coordinate Time (TCB) is a nonlinear transformation of TCG, dependent on observer location
-Barycentric Dynamical Time (TDB) is a linear transformation of TCB
-Sidereal time or Earth rotation angle (ERA) is a linear polynomial of Julian UT1 day number
-Terrestrial Time (TT) is TAI offset by 32.184 and revised for accuracy. Can be linearly interpolated from TAI values to accuracy of 1ns using the TT(BIPM) tables in 44 kB text files and extrapolated via a formula in the file to accuracy of within 8 nanoseconds.
-Mean solar time (UT1) is the rotation angle of the Earth as measured by various stars and radio sources corrected for location and smoothed. One mean solar revolution is 86400 UT1 seconds. Can be calculated as UTC+DUT1. DUT1 is available from https://datacenter.iers.org/eop.php to a precision of 0.05 ms daily, interpolated via an accurate IERS formula from https://hpiers.obspm.fr/iers/models/, and extrapolated to an estimated error of 25ms s at one year. The files are 3.3 MB CSV's.
-Apparent solar time: solar days plus fraction of that solar day. Calculated as UT1+equation of time+local offset. The best formula for EOT on Wikipedia is accurate to 3 seconds.
-
-Geocentric Coordinate Time (TCG) is the proper time
-experienced by an infinitely distant clock comoving with the Earth's geocentre.
-
-
-The JSR-310 `ThreeTen <https://www.threeten.org/>`__ library in `Java <https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/package-summary.html>`__ seems to have undergone the most peer review. It relies heavily on ISO 8601. Another is http://time4j.net/. For some reason these are all Java. Rust has a basic thing in `std <https://doc.rust-lang.org/std/time/index.html>`__. There is a more complete Rust library but the author is `opinionated <https://github.com/time-rs/time/issues/406#issuecomment-989753838>`__.
-
-%L - Millennium
-%C - Century
-%X - Decade
-%Y - Year
-%M - Month
-%D - Day
-%V - Week Year
-%W - Week
-%w - Week Day
-%O - Ordinal Day
-
-%h - Hour
-%m - Minute
-%s - Second
-%u - Microsecond
-
-%Z - Zone Hour including +/-
-%z - Zone Minute
-
-%[,.]3x - Value including fraction with given precision, using either comma or dot.
-%−Z     - Use U+2212 for negative timezone hours (ISO recommended)
-
-
-
-POSIX timestamp "seconds since Epoch" = {s : int*seconds}
-convertible to/from UTC { sec, min, hour, day, month, year} with leap seconds ignored by rounding up (01:60 -> 02:00). Each and every day has 86400 seconds, timestamp 0 is January 1 1970 00:00:00 UTC.
-
-Google smeared seconds
-UTS smeared seconds
-
-Note:
-    The last three terms of the expression add in a day for each year that follows a leap year starting with the first leap year since the Epoch. The first term adds a day every 4 years starting in 1973, the second subtracts a day back out every 100 years starting in 2001, and the third adds a day back in every 400 years starting in 2001. The divisions in the formula are integer divisions; that is, the remainder is discarded leaving only the integer quotient.
-

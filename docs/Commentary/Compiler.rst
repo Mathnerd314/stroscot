@@ -1,6 +1,8 @@
 Compiler design
 ###############
 
+Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly. Currently Stroscot is aiming for AOT with profiling.
+
 Scale
 =====
 
@@ -79,6 +81,11 @@ Special-purpose use
 If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
 Embedded systems
 These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code's speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code's timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.
+
+Need optimizations for:
+* avoiding intermediate structures and dead or redundantly duplicated computation
+* storing arrays on the heap in the most efficient of a few straightforward ways
+* boiling away higher-order functions into tedious boilerplate
 
 Output
 ======
@@ -313,7 +320,7 @@ a call, it's a slow procedure that looks
 up the interpreter endpoint or else
 jumps to a trampoline that jumped to the JITed code
 
-then there's deopt
+then there's deoptimization
 it's tricky to stop running processors
 from running code
 if you try to
@@ -324,9 +331,13 @@ can't actually stop it
 so first you change the vtable to the interpreter
 then you change the head of the method to jump to the interpreter
 
-
+there's also speculative optimization and escape analysis
 
 Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.
+
+Julia - faster than Python, but JIT uses many slow trampolines
+
+Javascript - V8 is a fast modern JIT
 
 Logic
 =====
@@ -347,8 +358,10 @@ Need this. Reversible debugging.
 Profiler
 ========
 
+Measure
 * time and memory usage.
 * throughput (calls/second)
-* A/B testing of multiple implementations of a function
+* A/B testing of multiple implementations
+for functions, expressions, programs, etc.
 
 Use statistical sampling and hardware performance counters to avoid overhead.

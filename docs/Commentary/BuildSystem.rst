@@ -58,12 +58,11 @@ Tasks
 
 The design is based on iThreads :cite:`bhatotiaIThreadsThreadingLibrary2015`, which out of a half dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build.
 
-They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value as it modifies global state. So I'm using the term "task" in the sense of a task queue.
+They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value and simply modifies a global state. So I'm using the term "task" in the sense of a task queue.
 
+It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``; the only constraint is that they are executed on every build and rebuild.
 
- It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``; the only constraint is that they are executed on every build and rebuild.
-
-If the build is not data race free different execution orders won't produce the same results. This is not checked thoroughly.
+The memory model is causal consistency: a task A should see only the write of a task B only if the synchronization operation that started A ensured that B was finished first. In practice this is not enforced strictly, and the keystate uses a global shared memory for performance. Hence the build can have data races where different execution orders produce different results.
 
 If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don't care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.
 

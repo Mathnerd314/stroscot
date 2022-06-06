@@ -1,15 +1,94 @@
 Library
 #######
 
+Stealing
+========
+
+Stroscot should support the standard libraries of popular languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination, and this allows an intermediate step of C semantics with Stroscot syntax. For example a function of type ``C.int -> C.size_t`` is different from plain ``int -> int``, and if you really need the semantics of C++'s unstable sort then it has to be included.
+
+It's only worth supporting the biggies, in particular:
+* C, the standardized library. Quite lean so it's the one to start with.
+* C++, the standardized library
+* Java, OpenJDK libraries (GPL but with linking exception, should be OK)
+
+Others such as the Python standard library, Glib, and Boost are probably not worth the effort of including directly, rather they can be supported via FFI or rewritten natively.
+
+Synthesizing
+============
+
+Building on the work of others isn't enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily - the goal is to eventually include everything. If a user needs a Y-fast trie, they should be able to find it in the standard library. Duplicating implementations is a waste of man‑hours that can be spent developing something new.
+
+
+
+ But the library should be divided up into modules and the modules should be versioned so that there's a deprecation cycle in place.
+
+For this, the proposals of the various languages are useful, as they encapsulate changes and include motivation as to why the change was made. A feature of a language might be historical accident but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library "smells", areas that could use improvement.
+
+Maybe once the language is more defined it will be worth standardizing the embedding of some application-specific libraries:
+* machine learning (TensorFlow)
+* R's statistics and data analysis
+* numerical libraries such as BLAS and SciPy
+* Erlang's distributed, fault-tolerant, reliable, soft real-time, concurrent database
+* audio, graphics, networking, databases, telephony, enterprise servers, cryptography
+
+
+* Julia - concurrency, parallelism, C+Fortran+Python FFIs
+syntax
+* C# - best designed. It's used in desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)
+
+Standard libraries:
+* `Rust <https://github.com/rust-lang/rust/tree/master/library>`__ (MIT + Apache 2.0)
+* `Go <https://github.com/golang/go/tree/master/src>`__ (BSD-style)
+* `Haskell <https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries>`__ (BSD-style)
+
+  * The alternate prelude `Foundation <https://github.com/haskell-foundation/foundation>`__ (BSD)
+
+* Julia `1 <https://github.com/JuliaLang/julia/tree/master/base>`__ `2 <https://github.com/JuliaLang/julia/tree/master/stdlib>`__ (MIT)
+* C
+
+  * `glibc <https://sourceware.org/git/?p=glibc.git;a=tree>`__ (LGPLv2.1, some files BSD/ISC/etc.)
+  * `Musl <https://git.musl-libc.org/cgit/musl/tree/>`__ (MIT)
+
+* Python `1 <https://github.com/python/cpython/tree/master/Modules>`__ `2 <https://github.com/python/cpython/tree/master/Lib>`__ (PSFv2)
+* `Zig <https://github.com/ziglang/zig/tree/master/lib/std>`__ (MIT)
+* Slate `1 <https://github.com/briantrice/slate-language/tree/master/src/core>`__ `2 <https://github.com/briantrice/slate-language/tree/master/src/lib>`__ `3 <https://github.com/briantrice/slate-language/tree/master/src/i18n>`__
+
+Proposals:
+* `GHC <https://github.com/ghc-proposals/ghc-proposals/pulls>`__
+* `Python <https://github.com/python/peps>`__. The repo includes almost all proposals, but there are a few stray PRs:
+https://github.com/python/peps/pull/2066/files
+https://github.com/python/peps/pull/609/files
+https://github.com/python/peps/pull/641/files
+https://github.com/python/peps/pull/671/files
+https://github.com/python/peps/pull/686/files
+https://github.com/python/peps/pull/690/files
+https://github.com/python/peps/pull/2620/files (and other PEPs after Jun 1 2022)
+
+* `Rust <https://github.com/rust-lang/rfcs/pulls>`__ (`accepted <https://rust-lang.github.io/rfcs/>`__)
+* `Go <https://github.com/golang/go/labels/Proposal>`__
+
+TODO: go through these, unfortunately there’s a lot
+
+
 Minimal definition
 ==================
 
 At a minimum, the standard library should provide:
-* containers, such as hash maps and binary trees
-* algorithms operating over those containers, such as sorting
+* containers, such as arrays, hash maps, and binary trees
+* algorithms operating over those containers, such as insertion, lookup, and sorting
 * basic support for multithreading
 * string tokenization
 * compiler's API
+
+Numbers
+=======
+
+Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.
+
+Matrix multiplication
+=====================
+
+Suppose we are multiplying three matrices A, B, C. Since matrix multiplication is associative, (AB)C = A(BC). But one order may be much better, depending on the sizes of A, B, C. Say A,B,C are m by n, n by p, p by q respectively. Then computing (AB)C requires mp(n + q) multiplications, and computing A(BC) requires (m + p)nq multiplications. So if m = p = kn = kq, then (AB)C costs 2k^3 n^3, while A(BC) costs 2 k n^3, which if k is large means A(BC) is going to be much faster than multiplying (AB)C. The matrix chain multiplication algorithm by Hu Shing finds the most efficient parenthesization in O(n log n) time, given the sizes of the matrices. In practice the sizes must be observed through profiling. But this data must be collected at the level of the matrix chain  multiplication, as re-association optimisations are hard to recognise when the multiplication is expanded into loops.
 
 Poison values
 =============

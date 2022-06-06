@@ -42,14 +42,14 @@ type Lambda = [EID]
 type A = EID
 type B = EID
 type T = EID
-type I = Level
-type J = Level
-type AI = (I, EID)
-type AJ = (J, EID)
-type TI = (I, EID)
-type TJ = (J, EID)
-type GammaI = [(I,EID)]
-type DeltaI = [(I,EID)]
+-- type I = Level
+-- type J = Level
+type AI = EID
+type AJ = EID
+type TI = EID
+type TJ = EID
+type GammaI = [(EID)]
+type DeltaI = [(EID)]
 
 data SequentX turnstile left right = Sequent
   { turnstile :: turnstile
@@ -59,7 +59,7 @@ data SequentX turnstile left right = Sequent
    deriving (Eq,Ord,Show)
 
 type Sequent = SequentX EID
-type SequentI = SequentX (I,EID)
+type SequentI = SequentX (EID)
 
 data Rule top bottom = Rule
   { top :: top
@@ -124,10 +124,8 @@ data Syntax
       )
   | Use Var (Rule () (Sequent Gamma Delta)) -- contexts kept because they're bindings
   | Assign Var (Rule (Sequent Gamma Delta) ()) -- contexts kept because they're bindings
-  | Dup Level HDir (Rule EID [EID])
-  | DupInv Level HDir (Rule [EID] EID)
-  | Lift HDir (Rule (Level,EID) (Level,EID))
-  | LiftInv HDir (Rule (Level,EID) (Level,EID))
+  | Dup HDir (Rule EID [EID])
+  | DupInv HDir (Rule [EID] EID)
    deriving (Eq,Ord,Show)
 
 type Graph = [Syntax]
@@ -168,8 +166,8 @@ translate seq vars (retlvl,ret) (Var v) = do
   let vl@(i,_) = vars Map.! v
   return $ [Identity (Rule () (Sequent vseq vret ret))
     ,BangD (Rule
-      (Sequent (retlvl,vseq) (retlvl, vret) ())
-      (Sequent (retlvl,seq) vl ())
+      (Sequent vseq vret ())
+      (Sequent seq (snd vl) ())
     )]
 translate seq vars (retlvl,ret) (Lam v b) = do
   varsi <- traverse (freshen "i") vars
@@ -220,8 +218,8 @@ translate seq vars (retlvl,ret) (App a b) = do
   newrretf <- newrret %% "f"; c_bseq <- mkEID "c_bseq"
   let retlvlinc = case retlvl of Level i -> Level (i+1)
   let bang = Bang (Rule
-              (Sequent (retlvlinc,c_bseq) (Map.elems bvarsf) ((retlvlinc, newrretf), []))
-              (Sequent (retlvl,dseq) (Map.elems bvars) ((retlvl, newrret), []))
+              (Sequent c_bseq (map snd $ Map.elems bvarsf) (newrretf, []))
+              (Sequent dseq (map snd $ Map.elems bvars) (newrret, []))
               )
   bt <- translate c_bseq bvarsf (retlvlinc,newrretf) b
   return $ bt ++ [bang] ++ [ident] ++ [pil] ++ at ++ [cut] ++ bangcs
@@ -265,10 +263,8 @@ ports s =
     Cut r -> rp r
     Use _ r -> rp r
     Assign _ r -> rp r
-    Dup l hd r -> map (\(v,gd) -> (v,gd {side = hd, level= Just l})) (rp r)
-    DupInv l hd r ->  map (\(v,gd) -> (v,gd {side = hd, level = Just l})) (rp r)
-    Lift hd r -> map (\(v,gd) -> (v,gd {side = hd})) (rp r)
-    LiftInv hd r -> map (\(v,gd) -> (v,gd {side = hd})) (rp r)
+    Dup hd r -> map (\(v,gd) -> (v,gd {side = hd, level= Nothing})) (rp r)
+    DupInv hd r ->  map (\(v,gd) -> (v,gd {side = hd, level = Nothing})) (rp r)
   where
     rp Rule {..} = map (Top,) (getHPorts top) ++ map (Bottom,) (getHPorts bottom)
 
@@ -286,13 +282,6 @@ instance {-# OVERLAPPABLE #-} (GetPorts a, GetPorts b) => GetHPorts (Sequent a b
     map (\gd -> gd { side = Right}) (getPorts right)
      where
        t_gd eid = GD eid Turnstile Nothing [] []
-instance {-# OVERLAPPABLE #-} (GetPorts a, GetPorts b) => GetHPorts (SequentI a b) where
-  getHPorts (Sequent{turnstile=(t_i,turnstile),..}) =
-    [t_gd turnstile] ++
-    map (\gd -> gd { side = Left}) (getPorts left) ++
-    map (\gd -> gd { side = Right}) (getPorts right)
-     where
-       t_gd eid = GD eid Turnstile (Just t_i) [] []
 instance (GetHPorts a, GetHPorts b) => GetHPorts (a, b) where
   getHPorts (a,b) = addHPath Fst (getHPorts a) ++ addHPath Snd (getHPorts b)
 instance (GetHPorts a) => GetHPorts [a] where
@@ -345,10 +334,8 @@ tagName s =
     Cut _ -> "Cut"
     Use _ _ -> "Use"
     Assign _ _ -> "Assign"
-    Dup _ _ _ -> "Dup"
-    DupInv _ _ _ -> "DupI"
-    Lift _ _ -> "Lift"
-    LiftInv _ _ -> "LiftI"
+    Dup _ _ -> "Dup"
+    DupInv _ _ -> "DupI"
 
 data EdgeInfo = EdgeInfo
   { e_eid :: EID
@@ -519,15 +506,11 @@ instance TraverseEID Syntax where
     Cut r -> Cut <$> traverseEID f r
     Use t r -> Use t <$> traverseEID f r
     Assign t r -> Assign t <$> traverseEID f r
-    Dup l h r -> Dup l h <$> traverseEID f r
-    DupInv l h r -> DupInv l h <$> traverseEID f r
-    Lift h r -> Lift h <$> traverseEID f r
-    LiftInv h r -> LiftInv h <$> traverseEID f r
+    Dup h r -> Dup h <$> traverseEID f r
+    DupInv h r -> DupInv h <$> traverseEID f r
 instance (TraverseEID a, TraverseEID b) => TraverseEID (Rule a b) where
   traverseEID f (Rule t b) = Rule <$> traverseEID f t <*> traverseEID f b
 instance (TraverseEID a, TraverseEID b) => TraverseEID (Sequent a b) where
-  traverseEID f (Sequent{..}) = Sequent <$> traverseEID f turnstile <*> traverseEID f left <*> traverseEID f right
-instance (TraverseEID a, TraverseEID b) => TraverseEID (SequentI a b) where
   traverseEID f (Sequent{..}) = Sequent <$> traverseEID f turnstile <*> traverseEID f left <*> traverseEID f right
 instance (TraverseEID a, TraverseEID b) => TraverseEID (a, b) where
   traverseEID f (a,b) = (,) <$> traverseEID f a <*> traverseEID f b
@@ -574,13 +557,13 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
     Nothing -> ([], pure graph)
     Just edge_n -> let (rest, g) = reduce graph edges edge_n dn in ((e,r) : rest, g)
   in case (r,s,dir) of
-  (Dup l hd (Rule dup_out dup_ins), _, _) ->
+  (Dup hd (Rule dup_out dup_ins), _, _) ->
     case follow dup_out Down of
       Nothing -> ([], pure graph)
       Just dup_target ->
         case dup_target of
-          Dup _ _ _ | dir == Down -> expand dup_out Down
-          DupInv li hdi (Rule dupi_ins dupi_out) | l == li && hd == hdi -> replaceM $ do
+          Dup _ _ | dir == Down -> expand dup_out Down
+          DupInv hdi (Rule dupi_ins dupi_out) | hd == hdi -> replaceM $ do
             pure . join_edges (zip dupi_ins dup_ins) . replace [r,dup_target] [] $ graph
           _ -> replaceM $ do
             (newnodes, newedges) <- fmap unzip . for dup_ins $ \in_edge -> runWriterT $ traverseEID (\e ->
@@ -592,35 +575,12 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
             let t_ports = filter (\(_,gd) -> eid gd /= dup_out) $ ports dup_target
             let tr_edges = transpose newedges
             let f (v,gd) out_edges = case v of {
-              Top -> Dup (maybe l id $ level gd) (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
-            ; Bottom -> DupInv (maybe l id $ level gd) (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+              Top -> Dup (side gd) (Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
+            ; Bottom -> DupInv (side gd) (flip Rule (eid gd) (map (\(e,e') -> assert (e == eid gd) $ e') out_edges))
             }
             let newdupnodes = assert (length t_ports == length tr_edges) $ zipWith f t_ports tr_edges
             pure $ replace [r,dup_target] (newnodes++newdupnodes) graph
-  (DupInv l hd (Rule dup_ins dup_out), _, Up) -> expand dup_out Up
-  (Lift hd (Rule (i,lt) (j,lb)), _, _) ->
-    case follow lt Down of
-      Nothing -> ([], pure graph)
-      Just lift_target ->
-        case lift_target of
-          Dup _ _ _ | dir == Down -> expand lt Down
-          LiftInv hdi (Rule (f,lti) (g,lbi)) | lt == lbi && hd == hdi && f == j && i == g -> replaceM $ do
-            pure . join_edges ([(lti,lb)]) . replace [r,lift_target] [] $ graph
-          _ -> replaceM $ do
-            (newnode, newedges) <- runWriterT $ traverseEID (\e ->
-                if e == lt then pure lb else do
-                  e' <- lift $ e %% ""
-                  tell [(e,e')]
-                  pure e') lift_target
-            -- make dup/dupinv nodes
-            let t_ports = filter (\(_,gd) -> eid gd /= lt) $ ports lift_target
-            let f (v,gd) (e,e') = let !() = assert (e == eid gd) () in traceShow (v,gd,e') $ case v of {
-              Top -> Lift (side gd) (Rule (i,e) (j,e'))
-            ; Bottom -> LiftInv (side gd) (Rule (j,e') (i,e))
-            }
-            let newliftnodes = assert (length t_ports == length newedges) $ zipWith f t_ports newedges
-            pure $ replace [r,lift_target] ([newnode]++newliftnodes) graph
-  (LiftInv hdi (Rule (j,lti) (i,lbi)), _, Up) -> expand lbi Up
+  (DupInv hd (Rule dup_ins dup_out), _, Up) -> expand dup_out Up
 {-
     case follow lbi Up of
       Nothing -> ([], pure graph)
@@ -656,10 +616,8 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                 pure . join_edges [(irr,c_r),(c_rseq,iseq),(c_lseq,c_bseq){-,(c_l,ill)-}] . replace [r,left_node] [] $ graph
               (Identity (Rule () (Sequent iseq ill irr)), _) | irr == c_r -> replaceM $ do
                 pure . join_edges [(ill,c_l),(c_lseq,iseq),(c_rseq,c_bseq){-,(c_r,irr)-}] . replace [r,right_node] [] $ graph
-              (Dup _ _ _, _) -> expand c_r Down
-              (_, Dup _ _ _) -> expand c_l Down
-              (Lift _ _, _) -> expand c_r Down
-              (_, Lift _ _) -> expand c_l Down
+              (Dup _ _, _) -> expand c_r Down
+              (_, Dup _ _) -> expand c_l Down
               (PiR (Rule pr_cases (Sequent pr_bseq pr_bl (pr_main, pr_br))),
                 PiL t (Rule (pl_r, pl_l) (Sequent pl_bseq pl_main ()))) | c_r == pr_main && pl_main == c_l -> replaceM $ do
                 let ([(_,Sequent pr_m_seq (pr_m_tl, pr_m_l) (pr_m_r, pr_m_tr))], extraCases@[]) = partition ((==t) . fst) pr_cases
@@ -676,7 +634,7 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                 pure . join_edges ([(c_lseq, c_bseq), (c_rseq, pl_bseq)] ++ zip pr_m_tl pr_bl ++ zip pr_m_tr pr_br) .
                   replace [r,right_node,left_node] newcuts $ graph
               (Bang (Rule (Sequent b_tseq b_tl (b_tmain, b_tr)) (Sequent b_bseq b_bl (b_bmain, b_br))),
-                BangC (Rule (Sequent bc_tseq bc_t ()) (Sequent bc_bseq bc_b ()))) | c_r == snd b_bmain && c_l == bc_b -> replaceM $ do
+                BangC (Rule (Sequent bc_tseq bc_t ()) (Sequent bc_bseq bc_b ()))) | c_r == b_bmain && c_l == bc_b -> replaceM $ do
                 let u = undefined
                 bangs <- traverseEID (%% "") $ replicate (length bc_t) right_node
                 let f (Bang (Rule (Sequent b_tseq b_tl (b_tmain, b_tr)) (Sequent b_bseq b_bl (b_bmain, b_br))))
@@ -688,55 +646,54 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                 let (bangs_tseq, bangs_tl, bangs_tmain, bangs_tr, bangs_bseq, bangs_bl, bangs_bmain, bangs_br)
                       = foldr f ([],[],[],[],[],[],[],[]) bangs
 
-                let dup_seq = Dup (fst b_tseq) Turnstile (Rule (snd b_tseq) (map snd bangs_tseq))
-                let dup_l = zipWith3 (\a b c -> Dup a Left (Rule b c)) (map fst b_tl) (map snd b_tl) (transpose $ map (map snd) bangs_tl)
-                let dup_r = zipWith3 (\a b c -> Dup a Right (Rule b c)) (map fst b_tr) (map snd b_tr) (transpose $ map (map snd) bangs_tr)
-                let dup_main = Dup (fst b_tmain) Right (Rule (snd b_tmain) (map snd bangs_tmain))
+                let dup_seq = Dup Turnstile (Rule (b_tseq) (bangs_tseq))
+                let dup_l = zipWith (\b c -> Dup Left (Rule b c)) (b_tl) (transpose $ bangs_tl)
+                let dup_r = zipWith (\b c -> Dup Right (Rule b c)) (b_tr) (transpose $ bangs_tr)
+                let dup_main = Dup Right (Rule (b_tmain) (bangs_tmain))
 
                 cutseq <- replicateM (length bc_t - 1) (mkEID "seqBC")
                 whimseq <- replicateM (length b_br) (mkEID "seqBW")
                 bangseq <- replicateM (length b_bl) (mkEID "seqBB")
-                let seqs = [bc_tseq] ++ cutseq ++ whimseq ++ bangseq ++ [snd b_bseq]
+                let seqs = [bc_tseq] ++ cutseq ++ whimseq ++ bangseq ++ [b_bseq]
 
                 let mkCut bangs_bseq bangs_bmain bc_t tseq bseq =
                       Cut (Rule (Sequent bangs_bseq () bangs_bmain, Sequent tseq bc_t ()) (Sequent bseq () ()))
-                let cuts = zipWith3 mkCut (map snd bangs_bseq) (map snd bangs_bmain) bc_t
+                let cuts = zipWith3 mkCut (bangs_bseq) (bangs_bmain) bc_t
                 let mkBangC b_bl bangs_bl tseq bseq = BangC (Rule (Sequent tseq bangs_bl ()) (Sequent bseq b_bl ()))
-                let bangcs = zipWith mkBangC (map snd b_bl) (transpose $ map (map snd) bangs_bl)
+                let bangcs = zipWith mkBangC (b_bl) (transpose $ bangs_bl)
                 let mkWhimC b_br bangs_br tseq bseq = WhimC (Rule (Sequent tseq () bangs_br) (Sequent bseq () b_br))
-                let whimcs = zipWith mkWhimC (map snd b_br) (transpose $ map (map snd) bangs_br)
+                let whimcs = zipWith mkWhimC (b_br) (transpose $ bangs_br)
 
                 let spine = zipWith3 id (cuts ++ whimcs ++ bangcs) seqs (tail seqs)
 
                 pure . join_edges [(c_lseq, c_bseq), (c_rseq, bc_bseq)] $
                   replace [r,right_node,left_node] ([dup_seq,dup_main] ++ dup_l ++ dup_r ++ bangs ++ spine) graph
               (Bang (Rule (Sequent b_tseq b_tl (b_tmain, b_tr)) (Sequent b_bseq b_bl (b_bmain, b_br))),
-                BangD (Rule (Sequent bd_tseq bd_t ()) (Sequent bd_bseq bd_b ()))) | c_r == snd b_bmain && c_l == snd bd_b -> replaceM $ do
-                let mkLift dir (i,a) (j,b) = if i == j then E.Right (b,a) else E.Left (Lift dir (Rule (i,a) (j,b)))
-                let !i = assert (fst b_bseq == fst b_bmain && fst b_bmain == fst bd_b && fst bd_b == fst b_bseq) (fst bd_b)
+                BangD (Rule (Sequent bd_tseq bd_t ()) (Sequent bd_bseq bd_b ()))) | c_r == b_bmain && c_l == bd_b -> replaceM $ do
+                let mkLift dir a b = E.Right (b,a)
                 b_lift_tseq <- mkEID "seqDS"
                 b_lift_tmain <- mkEID "seqDM"
                 bd_lift_tseq <- mkEID "seqDD"
                 bd_lift_t <- mkEID "seqDE"
 
-                let lift_seq_l = mkLift Turnstile bd_tseq (i, bd_lift_tseq)
-                let lift_main_l = mkLift Left bd_t (i, bd_lift_t)
-                let lift_seq_r = mkLift Turnstile b_tseq (i, b_lift_tseq)
-                let lift_main_r = mkLift Right b_tmain (i, b_lift_tmain)
+                let lift_seq_l = mkLift Turnstile bd_tseq (bd_lift_tseq)
+                let lift_main_l = mkLift Left bd_t (bd_lift_t)
+                let lift_seq_r = mkLift Turnstile b_tseq (b_lift_tseq)
+                let lift_main_r = mkLift Right b_tmain (b_lift_tmain)
                 let lift_l = zipWith (mkLift Left) b_tl b_bl
                 let lift_r = zipWith (mkLift Right) b_tr b_br
 
                 let lifts_all = [lift_seq_l,lift_seq_r,lift_main_l,lift_main_r] ++ lift_l ++ lift_r
                 let (lifts, joins) = E.partitionEithers lifts_all
 
-                let cut = Cut (Rule (Sequent b_lift_tseq () b_lift_tmain, Sequent bd_lift_tseq bd_lift_t ()) (Sequent (snd b_bseq) () ()))
+                let cut = Cut (Rule (Sequent b_lift_tseq () b_lift_tmain, Sequent bd_lift_tseq bd_lift_t ()) (Sequent (b_bseq) () ()))
 
-                pure . join_edges ([(c_lseq, c_bseq), (c_rseq, snd bd_bseq)] ++ joins) $
+                pure . join_edges ([(c_lseq, c_bseq), (c_rseq, bd_bseq)] ++ joins) $
                   replace [r,right_node,left_node] (cut:lifts) graph
 
               (Bang (Rule (Sequent br_tseq br_tl (br_tmain, br_tr)) (Sequent br_bseq br_bl (br_bmain, br_br))),
-                Bang (Rule (Sequent bl_tseq bl_tl (bl_tmain, bl_tr)) (Sequent bl_bseq bl_bl (bl_bmain, bl_br)))) | c_r == snd br_bmain -> replaceM $ do
-                let n = fromJust $ findIndex (\(_,eid) -> eid == c_l) bl_bl
+                Bang (Rule (Sequent bl_tseq bl_tl (bl_tmain, bl_tr)) (Sequent bl_bseq bl_bl (bl_bmain, bl_br)))) | c_r == br_bmain -> replaceM $ do
+                let n = fromJust $ findIndex (\eid -> eid == c_l) bl_bl
                 let bl_tln = bl_tl !! n
                 let
                   notn :: [a] -> [a]
@@ -750,18 +707,18 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
                 newcut_bseq <- mkEID "newcut_bseq"
                 brl_bl_eid <- replicateM ilength (mkEID "brl_bl")
                 brl_br_eid <- replicateM jlength (mkEID "brl_br")
-                let brl_bl = zip (map fst br_bl) brl_bl_eid
-                let brl_br = zip (map fst br_br) brl_br_eid
+                let brl_bl = brl_bl_eid
+                let brl_br = brl_br_eid
 
                 let bang_lower = Bang (Rule
                                   (Sequent br_tseq br_tl (br_tmain, br_tr))
-                                  (Sequent (fst br_bseq, newcut_rseq) brl_bl (br_bmain, brl_br)))
-                let newcut = Cut (Rule (Sequent newcut_rseq () (snd br_bmain), Sequent (snd bl_tseq) (snd bl_tln) ()) (Sequent newcut_bseq () ()))
+                                  (Sequent newcut_rseq brl_bl (br_bmain, brl_br)))
+                let newcut = Cut (Rule (Sequent newcut_rseq () (br_bmain), Sequent (bl_tseq) (bl_tln) ()) (Sequent newcut_bseq () ()))
                 let bang_upper = Bang (Rule
-                                  (Sequent (fst bl_tseq, newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
+                                  (Sequent (newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
                                   (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br)))
 
-                pure . join_edges ([(c_bseq, c_rseq), (snd br_bseq, c_lseq)]) $
+                pure . join_edges ([(c_bseq, c_rseq), (br_bseq, c_lseq)]) $
                   replace [r,right_node,left_node] [bang_lower,newcut,bang_upper] graph
 
               (_,_) -> replaceM $ traceShow (r,right_node,left_node) undefined
@@ -774,13 +731,13 @@ reduce graph edges e@(from_id,to_id,einf) dir = let
           (PiL _ (Rule _ (Sequent _ i _))) -> i
           (SigmaR _ (Rule _ (Sequent _ _ i))) -> i
           (SigmaL (Rule _  (Sequent _ (_, i) _))) -> i
-          (Bang (Rule _ (Sequent _ _ ((_,i), _)))) -> i
+          (Bang (Rule _ (Sequent _ _ ((i), _)))) -> i
         -- todo: handle auxiliary ports. Although we will never encounter them during reduction?
-          (BangD (Rule _ (Sequent _ (_,i) ()))) -> i
+          (BangD (Rule _ (Sequent _ (i) ()))) -> i
           (BangC (Rule _ (Sequent _ i ()))) -> i
           (BangW (Rule _  (Sequent _ i ()))) -> i
-          (Whim (Rule _  (Sequent _ (_, (_,i)) _))) -> i
-          (WhimD (Rule _ (Sequent _ () (_,i)))) -> i
+          (Whim (Rule _  (Sequent _ (_, (i)) _))) -> i
+          (WhimD (Rule _ (Sequent _ () (i)))) -> i
           (WhimC (Rule _ (Sequent _ () i))) -> i
           (WhimW (Rule _ (Sequent _ () i))) -> i
           _ -> traceShow p undefined
@@ -850,10 +807,37 @@ writeGraphs graph name limit = do
           , "xA9" -- 6
           , "xB10" -- 7
           , "xBf22" -- 8
-          , "rval39" -- 9, Asperti 2
-          , "ret42" -- 10
-          , "newrret61" -- 11
-          , "yA43" -- 12
+          , "xret26" -- 9
+          , "rval39" -- 10, Asperti 2
+          , "ret42" -- 11
+          , "newrret61" -- 12
+          , "yA43" -- 13
+          , "newrret117" -- 14
+          , "yBf56" -- 15
+          , "yret60" -- 16
+          , "newrretf31" -- 17, Asperti 3
+          , "c_bseq32" -- 18
+          , "lval14" -- 19, Asperti 4
+          , "lret19" -- 20
+          , "hf65" -- 21
+          , "c_bseq67" -- 22
+          , "lval70" -- 23, Asperti 5
+          , "hseq72" -- 24
+          , "newrret74" -- 25
+          , "dseq76" -- 26
+          , "newrretf78" -- 27, Asperti 6
+          , "c_bseq79" -- 28
+          , "i81" -- 29
+          , "seq80" -- 30
+          , "iret84" -- 31
+          , "ret82" -- 32, Asperti 7
+          , "iseq83" -- 33
+          , "lret75" -- 34
+          , "newrretf66" -- 35
+          , "idseq77" -- 36
+          , "lval48" -- 37
+          , "h34" -- 38, Asperti 8
+          , "seq33" -- 39
           ] ++ [Nothing]
 
 {-

@@ -1,16 +1,16 @@
 Values
 ######
 
-Values are `immutable <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg>`__ and have notions of equality, comparison, literal syntax, and deconstruction. Values can be copied freely and discarded if they are no longer needed.
+In Stroscot values are defined to be expressions that are in normal form (strongly reduced). WHNF is not sufficient to ensure a value, e.g. ``[1,undefined]`` reduces to ``undefined`` hence is not a value.
 
-Strictly, values are defined to be normal forms. Some confusion arises because of WHNF and weak reduction, but here we assume strong reduction. Expressions include values and terms containing reducible expressions.
+Values are immutable (as `Rich Hickey says <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg>`__) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.
 
-Values are described here in their typical syntactic forms for convenience. These syntactic forms typically are reducible terms, rather than values, but they reduce to a value of the compiler's preferred data structure implementation. Programs may define the syntax here to other values.
+For convenience, "value" really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - they reduce to a value of the compiler's preferred data structure implementation. Programs may define the syntax here to other values.
 
 Symbols
 =======
 
-Symbols are unique values defined in modules and addressed by strings. Bare symbols consist Of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus ``foo``, ``Foo``, and ``FOO`` are distinct identifiers. Other strings can be turned into symbols with ``@``, for example ``@"null"``. In addition operator symbols can be defined with parentheses and a sequence of punctuation characters, e.g. ``(+)``. There is also the empty parentheses symbol ``()``.
+Symbols are unique values defined in modules and addressed by strings. Bare symbols consist of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus ``foo``, ``Foo``, and ``FOO`` are distinct identifiers. Other strings can be turned into symbols with ``@``, for example ``@"null"``. In addition operator symbols can be defined with parentheses and a sequence of punctuation characters, e.g. ``(+)``. There is also the empty parentheses symbol ``()``, called "unit".
 
 ::
 
@@ -42,6 +42,13 @@ Note that if there is an appropriate syntax rule the second example could also b
 
 Terms subsume algebraic data types, since an ADT value is a symbol applied to other values.
 
+Terms also include the other function syntax, keyword arguments and so on.
+
+Infinite terms
+--------------
+
+Sometimes it is useful to deal with terms that are solutions to a system of equations, like ``let x=cons 1 x in x``. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. ``let fib x y = cons x (fib y (x+y)) in fib 0 1`` requires infinitely many reductions to reduce to an infinite normal form.
+
 Numbers
 =======
 
@@ -70,6 +77,8 @@ Leadings 0's are significant - literals with leading zeros must be stored in a t
 
   integer = base? digit+ pos_exponent? format?
 
+Really integers are just a special class of symbols.
+
 Rationals
 ---------
 
@@ -82,7 +91,9 @@ Rationals
 
 Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, but liberalized. We allow floats to be the numerator/denominator because writing out ``1e99 / 1e-99`` would be tedious.
 
-The normal form of a rational is ``AeB / C`` where ``A`` and ``C`` are relatively prime and ``C`` is not  zero and not divisible by 10.
+The normal form of a rational is ``AeB / C`` where ``A`` and ``C`` are relatively prime integers, ``B`` is an integer, and ``C`` is an integer that is not zero and not divisible by 10.
+
+So a rational is a term with a nested term, ``(/) ((e) <int> <int>) <int>``.
 
 Reals
 -----
@@ -97,7 +108,7 @@ These operations can be written out as terms, e.g. ``sin (7/2)``, so to support 
 p-adics and surreals
 --------------------
 
-Similarly to reals, p-adics and surreal numbers are represented using integers, rationals, constants, and operations on them.
+p-adics and surreal numbers are also represented using terms composed of integers, rationals, constants, and other terms, representing operations.
 
 Number formats
 --------------
@@ -109,79 +120,42 @@ Complex
 
 These are just a term ``complex a b`` representing ``a + b*i`` where ``a,b`` are real numbers. Maybe it is also worth having ``complex_polar r t = r*exp (i*t)``.
 
-Strings
-=======
-
-::
-
-  "Hello world!\n"
-  ``Hello user ${id}``
-  [Enclosed text]
-  'string'
-  """ multiline
-  string"""
-
-Double and single quotes are both supported, as well as a multi-line syntax.
-There is no explicit syntax for characters, instead characters are strings of length 1.
-Escape sequences are defined; the main ones are ``\"`` to escape a quote and ``\\`` to escape a backslash, the others aren't relevant to parsing the literal.
-
-String concatenation is ``++``.
-
-The string is raw bytes terminated with a null character, like in C, or a length plus raw bytes.
-Often strings are encoded in UTF-8.
-
-Character
----------
-
-A “character” is not just a single Unicode code point. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points. Unicode calls characters "grapheme clusters" and provides an algorithm for identifying them in UAX #29. The main notable feature of the algorithm is that a grapheme cluster may be arbitrarily long due to the use of combining characters/accents and ZWJs, for example in Zalgo text, hence a character must be repesented as a variable-length sequence of codepoints. Hence it is simplest and most correct to define a character as a Unicode string of grapheme length 1.
-
-Date/time
-=========
-
-Date/time values are written using symbols applied to strings, lists, or records using ISO 8601 style formats, e.g. ``instant "2011-12-03T10:15:30.999999999Z"``, ``gregorianDate [2010,12,03]``, or ``time { hour = 10, minute = 10, second = 12.3 }``. This hides all internal representation details. Internally there is a more compact form, e.g. a 128-bit number.
-
-Binary data
-===========
-
-Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. These are just a list of bits, ``bits [1,0,1]``, but as a separate datatype the bits can be stored compactly.
-
-There is also a binary/hex literal syntax:
-
-::
-
-  base = 0[a-z]
-  digit = [0-9a-fA-F_]
-
-  data = base digit+
-
-We allow various base prefixes ``0?`` - ``x`` (hexadecimal), ``o`` (octal), ``d`` (decimal) and ``b`` (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example ``0b010 = bits [0,1,0]``.
-
-Another way to write data is as a string ``bits "abcd\x0F"`` which makes use of UTF-8 characters and hexadecimal for invalid byte sequences.
-
 Lists
 ======
 
-A list represents an ordered sequence of values; it may be empty, finite, or infinite.
+A list represents an ordered sequence of values that is empty or finite, but not infinite (only terms can be infinite).
+
+Basic list syntax is the usual syntactic sugar for list values.
 
 ::
 
-  arr = a : [b, c]
+  [] // empty list
+  arr = [a, b, c]
 
-Basic list syntax is the same as in Haskell, thus ``[]`` is the empty list, ``x:xs`` denotes a list with head element ``x`` and tail list ``xs``, and the usual syntactic sugar for list values in brackets is also provided, thus ``[x,y,z]`` is exactly the same as ``x:y:z:[]``. But ``:`` isn't typed so you can write ``1:2`` for example, or have heterogeneous lists. More advanced list operations are done with the efficient ``++`` operator.
+``arr`` translates to a Lisp-like term ``list a b c``, making use of the term syntax's capability to take variadic arguments. Heterogeneous lists are possible, ``list 1 "x" (int32 3)``.
+
+Haskell's cons operator is abandoned in favor of concatenation:
+
+::
+
+  xs ++ ys // concatenation
+  [x] ++ xs // list with head element ``x`` and tail list ``xs``, like cons
+
+``++`` is just a symbol, so you can write ``[1] ++ 2`` for example, i.e. the term ``(++) (list 1) 2``.
 
 A list has push and pop operations from head and tail so can be used as a stack, queue, or double-ended queue (dequeue).
 
 Tuple
 -----
 
-In Stroscot tuple is synonymous with list. There's not a different type with different semantics like in Python or Pure. But you can use the tuple syntax ``(a,b)`` as is convenient.
+In Stroscot tuple is synonymous with list - they're both immutable. There's not a different type with different semantics like in Python or Pure. You can use the tuple syntax ``(a,b)`` in place of list syntax ``[a,b]`` whenever convenient.
 
 Arrays
 ------
 
 (Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example ``array (range_inclusive 1 3) [1,2,3]`` defines a 1-based array where ``arr[i] = i``. Maybe there is also an element type, ``typed_array int32 (range_inclusive 1 3) [1,2,3]``
 
-Mutable arrays are a reference pointing to an immutable array. There is also an array of mutable cells but this is not used often as mutable array operations are optimized to in-place operations.
+Mutable arrays are a reference pointing to an immutable array. There is also an array of mutable cells but this is not used often as mutable array operations are optimized to in-place operations. Mutable arrays are not C pointers - conceptually you are doing ``(read arr)[0]`` if you want the first element, as opposed to a pointer ``readOffset Int 0 ptr``. This is hidden normally because ``arr[0]`` and ``arr[0] := 1`` are overloaded to read/write mutable arrays.
 
 Tensors
 -------
@@ -221,6 +195,55 @@ There is also a ``matrix`` DSL which turns semicolons into rows.
 
   matrix [1,2;3,4]
   # [[1,2],[3,4]]
+
+Binary data
+===========
+
+Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. There is a binary/hex literal syntax:
+
+::
+
+  base = 0[a-z]
+  digit = [0-9a-fA-F_]
+
+  data = base digit+
+
+We allow various base prefixes ``0?`` - ``x`` (hexadecimal), ``o`` (octal), ``d`` (decimal) and ``b`` (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example ``0b010 = bits [0,1,0]``.
+
+Another way to write data is as a string ``bits "abcd\x0F"`` which makes use of UTF-8 characters and hexadecimal for invalid byte sequences.
+
+The normal form is just a term applied to a list of bits, ``bits [1,0,1]``. Because of the term tagging it, the list can be stored compactly.
+
+Strings
+=======
+
+::
+
+  "Hello world!\n"
+  ``Hello user ${id}``
+  [Enclosed text]
+  'string'
+  """ multiline
+  string"""
+
+Double and single quotes are both supported, as well as a multi-line syntax.
+There is no explicit syntax for characters, instead characters are strings of length 1.
+Escape sequences are defined; the main ones are ``\"`` to escape a quote and ``\\`` to escape a backslash, the others aren't relevant to parsing the literal.
+
+String concatenation is ``++``.
+
+The string is raw bytes terminated with a null character, like in C, or a length plus raw bytes.
+Often strings are encoded in UTF-8.
+
+Character
+---------
+
+A “character” is not just a single Unicode code point. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points. Unicode calls characters "grapheme clusters" and provides an algorithm for identifying them in UAX #29. The main notable feature of the algorithm is that a grapheme cluster may be arbitrarily long due to the use of combining characters/accents and ZWJs, for example in Zalgo text, hence a character must be repesented as a variable-length sequence of codepoints. Hence it is simplest and most correct to define a character as a Unicode string of grapheme length 1.
+
+Date/time
+=========
+
+Date/time values are written using symbols applied to strings, lists, or records using ISO 8601 style formats, e.g. ``instant "2011-12-03T10:15:30.999999999Z"``, ``gregorianDate [2010,12,03]``, or ``time { hour = 10, minute = 10, second = 12.3 }``. This hides all internal representation details. Internally there is a more compact form, e.g. a 128-bit number.
 
 Records
 =======
@@ -276,11 +299,6 @@ Functions
 
 Functions are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare via alpha equivalence).
 
-Cyclic values
-=============
-
-Sometimes it is useful to deal with solutions to a system of equations, like ``let x=cons 1 x in x``. These are also values - there is a way to compute the (unique) minimal graph representation.
-
 Modules
 =======
 
@@ -296,6 +314,7 @@ References
 
 References are like pointers but use symbols instead of integers, we'll go with ``Ref r123`` for syntax where ``r123`` is a symbol. The main difference from a pointer is that you can't do arithmetic on symbols. Most symbols are autogenerated inside the reference creation operation ``ref``, but you can also write reference values directly. This is mainly for convenience in debugging at the REPL, since fixed symbols are tantamount to global variables and hence are bad programming practice.
 
+Postfix ++ and -- are statements
 
 Data Structures
 ===============

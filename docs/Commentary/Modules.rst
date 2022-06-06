@@ -7,6 +7,9 @@ public - All data is directly accessible
 protected - a variant of public, because anybody can access a protected member if he or she wants to, without much difficulty.
 package - a variant of private, limiting access to the package rather than the file. Intended to replace C++ "friendly"
 
+- exports: we write: 'export a, b, c;' (with a, b, c, etc.  a list of
+  exported names, possibly also: structure.field)
+- the ordering of methods in interfaces is not relevant
 
 1ML
 ===
@@ -25,3 +28,12 @@ Dependency hell
 ===============
 
 It is key to support side-by-side execution of multiple versions of the same functionality. So names also include version numbers and a cryptographic hash.
+
+Lexical scoping
+===============
+
+An identifier is visible from the point of its declaration to the end of the immediately surrounding block.
+Later identifiers shadow earlier identifiers with the same name; shadowing generates a warning.
+There is only one effective scope at any point in the code (for instance, variables and types are looked up in the same scope).
+
+Uniform scoping rules make programs easier to read and to understand.
