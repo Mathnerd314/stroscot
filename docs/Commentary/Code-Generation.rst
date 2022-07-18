@@ -13,7 +13,7 @@ Operations
 
 To abstract the ISA we consider the instructions from a functional perspective - these functions are called "operations". Operations are exposed in Stroscot as intrinsic functions. This allows using a familiar syntax.
 
- Operations don't reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX).
+Operations don't reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX).
 
 For example the operations corresponding to x86-64 DIV, ADD, and ADC with 64-bit operands look like:
 
@@ -406,6 +406,42 @@ Other than that ability to avoid the PLT and GOT in some cases, a PIE is really 
 
 This does imply that a PIE must be dynamically linked, in the sense of using the dynamic linker. Since the dynamic linker and the C library are closely intertwined, linking the PIE statically with the C library is unlikely to work in general. It is possible to design a statically linked PIE, in which the program relocates itself at startup time. The dynamic linker itself does this. However, there is no general mechanism for this at present.
 
+
+ABI
+---
+
+Swift 5 has a stable ABI, which has been `praised <https://gankra.github.io/blah/swift-abi/>`__. This allows dynamic linking to system-wide libraries. Dynamic linking means that the ABI (method signatures) is provided at compile time but the actual methods are only available at runtime via the system dynamic linker.
+
+An ABI consists of the names of some symbols together with their calling convention, which specifies the layout of types and return values. It is a property of the platform and toolchain. Linux C uses the Itanium ABI, Windows has MSVC (supported by LLVM) and also gcc can use Itanium. There are split conventions for 64-bit vs 32-bit.
+
+C++ templated and Rust generic functions ``template <typename T> bool process(T value)`` generate symbols for each type (monomorphization) but have no direct ABI.
+
+ABI should follow API, nothing can save API-breaking changes. Annotations optimize the ABI, at the cost of adding more ways to break compatibility. Swift made adding some annotations backwards-compatible. Example annotations are frozen (non-resilient) layout, exhaustively matchable, inlineable, non-subclassable, non-escaping.
+
+Example: we change ``{ path : ptr char } -> Maybe {size : int64_t}`` to ``{ path : ptr char } -> Maybe {last_modified_time : int64_t, size : int64_t}``. In Swift this only breaks ABI if the ``frozen`` annotation is present. By default types are resilient, meaning they are passed by reference and the size, alignment, stride, and extra inhabitants of types are looked up from the type's witness table at runtime. But this is only outside the ABI boundary, inside the dynamic library it can assume the representation. And pointers have uniform layout hence don't need the witness table. Swift compiles polymorphic APIs to a generic ABI, rather than monomorphizing. Also fields of resilient types are only exposed as getters and setters, so can be computed instead of being stored fields.
+
+Reabstraction thunks wrap closures with the wrong ABI.
+
+ownership is part of the calling convention:
+
+- function stores value and will release it
+- functions borrows value and does not keep it
+
+exceptions use a special calling convention with the error type boxed in a register. The caller initializes the “swift error” register to 0, and if there’s an exception the callee sets that register to hold the boxed error’s pointer. This makes error propagation really fast.
+
+binary compatibility - changes will not break memory-safety or type-safety. Observable behavior may change, and preconditions, postconditions, and invariants may break. If a value is inlined, the old value will be used in existing compiled objects. Removing functionality has the expectation that the functionality is unused - if a client attempts to use the removed functionality it will get an error.
+
+"fragile" or "frozen" describes C structs, which have very strict binary compatibility rules. Swift has "resilient" structs which store a witness table with metadata on their interpretation.
+
+The following changes are binary compatible:
+
+- Changing the body/value/initial value of a function, constant, or variable
+- Adding, changing, or removing a default argument
+- Changing a variable to a constant or vice versa
+- Adding, reordering, or removing members of resilient structs.
+- Adding, reordering, or removing cases of a resilient enum.
+- Changing parsing rules
+
 Interpreter
 ===========
 
@@ -509,6 +545,7 @@ IR Style
 ========
 
 Goals:
+
 * represent non-local control flow (faults)
 * optimizations are localized (read small portion, write small portion)
 * all known optimizations can be implemented

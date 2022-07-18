@@ -1,7 +1,7 @@
 Syntax
 ######
 
-Almost everything in Stroscot is an expression. Values are numbers, booleans, and character strings of text. But there's also block statements and layout.
+Almost everything in Stroscot is an expression. But there's also block statements and layout.
 
 Unicode
 =======
@@ -16,7 +16,7 @@ Some combination of the following algorithms to do lexical analysis:
 
 * `line-breaking <https://www.unicode.org/reports/tr14/#BreakingRules>`__ (specifically, to determine hard / mandatory breaks)
 * `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
-* `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters
+* `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters. Go's rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, but this excludes combining characters and Devanagari. Go's upper case restriction means 日本語 cannot be exported, and instead X日本語 must be used.
 
 Stroscot is case-sensitive.
 
@@ -145,20 +145,24 @@ Mutable assignment (``:=``) is completely distinct from name binding (``=``). Th
 Functions
 =========
 
-::
-
-  f 1 = 1
-  f 2 = 2
-  f y | y != 1 && y != 2 = 3
-
 Sequential matching:
 
 ::
 
-  sequential
-    f 1 y = 1
-    f x 2 = 2
-    f x y = 3
+  f 1 y = 1
+  f x 2 = 2
+  f x y = 3
+
+Parallel matching:
+::
+
+  f 1 = 1
+  ;
+  f 2 = 2
+  ;
+  f y | y != 1 && y != 2 = 3
+
+The extra ``;`` is an escape to avoid sequential matching of a sequence; if you alternate clauses of different functions or define clauses in different files they will also be combined with parallel matching.
 
 Function application (juxtaposition) binds stronger than all operators and associates to the left, ``x y z --> (x y) z``.
 
@@ -215,7 +219,7 @@ This translates to:
   z x y = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
   -- z a fresh symbol
 
-To force a function definition you can use an as pattern, ``_@(,)
+To force a function definition you can use an as pattern, ``_@(,)``
 
 To force interpretation as a variable you can use an anonymous as pattern, ``(f@_) a b c``. Then ``f`` is a variable and will match any symbol, rather just ``f``. Example converting a function application to a list::
 
@@ -268,7 +272,7 @@ This just creates a low priority definition ``foo _ _ = undefined``.
 Non-linear patterns
 -------------------
 
-Non-left-linear patterns such as ``foo a a`` are allowed, this is interpreted as ``foo a b | a == b`` - rename variables and check for equality using ``==``. See :ref:`Equality and left-linearity` for a discussion.
+Non-left-linear patterns such as ``foo a a`` are allowed, this is interpreted as ``foo a b | a == b`` - rename variables and check for equality using ``==``. See :ref:`trs-equality-linearity` for a discussion.
 
 Pattern synonyms
 ----------------

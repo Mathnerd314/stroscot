@@ -57,7 +57,7 @@ Hardware exceptions
 
 Hardware exceptions on Linux are transformed to signals SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP, SIGEMT (emulator trap, not used on x86) `in the kernel <https://github.com/torvalds/linux/blob/a931dd33d370896a683236bba67c0d6f3d01144d/arch/x86/kernel/traps.c>`__. The type of exception is in si_code in siginfo_t SIGFPE->FPE_INTDIV (DE), SIGSEGV (`PF <https://github.com/torvalds/linux/blob/a931dd33d370896a683236bba67c0d6f3d01144d/arch/x86/mm/fault.c#L1487>`__, GP), SIGBUS (SS, AC), SIGILL (UD), etc. The signals can only be handled by the thread that raises them and are delivered immediately (synchronously); queueing and letting the thread continue normally doesn't make sense. The exceptions must be handled: execution cannot resume where it left off.
 
-On Windows the equivalent of signals for hardware exceptions is `Structured Exception Handling <https://docs.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=msvc-160>`__ or more specifically `Vectored Exception Handlers <https://docs.microsoft.com/en-us/windows/win32/debug/vectored-exception-handling>`__\ . In Visual C++ we can actually catch hardware exceptions inline with ``__try { } __except``. But GCC / LLVM haven't implemented SEH. (LLVM is `in progress <https://reviews.llvm.org/D80344>`__)
+On Windows the equivalent of signals for hardware exceptions is `Structured Exception Handling <https://docs.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=msvc-160>`__ or more specifically `Vectored Exception Handlers <https://docs.microsoft.com/en-us/windows/win32/debug/vectored-exception-handling>`__\ . In Visual C++ we can actually catch hardware exceptions inline with ``__try { } __except``. But GCC / LLVM haven't implemented SEH. (LLVM is `in progress <https://reviews.llvm.org/D102817>`__)
 
 SEH can be thought of much like temporarily registered signal handlers, where the exceptional conditions are signals, the __try blocks define where the handler is in effect, and the __except and __finally blocks are the handlers if the "signal" is received. In 64-bit Windows there are instruction tables that do unwinding.
 
@@ -118,7 +118,7 @@ These are synchronous exceptions in that they're directly attributable to the ac
 Nontermination
 ~~~~~~~~~~~~~~
 
-Infinite loops can be detected in some cases and replaced with a Nontermination or Loop exception. Dynamically, this can be implemented by decrementing a fuel counter on every reduction and throwing an exception. Whatever the starting fuel, an infinite loop is guaranteed to run it out. Statically the analyses are more general and can prove termination or nontermination without requiring an arbitrary initial fuel. Most functions terminate, but totality checkers are not omniscient.
+Infinite loops can be detected and replaced with a Nontermination or Loop exception. Dynamically, this can be implemented by decrementing a fuel counter on every reduction step and throwing an exception when it runs out. Whatever the starting fuel, an infinite loop is guaranteed to throw an exception. Statically the analyses are more general and can prove termination or nontermination without requiring the arbitrary choice of initial fuel. Most functions can be classified, but totality checkers are not omniscient.
 
 Exception groups
 ~~~~~~~~~~~~~~~~
@@ -223,7 +223,9 @@ Retry: execute a recovery block and call the block again with modified arguments
 
 Containment: All exceptions are caught at a level boundary (pokemon exception handling). It's not recovery - it doesn't fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) does logging, filtering, and display. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation. Another issue is that exceptions may be handled incorrectly in the middle of the call stack. Still, a common and useful pattern.
 
-Terminate (abort): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn't allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.
+Terminate (abort, crash): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn't allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.
+
+Dump core: Similar to termination but the contents of memory is written out.
 
 Backtrack: Try another path of execution at a previously encountered nondeterministic choice
 
@@ -244,20 +246,22 @@ Frequency
 ---------
 
 The most common behavior is unwinding, followed by containment or termination. Recovery also occurs for some interfaces that use exceptions for common cases.
-
+scate constant, 99, 123, 420,
+460, 481
 
 Traces
 ======
 
-A trace is built by keeping track of the exception as it propagates. Since exceptions are lazy the propagation is demand-driven. E.g. ``case {}.x of 1 -> ...`` produces ``MissingCaseException { trace = NoSuchAttributeException {...}, ...}``. With fancy formatting the nested exceptions will look like a stacktrace. The semantics are a little different, but should be close enough. For example the trace can become infinite, if you accumulate over an infinite list.
+A trace is built by keeping track of the exception as it propagates. The semantics are a little different with lazy evaluation because the propagation is demand-driven, but should be close enough. E.g. ``case {}.x of 1 -> ...`` produces ``MissingCaseException { trace = NoSuchAttributeException {...}, ...}``. With fancy formatting the nested exceptions will look like a stacktrace. Space considerations limit the depth and detail of stack traces.  For example if you accumulate over an infinite list, traces are theoretically infinite, but properly the trace display should compress this somehow. Similarly tail calls mean entries may be added or missing. So the trace is a best-effort guess subject to compiler whims - it has no formal contract. Traces are mainly useful as a light reminder to the programmer of where to look in the code in a large codebase.
 
-Traces are mainly used for debugging as the exception value is sufficient for handling purposes. Optimization (tail calls) means entries may be added or missing. Space considerations limit the depth of stack traces. So the trace is in general an implementation detail.
+Alas, building a trace is expensive. Throwing an exception should be cheap. What do?
 
-Also, building a trace is somewhat expensive. Throwing an exception should be cheap. So how can we allow handling the exception without building a trace at all?
+The basic strategy is to not provide traces in the language. Code should not use traces - the exception value should contain all relevant information to handle the exception. And a trace is mostly useless for debugging as it does not contain memory values - the programmer is better off walking through a dump with a debugger. Dumping core at the time of throwing is an established practice
 
-One strategy is to not provide traces for exception values. With reversible debugging the trace and any other information can be extracted after-the-fact. But it means that production code has to run in deterministic tracing mode all the time by default to have a hope of debugging exceptions. It's possible to get the overheads low, but the strategy of recording a trace at the time of throwing is more established and it will take a lot of work to overturn.
 
-Another solution is to only provide the first trace entry (closest to raising the exception). This is not too costly, and at least provides the file, line number, and attempted operation. E.g. assertions record the failing predicate expression.
+ And with reversible debugging the trace and any other information can be extracted after-the-fact in a debug environment. But how do we debug production crashes? We could run in deterministic tracing mode all the time by default. rr shows it's possible to get the overheads low, but so far only works on Linux. Another solution is to and should allow recovery of the trace.
+
+Erlang's solution is to only provide the first trace entry (closest to raising the exception). This is not too costly, and at least provides the file, line number, and attempted operation. E.g. assertions record the failing predicate expression.
 
 But the main solution IMO is to determine that the exception is caught by a handler that doesn't use the stack trace and optimize it away as an unused read-only operation.
 
@@ -461,16 +465,139 @@ Although poisoning by default allows using multithreading without having to cons
 Syntax
 ======
 
-The Swift error handling rationale classifies unwinding by the syntax required:
+The Swift error handling rationale classifies unwinding by the syntax required. With manual propagation is done with visible control operators or structures, while with automatic propagation happens according to rules defined by the language.
 
-* manual: propagation is done with control operators or structures (if return code in C, NSError out parameter in Objective-C, Maybe or Either ADT in Haskell)
-* automatic: propagation happens according to rules defined by the language
+Manual
+------
 
-Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manually propagated exceptions can be implemented with basic language facilities (out parameters, conditionals) they don't need any special considerations and are always available. The boilerplate marks the call site and that the function can throw exceptions (e.g. an out-parameter named ``error``), so it is also marked propagation and typed propagation. Ignoring an exception that is returned through a side channel is a coding error - it does not make manual exception propagation "untyped" as the Swift document claims. Unsafe, perhaps.
+Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manually propagated exceptions can be implemented with basic language facilities (out parameters, conditionals) they don't need any special considerations and are always available. The boilerplate marks the call site and that the function can throw exceptions, so it is also marked propagation and typed propagation. Manual propagation is often ugly and annoying but according to `Joel <https://www.joelonsoftware.com/2003/10/13/13/>`__ it's better than getting magic unexpected gotos sprinkled throughout your code at unpredictable places.
 
-Automatic propagation is more succinct and efficient, and besides complicating the language there's not much reason to avoid it.
+Manual propagation has to juggle three pieces of data: the error, the returned value, and a boolean describing whether an error or value was returned. The main coding problem is forgetting to check the flag and assuming you always have a valid value. This possibility does not make manual exception propagation "untyped" as the Swift document claims. Unsafe, perhaps. Because the flag variable is often re-used, it will not trigger an unused variable warning. However, Go's errcheck linter finds the missing exception checks every time, and can be integrated into the compiler as a warning.
 
-``throw`` / ``catch`` have become the common keywords after C++ and Java, but it's syntactically heavyweight. Exceptions aren't magic and don't need special syntax. With a variant type like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:
+The exception can store a little or a lot of data. Zig uses a global tagged union ``err`` type (limited to u16 for now), with compiler support that allows writing individual error subset types. In C an error is an integer constant. Java uses a Throwable class. Go and Swift use an Error protocol/interface. In C++ any value can be thrown. Rust uses a polymorphic Result type that can specialize to `most of the above <https://pcarleton.com/2021/04/28/rust-what-to-pick-for-the-type-when-writing-your-own-result-type/>`__:
+* an enum containing various types of library-specific errors
+* the enum ``std::io::Error``, which is an ADT ``Os i32|Simple ErrorKind|SimpleMessage ErrorKind str|Custom ErrorKind std::error::Error`` packed to fit in a pointer
+* a boxed ``std:error::Error`` trait
+
+C puts the return value in an out parameter, the error in the global variable ``errno``, and the boolean flag as the return, sometimes mixed with useful return info. We generally need a temporary for each return value and out parameter. So a nested function call ``f(g(x))`` looks like:
+
+.. code-block:: c
+
+    auto tmp, HRESULT hr;
+    hr = g(x, &tmp)
+    if (isError(hr))
+         errorhandling(hr, errno);
+    auto result;
+    auto hr = f(tmp, &result)
+    if (isError(hr))
+         errorhandling(hr, errno);
+    return result;
+
+Objective C uses an out-parameter ``NSError** err`` for the flag and exception data. ``err`` is declared locally in the calling function and used as an out-parameter multiple times. This looks like:
+
+.. code-block:: c
+
+    NSError err;
+    auto tmp = g(x, err);
+    if (isError(err))
+         errorhandling(err);
+    auto result = f(tmp, err)
+    if (isError(err))
+         errorhandling(err);
+
+Go uses multiple return values for exception codes. You reuse err for each call, so for ``f(g(x))`` you write:
+
+.. code-block:: go
+
+    v1, err := g(x)
+    if err != nil {
+        fmt.Println("error")
+        return
+    }
+    v2, err := f(v1)
+    if err != nil {
+        fmt.Println("error")
+        return
+    }
+    return v2
+
+Languages with variant types can use a single value to represent the failure/success/flag trifecta. In Haskell there's the ``Either a b = Left a | Right b`` variant type or its less informative cousin ``Maybe a = Either () a = Nothing | Just a``. Furthermore there is the monad transfomer `ExceptT <https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html>`__ equal to ``ExceptT (m (Either e a))``. Scala has Either, ``Option a = Some a | None``, and ``Try a = Success a | Failure Throwable``. Rust has Option like Scala and ``Result T E = OK T | Err E``.
+
+Variants force the caller to deal with the exception if they want to use the result.  This works well unless the call does not really have a meaningful result (e.g. ``write_line : (&mut self, s: &str) -> Result<(), IoError>`` in Rust); then it depends on whether there is a warning for ignoring results. Variant types also tends to create a lot of nesting, one level for every sequential computation that can fail.
+
+.. code-block:: rust
+
+  fn parse_two_ints_and_add_them() {
+    match parse_int() {
+      Err e => Err e
+      Ok x => match parse_int() {
+        Err e => Err e
+        Ok y => Ok (x + y)
+      }
+    }
+  }
+
+A bind operator addresses the repetitive exception handling logic but still requires nesting:
+
+.. code-block:: rust
+
+  fn parse_two_ints_and_add_them() {
+    parse_int().and_then(|x|
+      parse_int().and_then(|y|
+        x+y
+      )
+    )
+
+Returning errors early from the function addresses nesting:
+
+.. code-block:: rust
+
+  fn parse_two_ints_and_add_them() {
+    x = match parse_int() {
+      Err e => return (Err e)
+      Ok x => x
+    }
+
+    y = match parse_int() {
+      Err e => return (Err e)
+      Ok y => y
+    }
+
+    return Ok (x + y)
+  }
+
+To solve nesting and repetition simultaneously Rust has introduced the question mark syntax:
+
+.. code-block:: rust
+
+  fn parse_two_ints_and_add_them() {
+    x = parse_int()?
+    y = parse_int()?
+    return OK (x+y)
+  }
+
+
+Automatic
+---------
+
+Automatic propagation is more succinct and efficient, and besides complicating the language semantics there's not much reason to avoid it.
+
+``throw`` / ``catch`` have become the common keywords after C++ and Java, but it's syntactically heavyweight.
+
+In Haskell there are two ways of throwing an exception, ``throw`` and ``throwIO``. ``throw`` creates an exception which will propagate as soon as it is evaluated. ``throwIO`` is a command which will propagate once it reaches the top level. This is generalized to ``throwM = lift . throwIO``.
+
+Swift:
+try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
+try X else Y - presubstitute Y on exception
+
+NaN style propagation - ``a + b`` is either an exception or the sum. Problem: ``ExceptionA + ExceptionB``, which exception gets returned? Depends on evaluation strategy of compiler implementation.
+
+:cite:`jonesSemanticsImpreciseExceptions1999` says that ``catch`` should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad, ``getException`` is just ``return`` and pattern matching (section 4.4, page 9). Their approach is just using the I/O monad as a "sin bin" for nondeterminism. Stroscot's choice is to instead make exceptions first-class values of the language, allowing more concise and flexible exception handling. Exception nondeterminism is first-class as well, so an exceptional value's denotation is in fact a set of exceptions, and ``try`` randomly picks one. So ``let x = throw 1 + throw 2 in try x == try x`` can evaluate to false.
+
+Idea
+----
+
+Exceptions aren't magic and don't need special syntax. With a variant type like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:
 
 ::
 
@@ -485,102 +612,7 @@ But a Quorum-style study should check on what's clearest to beginners. Limiting 
 
 Just because there is shared syntax doesn't mean exceptions don't propagate, exceptions still unwind if they aren't caught by the case statement. They can be wrapped up in a Result type though to prevent propagation.
 
-``error "something bad happened"`` creates an exception in a pure value that needs to be evaluated before it's thrown. But it's bad practice. String-based exception messages make proper exception handling difficult. Instead, it's best to define a custom exception type SomethingBad, which is trivial to catch, ``catch (\SomethingBad -> ...)``.
-
-
- wheres ``throwM`` throws it in the monad and gives ordering guarantees.
-
-try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
-try X else Y - presubstitute Y on exception
-
-NaN style propagation - ``a + b`` is either an exception or the sum. Problem: ``ExceptionA + ExceptionB``, which exception gets returned? Depends on evaluation strategy, compiler implementation detail. (SPJ says "nondeterministic")
-
-exception type - In C integer constants. Used for Linux / Windows kernel programming. Go uses tuple (result,exception code) with nil code on success. Rust uses polymorphic Result type. Swift uses an Error protocol (interface class). Java uses a Throwable class.
-
-In C style you use an OUT parameter and a boolean flag for exception or value. The out parameter can hold either the flag or the actual return value. With the return value in the out parameter, a nested function call ``f(g(x))`` looks like:
-
-::
-
-    auto tmp;
-    if (ERROR == g(x, tmp))
-         errorhandling;
-    auto result;
-    if (ERROR == f(tmp, result))
-         errorhandling;
-
-
-Here we need a temporary for each return value and the exception details are stored in a global variable. Objective C uses an out-parameter ``NSError**``.
-
-With the flag/exception as an out parameter it looks like:
-
-::
-
-    NSError err;
-    auto tmp = g(x, err);
-    if (isError(err))
-         errorhandling;
-    auto result = f(tmp, err)
-    if (isError(err))
-         errorhandling;
-
-The same variable is used as an out-parameter multiple times; but the exception must be checked each time to avoid later calls overwriting the variable.
-Either way it's ugly and annoying but it's better than getting magic unexpected gotos sprinkled throughout your code at unpredictable places.
-
-Go uses multiple return values for exception codes. You reuse err for each call, so you write:
-
-::
-
-    v1, err := Foo(false)
-    if err != nil {
-        fmt.Println("error")
-        return
-    }
-    fmt.Println("first", v1)
-    v2, err := Foo(true)
-    if err != nil {
-        fmt.Println("error")
-        return
-    }
-    fmt.Println("second", v2)
-
-You can forget the if condition. Because `err` is used in other places it will not trigger an unused variable warning, but the errcheck linter finds missing checks every time.
-
-In functional languages there's the ``Either`` variant type or its less informative cousin ``Optional = Either ()``, e.g. ``write_line : (&mut self, s: &str) -> Result<(), IoError>`` in Rust, Scala's Option/Try, https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html.
-This forces the caller to deal with the exception if they want to use the
-result.  This works well unless the call does not really have a
-meaningful result (as ``write_line`` does not); then it depends on
-whether there is a warning for ignoring results. Variant types
-also tends to create a lot of nesting, one level for every sequential
-computation that can fail::
-
-  fn parse_two_ints_and_add_them() {
-    match parse_int() {
-      Err e => Err e
-      Ok x => match parse_int() {
-        Err e => Err e
-        Ok y => Ok (x + y)
-      }
-    }
-  }
-
-A bind operator addresses the exception handling but still requires nesting::
-
-  fn parse_two_ints_and_add_them() {
-    parse_int().and_then(\x ->
-      parse_int().and_then(\y ->
-        x+y
-      )
-    )
-
-To solve nesting Rust has introduced the question mark operator::
-
-  fn parse_two_ints_and_add_them() {
-    x = parse_int()?
-    y = parse_int()?
-    return OK (x+y)
-  }
-
-defining a custom exception type:
+``error "something bad happened"`` is bad practice. String-based exception messages make proper exception handling difficult. Instead, it's best to define a custom exception type SomethingBad, which is trivial to catch, ``catch (\SomethingBad -> ...)``. Syntax for defining a custom exception type:
 
 ::
 
@@ -833,7 +865,18 @@ The continuation-based approach depends on two things: callCC and dynamic scopin
 
 The throw is unregistered if the function returns normally, otherwise ``throw`` restores the context and jumps to the handler.
 
-``setjmp`` / ``longjmp`` are an explicitly stack-based implementation of continuations. The registers must all be saved, costing a lot on both exception and non-exception paths. It's disliked.
+``setjmp`` / ``longjmp`` are an inefficient stack-based implementation of continuations. The registers must all be saved, costing a lot on both exception and non-exception paths. It's disliked.
+
+::
+
+  body catch handler =
+    e = ref NoException
+    ctx = setjmp()
+    if read e == NoException
+      body { throw ex = { e := ex; longjmp ctx } }
+    else
+      handler (read e)
+
 
 
 Unwinding tables

@@ -50,21 +50,7 @@ For example instead of testing for stack overflow we can test for running out of
 Optimization
 ============
 
-The path from cloud to CPU is long, so there is a lot of caching in between:
-
-* Physical registers (0.3 ns): managed by the CPU
-* Logical registers (0.3 ns): assembly
-* Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
-* Main Memory (0.1us-4us): assembly
-* SSD (16us-62us): file APIs
-* LAN (0.5-500ms): network stack
-* HDD (3 ms): file APIs
-* WAN (150ms): network stack
-
-Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application.
-
-
-For a lot of compilation decisions we don't have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guide optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don't use a code path very often, then we can de-optimize it and use a slow version. But if it's a hot path then we want to streamline that path as much as possible.
+For a lot of compilation decisions we don't have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guided optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don't use a code path very often, then we can de-optimize it and use a slow version. But if it's a hot path then we want to streamline that path as much as possible.
 
 With respect to optimization we have various criteria to minimize.
 * O0 - Compile time - when we are just running static verification
@@ -291,6 +277,9 @@ For now living with REPL behavior seems fine.
 Dynamic execution
 =================
 
+benefit: erases distinction between compile time and execution time. Hence optimizes for compile+execute time.
+
+
 loading code at runtime
 - typecheck, JIT compile, return function pointer
 the function pointer doesn't have to be machine code, it can be bytecode, so the function runs through an interpreter
@@ -339,6 +328,29 @@ Julia - faster than Python, but JIT uses many slow trampolines
 
 Javascript - V8 is a fast modern JIT
 
+
+In a sea of nodes program dependence graph (PDG), nodes correspond to arithmetic/logic operations but also to control operations such as conditional jumps and loops. edges correspond to dependencies among operations.
+
+graphs corresponding to relatively small programs turn quickly into a tangle that is quite difficult to grasp. PDGs cannot be read directly without assistance; this affects debugging speed. PDGs remain an obscure topic in advanced compiler courses.
+
+In a CFG, nodes correspond to basic blocks, ordered sequences of operations that are always executed together. every operation belongs to a single basic block. edges correspond to control jumps across basic blocks. A CFG yields a structured, sequential view of the program that is easier to understand and debug, and is familiar for many systems engineers.
+
+To turn a PDG into a CFG, compute an assignment of operations to basic blocks (global schedule) and an ordering of operations within each basic block (local schedule).
+
+clustering basic blocks into (nested) loops, if-then-else structures, etc.
+coloring the basic blocks that are executed most often
+
+the value representation is optimized for the platform, and redundant checks are optimized out
+
+The Implementation of Functional Programming Languages
+Implementing functional languages: a tutorial
+Implementing Lazy Functional Languages on Stock Hardware: The Spineless Tagless G-Machine
+How to make a fast curry: push/enter vs eval/apply
+GHC also does strictness analysis and optimistic evaluation.
+
+a program is a dependency graph which is evaluated through a series of local reductions
+the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says "return the result."
+
 Logic
 =====
 
@@ -365,3 +377,43 @@ Measure
 for functions, expressions, programs, etc.
 
 Use statistical sampling and hardware performance counters to avoid overhead.
+
+
+IR dump
+=======
+
+A good compiler can get 80% of the code to a fast-enough state. But nontrivial hot spots will still need hand-optimizing and tuning. At first it can be good to tweak the original code to get it to generate IR differently, but eventually the algorithm is set and the micro-optimizations matter, so you want to bake in the low-level implementation.
+
+With a wide-spectrum language the IR is the same language as the original, just using lower-level operations. So you can compile source-to-source or directly write in the IR. For example SQL is declarative but being able to write a functional program using the underlying sort, filter, merge anti-join, etc. operations would be useful.
+
+There are many levels to the pipeline, and each one is useful. For an interpreted program the only step that can't be represented is actually running the program, e.g. converting ``print "Hi" exit`` to output.
+
+Error messages
+==============
+
+From `Elm <https://elm-lang.org/news/compiler-errors-for-humans>`__:
+* prefer "runtime" errors of dynamically-typed languages
+* code location: show the line number, full line of input code, and mark range with ``^^^```
+* give every message a hint / suggested fix
+* color: red to draw attention to location, blue to separate messages
+* layout: general message above code, hints below code
+* VSCode integration
+
+
+Features
+========
+
+A feature is a distinct chunk of compiler functionality. A feature toggle allows turning on a feature conditionally in the code. This allows testing features and integrating them on the main branch while isolating them from other tests and software releases. Identifying the scope of a feature is simply searching for uses of the feature flag. The feature toggles are stored in a big record of booleans in one place, to make finding them easier.
+
+A feature can be alpha, beta, or stable.
+
+* alpha: untested, may be changed or removed without automigration
+* beta: well tested, details may change, automigration will be provided
+* stable: beta but perceived as unlikely to change further
+
+Generally only alpha features need toggles, beta features have automigration so can be turned on all the time.
+
+All features should be documented in the commentary / reference in full detail, describing edge cases. Alpha features should be marked as alpha. Write a how-to if the feature is not obvious. Generally new features are advanced enough that they do not affect the tutorial.
+
+Moving a feature from alpha to beta should have a PR with documentation links and test case links. The actual process is to change the feature list to set the feature's beta release date as the current date, so the compiler knows to warn that the feature declaration is no longer needed and to declare the feature when bootstrapping, and to modify all uses of the feature toggle in the code to the case where the feature is present (avoiding toggle debt).
+

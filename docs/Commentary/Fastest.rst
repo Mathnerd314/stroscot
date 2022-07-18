@@ -3,7 +3,7 @@ As fast as C
 
 How do you prove that Stroscot is "as fast as C"? Well, we must show that every C program has a natural Stroscot translation, that performs at least as fast. Since Stroscot is an expressive language there may be many natural translations, and all must perform as fast.
 
-Stroscot should also have fast performance on programs that aren't natural translations of C programs, but this is secondary to the claim. Even the lambda calculus, after years of study, has no optimal implementation on modern machines. So long as the implementation is reasonable the actual performance doesn't matter - worst-case, the feature becomes a footgun for people are performance sensitive.
+Stroscot should also have fast performance on programs that aren't natural translations of C programs, but this is secondary to the claim. Even the lambda calculus, after years of study, has no optimal implementation on modern machines. So long as the implementation is reasonable the actual performance on non-C-like programs doesn't matter - worst-case, the feature becomes a footgun for people are performance sensitive.
 
 Benchmarks
 ==========
@@ -42,9 +42,9 @@ Asymptotics
 
 A direct mapping works for small programs, but what about large programs? We must ensure that the asymptotic overhead of each of our features is not too large. In particular time and space usage.
 
-Laziness can affect space usage. But forcing at each imperative operation should avoid this, it just means the compiler has to propagate demand and see that everything is strict.
-
 Tail-recursive term rewriting compiles into a state machine just like tail-recursive functions.
+
+Laziness can affect space usage. But forcing at each imperative operation should avoid this, it just means the compiler has to propagate demand and see that everything is strict.
 
 Exceptions add some complexity to the control flow, but if you don't use exception handling then they all turn into panics, which are pretty cheap.
 
@@ -64,41 +64,14 @@ The difference is on the order of 20% in practice.
 
 Nobody seems to have benchmarked 64-bit calling conventions. These use more registers so are less sensitive to stack stuff.
 
-
-Thorin impleemnts lambda mangling which makes basic blocks as fast as C.
-
-  A queries B receives future F1
-  A forwards a request containing F1 to C (drops reply)
-  A waits on F1
-  B queries C receives future F2
-  B replies with X2(F2) (into F1)
-  C replies with X1(F1) (into F2)
-
-  A = B
-  B = X2 C
-  C = X1 A
+Thorin implements lambda mangling which makes basic blocks as fast as C.
 
 Laziness
 ========
 
 The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded, and otherwise hurts. And intended laziness is actually quite rare.
 
-So in addition to GHC's demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).
-
-http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/
-
-
-the value representation is optimized for the platform, and redundant checks are optimized out
-
-The Implementation of Functional Programming Languages
-Implementing functional languages: a tutorial
-Implementing Lazy Functional Languages on Stock Hardware: The Spineless Tagless G-Machine
-How to make a fast curry: push/enter vs eval/apply
-GHC also does strictness analysis and optimistic evaluation.
-
-a program is a dependency graph which is evaluated through a series of local reductions
-the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says "return the result."
-
+So in addition to GHC's demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such): http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/
 
 Avoiding slow operations
 ========================

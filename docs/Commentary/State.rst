@@ -19,7 +19,7 @@ For the second relation, lazy languages allow cycles. :cite:`ben-amramNotesPippe
 
 For the third relation, it should be clear that the thunk mechanism of HASK can be emulated in IMPURE. :cite:`ben-amramNotesPippengerComparison1996` theorizes that for IMPURE programs following a read-update-write structure, there is a correspondingly efficient HASK program. Since Haskell 1.0 programs use a lazy stream ``[Response] -> [Request]`` for I/O, this read-update-write model seems to encompass all programs, hence it seems likely that the two languages are of equal efficiency, although nobody has formally proved this (TODO). But until then it is safer to assume HASK < IMPURE and provide destructive update facilities.
 
-The log(n) gap is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. :cite:`strakaFullyPersistentArrays`
+The log(n) gap is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. (:cite:`strakaFunctionalDataStuctures2013`, chapter 5) His implementation uses vEB trees which have a huge constant factor and space usage, maybe
 
 Automatic destructive update
 ============================
@@ -139,7 +139,7 @@ There are multiple syscalls in flight because of multithreading. Technically we 
 Tasks
 =====
 
-Tasks are a direct approach to I/O - sequences of I/O operations are values of type ``Task``, similar to a `free monad <https://www.reddit.com/r/haskell/comments/swffy/why_do_we_not_define_io_as_a_free_monad/>`__. Statements that don't return are directly of the Task type, like ``Exit { code : Int}``. Statements that continue in a sequential fashion have a ``continuation`` argument, like ``Print { s : String, continuation : Task }``, so are of type ``Command = Task -> Task``. Statements that return a value use a continuation of type ``a -> Task``, e.g. ``ReadFile { path : Fd, continuation : String -> Task}``, so are of type ``Operation a = (a -> Task) -> Task``. And since tasks are values we can also use them as arguments, like the ``delayed_task`` in ``SetTimeout { delay : Int, delayed_task : Task, continuation : Task}``.
+Tasks are a direct approach to I/O, erasing the distinction between commands and expressions. Sequences of I/O operations are values of type ``Task``, similar to a `free monad <https://www.reddit.com/r/haskell/comments/swffy/why_do_we_not_define_io_as_a_free_monad/>`__. Statements that don't return are directly of the Task type, like ``Exit { code : Int}``. Statements that continue in a sequential fashion have a ``continuation`` argument, like ``Print { s : String, continuation : Task }``, so are of type ``Command = Task -> Task``. Statements that return a value use a continuation of type ``a -> Task``, e.g. ``ReadFile { path : Fd, continuation : String -> Task}``, so are of type ``Operation a = (a -> Task) -> Task``. And since tasks are values we can also use them as arguments, like the ``delayed_task`` in ``SetTimeout { delay : Int, delayed_task : Task, continuation : Task}``.
 
 To see how I/O works, consider printing hello world: ``print "Hi"``. As a task this looks like ``Print "Hi" exit``, where ``exit`` is what happens after (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation, which expands to ``\cont -> Read ref (\v -> Print v cont)``.
 
@@ -159,27 +159,50 @@ The datatype is similar to the "fudgets" mentioned in :cite:`erkokValueRecursion
 I/O model showdown
 ==================
 
+Monads
+------
+
+Monads by themselves aren't really a solution. Sure, they tell you that you need the operations ``>>=``, ``>>``, and ``return = pure``, and you can write the type ``readLn :: IO String`` defining I/O to be done using the ``IO`` monad, but they don't give the actual implementation of all these operations. Still, most of the models here are in fact monads, or close to monads.
+
+Other operations include:
+
+* recursion: ``mfix :: MonadFix m => (a -> m a) -> m a``
+* exception handling: ``fail : String -> m a``, ``empty = fail ""``, and ``a <|> b = a `catch` \_ -> b``
+
+Monad transfomers are pretty much overrated:
+
+* ReaderT is handled by implicit parameters
+* StateT is a mutable reference
+* WriterT is a StateT that's not read
+* Error/Except are handled by poison values
+
+Codensity
+---------
+
+Codensity is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type via ``m >>=`` and retrieved via ``f return``. In particular ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
+
+Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity.
+
+Some instances of mfix for Codensity have been written (`Github <https://github.com/ekmett/kan-extensions/issues/64>`__), but not proven correct.
 
 Continuations
 -------------
 
-Stroscot use continuations for its I/O model because continuations are simple and universal. They're the supercharged typed equivalent of a goto. A continuation is a function that takes as argument "the rest of the program", or "its future". Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.
+Removing the forall from Codensity, we obtain the ``ContT r`` monad and gain more expressiveness: callcc is implementable, and the type contains values such as ``\_ -> \s -> (Wrong, s)`` which ignore the continuation. (:cite:`wadlerEssenceFunctionalProgramming1992` section 3.4)
+
+Continuations are the supercharged typed equivalent of a goto. A continuation is a function that takes as argument "the rest of the program", or "its future". Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.
 
 Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface.
 
-We can turn the continuation approach into data by modeling I/O operations as constructor terms (members of a ``Task`` type). With this approach an I/O operation is data that can be pattern-matched over, allowing many metaprogramming techniques. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
+Callbacks
+---------
 
-Monads
-------
-
-Continuations are `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type via ``m >>=`` and retrieved via ``f return``. In particular the Codensity monad ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Without the forall, callcc is implementable and the type is too large, see :cite:`wadlerEssenceFunctionalProgramming1992` section 3.4 for an example.
-
-Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned is similar to Codensity.
+We can turn continuations into data by modeling I/O operations as constructor terms (members of a ``Task`` type). With this approach an I/O operation is data that can be pattern-matched over, allowing many metaprogramming techniques. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
 
 Yoneda
 ------
 
-`Kmett <http://comonad.com/reader/2011/free-monads-for-less-2/>`__ says to use ``Yoneda (Rec f)``, i.e. ``newtype F f a = F { runF :: forall r. (a -> r) -> (f r -> r) -> r }``, instead of ``Codensity f a``. The claim is that this type is "smaller" than Codensity in the sense that the inhabitants of ``F`` are in a one-to-one correspondence with those of ``Free f a``. But what we are interested in is ``f a``; the recursive layering actually adds extra inhabitants as well, and there is also the ``Pure`` constructor that doesn't make much sense for I/O. For example ``F Identity ()`` is the type of Church numerals, while ``Codensity Identity () = forall r. r -> r = () = Identity ()``. So in this case it is actually ``F`` that is larger.
+`Kmett <http://comonad.com/reader/2011/free-monads-for-less-2/>`__ says to use ``Yoneda (Rec f) a``, i.e. ``newtype F f a = F { runF :: forall r. (a -> r) -> (f r -> r) -> r }``, instead of ``Codensity f a``. The claim is that this type is "smaller" than Codensity in the sense that the inhabitants of ``F`` are in a one-to-one correspondence with those of ``Free f a``. But what we are interested in is ``f a``; the recursive layering actually adds extra inhabitants as well, and there is also the ``Pure`` constructor that doesn't make much sense for I/O. For example ``F Identity ()`` is the type of Church numerals, while ``Codensity Identity () = forall r. r -> r = () = Identity ()``. So in this case it is actually ``F`` that is larger.
 
 Just looking at the types, F has more arrows. Similarly compare the instances:
 
@@ -195,7 +218,7 @@ Just looking at the types, F has more arrows. Similarly compare the instances:
 
 The instance for ``C`` is fewer characters.
 
-Finally there is :cite:`rivasNotionsComputationMonoids2014` which derives the Codensity monad from the Yoneda lemma and the assumption that ``f`` is a small functor. Whereas the Yoneda-Rec seems to have no category theory behind it.
+There is :cite:`rivasNotionsComputationMonoids2014` which derives the Codensity monad from the Yoneda lemma and the assumption that ``f`` is a small functor. Whereas the Yoneda-Rec seems to have no category theory behind it.
 
 Generally it seems that the Yoneda thing solves a problem Stroscot doesn't have.
 
@@ -207,14 +230,14 @@ Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFramew
 World token
 -----------
 
-Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse the world are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
+Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse world tokens are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
 
 Algebraic effects
 -----------------
 
-The two approaches are quite similar, both using a data type to represent operations. But continuations are much simpler syntactically than the handler functionality. In the effect approach computations are not first-class values.
+Tasks with callbacks and algebraic effects are quite similar, both using a data type to represent operations. But tasks are much simpler syntactically than the handler functionality. In the effect approach, computations are not first-class values.
 
-OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation, I think with the lazy identity monad you can recover lazy pure code.
+OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation.
 
 Call by push value
 ------------------
@@ -241,19 +264,10 @@ Applicative can also be represented typeclass-free as functions using their Cayl
 
 So every function ``Applicative f => f a -> f b -> ...`` can be replaced with ``Applicative f a -> Applicative f b -> ...`` - the normalization enabled by Cayley and Yoneda means you don't have to worry about instance coherency.
 
-Async
------
+Promises
+--------
 
-In JavaScript
-
-::
-
-  async function foo() {
-    v = await f
-    return g(v)
-  }
-
-translates to
+An example:
 
 ::
 
@@ -267,7 +281,32 @@ Some arguments against:
 
 * Promises do not conform to functor or monad laws and thus are not safe for compositional refactoring.
 * JS promises allow execution after the promise is resolved or rejected, resulting in untraceable behavior (fixed in C# by using return/throw)
-* async/await notation requires marking core library calls with "await" and the whole call chain with "async", a tedious syntactic burden that Bob Nystrom calls `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ .
+
+Monad combined with identity monad
+----------------------------------
+
+With the lazy identity monad you can recover lazy pure code, as if there was no monad syntax. ``M m a = Either a (m a)`` is a monad (`SO implementation <https://stackoverflow.com/a/49703783>`__) so we can mix this in with other monads. For a dynamic language, we would like to split the universal type ``Any`` into actions and pure values, so that ``Any`` forms a monad and actions are just a special type of value that has more complex sequencing behavior. We calculate::
+
+  Any = Either a (m a) = Either Pure Action
+  Pure = a
+  Action = m a = m Pure
+  Pure = Any \ Action
+
+``Int`` is not ``m _``, so it is pure. ``m Int`` is therefore an action. Therefore ``m (m Int)`` is not an action, because to be an action it would have to return a pure value. Hence ``m (m Int)`` is pure, a surprising conclusion. Similarly ``m (m (m Int))`` is an action. We can convert between these with ``join`` and ``return``. This weirdness somewhat explains why JS felt the need to collapse nested promises and break the monad laws - it avoids checking the static type of the action.
+
+Async
+-----
+
+In JavaScript
+
+::
+
+  async function foo() {
+    v = await f
+    return g(v)
+  }
+
+Async/await notation requires marking core library calls with "await" and the whole call chain with "async", a tedious syntactic burden that Bob Nystrom calls `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ .
 
 It's better to make the async behavior automatic. Zig has done this but has `tons of bugs <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/>`__\ . Monads in general and continuations in particular seem like a more principled approach, e.g. there is a `JS CPS library <https://github.com/dmitriz/cpsfy/blob/master/DOCUMENTATION.md>`__\ .
 

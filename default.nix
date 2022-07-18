@@ -4,6 +4,7 @@ let
   ghc = pkgs.haskellPackages.ghcWithPackages.override {
           useLLVM = true;
         } (ps: with ps; [
+          haskell-dap ghci-dap haskell-debug-adapter
           persistent-sqlite persistent-template
           ioref-stable concurrent-extra unliftio
           extra heaps unordered-containers

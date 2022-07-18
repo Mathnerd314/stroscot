@@ -199,23 +199,16 @@ There is also a ``matrix`` DSL which turns semicolons into rows.
 Binary data
 ===========
 
-Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. There is a binary/hex literal syntax:
+Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values.
 
-::
-
-  base = 0[a-z]
-  digit = [0-9a-fA-F_]
-
-  data = base digit+
-
-We allow various base prefixes ``0?`` - ``x`` (hexadecimal), ``o`` (octal), ``d`` (decimal) and ``b`` (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example ``0b010 = bits [0,1,0]``.
-
-Another way to write data is as a string ``bits "abcd\x0F"`` which makes use of UTF-8 characters and hexadecimal for invalid byte sequences.
+Another way to write data is as a string ``bits "abcd\x0F"`` which makes use of UTF-8 characters and
 
 The normal form is just a term applied to a list of bits, ``bits [1,0,1]``. Because of the term tagging it, the list can be stored compactly.
 
 Strings
 =======
+
+A string is a sequence of bytes of a given length. Subtypes include null-terminated strings like C and UTF-8 encoded strings.
 
 ::
 
@@ -227,18 +220,47 @@ Strings
   string"""
 
 Double and single quotes are both supported, as well as a multi-line syntax.
-There is no explicit syntax for characters, instead characters are strings of length 1.
-Escape sequences are defined; the main ones are ``\"`` to escape a quote and ``\\`` to escape a backslash, the others aren't relevant to parsing the literal.
+Escape sequences are defined:
+
+::
+
+  \newline Backslash and newline ignored
+  \\ Backslash (\)
+  \' Single quote (')
+  \" Double quote (")
+
+  \a ASCII Bell (BEL)
+  \b ASCII Backspace (BS)
+  \f ASCII Formfeed (FF)
+  \n ASCII Linefeed (LF)
+  \r ASCII Carriage Return (CR)
+  \t ASCII Horizontal Tab (TAB)
+  \v ASCII Vertical Tab (VT)
+
+  \0 null byte
+  \ooo Byte with octal value ooo
+  \xhh Byte with hex value hh
+  \N{name} Codepoint with name, abbreviation or alias 'name' in the Unicode database
+  \nnnn Codepoint with decimal value nnnn. The maximum value of a codepoint is 1114111.
+  \uxxxx Codepoint with hex value xxxx. The maximum value is hexadecimal 10ffff.
+  \& Backslash and ampersand ignored. The purpose of this escape sequence is to make it possible to write a numeric escape followed immediately by a regular ASCII digit.
+  \^[@A-Z[\\]^_] caret control code notation (does anyone use?)
+
+There is also a binary/hex literal syntax to abbreviate ``\xAA\xBB\xCC`` as ``0xAABBCC``: We allow various base prefixes - ``0x`` (hexadecimal), ``0o`` (octal), ``0d`` (decimal) and ``0b`` (binary). The decimal base expands to the shortest binary string that can contain that decimal. So for example ``0d6 = 0b110 = bits [1,1,0]``.
+
+::
+
+  base = 0[a-z]
+  digit = [0-9a-fA-F_]
+
+  data = base digit+
 
 String concatenation is ``++``.
 
-The string is raw bytes terminated with a null character, like in C, or a length plus raw bytes.
-Often strings are encoded in UTF-8.
+Characters
+----------
 
-Character
----------
-
-A “character” is not just a single Unicode code point. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points. Unicode calls characters "grapheme clusters" and provides an algorithm for identifying them in UAX #29. The main notable feature of the algorithm is that a grapheme cluster may be arbitrarily long due to the use of combining characters/accents and ZWJs, for example in Zalgo text, hence a character must be repesented as a variable-length sequence of codepoints. Hence it is simplest and most correct to define a character as a Unicode string of grapheme length 1.
+There is no explicit syntax for characters, instead a character is a Unicode string containing exactly one grapheme cluster. Unicode provides an algorithm for identifying grapheme clusters in UAX #29. The main notable feature of the algorithm is that a grapheme cluster / character is not just a single Unicode code point and may be arbitrarily long due to the use of combining characters/accents and ZWJs. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points, as does Zalgo text. Hence a character is in general an arbitrary length sequence of codepoints and it is simplest and most correct to define a character as a type of string.
 
 Date/time
 =========
@@ -260,6 +282,8 @@ Records are like C structs or Python dictionaries. The order of the fields is re
   # record update
   rec // {b=4, d = 4}
     # {a = 1, b = 4, c = 3, d = 5}
+
+Once you get to four values, it is best to make a record with named entries instead of using a tuple.
 
 Maps
 ----
@@ -319,204 +343,206 @@ Postfix ++ and -- are statements
 Data Structures
 ===============
 
-Arrays
-    Array
-    Bit array
-    Bit field
-    Bitboard
-    Bitmap
-    Circular buffer
-    Control table
-    Image
-    Dope vector
-    Dynamic array
-    Gap buffer
-    Hashed array tree
-    Lookup table
-    Matrix
-    Parallel array
-    Sorted array
-    Sparse matrix
-    Iliffe vector
-    Variable-length array
+.. code-block:: none
 
-Lists
+  Arrays
+      Array
+      Bit array
+      Bit field
+      Bitboard
+      Bitmap
+      Circular buffer
+      Control table
+      Image
+      Dope vector
+      Dynamic array
+      Gap buffer
+      Hashed array tree
+      Lookup table
+      Matrix
+      Parallel array
+      Sorted array
+      Sparse matrix
+      Iliffe vector
+      Variable-length array
 
-    Singly/Circular/Doubly Linked list
-    Array list
-    Association list
-    Self-organizing list
-    Skip list
-    Unrolled linked list
-    VList
-    Conc-tree list
-    Xor linked list
-    Zipper
-    Doubly connected edge list also known as half-edge
-    Difference list
-    Free list
+  Lists
 
-Trees
-  Binary trees
-    AA tree
-    AVL tree
-    Binary search tree
-    Binary tree
-    Cartesian tree
-    Conc-tree list
-    Left-child right-sibling binary tree
-    Order statistic tree
-    Pagoda
-    Randomized binary search tree
-    Red–black tree
-    Rope
-    Scapegoat tree
-    Self-balancing binary search tree
-    Splay tree
-    T-tree
-    Tango tree
-    Threaded binary tree
-    Top tree
-    Treap
-    WAVL tree
-    Weight-balanced tree
-  B-trees
-    B-tree
-    B+ tree
-    B*-tree
-    Dancing tree
-    2–3 tree
-    2–3–4 tree
-    Queap
-    Fusion tree
-    Bx-tree
-  Heaps
-    Heap
-    Binary heap
-    B-heap
-    Weak heap
-    Binomial heap
-    Fibonacci heap
-    AF-heap
-    Leonardo heap
-    2–3 heap
-    Soft heap
-    Pairing heap
-    Leftist heap
-    Treap
-    Beap
-    Skew heap
-    Ternary heap
-    D-ary heap
-    Brodal queue
-  Bit-slice trees - each tree node compares a bit slice of key values.
-    Radix tree (compressed trie), Patricia tree
-    Bitwise trie with bitmap
-    Suffix tree
-    Suffix array
-    Compressed suffix array
-    FM-index
-    Generalised suffix tree
-    B-tree
-    Judy array
-    X-fast trie
-    Y-fast trie
-    Merkle tree
-  Multi-way trees
-    Ternary tree
-    K-ary tree
-    And–or tree
-    (a,b)-tree
-    Link/cut tree
-    SPQR-tree
-    Spaghetti stack
-    Disjoint-set data structure (Union-find data structure)
-    Fusion tree
-    Enfilade
-    Exponential tree
-    Fenwick tree
-    Van Emde Boas tree
-    Rose tree
-  Space-partitioning trees
-    Segment tree
-    Interval tree
-    Range tree
-    Bin
-    K-d tree
-    Implicit k-d tree
-    Min/max k-d tree
-    Relaxed k-d tree
-    Adaptive k-d tree
-    Quadtree
-    Octree
-    Linear octree
-    Z-order
-    UB-tree
-    R-tree
-    R+ tree
-    R* tree
-    Hilbert R-tree
-    X-tree
-    Metric tree
-    Cover tree
-    M-tree
-    VP-tree
-    BK-tree
-    Bounding interval hierarchy
-    Bounding volume hierarchy
-    BSP tree
-    Rapidly exploring random tree
-  Application-specific trees
-    Abstract syntax tree
-    Parse tree
-    Decision tree
-    Alternating decision tree
-    Minimax tree
-    Expectiminimax tree
-    Finger tree
-    Expression tree
-    Log-structured merge-tree
+      Singly/Circular/Doubly Linked list
+      Array list
+      Association list
+      Self-organizing list
+      Skip list
+      Unrolled linked list
+      VList
+      Conc-tree list
+      Xor linked list
+      Zipper
+      Doubly connected edge list also known as half-edge
+      Difference list
+      Free list
 
-Hash-based structures
+  Trees
+    Binary trees
+      AA tree
+      AVL tree
+      Binary search tree
+      Binary tree
+      Cartesian tree
+      Conc-tree list
+      Left-child right-sibling binary tree
+      Order statistic tree
+      Pagoda
+      Randomized binary search tree
+      Red–black tree
+      Rope
+      Scapegoat tree
+      Self-balancing binary search tree
+      Splay tree
+      T-tree
+      Tango tree
+      Threaded binary tree
+      Top tree
+      Treap
+      WAVL tree
+      Weight-balanced tree
+    B-trees
+      B-tree
+      B+ tree
+      B*-tree
+      Dancing tree
+      2–3 tree
+      2–3–4 tree
+      Queap
+      Fusion tree
+      Bx-tree
+    Heaps
+      Heap
+      Binary heap
+      B-heap
+      Weak heap
+      Binomial heap
+      Fibonacci heap
+      AF-heap
+      Leonardo heap
+      2–3 heap
+      Soft heap
+      Pairing heap
+      Leftist heap
+      Treap
+      Beap
+      Skew heap
+      Ternary heap
+      D-ary heap
+      Brodal queue
+    Bit-slice trees - each tree node compares a bit slice of key values.
+      Radix tree (compressed trie), Patricia tree
+      Bitwise trie with bitmap
+      Suffix tree
+      Suffix array
+      Compressed suffix array
+      FM-index
+      Generalised suffix tree
+      B-tree
+      Judy array
+      X-fast trie
+      Y-fast trie
+      Merkle tree
+    Multi-way trees
+      Ternary tree
+      K-ary tree
+      And–or tree
+      (a,b)-tree
+      Link/cut tree
+      SPQR-tree
+      Spaghetti stack
+      Disjoint-set data structure (Union-find data structure)
+      Fusion tree
+      Enfilade
+      Exponential tree
+      Fenwick tree
+      Van Emde Boas tree
+      Rose tree
+    Space-partitioning trees
+      Segment tree
+      Interval tree
+      Range tree
+      Bin
+      K-d tree
+      Implicit k-d tree
+      Min/max k-d tree
+      Relaxed k-d tree
+      Adaptive k-d tree
+      Quadtree
+      Octree
+      Linear octree
+      Z-order
+      UB-tree
+      R-tree
+      R+ tree
+      R* tree
+      Hilbert R-tree
+      X-tree
+      Metric tree
+      Cover tree
+      M-tree
+      VP-tree
+      BK-tree
+      Bounding interval hierarchy
+      Bounding volume hierarchy
+      BSP tree
+      Rapidly exploring random tree
+    Application-specific trees
+      Abstract syntax tree
+      Parse tree
+      Decision tree
+      Alternating decision tree
+      Minimax tree
+      Expectiminimax tree
+      Finger tree
+      Expression tree
+      Log-structured merge-tree
 
-    Bloom filter
-    Count–min sketch
-    Distributed hash table
-    Double hashing
-    Dynamic perfect hash table
-    Hash array mapped trie
-    Hash list
-    Hash table
-    Hash tree
-    Hash trie
-    Koorde
-    Prefix hash tree
-    Rolling hash
-    MinHash
-    Quotient filter
-    Ctrie
+  Hash-based structures
 
-Graphs
-    Graph
-    Adjacency list
-    Adjacency matrix
-    Graph-structured stack
-    Scene graph
-    Decision tree
-        Binary decision diagram
-    Zero-suppressed decision diagram
-    And-inverter graph
-    Directed graph
-    Directed acyclic graph
-    Propositional directed acyclic graph
-    Multigraph
-    Hypergraph
+      Bloom filter
+      Count–min sketch
+      Distributed hash table
+      Double hashing
+      Dynamic perfect hash table
+      Hash array mapped trie
+      Hash list
+      Hash table
+      Hash tree
+      Hash trie
+      Koorde
+      Prefix hash tree
+      Rolling hash
+      MinHash
+      Quotient filter
+      Ctrie
 
-Other
+  Graphs
+      Graph
+      Adjacency list
+      Adjacency matrix
+      Graph-structured stack
+      Scene graph
+      Decision tree
+          Binary decision diagram
+      Zero-suppressed decision diagram
+      And-inverter graph
+      Directed graph
+      Directed acyclic graph
+      Propositional directed acyclic graph
+      Multigraph
+      Hypergraph
 
-    Lightmap
-    Winged edge
-    Quad-edge
-    Routing table
-    Symbol table
-    Piece table
+  Other
+
+      Lightmap
+      Winged edge
+      Quad-edge
+      Routing table
+      Symbol table
+      Piece table

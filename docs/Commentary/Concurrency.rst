@@ -1,10 +1,46 @@
 Concurrency
 ###########
 
-The general idea with concurrency is there are multiple threads of execution, each thread composed of (imperative) operations, and the combination of various operations may have various semantics. Normally we run in an OS thread and use a combination of hardware and OS operations. Working in the cloud, we still run in an OS thread, but the operations use the networking stack. In an embedded environment each thread is bound to a core.
-We only get the possibility of deadlock when we use blocking operations. With wait-free / atomic operations we never need to block.
+As Go says, the rise of multicore CPUs argues that a language should provide first-class support for concurrency and parallelism. Concurrency and multi-threaded programming have over time developed a reputation for difficulty.
+This is due to complex low-level designs such as pthreads, mutexes, condition variables, and memory barriers. Higher-level interfaces enable much simpler code, even if there are still mutexes and such under the covers.
 
-The smallest examples runtimewise just have memory access. For example this program SB: :cite:`sewellX86TSORigorousUsable2010`
+One of the most successful models for providing high-level linguistic support for concurrency comes from Hoare's Communicating Sequential Processes, or CSP. Occam and Erlang are two well known languages that stem from CSP. Go's concurrency primitives derive from a different part of the family tree whose main contribution is the powerful notion of channels as first class objects. Experience with several earlier languages has shown that the CSP model fits well into a procedural language framework.
+
+
+they have little overhead beyond the memory for the stack, which is just a few kilobytes.
+
+Go's run-time uses resizable, bounded stacks. A newly minted goroutine is given a few kilobytes, which is almost always enough. When it isn't, the run-time grows (and shrinks) the memory for storing the stack automatically, allowing many goroutines to live in a modest amount of memory. The CPU overhead averages about three cheap instructions per function call. It is practical to create hundreds of thousands of goroutines in the same address space. If goroutines were just threads, system resources would run out at a much smaller number.
+
+After long discussion it was decided that the typical use of maps did not require safe access from multiple goroutines, and in those cases where it did, the map was probably part of some larger data structure or computation that was already synchronized. Therefore requiring that all map operations grab a mutex would slow down most programs and add safety to few. This was not an easy decision, however, since it means uncontrolled map access can crash the program.
+
+The language does not preclude atomic map updates. When required, such as when hosting an untrusted program, the implementation could interlock map access.
+
+Map access is unsafe only when updates are occurring. As long as all goroutines are only reading—looking up elements in the map, including iterating through it using a for range loop—and not changing the map by assigning to elements or doing deletions, it is safe for them to access the map concurrently without synchronization.
+
+As an aid to correct map use, some implementations of the language contain a special check that automatically reports at run time when a map is modified unsafely by concurrent execution.
+
+
+Model
+=====
+
+The general idea with concurrency is there are multiple threads of execution. But practically there are more layers than just threads:
+
+* A node is a physical or virtual machine in a cluster
+* A pod is a group of one or more containers, that share storage and network resources and runs on a single node
+* A container / namespace (Linux) / silo (Windows) contains one or more applications in an isolated form with all dependencies loaded from the container image
+* A cgroup (Linux) / job object (Windows) is a group of processes whose resource usage is managed as a unit. Cgroups / job objects are arranged in a hierarchy of containment - cgroups may have multiple hierarchies for distinct resources, but job objects have only one hierarchy. A process belongs to one most specific job object / cgroup in each hierarchy. Cgroups / job objects have rules for assigning newly spawned processes to themselves, and there is an atomic API call to terminate all processes in the cgroup / job object, contrary to `what this says <http://jdebp.info/FGA/linux-control-groups-are-not-jobs.html>`__  (it was added later).
+* An application is the result of invoking a binary and consists of one or more running processes.
+* A process is an executing program and has a memory space and other resources allocated. One or more threads run in the context of the process.
+* An (OS) thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (`1 <https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989>`__, :cite:`nishanovFibersMagnifyingGlass2018` section 2.3.1)
+* A "UMS thread" is a special type of Windows thread which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
+* A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (`contiguous stacks <https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub>`__). Per Microsoft, fibers in C do not provide many advantages over threads.
+
+A typical thread uses a combination of hardware and OS operations. In the cloud, a thread uses more network-centric operations.
+
+Memory models and races
+=======================
+
+The smallest examples of races runtimewise just have memory access. For example this program SB: :cite:`sewellX86TSORigorousUsable2010`
 
 ::
 
@@ -18,7 +54,11 @@ The smallest examples runtimewise just have memory access. For example this prog
   print (!(read x), !(read u))
 
 Here the threads are provided by the C stdlib's pthreads, and the operations are hardware load/store instructions.
-This program has a race condition - the outcome may be ``(1,1)``, ``(1,0)``, or ``(0,1)`` under sequential consistency. But under the relaxed memory model used by X86 (Total Store Order or TSO) ``(0,0)`` is also possible. But under any model values other than 0 or 1 are not possible.
+This program has a race condition, i.e. the order of writing and reading from A, B, x and u is not fixed.
+
+At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot.
+
+Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be ``(1,1)``, ``(1,0)``, ``(0,1)``, or ``(0,0)``, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding memory models, x86-TSO :cite:`sewellX86TSORigorousUsable2010` for x86 and multicopy atomicicity (MCA) :cite:`pulteSimplifyingARMConcurrency2017` for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs ('litmus tests') and appear to be generally accepted by the processor vendors as standard.
 
 Another example is independent reads of independent writes (IRIW):
 
@@ -31,26 +71,31 @@ Another example is independent reads of independent writes (IRIW):
 
 Here the initial state is ``(X,Y)=(0,0)``, and the final state can be ``(a,b,c,d)=(1,0,1,0)`` under POWER. But both ARMv8 and x86 forbid this outcome.
 
+Now there have been attempts to make cross-platform memory models, e.g. there is a C++11 memory model, a Java memory model, a Linux kernel memory memory model, etc. But each of these models has been a poor match on hardware - either it prevents outcomes possible in hardware, or allows outcomes that hardware would not (e.g. reading values out of thin air), or requires too many fences and is slow. So Stroscot uses the hardware models. For cross-platform programming, instead of a cross-platform model, Stroscot encourages checking platform compatibility of the program, i.e. that the two memory models make the program produce equivalent results.
+
+Other types of races
+====================
+
+Races not involving memory can also happen:
+
+* Two acquires of a mutex with different continuations.
+* Appending to a file from multiple threads
+* Writing files in a different order
+* Exiting the program from a thread, when the program is doing anything else
+
+Races could conceivably be desired, e.g. when writing litmus tests, so it is just a warning. Also a "race" like the order of writing to files is generally not important.
+
+Blocking
+========
+
+Acquiring a lock blocks until the lock is released. This introduces the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders. With wait-free / atomic operations we never need to block.
+
 Simulation
 ==========
 
-On a low level, race conditions are fine and an expected part of concurrent programming. No undefined behavior here. But on a program level Stroscot simulates the program's (concurrent) execution, and will give a warning if it's not consistent.
-The program is required to have the same result regardless of the order the tasks are run. This is checked by the verification system. Basically the simulation maintains a list of each thread and its top-level Task value. Each loop iteration takes some arbitrary non-zero number of arbitrarily-chosen tasks and runs their operations in parallel. The tasks operate on a shared state, so the semantics of satisfying the requests in parallel must be defined. We want to error when things clearly conflict.
+On a program level Stroscot simulates the program's (concurrent) execution, and will give a warning if it's not deterministic or if deadlock is possible - the program is required to have the same result regardless of data race outcomes. This is checked by the verification system. Basically the simulation runs through the concurrency model and errors when the program behavior becomes visibly inconsistent. The verification system handles the nondeterminism somehow, check out papers on concurrency verification.
 
-Samples:
-
-* Variable: Two writes with different values conflict. But if only one task writes the variable or all writes are equal then no conflict.
-* Mutex: Two acquires, mutex available, a winner is nondeterministically chosen to be scheduled. The loser is blocked on the mutex or scheduled in a failure branch if it was try_acquire. No mutex available, block.
-* Append-style file writing: Conflicts if same file descriptor
-* Exiting: conflicts with anything but an identical exit (clean exit requirement), or else no conflicts
-
-Etc. It's a bit lengthy to simulate the entire task interface, but operations change infrequently, so it should be maintainable.
-
-Acquiring a lock blocks until the lock is released. This introduces the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders.
-
-All of these generate happens-before relationships on the various operations. We could track this with vector clocks, IDK why - the posets are easier to reason about directly.
-
-The verification system handles the nondeterminism somehow, check out papers on concurrency verification. The behavior of the OS scheduler is complicated and hard to model except as an adversary. The Linux scheduler might take an unreasonably long time to schedule a particular thread even if every other thread is sleeping or calls yield. Or it might decide to run it immediately, or move it on another core, etc.
+It's a bit lengthy to simulate the OS interface, but operations change infrequently, so it should be maintainable. The behavior of the OS scheduler is complicated and hard to model except as an adversary. The Linux scheduler might take an unreasonably long time to schedule a particular thread even if every other thread is sleeping or calls yield. Or it might decide to run it immediately, or move it on another core, etc.
 
 Parallelism
 ===========
@@ -85,17 +130,3 @@ But still, for complex data science computations we might want automatic paralle
 Haskell's "par" is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It's just as clear to use explicit fork/join operations, and indeed the ``rpar/rpar/rseq/rseq`` pattern proposed in `the Parallel Haskell book <https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html>`__ is just fork/join with different naming.
 
 As far as the actual task granularity, Cliff Click says the break-even point is somewhere around the middle of the microsecond range, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress in another thread.
-
-OS Model
-========
-
-An application consists of one or more processes. A process, in the simplest terms, is an executing program.
-
-A job object allows groups of processes to be managed as a unit. Job objects are namable, securable, sharable objects that control attributes of the processes associated with them. Operations performed on the job object affect all processes associated with the job object.
-
-One or more threads run in the context of the process. A thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread.
-
-Windows has a special thread type "UMS thread" which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
-
-A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer OS calls than a full thread context switch. When fibers are integrated into the runtime they can be more memory efficient than threads. Per Microsoft, fibers in C do not provide many advantages over threads.
-

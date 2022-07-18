@@ -1,26 +1,47 @@
 Memory management
 #################
 
-Rust has an unsafe alter ego
-the underlying computer hardware is inherently unsafe.
-certain tasks are unsafe.
-low-level systems programming
-directly interacting with the operating system
-writing your own operating system
+The path from cloud to CPU is long, so there is a lot of caching in between. Some latency numbers and the programming API:
 
-The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory leaks are a pervasive problem, in general there is no real solution besides profiling and buying more RAM. Stroscot can prove memory will not be accessed in the future and hence free it, with a more precise analysis than traditional GC. On the other hand use-after-free and double free can be statically checked for pointers, and aren't a problem at all for the rest of the language because Stroscot frees automatically.
+* Physical registers (0.3 ns): managed by the CPU
+* Logical registers (0.3 ns): assembly read/write
+* Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
+* Main Memory (0.1us-4us): assembly read/write
+* GPU memory (0.2us-0.5us): assembly read/write, driver ioctl's
+* SSD (16us-62us): kernel file APIs
+* LAN (0.5-500ms): kernel network stack, driver bypass
+* HDD (3 ms): kernel file APIs
+* WAN (150ms): kernel network stack, driver bypass
+
+Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application. The memory management system combines all of these into a single "storage" abstraction and moves data between locations as appropriate.
+
+Unsafe
+======
+
+Rust locks all its memory APIs behind the "unsafe" keyword, as if using the underlying computer hardware is inherently unsafe. It's only certain tasks that are unsafe. And with the proper API for low-level systems programming, those tasks can be statically checked. These sorts of memory APIs are necessary for writing your own operating system or memory allocator. "unsafe" is an anti-pattern - either a feature is useful or it isn't, and if it isn't useful then don't provide it. Nanny-state "yes I really want to do this" prompts are just a waste of everyone's time.
+
+Memory errors
+=============
+
+Unfreed memory, use-after-free, and double free can all be statically checked, so are basically a solved problem. Hence Stroscot frees automatically, in particular immediately after the last access.
+
+Wikipedia says a memory leak occurs when memory which is no longer needed is not released. Stroscot's analysis is more precise than traditional GC, so assuming Stroscot's definition of "needed" is accurate, Stroscot's analysis eliminates memory leaks. But it's up to dead code elimination to decide that since the result is discarded the data access can be ignored and hence the memory is not "needed", so there are still corner cases.
+
+There's also "space leaks" where memory could be freed by evaluating a computation earlier. In general this has no solution besides profiling and refactoring the program or buying more RAM.
 
 
+
+The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored.
 A scratch buffer, as exemplified by GNU C's `obstack <https://www.gnu.org/software/libc/manual/html_node/Obstacks.html>`__ seems to be an array variable plus metadata. They don't require any special support AFAICT.
 
 Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
-* A loop that allocates and deallocates a scratch buffer is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
+* A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)
 
 Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the ``Rc`` reference counted type, which besides cycles has the semantics of GC. There is even a `library <https://github.com/Others/shredder>`__ for a ``Gc`` type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management :cite:`appelGarbageCollectionCan1987`. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work :cite:`proustASAPStaticPossible2017` :cite:`corbynPracticalStaticMemory2020` on "as static as possible" (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It's whole program and undecidable, but Stroscot already has 3 or 4 of those planned.
 
-Why hasn't anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it's slow but there is a conceptual leap in going from program verification to program synthesis. It could be faster but I can see why it isn't.
+Why hasn't anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it's slow but there is a conceptual leap in going from program verification to program synthesis. It could have happened faster but I can see why it didn't.
 
 * The newly-dead set for a state transition ``s -> t`` is all objects that are accessed before but not accessed later, ``A = {z | Access(s,z) = yes && Access(t,z) = no} = L(s) intersect D(t)``.
 
@@ -28,7 +49,7 @@ We deallocate the newly-dead set after each operation. This doesn't necessarily 
 
 Quad-color marking
 
-The GC status of an object is set by two bits, the mark bit and the gray bit. The mark bit is stored in a bitmap, can be white or black. The gray bit is stored in a boxed_value object, determining whether an object has been fully marked. Only traversable objects have a gray bit and hence quad colors. Non-traversable (flat) objects have very simple state transitions (just white->black->white).
+The GC status of an object is set by two bits, the mark bit and the gray bit. The mark bit is stored in a bitmap, can be white or black. The gray bit is stored in a boxed_value object, determining whether an object has been fully marked. Only traversable objects have a gray bit and hence quad colors. Non-traversable (leaf) objects have very simple state transitions (just white->black->white).
 
 .. graphviz::
 
@@ -171,9 +192,6 @@ The array part of shared memory is necessary because there is a double-word CAS 
 Supporting persistent memory: The pointer API, assembly wrapping, and OS calls cover using persistent memory via standard file APIs or memory-mapped DAX. Memory is volatile while persistent memory is not, so persistent memory is faster storage, not weird RAM. And storage is complex enough that it seems best handled by libraries. Making the memory management system memkind-aware seems possible, like memory bound to NUMA nodes.
 
 With persistent memory only word-sized stores are atomic, hence the choice of shared memory as an array of words. https://stackoverflow.com/questions/46721075/can-modern-x86-hardware-not-store-a-single-byte-to-memory says that there are in fact atomic x86 load/store instructions on the byte level.
-
-Memory models: The actual hardware models (x86-TSO, Armv8 whatever, etc.) seem to be the most well-specified. Whereas C++11 is broken, Java was broken, ... in the sense that the described memory model was unimplementable on hardware, preventing outcomes possible in hardware, or else allowed outcomes that hardware would not (e.g. reading values out of thin air). So use the hardware models. For cross-platform programming allow checking model compatibility, i.e. that the two memory models make the program produce equivalent results,
-
 
 word
   An integer ``i`` with ``0 <= i < MAX``.
@@ -389,8 +407,7 @@ However, a prompt finalizer would give an error on programs such as the followin
 
 ::
 
-  free = print "Freed."
-  f = newFinalizer free
+  f = newFinalizer (print "Freed.")
   use f
   b = input Bool
   if b
@@ -399,7 +416,7 @@ However, a prompt finalizer would give an error on programs such as the followin
   else
     print "B"
 
-With a normal finalizer, instead of erroring, Stroscot will insert a call to ``free`` before the ``print "B"`` statement in the else branch.
+With a prompt finalizer this program will error. With a normal finalizer, Stroscot will insert calls to ``free`` after the ``use f`` in the true branch and before the ``print "B"`` statement in the else branch.
 
 Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
 1. ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
@@ -435,6 +452,16 @@ API for requesting memory in an async fashion - memory starvation is often the r
 * the API would have to ignore swapping. Otherwise, excessive paging occurs before actual memory exhaustion. So the request succeeds but because it's backed by the disk performance completely tanks and the user ends up killing the process.
 Unfortunately, no OS APIs allow requesting memory asynchronously. The closest you get is Linux's on-demand backing allocation.
 
-Azul GC: :cite:`clickPauselessGCAlgorithm2005` :cite:`teneC4ContinuouslyConcurrent`
-Shenandoah
+Azul GC: :cite:`clickPauselessGCAlgorithm2005` :cite:`teneC4ContinuouslyConcurrent2011`
+Shenandoah "low pause" is 10ms which is the same order of magnitude as NUMA memory map stuff (>10ms if misconfigured)
+
+cache misses are the most important performance metric for memory management, but not usually measured
+
+escape detection - 70% of allocations on stack, not good enough to beat Azul
+escape analysis - all or nothing
+separate allocator has to be as fast as main allocator
+
+compile time garbage collection is detecting when an allocation becomes unused and freeing it
+structure reuse is detecting when an allocation becomes unused and reusing the memory for a new allocation
+destructive assignment is when allocated memory is passed in and modified by the function
 

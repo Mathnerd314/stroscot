@@ -3,51 +3,6 @@ Sets
 
 Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see :ref:`Verification <Verification>`). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.
 
-What are types?
-===============
-
-Stroscot's sets are sometimes also called "types". But are sets types? Is Stroscot typed? These get down to ambiguities in the literature. Parnas, Shore & Weiss 1976 identified various definitions of a "type":
-
-Syntactic
-    A type is a purely syntactic label
-Representation
-    A type is defined in terms of a composition of machine types.
-Value space
-    A type is a set of possible values
-And behavior
-    One of the above plus a set of operators or functions that can be applied
-
-Recent type system papers have gravitated to the syntactic definition, because it's easier to publish meaningless gibberish.
-In Church style, the style present in most academic papers on type systems,
-
- there is only one principal type for a given expression, and the type system is sound and decidable. Haskell is Church-style - e.g. when the type inference fails for GADTs, the type signature must be given. Similarly substructural type systems are Church-style.
-
-Soundness mean "type preservation", i.e. if ``a : E`` then evaluating ``a`` must produce a value in ``[[E]]``.This property is qualified to a subset S of a language L. If S is sound we say L is sound relative to S. If L is unsound but L/S is sound we say L is sound up to S. An example of an unsound type system feature is Java's covariant array writes - ``(a : Array Dog).add(c : Cat)`` is an error, but ``(a : Array (Cat|Dog)).add(c : Cat)`` typechecks because of covariance and then gives a runtime error when assuming ``a : Array Dog`` later on. Java is sound up to covariant array writes, null pointers, and a few other warts. TypeScript is sound up to first class functions and downcasts from the any type
-
-arrays—but these features are enforced at runtime, so they’re only statically unsound features. , neither being enforced at runtime. The Dialyzer’s type system aggressively avoids false-negatives, and could be characterized as sound up-to variable references (at the very least—there must be more to say here). There is an incredibly rich spectrum of soundness, and this spectrum is worth exploring due to the contradictory force of completeness—sometimes what is meant by “usability”.
-
-A complete type system never rejects correct programs. When faced with soundness versus completeness tradeoffs, type system designers tend towards preserving soundness—rejecting some correct programs is more satisfying than accepting some incorrect ones. Depending on your goals for the type system, however, this might not always be the right decision. I imagine the designers of Java decided that using mid-1990’s type theory to soundly handle the null-pointer in the type system was not worth the cost to completeness (“usability”): too many correct programs would be rejected and threaten to turn away their core C++ target audience. So, because of the state of type research and its intended audience, Java’s type system is “sound” up-to (at least) null-pointers, but “complete” relative-to null-pointers—no program initially accepted by the type system will be rejected by adding null-pointers to its source (so long as the result is still a correct program).
-
-The tension between soundness and completeness is a key to understanding examples of unsoundness found in many type systems. There are two teams in this tug of war—the soundness-sacrificers and the soundness-preservers—and, depending on your perspective, each team is unfairly matched! Both sides want completeness (usability), and “pull” to increase the number of correct programs their type systems can accept. The soundness-sacrificers are willing to forgo some soundness in the name of completeness (usability) today; they create forgiving type systems, avoiding many technical challenges. Meanwhile, the soundness-preservers play the long game, and see supporting this new set of features soundly as a compelling technical challenge. On the other hand, the soundness-sacrificers often do the work of popularizing new realms of completeness (usability) and had to be inventive enough to recognize the soundness tradeoff in the first place. The soundness-preservers can instead borrow these insights as initial sparks for research directions. (This can also go the other way, with soundness-sacrificers removing hard-to-understand, but proven sound features for a less demanding audience.) The soundness-sacrificers are doing pretty well for themselves in 2018, but the soundness-preservers often catch up in time.
-
-Here’s an example to bring all this together: Java’s famous handling of the null-pointer. The soundness-sacrificers designing the Java type system made the first move. Instead of investing decades of research in sound-but-usable techniques for incorporating null-pointers into a type system, they made a type system that is ignorant of null-pointers, compensating by enforcing soundness via runtime checks. They “tugged” the other team over the line by being able to accept significantly more (correct) programs than the soundness-preservers. Many years later, the soundness-preservers designing Kotlin and Ceylon applied recent advances in control-flow analysis (Tobin-Hochstadt & Felleisen, 2010) to “pull back” the number of correct programs they can accept involving null-pointers, while keeping compile-time soundness. This tug-of-war is thrilling for both sides—the initial thrill of pulling away with usable and popular type systems, followed by the thrill of the technically challenging chase. Everyone wins in the end, and the players are usually keen on another round once the dust settles.
-
-
-
-Stroscot is dynamic, in the sense that there is a universe set that can contain all values. Haskell does too with a `Dynamic <https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html>`__ type, but it avoids allowing polymorphic values. Stroscot doesn't, which likely makes function values unsound.
-
- although the set logic is carefully defined to avoid the common paradoxes. If you include the general recursion or infinite type features then it's definitely unsound. Most languages are already unsound so this is not much of a loss, and it increases expressiveness because terms such as the Y combinator become typeable.
-
-There are sound Church-style type systems that are similar to Stroscot's sets. Distributive lattices as used in :cite:`dolanAlgebraicSubtyping2016` are isomorphic to collections of sets. Similarly :cite:`naikTypeSystemEquivalent2008` provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types. Stroscot could be written to output Church-style types reflecting the properties it verifies for every expression, and those types would unquestionably be types, and very similar to the set annotations specified, although unlikely to exactly match a set annotation. But the types would be complex and precise, e.g. ``length : (Nil-->0) & (Cons a b-->1+(length b))``, and likely hard to interpret, so this will likely never be implemented.
-
-Harper has `argued <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ that dynamic languages are unityped static languages. Instead of "proper" types, one defines an agglomerated unitype, and throws away soundness. Because the type system is trivial, properties are not part of the type system. Hence, because Stroscot is dynamic, Stroscot's sets are not types in Harper's sense. Admittedly Harper's post is somewhat trolling, but there is probably a group of people who agree with him.
-
-Then there's gradual typing. In `this post <https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/>`__ it says "a type is something that describes a set of values that have a bunch of operations in common". Stroscot's set have the "set of values" covered, but there's no requirement to have operations in common. So Stroscot's sets are not gradual types.
-
-There are also Curry-style types, called sorts in :cite:`pfenningChurchCurryCombining2012` to distinguish from Church-style types. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is dynamic. Stroscot's sets are indeed sorts or Curry-style types.
-
-So depending on who you ask, Stroscot's sets are not types, are similar to types, are almost types, or are types. To avoid useless arguments we use the term "set" instead of "type" where possible, as this is more precise and does not have any ambiguity.
-
 Sets
 ====
 
@@ -55,8 +10,8 @@ Sets in Stroscots are defined by a predicate ``a isElementOf S : Value -> Set ->
 
 Sets don't contain null by default, you have to add it to the predicate as an allowed value.
 
-Function definition
--------------------
+Definition by overloading
+-------------------------
 
 The usual method combination mechanisms apply. In particular you can define sets by creating a fresh symbol and overloading ``isElementOf``:
 
@@ -231,7 +186,7 @@ Set annotations are translated to assertions, and these assertions are staticall
 
   a : T = { assert(a isElemOf T); a }
 
-Don't override ``:``, it is intended as a no-op. For conversions use the explicit function ``convert Int64 2``.
+``:`` is a no-op to make analysis easy. There is also conversion ``convert Int64 2`` which might get an infix operator.
 
 Function annotations
 ====================

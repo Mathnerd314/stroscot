@@ -67,7 +67,7 @@ Finalizers
 
 Finalizers are a relaxed approach to prompt resource management. They allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, but do not require explicit marking of the free operation. A finalizer is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and command ``use : Finalizer -> Command`` and ``useForever : Finalizer -> Op Command``.
 
-The semantics is that ``free`` will be called as soon as it is known that ``use`` will no longer be called, unless ``useForever`` is called. ``useForever`` undoes the finalizer and returns the free operation. The general transformation:
+The semantics is that ``free`` will be called as soon as it is known that ``use`` and ``useForever`` will not be called. Calling ``use`` delays finalization until after the ``use``, and ``useForever`` cancels the finalizer and returns the free operation. The general transformation:
 
 ::
 
@@ -81,11 +81,41 @@ The semantics is that ``free`` will be called as soon as it is known that ``use`
   transform c =
     if will_call (UseForever f) c
       c
-    else if could_call (Use f) c
+    else if will_call (Use f) c
       let c' = continuation c
       reduce (c { continuation = transform c' })
-    else
+    else if !(could_call (Use f) c || could_call (UseForever f) c)
       reduce (free {continuation = c})
+    else
+      assert(could_call (Use f) c || could_call (UseForever f) c)
+      info("Delaying finalizer due to conditional usage")
+      let c' = continuation c
+      reduce (c { continuation = transform c' })
+
+The info can be an error if prompt memory management is desired. The situation happens when freeing depends on input data:
+
+::
+
+  af = print "a"
+  a = newFinalizer af
+  if randomBool then
+    exit
+  else
+    use a
+    exit
+
+Because ``a`` is used in the else branch, it cannot be freed before the condition. It is freed as soon as it is known it will not be used, hence this program is equivalent to:
+
+::
+
+  af = print "a"
+  if randomBool then
+    af
+    exit
+  else
+    af
+    exit
+
 
 If multiple finalizers simultaneously become able to call ``free``, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.
 
@@ -95,14 +125,16 @@ If multiple finalizers simultaneously become able to call ``free``, the finalize
   b = newFinalizer (print "b")
 
   if randomBool then
+    print "c"
     exit
   else
+    print "c"
     use a
     use b
     exit
 
-  # when bool is false: ab
-  # when bool is true: ba
+  # when bool is false: cab
+  # when bool is true: bac
 
 Freed on exit
 -------------

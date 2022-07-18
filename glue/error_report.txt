@@ -1,0 +1,44 @@
+SourceId = fmt::Debug + Hash + Eq + sized
+
+
+/// A type that represents a labelled section of source code.
+Label {
+    span.source: SourceId
+    span.start: usize,
+    span.end: usize,
+    msg: Option<String>,
+    color: Option<Color>,
+    order: i32,
+    priority: i32,
+}
+
+/// A type representing a diagnostic that is ready to be written to output.
+Report {
+    kind: ReportKind,
+    code: Option<String>,
+    msg: Option<String>,
+    note: Option<String>,
+    help: Option<String>,
+    location: (SourceId, usize),
+    labels: Vec<Label>,
+    config: Config,
+}
+
+ReportKind = (&'static str, Color)
+
+Error, Warning, Advice : ReportKind
+
+/// The attachment point of inline label arrows
+LabelAttach= {Start,Middle,End}
+
+CharSet={Unicode,Ascii}
+Config = {
+    cross_gap: bool = false,
+    label_attach: LabelAttach = Middle,
+    compact: bool = false,
+    underlines: bool = true,
+    multiline_arrows: bool = true,
+    color: bool = true,
+    tab_width: usize = 4,
+    char_set: CharSet = Unicode,
+}

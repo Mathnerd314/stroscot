@@ -1,10 +1,11 @@
-About
-#####
+Meta
+####
 
 Motivation
 ==========
 
 Why another programming language, you may ask?  Why does a painter paint? To paraphrase Chapter 1 of The Mythical Man Month, there is the joy of: [#tractable]_
+
 * designing and making complex and intricate things
 * making things that create real results and are useful to other people
 * constantly learning due to the nonrepeating nature of the task
@@ -51,6 +52,8 @@ Paradigms are vague and only express common patterns; they cannot be used to des
 * Organize functions by functionality into expressive components. (`Uli Weltersbach <https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/>`__)
 * When two elements of an interface conflict, or are ambiguous, the behavior should be that which will least surprise the user; in particular a programmer should try to think of the behavior that will least surprise someone who uses the program, rather than that behavior that is natural from knowing the inner workings of the program. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
 
+What are these principles useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons.
+
 Non-principles
 --------------
 
@@ -59,17 +62,17 @@ Readability
 
 Readability is a function of the program, not so much the programming language. Liberal comments can make even Brainfuck programs quite readable. So readability is only a consideration for the compiler - but even there, the extensive documentation means that few people will actually read the compiler code. So readability isn't a principle for Stroscot.
 
- But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__).
+But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win for that principle (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__).
 
 Turtles all the way down
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-"Turtles all the way down" only makes sense in the context of a directional layout, such as inheritance or composition. Stroscot has :ref:`no inheritance`, so it must be composition. But an infinite object tree would require infinite space - there has to be a trick, e.g. that the objects at some point repeat in a cycle. This trick is itself a useful programming tool, much more useful than the idea that all objects "look the same".
+"Turtles all the way down" only makes sense in the context of a directional layout, such as inheritance or composition. Stroscot has :ref:`no inheritance <no inheritance>`, so it must be composition. But an infinite object tree would require infinite space - there has to be a trick to allow compressing it, e.g. that the objects at some point refer back to themselves. This pointer trick is the principle, much more useful than the idea that all objects "look the same", and is covered by the productivity principle.
 
 The Vasa
 ~~~~~~~~
 
-Bjarne Stroustrup seems fond of the phrase "Remember the Vasa" to warn against large last-minute changes. According to `Wikipedia <https://en.wikipedia.org/wiki/Vasa_(ship)>`, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship "didn't have enough belly". So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot's principle to steal from great poets.
+Bjarne Stroustrup `seems fond <https://www.stroustrup.com/P0977-remember-the-vasa.pdf>`__ of the phrase "Remember the Vasa" to warn against large last-minute changes. According to `Wikipedia <https://en.wikipedia.org/wiki/Vasa_(ship)>`__, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship design "didn't have enough belly". So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot's principle to steal from great poets.
 
 Goals
 =====
@@ -77,17 +80,22 @@ Goals
 The ultimate
 ------------
 
-Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. The question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
+Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup, :cite:`sutterFamilyLanguages2000` but I think it can be made to work. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
 
-Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and mainly affect the design of the compiler. Syntax and features all have global optima.
+Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are undecidable and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and don't affect the overall design of the language. While solvers may not have global optima, syntax and features do.
 
-The main reason is that a lot of programming features overlap. By picking the best and most expressive version, there is only one syntax and feature to consider. This applies to anything from low-level systems programming to high-level computer algebra system manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there for a consistent, powerful interace should be clear.
+Global maximum
+--------------
 
-Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. For example C++ and Java have added lambdas. This is due to a shallow intellectual base. No idea is original, and lambdas are quite old. With sufficient research these old ideas can be uncovered and incorporated.
+Stroscot aims to be a global maximum. If the language can't do X, then people will choose to use another language that can do X. Macros make it easy to rapidly add new syntax so often "do X" is as simple as writing another library. Underneath the syntax there are multiple ways to implement X - Stroscot has to pick primitives that combine well together. There’s a combinatorial explosion in feature interactions.
+
+Features have a maximum because programming features overlap and solve particular needs. Taking some needs and finding the minimum cover of features, we can discard many redundant features. If the programming language has fewer concepts, there’s less to learn, and novices will become proficient faster. Particularly, redundant features should be avoided - although macros allow defining redundant syntax, consistency is better. By preferring covers with the most expressive features, we ensure a future-proof design. Many languages suffer from "idea envy", where new ideas in other languages seem better than the old ones implemented in the traditional language. For example C++ and Java have added lambdas. This is due to a shallow intellectual base. No idea is original, and lambdas are quite old. With sufficient research these old ideas can be uncovered and incorporated. This applies to anything from low-level systems programming to high-level computer algebra system manipulations. You may point to INTERCAL's COMEFROM as something best left unimplemented, but it's not hard to implement with continuations and macros. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there for a consistent, powerful interface should be clear.
+
+Syntax has a maximum too, because form follows function. There are only so many ways to write a given expression. Comparing these options on learnability, concision, and simplicity, there is only one option. It's often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used. A low-priority goal for syntax is simplicity. In a lot of cases this is overridden by other goals, e.g. the more  learnable option of using ``=`` for both assignment and equality comparison complicates the syntax quite a bit. But avoiding weird syntax features such as Rust's turbofish ``::<>`` seems reasonable.
 
 My theory is that, even if Stroscot fails as a language, if I implement complicated but generic algorithms for the compiler then people will refer to Stroscot just for the algorithms. I'm not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.
 
-Another focus is learnability, particularly for novices. It's often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used.
+Another advantage of being a maximum is stability. When a programming language changes significantly, it loses its identity - for example, Python 2 and Python 3 are effectively separate programming languages, as are Perl 5 and Perl 6 (Raku). A new language needs new tools and new libraries, so minimizing the number of new languages (breaking changes) is best. Write the compiler once and then go do something else. Stroscot is based on a survey of the academic literature and uses ideas and techniques that are decades old and have been recognized to be effective for their purpose. It is actually really hard to come up with better ideas than these papers.
 
 Performance
 -----------
@@ -129,7 +137,7 @@ modern processors
 Logo
 ====
 
-The logo for Stroscot is inspired by the color scheme of the cover of Accelerando (the red rise of the machines), the `cot icon <https://thenounproject.com/term/cot/154357/>`__ by P Thanga Vignesh from the Noun Project, and a design I made a while back of "the infinite stack". The Paint picture I made is lost in time, but the general idea is you had a (potentially infinite) stack of reusable/composable components (the white/black blocks in the current icon) going left-to-right, and underneath it a processor (white) and various glue bits (red/blue).
+The logo for Stroscot is inspired by the color scheme of the cover of Accelerando by Charles Stross (the red rise of the machines), the `cot icon <https://thenounproject.com/term/cot/154357/>`__ by P Thanga Vignesh from the Noun Project, and a design I made a while back of "the infinite stack". The Paint picture I made is lost in time, but the general idea is you had a (potentially infinite) stack of reusable/composable components (the white/black blocks in the current icon) going left-to-right, and underneath it a processor (white) and various glue bits (red/blue).
 
 The current logo is made mainly to solve the issue of finding the browser tabs with Stroscot documentation open (the default icon is unhelpful), so it is an instance of "programmer art". Interested parties can submit alternate designs and once there are a few submissions there will be a vote.
 
@@ -153,12 +161,13 @@ The documentation is organized according to `this system <https://diataxis.fr/>`
 
 The four functions:
 
-* Getting started  (system calls these "tutorials") - overview information for newcomers, learning oriented (aim for a 1-week course)
+* Tutorial  ("getting started") - overview information for newcomers, learning oriented (aim for a 1-week course)
 * how-to guides - specific tasks / goals, e.g. solve specific error messages
 * technical reference - describe the machinery, with as little fluff as possible
 * commentary/explanation - understanding, explain the possible alternatives and why a choice was made
 
 The categorization procedure:
+
 * Does it describe specific actions the reader should take (1), or is it theoretical (2)?
 * Is it an exploratory piece of art (A), or is it a descriptive quick-reference (B)?
 * 1A: getting started
@@ -174,32 +183,90 @@ The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-a
 Forbidden words
 ---------------
 
-A fair number of words in programming seem to be meaningless gibberish. So don't use them:
+A fair number of stuff in programming seem to be meaningless gibberish. So don't use them:
 
-* structured
-* paradigm
-* impure
-* object oriented
-* static
+* dynamic - As `Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ points out, this is a marketing term.
+
+  * dynamically typed - "unityped" (short for "has a universal type").
+  * dynamic library - shared library
+  * dynamic linking - linking at program startup
+  * dynamic loading - run-time loading
+
+* static - similar to dynamic, too many overloaded meanings to be usable.
+
+  * statically typed - every language
+  * static lifetime - program lifetime, bound when program starts and freed by OS when program terminates
+  * static method - utility method, not bound to any object instance
+  * static linkage - internal linkage, symbol only available in translation unit
+  * static imports - scoped import, import members of modules
+  * static library - precompiled file archive
+  * static linking - compile time binding, resolving memory addresses at compile time
+
+* pure - prefer the proposition that all expressions have values
+* strongly typed - `8 definitions <https://perl.plover.com/yak/12views/samples/slide045.html>`__, all different. It's the semantic equivalent of "amazing", i.e. "My language is strongly typed" == "My language is amazing".
+* undecidable - people use this word to imply that it's unimplementable, when there are working solvers like the ones in `termCOMP <https://termination-portal.org/wiki/Termination_Competition>`__ that solve many useful cases. Prefer "complexity at least :math:`\Sigma^0_1`", where :math:`\Sigma^0_1` is in the `arithmetic hierarchy <https://en.wikipedia.org/wiki/Arithmetical_hierarchy>`__, or a more precise class if known. Note that decidable problems / computable sets are in :math:`\Delta_{1}^{0} \subset \Sigma^0_1`.
 
 Open source
 -----------
 
 The license is still undecided, so set to WTFPL.
 
-Real "open source" goes beyond a LICENSE file:
+Real "open source" goes beyond a LICENSE file: (per `Luke Plant <https://lukeplant.me.uk/blog/posts/why-im-leaving-elm/>`__)
 
-* open development process
+* open development process, permanent records of decision making, decisions should be explained with reasoning
 * appreciate comments or ideas from the community, benefit from other people's expertise without flatly contradicting them
 * clearly documented process for contributing in CONTRIBUTING.md file, not "Old Boy's network"
 * pull requests by community members should be merged or closed within a year
-* records of decision making, decisions should be explained with reasoning
-* development discussions should stay open for longer than 10 days
-* mailing lists, forum, chat
 * deleting posts, blocking, and locking should be reserved for spam, not civil criticism
 * communication style should be civil, friendly, and helpful, and not aggressive or controlling.
 * leadership should not be a corrupt cabal that gives special treatment to itself. They need to think of themselves as stewards and not owners. The difficulty goes up as more people are affected by decisions and more contributions received from people.
 * possible to fork or patch without being called a "hostile attack"
+
+
+Communication methods
+---------------------
+
+Stroscot's documentation first approach should help a lot with open development. As far as information, the main avenue for Stroscot is the Git repo. This has the documentation and the code all-in-one. Secondary sources are:
+* real-time chat, for quick questions and discussion. Discord suffices for now (0 people anyway). Alternatives are Gitter, Element, and Matrix which are somewhat more open-source friendly.
+* issues, for anything more important. Github issues seems fine, even Swift is using it. If open-source is a concern then `migrating to Gitlab <https://docs.gitlab.com/ee/user/project/import/github.html>`__ is possible.
+* in the future, a forum for long-form discussions, where the problem needs more consideration than just the random sample in chat but it's not really an issue with the project. Github discussions is a possibility but Discourse is the standard. There are `free instances <https://free.discourse.group/>`__ for open-source projects, but needs 10+ contributors. Anything relevant to language/standard library development should have an issue filed.
+
+As far as the "ping bot" that closes issues if they are not active, it seems like a good idea since if there is no reporter to discuss with then making progress is hard. IMO the bot should request a little discussion summary if there have been more than a few comments. Something like:
+
+* Goal: Summary of what conditions need to be satisfied to close the issue
+* Deliverable: What can be delivered in a few weeks to further the progress of this issue?
+* Motivation: What advantages does this goal have?
+* Risks: What concerns have been raised about this goal?
+* Blockers: What resources or leadership decisions are needed, besides someone implementing it?
+
+The summary doesn't need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then "The previous summary is accurate" is fine as the summary.
+
+Paradigms
+=========
+
+In linguistics, a paradigm is "a set of linguistic items that form mutually exclusive choices in particular syntactic roles," specifically "a table of all the inflected forms of a particular verb, noun, or adjective." This seems to be a usable definition of a PL paradigm - you have all related versions of a semantic entity.
+
+Unfortunately people seem to use paradigms as labels of entire languages, rather than classifications of their features. Stroscot, like every other language, is "multi-paradigm" - even assembly is imperative (syscalls) and structured (conditional jump). So the terms "object oriented", "functional", etc. are best avoided in favor of discussing specific features. Translation table:
+
+* object oriented programming - class-based module structure and member function call syntax
+* imperative programming - mutating assignment and I/O
+* procedural programming - blocks (sequential series of statements)
+* functional programming - lambdas
+* structured programming - conditionals and loops
+
+Still though, it's good to have a map of which paradigms embed into which other paradigms:
+
+* loops are a kind of function (recursive)
+* conditionals are a type of function (lazy)
+* mutating assignments are a kind of syntax (passing and returning a store)
+* concurrency operations are a kind of I/O operation (concurrent)
+* I/O statements are a kind of value (action)
+* blocks are a kind of function (monadic composition)
+* lambas are a kind of function (anonymous)
+* functions are a kind of relation (total, functional)
+* automata are a kind of function (state transition)
+* `action descriptions <https://en.wikipedia.org/wiki/Action_language>`__ are a kind of relation (state trajectory)
+
 
 Other programming languages
 ===========================
@@ -207,6 +274,7 @@ Other programming languages
 There are many existing programming languages to learn from. All of them have had effort put into their design so their features should be considered. But the disadvantages to a feature are not obvious and generally can only be found by examining complexities in large software projects in the language. The trick is to isolate the use case and cut the Gordian knot in a surgical manner.
 
 Inspiring projects:
+
 -  `Lever <https://github.com/cheery/lever/>`__
 -  `Jai <https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md>`__
 -  `Pinafore <https://pinafore.info/>`__
@@ -214,80 +282,175 @@ Inspiring projects:
 -  `Wat <https://github.com/manuel/wat-js>`__
 -  `Atomo <https://github.com/vito/atomo>`__ / `Atomy <https://github.com/vito/atomy>`__
 
-Java
-* Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top
-* Compromises between performance and expressiveness such as covariant arrays
-* The OO mantra has led to design patterns, which are a reference point for features support with explicit syntax. The class-based syntax for the patterns is not worth emulating.
-* try-finally and checked exceptions have wasted the time of many programmers.
-* Keyword soup for declarations, such as "public static void main".
-* Lack of operators such as ``+`` for ``BigInteger``
-* Every object has a 4-byte header and identity using ``==``. No value types besides primitives.
-* Requirement that the class name must match the directory name.  When moving functionality around this implies a lot of changes inside source files. Led to IDEs with extensive support for refactoring.
-* Static methods. Scoped to a class, but not related to objects. Can be very confusing.
-* JIT is probably best in the world. Startup is slow but throughput matches C performance in many cases.
-* Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, something like 15% wall clock overhead. :cite:`caiDistillingRealCost2022`
+Languages in TIOBE index order:
 
 Python
-* Most popular besides C/C++, said to be "easy to learn for beginners", "simple and elegant syntax" "similar to English"
+
+* Most popular on TIOBE index, said to be "easy to learn for beginners", "simple and elegant syntax" "similar to English".
 * brevity, readability, developer-friendliness make it 5-10x more productive than Java
-* "Batteries included" standard library, such as lists and dictionaries
+* "Batteries included" standard library, such as lists and dictionaries, numpy (BLAS wrapper) and scipy
+* Twisted web framework
 * Mixed reference counting / tracing GC memory management
 * Significant indentation - still a point of contention, e.g. whether it makes copy pasting code harder
-* C++ interpreter CPython, low performance. Projects such as PyPy exist but haven't been widely adopted.
+* C++ interpreter CPython, slow performance. PyPy exists but has't been widely adopted due to incompatibility.
 
 C
+
 * old and widespread language. Language of most OS's, hence runs just about everywhere (portable).
 * statically compiled, compilers are very efficient.
 * unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these. Also there is the Boehm GC, used by many people who don't want to deal with memory management.
 * header files slow down compilation as they have to be read many times during compilation
 
-Scala
-* Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
+Java
+
+* Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top
+* Compromises between performance and expressiveness such as covariant arrays
+* The OO mantra has led to design patterns, which are a reference point for features support with explicit syntax. The class-based syntax for the patterns is not worth emulating.
+* try-finally and checked exceptions have wasted the time of many programmers.
+* Keyword soup for declarations, such as "public static void main".
+* Lack of operator overloading such as ``+`` for ``BigInteger``
+* Every object has a 4-byte header and identity using ``==``. No value types besides primitives.
+* Requirement that the class name must match the directory name.  When moving functionality around this implies a lot of changes inside source files. Led to IDEs with extensive support for refactoring.
+* Static methods. Scoped to a class, but not related to objects. Can be very confusing.
+* JIT is probably best in the world for throughput. Startup is slow but throughput matches C performance in many cases.
+* Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, around 15% overhead on wall clock time . :cite:`caiDistillingRealCost2022`
 
 C++
-* many features, which interact in complex ways making C++ take a long time to learn
+
+* many features, which interact in messy/complex ways making C++ take a long time to learn
 * fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)
 * templates, efficient at runtime but slow at compile time
 * memory unsafe like C, although smart pointers make this a little better.
 
-D
-* C/C++ style but different. never really took off.
-* many features that have been incorporated in C++, others that haven't been
+C#
+
+* best designed C-style syntax - e.g. introduced async/await
+* wide usage - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)
+
+Visual Basic
+
+* "mentally mutilates" programmers (according to Dijkstra)
+* runs on .NET, so very similar to C# in semantics
+
+JavaScript
+
+* second-best JIT, optimized for startup time - examine bytecode interpreter
+* many strange features such as implicit type conversion, ``with`` statement, and ``eval``
+
+Swift
+
+* Automatic reference counting, interesting but not something I want to copy
+* interesting syntax for exception handling, if let/guard let
+* `exponentially slow <https://www.cocoawithlove.com/blog/2016/07/12/type-checker-issues.html>`__ type inference for numeric expressions
+
+Delphi / Object Pascal
+
+* still kicking
+* proprietary, so not worth looking at too closely
+
+PHP
+
+* Initial design was hacked together quickly, inconsistent API design. Could be fixed but backwards compatibility is more important.
+* Several features with huge security or performance impact: eval, weak typing
+
+Objective C
+
+* deprecated by Apple in favor of Swift, but a good comparison against C++
+
+Go
+
+* opinionated design, touts meaningless features such as "strong typing"
+* goroutines, killer feature
+* finally added generics after a long time
+* supposedly a Python replacement, but TensorFlow is mainly in Python and the Go binding `isn't officially supported <https://github.com/tensorflow/build/tree/master/golang_install_guide>`__
+
+R
+
+* numerous libraries for statistics and data analysis
+* lazy evaluation
+
+Perl
+
+* A mess with the Raku split
+* Various libraries on CPAN are good
+* Contexts and sigils, terrible syntax IMO
+
+Lua
+
+* Use of "tables" for everything is interesting
+* LuaJIT was fast but the main developer left. Storscot needs to avoid the same fate.
 
 Ruby
-* crazy scripting language. weird syntax.
-* expression by itself is return value, causes mistakes.
 
-Stroscot aims to be a global maximum. If the language can't do X, then people will choose to use another language that can do X. Macros make it easy to rapidly add new syntax so often "do X" is as simple as writing another library. Underneath the syntax there are multiple ways to implement X - Stroscot has to pick primitives that combine well together. There’s a combinatorial explosion in feature interactions.
+* weird syntax, e.g. expression by itself is return value - causes mistakes.
+* Rails is `(still) <https://www.jetbrains.com/lp/devecosystem-2021/ruby/#Ruby_what-web-development-tools-and-or-frameworks-do-you-regularly-use-if-any>`__ the most popular framework
+* slow, `YJIT <https://github.com/ruby/ruby/blob/master/doc/yjit/yjit.md>`__ added in 3.1
 
-Another advantage of being a maximum is stability. When a programming language changes significantly, it loses its identity - for example, Python 2 and Python 3 are effectively separate programming languages, as are Perl 5 and Perl 6 (Raku). A new language needs new tools and new libraries, so minimizing the number of new languages (breaking changes) is best. Write the compiler once and then go do something else. Stroscot is based on a survey of the academic literature and uses ideas and techniques that are decades old and have been recognized to be effective for their purpose. It is actually really hard to come up with better ideas than these papers.
+Prolog
 
-A low-priority goal is simplicity at the syntactic and semantic level. In a lot of cases this is overridden by other goals, e.g. with learnability using ``=`` for both assignment and equality comparison complicates the syntax quite a bit. But avoiding weird syntax features such as Rust's turbofish ``::<>`` seems reasonable. And if the programming language has fewer concepts, there’s less to learn, and novices will become proficient faster. Particularly, redundant features should be avoided - although macros allow defining redundant syntax, consistency is better.
+* The inference algorithm (SLD resolution) is inefficient and should be replaced with DPLL or CDCL. But SLD's simplicity is the main reason Prolog execution is comprehensible.
+* Teyjus / λProlog rely on higher order pattern unification. It is possible to use Huet's semi-algorithm for higher order unification, though the lack of most general unifiers complicates things.
 
-erase distinction between commands and expressions
-erase distinction between compile time and execution time
-avoid implicit conversion
+Rust
 
-Language design is hard because the space of possible programming languages is infinite, and so compromises have to be made. It’s hard to provide hard numbers to quantify what makes one design better than another. Some of the things that can be quantified to some degree are the complexity of the implementation of a language and also the way that a particular language implementation performs.
+* good standard library design and documentation, probably worth copying
+* voted "most loved" by StackOverflow
+* borrow checker, can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. if you go through `real implementations <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  they end up using reference counting as a substitute for GC to ensure memory safety
+* concurrency safe, but async suffers from "borrow checker"-itis
 
-My PhD thesis involved the implementation of a JIT compiler for JavaScript ES5. As such, I got to become intimately familiar with the semantics of the language and everything that has to go on behind the scenes to make JavaScript code run fast. At times, that was a frustrating experience. I’ve become convinced that a lot of the complexity and the hidden behaviors in JS and in many other languages are essentially bad for everyone.
+Julia
 
-Unnecessary complexity in a language is bad for those learning the language, because it makes the language less intuitive and harder to learn. It’s bad for the programmers working with the language everyday, because it increases their cognitive load and makes it harder to communicate about code. It’s bad for language implementers and tool maintainers, because it makes their job harder, but at the end of the day, it’s also bad for end users, because it leads to software with more bugs and poorer performance.
+* good support for concurrency/parallelism
+* C+Fortran+Python FFIs and syntax
+* JIT design assumes trampolines, performance barrier
 
-many object-oriented languages have this idea, borrowed from Smalltalk, that everything should be an object, including booleans and integer values. At the same time, languages implementation for these languages have to do a lot of work behind the scenes to try and represent integers efficiently (as machine integers) while presenting an interface to the user that resembles that of an object. However, the abstraction presented to the user for an integer object is typically not really the same as that of a normal OOP object, it’s a leaky abstraction, because being able to redefine integer values makes no sense, because integer values have to be singletons, and because being able to store properties/attributes on integers is both dumb and terrible for performance and so typically isn’t allowed.
+Kotlin
 
-Ultimately, integers are not objects in the object oriented sense. They’re a distinct type of atomic value with a special meaning, and that’s okay. The mistaken idea that “everything should be an object” doesn’t actually simplify anything in practice. We’re lying to ourselves, and in doing so, we actually makes the life of both language implementers and programmers more complicated.
-Actionable Advice
+* JVM languages with improved features compared to Java
+* val keyword instead of final, null safety, extension methods, first-class type parameters
+* coroutines
 
-This blog post has turned into more of a rant than I expected it to be. It’s easy to critique the status quo, but I’ll also try to conclude with some actionable advice. My first piece of advice for aspiring language designers is that you should start small. Your language is a user interface, and an API which people use to interface with machines. The smaller the API surface, the less you risk introducing accidental complexity and subtle design mistakes.
+D
 
-My second piece of advice is that if you can, you should try to keep your language small. Limiting yourself to a smaller feature set likely means you will want to choose features that don’t overlap and that provide the most expressiveness, the most value to programmers. If you do want to grow your language, do it slowly. Take some time to write code in your language and work through the potential implications of the design changes that you are making.
+* C/C++ style but different. never really took off AFAICT.
+* many features that have been incorporated in C++, others that haven't been like scope guards
 
-It’s easy to add new features later on, but if you add new features and people begin using them, it’s going to be hard or even impossible to take these features back, so choose wisely. Remember that you don’t have to please everyone and say yes to every feature request. No language or tool can possibly satisfy every use case, and in my opinion, trying to do so is a mistake.
+Scala
 
-Lastly, remember that language design is an art. It’s a delicate balance of many different constraints, just like user interface design. Brainfuck is a language that is very small and has very few concepts, but nobody would call it expressive or elegant. Lisp is regarded by many as one of the most beautiful and elegant languages in existence, but my PhD advisor, a Scheme fanatic, had the habit of writing code with single-letter variable names and very few comments. An elegant language doesn’t automatically make for elegant code, but you can encourage good coding practices if you lead by example.
+* Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
 
-learnability
-tool support
-performance
+TypeScript
+
+* `near superset <https://stackoverflow.com/questions/29918324/is-typescript-really-a-superset-of-javascript>`__ of JavaScript with an unsound type system
+* doesn't really add anything besides the types, so only useful for ideas on gradual typing
+
+Haskell
+
+* "finest imperative programming language"
+* small community, few core/maintenance developers (mainly SPJ) compared to size of codebase
+* good in benchmarks and scripting but GC is still not usable in production
+* poor library design, e.g. verbose naming conventions
+
+Clojure
+
+* one of few languages to use software transactional memory, custom implementation "MVCC"
+* `interesting talks <https://github.com/matthiasn/talk-transcripts/tree/master/Hickey_Rich>`__ on functional programming and language design
+* runs well on JVM
+
+Elm
+
+* small ecosystem
+* derivative of OCaml
+* no substantial commits since 2019
+* BDFL doing "exploratory work" closed-repo, most recently described in a 2021 `status update <https://discourse.elm-lang.org/t/status-update-3-nov-2021/7870>`__
+
+Erlang
+
+* has a well-tested distributed, fault-tolerant, reliable, soft real-time, concurrent database
+* designed to be crash-only, restart tolerant
+* not used much outside Ericsson
+
+Elixir
+
+* based on Erlang, new and supposedly great syntax
 

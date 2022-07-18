@@ -8,16 +8,11 @@ The stuff here is mostly a dumping ground of ideas while the rest of the languag
 
 Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
 
+Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement this so choices could be A/B tested.
+
 Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
 
 Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird parentheses style may lose too many users)
-
-* Python - whitespace
-* Elixir - improved Erlang
-* TypeScript - JS with static typing
-* PHP - no design at all
-* Objective C - weirder than C++
-* Haskell - poor library design
 
 TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
 
@@ -113,6 +108,15 @@ TODO: test it out by modifying https://github.com/isral/elastic_tabstops_mono.vs
 
 The advantage of tablike spaces over elastic tabstops is that the underlying text file is just indenting with spaces in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
 
+Familiarity
+===========
+
+According to `this <https://soc.me/languages/familiarity>`__ the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with the `notion <https://steveklabnik.com/writing/the-language-strangeness-budget>`__ of Rust's "strangeness budget", where a language can only be so weird before it gets discarded from consideration and can never become standard.
+
+As Randomo shows, the choice of characters for operators is arbitrary. Using familiar syntax at least benefits existing programmers, while new programmers will be confused regardless.
+
+But cases where newbies can benefit, such as single = for assignment and comparison, do seem worth discarding familiarity for.
+
 Parsing
 =======
 
@@ -142,18 +146,10 @@ TODO: match this up with Parsec, attoparsec, trifecta, etc. the syntax should be
 Blocks
 ======
 
-Blocks are inspired by Haskell's do notation, but have a twist, based on the observation that the continuation monad is `the mother of all monads <https://www.schoolofhaskell.com/school/to-infinity-and-beyond/pick-of-the-week/the-mother-of-all-monads>`__. Since it's the mother, we don't lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations. That link gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
-
-It's worth noting that even though monads can be implemented easily, monads are overrated to begin with:
-
-* ReaderT is handled by implicit parameters
-* StateT is a mutable reference
-* WriterT is a StateT that's not read
-* Error/Except are handled by poison values
+Blocks are inspired by Haskell's do notation. For an example of how natural this is you can look at :ref:`how I/O works <tasks>`. Since codensity/continuations are the mother of all monads, we don't lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations.
 
 Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
 
-For an example of how natural this is you can look at :ref:`how I/O works <tasks>`.
 
 ApplicativeDo
 -------------
@@ -170,9 +166,9 @@ The second function is to use applicative operations instead of monadic operatio
     fy <- friendsOf y
     return (length (intersect fx fy))
 
-Well, sorry to burst the bubble, but if you're writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It's exactly these kinds of details that *are* accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the `use/def analysis <https://en.wikipedia.org/wiki/Use-define_chain>`__ that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.
+Well, if you're writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It's exactly these kinds of details that *are* accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the `use/def analysis <https://en.wikipedia.org/wiki/Use-define_chain>`__ that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.
 
-For regular do notation, the applicative notation translates to exactly the same continuation as the monadic notation.
+For regular do notation with continuations, the applicative notation translates to exactly the same functions as the monadic notation.
 
 Verdict: DSL in disguise. Just write a DSL. Stroscot does not benefit at all by adding ApplicativeDo.
 
@@ -236,9 +232,9 @@ Also, most monads fail to satisfy monadic right shrinking, which IMO makes the n
    w <- g z
    return (z,w)
 
-The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with ``mfix``. We can still implement ``mfix`` for the monads that matter, like ``State``. According to all available knowledge, ``mfix`` can't be implemented for continuations, so nothing is lost from regular programs.
+The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with ``mfix`` or its tuple-heavy cousin ``rec{}``. We can still implement ``mfix`` for the monads that matter, like ``State``. According to all available knowledge, ``mfix`` can't be implemented for continuations, so nothing is lost from regular programs.
 
-Verdict: Not only a DSL in disguise, but also a footgun. Provide mfix and the rec{} notation in an obscure library for those who care.
+Verdict: Not only a DSL in disguise, but also a footgun. mfix and the rec{} notation are better for those who care.
 
 Arrows
 ------
@@ -364,8 +360,10 @@ We want to support mutually recursive definitions, like so:
 
 ::
 
-  a = 1 : b
-  b = 1 : a
+  a = 1 : a
+
+  b = 1 : c
+  c = 1 : b
 
 And also sequential execution, like so:
 
@@ -374,12 +372,31 @@ And also sequential execution, like so:
   a = openFile "a.txt"
   b = openFile "b.txt"
 
-So the question is how ``b`` can be in scope in the body of ``a`` in the recursive version. Presumably it isn't in scope in the sequential version.
+And also shadowing variables, like so:
+
+::
+
+  a = a + 1
+  -- interpreted as
+  a_new = a_old + 1
+
+In the recursive version ``c`` can be in scope in the body of ``b`` even though it is defined later. Presumably it isn't in scope in the sequential version.
+
+In the recursive version ``a`` is in scope in its own body. In the shadowing version ``a`` is not.
+
+Resolving this probably means a special syntax for something. Choices:
+* ``a <- openFile "a.txt"`` for sequenced actions
+* ``a <- a + 1`` for shadowing
+* ``rec { a = 1 : a }`` for recursive definitions
+
+Generally sequential blocks do not use recursion. But recursion is used all the time at the module/function level.
 
 Type declarations
 =================
 
-``2 : s8`` and ``s8 2`` seem more logical compared to other choices such as ``a : s8 = 2`` (Swift,Jai - hard to find the = with long types) or ``s8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program. The second syntax is similar to assembler syntax such as ``dword 0``.
+``a = 2 : s8`` and ``a = s8 2`` seem more logical compared to other choices such as ``a : s8 = 2`` (Swift,Jai - hard to find the = with long types) or ``s8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program. The second syntax ``s8 2`` is similar to assembler syntax such as ``dword 0``.
+
+`This <https://soc.me/languages/type-annotations>`__ says name should be ahead of type annotation, which only ``s8 a = 2`` breaks. The consistency stuff is not relevant.
 
 Namespacing
 ===========
@@ -432,6 +449,15 @@ Although the parentheses make this unambiguous, Haskell requires indenting a lot
   let bang_upper = Bang (Rule
                     (Sequent (fst bl_tseq, newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
                     (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br)))
+
+Braces and brackets
+===================
+
+Haskell uses parentheses for most grouping, ``{}`` for replacing whitespace with explicit syntax, ``[]`` for lists, and has no special meaning for angle brackets.
+
+`This <https://soc.me/languages/stop-using-angle-brackets-for-generics>`__ argues for square brackets ``[]`` over angle brackets ``<>`` for generics. With Haskell syntax this is moot because parentheses suffices. But he argues collection literals and array lookup should use standard parentheses ``()`` instead of special syntax, because it will become dead weight once the standard library develops better data structures.
+
+Seems a bit weird, he cites Python as an example but Python still uses list literals: the syntax for a NumPy array is ``np.array([1, 2, 3, 4, 5])``. The only thing overloaded is access ``arr[i] = x``.
 
 Function syntax
 ===============
@@ -520,21 +546,6 @@ See example:
 
 To use explicit argument passing, we'd have to add explicit ``loglevel`` and ``logPrint`` arguments to ``log`` and all its callers. To minimize callers we could partially apply it in ``main`` and pass around just the ``log : String -> Cmd`` function. But still, we have to modify every caller of ``log`` and its callers and so on to pass around the ``log`` function.
 
-Default arguments and overloading
----------------------------------
-
-`The Go FAQ <https://go.dev/doc/faq#overloading>`__ and `Rob Pike <https://talks.golang.org/2012/splash.article>`_ say Go deliberately does not support overloading or default arguments. Supposedly:
-* overloading is confusing and fragile
-* adding default arguments to a function results in interactions among arguments that are difficult to understand
-* Naming separate functions leads to a clearer API
-* Leaving these out simplifies the type system and method dispatch.
-
-While separate functions can be clearer, supporting overloading and default arguments does not prevent creating separate functions. And when you do have a constructor-like method which supports several slightly different combinations of arguments, even the Go FAQ admits overloading is "useful". Similarly Pike admits there are cases where API design flaws can be patched by adding a default argument. And Stroscot is dynamically typed, so overloading doesn't complicate the type system at all. And although it complicates method dispatch, overloading enables generic functions and solves the expression problem.
-
-Furthermore if you are trying to mimic a Java library that makes heavy use of this sort of overloading,name mangling using simple rules will give very long names. While using complicated rules will give shorter names, the names will be impossible to remember. Implementing overloading is strictly better than skipping it.
-
-So the verdict here is that Go is excluding things people want to do, with unworkable alternatives.
-
 n+k patterns
 ============
 
@@ -552,6 +563,56 @@ GHC-specific:
 
 Pattern synonyms should allow defining this like a view pattern, but without the ugly ``Just``. Then the pattern like ``x@(dec k) -> e`` solves the main issues: dec is its own symbol, and the user has imported it so knows its semantics. And ``k`` should be evaluated so can be a negative number or constant expression.
 
+Pattern matching / conditionals
+================================
+
+`This <https://soc.me/languages/unified-condition-expressions>`__ has some syntax.
+
+The keyword can be if, match, when, switch, case. Here we use ``:~,\`` modeled on Randomo in :cite:`stefikEmpiricalComparisonAccuracy2011`
+
+
+::
+
+  : x \ 1.0 ~ "a" , "z"
+
+  : x \ 1.0 ~ "a"
+    2.0 ~ "b"
+    , "z"
+
+  : x
+      \ 1.0 ~ "a"
+      ^ NaN ~ "n"
+      , "z"
+
+  : xs
+    .isEmpty ~ "e"
+    .contains(0.0) ~ "n"
+    , "z"
+
+  : alice
+    .age < 18 ~ "18"
+    = Person("Alice", $age) ~ "$age"
+    = Person("Bob", _)$person ~ "{$person.age}"
+    , "0"
+
+pattern matching using “if-let”12
+
+if person is Person("Alice", $age) then "$age" else "o"
+
+wildcards (_) and pattern guards
+
+if person                         /* same as */      if person is
+  is Person("Alice", _)           then "alice"         Person("Alice", _)           then "alice"
+  is Person(_, $age) && age >= 18 then "adult"         Person(_, $age) && age >= 18 then "adult"
+                                  else "minor"                                      else "minor"
+
+
+    The condition can be split between a common discriminator and individual cases.
+        This requires doing away with mandatory parentheses around the conditions.
+        This strongly suggests using a keyword (then) to introduce branches, instead of using curly braces, based on readability considerations.
+    The   because it is keyword the largest number of developers are familiar with.
+
+
 Chained assignment
 ==================
 
@@ -565,7 +626,7 @@ In Python, assignment statements are not expressions and thus do not have a valu
 
 The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution. C's "the assignment returns the lvalue" semantics is possible too but seems contrived. C's RTL semantics is probably better than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>`.  So a chain ``a = b = 2`` expands to ``b = 2; a = b``.
 
-Using ``=`` for equality comparison conflicts with chaining ``a = b = 2``, because it can be interpreted as ``a = (b == 2)``. Really ``a = b = 2`` doesn't really seem that useful when you can just replace ``a`` with ``b`` in the rest of the expression. If you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable.
+Using ``=`` for comparison conflicts with chaining ``a = b = 2``, because it can be interpreted as ``a = (b == 2)``. Really ``a = b = 2`` doesn't really seem that useful when you can just replace ``a`` with ``b`` in the rest of the expression. If you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable.
 
 
 Chained update with ``:=``, ``a := b := 2``, seems implementable. It doesn't conflict with equality and shortens some assignments.
@@ -579,7 +640,7 @@ This embeds assignments in expressions, like
 
   a = (b = 1) + (c = 2)
 
-Clearly it conflicts with equality comparison.
+Clearly it conflicts with ``=`` as comparison.
 
 But for chained update it is unambiguous and returning the value would be possible:
 
@@ -598,12 +659,12 @@ would have an unused return value. Maybe this value could be marked as optional 
 Unless
 ======
 
-Ruby's ``unless-else`` is unintuitive. Only support ``if-else``. Also ``if not`` is a possible replacement for ``unless``.
+Ruby's ``unless-else`` is unintuitive. Only support ``if-else`` and ``unless`` without the else. Also ``if not`` is a possible replacement for ``unless``.
 
 Tuples and records
 ==================
 
-In `Maybe Not <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/MaybeNot.md>`__ Rich Hickey  says records/fields, and product types are "place oriented programming". Well, in `The Value of Values <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/ValueOfValuesLong.md>`__ he says place-oriented programming is when you use in-place update. But maps (his proposed alternative) also support in-place update and are place-oriented. The difference between maps and records seems to be that records have ordered fields.
+In `Maybe Not <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/MaybeNot.md>`__ Rich Hickey  says records/fields, and product types are "place oriented programming", hence bad. Well, in `The Value of Values <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/ValueOfValuesLong.md>`__ he says place-oriented programming is when you use in-place update. But maps (his proposed alternative) also support in-place update and are place-oriented. The only difference between maps and records seems to be that records have ordered fields.
 
 So he seems have a different definition in mind, in particular that place-oriented means accessors are not first class - even when the fields are named, you cannot say ``object["name"]`` for an arbitrary object or an arbitrary name. But this is easily solved by adding such functionality. It also doesn't get into the mutable/immutable distinction that the values talk made.
 
@@ -611,3 +672,23 @@ His second point is that product types "complects" the meaning of things with th
 Essentially he's saying that if you have ``(String, String)`` there is no way to know how the second string is different from the first string. Well, for commutative operations like addition the order literally doesn't matter. Adding any sort of information to ``(+) : (Int, Int) -> Int`` is complicating the picture. Similarly for Strings `coming up <https://gemma.msl.ubc.ca/resources/baseCode/apidocs/ubic/basecode/util/StringUtil.html#append-java.lang.String-java.lang.String-java.lang.String->`__ with names "appendee" and "appendant" for an  append operation is almost as bad as digging up "complect". Using numerical names ``s1`` and ``s2`` makes more sense. It still gives a record with named fields, but it makes sense to use positional arguments.
 
 And if the types are different there's no ambiguity: ``(FirstName, LastName``, ``(Int,Bool)``, etc.
+
+Precedence
+==========
+
+`This post <https://ericlippert.com/2020/02/27/hundred-year-mistakes/>`__ describes a mistake in C-style precedence: it should be ``&&, ==, &`` but is instead ``&&, & ==``, causing a footgun. "Swift, Go, Ruby and Python get it right."
+
+
+Cycle
+-----
+
+Can we have a precedence cycle, like ``a + (b * c)``, ``a * (b ^ c)``, ``a ^ (b + c)``?
+
+Well what about a large expression:
+
+::
+
+  a + (b * (c ^ d))
+  (a + (b * c)) ^ d
+
+These are both consistent with precedence so we would need another rules to decide between them.

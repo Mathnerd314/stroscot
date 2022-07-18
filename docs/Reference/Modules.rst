@@ -4,7 +4,8 @@ Modules
 Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax. They also define namespaces for symbols.
 
 A module starts with a module identifier followed by import declarations followed by other declarations.
-::
+
+.. code-block:: none
 
   module
 

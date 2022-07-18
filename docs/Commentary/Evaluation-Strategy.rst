@@ -10,18 +10,20 @@ Strict vs lazy
 Referential transparency
 ------------------------
 
-In a lazy language any subexpression can be named and "pulled out", modulo name capture. For instance ``e + e`` is the same as ``(\x -> x + x) e``. This gives common subexpressions a name (common subexpression elimination). In a strict language this transformation is invalid, e.g. with ``e = undefined`` the CSE'd version throws even if ``e`` was not originally evaluated.
+Common subexpression elimination "pulls out" a repeated expression by giving it a fresh name and generally improves performance by sharing the result (although it could be a tie with the compiler inlining the expression again if it is really cheap). For instance ``e + e`` is the same as ``(\x -> x + x) e``, but in the second ``e`` is only evaluated once.
 
-In a lazy language, the transformation ensures ``e`` will be evaluated exactly zero times or once, hence improving performance (although it could be a tie with the compiler de-optimizing and splitting ``e`` again if it is really cheap). In a strict language ``e`` will always be evaluated hence it is not an optimization if ``e`` could be skipped in some cases.
+In a strict language this transformation can only be performed if the expression is guaranteed to be evaluated. E.g. ``if c then undefined else f`` to ``let e = undefined in if c then e else f``, the second version always evalautes ``e`` and throws ``undefined`` whereas the original could succeed with ``f``. This is a form of speculative execution hazard.
+
+In a lazy language, this can be performed unconditionally because the expression will not be evaluated if it is not used. Similarly adding or removing unused expressions does not change the semantics, ``e`` versus ``let x= y in e``. Nontermination has the semantics of a value.
 
 A win for laziness.
 
 Control constructs
 ------------------
 
-Laziness allows defining new control constructs, e.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``.
+Laziness allows defining if-then-else and short-circuit functions without special handling. E.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` evaluates its arguments first and throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``.
 
-But this doesn't work for ``while``, because the condition and body must be evaluated multiple times. So in general we need `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__, macros, fexprs, etc. to define control constructs.
+This advantage doesn't extend to ``while``, because the condition and body must be evaluated multiple times. So in general we need `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__, macros, fexprs, monads, etc. to define control constructs.
 
 ::
 
@@ -38,7 +40,7 @@ But this doesn't work for ``while``, because the condition and body must be eval
     i -= 1
   }
 
-Hence this cannot be considered a full win for laziness.
+Hence this is only a partial win for laziness.
 
 Function composition
 --------------------
@@ -88,14 +90,14 @@ Data structures
 ---------------
 
 Laziness allows writing certain amortized data structures, as per :cite:`okasakiPurelyFunctionalData1998`.
-It also allows defining infinite data structures, e.g. ``omega = Succ omega`` or the Fibonacci stream. These are hard to replicate in strict code except via simulation. Arguably the simulation makes the amortized data structures clearer and easier to analyze.
+It also allows defining infinite data structures, e.g. ``omega = Succ omega`` or the Fibonacci stream, that have finite time and memory usage if only a part of the data is used. These are hard to replicate in strict code except via thunk simulation. When analyzing performance, the explicit simulation makes the data structures clearer and easier to analyze, but analyzing core IR of a lazy language should provide the same benefit.
 
 A strict, imperative stream (iterator) is one where reading from the stream is an operation ``next : Stream -> Op (Nil | Cons a Stream)``. It is not the same as a lazy stream - accessing elements does I/O, not just pure reduction of thunks. Iterators are ephemeral data structures (objects). An iterator can be turned into a pure data structure by reading it to exhaustion, or buffered using a thunk-like data structure to create a fake-lazy abstraction that still uses I/O but allows pure access to previous elements. Regardless, iterators can be implemented in a lazy langauge as well using an I/O monad, with little overhead.
 
 Normal order
 ------------
 
-Laziness has the joyous property that you can write down any old cyclic rubbish and get a value out if there's any sensible evaluation order.
+Laziness has the joyous property that you can write down any cyclic rubbish and get a value out if there's any sensible evaluation order.
 
 Strict order can evaluate unnecessarily, so it can fail needlessly if there is an expression that errors when evaluated in the wrong conditions, e.g. ``a`` in ``r where a = b / c; r = if c != 0 then a else 0``.
 

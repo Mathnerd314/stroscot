@@ -1,14 +1,15 @@
 Assembly
 ########
 
-A lot of languages aim for "no runtime overhead". But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which in some sense limits Stroscot to C's abstractions. But it would be nice to do assembly directly as well so Stroscot can be even faster in some cases.
+A lot of languages aim for "no runtime overhead". But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat restrictive and assembly can be faster in some cases, so it would be nice to do assembly directly as well.
 
 Architectures
 =============
 
 The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn't find a list of processor architectures by popularity, but from `this quora answer <https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use>`__ and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARMv8-A A64 (mobile devices).
 
-Others:
+Others to consider as well:
+
 * ARMv9-A A64: It's released, devices expected in 2022. Very similar to v8 so should be able to share the code. Verdict: on the roadmap
 * 32-bit ARM: Old phones, the Raspberry Pi Zero. The XML database is similar. Verdict: Contributor.
 * RISC-V: There are $100-ish dev boards listed at https://riscv.org/exchange/boards/. No non-dev systems yet. It's a relatively simple ISA, similar to ARM. Verdict: Contributor
@@ -35,19 +36,14 @@ We'll exclude Apple for now because its developer documentation sucks and its an
 Instruction database
 ====================
 
-An instruction is a sequence of bytes. Beyond that it's hard to define exactly. `sandsifter <https://github.com/xoreaxeaxeax/sandsifter>`__ defines an instruction as a sequence ``seq`` for which ``seq|000`` does not trigger a page fault, but ``se|q00`` does (where ``|`` is a page boundary), and which does not trigger an undefined instruction (#UD) trap. `haruspex <https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/>`__ is even more tricky and defines it as a sequence that fills the microcode speculation buffer with a number of micro-ops not matching the undefined instruction.
-
-There are usually at least a few undocumented instructions on a processor, and we won't know what they are. So we need a syntax for writing instructions directly, ``instr('f0 0f')``. It's basically a ``.db`` statement, but whereas ``.db`` is used for file headers or data in the ``.data`` section, this is meant specifically for executable data.
-
-But for a random byte sequence there is nothing the compiler can do besides pass it through. Normally we want to run a lot of pipelining optimizations. So for an optimizing compiler we need instruction metadata.
-
 Data sources
 ------------
 
 In terms of data sources for ISAs, for x86 the official sources are `Intel's SDM <https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html>`__ / `AMD's Architecture Programmer's Manual <https://developer.amd.com/resources/developer-guides-manuals/>`__, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. `EXEgesis <https://github.com/google/EXEgesis>`__ uses a hacky Xpdf parser but has some amount of effort invested by Google. `x86doc <https://github.com/HJLebbink/x86doc/tree/master/Python>`__ uses pdfminer to generate HTML which seems like a more friendly starting point.
 
 More structured are x86 instruction databases:
-* `Intel XED <https://intelxed.github.io/>` (`file <https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt>`__).
+
+* `Intel XED <https://intelxed.github.io/>`__ (`file <https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt>`__).
 * LLVM `x86 tables <https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/X86/X86.td>`__
 * NASM `instruction table <https://github.com/netwide-assembler/nasm/blob/master/x86/insns.dat>`__
 * `GNU Assembler (gas) <https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/i386-opc.tbl;h=b0530e5fb82f4f4cd85d67f7ebf6ce6ebf9b45b5;hb=HEAD>`__
@@ -63,16 +59,26 @@ More structured are x86 instruction databases:
 For ARM we have XML `Machine Readable Architecture instruction tables <https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools>`__, which is nice-ish XML, and the code has been validated against ARM's conformance suite. There is a toy disassembler `hs-arm <https://github.com/nspin/hs-arm>`__ using the tables. EXEgesis also parses the XML. `asl-interpreter <https://github.com/alastairreid/asl-interpreter>`__ runs the descriptions.
 
 Timing:
+
 * https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions
 * ARM: ?
 
 
 The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly.
 
+Definition of an instruction
+----------------------------
+
+An instruction is a finite sequence of bytes (or bits, if there was a processor that did that). For a given instruction we can determine its length and index each byte. `sandsifter <https://github.com/xoreaxeaxeax/sandsifter>`__ determines the length of instructions by finding sequences ``seq`` for which ``seq|000`` does not trigger a page fault, but ``se|q00`` does (where ``|`` is a page boundary). `haruspex <https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/>`__ is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the instruction were speculated. Whatever the method, the general idea is that instructions are a level above bytes, like words in a character string.
+
+A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Running sandsifter and haruspex have found many undocumented instructions. Expecting to run these tools as part of a compiler build is pretty demanding; they take days. It's better to design for our validity database being inaccurate, and allow a syntax for writing undocumented instructions directly, ``instr('f0 0f')``. It's basically a ``.db`` statement, but whereas ``.db`` is used for file headers or data in the ``.data`` section, this is meant specifically for executable data.
+
+The issue with these literal instructions is that there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.
+
 Templates
 ---------
 
-The most basic data is an instruction list. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addressing modes / addresses, and immediate values.
+The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addresses, and immediate values.
 
 The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.
 
@@ -140,6 +146,7 @@ Classification
 --------------
 
 There are a lot of instructions. We can classify them based on their affected state:
+
 * data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions
 * call: reads the program counter
 * jump: sets the program counter to something other than the next instruction

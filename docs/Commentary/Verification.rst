@@ -3,23 +3,35 @@
 Verification
 ############
 
-Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a fairly natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazing programs to emerge.
+.. epigraph::
 
-Still, static analysis is incomplete - some programs will be too complex to categorize as wrong or right. Being conservative means to reject these programs as wrong, with an error. Stroscot is not conservative by default - it will simply output a warning, even if it discovers a definite bug in the program. But bugs and incomplete analyses can be treated as errors with ``-Werror``, or conversely completely suppressed.
+   The attitude today is that you can write any sloppy piece of code and the compiler will run diagnostics. If it doesn’t spit out an error message, it must be done correctly.
 
-Scalability and undecidability
-==============================
+   -- `Peter G. Neumann <https://www.technologyreview.com/2002/07/01/40875/why-software-is-so-bad/>`__
 
-Verification suffers from *extreme* scalability limitations. The combinations of program states increase exponentially, state space explosion. Midori says: "The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!" In general there is no fix: the properties we are interested in are non-trivial, so by Rice's theorem they are undecidable. Because of the undecidability no sound algorithm is complete - there are always programs which an algorithm will be unable to analyze.
+Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a fairly natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazingly robust programs to emerge.
+
+Scalability
+===========
+
+Verification suffers from *extreme* scalability limitations. "State space explosion" is a thing, i.e. the combinations of program states increases exponentially. Midori says: "The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!" Verification is always a time and memory hog.
 
 To get around this there are various tricks:
 
 * coarsen: combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
-* brute force: check individual states really fast, so larger state spaces can be checked in a given amount of time
-* smart fuzzing: change the order states are explored, so that the failure mode is found earlier, before we run out of time or memory. But here we are not exploring the full state space
-* approximate: check a property that implies the property we interested in
+* approximate: check a property that implies or is implied by the property we interested in. Can give positive / negative result but failure provides no information.
+* optimization: check individual states really fast, so larger state spaces can be checked in a given amount of time
+* smart fuzzing: change the order states are explored. Speeds up verification of some properties, but verifying the negation still requires exploring the full state space.
 
-In practice, we can't check deep properties on 200KLOC, but we can affordably verify them on 2KLOC. And meanwhile we can check "shallow" properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and this will likely be an area of development after Stroscot gets popular.
+TLA+ can't check deep properties on 200KLOC, but can affordably verify them on 2KLOC. And meanwhile we can check "shallow" properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and clever design.
+
+This will likely be an area of development forever. There is no panacea: the properties we are interested in are non-trivial, so by Rice's theorem they are complexity at least :math:`\Sigma^0_1` and any specific algorithm will fail to produce an answer for some programs. We have options for the programmer:
+
+* conservative: reject programs for which the algorithm fails as wrong (like ``-Werror``)
+* deferred: insert runtime checks if needed and throw an error when the property fails (like Haskell's ``-fdefer-type-errors``)
+* override: behave as if the algorithm gave answer A (could crash at runtime)
+
+For definite bugs the options are similar, although the override option implies a somewhat foolish promise that "poison" inputs will be avoided, in exchange for a minimal speedup and the loss of safety.
 
 Implementation
 ==============

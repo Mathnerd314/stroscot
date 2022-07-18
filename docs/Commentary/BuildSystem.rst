@@ -1,17 +1,12 @@
 Build system
 ############
 
-The name Cot is unimaginative.
+The name Cot is unimaginative but suffices for now.
 
-Compiler
-========
+Justification
+=============
 
 The compiler needs a build system integrated so that intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.
-
-Correctness
-===========
-
-To correctly build software, we assume for each task that the recorded read operations uniquely determine the execution behavior of the task, specifically its write and synchronization operations.
 
 Overview
 ========
@@ -49,6 +44,8 @@ Logically, there is a clear separation between inputs and outputs. Inputs are co
 
 For incremental builds (builds that aren't clean), we also have reference to the previous runs of the engine, in the form of traces produced by the rule engine. In the simplest case it is only the trace of the previous run that is available, but a caching build system with constructive traces ("build farm") can maintain many sets of traces in parallel and interpolate between them, a trace database. And the incremental build itself produces a trace.
 
+To correctly build software, we assume for each task that the recorded read operations uniquely determine the execution behavior of the task, specifically its write and synchronization operations.
+
 Determining the input keystate for an incremental build is a bit tricky, because the output files from a clean build may become input files for the incremental build. Generally we don't want to mix in artifacts produced from previous builds. Hence we define the inputs of the incremental build as the inputs of the clean build plus any other files so long as those files are not the outputs of the clean build. But we may include some output files as well, as exceptions.
 
 Another issue is "time travel", a task reading a file from the previous build that hasn't yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.
@@ -58,11 +55,11 @@ Tasks
 
 The design is based on iThreads :cite:`bhatotiaIThreadsThreadingLibrary2015`, which out of a half dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build.
 
-They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value and simply modifies a global state. So I'm using the term "task" in the sense of a task queue.
+They call the units of computation "thunks", but this term doesn't have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value and simply modifies the shared keystate. So I'm using the term "task" in the sense of a task queue.
 
-It is relatively simple to add new concurrency operations so long as they are of type ``a -> IO ()``; the only constraint is that they are executed on every build and rebuild.
+It is relatively simple to add new synchronization operations; the only constraint is that they are executed on every build and rebuild, so should not be expensive.
 
-The memory model is causal consistency: a task A should see only the write of a task B only if the synchronization operation that started A ensured that B was finished first. In practice this is not enforced strictly, and the keystate uses a global shared memory for performance. Hence the build can have data races where different execution orders produce different results.
+The ideal memory model is causal consistency: a task A should see only the write of a task B only if the synchronization operation that started A ensured that B was finished first. The real model is that the keystate uses a global shared memory for performance. Hence the build can have data races where different execution orders produce different results.
 
 If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don't care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.
 
