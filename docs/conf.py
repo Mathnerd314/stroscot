@@ -4,7 +4,7 @@
 # -- Project information
 
 project = 'Stroscot'
-copyright = '2019-2020 Mathnerd314'
+copyright = '2019-2022 Mathnerd314'
 author = 'Mathnerd314'
 
 # -- General configuration
@@ -24,6 +24,7 @@ mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"
 
 graphviz_output_format = 'svg'
 
+# References
 bibtex_bibfiles = ['references.bib']
 
 

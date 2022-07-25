@@ -170,8 +170,8 @@ Lazy vs optimal
 
 Optimal reduction is similar to lazy reduction in that the evaluation loop computes a "needed" redex and reduces it. It differs in that it can share the bodies of lambda abstractions. It's optimal in the sense that it ensures the minimal amount of family reduction steps. but this does not imply the fastest real-world performance.
 
-Sharing
--------
+Exponential speedup
+-------------------
 
 Although thunks prevent some forms of duplication, lazy reduction still duplicates work. An example is
 
@@ -182,18 +182,25 @@ Although thunks prevent some forms of duplication, lazy reduction still duplicat
   z = 2 :: Integer
   t = 3 :: Integer
   f = \x -> (x z) + (x t)
-  main = print (f (\y -> i y) :: Integer)
+  main = print (f i :: Integer)
 
-This produces ``5`` in Haskell. However, without GHC's optimizations, ``"i"`` is evaluated (printed) twice. With optimal reduction, all function applications with known arguments are evaluated exactly once. In particular, the only time a function is evaluated twice is when it is called with different arguments. In the example above it corresponds to a "hoisting" transformation that makes ``i = (unsafePerformIO (print "i")) `seq` \w -> w``. Although GHC will do this with ``-O``, it does it messily; the interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. More complex cases have higher-level sharing that no GHC code transformation mimics. For example consider:
+Without GHC's optimizations, ``print "i"`` is evaluated twice. With ``-O`` GHC does a "hoisting" transformation that makes ``i = (unsafePerformIO (print "i")) `seq` \w -> w``. But it doesn't optimize another example:
 
 ::
 
-  id a = a
-  dbl g = g (g id)
-  y h = dbl (\w -> h (w id))
-  x = dbl y
+  foo 0 = 1
+  foo n =
+    let a = \x -> (foo (n - 1))
+    a r + a s
 
-In contrast, optimal reduction is based on a principled approach to sharing. The graph corresponds almost exactly to linear logic proof nets. Also, since the sharing is part of the reduction semantics rather than a compiler optimization, it is available in the interpreter (and in the runtime system too). There are no thunks, so there is no need for ``seq``; instead there are boxes and duplicators.
+Without optimizations, this is exponential with lazy, vs linear with optimal. The reason is that with optimal reduction, sub-expressions of function bodies are shared between calls. In particular, the only time an expression is re-evaluated is when it depends on the arguments. Again with ``-O`` this improves: GHC inlines ``a`` and does CSE, giving ``foo n = let a = foo (n-1) in a + a``.
+
+However, there should more complex cases have higher-level sharing that no GHC code transformation mimics. TODO: find some.
+
+Principled
+----------
+
+The interaction of ``seq`` and inlining is the source of `numerous bugs <https://gitlab.haskell.org/ghc/ghc/issues/2273>`__. In contrast, optimal reduction is based on a principled approach to sharing - any reduction sequence in the sharing graph will at most duplicate work.
 
 Better composition
 ------------------
@@ -212,6 +219,6 @@ Time complexity
 
 * Optimal reduction has exponential savings over lazy evaluation when evaluating Church numeral exponentiation. :cite:`aspertiBolognaOptimalHigherorder1996`
 * The optimal non-family reduction sequence is uncomputable for the lambda calculus (best known is essentially a brute force search over all reduction sequences shorter than leftmost-outermost reduction), while the optimal family reduction is simply leftmost-outermost.
-* For elementary lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. :cite:`guerriniOptimalImplementationInefficient2017` Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn't find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.
-* A simply-typed term, when beta-eta expanded to a specific form "optimal root", reduces to normal form in a number of family reduction steps linearly proportional to the "size" of the term ("size" is defined in a way polynomially more than its number of characters). Since the simply typed terms can compute functions in ℰ4\\ℰ3 of the Grzegorczyk hierarchy (Statman), one concludes there are terms that will take strictly ℰ4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. :math:`2^{2^{2^n}}` for any number of 2's. :cite:`coppolaComplexityOptimalReduction2002`
+* For elementary linear lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. :cite:`guerriniOptimalImplementationInefficient2017` Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn't find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.
+* A simply-typed term, when beta-eta expanded to a specific "optimal root" form, reduces to normal form in a number of family reduction steps linearly proportional to the "size" of the term ("size" is defined in a way polynomially more than its number of characters). Since the simply typed terms can compute functions in ℰ4\\ℰ3 of the Grzegorczyk hierarchy with linear size (Statman), one concludes there is a sequence of terms which reduces in a linear number of family reductions but takes ℰ4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking optimal graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. :math:`2^{2^{2^n}}` for any number of 2's. :cite:`coppolaComplexityOptimalReduction2002`
 

@@ -49,13 +49,14 @@ Also, the proposals of the various languages are really useful, as they encapsul
 
 * `GHC <https://github.com/ghc-proposals/ghc-proposals/pulls>`__
 * `Python <https://github.com/python/peps>`__. The repo includes almost all proposals, but there are a few stray PRs:
-https://github.com/python/peps/pull/2066/files
-https://github.com/python/peps/pull/609/files
-https://github.com/python/peps/pull/641/files
-https://github.com/python/peps/pull/671/files
-https://github.com/python/peps/pull/686/files
-https://github.com/python/peps/pull/690/files
-https://github.com/python/peps/pull/2620/files (and other PEPs after Jun 1 2022)
+
+  * https://github.com/python/peps/pull/2066/files
+  * https://github.com/python/peps/pull/609/files
+  * https://github.com/python/peps/pull/641/files
+  * https://github.com/python/peps/pull/671/files
+  * https://github.com/python/peps/pull/686/files
+  * https://github.com/python/peps/pull/690/files
+  * https://github.com/python/peps/pull/2620/files (and other PEPs after Jun 1 2022)
 
 * `Rust <https://github.com/rust-lang/rfcs/pulls>`__ (`accepted <https://rust-lang.github.io/rfcs/>`__)
 * `Go <https://github.com/golang/go/labels/Proposal>`__

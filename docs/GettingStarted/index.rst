@@ -5,4 +5,5 @@ Getting started
   :maxdepth: 2
 
   About
+  Introduction
   FAQ

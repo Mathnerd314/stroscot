@@ -31,11 +31,18 @@ A higher order rewriting system (HORS) consists of a substitution calculus and a
 
 A substitution calculus is an abstract rewriting system on a set of preterms. We assume an infinite number of atomic preterms, including variables, holes, symbols, and constants, indexed by integers, with holes being considered a subset of variables. We assume a substitution operation that renames bound variables as needed. A preterm is closed if it contains no free variables. A m-ary precontext is a preterm with holes 1 through m. It is linear if every hole occurs exactly once.
 
-Terms are representatives of equivalence classes of preterms under ``<->*`` of the substitution calculus. If the substitution calculus is convergent, then terms are normal forms. Contexts are similarly representatives of precontexts.
+Terms are representatives of equivalence classes of preterms under ``<->*`` of the substitution calculus. Contexts are similarly representatives of precontexts.
 
 A rewrite rule is of the form ``l -> r`` where ``l`` and ``r`` are both closed terms. The rewriting relation on terms is defined by ``M -> N`` if ``M <->* C[l]`` and ``C[r] <->* N`` for some rewrite rule ``l -> r`` and context ``C`` containing a hole; ``C[l]`` means ``C`` with the hole substituted by ``l``. Closed terms suffice because binders are in the substitution calculus, e.g. ``f x y = plus x y`` can be written as ``\x y. f x y -> \x y. plus x y``.
 
 An example is the lambda calculus. The set of preterms is built from nullary symbols (variables, holes, symbols, and constants), applications of two preterms, and abstractions of a variable and a preterm. The substitution calculus rewriting rules are beta reduction and alpha renaming. Eta reduction can be added but makes the system only weakly orthogonal. :cite:`endrullisHighlightsInfinitaryRewriting2012`
+
+Currying
+========
+
+In the literature TRS definitions are usually presented in a "functional" form where n-ary function symbols are applied to terms, forming ``f(t1, ... , tn)`` from n terms t1,...,tn and a function symbol f. In a curried system, also called "applicative", function symbols are just nullary constants and there is only one form for combining terms, binary application, written as left-associative juxtaposition. Any TRS can be curried by rewriting ``f(t1, ... , tn)`` to ``f t1 ... tn`` in the LHS and RHS of each rule.
+
+When compiling currying we translate the curried system to a set of partially applied function symbols, so that if ``f`` is the original binary function symbol and ``f_0`` is the nullary symbol in the curried system, then ``f_0 a = f_1(a)`` and ``f_1(a) b = f(a,b)``, hence ``f_0 a b = f(a,b)``.
 
 Conditional rewriting
 =====================
@@ -45,9 +52,9 @@ A conditional rewrite rule has the form ``l -> r | C1, ..., Cn``. It consists of
 * type predicates, term must be of a certain form
 * ``a`` joins with, rewrites to, or is convertible to ``b``
 
-The rewrite relation is defined as the fixed point of the union of the rewrite rules. Terese presents the least fixed point, but we could presumably use the optimal fixed point.
+Ideally the rewrite relation would be defined as the fixed point of the rewrite rules. In particular letting ``S`` be the system we define ``->`` as a relation ``R`` such that ``R = S(R)``. Terese presents the least fixed point. However, no fixed point may exist, for example with a rule ``a -> a | a is a normal form``. In this case ``S({}) = {(a,a)}`` and ``S({a,a}) = {}``. We solve this similarly to the optimal fixed point by using the intersection of the maximal prefixedpoints, in this case giving ``R = {}``. We find the sets ``Pre = { R : R subseteq S(R) }, PreMax = { R in Pre : forall R' in Pre, R subseteq R' implies R= R' }, R = intersection PreMax``. The choice is correct in that reductions must satisfy conditions, conservative in that systems which have multiple consistent interpretations, like ``a -> b if not(c -> d); c -> d if not(a -> b)``, do not reduce, but it still is not the least fixed point as it allows ``a`` to reduce in ``a -> b if a -> b`` .
 
-We can add a form of logic programming by allowing conditions to mention variables not in the LHS or RHS, e.g. ``precedes x z | precedes x y && precedes y z = true`` quantifies over all ``y``. This further extends to allowing variables on the RHS not present on the LHS,
+We can add a form of logic programming by allowing conditions to mention variables not in the LHS or RHS, e.g. ``precedes x z | precedes x y && precedes y z = true`` quantifies over all ``y``. This further extends to allowing variables on the RHS not present on the LHS. Some syntax like ``l | exists x. C = r`` and ``l = exists x. r`` might make this easier to follow.
 
 Cycles
 ======
@@ -80,29 +87,29 @@ Exceptions complicate the semantics. We want our reduction strategy to be normal
 
 Also, exception propagation is nondeterministic. For example ``e = throw b + throw c`` will throw either ``b`` or ``c`` depending on which is evaluated first, and the choice is observable in a program with ``e catch print``. Exception nondeterminism is a different category from method dispatch nondeterminism and by default is considered benign, i.e. the compiler will not output a diagnostic and will resolve the ``catch`` using the exception that is most efficient to dispatch. But you can enable an error or warning that ensures thrown exceptions are unique. Regardless, the verification system will verify properties for all choices of exception, i.e. ``(case e of Exc b -> 1; Exc c -> "a") : Int`` will fail but ``(case (throw b) of Exc b -> 1; Exc c -> "a") : Int`` will not because ``c`` is unreachable.
 
-Ordinal reduction
-=================
+Infinite reduction
+==================
 
-Ordinal reduction is useful because it is "smoother" than finite reduction - normal forms exist more often, and there are fewer non-converging reduction sequences. E.g. ``x = 1 :: x`` has a proper denotation, instead of having to work with head normal forms and partially evaluated terms. Also I/O can be modeled as an infinite value with sub-terms for each outcome of the I/O operation.
+Infinite reduction is useful because it is "smoother" than finite reduction - normal forms exist more often, and there are fewer non-converging reduction sequences. For example ``x = 1 :: x`` reduces to ``x = 1 :: 1 :: 1 :: ...``, ``fib = 1 :: 2 :: zipWith (+) fib (head fib)`` reduces to ``fib = 1 :: 2 :: 3 :: ...``, and ``foo = let t = \x. x x x in t t`` reduces to ``foo = ... t t t t``. With infinite reduction all of these terms have a proper denotation, instead of having to work with head normal forms and partially evaluated terms. Also I/O can be modeled as an infinite value with sub-terms for each outcome of the I/O operation.
 
-The idea is to extend our set of terms to include infinite terms, defined as the `metric completion <https://en.wikipedia.org/wiki/Complete_metric_space#Completion>`__ of finite terms with a distance function :math:`2^{-n}` if the n-th level of the terms is the first level where a difference appears and 0 if the terms are equal.
+The idea is to extend our set of terms to include infinite terms, defined as the `metric completion <https://en.wikipedia.org/wiki/Complete_metric_space#Completion>`__ of finite terms with a distance function :math:`2^{-n}` if the n-th level of the terms is the first level where a difference appears and 0 if the terms are equal. As a convention the top level is level zero.
 
-The limit is extended to ordinal sequences, :math:`\lim_b s_b = l` if for every real number :math:`\epsilon > 0` there exists an ordinal :math:`N` such that :math:`d(s_b, l) < \epsilon` for :math:`N < b`. :math:`s` is said to (weakly) converge to :math:`l`.
+The literature :cite:`simonsenWeakConvergenceUniform2010` defines the transitive closure of reduction :math:`\overset{*}{\to}` using ordinals, with the identity relation :math:`\{x\|(x,x)\}`, the successor relation :math:`\overset{*}{\to} \circ \to`, and a limit operation. Some confusion arises because there are multiple definitions for the limit, "weak" convergence which is the standard metric space definition and a newer "strong" convergence which requires that the depth of the redexes contracted in the successive steps tends to infinity. There is the additional complication that reductions may happen after the limit is taken, e.g. ``a = b; f x a = f (g x) a`` has ``f c a -ω> f (g (g (g ...))) a -> f (g (g (g ...))) b``, :cite:`dershowitzRewriteRewriteRewrite1991` so a reduction sequence must be defined to be of any ordinal length.
 
-We define the transitive closure of reduction :math:`\overset{*}{\to}` to contain the following:
+I think strong convergence is the wrong direction. If there is a reduction that switches heads, ``a X = b (c X); b X = a (c X)``, then I don't want to say that there are no w-reductions, as with weak or strong convergence, but instead I want ``a e -w> a (mu x. c x)`` and ``a e -w> b (mu x. c x)``. TRSs are in general nondeterministic, so definitions requiring a single limit to exist are too strong - the convergence condition should actually be weakened further. For cycle condensation we would like to equate as many terms as possible, so the reduction relation should be as big as possible.
 
-* the identity relation :math:`\{x\|(x,x)\}`
-* the successor relation :math:`\overset{*}{\to} \circ \to`
-* the limit relation: if there exist elements :math:`s_i, i \geq 0` such that :math:`s_i \overset{*}{\to} s_j` for :math:`i < j`, and :math:`\lim_b s_b = t`, then :math:`s_0 \overset{*}{\to} t`
+So rather than a single, unique limit, we instead want to define the transitive closure of reduction as the topological closure of the set ``{ b : a ->> b }``. Thus ``b`` is a w-reduct of ``a`` if it is an `adherent point <https://en.wikipedia.org/wiki/Adherent_point>`__. In particular each w-reduct is either an accumulation point, i.e. a limit of a sequence of distinct reducts (possibly from different reduction sequences), or an isolated point which can be reached in a finite number of reductions from ``a``.
 
-There is also strong convergence, which requires that the depth of the redexes contracted in the successive steps tends to infinity when approaching a limit ordinal from below. :cite:`simonsenWeakConvergenceUniform2010` proved that if there exists a weakly convergent reduction :math:`s \overset{*}{\to} t` that is not also strongly convergent, there will be some intermediate reduct :math:`u`` with the property that :math:`u`` reduces to itself in one step. When we use condensed reduction, the loops are removed (a loop does not reduce out of the SCC), so the strong and weak definitions coincide.
+This allows obtaining all infinite reducts without ordinals, because this definition of infinite reduction is transitive. Proof: a reduction ``a -w> b -w> c`` means for all depths  :math:`d_1,d_2 \in \mathbb{N}` there exists some :math:`b_c \in \{ b' : b \twoheadleftarrow b' \}`, :math:`a_b \in \{ a' : a \twoheadleftarrow a' \}` such that :math:`c` matches :math:`b_c` to depth :math:`d_1` and :math:`b` matches :math:`a_b` to depth :math:`d_2`. Then for any depth :math:`d`, we can set :math:`d_1=d` to obtain a term :math:`b_c` matching :math:`c` to depth :math:`d` for which there is a finite reduction ``b ->> b_c``. Then we can compute the highest depth of ``b`` used during this reduction - set :math:`d_2` to the maximum of this and :math:`d`, obtaining a term ``a_b`` for which there is a finite reduction ``a ->> a_b`` that matches ``b``to depth :math:`d_2`. Then replacing the subterms of ``b`` below depth :math:`d_2` with those from ``a_b`` in the reduction ``b ->> b_c``, we obtain a reduction ``a ->> a_b ->> b_c'`` where ``b_c'`` matches ``c`` to at least depth :math:`d`. Hence ``a -w> c``.
 
-Generally reduction sequences only need to be computed to the first transfinite ordinal :math:`\omega`, because that suffices to obtain all reducts. For example ``x = 1 :: x`` reduces to ``x = 1 :: 1 :: 1 :: ...``, ``fib = 1 :: 2 :: zipWith (+) fib (head fib)`` reduces to ``fib = 1 :: 2 :: 3 :: ...``, and ``foo = let t = \x. x x x in t t`` reduces to ``foo = ... t t t t``. But for some systems this is not sufficient, e.g. ``a = b; f x a = f (g x) a`` has ``f c a -ω> f (g (g (g ...))) a -> f (g (g (g ...))) b`` but there is no derivation of length ω. :cite:`dershowitzRewriteRewriteRewrite1991` To collect all possible sequences I have instead used sequences indexed by all ordinals (a proper class). Using the `first uncountable ordinal <https://en.wikipedia.org/wiki/First_uncountable_ordinal>`__  :math:`\omega_{1}}` might also work.
+Using the previous example, with ``f c a -ω> f (g (g (g ...))) a -> f (g (g (g ...))) b``, let's say we want an approximation of depth 2. ``b_c = f (g (g (g ...))) b`` and matches ``c`` exactly. The highest depth of ``b`` used in the reduction ``b -> b_c`` is 1, so :math:`d_2` is the approximation depth 2. ``a_b =  f (g (g c)) a``. Our final reduction is then ``f c a -> f (g (g c)) a -> f (g (g c)) b``.
+
+The theorem only works if the rules are limited to finite depth, a common restriction in infinitary TRSs. The main place this might bite is conditional TRSs, where e.g. equality can inspect infinite terms. Equality and type membership have natural approximations of examining to a depth, which can probably be worked into the fixpoint, taking the intersection of the closure of the finite approximations of the prefixedpoints. Other predicates might not be so well behaved, but the infinite reduction is mainly to smooth finite terms so weird behavior on infinite terms doesn't matter too much.
 
 Meaningless terms
 =================
 
-If a term infinitely reduces and never reaches a normal form, then there's not much semantic meaning in it.  We could compute equivalence classes of these terms but it is easier to define them all away. :cite:`kennawayMeaninglessTermsRewriting1999` defines the set of "mute" terms, the smallest set with the following properties:
+If a term never reaches a normal form, then there's not much semantic meaning in it.  We could compute equivalence classes of these terms but it is easier to define them all away. :cite:`kennawayMeaninglessTermsRewriting1999` defines the set of "mute" terms, the smallest set with the following properties:
 
 * Contains all root-active terms. A term t is root-active if every reduct of t can be reduced to a term with a top-level redex.
 * Closure under reduction. If ``M ∈ U``, ``M → N`` then ``N ∈ U``.
@@ -114,61 +121,39 @@ There is also closure under expansion introduced in :cite:`severiDecomposingLatt
 
 Mute terms form an easy set, :cite:`bucciarelliGraphEasySets2016` meaning we can safely equate all mute terms to an exception term without changing the semantics of normal terms. In particular we can equate them to a ``NonTermination`` or ``Meaningless`` exception.
 
-Equating mute terms solves the issue of divergence of ordinal reduction. The negation of weak convergence is that there exists a depth where the subterm keeps changing, i.e. a divergent term must contain a mute term. With the mute term reduced to an exception the overall term converges.
+Every TRS with unique normal forms (UN=) can be extended to a confluent TRS with the same set of normal forms by adding bottom terms and reductions to normal forms and bottoms that preserve the equivalence classes of terms. :cite:`middeldorpModularAspectsProperties1989` It's not clear if meaningless terms accomplish this extension.
 
 .. _trs-equality-linearity:
 
 Equality and left-linearity
 ===========================
 
-There are several notions of equality, here presented in the order of earlier implies later:
+There are several notions of equality, here presented in the order of decreasing strength (earlier implies later):
 
-* strict equality ``eq_s x y | x == y`` is syntactic equality of normal forms (both arguments must be fully reduced terms).
-* syntactic equality is that used in non-linear TRS, ``eq_t x x -> True``. It matches unreduced terms, hence can match even if the term doesn't have a normal form.
+* strict equality ``eq_s x y | x == y`` - require all variables to be in normal form, reduce both sides to normal form, then compare with syntactic equality.
+* syntactic equality matches unreduced terms, hence can match even if the term doesn't have a normal form. It is the notion used for non-linear TRS in the literature.
 * join equality ``a ↓ b`` means that a common reduct exists, i.e. there is a term ``c`` such that ``a -> c`` and ``b -> c``.
 * semi-equational equality ``a ≈ b`` means that ``a`` can be rewritten to ``b`` via rewrites and inverse rewrites.
 
-Computing any of these equalities is of complexity :math:`\Sigma^0_1` because it is a nontrivial property of the reduction relation.
+Computing any of these equalities is of complexity at least :math:`\Sigma^0_1` because it is a nontrivial property of the reduction relation.
 
-Consider ``a = c a; c x = d x (c x); d x x = e``. ``a = mu x. c x = mu x. d x x``. If we allow ``mu x. d x x = e``, then we get both ``e`` and ``mu x. d e x`` as reducts. ``e`` is clearly a normal form hence for the system to be confluent we must have ``mu x. d e x == e`` so that ``mu x. d e x = e``. So for the different equalities:
+Consider ``a = c a; c x = d x (c x); d x x = e``. ``a = mu x. c x = mu x. d x x``. Abbreviate ``G = mu x. d x x``. For the different equalities:
 
-* strict equality denies ``mu x. d x x``, because it might be reducible
-*
+* strict equality denies reducing ``G``, because if ``G`` is reducible then it is not a normal form and equality does not hold. Hence ``G`` is a normal form and ``a = G``.
+* syntactic equality and join equality allow the reductions ``G = e`` and ``G = mu x. d e x``, but ``mu x. d e x != e`` so the system is nondeterministic for ``a``.
+* semi-equational equality concludes from the nondeterministic reduction that ``mu x. d e x == e``, so the reduction ``mu x. d e x = e`` holds and ``a`` reduces deterministically to ``e``.
 
- With syntactic equality and join equality this doesn't hold. With semi-equational equality it holds because they are reducts of the same term.
+More generally, syntactic equality and join equality are not stable, meaning if the terms involved are reduced then they may not be equal anymore (Terese 4.11.1, page 145 / PDF page 165). This instability means that the CTRS may not be confluent even if the unconditional TRS is. Strict equality and semi-equational equality are stable. For a confluent rewriting system semi-equational equality is equivalent to join equality, it just allows more reductions.
 
+As another example, consider a nondeterministic term ``a = b; a = c``. ``a == a`` reduces to both ``b == b`` and ``b == c``. With semi-equational equality, ``b == c`` is actually true, so ``a == a`` only reduces to true. Hence ``f x y | x != y = ...`` would not reduce ``f a a``. With strict equality ``a == a`` reduces to both true and false, hence reducing ``f a a`` would reduce ``f b c``. Semi-equational equality seems to have the wrong behavior here because it equates all reducts of a nondeterministic term. Strict equality seems easier to understand in the context of nondeterminism.
 
-Syntactic equality and join equality are not stable, i.e. if the terms involved are reduced the terms may not be equal anymore. This instability means that the CTRS may not be confluent even if the unconditional TRS is.
-
- = e`` and this is the only result. Admittedly you have to define equality of infinite structures carefully; otherwise ``mu x. d x x`` doesn't even reduce. However, with TRS equality, ``a = c a = c (c a) = c (d a (c a)) = c (d (c a) (c a)) = c e = `` which definitely doesn't reduce, hence is distinct from ``e``, hence the system becomes nondeterministic.
-
- Strict equality and semi-equational equality are stable.
+Overall, strict equality is the most conservative, the choice used in traditional programming languages, and the one whose behavior seems easiest to understand. It does reduce the laziness of the language a bit but even Haskell's equality is strict.
 
 
 
 
 
 
-
-
-For example, ``c x | x ↓ c x = e; b = c b`` is confluent ignoring the conditions, but ``e ↓ c e`` does not hold because a CTRS is constructed as the least fixed point hence ``b`` reduces to normal forms ``e`` and ``c e``. Similarly with ``f x x = X, a = b, a = c, d = c, d = e``, ``f a d`` reduces to both ``f c c`` and ``f b e``. In the unconditional system both of these reduce to ``X``, but when the non-linearity is interpreted as TRS equality, ``f c c`` reduces but ``f b e`` does not.
-
-``f x x = a, f x (g x) = b, c = g c`` ``f c c`` reduces to both ``a`` and ``b``
-
-Semi-equational equality is a global property of the rewrite relation, meaning if you define a new nondeterministic term ``a = b; a = c`` then suddenly ``b == c`` when it didn't before. But for a confluent rewriting system semi-equational equality is equivalent to join equality, it just allows more reductions.
-
-The main issue with strict equality can't simplify ``x==x`` to true but TRS equality and above can.
-
-
-
-Consider some systems:
-
-* The system  where the first and second rules use equality. With strict equality ``c`` has no normal form, hence ``f c c`` does not reduce with an ``f``-rule (it gets stuck evaluating a reduction of the form ``c -> g c -> g (g c) -> ...``).
-
-
- There are no critical pairs, so the system is locally confluent, but  hence the system is not confluent. With equational equality ``f c c`` reduces to both ``a`` and ``b`` in one step hence the system is not locally confluent.
-
-* In the system , the term , hence the system does not have unique normal forms. With strict equality ``f a d`` does not reduce to ``X`` and with equational equality ``f b e`` reduces to ``X``.
 
 
 * convergent (confluent and terminating) - These include typed systems such as the simply typed lambda calculus. For these, the result is the same no matter how they are reduced. So the focus is on do the reduction efficiently, compiling to fast assembly via a state machine and data format analysis and/or doing optimal reduction to reduce in the smallest number of steps.
@@ -176,7 +161,7 @@ Consider some systems:
 Confluence
 ----------
 
-Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem: every TRS with unique normal forms (UN=) can be extended to a confluent TRS with the same set of normal forms by adding bottom terms and reductions to normal forms and bottoms that preserve the equivalence classes of terms. :cite:`middeldorpModularAspectsProperties1989` Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. :cite:`klopExtendedTermRewriting1991` So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.
+Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem:  Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. :cite:`klopExtendedTermRewriting1991` So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.
 
 Confluence avoids situations where a system may branch into two distinct diverging states. It makes finding a normalizing strategy much easier as the strategy only has to avoid getting stuck evaluating a term infinitely (using the same rule infinitely often), as opposed to UN→ where the strategy must avoid using the wrong reduction rule at every step.
 
@@ -275,19 +260,6 @@ Most programs have finite output on finite input and block gracefully. Thus for 
 That interleaving works with certain infinite streams is just a natural generalization. The slow behavior of sort is also visible with long lists.
 Laziness means you can implement interleaving once in the language (as the evaluation strategy) as opposed to piecemeal for each program.
 
-
-Tree structure of terms (n⋅(n+1))/2 and n⋅((n+1)/2)
-
-Given a set V of variable symbols, a set C of constant symbols and sets Fn of n-ary function symbols, also called operator symbols, for each natural number n ≥ 1, the set of (unsorted first-order) terms T is recursively defined to be the smallest set with the following properties:[1]
-
-    every variable symbol is a term: V ⊆ T,
-    every constant symbol is a term: C ⊆ T,
-    from every n terms t1,...,tn, and every n-ary function symbol f ∈ Fn, a larger term f(t1, ..., tn) can be built.
-
-Using an intuitive, pseudo-grammatical notation, this is sometimes written as: t ::= x | c | f(t1, ..., tn). Usually, only the first few function symbol sets Fn are inhabited. Well-known examples are the unary function symbols sin, cos ∈ F1, and the binary function symbols +, −, ⋅, / ∈ F2, while ternary operations are less known, let alone higher-arity functions. Many authors consider constant symbols as 0-ary function symbols F0, thus needing no special syntactic class for them.
-
-A term denotes a mathematical object from the domain of discourse. A constant c denotes a named object from that domain, a variable x ranges over the objects in that domain, and an n-ary function f maps n-tuples of objects to objects. For example, if n ∈ V is a variable symbol, 1 ∈ C is a constant symbol, and add ∈ F2 is a binary function symbol, then n ∈ T, 1 ∈ T, and (hence) add(n, 1) ∈ T by the first, second, and third term building rule, respectively. The latter term is usually written as n+1, using infix notation and the more common operator symbol + for convenience.
-
 Condensing acyclic rewriting systems gives back the same system. Orthogonal higher-order TRSs that are weakly head normalizing are acyclic, per :cite:`ketemaViciousCirclesRewriting2005`.
 
 So The way we handle cycles in the rewrite engine is something like:
@@ -301,6 +273,8 @@ Then this infinite term is computed in chunks and fed to the surrounding context
 
 Higher-order matching
 ---------------------
+
+If the substitution calculus is convergent, then terms can be represented by preterms in normal form.
 
 Handling lambdas in RHSs is fairly straightforward, just beta-reduce as much as possible when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction. Executing a rule ``l -> r`` on a term ``t`` solves the equation ``t = C[lθ]`` and replaces it with ``C[rθ]``.
 

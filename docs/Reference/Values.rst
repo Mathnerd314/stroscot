@@ -210,7 +210,7 @@ Strings
 
 A string is a sequence of bytes of a given length. Subtypes include null-terminated strings like C and UTF-8 encoded strings.
 
-::
+.. code-block:: none
 
   "Hello world!\n"
   ``Hello user ${id}``
@@ -222,7 +222,7 @@ A string is a sequence of bytes of a given length. Subtypes include null-termina
 Double and single quotes are both supported, as well as a multi-line syntax.
 Escape sequences are defined:
 
-::
+.. code-block:: none
 
   \newline Backslash and newline ignored
   \\ Backslash (\)

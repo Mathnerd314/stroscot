@@ -1,5 +1,5 @@
-Imperative programming
-######################
+Stateful programming
+####################
 
 Limitations of purity
 =====================
@@ -41,18 +41,10 @@ Haskell avoided automatic destructive update because it seemed too complicated, 
 
 Roc and Koka seem to be going down the automatic destructive update route via alias analysis and ref-counting optimizations.
 
+Store
+=====
 
-Above we take streams as primitive and define continuations in
-terms of them. Conversely, with some cleverness it is also possi-
-ble to take continuations as primitive and define streams in terms
-of them (see (Hudak and Sundaresh, 1989), where the definition
-of streams in terms of continuations is attributed to Peyton Jones).
-However, the definition of streams in terms of continuations was
-inefficient, requiring linear space and quadratic time in terms of
-the number of requests issued, as opposed to the expected constant
-space and linear time. For this reason, Haskell 1.0 defined streams
-as primitive, and continuations in terms of them, even though con-
-tinuations were considered easier to use for most purposes.
+We can formalize destructive update with the notion of a store. An assignment statement ``a = b + c`` translates to ``write s "a" (read s "b" + read s "c")``. Store references allow deep updates in constant time.
 
 State
 =====
@@ -70,8 +62,8 @@ Conceptually the state of a program could include a lot of things, including the
 
 * Address space information (VMAs, segments, exe file, etc.)
 
-  * Info about which virtual regions are populated with data
-  * 4k page data dumps that are to be put into the memory according to the pagemap.
+  * Info about which virtual regions are populated with data (pagemap)
+  * 4k page data dumps for each mapped page in the pagemap.
 
 * Filesystem info
 
@@ -134,52 +126,32 @@ The dumping and patching are not too interesting as they are just extending the 
 
 There are multiple syscalls in flight because of multithreading. Technically we do not need ``[SysCallReq]`` because it can be determined from the state which threads are blocked on a syscall and what they requested, but the debugger knows this information from the breakpoint trap and it is clearer this way.
 
-.. _tasks:
+Sequencing model showdown
+=========================
 
-Tasks
-=====
+You can define ``readLn :: IO String``, but what is the implementation semantics? Assuming monads you can compose ``readLn`` with ``print``, but how is the bind operation implemented? So let's consider the solutions.
 
-Tasks are a direct approach to I/O, erasing the distinction between commands and expressions. Sequences of I/O operations are values of type ``Task``, similar to a `free monad <https://www.reddit.com/r/haskell/comments/swffy/why_do_we_not_define_io_as_a_free_monad/>`__. Statements that don't return are directly of the Task type, like ``Exit { code : Int}``. Statements that continue in a sequential fashion have a ``continuation`` argument, like ``Print { s : String, continuation : Task }``, so are of type ``Command = Task -> Task``. Statements that return a value use a continuation of type ``a -> Task``, e.g. ``ReadFile { path : Fd, continuation : String -> Task}``, so are of type ``Operation a = (a -> Task) -> Task``. And since tasks are values we can also use them as arguments, like the ``delayed_task`` in ``SetTimeout { delay : Int, delayed_task : Task, continuation : Task}``.
+Free monad
+----------
 
-To see how I/O works, consider printing hello world: ``print "Hi"``. As a task this looks like ``Print "Hi" exit``, where ``exit`` is what happens after (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation, which expands to ``\cont -> Read ref (\v -> Print v cont)``.
-
-So conceptually the "Hello World" program is simply the value ``Print "Hello World" (Exit 0)``. Except print isn't a primitive operation, it's more like:
-
-::
-
-  Data "Hello, world!\n" (\msg ->
-    Block "_start" [Sys_write stdout (addr msg) (length msg) (Sys_exit 0)])
-
-with Stroscot's internal assembler language.
-
-Task isn't really a monad, but we can compose operations that return values using the continuation monad's bind operation, as implemented with do-notation.
-
-The datatype is similar to the "fudgets" mentioned in :cite:`erkokValueRecursionMonadic2002`, except we don't have a pure constructor. Or `this <http://comonad.com/reader/2011/free-monads-for-less-3/>`__ type ``FFI o i``, but with control flow represented explicitly instead of using ``o`` or ``i`` parameters.
-
-I/O model showdown
-==================
-
-Monads
-------
-
-Monads by themselves aren't really a solution. Sure, they tell you that you need the operations ``>>=``, ``>>``, and ``return = pure``, and you can write the type ``readLn :: IO String`` defining I/O to be done using the ``IO`` monad, but they don't give the actual implementation of all these operations. Still, most of the models here are in fact monads, or close to monads.
+Monads consist of the operations ``>>=``, ``>>``, and ``return = pure``.
 
 Other operations include:
 
 * recursion: ``mfix :: MonadFix m => (a -> m a) -> m a``
-* exception handling: ``fail : String -> m a``, ``empty = fail ""``, and ``a <|> b = a `catch` \_ -> b``
+* exception handling: ``fail : String -> m a``, ``mempty = fail ""``, and ``a <|> b = a `catch` \_ -> b``
 
-Monad transfomers are pretty much overrated:
+Monad transformers are pretty much overrated:
 
 * ReaderT is handled by implicit parameters
 * StateT is a mutable reference
 * WriterT is a StateT that's not read
-* Error/Except are handled by poison values
+* Error/Except are handled by exceptional values
 
 Codensity
 ---------
 
-Codensity is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ as all other monads can be embedded in the continuation type via ``m >>=`` and retrieved via ``f return``. In particular ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
+Codensity is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__. In particular ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Furthermore all monads can be embedded in the type via ``\m -> m >>=`` and retrieved via ``\f -> f return``. That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
 
 Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity.
 
@@ -194,15 +166,30 @@ Continuations are the supercharged typed equivalent of a goto. A continuation is
 
 Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface.
 
-Callbacks
----------
+Streams
+-------
 
-We can turn continuations into data by modeling I/O operations as constructor terms (members of a ``Task`` type). With this approach an I/O operation is data that can be pattern-matched over, allowing many metaprogramming techniques. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
+Haskell 1.0 defined streams as primitive, and continuations in terms of them, even though continuations were considered easier to use for most purposes. The main reason is that, although streams can be defined to
+
+
+Conversely, with some cleverness it is also possi-
+ble to take continuations as primitive and define streams in terms
+of them (see (Hudak and Sundaresh, 1989), where the definition
+of streams in terms of continuations is attributed to Peyton Jones).
+However, the definition of streams in terms of continuations was
+inefficient, requiring linear space and quadratic time in terms of
+the number of requests issued, as opposed to the expected constant
+space and linear time. For this reason,
+
+Multi-prompt delimited continuations
+------------------------------------
+
+Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations ``Cont b a = (a -> b) -> b``, but as the paper shows, multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
 
 Yoneda
 ------
 
-`Kmett <http://comonad.com/reader/2011/free-monads-for-less-2/>`__ says to use ``Yoneda (Rec f) a``, i.e. ``newtype F f a = F { runF :: forall r. (a -> r) -> (f r -> r) -> r }``, instead of ``Codensity f a``. The claim is that this type is "smaller" than Codensity in the sense that the inhabitants of ``F`` are in a one-to-one correspondence with those of ``Free f a``. But what we are interested in is ``f a``; the recursive layering actually adds extra inhabitants as well, and there is also the ``Pure`` constructor that doesn't make much sense for I/O. For example ``F Identity ()`` is the type of Church numerals, while ``Codensity Identity () = forall r. r -> r = () = Identity ()``. So in this case it is actually ``F`` that is larger.
+`Kmett <http://comonad.com/reader/2011/free-monads-for-less-2/>`__ says to use ``Yoneda (Rec f) a``, i.e. ``newtype F f a = F { runF :: forall r. (a -> r) -> (f r -> r) -> r }``, instead of ``Codensity f a``. The claim is that this type is "smaller" than Codensity in the sense that the inhabitants of ``F`` are in a one-to-one correspondence with those of ``Free f a``. But what we are interested in is ``f a``; the recursive layering actually adds extra inhabitants as well, and there is also the ``Pure`` constructor that doesn't make much sense for I/O. For example ``F Identity ()`` is the type of Church numerals, ``(r -> r) -> (r -> r)`` while ``Codensity Identity () = forall r. r -> r = () = Identity ()``. So in this case it is actually ``F`` that is larger.
 
 Just looking at the types, F has more arrows. Similarly compare the instances:
 
@@ -222,20 +209,10 @@ There is :cite:`rivasNotionsComputationMonoids2014` which derives the Codensity 
 
 Generally it seems that the Yoneda thing solves a problem Stroscot doesn't have.
 
-Multi-prompt delimited continuations
-------------------------------------
-
-Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations ``Cont b a = (a -> b) -> b``, but as the paper shows, multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
-
-World token
------------
-
-Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse world tokens are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
-
 Algebraic effects
 -----------------
 
-Tasks with callbacks and algebraic effects are quite similar, both using a data type to represent operations. But tasks are much simpler syntactically than the handler functionality. In the effect approach, computations are not first-class values.
+Tasks and algebraic effects are quite similar, both using a data type to represent operations. But tasks are much simpler syntactically than the handler functionality. In the effect approach, computations are not first-class values.
 
 OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation.
 
@@ -280,7 +257,7 @@ The ``then`` operation is basically monadic bind, so this is another form of mon
 Some arguments against:
 
 * Promises do not conform to functor or monad laws and thus are not safe for compositional refactoring.
-* JS promises allow execution after the promise is resolved or rejected, resulting in untraceable behavior (fixed in C# by using return/throw)
+* JS promises allow execution after the promise is resolved or rejected, resulting in untraceable behavior (fixed in C# by overriding return/throw instead of using resolve/reject)
 
 Monad combined with identity monad
 ----------------------------------
@@ -309,6 +286,47 @@ In JavaScript
 Async/await notation requires marking core library calls with "await" and the whole call chain with "async", a tedious syntactic burden that Bob Nystrom calls `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ .
 
 It's better to make the async behavior automatic. Zig has done this but has `tons of bugs <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/>`__\ . Monads in general and continuations in particular seem like a more principled approach, e.g. there is a `JS CPS library <https://github.com/dmitriz/cpsfy/blob/master/DOCUMENTATION.md>`__\ .
+
+IO representation showdown
+==========================
+
+What type do we want for I/O? Let's look at the options.
+
+.. _tasks:
+
+Tasks
+-----
+
+We can model I/O operations as members of a ``Task`` type, consisting of constructor terms plus callback(s) for what to do with the return value. Sequences of I/O operations are values of type ``Task``, similar to a `free monad <https://www.reddit.com/r/haskell/comments/swffy/why_do_we_not_define_io_as_a_free_monad/>`__. Statements that don't return are directly of the Task type, like ``Exit { code : Int}``. Statements that continue in a sequential fashion have a ``continuation`` argument, like ``Print { s : String, continuation : Task }``, so are of type ``Command = Task -> Task``. Statements that return a value use a continuation of type ``a -> Task``, e.g. ``ReadFile { path : Fd, continuation : String -> Task}``, so are of type ``Operation a = (a -> Task) -> Task``. And since tasks are values we can also use them as arguments, like the ``delayed_task`` in ``SetTimeout { delay : Int, delayed_task : Task, continuation : Task}``.
+
+With this approach an I/O operation is data that can be pattern-matched over, allowing many metaprogramming techniques. It's a little harder for the compiler to optimize that readIORef has no observable side effects, as it's a reordering property (commutativity), but strict languages have been doing this for years.
+
+To see how this works, consider the program ``print "Hi"``. As a task this is the value ``Print "Hi" (Exit 0)``, where ``Exit 0`` is what happens after printing (the continuation). The operation is ``print a = \cont -> Print a cont``. With the continuation as the last argument we can just use the partially-applied function, ``print = Print``. ``print a >> print b = \cont -> Print a (Print b cont)``. Now consider ``read ref >>= print``. The operation is ``Read ref >>= Print`` where ``>>=`` is the continuation monad's bind operation, which expands to ``\cont -> Read ref (\v -> Print v cont)``.
+
+Actually print isn't a primitive operation, it's more like:
+
+::
+
+  Data "Hello, world!\n" (\msg ->
+    Block "_start" [Sys_write stdout (addr msg) (length msg) (Sys_exit 0)])
+
+with Stroscot's internal assembler language.
+
+Task isn't really a monad, but we can compose operations that return values using the continuation monad's bind operation, as implemented with do-notation.
+
+The datatype is similar to the "fudgets" mentioned in :cite:`erkokValueRecursionMonadic2002`, except we don't have a pure constructor. Or `this <http://comonad.com/reader/2011/free-monads-for-less-3/>`__ type ``FFI o i``, but with control flow represented explicitly instead of using ``o`` or ``i`` parameters.
+
+World token
+-----------
+
+Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse world tokens are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
+
+Logic programming
+=================
+
+To make a general-purpose relational programming language, we must find a method of embedding I/O that preserves the relational semantics. What I've come up with is to make programs produce a functional I/O term as output, so that the satisfying states contains bindings like ``main = readln (\x -> (print ("hello "++x) end)))``.
+
+In general running a relational program may produce infinite satisfying states. Using the ``run`` function, the list of possible states of a term can be inspected, so it would limit expressiveness to disallow local nondeterminism. But nondeterminism in the I/O term is an error - there is no way to reconcile ``print "b"`` and ``print "c"``, because the user can only see one output. Arbitrarily choosing a state would just be confusing. So we require that the I/O be unique over all satisfying states. In standalone programs the state only contains the ``main`` term, so this means standalone programs must be deterministic overall and resolve to a single state. But ``run`` transforms a nondeterministic logic program to a deterministic stream of data, and spawning threads uses a fresh ``threadMain`` binding, so this shouldn't be too restrictive. Mercury `uses <https://www.mercurylang.org/information/doc-latest/mercury_trans_guide/IO.html>`__ the "unique world" state-passing model of I/O, and has a similar restriction that predicates that do I/O must be deterministic (may not fail or return multiple times).
 
 Colored values
 ==============

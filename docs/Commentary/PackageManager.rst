@@ -16,23 +16,27 @@ Package format
 
 One advantage of C/C++ is that it is the de-facto standard, so everyone has a method to distribute application binaries compiled in those languages. But this is only a small advantage as there is still no common format: there are self-extracting installers and then a variety of package formats. MSI and PKG are fiat standards for Windows and Mac, but they have been superseded by the stores and practically for programming people use application-specific package managers that don't interface with the OS level package managers.
 
+Arch/pacman's tar.xz seems fine.
+
 Linux distribution
 ==================
 
-Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn't strictly necessary and it's easily broken anyways as few people use it.
+Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a Linux distro package manager must be built a bit more robustly to handle crashes and allow rollbacks without breaking the system. It needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn't strictly necessary and it's easily broken anyways as few people use it.
 
-The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.
+The goal of the Linux distribution, compared to others, is automation and speed. The package update process will be completely automated, including checking for releases, building, and testing. And this process should be fast so new versions of packages become widely available within 24 hours of release. This allows responding to security updates with the normal update cycle.
+
+Also, language-specific package formats and repositories have grown to be bigger than most distros, so providing easy installation of these kinds of packages is paramount. They should install via an identifier ``pypi:pdfminer.six`` or URL ``https://pypi.org/project/pdfminer.six/`` and not need any manual build instructions. Of course C/C++ projects will still need a machine-readable version of the dependency information and custom build systems will need manual build scripts to interface with them.
 
 Upgrade cycle
 =============
 
 A package has various versions. It also depends on other packages which can themselves be various versions.
 
-In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form "breakage: A-2 B-2 C-2".
+In a perfect world we would simply use the latest "blessed" version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form "combination A-2 B-2 C-2 fails".
 
-There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.
+Breakages can be resolved in two ways: either release new package versions that are compatible, or use old versions that work together. New versions are long-term the best solution but require patch-writing, so cannot be automated. Hence in the short term the only solution for a distro is to package old versions.
 
-Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.
+Packaging old versions can be handled in two ways. The traditional way is that a dependency can only have one installed version, and we have to use a solver to find a version that is compatible with all applications. But often there is no solution - e.g. ``python`` cannot be both Python 2 and Python 3, so the packages using Python are split into two incompatible sets and one cannot mix them on a system. With side-by-side dependencies, the dependency lookup is modified to use additional data so that one application can use version A of a dependency and another application can use version B of a dependency in the same installation. E.g. applications lookup ``python2`` and ``python3``.
 
 Versioned paths
 ===============

@@ -31,12 +31,12 @@ Terminology
 * A (Scheme) special form is a hard-coded operative accessed by a reserved symbol
 * A (Kernel) fexpr is a non-macro operative that is expressed as a ``$vau`` lambda taking unevaluated operands and the dynamic environment where the function is called
 
-Although consistent, this terminology is confusing to newcomers, because there is no similarity to other languages. So Stroscot's terminology:
+Although it gives each concept its own name, "fexpr" is an unusual word with no prior referent except maybe the old Lisp I fexpr which didn't take an environment hence couldn't implement lexical scope. So Stroscot's terminology follows `newLISP <http://www.newlisp.org/index.cgi?page=Differences_to_Other_LISPs>`__  and calls fexprs "macros":
 
-* A function is a Shutt applicative
-* A macro is a Shutt fexpr
+* A Stroscot function is a Shutt applicative
+* A Stroscot macro is a Shutt fexpr
 
-Although fexprs are more powerful and have different semantics from the macros found in other languages, they are still "macro-like" in that they operate on ASTs, so it's clearer to the uninitiated to call them macros in a general sense. As evidence, `newLISP <http://www.newlisp.org/index.cgi?page=Differences_to_Other_LISPs>`__  calls their fexprs "macros".
+The rationale is that Stroscot's macros operate on ASTs like macros in other languages, so it's clearer to the uninitiated to call them macros. But, they return a value instead of an AST, so they are more powerful than other languages' macros.
 
 Hygiene
 =======
@@ -48,11 +48,3 @@ Fexprs in contrast get an explicit environment. They can do staged lookup, ``eva
 ``eval`` is hard to compile, because it makes the full power of an interpreter available. But we can often simplify ``eval (a + b)`` to ``eval a + eval b``, reducing the amount of code that is evaluated each loop. If all of the variable lookups are static, we can furthermore optimize the environment to remove all unneeded variables. Hence we can recover macro-level performance on macros. Dynamic lookups need the full environment unfortunately. But dynamic lookups are essentially a REPL or debugging tool, so does not need to be too efficient, and we can warn that they are not optimized.
 
 Fexprs make the equational theory of ASTs trivial, (:cite:`shuttFexprsBasisLisp2010`, chapter 15) in that ASTs can be completely deconstructed, so no two ASTS are behaviorally equivalent. But this is good, because it means the programmer's intent can be fully examined. If ``(\x. x) y`` was equivalent to ``y`` then many DSL's would not be possible. The behavior of programs containing fexprs is decidedly nontrivial and quite varied.
-
-::
-
-  unwrap (wrap combiner) ≡ combiner
-  vau (\ptree -> body) static-env = wrap (eval (\vau ptree _ -> body) static-env)
-  eval performs evaluation
-
-

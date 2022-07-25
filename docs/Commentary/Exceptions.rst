@@ -592,7 +592,7 @@ try X else Y - presubstitute Y on exception
 
 NaN style propagation - ``a + b`` is either an exception or the sum. Problem: ``ExceptionA + ExceptionB``, which exception gets returned? Depends on evaluation strategy of compiler implementation.
 
-:cite:`jonesSemanticsImpreciseExceptions1999` says that ``catch`` should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad, ``getException`` is just ``return`` and pattern matching (section 4.4, page 9). Their approach is just using the I/O monad as a "sin bin" for nondeterminism. Stroscot's choice is to instead make exceptions first-class values of the language, allowing more concise and flexible exception handling. Exception nondeterminism is first-class as well, so an exceptional value's denotation is in fact a set of exceptions, and ``try`` randomly picks one. So ``let x = throw 1 + throw 2 in try x == try x`` can evaluate to false.
+:cite:`peytonjonesSemanticsImpreciseExceptions1999` says that ``catch`` should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad, ``getException`` is just ``return`` and pattern matching (section 4.4, page 9). Their approach is just using the I/O monad as a "sin bin" for nondeterminism. Stroscot's choice is to instead make exceptions first-class values of the language, allowing more concise and flexible exception handling. Exception nondeterminism is first-class as well, so an exceptional value's denotation is in fact a set of exceptions, and ``try`` randomly picks one. So ``let x = throw 1 + throw 2 in try x == try x`` can evaluate to false.
 
 Idea
 ----

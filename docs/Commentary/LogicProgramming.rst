@@ -4,21 +4,7 @@ Logic programming
 Benefits
 ========
 
-Quoting :cite:`iversonNotationToolThought1980`:
-
-    Users of computers and programming languages are often concerned primarily with the efficiency of execution of algorithms, and might, therefore, summarily dismiss [logic programming]. Such dismissal would be short-sighted since a clear statement [...] can usually be used as a basis from which one may easily derive a more efficient algorithm.
-
-    [...]
-
-    The practice of first developing a clear and precise definition [...] without regard to efficiency, and then using it as a guide and a test in exploring equivalent processes possessing other characteristics, such as greater efficiency, is very common in mathematics. It is a very fruitful practice which should not be blighted by premature emphasis on efficiency in computer execution.
-
-    [...]
-
-    Finally, overemphasis of efficiency leads to an unfortunate circularity in design: for reasons of efficiency early programming languages reflected the characteristics of the early computers, and each generation of computers reflects the needs of the programming languages of the preceding generation.
-
-Practically, logic programming is a great tool for expressing some computational tasks that naturally use logical constraints. Large programs generally run into one or two of these tasks. Without logic programming these tasks must be solved in an ad-hoc and verbose way. Compare `Sudoku with Prolog <https://www.metalevel.at/sudoku/>`__ vs `Norvig's Sudoku solution <https://norvig.com/sudopy.shtml>`__.
-
-Prolog's Definite Clause Grammars, and Ulrich Neumerkel's library pio, are a great parsing DSL.
+Prolog's Definite Clause Grammars, and library `pio <https://www.swi-prolog.org/pldoc/doc/_SWI_/library/pio.pl>`__, are a great parsing DSL.
 
 With typecheckers you can just directly translate the rules to Horn clauses and it runs. Similarly language interpreters are a direct translation of their operational semantics.
 
@@ -87,7 +73,7 @@ This seems helpful syntax-wise, but MiniKanren and Clojure core.logic are also q
 * ``conj [x,y,z]``: true if all of ``x,y,z`` are true (logical and / conjunction)
 * ``run (\x y. <body>)`` delimits the boundary of the logic program. It returns the stream of substitutions of the given variables for which the body is true. Optionally the maximum length of the stream may be specified.
 
-The expansion of ``nrev`` is given in :cite:`hemannFrameworkExtendingMicroKanren2017` page 137 (``define-relation`` is just DSL fluff around ``define`` per the appendix)::
+The expansion of ``nrev`` is given in :cite:`hemannFrameworkExtendingMicrokanren2017` page 137 (``define-relation`` is just DSL fluff around ``define`` per the appendix)::
 
   nrev l1 l2 =
     disj
@@ -113,8 +99,6 @@ miniKanren uses an "interleaving" search from :cite:`kiselyovBacktrackingInterle
 
 By default Prolog does not use the `occurs check <https://en.wikipedia.org/wiki/Occurs_check>`__ in unification. This means for ``x == f x`` the substitution ``x -> f x`` is obtained. Denotationally this can be accommodated by allowing states to contain infinite terms, :cite:`weijlandSemanticsLogicPrograms1990` ``x = f (f (f (...)))`` in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. :cite:`aptWhyOccurcheckNot1992` Prolog defines a ``unify_with_occurs_check`` predicate for situations where logical soundness is desired, although the implicit unification when dispatching predicates is still unsound. miniKanren always uses the occurs check.
 
-To make a general-purpose relational programming language, we must find a method of embedding I/O that preserves the relational semantics. The simplest is to make programs produce a functional I/O term as output, so that the satisfying states contains bindings like ``main = readln (\x -> (print ("hello "++x) end)))``. But in general running a relational program may produce infinite satisfying states. Using the ``run`` function, the list of possible states of a term can be inspected, so it would limit expressiveness to disallow local nondeterminism. But nondeterminism in the I/O term is an error - there is no way to reconcile ``print "b"`` and ``print "c"``, because the user can only see one output. Arbitrarily choosing a state would just be confusing. So we require that the I/O be unique over all satisfying states. In standalone programs the state only contains the I/O term, so this means standalone programs must be deterministic overall. But ``run`` can be nondeterministic and spawning threads uses a fresh I/O term.
-
 Non-relational programming
 ==========================
 
@@ -128,7 +112,7 @@ Non-relational programming
 * unfair search so that ``ancestor_of(A, P) :- ancestor_of(A, Parent), parent_of(Parent, P). :- ancestor_of(x,y)`` diverges e switching the order of the goals does not
 * Meta-programming which allows querying or modifying clauses at run time, such as nth_clause, assert, retract
 
-These features expose the search strategy's order of trying clauses and mean the denotational semantics of programs must include the search strategy's implementation and any goal side effects. Programs that heavily use non-relational features are best understood as an imperative execution model with embedded backtracking.Backtracking can re-execute side-effectful operations, so Prolog uses a simple depth-first search strategy to explore proofs in an effort to make the imperative semantics comprehensible.
+These features expose the search strategy's order of trying clauses and mean the denotational semantics of programs must include the search strategy's implementation and any goal side effects. Programs that heavily use non-relational features are best understood as an imperative execution model with embedded backtracking.Backtracking can re-execute side-effectful operations, so Prolog uses a simple depth-first search strategy in an effort to make the imperative semantics comprehensible.
 
 `Merritt <https://www.amzi.com/articles/prolog_under_the_hood.htm>`__ presents an execution model as follows. A goal is of type ``Goal = {call : Entry, redo : Entry }; Entry = {exit: Entry, fail : Entry} -> Exit; Exit = IO ()``. The composition ``A ; B`` of two goals is::
 
@@ -145,6 +129,26 @@ Various examples of goals::
   write X = { call = {print X; exit} ; redo = fail }
   fail = { call = fail ; redo = fail }
   cut = { call = exit ; redo = abort_goal }
+  unify X Y =
+    r = newGoalId;
+    tryNext =
+      if (u = pop unifiers)
+        pushChoicePoint r (tail unifiers)
+        unify X u
+        exit
+      else
+        fail
+    return {
+      call =
+        (X, Y) = lookupOrAllocVars (X,Y)
+        unifiers = unificationAlgo X Y
+        pushChoicePoint r unifiers
+        tryNext
+      redo =
+        unifiers = popChoicePoint r
+        tryNext
+    }
+
   predicate X =
     r = newGoalId
     tryNext =
@@ -164,14 +168,14 @@ Various examples of goals::
         tryNext
     }
 
-The general advice is to use non-relational features `sparingly <http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/cut.html>`__ and only if you can justify the need. :cite:`byrdRelationalProgrammingMinikanren2009` shows that non-relational features can be avoided in a sample program. Cut can almost always be replaced with a tagging scheme that makes the matching clause unambiguous, or more expressive constraints. Byrd says there is no complete method for avoiding copy-term, but in his example it can be replaced by using templates with unique names and substituting these with logic variables.
+The general advice is to use non-relational features `sparingly <http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/cut.html>`__ and only if you can justify the need based on performance. :cite:`byrdRelationalProgrammingMinikanren2009` shows that, for a sample program, non-relational features can be completely avoided. Cut can almost always be replaced with a tagging scheme that makes the matching clause unambiguous, or more expressive constraints. Byrd says there is no complete method for avoiding copy-term, but in his example it can be replaced by using templates with unique names and substituting these with logic variables.
 
-Overall it seems that relational programming covers all the cases of logic programming that people care about. Relational programming has much clearer semantics. These non-relational features are antipatterns: implementation hacks for cases where the compiler is not sufficiently smart or the constraint language is not sufficiently expressive.
+Overall it seems that relational programming covers all the cases of logic programming that people care about. Relational programming has much clearer semantics. These non-relational features are antipatterns: implementation hacks for cases where the compiler is not sufficiently smart or the constraint language is not sufficiently expressive. Mercury has eliminated impure features. :cite:`hendersonDeterminismAnalysisMercury1996`
 
 Modes
 =====
 
-Mercury has `modes <https://www.mercurylang.org/information/doc-latest/mercury_ref/Modes.html#Modes>`__\ . An instantiation state is either "free", a unbound variable "distinct" in that it does not appear anywhere else, or "bound", a mapping from possible function symbols to instantiation states of the symbols' arguments. A mode is a mapping from initial instantiation states to final instantiation states, with the constraint that no node is transformed from bound to free. The two standard modes are:
+Mercury has `modes <https://www.mercurylang.org/information/doc-latest/mercury_ref/Modes.html#Modes>`__. An instantiation state is either "free", a unbound variable "distinct" in that it does not appear anywhere else, or "bound", a mapping from possible function symbols to instantiation states of the symbols' arguments. A mode is a mapping from initial instantiation states to final instantiation states, with the constraint that no node is transformed from bound to free. The two standard modes are:
 
 * ``in == ground >> ground.``
 * ``out == free >> ground.``
@@ -201,9 +205,9 @@ Logic programming allows writing very concise code, although it can be unusably 
 Unification
 ===========
 
-Unification is the problem of finding all solutions to equations ``a1=b1, a2=b2, ...`` over tree terms and variables. This can be extended to the "dual unification" problem that also includes disequations ``c1 != d1`` in the list that must not be satisfied. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution.
+Unification is the problem of finding all solutions to equations ``a1=b1, a2=b2, ...`` over tree terms and variables. This can be extended to the "dual unification" problem that also includes disequations ``c1 != d1`` in the list that must not be satisfied. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution. A substitution is a unification problem where the left sides are all variables and those variables do not appear in the right sides.
 
-Unification isn't actually a core concept of logic programing AFAICT, as e.g. constraint logic programming on reals doesn't use it (it uses single equalities of reals). But syntax trees require first-order unification to solve all the equalities that arise, so it's a standard implementation technique for logic programming.
+Unification isn't actually a core concept of logic programing AFAICT, as e.g. constraint logic programming on reals doesn't use it (it uses systems of equalities of reals). But syntax trees require first-order unification to solve all the equalities that arise, so it's a standard technique for implementing logic programming.
 
 The standard `unification algorithm <https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm>`__ :cite:`vukmirovicEfficientFullHigherOrder2021` works by applying reduction operations to various cases:
 
@@ -239,17 +243,7 @@ Based on:
 * `Reddit thread <https://www.reddit.com/r/ProgrammingLanguages/comments/9kb9z5/logic_programming_languages/>`__, particularly Paul Bone who did his PhD "Automatic Parallelism in Mercury")
 * `HN thread <https://news.ycombinator.com/item?id=14439137>`__
 
-Have you been exposed to more recent research on Prolog language constructs?
+Answer-set programming (ASP) rebases the solving process onto SMT/SAT-style propositional solvers. The semantics of ASP give a conventional first-order logical semantics to Prolog. Prolog's semantics are a bit obscure, because it's "whatever SLDNF gives you", which includes things like queries not terminating.
 
-In particular, I recommend the following publication:
-
-https://arxiv.org/abs/1607.01590
-
-if_/3 and other declarative predicates like dif/2 are more general alternatives and likely good solutions in the cases you mention. They are still quite recent, at least if we ignore the fact that dif/2 was even available in the very first Prolog system, sometimes called Prolog 0.
-
-
-
-Answer-set programming (ASP) is another direction to go in w.r.t. this relationship. It takes a Prolog-like semantics (and syntax), but rebases the solving process on top of a solver-style backend that shares some general similarities with SMT/SAT-style propositional solvers. The semantics of ASP were initially arrived at as one of several attempts to give a conventional logical semantics to Prolog. Prolog's semantics from the perspective of traditional logic are a bit obscure, because it's defined in a somewhat imperative manner as "whatever SLDNF gives you", which includes things like statement order being significant (queries might terminate under one ordering and not under another, which is not something you find in logical semantics).
-
-ASP is based on one of those Prolog-semantic proposals, the "stable-model semantics", which competed with other proposals like the "well-founded semantics". Although these are first-order in principle, existing practical tools only implement propositional solvers. ASP systems still take a Prolog-like input language that looks first-order, but they work by first "grounding" the first-order formulae to a propositional representation, and then solving them. If you make suitable assumptions about finite domains etc. this has the same expressivity, but sometimes causes blow-up (other times it causes surprisingly fast-running programs, though).
+ASP is based on the "stable-model semantics", which competed with the "well-founded semantics". Existing practical tools only implement propositional solvers, not first-order logic - they work by first "grounding" the first-order formulae to a propositional representation, and then solving them. Compared to SLDNF this can cause blow-up or speed-up but under a finite domain assumption it gives the same results.
 
