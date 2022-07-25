@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Posets" href="Posets.html" />
-    <link rel="prev" title="Modules" href="Modules.html" /> 
+    <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Memory</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a><ul>
@@ -106,7 +107,7 @@
              
   <section id="memory">
 <h1>Memory<a class="headerlink" href="#memory" title="Permalink to this heading"></a></h1>
-<p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id57" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
+<p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id76" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
 <section id="value-representation">
 <h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
 <p>We don’t consider memory a scarce resource, hence pure values can be created and destroyed as needed by the RTS. But the RTS allows controlling the in-memory representation with user-written code.</p>
@@ -152,7 +153,7 @@
 <section id="finalizers">
 <span id="id2"></span><h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this heading"></a></h2>
 <p>Finalizers are a relaxed approach to prompt resource management. They allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, but do not require explicit marking of the free operation. A finalizer is a magic value created with the one-argument function <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">:</span> <span class="pre">(free</span> <span class="pre">:</span> <span class="pre">Command)</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Finalizer</span></code>. It supports equality, hashing, and command <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Command</span></code>.</p>
-<p>The semantics is that <code class="docutils literal notranslate"><span class="pre">free</span></code> will be called as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> will no longer be called, unless <code class="docutils literal notranslate"><span class="pre">useForever</span></code> is called. <code class="docutils literal notranslate"><span class="pre">useForever</span></code> undoes the finalizer and returns the free operation. The general transformation:</p>
+<p>The semantics is that <code class="docutils literal notranslate"><span class="pre">free</span></code> will be called as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> will not be called. Calling <code class="docutils literal notranslate"><span class="pre">use</span></code> delays finalization until after the <code class="docutils literal notranslate"><span class="pre">use</span></code>, and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> cancels the finalizer and returns the free operation. The general transformation:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
 <span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span><span class="w"></span>
 <span class="w">  </span><span class="n">transform</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="n">free</span><span class="p">,</span><span class="n">f</span><span class="p">}</span><span class="w"></span>
@@ -163,11 +164,36 @@
 <span class="nf">transform</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
 <span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">    </span><span class="n">c</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
 <span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">free</span><span class="w"> </span><span class="p">{</span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="p">})</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Delaying finalizer due to conditional usage&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The info can be an error if prompt memory management is desired. The situation happens when freeing depends on input data:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="n">af</span><span class="w"></span>
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
+<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+<span class="kr">else</span><span class="w"></span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Because <code class="docutils literal notranslate"><span class="pre">a</span></code> is used in the else branch, it cannot be freed before the condition. It is freed as soon as it is known it will not be used, hence this program is equivalent to:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
+<span class="w">  </span><span class="n">af</span><span class="w"></span>
+<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+<span class="kr">else</span><span class="w"></span>
+<span class="w">  </span><span class="n">af</span><span class="w"></span>
+<span class="w">  </span><span class="n">exit</span><span class="w"></span>
 </pre></div>
 </div>
 <p>If multiple finalizers simultaneously become able to call <code class="docutils literal notranslate"><span class="pre">free</span></code>, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.</p>
@@ -175,14 +201,16 @@
 <span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">)</span><span class="w"></span>
 
 <span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="n">exit</span><span class="w"></span>
 <span class="kr">else</span><span class="w"></span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="w"></span>
 <span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
 <span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
 <span class="w">  </span><span class="n">exit</span><span class="w"></span>
 
-<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">false</span><span class="kt">:</span><span class="w"> </span><span class="n">ab</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">true</span><span class="kt">:</span><span class="w"> </span><span class="n">ba</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">false</span><span class="kt">:</span><span class="w"> </span><span class="n">cab</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">true</span><span class="kt">:</span><span class="w"> </span><span class="n">bac</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="freed-on-exit">
@@ -273,14 +301,14 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Posets.html" class="btn btn-neutral float-right" title="Posets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

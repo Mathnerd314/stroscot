@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="About" href="About.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#secrets-of-matching">Secrets of matching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logic-programming">Logic programming</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Getting started</a> &raquo;</li>
+      <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/GettingStarted/Introduction.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<p>This is a 10-minute introduction of the main concepts of Stroscot.</p>
+<section id="secrets-of-matching">
+<h2>Secrets of matching<a class="headerlink" href="#secrets-of-matching" title="Permalink to this heading"></a></h2>
+<p>Consider the program from <a class="reference external" href="https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ">this old Usenet post</a>):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">myand</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
+<span class="nf">myand</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
+<span class="nf">myand</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">True</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This syntax sequentially matches the clauses in order. Consider <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">undefined</span> <span class="pre">False</span></code> - matching the first clause evaluates <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">==</span> <span class="pre">undefined</span></code>. In Haskell <code class="docutils literal notranslate"><span class="pre">undefined</span></code> throws and evaluation results in an error. In Stroscot <code class="docutils literal notranslate"><span class="pre">undefined</span></code> is just a value, so this clause fails and the second clause gives <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">undefined</span> <span class="pre">False</span> <span class="pre">=</span> <span class="pre">False</span></code>.</p>
+<p>Now this depends on proving <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">!=</span> <span class="pre">undefined</span></code>. In this case they are both values this is trivial, but what about an <code class="docutils literal notranslate"><span class="pre">expensive_undefined</span></code> which is an expensive computation that never terminates? Well, Stroscot also allows parallel matching:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">myand</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
+<span class="nf">myand</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
+<span class="nf">myand</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">True</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The semantics is based on term rewriting - all possible matches and rewrites are considered. It is an error if there is no unique answer. For this example, the system is weakly orthogonal so it is easy to analyze. Stroscot proves that the answer is unique because  in the one ambiguous case <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">False</span> <span class="pre">False</span></code> both clauses give <code class="docutils literal notranslate"><span class="pre">False</span></code>, and selects the parallel outermost reduction strategy which will always succeed if there is an answer. Hence evaluating <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">expensive_undefined</span> <span class="pre">False</span></code> reduces <code class="docutils literal notranslate"><span class="pre">expensive_undefined</span></code> for a little bit, then evaluates <code class="docutils literal notranslate"><span class="pre">False</span></code> to completion and matches the second clause.</p>
+</section>
+<section id="logic-programming">
+<h2>Logic programming<a class="headerlink" href="#logic-programming" title="Permalink to this heading"></a></h2>
+<p>Sometimes the requirement that the return value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.</p>
+<p>Misquoting <span id="id1">[<a class="reference internal" href="../zzreferences.html#id68" title="Kenneth E. Iverson. Notation as a tool of thought. Communications of the ACM, 23(8):444–465, August 1980. URL: https://doi.org/10.1145/358896.358899 (visited on 2022-07-18), doi:10.1145/358896.358899.">Ive80</a>]</span>:</p>
+<blockquote>
+<div><p>Users of computers and programming languages are often concerned primarily with the efficiency of execution of algorithms, and might, therefore, summarily dismiss [logic programming]. Such dismissal would be short-sighted since a clear statement […] can usually be used as a basis from which one may easily derive a more efficient algorithm.</p>
+<p>[…]</p>
+<p>The practice of first developing a clear and precise definition […] without regard to efficiency, and then using it as a guide and a test in exploring equivalent processes possessing other characteristics, such as greater efficiency, is very common in mathematics. It is a very fruitful practice which should not be blighted by premature emphasis on efficiency in computer execution.</p>
+<p>[…]</p>
+<p>Finally, overemphasis of efficiency leads to an unfortunate circularity in design: for reasons of efficiency early programming languages reflected the characteristics of the early computers, and each generation of computers reflects the needs of the programming languages of the preceding generation.</p>
+</div></blockquote>
+<p>Practically, logic programming is a great tool for naturally expressing computational tasks that use logical constraints. Large programs generally run into one or two of these tasks. Without logic programming these tasks must be solved in an ad-hoc and verbose way. Compare <a class="reference external" href="https://www.metalevel.at/sudoku/">Sudoku with Prolog</a> vs <a class="reference external" href="https://norvig.com/sudopy.shtml">Norvig’s Sudoku solution</a>. Other examples include parsers, typecheckers, and database queries.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="About.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

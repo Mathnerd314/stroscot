@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Logic" href="Logic.html" />
-    <link rel="prev" title="Macros" href="Fexprs.html" /> 
+    <link rel="prev" title="As fast as C" href="Fastest.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,15 +56,15 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#stealing">Stealing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#importing">Importing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#versioning">Versioning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#synthesizing">Synthesizing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#minimal-definition">Minimal definition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#numbers">Numbers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#matrix-multiplication">Matrix multiplication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#poison-values">Poison values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#relations">Relations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#posets">Posets</a></li>
@@ -79,27 +79,35 @@
 <li class="toctree-l3"><a class="reference internal" href="#arrays">Arrays</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#evolution">Evolution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#equality">Equality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conversion">Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#promotion">Promotion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comparison">Comparison</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#value-representation">Value representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#terms">Terms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-structures">Data structures</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#list-flattening">List flattening</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#list-homomorphisms">List homomorphisms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#serialization">Serialization</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -134,8 +142,8 @@
              
   <section id="library">
 <h1>Library<a class="headerlink" href="#library" title="Permalink to this heading"></a></h1>
-<section id="stealing">
-<h2>Stealing<a class="headerlink" href="#stealing" title="Permalink to this heading"></a></h2>
+<section id="importing">
+<h2>Importing<a class="headerlink" href="#importing" title="Permalink to this heading"></a></h2>
 <p>Stroscot should support the standard libraries of popular languages, so e.g. if you want the C functions with C semantics you would <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">Library.C</span></code>. Compatibility is a natural step to world domination, and this allows an intermediate step of C semantics with Stroscot syntax. For example a function of type <code class="docutils literal notranslate"><span class="pre">C.int</span> <span class="pre">-&gt;</span> <span class="pre">C.size_t</span></code> is different from plain <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code>, and if you really need the semantics of C++’s unstable sort then it has to be included.</p>
 <p>It’s only worth supporting the biggies, in particular:
 * C, the standardized library. Quite lean so it’s the one to start with.
@@ -143,34 +151,21 @@
 * Java, OpenJDK libraries (GPL but with linking exception, should be OK)</p>
 <p>Others such as the Python standard library, Glib, and Boost are probably not worth the effort of including directly, rather they can be supported via FFI or rewritten natively.</p>
 </section>
+<section id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this heading"></a></h2>
+<p>The library should be divided up into modules and the modules should be versioned so that there’s a deprecation cycle in place.</p>
+</section>
 <section id="synthesizing">
 <h2>Synthesizing<a class="headerlink" href="#synthesizing" title="Permalink to this heading"></a></h2>
-<p>Building on the work of others isn’t enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily - the goal is to eventually include everything. If a user needs a Y-fast trie, they should be able to find it in the standard library. Duplicating implementations is a waste of man‑hours that can be spent developing something new.</p>
-<blockquote>
-<div><p>But the library should be divided up into modules and the modules should be versioned so that there’s a deprecation cycle in place.</p>
-</div></blockquote>
-<p>For this, the proposals of the various languages are useful, as they encapsulate changes and include motivation as to why the change was made. A feature of a language might be historical accident but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library “smells”, areas that could use improvement.</p>
-<p>Maybe once the language is more defined it will be worth standardizing the embedding of some application-specific libraries:
-* machine learning (TensorFlow)
-* R’s statistics and data analysis
-* numerical libraries such as BLAS and SciPy
-* Erlang’s distributed, fault-tolerant, reliable, soft real-time, concurrent database
-* audio, graphics, networking, databases, telephony, enterprise servers, cryptography</p>
+<p>Building on the work of others isn’t enough, we also have to improve and synthesize a new, universal standard library for new programs to use. The standard library should be well-designed and built up steadily - the goal is to eventually include everything. If a user needs a Y-fast trie, they should be able to find it in the standard library. Duplicating implementations is a waste of man‑hours that can be spent developing something new. So we have to synthesize and combine various standard libraries:</p>
 <ul class="simple">
-<li><p>Julia - concurrency, parallelism, C+Fortran+Python FFIs</p></li>
-</ul>
-<p>syntax
-* C# - best designed. It’s used in desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)</p>
-<p>Standard libraries:
-* <a class="reference external" href="https://github.com/rust-lang/rust/tree/master/library">Rust</a> (MIT + Apache 2.0)
-* <a class="reference external" href="https://github.com/golang/go/tree/master/src">Go</a> (BSD-style)
-* <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries">Haskell</a> (BSD-style)</p>
-<blockquote>
-<div><ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rust-lang/rust/tree/master/library">Rust</a> (MIT + Apache 2.0)</p></li>
+<li><p><a class="reference external" href="https://github.com/golang/go/tree/master/src">Go</a> (BSD-style)</p></li>
+<li><p><a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/tree/master/libraries">Haskell</a> (BSD-style)</p>
+<ul>
 <li><p>The alternate prelude <a class="reference external" href="https://github.com/haskell-foundation/foundation">Foundation</a> (BSD)</p></li>
 </ul>
-</div></blockquote>
-<ul class="simple">
+</li>
 <li><p>Julia <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/base">1</a> <a class="reference external" href="https://github.com/JuliaLang/julia/tree/master/stdlib">2</a> (MIT)</p></li>
 <li><p>C</p>
 <ul>
@@ -178,25 +173,37 @@
 <li><p><a class="reference external" href="https://git.musl-libc.org/cgit/musl/tree/">Musl</a> (MIT)</p></li>
 </ul>
 </li>
+<li><p>C++</p>
+<ul>
+<li><p><a class="reference external" href="https://nvidia.github.io/libcudacxx/">NVIDIA</a>, <a class="reference external" href="https://libcxx.llvm.org/">LLVM</a>, <a class="reference external" href="https://github.com/microsoft/STL">MSVC</a> (Apache 2 with LLVM Exceptions)</p></li>
+<li><p><a class="reference external" href="https://hpx.stellar-group.org/">HPX</a> (Boost Software License 1.0)</p></li>
+<li><p><a class="reference external" href="https://github.com/electronicarts/EASTL">EASTL</a> (BSD 3-Clause)</p></li>
+</ul>
+</li>
 <li><p>Python <a class="reference external" href="https://github.com/python/cpython/tree/master/Modules">1</a> <a class="reference external" href="https://github.com/python/cpython/tree/master/Lib">2</a> (PSFv2)</p></li>
 <li><p><a class="reference external" href="https://github.com/ziglang/zig/tree/master/lib/std">Zig</a> (MIT)</p></li>
-<li><p>Slate <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/core">1</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/lib">2</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/i18n">3</a></p></li>
+<li><p>Slate <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/core">1</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/lib">2</a> <a class="reference external" href="https://github.com/briantrice/slate-language/tree/master/src/i18n">3</a> (MIT)</p></li>
 </ul>
-<p>Proposals:
-* <a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pulls">GHC</a>
-* <a class="reference external" href="https://github.com/python/peps">Python</a>. The repo includes almost all proposals, but there are a few stray PRs:
-<a class="reference external" href="https://github.com/python/peps/pull/2066/files">https://github.com/python/peps/pull/2066/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/609/files">https://github.com/python/peps/pull/609/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/641/files">https://github.com/python/peps/pull/641/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/671/files">https://github.com/python/peps/pull/671/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/686/files">https://github.com/python/peps/pull/686/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/690/files">https://github.com/python/peps/pull/690/files</a>
-<a class="reference external" href="https://github.com/python/peps/pull/2620/files">https://github.com/python/peps/pull/2620/files</a> (and other PEPs after Jun 1 2022)</p>
+<p>Also, the proposals of the various languages are really useful, as they encapsulate changes and include motivation as to why the change was made. An aspect might simply be a historical “accident” from the initial design, but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library “smells”, areas that could use improvement.</p>
 <ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ghc-proposals/ghc-proposals/pulls">GHC</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps">Python</a>. The repo includes almost all proposals, but there are a few stray PRs:</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/2066/files">https://github.com/python/peps/pull/2066/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/609/files">https://github.com/python/peps/pull/609/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/641/files">https://github.com/python/peps/pull/641/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/671/files">https://github.com/python/peps/pull/671/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/686/files">https://github.com/python/peps/pull/686/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/690/files">https://github.com/python/peps/pull/690/files</a></p></li>
+<li><p><a class="reference external" href="https://github.com/python/peps/pull/2620/files">https://github.com/python/peps/pull/2620/files</a> (and other PEPs after Jun 1 2022)</p></li>
+</ul>
+</li>
 <li><p><a class="reference external" href="https://github.com/rust-lang/rfcs/pulls">Rust</a> (<a class="reference external" href="https://rust-lang.github.io/rfcs/">accepted</a>)</p></li>
 <li><p><a class="reference external" href="https://github.com/golang/go/labels/Proposal">Go</a></p></li>
+<li><p><a class="reference external" href="https://wiki.php.net/rfc">PHP</a></p></li>
 </ul>
 <p>TODO: go through these, unfortunately there’s a lot</p>
+<p>Maybe once the language is more defined it will be worth standardizing the embedding of some application-specific libraries. Audio, graphics, networking, databases, servers, cryptography.</p>
 </section>
 <section id="minimal-definition">
 <h2>Minimal definition<a class="headerlink" href="#minimal-definition" title="Permalink to this heading"></a></h2>
@@ -209,11 +216,20 @@
 </section>
 <section id="numbers">
 <h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this heading"></a></h2>
-<p>Arbitrary precision is attractive but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.</p>
+<p>Arbitrary precision is attractive for beginners but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.</p>
 </section>
 <section id="matrix-multiplication">
 <h2>Matrix multiplication<a class="headerlink" href="#matrix-multiplication" title="Permalink to this heading"></a></h2>
 <p>Suppose we are multiplying three matrices A, B, C. Since matrix multiplication is associative, (AB)C = A(BC). But one order may be much better, depending on the sizes of A, B, C. Say A,B,C are m by n, n by p, p by q respectively. Then computing (AB)C requires mp(n + q) multiplications, and computing A(BC) requires (m + p)nq multiplications. So if m = p = kn = kq, then (AB)C costs 2k^3 n^3, while A(BC) costs 2 k n^3, which if k is large means A(BC) is going to be much faster than multiplying (AB)C. The matrix chain multiplication algorithm by Hu Shing finds the most efficient parenthesization in O(n log n) time, given the sizes of the matrices. In practice the sizes must be observed through profiling. But this data must be collected at the level of the matrix chain  multiplication, as re-association optimisations are hard to recognise when the multiplication is expanded into loops.</p>
+</section>
+<section id="strings">
+<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
+<p>Text types:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Text</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ByteArray</span><span class="o">#</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">-- sequence of bytes, integers are byte offsets</span><span class="w"></span>
+<span class="kt">ByteString</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">BS</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Addr</span><span class="o">#</span><span class="p">,</span><span class="w"> </span><span class="n">finalizer</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">ref</span><span class="w"> </span><span class="kt">Finalizers</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="kt">Lazy</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Empty</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Chunk</span><span class="w"> </span><span class="kt">Text</span><span class="w"> </span><span class="kt">Lazy</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="poison-values">
 <h2>Poison values<a class="headerlink" href="#poison-values" title="Permalink to this heading"></a></h2>
@@ -268,7 +284,7 @@
 </section>
 <section id="typed-collections">
 <h2>Typed collections<a class="headerlink" href="#typed-collections" title="Permalink to this heading"></a></h2>
-<p>Following section 9.1.1 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id25" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span>, there are two interesting sets: the read bound and the write bound.</p>
+<p>Following section 9.1.1 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id37" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span>, there are two interesting sets: the read bound and the write bound.</p>
 <p>A simple read bound of a collection is that the returned value must be one of the elements - this can just be computed from the value. For example, for a list, defining <code class="docutils literal notranslate"><span class="pre">contents</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">List)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">e</span> <span class="pre">|</span> <span class="pre">e</span> <span class="pre">elementOf</span> <span class="pre">l</span> <span class="pre">}</span></code>, we have <code class="docutils literal notranslate"><span class="pre">elemAt</span> <span class="pre">:</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">List)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">contents</span> <span class="pre">l</span></code>. We can make a refinement type, <code class="docutils literal notranslate"><span class="pre">TypedList</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">l</span> <span class="pre">:</span> <span class="pre">List</span> <span class="pre">|</span> <span class="pre">contents</span> <span class="pre">l</span> <span class="pre">subset</span> <span class="pre">t}</span></code>. With modifiable arrays the restriction must be put on the state parameter, <code class="docutils literal notranslate"><span class="pre">TypedVar</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">v</span> <span class="pre">:</span> <span class="pre">Var</span> <span class="pre">|</span> <span class="pre">read</span> <span class="pre">v</span> <span class="pre">:</span> <span class="pre">t}</span></code>. Then <code class="docutils literal notranslate"><span class="pre">elemAt</span> <span class="pre">:</span> <span class="pre">(l</span> <span class="pre">:</span> <span class="pre">TypedList</span> <span class="pre">x)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">x</span></code>.</p>
 <p>However, the write bound is external to the collection - straightforward implementations produce heterogeneous collections that can contain anything. So for example <code class="docutils literal notranslate"><span class="pre">setElemAt</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">List</span> <span class="pre">-&gt;</span> <span class="pre">List</span></code>. Errors will show up once you try to read and use an element of the wrong type, but maybe the error message will not be so clear on when the element was inserted, making it hard to debug.</p>
 <p>One solution is to write <code class="docutils literal notranslate"><span class="pre">(setElemAt</span> <span class="pre">...)</span> <span class="pre">:</span> <span class="pre">TypedList</span> <span class="pre">x</span></code> around every modification operation. This will verify at compile time that all values are members of the set <code class="docutils literal notranslate"><span class="pre">x</span></code>. Honestly this solution seems quite sufficient - the only issue is that asserting the value every time can become tedious.</p>
@@ -277,7 +293,7 @@
 <section id="transactional-memory">
 <h2>Transactional memory<a class="headerlink" href="#transactional-memory" title="Permalink to this heading"></a></h2>
 <p>STM is a very attractive abstraction for beginners or those who can sacrifice some performance to ensure correctness. But the performance in benchmarks is so-so and when it’s really slow the implementation is somewhat complex to optimize. So STM hasn’t seen much success in high-performance areas. The main primitives have to be the OS mutexes and atomic instructions. But still, providing STM as a library would be good. Haskell has STM, Fortress worked on STM. It automates the programming pattern of “read struct pointer, read members, allocate new structure, compare-and-swap struct pointer” which is really common for high-performance concurrency.</p>
-<p>The syntax is a simple DSL, <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">retry</span> <span class="pre">};</span> <span class="pre">y</span> <span class="pre">:=</span> <span class="pre">z</span> <span class="pre">}</span></code>. Transactions nested inside another transaction are elided, so that one big transaction forms. The semantics is a transaction has a visible effect (commits its writes) only if all state read during the transaction is not modified by another thread. The <code class="docutils literal notranslate"><span class="pre">retry</span></code> command blocks the transaction until the read state has changed, then starts it over, in an endless loop until a path avoiding the <code class="docutils literal notranslate"><span class="pre">retry</span></code> is taken. The implementation should guarantee eventual fairness: A transaction will be committed eventually, provided it doesn’t retry all the time. The latest research seems to be <span id="id2">[<a class="reference internal" href="../zzreferences.html#id81" title="Pedro Ramalhete, Andreia Correia, and Pascal Felber. Efficient algorithms for persistent transactional memory. In Proceedings of the 26th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming, PPoPP '21, 1–15. New York, NY, USA, February 2021. Association for Computing Machinery. URL: https://doi.org/10.1145/3437801.3441586 (visited on 2021-11-11), doi:10.1145/3437801.3441586.">RCF21</a>]</span>, it might be usable. Have to extend it to handle transaction retries though.</p>
+<p>The syntax is a simple DSL, <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{</span> <span class="pre">if</span> <span class="pre">x</span> <span class="pre">{</span> <span class="pre">retry</span> <span class="pre">};</span> <span class="pre">y</span> <span class="pre">:=</span> <span class="pre">z</span> <span class="pre">}</span></code>. Transactions nested inside another transaction are elided, so that one big transaction forms. The semantics is a transaction has a visible effect (commits its writes) only if all state read during the transaction is not modified by another thread. The <code class="docutils literal notranslate"><span class="pre">retry</span></code> command blocks the transaction until the read state has changed, then starts it over, in an endless loop until a path avoiding the <code class="docutils literal notranslate"><span class="pre">retry</span></code> is taken. The implementation should guarantee eventual fairness: A transaction will be committed eventually, provided it doesn’t retry all the time. The latest research seems to be <span id="id2">[<a class="reference internal" href="../zzreferences.html#id114" title="Pedro Ramalhete, Andreia Correia, and Pascal Felber. Efficient algorithms for persistent transactional memory. In Proceedings of the 26th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming, PPoPP '21, 1–15. New York, NY, USA, February 2021. Association for Computing Machinery. URL: https://doi.org/10.1145/3437801.3441586 (visited on 2021-11-11), doi:10.1145/3437801.3441586.">RCF21</a>]</span>, it might be usable. Have to extend it to handle transaction retries though.</p>
 <p>Transactions have sequentially consistent semantics by default. But mixing transactions with low-level code might work, IDK. There could be <code class="docutils literal notranslate"><span class="pre">atomically</span> <span class="pre">{order=relaxed}</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> to use the CPU’s memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL for machine code instruction would be nice. I.e. transactions matching atomic machine code instructions should compile to the atomic machine code instructions, plus junk like thread wakeups etc. but only if there are waiting threads with <code class="docutils literal notranslate"><span class="pre">retry</span></code> involved.</p>
 </section>
 <section id="iterators">
@@ -305,7 +321,7 @@
 <section id="arrays">
 <h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h2>
 <p>In Stroscot the only mutable thing is a reference. So mutable arrays could mean two things: a fixed-size immutable array containing mutable values, or a mutable variable storing an immutable array. The second seems more similar to Java’s ArrayList or C++ std::vector so is probably what is meant.</p>
-<p>The key here for efficient performance is in-place (destructive) update, so that the array re-uses its storage instead of copying on every operation. There is a paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id48" title="Paul Hudak and Adrienne Bloss. The aggregate update problem in functional programming systems. In Proceedings of the 12th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages - POPL '85, 300–314. New Orleans, Louisiana, United States, 1985. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=318593.318660 (visited on 2022-01-04), doi:10.1145/318593.318660.">HB85</a>]</span> on how to do it for lazy programming - basically you perform reads eagerly, and delay array update operations as long as possible, until it is clear if you can do in-place update or will have to copy.</p>
+<p>The key here for efficient performance is in-place (destructive) update, so that the array re-uses its storage instead of copying on every operation. There is a paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id66" title="Paul Hudak and Adrienne Bloss. The aggregate update problem in functional programming systems. In Proceedings of the 12th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages - POPL '85, 300–314. New Orleans, Louisiana, United States, 1985. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=318593.318660 (visited on 2022-01-04), doi:10.1145/318593.318660.">HB85</a>]</span> on how to do it for lazy programming - basically you perform reads eagerly, and delay array update operations as long as possible, until it is clear if you can do in-place update or will have to copy.</p>
 </section>
 <section id="evolution">
 <h2>Evolution<a class="headerlink" href="#evolution" title="Permalink to this heading"></a></h2>
@@ -314,8 +330,75 @@
 </section>
 <section id="equality">
 <h2>Equality<a class="headerlink" href="#equality" title="Permalink to this heading"></a></h2>
-<p>Equality is an equivalence relation <code class="docutils literal notranslate"><span class="pre">(==)</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> built in to Stroscot. Or maybe it is <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> and only defined on certain types. The built-in approach seems more attractive.</p>
-<p>For ordering though, <code class="docutils literal notranslate"><span class="pre">(&lt;=)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">{LT,GT,EQ}</span></code> seems the way to go. Many types do not have a reasonable ordering.</p>
+<p>Since functions can nondeterministically return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to control how values are merged.</p>
+</section>
+<section id="conversion">
+<h2>Conversion<a class="headerlink" href="#conversion" title="Permalink to this heading"></a></h2>
+<p>There is a function <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">(T</span> <span class="pre">:</span> <span class="pre">Set)</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">T|Exception</span></code> in a module in the core library.</p>
+<p>Conversion is intended for equivalent values, so it should satisfy the properties of an equivalence relation:
+* Reflexive: <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">T</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span></code>, if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">T</span></code>
+* Symmetric: <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">T</span> <span class="pre">(convert</span> <span class="pre">T2</span> <span class="pre">a)</span> <span class="pre">=</span> <span class="pre">a</span></code>, if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">T</span></code> (assuming <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">T2</span> <span class="pre">a</span></code> succeeds)
+* Transitive: <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">T3</span> <span class="pre">(convert</span> <span class="pre">T2</span> <span class="pre">a)</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">T3</span> <span class="pre">a</span></code> (assuming both conversions succeed)</p>
+<p>These rules avoid conversion “gotchas” where information is lost during conversion. For example all convertible numbers must be “exactly representable” in the target type because of transitivity and the existence of arbitrary-precision types (<code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Exact</span> <span class="pre">(convert</span> <span class="pre">Approx</span> <span class="pre">a)</span> <span class="pre">==</span> <span class="pre">convert</span> <span class="pre">Exact</span> <span class="pre">a</span></code>).</p>
+<p>Conversion is only a partial function, hence these properties may not hold due to some of the conversions resulting in errors. For example <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Float32</span> <span class="pre">(2^24+1</span> <span class="pre">:</span> <span class="pre">Int32)</span></code> fails because only <code class="docutils literal notranslate"><span class="pre">2^24</span></code> and <code class="docutils literal notranslate"><span class="pre">2^24+2</span></code> are exactly representable as floats. Generally one direction of the conversion should be total, or there should be subtypes like <code class="docutils literal notranslate"><span class="pre">Float32_Int</span> <span class="pre">subset</span> <span class="pre">Float</span> <span class="pre">32</span></code> and <code class="docutils literal notranslate"><span class="pre">Int32_Float</span> <span class="pre">subset</span> <span class="pre">Int32</span></code> for which conversion to both <code class="docutils literal notranslate"><span class="pre">Float32</span></code> and <code class="docutils literal notranslate"><span class="pre">Int32</span></code> is total.</p>
+<p>Conversion for unions is often undefined, because if <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">T2</span> <span class="pre">(a</span> <span class="pre">:</span> <span class="pre">T)</span> <span class="pre">=</span> <span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">!=</span> <span class="pre">b</span></code>, then by reflexivity we have <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(T|T2)</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span></code>.  and by assumption and reflexivity we have <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(T|T2)</span> <span class="pre">(convert</span> <span class="pre">T2</span> <span class="pre">a)</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">(T|T2)</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">b</span></code>, violating transitivity. Hence <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(T|T2)</span></code> must be undefined.</p>
+<p>Also, it is generally too much work (quadratic) to define all conversions explicitly. Conversion thus relies on an A* search through the conversion graph for the minimum cost conversion. The conversion graph is specified via some functions:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">guess_starting_type</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Any</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">[</span><span class="kt">Set</span><span class="p">]</span><span class="w"></span>
+<span class="nf">neighbors</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">[(</span><span class="kt">Set</span><span class="p">,</span><span class="kt">Cost</span><span class="p">)]</span><span class="w"></span>
+<span class="nf">est_distance</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Cost</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The cost can be an estimate of the CPU cycles needed to compute it, or the amount of precision lost during conversion, or both (combined with a lexicographic order). With precise numbers the lowest-cost conversion will be unambiguous, and probably fairly stable even if conversions are added or removed.</p>
+<p>The conversion syntax overlaps somewhat with a constructor function, e.g. it is often the case that <code class="docutils literal notranslate"><span class="pre">int32</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">convert</span> <span class="pre">Int32</span> <span class="pre">x</span></code>. But constructors have fewer rules. Because convert is an equivalence relation it can be applied automatically, whereas constructors may lose information, be stateful, or lazily evaluate their argument.</p>
+<p>Values could be made equivalent to their string representation. This would mainly be useful for converting values to strings, as multiple decimal literals parse to the same floating point number so that direction would be a partial function. So an explicit parse function is also needed.</p>
+<p>Often we prefer conversions to be total; this is accomplished by overloading <code class="docutils literal notranslate"><span class="pre">convert</span></code> with a default flag argument to get the desired behavior. These flags are outside the scope of the equivalence relation. For example <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Byte</span> <span class="pre">1099</span> <span class="pre">{</span> <span class="pre">narrowing</span> <span class="pre">=</span> <span class="pre">true</span> <span class="pre">}</span> <span class="pre">=</span> <span class="pre">75</span></code> whereas without the narrowing flag it would error, as it is not exactly representable. This allows re-using the promotion mechanism so is preferred to defining a new function like <code class="docutils literal notranslate"><span class="pre">lossyConvert</span></code>. Some conversions such as <a class="reference external" href="https://stackoverflow.com/questions/13269523/can-all-32-bit-ints-be-exactly-represented-as-a-double">int32 to float64</a> do not need flags as they are already total.</p>
+<p>Conversion is misleading when it privileges one out of multiple sensible mappings. For example, a Date July 30, 1989 might convert to an int with a decimal representation of the year, month, and day 19800730, or a Unix epoch date 617760000 / 86400 = 7150. Both these conversions have the desirable property that later dates correspond to larger integers, and so either might be useful. In such cases, it is better not to define the convert operator, and instead provide multiple ordinary functions to implement the various mappings.</p>
+</section>
+<section id="promotion">
+<h2>Promotion<a class="headerlink" href="#promotion" title="Permalink to this heading"></a></h2>
+<p>Promotion is a catch-all dispatch rule for arithmetic operators on mixed types, based on <a class="reference external" href="https://docs.julialang.org/en/v1/manual/conversion-and-promotion/">Julia’s</a>. It works as follows:</p>
+<ol class="arabic simple">
+<li><p>Compute a common type using <code class="docutils literal notranslate"><span class="pre">promote_rule</span></code></p></li>
+<li><p>Promote all operands to common type using <code class="docutils literal notranslate"><span class="pre">convert</span></code></p></li>
+<li><p>Invoke the same-type implementation of the operator, if it exists</p></li>
+</ol>
+<p>For example <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">:</span> <span class="pre">Int32)</span> <span class="pre">+</span> <span class="pre">(b</span> <span class="pre">:</span> <span class="pre">Float32)</span> <span class="pre">=</span> <span class="pre">(convert</span> <span class="pre">Float32</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">convert</span> <span class="pre">Float32</span> <span class="pre">b)</span> <span class="pre">{</span> <span class="pre">lossy</span> <span class="pre">=</span> <span class="pre">true</span> <span class="pre">}</span></code> since <code class="docutils literal notranslate"><span class="pre">promote_rule</span> <span class="pre">(a</span> <span class="pre">:</span> <span class="pre">Int32)</span> <span class="pre">(b</span> <span class="pre">:</span> <span class="pre">Float32)</span> <span class="pre">=</span> <span class="pre">out</span> <span class="pre">{</span> <span class="pre">lossy</span> <span class="pre">=</span> <span class="pre">true};</span> <span class="pre">Float32</span></code>. The system is extensible by defining new conversions and new promotion rules.</p>
+<p>Julia’s promotion rules:
+* Floating-point values are promoted to the largest of the floating-point argument types.
+* Integer values are promoted to the larger of either the native machine word size or the largest integer argument type.
+* Mixtures of integers and floating-point values are promoted to a floating-point type big enough to hold all the values.
+* Integers mixed with rationals are promoted to rationals.
+* Rationals mixed with floats are promoted to floats.
+* Complex values mixed with real values are promoted to the appropriate kind of complex value.</p>
+<p>The main issue is that promotion is implicit type conversion. Standard ML, OCaml, Elm, F#, Haskell, and Rust don’t have any implicit type conversions and work fine. Doing <code class="docutils literal notranslate"><span class="pre">5</span> <span class="pre">==</span> <span class="pre">&quot;5&quot;</span></code> by converting the number to a string is weird; equality should not promote. Scala has implicit conversions and static typing but its algorithm is a brute force search type thing. It’s expensive and a powerful feature, that maybe overloading is sufficient to emulate.</p>
+<p>Per <span id="id4">[<a class="reference internal" href="../zzreferences.html#id108" title="Michael Pradel and Koushik Sen. The Good, the Bad, and the Ugly: An Empirical Study of Implicit Type Conversions in JavaScript. In John Tang Boyland, editor, 29th European Conference on Object-Oriented Programming (ECOOP 2015), volume 37 of Leibniz International Proceedings in Informatics (LIPIcs), 519–541. Dagstuhl, Germany, 2015. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik. \subsection Other Most popular programming languages support situations where a value of one type is converted into a value of another type without any explicit cast. Such implicit type conversions, or type coercions, are a highly controversial language feature. Proponents argue that type coercions enable writing concise code. Opponents argue that type coercions are error-prone and that they reduce the understandability of programs. This paper studies the use of type coercions in JavaScript, a language notorious for its widespread use of coercions. We dynamically analyze hundreds of programs, including real-world web applications and popular benchmark programs. We find that coercions are widely used (in 80.42% of all function executions) and that most coercions are likely to be harmless (98.85%). Furthermore, we identify a set of rarely occurring and potentially harmful coercions that safer subsets of JavaScript or future language designs may want to disallow. Our results suggest that type coercions are significantly less evil than commonly assumed and that analyses targeted at real-world JavaScript programs must consider coercions. URL: http://drops.dagstuhl.de/opus/volltexte/2015/5236 (visited on 2022-07-25), doi:10.4230/LIPIcs.ECOOP.2015.519.">PS15</a>]</span> the acceptable JS coercions are:</p>
+<ul class="simple">
+<li><p>coercing to bool in <code class="docutils literal notranslate"><span class="pre">if-else</span></code>, <code class="docutils literal notranslate"><span class="pre">!x</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&amp;&amp;</span> <span class="pre">y</span></code>, and <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">||</span> <span class="pre">y</span></code>  as follows:</p>
+<ul>
+<li><p>0, -0, null, false, NaN, undefined, and the empty string (“”) coerce to false.</p></li>
+<li><p>Objects, including empty objects {}, empty array [], all nonempty strings (including “false”), all numbers except zero and NaN coerce to true.</p></li>
+</ul>
+</li>
+<li><p>binary <code class="docutils literal notranslate"><span class="pre">+</span></code> can combine two numbers or a string and a defined value (not null or undefined).</p></li>
+<li><p>unary <code class="docutils literal notranslate"><span class="pre">+,</span> <span class="pre">-</span></code> and binary <code class="docutils literal notranslate"><span class="pre">-,</span> <span class="pre">*,</span> <span class="pre">/,</span> <span class="pre">%,</span> <span class="pre">&lt;&lt;,</span> <span class="pre">&gt;&gt;,</span> <span class="pre">&gt;&gt;&gt;</span></code> only work on numbers</p></li>
+<li><p>relational operators <code class="docutils literal notranslate"><span class="pre">&lt;,</span> <span class="pre">&gt;,</span> <span class="pre">&lt;=,</span> <span class="pre">&gt;=</span></code> works on two numbers or two strings</p></li>
+<li><p>bitwise operators <code class="docutils literal notranslate"><span class="pre">~,</span> <span class="pre">&amp;,</span> <span class="pre">|</span></code> work only on numbers</p></li>
+<li><p>equality is of type <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">a.</span> <span class="pre">(a|undefined|null)</span> <span class="pre">-&gt;</span> <span class="pre">(a|undefined|null)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code> and does no coercions</p></li>
+</ul>
+<p>The counter idiom <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">(x</span> <span class="pre">|</span> <span class="pre">0)</span> <span class="pre">+</span> <span class="pre">1</span></code> seems to be hardly used, probably not worth supporting.</p>
+<p>The one confusing example is <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">&amp;</span> <span class="pre">8192</span> <span class="pre">!=</span> <span class="pre">8192</span></code>, which parses as <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">&amp;</span> <span class="pre">(8192</span> <span class="pre">!=</span> <span class="pre">8192)</span> <span class="pre">=</span> <span class="pre">m</span> <span class="pre">&amp;</span> <span class="pre">false</span></code>. So using a boolean in place of a number here should be an error.</p>
+<p>Strict and non-strict equality are easily confused so strict equality should be the default.</p>
+</section>
+<section id="comparison">
+<h2>Comparison<a class="headerlink" href="#comparison" title="Permalink to this heading"></a></h2>
+<p>Equality and ordering can be defined two ways:
+* as a heterogeneous built-in for all values, <code class="docutils literal notranslate"><span class="pre">het_eq</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> and <code class="docutils literal notranslate"><span class="pre">het_ord</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{LT,GT,EQ}</span></code>
+* homogeneously / strictly, only on arguments of the same type for certain types <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">(==)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code> and <code class="docutils literal notranslate"><span class="pre">(&lt;=)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">{LT,GT,EQ}</span></code></p>
+<p>Python and Ruby allow heterogeneous equality <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">==</span> <span class="pre">'a'</span></code> but not heterogeneous comparison <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;</span> <span class="pre">'a'</span></code>. However a Python library <a class="reference external" href="https://github.com/wolever/safesort">safesort</a> implements heterogeneous comparison as <code class="docutils literal notranslate"><span class="pre">(type(objA).__mro__,</span> <span class="pre">objA)</span> <span class="pre">&gt;</span> <span class="pre">(type(objB).__mro__,</span> <span class="pre">objB)</span></code>. Java <code class="docutils literal notranslate"><span class="pre">.compareTo()</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> are homogeneous (<code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> is limited to primitive types), but <code class="docutils literal notranslate"><span class="pre">.equals()</span></code> is heterogeneous, and <code class="docutils literal notranslate"><span class="pre">==</span></code> is as well if you cast to <code class="docutils literal notranslate"><span class="pre">Object</span></code> first. C++ and Haskell only provide homogeneous equality and comparison, although C++ allows overloading like <code class="docutils literal notranslate"><span class="pre">operator&lt;(Type1,Type2)</span></code>.</p>
+<p>It seems from googling “TypeError: ‘&lt;’ not supported between instances of ‘str’ and ‘int’” that forgetting to parse a string to an int is a common error - heterogeneous operators make this error invisible. Also many types do not have a reasonable intrinsic ordering, and there is no canonical ordering across different types, so any heterogeneous order is mostly arbitrary. Similarly syntactic comparison of lambdas is subject to break under optimization. So making <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code> and <code class="docutils literal notranslate"><span class="pre">==</span></code> the homogeneous, preferred operators will probably catch many errors, although it breaks the tradition to have heterogeneous equality.</p>
+<p>But heterogeneous comparison allows non-linear patterns, sorting heterogeneous lists, ordering record fields, etc. So it should still be available in the standard library as <code class="docutils literal notranslate"><span class="pre">het_ord</span></code> and <code class="docutils literal notranslate"><span class="pre">het_eq</span></code>. It’s just a bit too powerful to make it the syntactic default - a little ugliness in generic code is a small price to pay for catching beginner errors. The default <code class="docutils literal notranslate"><span class="pre">==</span></code> can be extended when convenient to delegate to <code class="docutils literal notranslate"><span class="pre">het_eq</span></code>, e.g. adding <code class="docutils literal notranslate"><span class="pre">None</span> <span class="pre">==</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">het_eq</span> <span class="pre">None</span> <span class="pre">a</span></code> to allow comparison with <code class="docutils literal notranslate"><span class="pre">None</span></code> for all values and hence implementing comparison on <code class="docutils literal notranslate"><span class="pre">(a|None)</span></code>.</p>
+<p>Julia has separate heterogeneous equality <code class="docutils literal notranslate"><span class="pre">===</span></code>, using the same syntax as Javascript’s strict equality. I think the different types of equality are a bit too confusing and <code class="docutils literal notranslate"><span class="pre">het_eq</span></code> is clearer, but this should be verified.</p>
+<p>Since functions can nondeterministically return multiple values and comparing them can give multiple results, we might want equality operations anyEqual and allEqual to resolve the nondeterminism.</p>
 </section>
 <section id="value-representation">
 <h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
@@ -352,20 +435,25 @@
 </div>
 <p>This all works because the set of lists/nonempty lists under concatenation is isomorphic to the free monoid / free semigroup.</p>
 </section>
+<section id="serialization">
+<h2>Serialization<a class="headerlink" href="#serialization" title="Permalink to this heading"></a></h2>
+<p>The hard parts are that Storscot has more types of values: cyclic terms, lambdas. Ideally these would be deconstructible with term rewriting. References are a sticking point, the store needs special handling, probably just a reference &lt;-&gt; refid map.</p>
+<p>As far as wire encoding, a custom binary format and JSON seem sufficient.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Fexprs.html" class="btn btn-neutral float-left" title="Macros" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Fastest.html" class="btn btn-neutral float-left" title="As fast as C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Logic.html" class="btn btn-neutral float-right" title="Logic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

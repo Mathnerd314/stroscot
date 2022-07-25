@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Imperative programming" href="State.html" />
+    <link rel="next" title="Stateful programming" href="State.html" />
     <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
 </head>
 
@@ -56,23 +56,23 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Sets</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#what-are-types">What are types?</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Sets</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#function-definition">Function definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Sets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#definition-by-overloading">Definition by overloading</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#set-syntax-definition">Set syntax definition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#element-definition">Element definition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#poset-definition">Poset definition</a></li>
@@ -97,10 +97,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#roles">Roles</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -136,45 +137,12 @@
   <section id="sets">
 <h1>Sets<a class="headerlink" href="#sets" title="Permalink to this heading"></a></h1>
 <p>Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see <a class="reference internal" href="Verification.html#verification"><span class="std std-ref">Verification</span></a>). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.</p>
-<section id="what-are-types">
-<h2>What are types?<a class="headerlink" href="#what-are-types" title="Permalink to this heading"></a></h2>
-<p>Stroscot’s sets are sometimes also called “types”. But are sets types? Is Stroscot typed? These get down to ambiguities in the literature. Parnas, Shore &amp; Weiss 1976 identified various definitions of a “type”:</p>
-<dl class="simple">
-<dt>Syntactic</dt><dd><p>A type is a purely syntactic label</p>
-</dd>
-<dt>Representation</dt><dd><p>A type is defined in terms of a composition of machine types.</p>
-</dd>
-<dt>Value space</dt><dd><p>A type is a set of possible values</p>
-</dd>
-<dt>And behavior</dt><dd><p>One of the above plus a set of operators or functions that can be applied</p>
-</dd>
-</dl>
-<p>Recent type system papers have gravitated to the syntactic definition, because it’s easier to publish meaningless gibberish.
-In Church style, the style present in most academic papers on type systems,</p>
-<blockquote>
-<div><p>there is only one principal type for a given expression, and the type system is sound and decidable. Haskell is Church-style - e.g. when the type inference fails for GADTs, the type signature must be given. Similarly substructural type systems are Church-style.</p>
-</div></blockquote>
-<p>Soundness mean “type preservation”, i.e. if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">E</span></code> then evaluating <code class="docutils literal notranslate"><span class="pre">a</span></code> must produce a value in <code class="docutils literal notranslate"><span class="pre">[[E]]</span></code>.This property is qualified to a subset S of a language L. If S is sound we say L is sound relative to S. If L is unsound but L/S is sound we say L is sound up to S. An example of an unsound type system feature is Java’s covariant array writes - <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">:</span> <span class="pre">Array</span> <span class="pre">Dog).add(c</span> <span class="pre">:</span> <span class="pre">Cat)</span></code> is an error, but <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">:</span> <span class="pre">Array</span> <span class="pre">(Cat|Dog)).add(c</span> <span class="pre">:</span> <span class="pre">Cat)</span></code> typechecks because of covariance and then gives a runtime error when assuming <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Array</span> <span class="pre">Dog</span></code> later on. Java is sound up to covariant array writes, null pointers, and a few other warts. TypeScript is sound up to first class functions and downcasts from the any type</p>
-<p>arrays—but these features are enforced at runtime, so they’re only statically unsound features. , neither being enforced at runtime. The Dialyzer’s type system aggressively avoids false-negatives, and could be characterized as sound up-to variable references (at the very least—there must be more to say here). There is an incredibly rich spectrum of soundness, and this spectrum is worth exploring due to the contradictory force of completeness—sometimes what is meant by “usability”.</p>
-<p>A complete type system never rejects correct programs. When faced with soundness versus completeness tradeoffs, type system designers tend towards preserving soundness—rejecting some correct programs is more satisfying than accepting some incorrect ones. Depending on your goals for the type system, however, this might not always be the right decision. I imagine the designers of Java decided that using mid-1990’s type theory to soundly handle the null-pointer in the type system was not worth the cost to completeness (“usability”): too many correct programs would be rejected and threaten to turn away their core C++ target audience. So, because of the state of type research and its intended audience, Java’s type system is “sound” up-to (at least) null-pointers, but “complete” relative-to null-pointers—no program initially accepted by the type system will be rejected by adding null-pointers to its source (so long as the result is still a correct program).</p>
-<p>The tension between soundness and completeness is a key to understanding examples of unsoundness found in many type systems. There are two teams in this tug of war—the soundness-sacrificers and the soundness-preservers—and, depending on your perspective, each team is unfairly matched! Both sides want completeness (usability), and “pull” to increase the number of correct programs their type systems can accept. The soundness-sacrificers are willing to forgo some soundness in the name of completeness (usability) today; they create forgiving type systems, avoiding many technical challenges. Meanwhile, the soundness-preservers play the long game, and see supporting this new set of features soundly as a compelling technical challenge. On the other hand, the soundness-sacrificers often do the work of popularizing new realms of completeness (usability) and had to be inventive enough to recognize the soundness tradeoff in the first place. The soundness-preservers can instead borrow these insights as initial sparks for research directions. (This can also go the other way, with soundness-sacrificers removing hard-to-understand, but proven sound features for a less demanding audience.) The soundness-sacrificers are doing pretty well for themselves in 2018, but the soundness-preservers often catch up in time.</p>
-<p>Here’s an example to bring all this together: Java’s famous handling of the null-pointer. The soundness-sacrificers designing the Java type system made the first move. Instead of investing decades of research in sound-but-usable techniques for incorporating null-pointers into a type system, they made a type system that is ignorant of null-pointers, compensating by enforcing soundness via runtime checks. They “tugged” the other team over the line by being able to accept significantly more (correct) programs than the soundness-preservers. Many years later, the soundness-preservers designing Kotlin and Ceylon applied recent advances in control-flow analysis (Tobin-Hochstadt &amp; Felleisen, 2010) to “pull back” the number of correct programs they can accept involving null-pointers, while keeping compile-time soundness. This tug-of-war is thrilling for both sides—the initial thrill of pulling away with usable and popular type systems, followed by the thrill of the technically challenging chase. Everyone wins in the end, and the players are usually keen on another round once the dust settles.</p>
-<p>Stroscot is dynamic, in the sense that there is a universe set that can contain all values. Haskell does too with a <a class="reference external" href="https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html">Dynamic</a> type, but it avoids allowing polymorphic values. Stroscot doesn’t, which likely makes function values unsound.</p>
-<blockquote>
-<div><p>although the set logic is carefully defined to avoid the common paradoxes. If you include the general recursion or infinite type features then it’s definitely unsound. Most languages are already unsound so this is not much of a loss, and it increases expressiveness because terms such as the Y combinator become typeable.</p>
-</div></blockquote>
-<p>There are sound Church-style type systems that are similar to Stroscot’s sets. Distributive lattices as used in <span id="id1">[<a class="reference internal" href="../zzreferences.html#id25" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span> are isomorphic to collections of sets. Similarly <span id="id2">[<a class="reference internal" href="../zzreferences.html#id73" title="Mayur Naik and Jens Palsberg. A type system equivalent to a model checker. ACM Transactions on Programming Languages and Systems, 30(5):1–24, August 2008. URL: https://dl.acm.org/doi/10.1145/1387673.1387678 (visited on 2021-07-15), doi:10.1145/1387673.1387678.">NP08</a>]</span> provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types. Stroscot could be written to output Church-style types reflecting the properties it verifies for every expression, and those types would unquestionably be types, and very similar to the set annotations specified, although unlikely to exactly match a set annotation. But the types would be complex and precise, e.g. <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">:</span> <span class="pre">(Nil--&gt;0)</span> <span class="pre">&amp;</span> <span class="pre">(Cons</span> <span class="pre">a</span> <span class="pre">b--&gt;1+(length</span> <span class="pre">b))</span></code>, and likely hard to interpret, so this will likely never be implemented.</p>
-<p>Harper has <a class="reference external" href="https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/">argued</a> that dynamic languages are unityped static languages. Instead of “proper” types, one defines an agglomerated unitype, and throws away soundness. Because the type system is trivial, properties are not part of the type system. Hence, because Stroscot is dynamic, Stroscot’s sets are not types in Harper’s sense. Admittedly Harper’s post is somewhat trolling, but there is probably a group of people who agree with him.</p>
-<p>Then there’s gradual typing. In <a class="reference external" href="https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/">this post</a> it says “a type is something that describes a set of values that have a bunch of operations in common”. Stroscot’s set have the “set of values” covered, but there’s no requirement to have operations in common. So Stroscot’s sets are not gradual types.</p>
-<p>There are also Curry-style types, called sorts in <span id="id3">[<a class="reference internal" href="../zzreferences.html#id78">Pfe12</a>]</span> to distinguish from Church-style types. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is dynamic. Stroscot’s sets are indeed sorts or Curry-style types.</p>
-<p>So depending on who you ask, Stroscot’s sets are not types, are similar to types, are almost types, or are types. To avoid useless arguments we use the term “set” instead of “type” where possible, as this is more precise and does not have any ambiguity.</p>
-</section>
-<section id="id4">
-<h2>Sets<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h2>
+<section id="id1">
+<h2>Sets<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
 <p>Sets in Stroscots are defined by a predicate <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">isElementOf</span> <span class="pre">S</span> <span class="pre">:</span> <span class="pre">Value</span> <span class="pre">-&gt;</span> <span class="pre">Set</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code>, where <code class="docutils literal notranslate"><span class="pre">Set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Any.</span> <span class="pre">(a</span> <span class="pre">isElemof</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Bool)</span> <span class="pre">}</span></code>. The predicate can describe any side effect free computation, so a set can describe any boolean function.</p>
 <p>Sets don’t contain null by default, you have to add it to the predicate as an allowed value.</p>
-<section id="function-definition">
-<h3>Function definition<a class="headerlink" href="#function-definition" title="Permalink to this heading"></a></h3>
+<section id="definition-by-overloading">
+<h3>Definition by overloading<a class="headerlink" href="#definition-by-overloading" title="Permalink to this heading"></a></h3>
 <p>The usual method combination mechanisms apply. In particular you can define sets by creating a fresh symbol and overloading <code class="docutils literal notranslate"><span class="pre">isElementOf</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
 <span class="mi">1</span><span class="w"> </span><span class="n">isElementOf</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
@@ -282,7 +250,7 @@ In Church style, the style present in most academic papers on type systems,</p>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p><span id="id5">[<a class="reference internal" href="../zzreferences.html#id26" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
+<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id38" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
 </section>
 <section id="records">
 <h3>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h3>
@@ -312,7 +280,7 @@ In Church style, the style present in most academic papers on type systems,</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">assert</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="n">isElemOf</span><span class="w"> </span><span class="kt">T</span><span class="p">);</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Don’t override <code class="docutils literal notranslate"><span class="pre">:</span></code>, it is intended as a no-op. For conversions use the explicit function <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Int64</span> <span class="pre">2</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">:</span></code> is a no-op to make analysis easy. There is also conversion <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Int64</span> <span class="pre">2</span></code> which might get an infix operator.</p>
 </section>
 <section id="function-annotations">
 <h2>Function annotations<a class="headerlink" href="#function-annotations" title="Permalink to this heading"></a></h2>
@@ -428,13 +396,13 @@ In Church style, the style present in most academic papers on type systems,</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="State.html" class="btn btn-neutral float-right" title="Imperative programming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="State.html" class="btn btn-neutral float-right" title="Stateful programming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

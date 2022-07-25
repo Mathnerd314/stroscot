@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Units" href="Units.html" />
+    <link rel="next" title="Types" href="Types.html" />
     <link rel="prev" title="Term rewriting" href="TermRewriting.html" /> 
 </head>
 
@@ -56,21 +56,22 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Time API</a><ul>
@@ -88,9 +89,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#recurrence">Recurrence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#format-information">Format information</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#time-zones">Time zones</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#libraries">Libraries</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#os-interface">OS interface</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -127,7 +130,7 @@
 <h1>Time API<a class="headerlink" href="#time-api" title="Permalink to this heading"></a></h1>
 <section id="instant">
 <h2>Instant<a class="headerlink" href="#instant" title="Permalink to this heading"></a></h2>
-<p>An instant marks a proper time (real number) as measured by some observer.  Although relativity means not all events can be given a time,</p>
+<p>An instant marks a proper time (real number) as measured by some observer.  Although relativity means not all events can be given a time as they happened with space-like separation from the observer, the speed of light is quite fast so most events on a human-level timescale do have timelike separation.</p>
 <p>A timescale T is a one-to-one function of the proper time, i.e. each instant corresponds to a value on the timescale.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
 
@@ -156,20 +159,21 @@
 <li><p>UTC-SLS or UTS smeared UTC</p></li>
 <li><p>Bloomberg smeared UTC</p></li>
 </ul>
-<p>A standard defines a way of marking time, including the length of a second and of a day. The length can vary, making a nonlinear transformation to proper time. TCG, TT, TAI, GPS, UT1 and TST have a fixed day length of 86400 seconds; for UT1/TST it is one rotation of the Earth, while for TCG/TT/TAI/GPS it is simply a nominal day. The nominal day is shorter than the time for a full Earth rotation, and it is somewhat misleading to use such day-based notations because they are not connected to the solar day, but it is conventional practice nonetheless. UTC uses a varying day of 86400 plus or minus a second. Civil time varies like UTC and also has daylight savings time and other zone transitions.</p>
-<p>For measuring durations TAI, TT, or GPS is best because the second is uniform and based on the SI definition. Although the system’s CLOCK_MONOTONIC is close, NTP’s corrections become important over longer time scales. NTP errors can be between 2ms-100ms depending on connectivity. For astronomical calculations UT1, TST, and LTST are best. UTC’s only real advantage is its ubiquity - there are lookup tables (leap second table, DUT1) and formulas to convert UTC to other formats. TCG, TCB, TDB are rare formats and do not necessarily need to be implemented immediately.</p>
+<p>A standard defines a way of marking time, including the length of a second and of a day. The lengths can vary, making a nonlinear transformation to proper time. TCG, TT, TAI, GPS, UT1 and TST have a fixed day length of 86400 seconds; for UT1/TST this corresponds is one rotation of the Earth, while for TCG/TT/TAI/GPS it is simply a nominal day. The nominal day is shorter than the time for a full Earth rotation, and it is somewhat misleading to use such day-based notations because they are not connected to the solar day, but it is conventional practice nonetheless. UTC uses a varying day of 86400 plus or minus a second. Civil time varies like UTC and also has daylight savings time and other zone transitions making the day length vary by hours.</p>
+<p>For measuring durations, TAI, TT, or GPS is best because the second is uniform and based on the SI definition. Although Linux’s CLOCK_MONOTONIC is close, NTP’s corrections become important over longer time scales. NTP errors can be between 2ms-100ms depending on connectivity. For astronomical calculations UT1, TST, and LTST are best. TCG, TCB, TDB are rare standards and do not need to be implemented in the standard library.</p>
+<p>UTC’s only real advantage is its ubiquity - there are lookup tables (leap second table, DUT1) and formulas to convert UTC to other standards. Smeared UTC is its own thing, even more contrived than UTC.</p>
 </section>
 <section id="epochs">
 <h2>Epochs<a class="headerlink" href="#epochs" title="Permalink to this heading"></a></h2>
-<p>The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, too many to list here. The epochs may be calendar times which require a time standard to interpret as an instant, such as Rata Die, or be a fixed instant in a given standard, such as the GPS epoch.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">CalendarEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
-<span class="kt">FixedEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
+<p>The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, too many to list here. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">FixedEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
+<span class="kt">CalendarEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="epoch-relative-time">
 <h2>Epoch-relative time<a class="headerlink" href="#epoch-relative-time" title="Permalink to this heading"></a></h2>
-<p>The form of specifying time most convenient for calculations is as a quantity of time elapse relative to some particular epoch, where the quantity is a number and some time unit. The time standard must also be specified to fix the length of the day and the second. So it looks as follows:</p>
+<p>The form of specifying time most convenient for calculations is as a quantity of time elapsed relative to some particular epoch, where the quantity is a number and some time unit. The time standard must also be specified to fix the length of the time unit. So it looks as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">EpochTime</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Epoch</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeStandard</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 
 <span class="kt">EpochTime</span><span class="w"> </span><span class="mi">14247</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="kt">UnixEpoch</span><span class="w"> </span><span class="kt">UTC</span><span class="w"> </span><span class="c1">-- 14247 days after Unix epoch</span><span class="w"></span>
@@ -183,7 +187,7 @@
 <p>A time record specifies an instant using a collection of fields from the proleptic Gregorian calendar (ISO 8601), implicitly using the Rata Die epoch. The time standard must also be specified.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">AdjustField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">InLeapSecond</span><span class="p">,</span><span class="w"> </span><span class="kt">TAIOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">InDST</span><span class="p">,</span><span class="w"> </span><span class="kt">UTCHourOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">Fold</span><span class="p">}</span><span class="w"></span>
 
-<span class="kt">ChronoField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">Nanosecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Microsecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Second</span><span class="p">,</span><span class="w"> </span><span class="kt">Minute</span><span class="p">,</span><span class="w"> </span><span class="kt">Hour</span><span class="p">,</span><span class="w"> </span><span class="kt">Half_Day</span><span class="p">,</span><span class="w"> </span><span class="kt">Day</span><span class="p">,</span><span class="w"> </span><span class="kt">Week</span><span class="p">,</span><span class="w"> </span><span class="kt">AlignedWeek</span><span class="p">,</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="kt">Quarter</span><span class="p">,</span><span class="w"> </span><span class="kt">Year</span><span class="p">,</span><span class="w"> </span><span class="kt">JulianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">BesselianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">Decade</span><span class="p">,</span><span class="w"> </span><span class="kt">Century</span><span class="p">,</span><span class="w"> </span><span class="kt">Millennium</span><span class="p">,</span><span class="w"> </span><span class="kt">Era</span><span class="p">}</span><span class="w"> </span><span class="n">union</span><span class="w"> </span><span class="kt">AdjustField</span><span class="w"></span>
+<span class="kt">ChronoField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">Nanosecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Microsecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Second</span><span class="p">,</span><span class="w"> </span><span class="kt">Minute</span><span class="p">,</span><span class="w"> </span><span class="kt">Hour</span><span class="p">,</span><span class="w"> </span><span class="kt">Half_Day</span><span class="p">,</span><span class="w"> </span><span class="kt">Day</span><span class="p">,</span><span class="w"> </span><span class="kt">WeekDay</span><span class="p">,</span><span class="w"> </span><span class="kt">Week</span><span class="p">,</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="kt">Quarter</span><span class="p">,</span><span class="w"> </span><span class="kt">Year</span><span class="p">,</span><span class="w"> </span><span class="kt">JulianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">BesselianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">Decade</span><span class="p">,</span><span class="w"> </span><span class="kt">Century</span><span class="p">,</span><span class="w"> </span><span class="kt">Millennium</span><span class="p">,</span><span class="w"> </span><span class="kt">Era</span><span class="p">}</span><span class="w"> </span><span class="n">union</span><span class="w"> </span><span class="kt">AdjustField</span><span class="w"></span>
 
 
 <span class="c1">-- convertible to integers</span><span class="w"></span>
@@ -201,7 +205,6 @@
 * year : int, month : Month, day : range int 1 32, hour : range real 0 24
 * year : int, day : range real 1 367
 * year : int, week : range int 1 54, day : DayOfWeek
-* year : int, alignedweek : range int 0 53, day : range real 0 7
 * decade : int, year : range int 0 10, day : range real 1 367
 * century : int, decade : range int 0 10, year : range int 0 10, day : range real 1 367
 * century : real
@@ -213,7 +216,7 @@
 
 <span class="c1">-- only looks at which fields are present</span><span class="w"></span>
 <span class="nf">range</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">NormalizedRange</span><span class="w"></span>
-<span class="kr">type</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">{</span><span class="kt">Int</span><span class="p">,</span><span class="kt">Real</span><span class="p">,</span><span class="kt">DayOfWeek</span><span class="p">,</span><span class="kt">Month</span><span class="p">,</span><span class="kt">Era</span><span class="p">}</span><span class="w"></span>
+<span class="kr">type</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Type</span><span class="w"></span>
 
 <span class="c1">-- looks at values of fields</span><span class="w"></span>
 <span class="nf">preciseRange</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeRecord</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="n">min</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">)</span><span class="w"></span>
@@ -224,7 +227,10 @@
 <p>For civil time, there is also DST. Without adjustment fields this is represented by varying the number of hours in the day - useful for calculations, but probably not desired for display. InDST represents this unambiguously, or fold may be used - it takes on the value 2 if DST and the leap second overlap (unlikely).</p>
 <section id="other-calendars">
 <h3>Other calendars<a class="headerlink" href="#other-calendars" title="Permalink to this heading"></a></h3>
-<p>There are other calendars, e.g. the Julian calendar and localized calendars like Hijrah, Thai Buddhist, Japanese, and Minguo. These can have their own ChronoFields like <code class="docutils literal notranslate"><span class="pre">Julian_year</span></code>, <code class="docutils literal notranslate"><span class="pre">Japanese_era</span></code>, etc. so there should be a way to extend the list of ChronoFields.</p>
+<p>There are many other calendars besides Gregorian, e.g.:
+* Buddhist, Chinese lunar, Ethiopian, Hindu, Lunar Hijri (Islamic), Solar Hijri, ISO week date
+* Akan, Armenian, Assamese, Assyrian, Baháʼí, Balinese pawukon, Balinese saka, Bengali, Bangladeshi, Berber, Borana, Burmese, Coptic, Earthly Branches, Ethiopian,  Heavenly Stems, Minguo, Gaelic, Germanic heathen, Georgian, Hebrew / Jewish, Hindu, Vikram Samvat, Saka, Igbo, Zoroastrian, Fasli, Tabular, Jain, Japanese, Javanese, Korean, Juche, Julian, Kurdish, Lithuanian, Maithili, Malayalam, Mandaean, Mayan long count, Mayan Haab, MAyan Tzolkin, Meitei, Melanau, Mongolian, Nepal Sambat, Bikram Sambat, Yele Sambat, Nisg̱a’a, Odia, Punjabi, Nanakshahi, Romanian, Shona, Solar term, Somali, Sesotho, Slavic, Slavic Native Faith, Macedonian, Tamil, Thai lunar, Thai solar, Tibetan, Tripuri, Tulu, Vietnamese, Wicca, Xhosa, Yoruba, Zulu</p>
+<p>These can have their own ChronoFields like <code class="docutils literal notranslate"><span class="pre">Julian_year</span></code>, <code class="docutils literal notranslate"><span class="pre">Japanese_era</span></code>, etc. so there should be a way to extend the list of ChronoFields.</p>
 </section>
 </section>
 <section id="duration">
@@ -234,6 +240,10 @@
 </pre></div>
 </div>
 <p>The length of the fields varies by time standard, so that must also be specified. Although the primary use of a duration is to be added or subtracted from an instant, and some instant formats have standards associated with them which might allow avoiding the standard field in the duration, other instant types such as well-known fixed instants have no standard, so the instant’s standard cannot be used in general.</p>
+<p>Examples:
+* years, months, days
+* months, days
+* weeks, days</p>
 </section>
 <section id="partial-date">
 <h2>Partial date<a class="headerlink" href="#partial-date" title="Permalink to this heading"></a></h2>
@@ -327,7 +337,11 @@
 </pre></div>
 </div>
 <p>TODO: Checkout Python zoneinfo, whatever Rust does, etc. for a better API</p>
+</section>
+<section id="libraries">
+<h2>Libraries<a class="headerlink" href="#libraries" title="Permalink to this heading"></a></h2>
 <p>The JSR-310 <a class="reference external" href="https://www.threeten.org/">ThreeTen</a> library in <a class="reference external" href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/package-summary.html">Java</a> seems to have undergone the most peer review. It relies heavily on ISO 8601. Another is <a class="reference external" href="http://time4j.net/">http://time4j.net/</a>. For some reason these are all Java. Rust has a basic thing in <a class="reference external" href="https://doc.rust-lang.org/std/time/index.html">std</a>. There is a more complete Rust library but the author is <a class="reference external" href="https://github.com/time-rs/time/issues/406#issuecomment-989753838">opinionated</a>.</p>
+<p><a class="reference external" href="https://github.com/fifth-postulate/julian">https://github.com/fifth-postulate/julian</a></p>
 </section>
 <section id="os-interface">
 <h2>OS interface<a class="headerlink" href="#os-interface" title="Permalink to this heading"></a></h2>
@@ -343,13 +357,13 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="TermRewriting.html" class="btn btn-neutral float-left" title="Term rewriting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Units.html" class="btn btn-neutral float-right" title="Units" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

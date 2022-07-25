@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Macros" href="Fexprs.html" />
-    <link rel="prev" title="F2 G2" href="F2G2_example.html" /> 
+    <link rel="next" title="Library" href="Library.html" />
+    <link rel="prev" title="Exceptions" href="Exceptions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,7 +56,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">As fast as C</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#benchmarks">Benchmarks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#c-programs">C programs</a></li>
@@ -67,22 +66,25 @@
 <li class="toctree-l3"><a class="reference internal" href="#avoiding-slow-operations">Avoiding slow operations</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -118,7 +120,7 @@
   <section id="as-fast-as-c">
 <h1>As fast as C<a class="headerlink" href="#as-fast-as-c" title="Permalink to this heading"></a></h1>
 <p>How do you prove that Stroscot is “as fast as C”? Well, we must show that every C program has a natural Stroscot translation, that performs at least as fast. Since Stroscot is an expressive language there may be many natural translations, and all must perform as fast.</p>
-<p>Stroscot should also have fast performance on programs that aren’t natural translations of C programs, but this is secondary to the claim. Even the lambda calculus, after years of study, has no optimal implementation on modern machines. So long as the implementation is reasonable the actual performance doesn’t matter - worst-case, the feature becomes a footgun for people are performance sensitive.</p>
+<p>Stroscot should also have fast performance on programs that aren’t natural translations of C programs, but this is secondary to the claim. Even the lambda calculus, after years of study, has no optimal implementation on modern machines. So long as the implementation is reasonable the actual performance on non-C-like programs doesn’t matter - worst-case, the feature becomes a footgun for people are performance sensitive.</p>
 <section id="benchmarks">
 <h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Permalink to this heading"></a></h2>
 <p>One aspect is benchmarks implemented in both C and Stroscot. This is the approach taken by the programming language shootout. The Stroscot programs could cheat by being “better written” than “naive” C programs, but requiring that they be “natural translations” avoids this.</p>
@@ -142,8 +144,8 @@
 <section id="asymptotics">
 <h2>Asymptotics<a class="headerlink" href="#asymptotics" title="Permalink to this heading"></a></h2>
 <p>A direct mapping works for small programs, but what about large programs? We must ensure that the asymptotic overhead of each of our features is not too large. In particular time and space usage.</p>
-<p>Laziness can affect space usage. But forcing at each imperative operation should avoid this, it just means the compiler has to propagate demand and see that everything is strict.</p>
 <p>Tail-recursive term rewriting compiles into a state machine just like tail-recursive functions.</p>
+<p>Laziness can affect space usage. But forcing at each imperative operation should avoid this, it just means the compiler has to propagate demand and see that everything is strict.</p>
 <p>Exceptions add some complexity to the control flow, but if you don’t use exception handling then they all turn into panics, which are pretty cheap.</p>
 <p>The verification stuff is all at compile time, so it gets cached. So not a big factor.</p>
 </section>
@@ -155,32 +157,12 @@
 caller, you have to make sure that callees pop all their arguments, i.e. it requires callee cleanup.</p>
 <p>The difference is on the order of 20% in practice.</p>
 <p>Nobody seems to have benchmarked 64-bit calling conventions. These use more registers so are less sensitive to stack stuff.</p>
-<p>Thorin impleemnts lambda mangling which makes basic blocks as fast as C.</p>
-<blockquote>
-<div><p>A queries B receives future F1
-A forwards a request containing F1 to C (drops reply)
-A waits on F1
-B queries C receives future F2
-B replies with X2(F2) (into F1)
-C replies with X1(F1) (into F2)</p>
-<p>A = B
-B = X2 C
-C = X1 A</p>
-</div></blockquote>
+<p>Thorin implements lambda mangling which makes basic blocks as fast as C.</p>
 </section>
 <section id="laziness">
 <h2>Laziness<a class="headerlink" href="#laziness" title="Permalink to this heading"></a></h2>
 <p>The overhead of laziness means Haskell often loses to C. Laziness only helps timewise if a box is discarded, and otherwise hurts. And intended laziness is actually quite rare.</p>
-<p>So in addition to GHC’s demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such).</p>
-<p><a class="reference external" href="http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/">http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/</a></p>
-<p>the value representation is optimized for the platform, and redundant checks are optimized out</p>
-<p>The Implementation of Functional Programming Languages
-Implementing functional languages: a tutorial
-Implementing Lazy Functional Languages on Stock Hardware: The Spineless Tagless G-Machine
-How to make a fast curry: push/enter vs eval/apply
-GHC also does strictness analysis and optimistic evaluation.</p>
-<p>a program is a dependency graph which is evaluated through a series of local reductions
-the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says “return the result.”</p>
+<p>So in addition to GHC’s demand analysis which has to prove usage to optimize to strict and falls back to lazy, we want a cost analysis which identifies nontermination and opportunities for saving a lot by discarding and falls back to strict. Also we should evaluate in the case where evaluating directly is cheaper than allocating a thunk (numerical computations and such): <a class="reference external" href="http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/">http://blog.ezyang.com/2011/05/anatomy-of-a-thunk-leak/</a></p>
 </section>
 <section id="avoiding-slow-operations">
 <h2>Avoiding slow operations<a class="headerlink" href="#avoiding-slow-operations" title="Permalink to this heading"></a></h2>
@@ -192,14 +174,14 @@ the graph itself can be represented as code. In particular, we can represent a n
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="F2G2_example.html" class="btn btn-neutral float-left" title="F2 G2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Macros" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Exceptions.html" class="btn btn-neutral float-left" title="Exceptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

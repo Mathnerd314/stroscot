@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dispatch &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Memory" href="Memory.html" />
+    <link rel="prev" title="Modules" href="Modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dispatch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#priorities">Priorities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#next-method">Next method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list-methods">List methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Language Reference</a> &raquo;</li>
+      <li>Dispatch</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Dispatch.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dispatch">
+<h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this heading"></a></h1>
+<p>Stroscot supports pattern matching as well as predicate dispatch:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Dispatch cases are not ordered - they overlap and run in parallel. All cases are tried nondeterministically and run. If multiple predicates succeed, it is required that they produce the same result. For example if we were to modify the last case:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="n">conflict</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="p">`</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="p">`</span><span class="w"></span>
+</pre></div>
+</div>
+<p>But if the first clause was <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">1</span> <span class="pre">=</span> <span class="pre">2</span></code> it would be allowed. This behavior is useful for creating generic implementations that have optimized methods for specific types, and also for tests:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">test</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
+<p>Local functions are applied in the same way as global ones, i.e., the argument patterns of each rule are matched against the actual function arguments nondeterministically and optimal reduction is performed.</p>
+<p>If none of the rules match then the term does not reduce (it becomes a normal form) - to raise an exception a catch-all clause must be defined.</p>
+<section id="priorities">
+<h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this heading"></a></h2>
+<p>The way sequential matching expands is that there is a chain of priorities.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">clause</span><span class="w"> </span><span class="n">c1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="nf">clause</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">clause</span><span class="w"> </span><span class="n">c3</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+
+<span class="nf">prioConstrain</span><span class="w"> </span><span class="n">prioHigh</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">prioLow</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Each clause has its own priority, which is the tuple (declared priority, specificity) ordered by lexicographical order. If a declared priority is not specified then it is an unnamed fresh priority with the relation <code class="docutils literal notranslate"><span class="pre">prioLow</span> <span class="pre">&lt;</span> <span class="pre">fresh</span> <span class="pre">&lt;</span> <span class="pre">prioHigh</span></code>. Specificity is a poset relation defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is more specific than (higher priority) <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">UNSAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">SAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>.</p>
+<p>Clauses with lower priority are shadowed by clauses with higher priorities. Clauses with incomparable priorities are run in parallel. Clauses with equal priorities give a warning and are run in parallel.</p>
+<p>There is a macro to give all clauses in a region the same priority, which makes the specificity implementation more useful.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;garden gate&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="c1">-- the second clause is more specific than the first, hence overrides it</span><span class="w"></span>
+
+<span class="nf">prioAll</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isPerson</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Humanoid&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Masculine&quot;</span><span class="w"></span>
+<span class="w">   </span><span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="c1">-- again each clause overrides the second</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You can get the priority of a clause with <code class="docutils literal notranslate"><span class="pre">prioOf</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">condition</span> <span class="pre">}</span></code>, so as to constrain a clause that has an anonymous priority. The AST must match exactly.</p>
+<p>There is also <code class="docutils literal notranslate"><span class="pre">prioBound</span> <span class="pre">{}</span></code>, similar in syntax to <code class="docutils literal notranslate"><span class="pre">prioAll</span></code> but puts a top/bottom constraint on fresh priorities.</p>
+<p>You can also define sets of priorities, either by listing or with <code class="docutils literal notranslate"><span class="pre">prioSet</span> <span class="pre">{</span> <span class="pre">}</span></code>, and use <code class="docutils literal notranslate"><span class="pre">prioSetDef</span></code> to define large-scale orderings. You can resolve conflicts in the priority ordering definitions by declaring the priorities (meta-priorities) of the definitions. See Posets.</p>
+<section id="next-method">
+<h3>Next method<a class="headerlink" href="#next-method" title="Permalink to this heading"></a></h3>
+<p>High priority methods shadow lower-priority methods, rather than entirely replacing them. <code class="docutils literal notranslate"><span class="pre">next-method</span></code> allows access to these shadowed methods. The shadowed methods are run in parallel.</p>
+<p>You can run the methods with different parameters, <code class="docutils literal notranslate"><span class="pre">next-method</span> <span class="pre">{</span> <span class="pre">silently=true</span> <span class="pre">}</span></code>.</p>
+<p>You can also call a specific clause, <code class="docutils literal notranslate"><span class="pre">callClause</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">guard,</span> <span class="pre">module</span> <span class="pre">=</span> <span class="pre">...,</span> <span class="pre">priority</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">}</span></code>, or its <code class="docutils literal notranslate"><span class="pre">next-method</span></code>, <code class="docutils literal notranslate"><span class="pre">callClauseNext</span></code>.</p>
+</section>
+<section id="list-methods">
+<h3>List methods<a class="headerlink" href="#list-methods" title="Permalink to this heading"></a></h3>
+<p>Stroscot also supports Common Lisp’s custom qualifier <code class="docutils literal notranslate"><span class="pre">list</span></code>. <code class="docutils literal notranslate"><span class="pre">list</span></code> simply produces the list of applicable methods (ones whose guard is OK). This list can then be applied or manipulated as needed. It is an error to define a list method if there are any normal methods defined.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

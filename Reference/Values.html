@@ -74,7 +74,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#binary-data">Binary data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#character">Character</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#characters">Characters</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#date-time">Date/time</a></li>
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -285,36 +286,57 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 </section>
 <section id="binary-data">
 <h2>Binary data<a class="headerlink" href="#binary-data" title="Permalink to this heading"></a></h2>
-<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values. There is a binary/hex literal syntax:</p>
+<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values.</p>
+<p>Another way to write data is as a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code> which makes use of UTF-8 characters and</p>
+<p>The normal form is just a term applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. Because of the term tagging it, the list can be stored compactly.</p>
+</section>
+<section id="strings">
+<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
+<p>A string is a sequence of bytes of a given length. Subtypes include null-terminated strings like C and UTF-8 encoded strings.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Hello world!\n&quot;
+``Hello user ${id}``
+[Enclosed text]
+&#39;string&#39;
+&quot;&quot;&quot; multiline
+string&quot;&quot;&quot;
+</pre></div>
+</div>
+<p>Double and single quotes are both supported, as well as a multi-line syntax.
+Escape sequences are defined:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>\newline Backslash and newline ignored
+\\ Backslash (\)
+\&#39; Single quote (&#39;)
+\&quot; Double quote (&quot;)
+
+\a ASCII Bell (BEL)
+\b ASCII Backspace (BS)
+\f ASCII Formfeed (FF)
+\n ASCII Linefeed (LF)
+\r ASCII Carriage Return (CR)
+\t ASCII Horizontal Tab (TAB)
+\v ASCII Vertical Tab (VT)
+
+\0 null byte
+\ooo Byte with octal value ooo
+\xhh Byte with hex value hh
+\N{name} Codepoint with name, abbreviation or alias &#39;name&#39; in the Unicode database
+\nnnn Codepoint with decimal value nnnn. The maximum value of a codepoint is 1114111.
+\uxxxx Codepoint with hex value xxxx. The maximum value is hexadecimal 10ffff.
+\&amp; Backslash and ampersand ignored. The purpose of this escape sequence is to make it possible to write a numeric escape followed immediately by a regular ASCII digit.
+\^[@A-Z[\\]^_] caret control code notation (does anyone use?)
+</pre></div>
+</div>
+<p>There is also a binary/hex literal syntax to abbreviate <code class="docutils literal notranslate"><span class="pre">\xAA\xBB\xCC</span></code> as <code class="docutils literal notranslate"><span class="pre">0xAABBCC</span></code>: We allow various base prefixes - <code class="docutils literal notranslate"><span class="pre">0x</span></code> (hexadecimal), <code class="docutils literal notranslate"><span class="pre">0o</span></code> (octal), <code class="docutils literal notranslate"><span class="pre">0d</span></code> (decimal) and <code class="docutils literal notranslate"><span class="pre">0b</span></code> (binary). The decimal base expands to the shortest binary string that can contain that decimal. So for example <code class="docutils literal notranslate"><span class="pre">0d6</span> <span class="pre">=</span> <span class="pre">0b110</span> <span class="pre">=</span> <span class="pre">bits</span> <span class="pre">[1,1,0]</span></code>.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span><span class="w"></span>
 <span class="nf">digit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="w"></span>
 
 <span class="kr">data</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"></span>
 </pre></div>
 </div>
-<p>We allow various base prefixes <code class="docutils literal notranslate"><span class="pre">0?</span></code> - <code class="docutils literal notranslate"><span class="pre">x</span></code> (hexadecimal), <code class="docutils literal notranslate"><span class="pre">o</span></code> (octal), <code class="docutils literal notranslate"><span class="pre">d</span></code> (decimal) and <code class="docutils literal notranslate"><span class="pre">b</span></code> (binary), but extensible to other bases. The decimal base expands to the shortest binary string that can contain that decimal. So for example <code class="docutils literal notranslate"><span class="pre">0b010</span> <span class="pre">=</span> <span class="pre">bits</span> <span class="pre">[0,1,0]</span></code>.</p>
-<p>Another way to write data is as a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code> which makes use of UTF-8 characters and hexadecimal for invalid byte sequences.</p>
-<p>The normal form is just a term applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. Because of the term tagging it, the list can be stored compactly.</p>
-</section>
-<section id="strings">
-<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;Hello world!</span><span class="se">\n</span><span class="s">&quot;</span><span class="w"></span>
-<span class="p">``</span><span class="kt">Hello</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="o">$</span><span class="p">{</span><span class="n">id</span><span class="p">}``</span><span class="w"></span>
-<span class="p">[</span><span class="kt">Enclosed</span><span class="w"> </span><span class="n">text</span><span class="p">]</span><span class="w"></span>
-<span class="n">&#39;string&#39;</span><span class="w"></span>
-<span class="s">&quot;&quot;&quot; multiline</span>
-<span class="s">string&quot;&quot;&quot;</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Double and single quotes are both supported, as well as a multi-line syntax.
-There is no explicit syntax for characters, instead characters are strings of length 1.
-Escape sequences are defined; the main ones are <code class="docutils literal notranslate"><span class="pre">\&quot;</span></code> to escape a quote and <code class="docutils literal notranslate"><span class="pre">\\</span></code> to escape a backslash, the others aren’t relevant to parsing the literal.</p>
 <p>String concatenation is <code class="docutils literal notranslate"><span class="pre">++</span></code>.</p>
-<p>The string is raw bytes terminated with a null character, like in C, or a length plus raw bytes.
-Often strings are encoded in UTF-8.</p>
-<section id="character">
-<h3>Character<a class="headerlink" href="#character" title="Permalink to this heading"></a></h3>
-<p>A “character” is not just a single Unicode code point. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points. Unicode calls characters “grapheme clusters” and provides an algorithm for identifying them in UAX #29. The main notable feature of the algorithm is that a grapheme cluster may be arbitrarily long due to the use of combining characters/accents and ZWJs, for example in Zalgo text, hence a character must be repesented as a variable-length sequence of codepoints. Hence it is simplest and most correct to define a character as a Unicode string of grapheme length 1.</p>
+<section id="characters">
+<h3>Characters<a class="headerlink" href="#characters" title="Permalink to this heading"></a></h3>
+<p>There is no explicit syntax for characters, instead a character is a Unicode string containing exactly one grapheme cluster. Unicode provides an algorithm for identifying grapheme clusters in UAX #29. The main notable feature of the algorithm is that a grapheme cluster / character is not just a single Unicode code point and may be arbitrarily long due to the use of combining characters/accents and ZWJs. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points, as does Zalgo text. Hence a character is in general an arbitrary length sequence of codepoints and it is simplest and most correct to define a character as a type of string.</p>
 </section>
 </section>
 <section id="date-time">
@@ -334,6 +356,7 @@ Often strings are encoded in UTF-8.</p>
 <span class="w">  </span><span class="o">#</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Once you get to four values, it is best to make a record with named entries instead of using a tuple.</p>
 <section id="maps">
 <h3>Maps<a class="headerlink" href="#maps" title="Permalink to this heading"></a></h3>
 <p>Maps are the same as records except the fields are not ordered (set of pairs).</p>
@@ -380,215 +403,209 @@ Often strings are encoded in UTF-8.</p>
 </section>
 <section id="data-structures">
 <h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>Arrays</dt><dd><p>Array
-Bit array
-Bit field
-Bitboard
-Bitmap
-Circular buffer
-Control table
-Image
-Dope vector
-Dynamic array
-Gap buffer
-Hashed array tree
-Lookup table
-Matrix
-Parallel array
-Sorted array
-Sparse matrix
-Iliffe vector
-Variable-length array</p>
-</dd>
-</dl>
-<p>Lists</p>
-<blockquote>
-<div><p>Singly/Circular/Doubly Linked list
-Array list
-Association list
-Self-organizing list
-Skip list
-Unrolled linked list
-VList
-Conc-tree list
-Xor linked list
-Zipper
-Doubly connected edge list also known as half-edge
-Difference list
-Free list</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Trees</dt><dd><dl class="simple">
-<dt>Binary trees</dt><dd><p>AA tree
-AVL tree
-Binary search tree
-Binary tree
-Cartesian tree
-Conc-tree list
-Left-child right-sibling binary tree
-Order statistic tree
-Pagoda
-Randomized binary search tree
-Red–black tree
-Rope
-Scapegoat tree
-Self-balancing binary search tree
-Splay tree
-T-tree
-Tango tree
-Threaded binary tree
-Top tree
-Treap
-WAVL tree
-Weight-balanced tree</p>
-</dd>
-<dt>B-trees</dt><dd><p>B-tree
-B+ tree
-B*-tree
-Dancing tree
-2–3 tree
-2–3–4 tree
-Queap
-Fusion tree
-Bx-tree</p>
-</dd>
-<dt>Heaps</dt><dd><p>Heap
-Binary heap
-B-heap
-Weak heap
-Binomial heap
-Fibonacci heap
-AF-heap
-Leonardo heap
-2–3 heap
-Soft heap
-Pairing heap
-Leftist heap
-Treap
-Beap
-Skew heap
-Ternary heap
-D-ary heap
-Brodal queue</p>
-</dd>
-<dt>Bit-slice trees - each tree node compares a bit slice of key values.</dt><dd><p>Radix tree (compressed trie), Patricia tree
-Bitwise trie with bitmap
-Suffix tree
-Suffix array
-Compressed suffix array
-FM-index
-Generalised suffix tree
-B-tree
-Judy array
-X-fast trie
-Y-fast trie
-Merkle tree</p>
-</dd>
-<dt>Multi-way trees</dt><dd><p>Ternary tree
-K-ary tree
-And–or tree
-(a,b)-tree
-Link/cut tree
-SPQR-tree
-Spaghetti stack
-Disjoint-set data structure (Union-find data structure)
-Fusion tree
-Enfilade
-Exponential tree
-Fenwick tree
-Van Emde Boas tree
-Rose tree</p>
-</dd>
-<dt>Space-partitioning trees</dt><dd><p>Segment tree
-Interval tree
-Range tree
-Bin
-K-d tree
-Implicit k-d tree
-Min/max k-d tree
-Relaxed k-d tree
-Adaptive k-d tree
-Quadtree
-Octree
-Linear octree
-Z-order
-UB-tree
-R-tree
-R+ tree
-R* tree
-Hilbert R-tree
-X-tree
-Metric tree
-Cover tree
-M-tree
-VP-tree
-BK-tree
-Bounding interval hierarchy
-Bounding volume hierarchy
-BSP tree
-Rapidly exploring random tree</p>
-</dd>
-<dt>Application-specific trees</dt><dd><p>Abstract syntax tree
-Parse tree
-Decision tree
-Alternating decision tree
-Minimax tree
-Expectiminimax tree
-Finger tree
-Expression tree
-Log-structured merge-tree</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>Hash-based structures</p>
-<blockquote>
-<div><p>Bloom filter
-Count–min sketch
-Distributed hash table
-Double hashing
-Dynamic perfect hash table
-Hash array mapped trie
-Hash list
-Hash table
-Hash tree
-Hash trie
-Koorde
-Prefix hash tree
-Rolling hash
-MinHash
-Quotient filter
-Ctrie</p>
-</div></blockquote>
-<dl>
-<dt>Graphs</dt><dd><p>Graph
-Adjacency list
-Adjacency matrix
-Graph-structured stack
-Scene graph
-Decision tree</p>
-<blockquote>
-<div><p>Binary decision diagram</p>
-</div></blockquote>
-<p>Zero-suppressed decision diagram
-And-inverter graph
-Directed graph
-Directed acyclic graph
-Propositional directed acyclic graph
-Multigraph
-Hypergraph</p>
-</dd>
-</dl>
-<p>Other</p>
-<blockquote>
-<div><p>Lightmap
-Winged edge
-Quad-edge
-Routing table
-Symbol table
-Piece table</p>
-</div></blockquote>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Arrays
+    Array
+    Bit array
+    Bit field
+    Bitboard
+    Bitmap
+    Circular buffer
+    Control table
+    Image
+    Dope vector
+    Dynamic array
+    Gap buffer
+    Hashed array tree
+    Lookup table
+    Matrix
+    Parallel array
+    Sorted array
+    Sparse matrix
+    Iliffe vector
+    Variable-length array
+
+Lists
+
+    Singly/Circular/Doubly Linked list
+    Array list
+    Association list
+    Self-organizing list
+    Skip list
+    Unrolled linked list
+    VList
+    Conc-tree list
+    Xor linked list
+    Zipper
+    Doubly connected edge list also known as half-edge
+    Difference list
+    Free list
+
+Trees
+  Binary trees
+    AA tree
+    AVL tree
+    Binary search tree
+    Binary tree
+    Cartesian tree
+    Conc-tree list
+    Left-child right-sibling binary tree
+    Order statistic tree
+    Pagoda
+    Randomized binary search tree
+    Red–black tree
+    Rope
+    Scapegoat tree
+    Self-balancing binary search tree
+    Splay tree
+    T-tree
+    Tango tree
+    Threaded binary tree
+    Top tree
+    Treap
+    WAVL tree
+    Weight-balanced tree
+  B-trees
+    B-tree
+    B+ tree
+    B*-tree
+    Dancing tree
+    2–3 tree
+    2–3–4 tree
+    Queap
+    Fusion tree
+    Bx-tree
+  Heaps
+    Heap
+    Binary heap
+    B-heap
+    Weak heap
+    Binomial heap
+    Fibonacci heap
+    AF-heap
+    Leonardo heap
+    2–3 heap
+    Soft heap
+    Pairing heap
+    Leftist heap
+    Treap
+    Beap
+    Skew heap
+    Ternary heap
+    D-ary heap
+    Brodal queue
+  Bit-slice trees - each tree node compares a bit slice of key values.
+    Radix tree (compressed trie), Patricia tree
+    Bitwise trie with bitmap
+    Suffix tree
+    Suffix array
+    Compressed suffix array
+    FM-index
+    Generalised suffix tree
+    B-tree
+    Judy array
+    X-fast trie
+    Y-fast trie
+    Merkle tree
+  Multi-way trees
+    Ternary tree
+    K-ary tree
+    And–or tree
+    (a,b)-tree
+    Link/cut tree
+    SPQR-tree
+    Spaghetti stack
+    Disjoint-set data structure (Union-find data structure)
+    Fusion tree
+    Enfilade
+    Exponential tree
+    Fenwick tree
+    Van Emde Boas tree
+    Rose tree
+  Space-partitioning trees
+    Segment tree
+    Interval tree
+    Range tree
+    Bin
+    K-d tree
+    Implicit k-d tree
+    Min/max k-d tree
+    Relaxed k-d tree
+    Adaptive k-d tree
+    Quadtree
+    Octree
+    Linear octree
+    Z-order
+    UB-tree
+    R-tree
+    R+ tree
+    R* tree
+    Hilbert R-tree
+    X-tree
+    Metric tree
+    Cover tree
+    M-tree
+    VP-tree
+    BK-tree
+    Bounding interval hierarchy
+    Bounding volume hierarchy
+    BSP tree
+    Rapidly exploring random tree
+  Application-specific trees
+    Abstract syntax tree
+    Parse tree
+    Decision tree
+    Alternating decision tree
+    Minimax tree
+    Expectiminimax tree
+    Finger tree
+    Expression tree
+    Log-structured merge-tree
+
+Hash-based structures
+
+    Bloom filter
+    Count–min sketch
+    Distributed hash table
+    Double hashing
+    Dynamic perfect hash table
+    Hash array mapped trie
+    Hash list
+    Hash table
+    Hash tree
+    Hash trie
+    Koorde
+    Prefix hash tree
+    Rolling hash
+    MinHash
+    Quotient filter
+    Ctrie
+
+Graphs
+    Graph
+    Adjacency list
+    Adjacency matrix
+    Graph-structured stack
+    Scene graph
+    Decision tree
+        Binary decision diagram
+    Zero-suppressed decision diagram
+    And-inverter graph
+    Directed graph
+    Directed acyclic graph
+    Propositional directed acyclic graph
+    Multigraph
+    Hypergraph
+
+Other
+
+    Lightmap
+    Winged edge
+    Quad-edge
+    Routing table
+    Symbol table
+    Piece table
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -603,7 +620,7 @@ Piece table</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

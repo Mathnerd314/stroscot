@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="F2 G2" href="F2G2_example.html" />
+    <link rel="next" title="As fast as C" href="Fastest.html" />
     <link rel="prev" title="Evaluation strategy" href="Evaluation-Strategy.html" /> 
 </head>
 
@@ -78,6 +78,9 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#syntax">Syntax</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#manual">Manual</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#automatic">Automatic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#idea">Idea</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#try">Try</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#exit-points">Exit points</a></li>
 </ul>
@@ -106,24 +109,26 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -196,7 +201,7 @@
 <section id="hardware-exceptions">
 <h4>Hardware exceptions<a class="headerlink" href="#hardware-exceptions" title="Permalink to this heading"></a></h4>
 <p>Hardware exceptions on Linux are transformed to signals SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP, SIGEMT (emulator trap, not used on x86) <a class="reference external" href="https://github.com/torvalds/linux/blob/a931dd33d370896a683236bba67c0d6f3d01144d/arch/x86/kernel/traps.c">in the kernel</a>. The type of exception is in si_code in siginfo_t SIGFPE-&gt;FPE_INTDIV (DE), SIGSEGV (<a class="reference external" href="https://github.com/torvalds/linux/blob/a931dd33d370896a683236bba67c0d6f3d01144d/arch/x86/mm/fault.c#L1487">PF</a>, GP), SIGBUS (SS, AC), SIGILL (UD), etc. The signals can only be handled by the thread that raises them and are delivered immediately (synchronously); queueing and letting the thread continue normally doesn’t make sense. The exceptions must be handled: execution cannot resume where it left off.</p>
-<p>On Windows the equivalent of signals for hardware exceptions is <a class="reference external" href="https://docs.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=msvc-160">Structured Exception Handling</a> or more specifically <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/debug/vectored-exception-handling">Vectored Exception Handlers</a>. In Visual C++ we can actually catch hardware exceptions inline with <code class="docutils literal notranslate"><span class="pre">__try</span> <span class="pre">{</span> <span class="pre">}</span> <span class="pre">__except</span></code>. But GCC / LLVM haven’t implemented SEH. (LLVM is <a class="reference external" href="https://reviews.llvm.org/D80344">in progress</a>)</p>
+<p>On Windows the equivalent of signals for hardware exceptions is <a class="reference external" href="https://docs.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=msvc-160">Structured Exception Handling</a> or more specifically <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/debug/vectored-exception-handling">Vectored Exception Handlers</a>. In Visual C++ we can actually catch hardware exceptions inline with <code class="docutils literal notranslate"><span class="pre">__try</span> <span class="pre">{</span> <span class="pre">}</span> <span class="pre">__except</span></code>. But GCC / LLVM haven’t implemented SEH. (LLVM is <a class="reference external" href="https://reviews.llvm.org/D102817">in progress</a>)</p>
 <p>SEH can be thought of much like temporarily registered signal handlers, where the exceptional conditions are signals, the __try blocks define where the handler is in effect, and the __except and __finally blocks are the handlers if the “signal” is received. In 64-bit Windows there are instruction tables that do unwinding.</p>
 <p><a class="reference external" href="https://github.com/ziglang/zig/blob/e2b954c2738c683a85b864eb33530f0e3dbbc480/lib/std/debug.zig#L1527">Zig</a> implements a signal handler for hardware exceptions that dumps the stacktrace and aborts. But we can do better and, like Windows SEH, allow unwinding to a handler in the code. Signal handlers can only call async-signal-safe functions. In practice we can get around this with <code class="docutils literal notranslate"><span class="pre">siglongjmp</span></code>. A further extension should be able to do DWARF unwinding and allow pretending that hardware exceptions are simply return values from instructions. Really what happens is that the handler jumps to a failure continuation, and this failure continuation is <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">DivByZero</span></code>, while the success continuation is <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">123</span></code> or whatever.</p>
 </section>
@@ -238,7 +243,7 @@
 </section>
 <section id="nontermination">
 <h4>Nontermination<a class="headerlink" href="#nontermination" title="Permalink to this heading"></a></h4>
-<p>Infinite loops can be detected in some cases and replaced with a Nontermination or Loop exception. Dynamically, this can be implemented by decrementing a fuel counter on every reduction and throwing an exception. Whatever the starting fuel, an infinite loop is guaranteed to run it out. Statically the analyses are more general and can prove termination or nontermination without requiring an arbitrary initial fuel. Most functions terminate, but totality checkers are not omniscient.</p>
+<p>Infinite loops can be detected and replaced with a Nontermination or Loop exception. Dynamically, this can be implemented by decrementing a fuel counter on every reduction step and throwing an exception when it runs out. Whatever the starting fuel, an infinite loop is guaranteed to throw an exception. Statically the analyses are more general and can prove termination or nontermination without requiring the arbitrary choice of initial fuel. Most functions can be classified, but totality checkers are not omniscient.</p>
 </section>
 <section id="exception-groups">
 <h4>Exception groups<a class="headerlink" href="#exception-groups" title="Permalink to this heading"></a></h4>
@@ -316,7 +321,8 @@ code will generally just work.</p>
 <p>Resume: The exception value contains a continuation. The handler performs some work and then calls the continuation. A more complex version of recovery.</p>
 <p>Retry: execute a recovery block and call the block again with modified arguments. The block is treated as a transaction, meaning that the application state is not modified by the failed block. Most complex version of recovery.</p>
 <p>Containment: All exceptions are caught at a level boundary (pokemon exception handling). It’s not recovery - it doesn’t fix the exception at the source, but merely restricts the damage. The inner level cleans up its resources when the exception propagates. The outer level terminates the inner level and (often) does logging, filtering, and display. Usually the outer level is close to the base of the program. For example, an event loop or thread pool, and only an throwing task gets terminated. Or a thread terminates but not the process. Or an exception gets caught before an FFI boundary to avoid polluting the API. In a high-reliability context containment is dangerous because code may cause damage if it continues and the other threads might not be isolated from it. But it can prevent DOS attacks by allowing partial restarts, and poisoning locks ensures isolation. Another issue is that exceptions may be handled incorrectly in the middle of the call stack. Still, a common and useful pattern.</p>
-<p>Terminate (abort): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn’t allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.</p>
+<p>Terminate (abort, crash): Ask to OS to end the process. Similar to containment but the boundary is the OS. Termination makes people more productive at writing code, because exceptions are obvious during testing. But it doesn’t allow graceful communication to the user. It makes the system very brittle. But it is safe if the program is crash-only, designed to handle SIGKILL without data loss. In such a case termination is one method call away. Crash-only affects design, e.g. a network protocol cannot demand a goodbye message, and file I/O must use shadow copies, etc., so it cannot be the only option.</p>
+<p>Dump core: Similar to termination but the contents of memory is written out.</p>
 <p>Backtrack: Try another path of execution at a previously encountered nondeterministic choice</p>
 <p>Trap: Suspend process and signal exception. Wait for another process (e.g. interactive debugger) to fix</p>
 </section>
@@ -329,16 +335,20 @@ code will generally just work.</p>
 </section>
 <section id="frequency">
 <h3>Frequency<a class="headerlink" href="#frequency" title="Permalink to this heading"></a></h3>
-<p>The most common behavior is unwinding, followed by containment or termination. Recovery also occurs for some interfaces that use exceptions for common cases.</p>
+<p>The most common behavior is unwinding, followed by containment or termination. Recovery also occurs for some interfaces that use exceptions for common cases.
+scate constant, 99, 123, 420,
+460, 481</p>
 </section>
 </section>
 <section id="traces">
 <h2>Traces<a class="headerlink" href="#traces" title="Permalink to this heading"></a></h2>
-<p>A trace is built by keeping track of the exception as it propagates. Since exceptions are lazy the propagation is demand-driven. E.g. <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code> produces <code class="docutils literal notranslate"><span class="pre">MissingCaseException</span> <span class="pre">{</span> <span class="pre">trace</span> <span class="pre">=</span> <span class="pre">NoSuchAttributeException</span> <span class="pre">{...},</span> <span class="pre">...}</span></code>. With fancy formatting the nested exceptions will look like a stacktrace. The semantics are a little different, but should be close enough. For example the trace can become infinite, if you accumulate over an infinite list.</p>
-<p>Traces are mainly used for debugging as the exception value is sufficient for handling purposes. Optimization (tail calls) means entries may be added or missing. Space considerations limit the depth of stack traces. So the trace is in general an implementation detail.</p>
-<p>Also, building a trace is somewhat expensive. Throwing an exception should be cheap. So how can we allow handling the exception without building a trace at all?</p>
-<p>One strategy is to not provide traces for exception values. With reversible debugging the trace and any other information can be extracted after-the-fact. But it means that production code has to run in deterministic tracing mode all the time by default to have a hope of debugging exceptions. It’s possible to get the overheads low, but the strategy of recording a trace at the time of throwing is more established and it will take a lot of work to overturn.</p>
-<p>Another solution is to only provide the first trace entry (closest to raising the exception). This is not too costly, and at least provides the file, line number, and attempted operation. E.g. assertions record the failing predicate expression.</p>
+<p>A trace is built by keeping track of the exception as it propagates. The semantics are a little different with lazy evaluation because the propagation is demand-driven, but should be close enough. E.g. <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">{}.x</span> <span class="pre">of</span> <span class="pre">1</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code> produces <code class="docutils literal notranslate"><span class="pre">MissingCaseException</span> <span class="pre">{</span> <span class="pre">trace</span> <span class="pre">=</span> <span class="pre">NoSuchAttributeException</span> <span class="pre">{...},</span> <span class="pre">...}</span></code>. With fancy formatting the nested exceptions will look like a stacktrace. Space considerations limit the depth and detail of stack traces.  For example if you accumulate over an infinite list, traces are theoretically infinite, but properly the trace display should compress this somehow. Similarly tail calls mean entries may be added or missing. So the trace is a best-effort guess subject to compiler whims - it has no formal contract. Traces are mainly useful as a light reminder to the programmer of where to look in the code in a large codebase.</p>
+<p>Alas, building a trace is expensive. Throwing an exception should be cheap. What do?</p>
+<p>The basic strategy is to not provide traces in the language. Code should not use traces - the exception value should contain all relevant information to handle the exception. And a trace is mostly useless for debugging as it does not contain memory values - the programmer is better off walking through a dump with a debugger. Dumping core at the time of throwing is an established practice</p>
+<blockquote>
+<div><p>And with reversible debugging the trace and any other information can be extracted after-the-fact in a debug environment. But how do we debug production crashes? We could run in deterministic tracing mode all the time by default. rr shows it’s possible to get the overheads low, but so far only works on Linux. Another solution is to and should allow recovery of the trace.</p>
+</div></blockquote>
+<p>Erlang’s solution is to only provide the first trace entry (closest to raising the exception). This is not too costly, and at least provides the file, line number, and attempted operation. E.g. assertions record the failing predicate expression.</p>
 <p>But the main solution IMO is to determine that the exception is caught by a handler that doesn’t use the stack trace and optimize it away as an unused read-only operation.</p>
 </section>
 <section id="top-level">
@@ -494,14 +504,112 @@ code will generally just work.</p>
 </section>
 <section id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h2>
-<p>The Swift error handling rationale classifies unwinding by the syntax required:</p>
-<ul class="simple">
-<li><p>manual: propagation is done with control operators or structures (if return code in C, NSError out parameter in Objective-C, Maybe or Either ADT in Haskell)</p></li>
-<li><p>automatic: propagation happens according to rules defined by the language</p></li>
-</ul>
-<p>Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manually propagated exceptions can be implemented with basic language facilities (out parameters, conditionals) they don’t need any special considerations and are always available. The boilerplate marks the call site and that the function can throw exceptions (e.g. an out-parameter named <code class="docutils literal notranslate"><span class="pre">error</span></code>), so it is also marked propagation and typed propagation. Ignoring an exception that is returned through a side channel is a coding error - it does not make manual exception propagation “untyped” as the Swift document claims. Unsafe, perhaps.</p>
-<p>Automatic propagation is more succinct and efficient, and besides complicating the language there’s not much reason to avoid it.</p>
-<p><code class="docutils literal notranslate"><span class="pre">throw</span></code> / <code class="docutils literal notranslate"><span class="pre">catch</span></code> have become the common keywords after C++ and Java, but it’s syntactically heavyweight. Exceptions aren’t magic and don’t need special syntax. With a variant type like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b|Exception</span></code> a function returns either a value or an exception. So just use the normal <code class="docutils literal notranslate"><span class="pre">return</span></code> keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:</p>
+<p>The Swift error handling rationale classifies unwinding by the syntax required. With manual propagation is done with visible control operators or structures, while with automatic propagation happens according to rules defined by the language.</p>
+<section id="manual">
+<h3>Manual<a class="headerlink" href="#manual" title="Permalink to this heading"></a></h3>
+<p>Manual propagation has tedious repetitive boilerplate, making programmers discouraged and code less readable and maintainable. But since manually propagated exceptions can be implemented with basic language facilities (out parameters, conditionals) they don’t need any special considerations and are always available. The boilerplate marks the call site and that the function can throw exceptions, so it is also marked propagation and typed propagation. Manual propagation is often ugly and annoying but according to <a class="reference external" href="https://www.joelonsoftware.com/2003/10/13/13/">Joel</a> it’s better than getting magic unexpected gotos sprinkled throughout your code at unpredictable places.</p>
+<p>Manual propagation has to juggle three pieces of data: the error, the returned value, and a boolean describing whether an error or value was returned. The main coding problem is forgetting to check the flag and assuming you always have a valid value. This possibility does not make manual exception propagation “untyped” as the Swift document claims. Unsafe, perhaps. Because the flag variable is often re-used, it will not trigger an unused variable warning. However, Go’s errcheck linter finds the missing exception checks every time, and can be integrated into the compiler as a warning.</p>
+<p>The exception can store a little or a lot of data. Zig uses a global tagged union <code class="docutils literal notranslate"><span class="pre">err</span></code> type (limited to u16 for now), with compiler support that allows writing individual error subset types. In C an error is an integer constant. Java uses a Throwable class. Go and Swift use an Error protocol/interface. In C++ any value can be thrown. Rust uses a polymorphic Result type that can specialize to <a class="reference external" href="https://pcarleton.com/2021/04/28/rust-what-to-pick-for-the-type-when-writing-your-own-result-type/">most of the above</a>:
+* an enum containing various types of library-specific errors
+* the enum <code class="docutils literal notranslate"><span class="pre">std::io::Error</span></code>, which is an ADT <code class="docutils literal notranslate"><span class="pre">Os</span> <span class="pre">i32|Simple</span> <span class="pre">ErrorKind|SimpleMessage</span> <span class="pre">ErrorKind</span> <span class="pre">str|Custom</span> <span class="pre">ErrorKind</span> <span class="pre">std::error::Error</span></code> packed to fit in a pointer
+* a boxed <code class="docutils literal notranslate"><span class="pre">std:error::Error</span></code> trait</p>
+<p>C puts the return value in an out parameter, the error in the global variable <code class="docutils literal notranslate"><span class="pre">errno</span></code>, and the boolean flag as the return, sometimes mixed with useful return info. We generally need a temporary for each return value and out parameter. So a nested function call <code class="docutils literal notranslate"><span class="pre">f(g(x))</span></code> looks like:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="p">;</span><span class="w"></span>
+<span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">)</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">hr</span><span class="p">))</span><span class="w"></span>
+<span class="w">     </span><span class="n">errorhandling</span><span class="p">(</span><span class="n">hr</span><span class="p">,</span><span class="w"> </span><span class="n">errno</span><span class="p">);</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">)</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">hr</span><span class="p">))</span><span class="w"></span>
+<span class="w">     </span><span class="n">errorhandling</span><span class="p">(</span><span class="n">hr</span><span class="p">,</span><span class="w"> </span><span class="n">errno</span><span class="p">);</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Objective C uses an out-parameter <code class="docutils literal notranslate"><span class="pre">NSError**</span> <span class="pre">err</span></code> for the flag and exception data. <code class="docutils literal notranslate"><span class="pre">err</span></code> is declared locally in the calling function and used as an out-parameter multiple times. This looks like:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">NSError</span><span class="w"> </span><span class="n">err</span><span class="p">;</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">err</span><span class="p">))</span><span class="w"></span>
+<span class="w">     </span><span class="n">errorhandling</span><span class="p">(</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+<span class="k">auto</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">)</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">err</span><span class="p">))</span><span class="w"></span>
+<span class="w">     </span><span class="n">errorhandling</span><span class="p">(</span><span class="n">err</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Go uses multiple return values for exception codes. You reuse err for each call, so for <code class="docutils literal notranslate"><span class="pre">f(g(x))</span></code> you write:</p>
+<div class="highlight-go notranslate"><div class="highlight"><pre><span></span><span class="nx">v1</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="nx">v2</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">(</span><span class="nx">v1</span><span class="p">)</span><span class="w"></span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="nx">v2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Languages with variant types can use a single value to represent the failure/success/flag trifecta. In Haskell there’s the <code class="docutils literal notranslate"><span class="pre">Either</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">Left</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">Right</span> <span class="pre">b</span></code> variant type or its less informative cousin <code class="docutils literal notranslate"><span class="pre">Maybe</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Either</span> <span class="pre">()</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Nothing</span> <span class="pre">|</span> <span class="pre">Just</span> <span class="pre">a</span></code>. Furthermore there is the monad transfomer <a class="reference external" href="https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html">ExceptT</a> equal to <code class="docutils literal notranslate"><span class="pre">ExceptT</span> <span class="pre">(m</span> <span class="pre">(Either</span> <span class="pre">e</span> <span class="pre">a))</span></code>. Scala has Either, <code class="docutils literal notranslate"><span class="pre">Option</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Some</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">None</span></code>, and <code class="docutils literal notranslate"><span class="pre">Try</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Success</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">Failure</span> <span class="pre">Throwable</span></code>. Rust has Option like Scala and <code class="docutils literal notranslate"><span class="pre">Result</span> <span class="pre">T</span> <span class="pre">E</span> <span class="pre">=</span> <span class="pre">OK</span> <span class="pre">T</span> <span class="pre">|</span> <span class="pre">Err</span> <span class="pre">E</span></code>.</p>
+<p>Variants force the caller to deal with the exception if they want to use the result.  This works well unless the call does not really have a meaningful result (e.g. <code class="docutils literal notranslate"><span class="pre">write_line</span> <span class="pre">:</span> <span class="pre">(&amp;mut</span> <span class="pre">self,</span> <span class="pre">s:</span> <span class="pre">&amp;str)</span> <span class="pre">-&gt;</span> <span class="pre">Result&lt;(),</span> <span class="pre">IoError&gt;</span></code> in Rust); then it depends on whether there is a warning for ignoring results. Variant types also tends to create a lot of nesting, one level for every sequential computation that can fail.</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">parse_two_ints_and_add_them</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">match</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Ok</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">      </span><span class="nb">Ok</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Ok</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>A bind operator addresses the repetitive exception handling logic but still requires nesting:</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">parse_two_ints_and_add_them</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">parse_int</span><span class="p">().</span><span class="n">and_then</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="n">parse_int</span><span class="p">().</span><span class="n">and_then</span><span class="p">(</span><span class="o">|</span><span class="n">y</span><span class="o">|</span><span class="w"></span>
+<span class="w">      </span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="w"></span>
+<span class="w">    </span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Returning errors early from the function addresses nesting:</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">parse_two_ints_and_add_them</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Ok</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="nb">Err</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="nb">Ok</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">Ok</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>To solve nesting and repetition simultaneously Rust has introduced the question mark syntax:</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">parse_two_ints_and_add_them</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="o">?</span><span class="w"></span>
+<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parse_int</span><span class="p">()</span><span class="o">?</span><span class="w"></span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">OK</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="automatic">
+<h3>Automatic<a class="headerlink" href="#automatic" title="Permalink to this heading"></a></h3>
+<p>Automatic propagation is more succinct and efficient, and besides complicating the language semantics there’s not much reason to avoid it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">throw</span></code> / <code class="docutils literal notranslate"><span class="pre">catch</span></code> have become the common keywords after C++ and Java, but it’s syntactically heavyweight.</p>
+<p>In Haskell there are two ways of throwing an exception, <code class="docutils literal notranslate"><span class="pre">throw</span></code> and <code class="docutils literal notranslate"><span class="pre">throwIO</span></code>. <code class="docutils literal notranslate"><span class="pre">throw</span></code> creates an exception which will propagate as soon as it is evaluated. <code class="docutils literal notranslate"><span class="pre">throwIO</span></code> is a command which will propagate once it reaches the top level. This is generalized to <code class="docutils literal notranslate"><span class="pre">throwM</span> <span class="pre">=</span> <span class="pre">lift</span> <span class="pre">.</span> <span class="pre">throwIO</span></code>.</p>
+<p>Swift:
+try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
+try X else Y - presubstitute Y on exception</p>
+<p>NaN style propagation - <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></code> is either an exception or the sum. Problem: <code class="docutils literal notranslate"><span class="pre">ExceptionA</span> <span class="pre">+</span> <span class="pre">ExceptionB</span></code>, which exception gets returned? Depends on evaluation strategy of compiler implementation.</p>
+<p><span id="id1">[<a class="reference internal" href="../zzreferences.html#id105" title="Simon Peyton Jones, Alastair Reid, Fergus Henderson, Tony Hoare, and Simon Marlow. A semantics for imprecise exceptions. ACM SIGPLAN Notices, 34(5):25–36, May 1999. URL: https://doi.org/10.1145/301631.301637 (visited on 2022-07-25), doi:10.1145/301631.301637.">PJRH+99</a>]</span> says that <code class="docutils literal notranslate"><span class="pre">catch</span></code> should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad, <code class="docutils literal notranslate"><span class="pre">getException</span></code> is just <code class="docutils literal notranslate"><span class="pre">return</span></code> and pattern matching (section 4.4, page 9). Their approach is just using the I/O monad as a “sin bin” for nondeterminism. Stroscot’s choice is to instead make exceptions first-class values of the language, allowing more concise and flexible exception handling. Exception nondeterminism is first-class as well, so an exceptional value’s denotation is in fact a set of exceptions, and <code class="docutils literal notranslate"><span class="pre">try</span></code> randomly picks one. So <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">throw</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">2</span> <span class="pre">in</span> <span class="pre">try</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">try</span> <span class="pre">x</span></code> can evaluate to false.</p>
+</section>
+<section id="idea">
+<h3>Idea<a class="headerlink" href="#idea" title="Permalink to this heading"></a></h3>
+<p>Exceptions aren’t magic and don’t need special syntax. With a variant type like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b|Exception</span></code> a function returns either a value or an exception. So just use the normal <code class="docutils literal notranslate"><span class="pre">return</span></code> keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="kt">AnException</span><span class="w"></span>
 
 <span class="nf">bar</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
@@ -512,88 +620,7 @@ code will generally just work.</p>
 <p>The case handling syntax seems easy and clear, and it’s possible to locally reason about and decide how best to react to exceptions.
 But a Quorum-style study should check on what’s clearest to beginners. Limiting <code class="docutils literal notranslate"><span class="pre">return</span></code> to normal values and using <code class="docutils literal notranslate"><span class="pre">throw</span></code> for <code class="docutils literal notranslate"><span class="pre">Exception</span></code> values is also a possibility.</p>
 <p>Just because there is shared syntax doesn’t mean exceptions don’t propagate, exceptions still unwind if they aren’t caught by the case statement. They can be wrapped up in a Result type though to prevent propagation.</p>
-<p><code class="docutils literal notranslate"><span class="pre">error</span> <span class="pre">&quot;something</span> <span class="pre">bad</span> <span class="pre">happened&quot;</span></code> creates an exception in a pure value that needs to be evaluated before it’s thrown. But it’s bad practice. String-based exception messages make proper exception handling difficult. Instead, it’s best to define a custom exception type SomethingBad, which is trivial to catch, <code class="docutils literal notranslate"><span class="pre">catch</span> <span class="pre">(\SomethingBad</span> <span class="pre">-&gt;</span> <span class="pre">...)</span></code>.</p>
-<blockquote>
-<div><p>wheres <code class="docutils literal notranslate"><span class="pre">throwM</span></code> throws it in the monad and gives ordering guarantees.</p>
-</div></blockquote>
-<p>try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
-try X else Y - presubstitute Y on exception</p>
-<p>NaN style propagation - <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></code> is either an exception or the sum. Problem: <code class="docutils literal notranslate"><span class="pre">ExceptionA</span> <span class="pre">+</span> <span class="pre">ExceptionB</span></code>, which exception gets returned? Depends on evaluation strategy, compiler implementation detail. (SPJ says “nondeterministic”)</p>
-<p>exception type - In C integer constants. Used for Linux / Windows kernel programming. Go uses tuple (result,exception code) with nil code on success. Rust uses polymorphic Result type. Swift uses an Error protocol (interface class). Java uses a Throwable class.</p>
-<p>In C style you use an OUT parameter and a boolean flag for exception or value. The out parameter can hold either the flag or the actual return value. With the return value in the out parameter, a nested function call <code class="docutils literal notranslate"><span class="pre">f(g(x))</span></code> looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">auto</span><span class="w"> </span><span class="n">tmp</span><span class="p">;</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="kt">ERROR</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">tmp</span><span class="p">))</span><span class="w"></span>
-<span class="w">     </span><span class="n">errorhandling</span><span class="p">;</span><span class="w"></span>
-<span class="nf">auto</span><span class="w"> </span><span class="n">result</span><span class="p">;</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="kt">ERROR</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">))</span><span class="w"></span>
-<span class="w">     </span><span class="n">errorhandling</span><span class="p">;</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Here we need a temporary for each return value and the exception details are stored in a global variable. Objective C uses an out-parameter <code class="docutils literal notranslate"><span class="pre">NSError**</span></code>.</p>
-<p>With the flag/exception as an out parameter it looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">NSError</span><span class="w"> </span><span class="n">err</span><span class="p">;</span><span class="w"></span>
-<span class="nf">auto</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">err</span><span class="p">))</span><span class="w"></span>
-<span class="w">     </span><span class="n">errorhandling</span><span class="p">;</span><span class="w"></span>
-<span class="nf">auto</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">)</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isError</span><span class="p">(</span><span class="n">err</span><span class="p">))</span><span class="w"></span>
-<span class="w">     </span><span class="n">errorhandling</span><span class="p">;</span><span class="w"></span>
-</pre></div>
-</div>
-<p>The same variable is used as an out-parameter multiple times; but the exception must be checked each time to avoid later calls overwriting the variable.
-Either way it’s ugly and annoying but it’s better than getting magic unexpected gotos sprinkled throughout your code at unpredictable places.</p>
-<p>Go uses multiple return values for exception codes. You reuse err for each call, so you write:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">v1</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Foo</span><span class="p">(</span><span class="n">false</span><span class="p">)</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">fmt</span><span class="o">.</span><span class="kt">Println</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">return</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="nf">fmt</span><span class="o">.</span><span class="kt">Println</span><span class="p">(</span><span class="s">&quot;first&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">v1</span><span class="p">)</span><span class="w"></span>
-<span class="nf">v2</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Foo</span><span class="p">(</span><span class="n">true</span><span class="p">)</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">fmt</span><span class="o">.</span><span class="kt">Println</span><span class="p">(</span><span class="s">&quot;error&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">return</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="nf">fmt</span><span class="o">.</span><span class="kt">Println</span><span class="p">(</span><span class="s">&quot;second&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">v2</span><span class="p">)</span><span class="w"></span>
-</pre></div>
-</div>
-<p>You can forget the if condition. Because <cite>err</cite> is used in other places it will not trigger an unused variable warning, but the errcheck linter finds missing checks every time.</p>
-<p>In functional languages there’s the <code class="docutils literal notranslate"><span class="pre">Either</span></code> variant type or its less informative cousin <code class="docutils literal notranslate"><span class="pre">Optional</span> <span class="pre">=</span> <span class="pre">Either</span> <span class="pre">()</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">write_line</span> <span class="pre">:</span> <span class="pre">(&amp;mut</span> <span class="pre">self,</span> <span class="pre">s:</span> <span class="pre">&amp;str)</span> <span class="pre">-&gt;</span> <span class="pre">Result&lt;(),</span> <span class="pre">IoError&gt;</span></code> in Rust, Scala’s Option/Try, <a class="reference external" href="https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html">https://hackage.haskell.org/package/mtl-2.2.2/docs/Control-Monad-Except.html</a>.
-This forces the caller to deal with the exception if they want to use the
-result.  This works well unless the call does not really have a
-meaningful result (as <code class="docutils literal notranslate"><span class="pre">write_line</span></code> does not); then it depends on
-whether there is a warning for ignoring results. Variant types
-also tends to create a lot of nesting, one level for every sequential
-computation that can fail:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fn</span><span class="w"> </span><span class="n">parse_two_ints_and_add_them</span><span class="nb">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">match</span><span class="w"> </span><span class="n">parse_int</span><span class="nb">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">=&gt;</span><span class="w"> </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
-<span class="w">    </span><span class="kt">Ok</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=&gt;</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="n">parse_int</span><span class="nb">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">=&gt;</span><span class="w"> </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
-<span class="w">      </span><span class="kt">Ok</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=&gt;</span><span class="w"> </span><span class="kt">Ok</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>A bind operator addresses the exception handling but still requires nesting:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fn</span><span class="w"> </span><span class="n">parse_two_ints_and_add_them</span><span class="nb">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">parse_int</span><span class="nb">()</span><span class="o">.</span><span class="n">and_then</span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
-<span class="w">    </span><span class="n">parse_int</span><span class="nb">()</span><span class="o">.</span><span class="n">and_then</span><span class="p">(</span><span class="nf">\</span><span class="n">y</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
-<span class="w">      </span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="w"></span>
-<span class="w">    </span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">)</span><span class="w"></span>
-</pre></div>
-</div>
-<p>To solve nesting Rust has introduced the question mark operator:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fn</span><span class="w"> </span><span class="n">parse_two_ints_and_add_them</span><span class="nb">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">parse_int</span><span class="nb">()</span><span class="o">?</span><span class="w"></span>
-<span class="w">  </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">parse_int</span><span class="nb">()</span><span class="o">?</span><span class="w"></span>
-<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="kt">OK</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>defining a custom exception type:</p>
+<p><code class="docutils literal notranslate"><span class="pre">error</span> <span class="pre">&quot;something</span> <span class="pre">bad</span> <span class="pre">happened&quot;</span></code> is bad practice. String-based exception messages make proper exception handling difficult. Instead, it’s best to define a custom exception type SomethingBad, which is trivial to catch, <code class="docutils literal notranslate"><span class="pre">catch</span> <span class="pre">(\SomethingBad</span> <span class="pre">-&gt;</span> <span class="pre">...)</span></code>. Syntax for defining a custom exception type:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">SomethingBad</span><span class="w"></span>
 <span class="nf">show</span><span class="w"> </span><span class="kt">SomethingBad</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;something bad happened&quot;</span><span class="w"></span>
 <span class="nf">isException</span><span class="w"> </span><span class="kt">SomethingBad</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
@@ -634,6 +661,7 @@ Let’s consider the simplest form, suitable for scripting tasks and other thing
 </pre></div>
 </div>
 <p>We want composability and a unified interface across Maybe, Either, and IO. Say we need to know about why a lookup failed. <code class="docutils literal notranslate"><span class="pre">lookup</span> <span class="pre">k</span></code> could throw <code class="docutils literal notranslate"><span class="pre">KeyNotFound</span> <span class="pre">k</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span> <span class="pre">::</span> <span class="pre">(Eq</span> <span class="pre">k)</span> <span class="pre">=&gt;</span> <span class="pre">k</span> <span class="pre">-&gt;</span> <span class="pre">[(k,</span> <span class="pre">v)]</span> <span class="pre">-&gt;</span> <span class="pre">(KeyNotFound</span> <span class="pre">k|v)</span></code>. Exceptions should unwind like Either, so if any of the lookups fail then func returns the failure. We should be able to specify a default for lookup like with <code class="docutils literal notranslate"><span class="pre">maybe</span></code>, <code class="docutils literal notranslate"><span class="pre">lookup</span> <span class="pre">key</span> <span class="pre">m</span> <span class="pre">{KeyNotFound</span> <span class="pre">_</span> <span class="pre">=</span> <span class="pre">Nothing}</span></code>.  The type of <code class="docutils literal notranslate"><span class="pre">f</span></code> should not contain the lookup exceptions, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">::</span> <span class="pre">SomeVal</span> <span class="pre">-&gt;</span> <span class="pre">SomeVal</span> <span class="pre">-&gt;</span> <span class="pre">SomeVal</span> <span class="pre">-&gt;</span> <span class="pre">(F'sExceptionType|F'sResult)</span></code>.</p>
+</section>
 <section id="try">
 <h3>Try<a class="headerlink" href="#try" title="Permalink to this heading"></a></h3>
 <p>Swift/Rust define syntactic markers for local exception propagation points, a “try” or “?” keyword at the call site. <code class="docutils literal notranslate"><span class="pre">try</span> <span class="pre">foo()</span></code> examines the ValueOrError type that <code class="docutils literal notranslate"><span class="pre">foo()</span></code> returns. If it is an exception, <code class="docutils literal notranslate"><span class="pre">try</span></code> unwinds/propagates/throws/returns the exception from the function, otherwise the function continues with the value. The claim is that without <code class="docutils literal notranslate"><span class="pre">try</span></code> exceptions are silent or invisible.</p>
@@ -773,7 +801,16 @@ mature -&gt; fresh [label=&quot;remove handler&quot;]
 </pre></div>
 </div>
 <p>The throw is unregistered if the function returns normally, otherwise <code class="docutils literal notranslate"><span class="pre">throw</span></code> restores the context and jumps to the handler.</p>
-<p><code class="docutils literal notranslate"><span class="pre">setjmp</span></code> / <code class="docutils literal notranslate"><span class="pre">longjmp</span></code> are an explicitly stack-based implementation of continuations. The registers must all be saved, costing a lot on both exception and non-exception paths. It’s disliked.</p>
+<p><code class="docutils literal notranslate"><span class="pre">setjmp</span></code> / <code class="docutils literal notranslate"><span class="pre">longjmp</span></code> are an inefficient stack-based implementation of continuations. The registers must all be saved, costing a lot on both exception and non-exception paths. It’s disliked.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">body</span><span class="w"> </span><span class="n">catch</span><span class="w"> </span><span class="n">handler</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">e</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">ref</span><span class="w"> </span><span class="kt">NoException</span><span class="w"></span>
+<span class="w">  </span><span class="n">ctx</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">setjmp</span><span class="nb">()</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">NoException</span><span class="w"></span>
+<span class="w">    </span><span class="n">body</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">throw</span><span class="w"> </span><span class="n">ex</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">ex</span><span class="p">;</span><span class="w"> </span><span class="n">longjmp</span><span class="w"> </span><span class="n">ctx</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">    </span><span class="n">handler</span><span class="w"> </span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="unwinding-tables">
 <h3>Unwinding tables<a class="headerlink" href="#unwinding-tables" title="Permalink to this heading"></a></h3>
@@ -910,13 +947,13 @@ bar :: (MonadIO m, MonadMask m) =&gt; FilePath -&gt; (Handle -&gt; m a) -&gt; m 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Evaluation-Strategy.html" class="btn btn-neutral float-left" title="Evaluation strategy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="F2G2_example.html" class="btn btn-neutral float-right" title="F2 G2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Fastest.html" class="btn btn-neutral float-right" title="As fast as C" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

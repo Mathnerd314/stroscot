@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Term rewriting" href="TermRewriting.html" />
-    <link rel="prev" title="Imperative programming" href="State.html" /> 
+    <link rel="prev" title="Stateful programming" href="State.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,21 +57,22 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Syntax</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#design">Design</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#textual">Textual</a></li>
@@ -80,6 +81,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#proportional-fonts">Proportional fonts</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#familiarity">Familiarity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parsing">Parsing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#blocks">Blocks</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#applicativedo">ApplicativeDo</a></li>
@@ -100,23 +102,29 @@
 <li class="toctree-l3"><a class="reference internal" href="#specificity">Specificity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#comments">Comments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#whitespace">Whitespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#braces-and-brackets">Braces and brackets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#function-syntax">Function syntax</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#arguments">Arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#currying">Currying</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#call-syntax">Call syntax</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implicit-arguments">Implicit arguments</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#default-arguments-and-overloading">Default arguments and overloading</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#n-k-patterns">n+k patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-matching-conditionals">Pattern matching / conditionals</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#chained-assignment">Chained assignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#embedded-assignment">Embedded assignment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#unless">Unless</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tuples-and-records">Tuples and records</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#precedence">Precedence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cycle">Cycle</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -155,16 +163,9 @@
 <h2>Design<a class="headerlink" href="#design" title="Permalink to this heading"></a></h2>
 <p>The stuff here is mostly a dumping ground of ideas while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode and <a class="reference external" href="http://rigaux.org/language-study/syntax-across-languages/">Rigaux’s list of syntax across languages</a>) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.</p>
 <p>Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can’t use a lot of the research, and the research is limited to begin with.</p>
+<p>Some studies use a “Randomo” language which randomizes design choices. It would be useful to implement this so choices could be A/B tested.</p>
 <p>Some languages offer a “simple” syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot’s goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.</p>
 <p>Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird parentheses style may lose too many users)</p>
-<ul class="simple">
-<li><p>Python - whitespace</p></li>
-<li><p>Elixir - improved Erlang</p></li>
-<li><p>TypeScript - JS with static typing</p></li>
-<li><p>PHP - no design at all</p></li>
-<li><p>Objective C - weirder than C++</p></li>
-<li><p>Haskell - poor library design</p></li>
-</ul>
 <p>TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser</p>
 <p>Natural language like Inform 7, while interesting, is quite wordy. It’s also hard to scan through.</p>
 <p>Fortress has “mathematical syntax”, with an ASCII form and typeset form. They used LaTeX but HTML / MathML output should be possible too. And juxtaposition was overloaded. Probably worth emulating.</p>
@@ -192,7 +193,7 @@
 <p>Reading code top-to-bottom, left-to-right makes sense. So definitions should be on the left, blocks indented in, and lines themselves should read left to right. So Ruby’s statement modifiers <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">if</span> <span class="pre">Y</span></code> are a bad idea because the <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">Y</span></code> is easy to miss when scanning control flow.  But operators like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">xor</span> <span class="pre">c</span></code> are fine because the assignment <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span></code> is clear and if the value of the expression matters you’re reading the whole line anyway and can parse it in your head.</p>
 <p>Unicode can improve legibility when the syntax is standard (e.g. θ for angles), but generally long names like <code class="docutils literal notranslate"><span class="pre">Optimiser(learning_rate=...)</span></code> are more readable than <code class="docutils literal notranslate"><span class="pre">Optimiser(η=...)</span></code>. Programmers have neither the time nor the inclination to learn a new character set and accompanying set of conventions.</p>
 <p>When the convention is established, short names are clearer than long names. Writing <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">{</span> <span class="pre">augend</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">addend</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">}</span></code> is less clear than the simple <code class="docutils literal notranslate"><span class="pre">1+2</span></code> - the long names are not commonly used. But it is arguably still useful to include the long names, e.g. for currying.</p>
-<p>A study <span id="id1">[]</span> found the following:</p>
+<p>A study <span id="id1">[<a class="reference internal" href="../zzreferences.html#id39" title="Rodrigo Magalhães dos Santos and Marco Aurélio Gerosa. Impacts of coding practices on readability. In Proceedings of the 26th Conference on Program Comprehension, 277–285. Gothenburg Sweden, May 2018. ACM. URL: https://dl.acm.org/doi/10.1145/3196321.3196342 (visited on 2022-05-18), doi:10.1145/3196321.3196342.">dosSantosG18</a>]</span> found the following:</p>
 <p>Putting opening braces in a line of their own (C# convention), as opposed to the same line of the statement, improved readability. The extra white space and matching vertical alignment of related curly braces makes blocks clearer. Closing curly braces terminating code blocks should be on their own line, except for secondary paths of execution, e.g.: closing brace of if statements followed by an else; closing braces of try statements followed by a catch.
 Line lengths must be kept within the limit of 80 characters;
 Each statement should be in a line of its own; do not separate multiple statements by a ‘‘;’’ in a single line.
@@ -203,8 +204,8 @@ Grouping instructions using blank lines was inconclusive. Some thought the blank
 On indenting 2 spaces vs 4 spaces, there was no consensus.
 Nesting conditionals more than three levels deep was considered by some to be easy to read and clearer than using a complex condition. But the majority preferred refactoring to an <code class="docutils literal notranslate"><span class="pre">else</span> <span class="pre">if</span></code> chain.
 Using variables to store intermediate parts of long logical expressions is only useful if that intermedate expression has a meaningful name and purpose or the expression is repeated. Otherwise it adds clutter, and you are better off just writing the complex expression.</p>
-<p><span id="id2">[]</span> studied indentation with eye tracking and found no statistically significant difference between 0,2,4,8 spaces. Looking at their graphs 4 spaces does seem to be a sweet spot though.</p>
-<p>Another study <span id="id3">[]</span> identified factors for readability, in decreasing order of significance:</p>
+<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id13" title="Jennifer Bauer, Janet Siegmund, Norman Peitek, Johannes C. Hofmeister, and Sven Apel. Indentation: Simply a Matter of Style or Support for Program Comprehension? In 2019 IEEE/ACM 27th International Conference on Program Comprehension (ICPC), 154–164. Montreal, QC, Canada, May 2019. IEEE. URL: https://ieeexplore.ieee.org/document/8813302/ (visited on 2022-05-19), doi:10.1109/ICPC.2019.00033.">BSP+19</a>]</span> studied indentation with eye tracking and found no statistically significant difference between 0,2,4,8 spaces. Looking at their graphs 4 spaces does seem to be a sweet spot though.</p>
+<p>Another study <span id="id3">[<a class="reference internal" href="../zzreferences.html#id21" title="Raymond P.L. Buse and Westley R. Weimer. A metric for software readability. In Proceedings of the 2008 International Symposium on Software Testing and Analysis - ISSTA '08, 121. Seattle, WA, USA, 2008. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=1390630.1390647 (visited on 2022-05-19), doi:10.1145/1390630.1390647.">BW08</a>]</span> identified factors for readability, in decreasing order of significance:</p>
 <ul class="simple">
 <li><p>fewer identifiers per line</p></li>
 <li><p>shorter lines (characters)</p></li>
@@ -223,7 +224,7 @@ Using variables to store intermediate parts of long logical expressions is only 
 </section>
 <section id="proportional-fonts">
 <h3>Proportional fonts<a class="headerlink" href="#proportional-fonts" title="Permalink to this heading"></a></h3>
-<p>For prose, a proportional fonts is more readable than monospace because it is denser and hence less eye movement is needed for reading. Spaces between words are easier to see. <span id="id4">[]</span> But proportional fonts have not caught on in programming. The main complaint is that identifiers do not line up nicely the way they do with a monospace font.</p>
+<p>For prose, a proportional fonts is more readable than monospace because it is denser and hence less eye movement is needed for reading. Spaces between words are easier to see. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id10" title="Aries Arditi, Kenneth Knoblauch, and Ilana Grunwald. Reading with fixed and variable character pitch. Journal of the Optical Society of America A, 7(10):2011, October 1990. URL: https://opg.optica.org/abstract.cfm?URI=josaa-7-10-2011 (visited on 2022-05-25), doi:10.1364/JOSAA.7.002011.">AKG90</a>]</span> But proportional fonts have not caught on in programming. The main complaint is that identifiers do not line up nicely the way they do with a monospace font.</p>
 <p>After reading about elastic tabstops I’ve come up with my own solution, “tablike spaces”. The idea here is to use a proportional font for rendering, but to make the spaces jump to the pixel column they would use if the font was monospaced. So rendering “a bit of text” would render “a” at 0, “bit” at 2 ems, “of” at 6 ems, and “text” at 9 ems, where an em is the width of the widest character in the font.</p>
 <p>A more complex algorithm treats the text as a giant table, so “a bit of text” gets split up into 4 cells “a “, “bit “, “of “, “text” which span 2,4,3,4 columns respectively. Then the column widths are calculated using the <a class="reference external" href="https://www.w3.org/TR/CSS2/tables.html#auto-table-layout">auto table layout algorithm</a> (simplified):</p>
 <ul class="simple">
@@ -236,6 +237,12 @@ Using variables to store intermediate parts of long logical expressions is only 
 <p>The advantage of tablike spaces over elastic tabstops is that the underlying text file is just indenting with spaces in a monospaced font. So it’s only the visual presentation that changes, hence it can be used on a team.</p>
 </section>
 </section>
+<section id="familiarity">
+<h2>Familiarity<a class="headerlink" href="#familiarity" title="Permalink to this heading"></a></h2>
+<p>According to <a class="reference external" href="https://soc.me/languages/familiarity">this</a> the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with the <a class="reference external" href="https://steveklabnik.com/writing/the-language-strangeness-budget">notion</a> of Rust’s “strangeness budget”, where a language can only be so weird before it gets discarded from consideration and can never become standard.</p>
+<p>As Randomo shows, the choice of characters for operators is arbitrary. Using familiar syntax at least benefits existing programmers, while new programmers will be confused regardless.</p>
+<p>But cases where newbies can benefit, such as single = for assignment and comparison, do seem worth discarding familiarity for.</p>
+</section>
 <section id="parsing">
 <h2>Parsing<a class="headerlink" href="#parsing" title="Permalink to this heading"></a></h2>
 <p>I’ve got a basic Earley algorithm working for now. But eventually I’m extending it with BSRs and layout and other fun things. There’s also <a class="reference external" href="https://github.com/attresearch/yakker">Yakker</a>, which is the most developed parser I’ve seen feature-wise. It’s only missing incremental parsing.</p>
@@ -244,7 +251,7 @@ Using variables to store intermediate parts of long logical expressions is only 
 </div></blockquote>
 <p>I’ve looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on the set of parse tree generated by a nondeterministic automaton. The alternatives involve restricting parsers to be deterministic, for example PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There’s just no information on what possible parses are available or what token is expected. Whereas with Earley you can do “Ruby slippers”: scan the sets for what they want next, output “warning: expected ‘;’ at end of statement”, and then add that to the parse forest and continue parsing with almost no overhead.</p>
 <p>Treesitter implements incremental LR parsing with error recovery, but since it doesn’t support ambiguity I don’t think it’s sufficient for a compiler.</p>
-<p>Revisiting this, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation <span id="id5">[<a class="reference internal" href="../zzreferences.html#id94" title="Michael Sperber and Peter Thiemann. Generation of LR parsers by partial evaluation. ACM Transactions on Programming Languages and Systems (TOPLAS), 22(2):224–264, March 2000. URL: http://dl.acm.org/doi/10.1145/349214.349219 (visited on 2020-06-15), doi:10.1145/349214.349219.">ST00</a>]</span> and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.</p>
+<p>Revisiting this, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation <span id="id5">[<a class="reference internal" href="../zzreferences.html#id130" title="Michael Sperber and Peter Thiemann. Generation of LR parsers by partial evaluation. ACM Transactions on Programming Languages and Systems (TOPLAS), 22(2):224–264, March 2000. URL: http://dl.acm.org/doi/10.1145/349214.349219 (visited on 2020-06-15), doi:10.1145/349214.349219.">ST00</a>]</span> and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.</p>
 <p>In particular the parser should be written as a nondeterministic finite state transducer that builds up trees (outputs a list in the style of start-children-end or S-expressions or something).</p>
 <p>Formally:</p>
 <ul class="simple">
@@ -259,19 +266,11 @@ Using variables to store intermediate parts of long logical expressions is only 
 </section>
 <section id="blocks">
 <h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h2>
-<p>Blocks are inspired by Haskell’s do notation, but have a twist, based on the observation that the continuation monad is <a class="reference external" href="https://www.schoolofhaskell.com/school/to-infinity-and-beyond/pick-of-the-week/the-mother-of-all-monads">the mother of all monads</a>. Since it’s the mother, we don’t lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations. That link gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the <a class="reference external" href="https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs">StateT monad</a>.</p>
-<p>It’s worth noting that even though monads can be implemented easily, monads are overrated to begin with:</p>
-<ul class="simple">
-<li><p>ReaderT is handled by implicit parameters</p></li>
-<li><p>StateT is a mutable reference</p></li>
-<li><p>WriterT is a StateT that’s not read</p></li>
-<li><p>Error/Except are handled by poison values</p></li>
-</ul>
+<p>Blocks are inspired by Haskell’s do notation. For an example of how natural this is you can look at <a class="reference internal" href="State.html#tasks"><span class="std std-ref">how I/O works</span></a>. Since codensity/continuations are the mother of all monads, we don’t lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations.</p>
 <p>Using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation <code class="docutils literal notranslate"><span class="pre">{e;stmts}</span> <span class="pre">=</span> <span class="pre">e</span> <span class="pre">&gt;&gt;</span> <span class="pre">stmts</span> <span class="pre">=</span> <span class="pre">\c</span> <span class="pre">-&gt;</span> <span class="pre">e</span> <span class="pre">(\_</span> <span class="pre">-&gt;</span> <span class="pre">{stmts}</span> <span class="pre">c)</span></code>. But usually <code class="docutils literal notranslate"><span class="pre">e</span></code> returns <code class="docutils literal notranslate"><span class="pre">()</span></code>, so <code class="docutils literal notranslate"><span class="pre">(&gt;&gt;)</span></code> is applied at the type <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">()</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">b</span></code> and that <code class="docutils literal notranslate"><span class="pre">\_</span></code> is a <code class="docutils literal notranslate"><span class="pre">\()</span></code>. With our translation, commands (which don’t return a value) are functions <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>. Haskell’s translation would require them to be <code class="docutils literal notranslate"><span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">()</span> <span class="pre">=</span> <span class="pre">(()</span> <span class="pre">-&gt;</span> <span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>, which is equivalent but has an extra <code class="docutils literal notranslate"><span class="pre">()</span></code> floating around. But in both translations operations (whose value is used) are of type <code class="docutils literal notranslate"><span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code>. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That’s right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change <code class="docutils literal notranslate"><span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> to <code class="docutils literal notranslate"><span class="pre">r)</span> <span class="pre">-&gt;</span> <span class="pre">s</span></code>.</p>
-<p>For an example of how natural this is you can look at <a class="reference internal" href="State.html#tasks"><span class="std std-ref">how I/O works</span></a>.</p>
 <section id="applicativedo">
 <h3>ApplicativeDo<a class="headerlink" href="#applicativedo" title="Permalink to this heading"></a></h3>
-<p>ApplicativeDo <span id="id6">[<a class="reference internal" href="../zzreferences.html#id66" title="Simon Marlow, Simon Peyton Jones, Edward Kmett, and Andrey Mokhov. Desugaring Haskell's do-notation into applicative operations. In Proceedings of the 9th International Symposium on Haskell, Haskell 2016, 92–104. New York, NY, USA, September 2016. Association for Computing Machinery. URL: https://doi.org/10.1145/2976002.2976007 (visited on 2021-07-16), doi:10.1145/2976002.2976007.">MPJKM16</a>]</span> has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form <code class="docutils literal notranslate"><span class="pre">{a</span> <span class="pre">&lt;-</span> <span class="pre">ax;</span> <span class="pre">b</span> <span class="pre">&lt;-</span> <span class="pre">bx;</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">a</span> <span class="pre">b)}</span> <span class="pre">=</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">!a</span> <span class="pre">!b)</span></code>. Idiom brackets are shorter, so the value this provides is minimal.</p>
+<p>ApplicativeDo <span id="id6">[<a class="reference internal" href="../zzreferences.html#id91" title="Simon Marlow, Simon Peyton Jones, Edward Kmett, and Andrey Mokhov. Desugaring Haskell's do-notation into applicative operations. In Proceedings of the 9th International Symposium on Haskell, Haskell 2016, 92–104. New York, NY, USA, September 2016. Association for Computing Machinery. URL: https://doi.org/10.1145/2976002.2976007 (visited on 2021-07-16), doi:10.1145/2976002.2976007.">MPJKM16</a>]</span> has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form <code class="docutils literal notranslate"><span class="pre">{a</span> <span class="pre">&lt;-</span> <span class="pre">ax;</span> <span class="pre">b</span> <span class="pre">&lt;-</span> <span class="pre">bx;</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">a</span> <span class="pre">b)}</span> <span class="pre">=</span> <span class="pre">return</span> <span class="pre">(f</span> <span class="pre">!a</span> <span class="pre">!b)</span></code>. Idiom brackets are shorter, so the value this provides is minimal.</p>
 <p>The second function is to use applicative operations instead of monadic operations because in “some” monads the applicative operation is more efficient. Their example is the Haxl DSL:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">numCommonFriends</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Id</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Id</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Haxl</span><span class="w"> </span><span class="kt">Int</span><span class="w"></span>
 <span class="nf">numCommonFriends</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">do</span><span class="w"></span>
@@ -280,13 +279,13 @@ Using variables to store intermediate parts of long logical expressions is only 
 <span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="p">(</span><span class="n">intersect</span><span class="w"> </span><span class="n">fx</span><span class="w"> </span><span class="n">fy</span><span class="p">))</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Well, sorry to burst the bubble, but if you’re writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It’s exactly these kinds of details that <em>are</em> accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the <a class="reference external" href="https://en.wikipedia.org/wiki/Use-define_chain">use/def analysis</a> that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.</p>
-<p>For regular do notation, the applicative notation translates to exactly the same continuation as the monadic notation.</p>
+<p>Well, if you’re writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It’s exactly these kinds of details that <em>are</em> accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the <a class="reference external" href="https://en.wikipedia.org/wiki/Use-define_chain">use/def analysis</a> that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.</p>
+<p>For regular do notation with continuations, the applicative notation translates to exactly the same functions as the monadic notation.</p>
 <p>Verdict: DSL in disguise. Just write a DSL. Stroscot does not benefit at all by adding ApplicativeDo.</p>
 </section>
 <section id="recursivedo">
 <h3>RecursiveDo<a class="headerlink" href="#recursivedo" title="Permalink to this heading"></a></h3>
-<p>RecursiveDo <span id="id7">[<a class="reference internal" href="../zzreferences.html#id35" title="Levent Erkok. Value Recursion in Monadic Computations. PhD thesis, Oregon Health and Science University, October 2002. URL: http://leventerkok.github.io/papers/erkok-thesis.pdf.">Erk02</a>]</span> is an older extension to do notation. The motivating example is a circuit DSL:</p>
+<p>RecursiveDo <span id="id7">[<a class="reference internal" href="../zzreferences.html#id49" title="Levent Erkok. Value Recursion in Monadic Computations. PhD thesis, Oregon Health and Science University, October 2002. URL: http://leventerkok.github.io/papers/erkok-thesis.pdf.">Erk02</a>]</span> is an older extension to do notation. The motivating example is a circuit DSL:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">toggle</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Signal</span><span class="w"> </span><span class="kt">Bool</span><span class="w"></span>
 <span class="nf">toggle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">out</span><span class="w"></span>
 <span class="w">   </span><span class="kr">where</span><span class="w"></span>
@@ -335,8 +334,8 @@ Using variables to store intermediate parts of long logical expressions is only 
 <span class="nf">return</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with <code class="docutils literal notranslate"><span class="pre">mfix</span></code>. We can still implement <code class="docutils literal notranslate"><span class="pre">mfix</span></code> for the monads that matter, like <code class="docutils literal notranslate"><span class="pre">State</span></code>. According to all available knowledge, <code class="docutils literal notranslate"><span class="pre">mfix</span></code> can’t be implemented for continuations, so nothing is lost from regular programs.</p>
-<p>Verdict: Not only a DSL in disguise, but also a footgun. Provide mfix and the rec{} notation in an obscure library for those who care.</p>
+<p>The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with <code class="docutils literal notranslate"><span class="pre">mfix</span></code> or its tuple-heavy cousin <code class="docutils literal notranslate"><span class="pre">rec{}</span></code>. We can still implement <code class="docutils literal notranslate"><span class="pre">mfix</span></code> for the monads that matter, like <code class="docutils literal notranslate"><span class="pre">State</span></code>. According to all available knowledge, <code class="docutils literal notranslate"><span class="pre">mfix</span></code> can’t be implemented for continuations, so nothing is lost from regular programs.</p>
+<p>Verdict: Not only a DSL in disguise, but also a footgun. mfix and the rec{} notation are better for those who care.</p>
 </section>
 <section id="arrows">
 <h3>Arrows<a class="headerlink" href="#arrows" title="Permalink to this heading"></a></h3>
@@ -410,7 +409,7 @@ Using variables to store intermediate parts of long logical expressions is only 
 <p>Haskell has a division between constructors and functions:
 * identifiers starting with lowercase letters are functions, and can only be used with function bindings.
 * identifiers starting with uppercase letters are constructors, and assignments of the form <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">...</span></code> are pattern bindings.</p>
-<p>This rule reduces maintainability. If the representation is changed there is no way to replace the dumb constructor with a smart constructor. So instead libraries are littered with boilerplate pseudo-constructors like <code class="docutils literal notranslate"><span class="pre">mkThing</span> <span class="pre">=</span> <span class="pre">Thing</span></code> to get around this syntactic restriction. In fact in <span id="id8">[<a class="reference internal" href="../zzreferences.html#id56" title="Stefan Kahrs and Connor Smith. Non-Omega-Overlapping TRSs are UN. In Delia Kesner and Brigitte Pientka, editors, 1st International Conference on Formal Structures for Computation and Deduction (FSCD 2016), volume 52 of Leibniz International Proceedings in Informatics (LIPIcs), 22:1–22:17. Dagstuhl, Germany, 2016. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik. URL: http://drops.dagstuhl.de/opus/volltexte/2016/5996 (visited on 2021-09-11), doi:10.4230/LIPIcs.FSCD.2016.22.">KS16</a>]</span> there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating <code class="docutils literal notranslate"><span class="pre">foo</span></code> into a constructor <code class="docutils literal notranslate"><span class="pre">Foo</span></code> and a function <code class="docutils literal notranslate"><span class="pre">foo</span></code>, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">x;</span> <span class="pre">s</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">=</span> <span class="pre">(x</span> <span class="pre">z)</span> <span class="pre">(y</span> <span class="pre">z)</span></code> turns into:</p>
+<p>This rule reduces maintainability. If the representation is changed there is no way to replace the dumb constructor with a smart constructor. So instead libraries are littered with boilerplate pseudo-constructors like <code class="docutils literal notranslate"><span class="pre">mkThing</span> <span class="pre">=</span> <span class="pre">Thing</span></code> to get around this syntactic restriction. In fact in <span id="id8">[<a class="reference internal" href="../zzreferences.html#id75" title="Stefan Kahrs and Connor Smith. Non-Omega-Overlapping TRSs are UN. In Delia Kesner and Brigitte Pientka, editors, 1st International Conference on Formal Structures for Computation and Deduction (FSCD 2016), volume 52 of Leibniz International Proceedings in Informatics (LIPIcs), 22:1–22:17. Dagstuhl, Germany, 2016. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik. URL: http://drops.dagstuhl.de/opus/volltexte/2016/5996 (visited on 2021-09-11), doi:10.4230/LIPIcs.FSCD.2016.22.">KS16</a>]</span> there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating <code class="docutils literal notranslate"><span class="pre">foo</span></code> into a constructor <code class="docutils literal notranslate"><span class="pre">Foo</span></code> and a function <code class="docutils literal notranslate"><span class="pre">foo</span></code>, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">x;</span> <span class="pre">s</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">=</span> <span class="pre">(x</span> <span class="pre">z)</span> <span class="pre">(y</span> <span class="pre">z)</span></code> turns into:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">app</span><span class="w"> </span><span class="p">(</span><span class="kt">App</span><span class="w"> </span><span class="kt">K</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 <span class="nf">app</span><span class="w"> </span><span class="kt">K</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">App</span><span class="w"> </span><span class="kt">K</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
 <span class="nf">k</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">K</span><span class="w"></span>
@@ -428,8 +427,10 @@ Using variables to store intermediate parts of long logical expressions is only 
 <section id="recursive-definitions">
 <h3>Recursive definitions<a class="headerlink" href="#recursive-definitions" title="Permalink to this heading"></a></h3>
 <p>We want to support mutually recursive definitions, like so:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
-<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<span class="nf">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
 </pre></div>
 </div>
 <p>And also sequential execution, like so:</p>
@@ -437,12 +438,25 @@ Using variables to store intermediate parts of long logical expressions is only 
 <span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">openFile</span><span class="w"> </span><span class="s">&quot;b.txt&quot;</span><span class="w"></span>
 </pre></div>
 </div>
-<p>So the question is how <code class="docutils literal notranslate"><span class="pre">b</span></code> can be in scope in the body of <code class="docutils literal notranslate"><span class="pre">a</span></code> in the recursive version. Presumably it isn’t in scope in the sequential version.</p>
+<p>And also shadowing variables, like so:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="c1">-- interpreted as</span><span class="w"></span>
+<span class="nf">a_new</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a_old</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In the recursive version <code class="docutils literal notranslate"><span class="pre">c</span></code> can be in scope in the body of <code class="docutils literal notranslate"><span class="pre">b</span></code> even though it is defined later. Presumably it isn’t in scope in the sequential version.</p>
+<p>In the recursive version <code class="docutils literal notranslate"><span class="pre">a</span></code> is in scope in its own body. In the shadowing version <code class="docutils literal notranslate"><span class="pre">a</span></code> is not.</p>
+<p>Resolving this probably means a special syntax for something. Choices:
+* <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;-</span> <span class="pre">openFile</span> <span class="pre">&quot;a.txt&quot;</span></code> for sequenced actions
+* <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;-</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">1</span></code> for shadowing
+* <code class="docutils literal notranslate"><span class="pre">rec</span> <span class="pre">{</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">}</span></code> for recursive definitions</p>
+<p>Generally sequential blocks do not use recursion. But recursion is used all the time at the module/function level.</p>
 </section>
 </section>
 <section id="type-declarations">
 <h2>Type declarations<a class="headerlink" href="#type-declarations" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">:</span> <span class="pre">s8</span></code> and <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">2</span></code> seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to find the = with long types) or <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program. The second syntax is similar to assembler syntax such as <code class="docutils literal notranslate"><span class="pre">dword</span> <span class="pre">0</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">:</span> <span class="pre">s8</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">s8</span> <span class="pre">2</span></code> seem more logical compared to other choices such as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">=</span> <span class="pre">2</span></code> (Swift,Jai - hard to find the = with long types) or <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn’t have an innate type. In contrast the representation of the value must be specified to compile the program. The second syntax <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">2</span></code> is similar to assembler syntax such as <code class="docutils literal notranslate"><span class="pre">dword</span> <span class="pre">0</span></code>.</p>
+<p><a class="reference external" href="https://soc.me/languages/type-annotations">This</a> says name should be ahead of type annotation, which only <code class="docutils literal notranslate"><span class="pre">s8</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">2</span></code> breaks. The consistency stuff is not relevant.</p>
 </section>
 <section id="namespacing">
 <h2>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this heading"></a></h2>
@@ -480,6 +494,12 @@ Using variables to store intermediate parts of long logical expressions is only 
 <span class="w">                  </span><span class="p">(</span><span class="kt">Sequent</span><span class="w"> </span><span class="n">bl_bseq</span><span class="w"> </span><span class="p">(</span><span class="n">bl_blnotn</span><span class="o">++</span><span class="n">br_bl</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">bl_bmain</span><span class="p">,</span><span class="w"> </span><span class="n">bl_br</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">br_br</span><span class="p">)))</span><span class="w"></span>
 </pre></div>
 </div>
+</section>
+<section id="braces-and-brackets">
+<h2>Braces and brackets<a class="headerlink" href="#braces-and-brackets" title="Permalink to this heading"></a></h2>
+<p>Haskell uses parentheses for most grouping, <code class="docutils literal notranslate"><span class="pre">{}</span></code> for replacing whitespace with explicit syntax, <code class="docutils literal notranslate"><span class="pre">[]</span></code> for lists, and has no special meaning for angle brackets.</p>
+<p><a class="reference external" href="https://soc.me/languages/stop-using-angle-brackets-for-generics">This</a> argues for square brackets <code class="docutils literal notranslate"><span class="pre">[]</span></code> over angle brackets <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> for generics. With Haskell syntax this is moot because parentheses suffices. But he argues collection literals and array lookup should use standard parentheses <code class="docutils literal notranslate"><span class="pre">()</span></code> instead of special syntax, because it will become dead weight once the standard library develops better data structures.</p>
+<p>Seems a bit weird, he cites Python as an example but Python still uses list literals: the syntax for a NumPy array is <code class="docutils literal notranslate"><span class="pre">np.array([1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5])</span></code>. The only thing overloaded is access <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">x</span></code>.</p>
 </section>
 <section id="function-syntax">
 <h2>Function syntax<a class="headerlink" href="#function-syntax" title="Permalink to this heading"></a></h2>
@@ -519,7 +539,7 @@ Function symbols also become first-class, because they can be passed around with
 * Curried is pretty simple, only a bit more complex than S-expressions
 * Curried is good for writing curried functions. In contrast the C style makes it inconvenient to use curried functions, you have to write lots of parentheses <code class="docutils literal notranslate"><span class="pre">f(1)(2)(3)</span></code>. Also comparing <code class="docutils literal notranslate"><span class="pre">any</span> <span class="pre">(==</span> <span class="pre">x)</span> <span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">any(\y</span> <span class="pre">-&gt;</span> <span class="pre">y</span> <span class="pre">==</span> <span class="pre">x,l)</span></code>, in the C style the comma is almost unnoticeable and the syntax is ambiguous as it could be grouped <code class="docutils literal notranslate"><span class="pre">(x,l)</span></code>
 * Curried style still allows tuples as arguments, pretty much matching the C style. In contrast the C style forces a tuple even if the combination of arguments doesn’t represent a meaningful idea.</p>
-<p>The main question is which style makes it easier to match parentheses - mismatching is a common novice programming error. <span id="id9">[]</span> Also error messages for accidental partial application are important. TODO: test or survey some novice programmers later on</p>
+<p>The main question is which style makes it easier to match parentheses - mismatching is a common novice programming error. <span id="id9">[<a class="reference internal" href="../zzreferences.html#id128" title="Jeremy Singer and Blair Archibald. Functional Baby Talk: Analysis of Code Fragments from Novice Haskell Programmers. Electronic Proceedings in Theoretical Computer Science, 270:37–51, May 2018. URL: http://arxiv.org/abs/1805.05126v1 (visited on 2022-05-23), doi:10.4204/EPTCS.270.3.">SA18</a>]</span> Also error messages for accidental partial application are important. TODO: test or survey some novice programmers later on</p>
 </section>
 <section id="implicit-arguments">
 <h3>Implicit arguments<a class="headerlink" href="#implicit-arguments" title="Permalink to this heading"></a></h3>
@@ -549,17 +569,6 @@ Function symbols also become first-class, because they can be passed around with
 <p><code class="docutils literal notranslate"><span class="pre">loglevel</span></code> is defined at the top level, but each use site is scattered in the code. The implicit argument replaces the global variable that is often used. Similarly <code class="docutils literal notranslate"><span class="pre">logPrint</span></code> is passed implicitly instead of being a member of a global Logger instance. The <code class="docutils literal notranslate"><span class="pre">file</span></code> variable does not exist in the standard library; it is part of the user’s code.</p>
 <p>To use explicit argument passing, we’d have to add explicit <code class="docutils literal notranslate"><span class="pre">loglevel</span></code> and <code class="docutils literal notranslate"><span class="pre">logPrint</span></code> arguments to <code class="docutils literal notranslate"><span class="pre">log</span></code> and all its callers. To minimize callers we could partially apply it in <code class="docutils literal notranslate"><span class="pre">main</span></code> and pass around just the <code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">:</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">Cmd</span></code> function. But still, we have to modify every caller of <code class="docutils literal notranslate"><span class="pre">log</span></code> and its callers and so on to pass around the <code class="docutils literal notranslate"><span class="pre">log</span></code> function.</p>
 </section>
-<section id="default-arguments-and-overloading">
-<h3>Default arguments and overloading<a class="headerlink" href="#default-arguments-and-overloading" title="Permalink to this heading"></a></h3>
-<p><a class="reference external" href="https://go.dev/doc/faq#overloading">The Go FAQ</a> and <a class="reference external" href="https://talks.golang.org/2012/splash.article">Rob Pike</a> say Go deliberately does not support overloading or default arguments. Supposedly:
-* overloading is confusing and fragile
-* adding default arguments to a function results in interactions among arguments that are difficult to understand
-* Naming separate functions leads to a clearer API
-* Leaving these out simplifies the type system and method dispatch.</p>
-<p>While separate functions can be clearer, supporting overloading and default arguments does not prevent creating separate functions. And when you do have a constructor-like method which supports several slightly different combinations of arguments, even the Go FAQ admits overloading is “useful”. Similarly Pike admits there are cases where API design flaws can be patched by adding a default argument. And Stroscot is dynamically typed, so overloading doesn’t complicate the type system at all. And although it complicates method dispatch, overloading enables generic functions and solves the expression problem.</p>
-<p>Furthermore if you are trying to mimic a Java library that makes heavy use of this sort of overloading,name mangling using simple rules will give very long names. While using complicated rules will give shorter names, the names will be impossible to remember. Implementing overloading is strictly better than skipping it.</p>
-<p>So the verdict here is that Go is excluding things people want to do, with unworkable alternatives.</p>
-</section>
 </section>
 <section id="n-k-patterns">
 <h2>n+k patterns<a class="headerlink" href="#n-k-patterns" title="Permalink to this heading"></a></h2>
@@ -574,6 +583,53 @@ Function symbols also become first-class, because they can be passed around with
 * only works for <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>, as writing <code class="docutils literal notranslate"><span class="pre">n+(-1)</span></code> is forbidden.</p>
 <p>Pattern synonyms should allow defining this like a view pattern, but without the ugly <code class="docutils literal notranslate"><span class="pre">Just</span></code>. Then the pattern like <code class="docutils literal notranslate"><span class="pre">x&#64;(dec</span> <span class="pre">k)</span> <span class="pre">-&gt;</span> <span class="pre">e</span></code> solves the main issues: dec is its own symbol, and the user has imported it so knows its semantics. And <code class="docutils literal notranslate"><span class="pre">k</span></code> should be evaluated so can be a negative number or constant expression.</p>
 </section>
+<section id="pattern-matching-conditionals">
+<h2>Pattern matching / conditionals<a class="headerlink" href="#pattern-matching-conditionals" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://soc.me/languages/unified-condition-expressions">This</a> has some syntax.</p>
+<p>The keyword can be if, match, when, switch, case. Here we use <code class="docutils literal notranslate"><span class="pre">:~,\</span></code> modeled on Randomo in <span id="id10">[<a class="reference internal" href="../zzreferences.html#id131" title="Andreas Stefik, Susanna Siebert, Melissa Stefik, and Kim Slattery. An empirical comparison of the accuracy rates of novices using the quorum, perl, and randomo programming languages. In Proceedings of the 3rd ACM SIGPLAN Workshop on Evaluation and Usability of Programming Languages and Tools - PLATEAU '11, 3. Portland, Oregon, USA, 2011. ACM Press. URL: http://dl.acm.org/citation.cfm?doid=2089155.2089159 (visited on 2022-06-18), doi:10.1145/2089155.2089159.">SSSS11</a>]</span></p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">:</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="s">&quot;z&quot;</span><span class="w"></span>
+
+<span class="kt">:</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="mf">2.0</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="s">&quot;z&quot;</span><span class="w"></span>
+
+<span class="kt">:</span><span class="w"> </span><span class="n">x</span><span class="w"></span>
+<span class="w">    </span><span class="nf">\</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="o">^</span><span class="w"> </span><span class="kt">NaN</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;n&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="s">&quot;z&quot;</span><span class="w"></span>
+
+<span class="kt">:</span><span class="w"> </span><span class="n">xs</span><span class="w"></span>
+<span class="w">  </span><span class="o">.</span><span class="n">isEmpty</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;e&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;n&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="s">&quot;z&quot;</span><span class="w"></span>
+
+<span class="kt">:</span><span class="w"> </span><span class="n">alice</span><span class="w"></span>
+<span class="w">  </span><span class="o">.</span><span class="n">age</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">18</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;18&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kt">Person</span><span class="p">(</span><span class="s">&quot;Alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">$</span><span class="n">age</span><span class="p">)</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;$age&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kt">Person</span><span class="p">(</span><span class="s">&quot;Bob&quot;</span><span class="p">,</span><span class="w"> </span><span class="kr">_</span><span class="p">)</span><span class="o">$</span><span class="n">person</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="s">&quot;{$person.age}&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="s">&quot;0&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>pattern matching using “if-let”12</p>
+<p>if person is Person(“Alice”, $age) then “$age” else “o”</p>
+<p>wildcards (_) and pattern guards</p>
+<dl>
+<dt>if person                         /* same as <a href="#id11"><span class="problematic" id="id12">*</span></a>/      if person is</dt><dd><p>is Person(“Alice”, _)           then “alice”         Person(“Alice”, _)           then “alice”
+is Person(_, $age) &amp;&amp; age &gt;= 18 then “adult”         Person(_, $age) &amp;&amp; age &gt;= 18 then “adult”</p>
+<blockquote>
+<div><blockquote>
+<div><p>else “minor”                                      else “minor”</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The condition can be split between a common discriminator and individual cases.</dt><dd><p>This requires doing away with mandatory parentheses around the conditions.
+This strongly suggests using a keyword (then) to introduce branches, instead of using curly braces, based on readability considerations.</p>
+</dd>
+</dl>
+<p>The   because it is keyword the largest number of developers are familiar with.</p>
+</div></blockquote>
+</dd>
+</dl>
+</section>
 <section id="chained-assignment">
 <h2>Chained assignment<a class="headerlink" href="#chained-assignment" title="Permalink to this heading"></a></h2>
 <p>w = x = y = z
@@ -581,7 +637,7 @@ the value of z is assigned to multiple variables w, x, and y</p>
 <p>the evaluation strategy differs between languages. For simple chained assignments, like initializing multiple variables, the evaluation strategy does not matter, but if the targets (l-values) in the assignment are connected in some way, the evaluation strategy affects the result.</p>
 <p>In Python, assignment statements are not expressions and thus do not have a value. Instead, chained assignments are a series of statements with multiple targets for a single expression. The assignments are executed left-to-right so that i = arr[i] = f() evaluates the expression f(), then assigns the result to the leftmost target, i, and then assigns the same result to the next target, arr[i], using the new value of i.[9] This is essentially equivalent to tmp = f(); i = tmp; arr[i] = tmp though no actual variable is produced for the temporary value.</p>
 <p>The <a class="reference external" href="http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf">literature</a> classifies this as “syntactic sugar”, so handling it in the parser like Python seems the reasonable solution. C’s “the assignment returns the lvalue” semantics is possible too but seems contrived. C’s RTL semantics is probably better than <cite>Python’s LTR &lt;https://docs.python.org/3/reference/simple_stmts.html#assignment-statements&gt;</cite>.  So a chain <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">2</span></code> expands to <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">2;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span></code>.</p>
-<p>Using <code class="docutils literal notranslate"><span class="pre">=</span></code> for equality comparison conflicts with chaining <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">2</span></code>, because it can be interpreted as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">(b</span> <span class="pre">==</span> <span class="pre">2)</span></code>. Really <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">2</span></code> doesn’t really seem that useful when you can just replace <code class="docutils literal notranslate"><span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code> in the rest of the expression. If you need multiple variables with the same value then you would write <code class="docutils literal notranslate"><span class="pre">[a,b,c]</span> <span class="pre">=</span> <span class="pre">replicateM</span> <span class="pre">3</span> <span class="pre">(ref</span> <span class="pre">0)</span></code> rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">[]</span></code>, because <code class="docutils literal notranslate"><span class="pre">[]</span></code> is mutable.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">=</span></code> for comparison conflicts with chaining <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">2</span></code>, because it can be interpreted as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">(b</span> <span class="pre">==</span> <span class="pre">2)</span></code>. Really <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">2</span></code> doesn’t really seem that useful when you can just replace <code class="docutils literal notranslate"><span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">b</span></code> in the rest of the expression. If you need multiple variables with the same value then you would write <code class="docutils literal notranslate"><span class="pre">[a,b,c]</span> <span class="pre">=</span> <span class="pre">replicateM</span> <span class="pre">3</span> <span class="pre">(ref</span> <span class="pre">0)</span></code> rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">[]</span></code>, because <code class="docutils literal notranslate"><span class="pre">[]</span></code> is mutable.</p>
 <p>Chained update with <code class="docutils literal notranslate"><span class="pre">:=</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:=</span> <span class="pre">b</span> <span class="pre">:=</span> <span class="pre">2</span></code>, seems implementable. It doesn’t conflict with equality and shortens some assignments.</p>
 </section>
 <section id="embedded-assignment">
@@ -590,7 +646,7 @@ the value of z is assigned to multiple variables w, x, and y</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Clearly it conflicts with equality comparison.</p>
+<p>Clearly it conflicts with <code class="docutils literal notranslate"><span class="pre">=</span></code> as comparison.</p>
 <p>But for chained update it is unambiguous and returning the value would be possible:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
 </pre></div>
@@ -603,15 +659,29 @@ the value of z is assigned to multiple variables w, x, and y</p>
 </section>
 <section id="unless">
 <h2>Unless<a class="headerlink" href="#unless" title="Permalink to this heading"></a></h2>
-<p>Ruby’s <code class="docutils literal notranslate"><span class="pre">unless-else</span></code> is unintuitive. Only support <code class="docutils literal notranslate"><span class="pre">if-else</span></code>. Also <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span></code> is a possible replacement for <code class="docutils literal notranslate"><span class="pre">unless</span></code>.</p>
+<p>Ruby’s <code class="docutils literal notranslate"><span class="pre">unless-else</span></code> is unintuitive. Only support <code class="docutils literal notranslate"><span class="pre">if-else</span></code> and <code class="docutils literal notranslate"><span class="pre">unless</span></code> without the else. Also <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">not</span></code> is a possible replacement for <code class="docutils literal notranslate"><span class="pre">unless</span></code>.</p>
 </section>
 <section id="tuples-and-records">
 <h2>Tuples and records<a class="headerlink" href="#tuples-and-records" title="Permalink to this heading"></a></h2>
-<p>In <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/MaybeNot.md">Maybe Not</a> Rich Hickey  says records/fields, and product types are “place oriented programming”. Well, in <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/ValueOfValuesLong.md">The Value of Values</a> he says place-oriented programming is when you use in-place update. But maps (his proposed alternative) also support in-place update and are place-oriented. The difference between maps and records seems to be that records have ordered fields.</p>
+<p>In <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/MaybeNot.md">Maybe Not</a> Rich Hickey  says records/fields, and product types are “place oriented programming”, hence bad. Well, in <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/ValueOfValuesLong.md">The Value of Values</a> he says place-oriented programming is when you use in-place update. But maps (his proposed alternative) also support in-place update and are place-oriented. The only difference between maps and records seems to be that records have ordered fields.</p>
 <p>So he seems have a different definition in mind, in particular that place-oriented means accessors are not first class - even when the fields are named, you cannot say <code class="docutils literal notranslate"><span class="pre">object[&quot;name&quot;]</span></code> for an arbitrary object or an arbitrary name. But this is easily solved by adding such functionality. It also doesn’t get into the mutable/immutable distinction that the values talk made.</p>
 <p>His second point is that product types “complects” the meaning of things with their position in a list. “Complect” is from <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/SimpleMadeEasy-mostly-text.md">Simple Made Easy</a> and is a pejorative version of “braid together”.
 Essentially he’s saying that if you have <code class="docutils literal notranslate"><span class="pre">(String,</span> <span class="pre">String)</span></code> there is no way to know how the second string is different from the first string. Well, for commutative operations like addition the order literally doesn’t matter. Adding any sort of information to <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">(Int,</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code> is complicating the picture. Similarly for Strings <a class="reference external" href="https://gemma.msl.ubc.ca/resources/baseCode/apidocs/ubic/basecode/util/StringUtil.html#append-java.lang.String-java.lang.String-java.lang.String-">coming up</a> with names “appendee” and “appendant” for an  append operation is almost as bad as digging up “complect”. Using numerical names <code class="docutils literal notranslate"><span class="pre">s1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2</span></code> makes more sense. It still gives a record with named fields, but it makes sense to use positional arguments.</p>
 <p>And if the types are different there’s no ambiguity: <code class="docutils literal notranslate"><span class="pre">(FirstName,</span> <span class="pre">LastName</span></code>, <code class="docutils literal notranslate"><span class="pre">(Int,Bool)</span></code>, etc.</p>
+</section>
+<section id="precedence">
+<h2>Precedence<a class="headerlink" href="#precedence" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://ericlippert.com/2020/02/27/hundred-year-mistakes/">This post</a> describes a mistake in C-style precedence: it should be <code class="docutils literal notranslate"><span class="pre">&amp;&amp;,</span> <span class="pre">==,</span> <span class="pre">&amp;</span></code> but is instead <code class="docutils literal notranslate"><span class="pre">&amp;&amp;,</span> <span class="pre">&amp;</span> <span class="pre">==</span></code>, causing a footgun. “Swift, Go, Ruby and Python get it right.”</p>
+<section id="cycle">
+<h3>Cycle<a class="headerlink" href="#cycle" title="Permalink to this heading"></a></h3>
+<p>Can we have a precedence cycle, like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">(b</span> <span class="pre">*</span> <span class="pre">c)</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">*</span> <span class="pre">(b</span> <span class="pre">^</span> <span class="pre">c)</span></code>, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">^</span> <span class="pre">(b</span> <span class="pre">+</span> <span class="pre">c)</span></code>?</p>
+<p>Well what about a large expression:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">d</span><span class="p">))</span><span class="w"></span>
+<span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
+</pre></div>
+</div>
+<p>These are both consistent with precedence so we would need another rules to decide between them.</p>
+</section>
 </section>
 </section>
 
@@ -619,14 +689,14 @@ Essentially he’s saying that if you have <code class="docutils literal notrans
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="State.html" class="btn btn-neutral float-left" title="Imperative programming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="State.html" class="btn btn-neutral float-left" title="Stateful programming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="TermRewriting.html" class="btn btn-neutral float-right" title="Term rewriting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

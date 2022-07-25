@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logic programming &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Macros" href="Macros.html" />
+    <link rel="prev" title="Logic" href="Logic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Logic programming</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#benefits">Benefits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#relational-programming">Relational programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-relational-programming">Non-relational programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modes">Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unification">Unification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#perspectives">Perspectives</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Logic programming</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/LogicProgramming.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="logic-programming">
+<h1>Logic programming<a class="headerlink" href="#logic-programming" title="Permalink to this heading"></a></h1>
+<section id="benefits">
+<h2>Benefits<a class="headerlink" href="#benefits" title="Permalink to this heading"></a></h2>
+<p>Prolog’s Definite Clause Grammars, and library <a class="reference external" href="https://www.swi-prolog.org/pldoc/doc/_SWI_/library/pio.pl">pio</a>, are a great parsing DSL.</p>
+<p>With typecheckers you can just directly translate the rules to Horn clauses and it runs. Similarly language interpreters are a direct translation of their operational semantics.</p>
+<p>Incomplete data structures are great. <code class="docutils literal notranslate"><span class="pre">date(2018,</span> <span class="pre">month,</span> <span class="pre">14)</span></code> describes every 14th day in this year, and the month can be constrained or the set of dates extracted.</p>
+<p>Database queries are naturally expressed as logical operations on relations. For example pyDatalog and SQL can be called relational languages.</p>
+</section>
+<section id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h2>
+<p>Prolog uses Horn clauses of the form <code class="docutils literal notranslate"><span class="pre">H</span> <span class="pre">:-</span> <span class="pre">A1,</span> <span class="pre">A2,</span> <span class="pre">A3</span></code>. This is read “The clause head <code class="docutils literal notranslate"><span class="pre">H</span></code> is implied by the body’s goals <code class="docutils literal notranslate"><span class="pre">A1</span></code>, <code class="docutils literal notranslate"><span class="pre">A2</span></code> and <code class="docutils literal notranslate"><span class="pre">A3</span></code>.” A fact is a clause with no goals, <code class="docutils literal notranslate"><span class="pre">F.</span></code> or <code class="docutils literal notranslate"><span class="pre">F</span> <span class="pre">:-</span> <span class="pre">``,</span> <span class="pre">equivalent</span> <span class="pre">to</span> <span class="pre">``F</span> <span class="pre">:-</span> <span class="pre">true</span></code> (since <code class="docutils literal notranslate"><span class="pre">true</span> <span class="pre">&amp;&amp;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span></code>). The head and goals are predicates of various syntax. There are various goals; they can be predicate terms with variables and list patterns (Herbrand domain, original Prolog), linear logic formulas (<a class="reference external" href="https://www.youtube.com/watch?v=rICThUCtJ0k">linear logic programming</a>), or constraints (constraint logic programming).</p>
+<p>For example, reversing a list:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">nrev</span><span class="p">(</span><span class="kt">[]</span><span class="p">,</span><span class="kt">[]</span><span class="p">)</span><span class="o">.</span><span class="w"></span>
+<span class="nf">nrev</span><span class="p">([</span><span class="kt">H</span><span class="o">|</span><span class="kt">T</span><span class="p">],</span><span class="kt">L2</span><span class="p">)</span><span class="w"> </span><span class="kt">:-</span><span class="w"> </span><span class="n">nrev</span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="kt">R</span><span class="p">),</span><span class="w"> </span><span class="n">append</span><span class="p">(</span><span class="kt">R</span><span class="p">,[</span><span class="kt">H</span><span class="p">],</span><span class="kt">L2</span><span class="p">)</span><span class="o">.</span><span class="w"></span>
+
+<span class="kt">:-</span><span class="w"> </span><span class="n">nrev</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="kt">X</span><span class="p">),</span><span class="w"> </span><span class="n">write</span><span class="p">(</span><span class="kt">X</span><span class="p">),</span><span class="w"> </span><span class="n">nl</span><span class="w"></span>
+<span class="o">%</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>In practice Prolog syntax is pretty bad; programs are heavy on meaningless intermediate variables such as <code class="docutils literal notranslate"><span class="pre">R</span></code> in the above. There is a <a class="reference external" href="https://www.swi-prolog.org/pack/list?p=func">func</a> package that allows writing <code class="docutils literal notranslate"><span class="pre">nrev</span> <span class="pre">$</span> <span class="pre">T</span></code> instead of <code class="docutils literal notranslate"><span class="pre">nrev(T,R),</span> <span class="pre">R</span></code>. A “function” is defined as follows:</p>
+<ul>
+<li><p>Any predicate <code class="docutils literal notranslate"><span class="pre">p(...in,</span> <span class="pre">out)</span></code> is a function from <code class="docutils literal notranslate"><span class="pre">in</span></code> to <code class="docutils literal notranslate"><span class="pre">out</span></code></p></li>
+<li><p>A dictionary is a function from keys to values</p></li>
+<li><p>An arithmetic expression <code class="docutils literal notranslate"><span class="pre">2*_+3</span></code> is a function on numbers</p></li>
+<li><p>A format string is a function from argument list to interpolated output</p></li>
+<li><p>A term with a <code class="docutils literal notranslate"><span class="pre">~</span></code> is a function which takes no input values and produces an output at the ~ position. For example:</p>
+<p>atom(atom_string(~,”hello world”)).</p>
+<p>% is equivalent to</p>
+<p>atom_string(X,”hello world”),atom(X).</p>
+</li>
+</ul>
+<p>More generally we should be able to build compound expressions:
+*  <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">=</span> <span class="pre">append</span> <span class="pre">a</span> <span class="pre">(append</span> <span class="pre">b</span> <span class="pre">c)</span></code> instead of <code class="docutils literal notranslate"><span class="pre">append(a,b,temp),append(temp,c,z)</span></code>
+* <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">g</span> <span class="pre">x</span></code> instead of <code class="docutils literal notranslate"><span class="pre">f(x,y),</span> <span class="pre">g(x,z),</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">z</span></code>
+* in general, <code class="docutils literal notranslate"><span class="pre">pred</span> <span class="pre">(f</span> <span class="pre">x)</span></code> instead of <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y,</span> <span class="pre">pred(y)</span></code></p>
+<p>There is no issue with devising a consistent use of output variables for an expression syntax; Oz does this. In practice the “boring” deterministic code will take up 66%-95% of the program so special-casing familiar function syntax is important. Although it’s not clear if Horn clauses are more readable, programmers have gotten used to skimming over assignment clauses and parsing parentheses and infix expressions.</p>
+<p>For relations like <code class="docutils literal notranslate"><span class="pre">precedes(x,y)</span></code>, Horn clauses are not necessarily the optimal syntax either. But the predicate syntax is traditional in logic and unlike functions there is not a well-developed alternative syntax to use. Powerful high-level logic syntax is still an unexplored area.</p>
+<p>miniKanren <span id="id1">[<a class="reference internal" href="../zzreferences.html#id22" title="William E. Byrd. Relational Programming in Minikanren: Techniques, Applications, and Implementations. PhD thesis, Indiana University, August 2009. URL: https://scholarworks.iu.edu/dspace/handle/2022/8777 (visited on 2022-07-14).">Byr09</a>]</span> doesn’t have a global clause database so clauses of the same predicate must be grouped, this gives a local “match” syntax:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">nrev</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="kt">:-</span><span class="w"></span>
+<span class="w">  </span><span class="n">matche</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="w"></span>
+<span class="w">    </span><span class="kt">[]</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">h</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">fresh</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">r</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">conj</span><span class="w"></span>
+<span class="w">      </span><span class="p">[</span><span class="w"> </span><span class="n">nrev</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="n">r</span><span class="w"></span>
+<span class="w">      </span><span class="p">,</span><span class="w"> </span><span class="n">append</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="w"> </span><span class="n">l2</span><span class="w"></span>
+<span class="w">      </span><span class="p">])</span><span class="w"></span>
+
+<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">nrev</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"></span>
+<span class="c1">-- [[2,1]]</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This seems helpful syntax-wise, but MiniKanren and Clojure core.logic are also quite tedious to use in practice.</p>
+<p><code class="docutils literal notranslate"><span class="pre">matche</span></code> and other syntax desugars into a small set of primitives: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id61" title="Jason Hemann and Daniel P. . Friedman. microKanren: A Minimal Functional Core for Relational Programming. In Proceedings of the 2013 Workshop on Scheme and Functional Programming. 2013. URL: http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf (visited on 2022-07-14).">HF13</a>]</span></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fresh</span></code> or <code class="docutils literal notranslate"><span class="pre">exists</span> <span class="pre">(\x.&lt;body&gt;)</span></code>: true if <code class="docutils literal notranslate"><span class="pre">body</span></code> is true for some value of <code class="docutils literal notranslate"><span class="pre">x</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unify</span> <span class="pre">x</span> <span class="pre">y</span></code> / <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code>: true if <code class="docutils literal notranslate"><span class="pre">x</span></code> unifies with <code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">disj</span> <span class="pre">[x,y,z]</span></code> / <code class="docutils literal notranslate"><span class="pre">conde</span> <span class="pre">[x,y,z]</span></code>: true if any of <code class="docutils literal notranslate"><span class="pre">x,y,z</span></code> are true (logical or / disjunction)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conj</span> <span class="pre">[x,y,z]</span></code>: true if all of <code class="docutils literal notranslate"><span class="pre">x,y,z</span></code> are true (logical and / conjunction)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">(\x</span> <span class="pre">y.</span> <span class="pre">&lt;body&gt;)</span></code> delimits the boundary of the logic program. It returns the stream of substitutions of the given variables for which the body is true. Optionally the maximum length of the stream may be specified.</p></li>
+</ul>
+<p>The expansion of <code class="docutils literal notranslate"><span class="pre">nrev</span></code> is given in <span id="id3">[<a class="reference internal" href="../zzreferences.html#id60" title="Jason Hemann and Daniel P. Friedman. A framework for extending microkanren with constraints. Electronic Proceedings in Theoretical Computer Science, 234:135–149, January 2017. Comment: In Proceedings WLP'15/'16/WFLP'16, arXiv:1701.00148. URL: http://arxiv.org/abs/1701.00633 (visited on 2022-07-15), arXiv:1701.00633, doi:10.4204/EPTCS.234.10.">HF17</a>]</span> page 137 (<code class="docutils literal notranslate"><span class="pre">define-relation</span></code> is just DSL fluff around <code class="docutils literal notranslate"><span class="pre">define</span></code> per the appendix):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">nrev</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">disj</span><span class="w"></span>
+<span class="w">    </span><span class="p">[</span><span class="w"> </span><span class="n">conj</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">[]</span><span class="p">,</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">fresh</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">h</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">fresh</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">t</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
+<span class="w">        </span><span class="n">conj</span><span class="w"></span>
+<span class="w">          </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">l1</span><span class="w"></span>
+<span class="w">          </span><span class="p">,</span><span class="n">fresh</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">r</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">conj</span><span class="w"> </span><span class="p">[</span><span class="n">nrev</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">append</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="p">[</span><span class="n">h</span><span class="p">]</span><span class="w"> </span><span class="n">l2</span><span class="p">])]</span><span class="w"></span>
+<span class="w">          </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">))]</span><span class="w"></span>
+
+<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="n">run</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">nrev</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"></span>
+<span class="c1">-- [[2,1]]</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="relational-programming">
+<h2>Relational programming<a class="headerlink" href="#relational-programming" title="Permalink to this heading"></a></h2>
+<p>Simple logic programs have what <span id="id4">[<a class="reference internal" href="../zzreferences.html#id22" title="William E. Byrd. Relational Programming in Minikanren: Techniques, Applications, and Implementations. PhD thesis, Indiana University, August 2009. URL: https://scholarworks.iu.edu/dspace/handle/2022/8777 (visited on 2022-07-14).">Byr09</a>]</span> terms “relational” semantics. A state is a map from some set of nominal variables to their substitution, a set of ground terms. A goal is a logical predicate over some variables - applying it to a state that defines the relevant variables gives true or false. The way sub-predicates works is complicated slightly by <span id="id5">[<a class="reference internal" href="../zzreferences.html#id26" title="Keith L. Clark. Negation as Failure. In Hervé Gallaire and Jack Minker, editors, Logic and Data Bases, pages 293–322. Springer US, Boston, MA, 1978. URL: https://doi.org/10.1007/978-1-4684-3384-5_11 (visited on 2022-07-15), doi:10.1007/978-1-4684-3384-5_11.">Cla78</a>]</span>, basically we use iff. Running a program consists of computing the set of satisifable states, which may be empty or infinite.</p>
+<p>Practically the execution engine does not return a set, but rather a finite or infinite stream of satisfying meta-states. Meta-states are states that include unbound variables representing any term, and (in constraint logic programming) constraints for these unbound variables. Ideally the stream would be a minimal completely-covering set of meta-states in some arbitrary order, but in practice implementations can return identical or overlapping results.</p>
+<p>miniKanren uses an “interleaving” search from <span id="id6">[<a class="reference internal" href="../zzreferences.html#id82" title="Oleg Kiselyov, Chung-chieh Shan, Daniel P. Friedman, and Amr Sabry. Backtracking, interleaving, and terminating monad transformers: (functional pearl). In Proceedings of the Tenth ACM SIGPLAN International Conference on Functional Programming - ICFP '05, 192. Tallinn, Estonia, 2005. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=1086365.1086390 (visited on 2022-07-15), doi:10.1145/1086365.1086390.">KSFS05</a>]</span>, which is “complete” in the sense that it explores all branches fairly and will find all answers eventually. For relational programs the search strategy is irrelevant so long as it terminates, so there are many other choices; we can optimize the search, or dump the problem into an SMT solver and use its search strategy. CDCL with optimizations should be the fastest. This has been explored in the field of “answer set programming”.</p>
+<p>By default Prolog does not use the <a class="reference external" href="https://en.wikipedia.org/wiki/Occurs_check">occurs check</a> in unification. This means for <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">f</span> <span class="pre">x</span></code> the substitution <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">x</span></code> is obtained. Denotationally this can be accommodated by allowing states to contain infinite terms, <span id="id7">[<a class="reference internal" href="../zzreferences.html#id142" title="W.P. Weijland. Semantics for logic programs without occur check. Theoretical Computer Science, 71(1):155–174, March 1990. URL: https://linkinghub.elsevier.com/retrieve/pii/030439759090194M (visited on 2022-07-15), doi:10.1016/0304-3975(90)90194-M.">Wei90</a>]</span> <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">(f</span> <span class="pre">(f</span> <span class="pre">(...)))</span></code> in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. <span id="id8">[<a class="reference internal" href="../zzreferences.html#id9" title="Krzysztof R. Apt and Alessandro Pellegrini. Why the occur-check is not a problem. In Maurice Bruynooghe and Martin Wirsing, editors, Programming Language Implementation and Logic Programming, volume 631, pages 69–86. Springer-Verlag, Berlin/Heidelberg, 1992. URL: http://link.springer.com/10.1007/3-540-55844-6_128 (visited on 2022-07-14), doi:10.1007/3-540-55844-6_128.">AP92</a>]</span> Prolog defines a <code class="docutils literal notranslate"><span class="pre">unify_with_occurs_check</span></code> predicate for situations where logical soundness is desired, although the implicit unification when dispatching predicates is still unsound. miniKanren always uses the occurs check.</p>
+</section>
+<section id="non-relational-programming">
+<h2>Non-relational programming<a class="headerlink" href="#non-relational-programming" title="Permalink to this heading"></a></h2>
+<p>“Logic programming” a la Prolog has extended the execution engine with non-relational predicates that expose details of the underlying implementation:</p>
+<ul class="simple">
+<li><p>Cut (!) which commits to choices made since the parent goal was unified with the left-hand side of the clause containing the cut. miniKanren similarly includes operators conda (soft-cut) and condu (committed choice). Concurrent logic programming also has committed choice which prunes off all other branches once it is known that a clause’s guard goals all succeed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var/1</span></code> which checks if the variable is unbound</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">copy_term/2</span></code> which can duplicate unbound variables to fresh ones</p></li>
+<li><p>Side-effectful operations which execute even if the operation fails</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is</span></code> which - as a side effect - computes an arithmetic expression and binds a variable</p></li>
+<li><p>unfair search so that <code class="docutils literal notranslate"><span class="pre">ancestor_of(A,</span> <span class="pre">P)</span> <span class="pre">:-</span> <span class="pre">ancestor_of(A,</span> <span class="pre">Parent),</span> <span class="pre">parent_of(Parent,</span> <span class="pre">P).</span> <span class="pre">:-</span> <span class="pre">ancestor_of(x,y)</span></code> diverges e switching the order of the goals does not</p></li>
+<li><p>Meta-programming which allows querying or modifying clauses at run time, such as nth_clause, assert, retract</p></li>
+</ul>
+<p>These features expose the search strategy’s order of trying clauses and mean the denotational semantics of programs must include the search strategy’s implementation and any goal side effects. Programs that heavily use non-relational features are best understood as an imperative execution model with embedded backtracking.Backtracking can re-execute side-effectful operations, so Prolog uses a simple depth-first search strategy in an effort to make the imperative semantics comprehensible.</p>
+<p><a class="reference external" href="https://www.amzi.com/articles/prolog_under_the_hood.htm">Merritt</a> presents an execution model as follows. A goal is of type <code class="docutils literal notranslate"><span class="pre">Goal</span> <span class="pre">=</span> <span class="pre">{call</span> <span class="pre">:</span> <span class="pre">Entry,</span> <span class="pre">redo</span> <span class="pre">:</span> <span class="pre">Entry</span> <span class="pre">};</span> <span class="pre">Entry</span> <span class="pre">=</span> <span class="pre">{exit:</span> <span class="pre">Entry,</span> <span class="pre">fail</span> <span class="pre">:</span> <span class="pre">Entry}</span> <span class="pre">-&gt;</span> <span class="pre">Exit;</span> <span class="pre">Exit</span> <span class="pre">=</span> <span class="pre">IO</span> <span class="pre">()</span></code>. The composition <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">;</span> <span class="pre">B</span></code> of two goals is:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">comp</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Goal</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">exit</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">exit</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">where</span><span class="w"></span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">A</span><span class="o">.</span><span class="n">call</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="w">  </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">B</span><span class="o">.</span><span class="n">call</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">  </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">exit</span><span class="w"></span>
+<span class="w">  </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">B</span><span class="o">.</span><span class="n">redo</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<span class="w">  </span><span class="n">e</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">A</span><span class="o">.</span><span class="n">redo</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fail</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Various examples of goals:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">write</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="n">print</span><span class="w"> </span><span class="kt">X</span><span class="p">;</span><span class="w"> </span><span class="n">exit</span><span class="p">}</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">fail</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">cut</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">abort_goal</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">unify</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="kt">Y</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">r</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newGoalId</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="n">tryNext</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">pop</span><span class="w"> </span><span class="n">unifiers</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">pushChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="n">unifiers</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">unify</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="n">u</span><span class="w"></span>
+<span class="w">      </span><span class="n">exit</span><span class="w"></span>
+<span class="w">    </span><span class="kr">else</span><span class="w"></span>
+<span class="w">      </span><span class="n">fail</span><span class="w"></span>
+<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="kt">X</span><span class="p">,</span><span class="w"> </span><span class="kt">Y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lookupOrAllocVars</span><span class="w"> </span><span class="p">(</span><span class="kt">X</span><span class="p">,</span><span class="kt">Y</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">unifiers</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">unificationAlgo</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="kt">Y</span><span class="w"></span>
+<span class="w">      </span><span class="n">pushChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">unifiers</span><span class="w"></span>
+<span class="w">      </span><span class="n">tryNext</span><span class="w"></span>
+<span class="w">    </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">      </span><span class="n">unifiers</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">popChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"></span>
+<span class="w">      </span><span class="n">tryNext</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="nf">predicate</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="n">r</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newGoalId</span><span class="w"></span>
+<span class="w">  </span><span class="n">tryNext</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">pop</span><span class="w"> </span><span class="n">unifiers</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">pushChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="p">(</span><span class="n">tail</span><span class="w"> </span><span class="n">unifiers</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">unify</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="n">u</span><span class="w"></span>
+<span class="w">      </span><span class="n">exit</span><span class="w"></span>
+<span class="w">    </span><span class="kr">else</span><span class="w"></span>
+<span class="w">      </span><span class="n">fail</span><span class="w"></span>
+<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">call</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">      </span><span class="n">unifiers</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">findClauses</span><span class="w"> </span><span class="kt">X</span><span class="w"> </span><span class="o">&gt;&gt;=</span><span class="w"> </span><span class="n">findUnifiers</span><span class="w"></span>
+<span class="w">      </span><span class="n">pushChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">unifiers</span><span class="w"></span>
+<span class="w">      </span><span class="n">tryNext</span><span class="w"></span>
+<span class="w">    </span><span class="n">redo</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">      </span><span class="n">unifiers</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">popChoicePoint</span><span class="w"> </span><span class="n">r</span><span class="w"></span>
+<span class="w">      </span><span class="n">tryNext</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The general advice is to use non-relational features <a class="reference external" href="http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/cut.html">sparingly</a> and only if you can justify the need based on performance. <span id="id9">[<a class="reference internal" href="../zzreferences.html#id22" title="William E. Byrd. Relational Programming in Minikanren: Techniques, Applications, and Implementations. PhD thesis, Indiana University, August 2009. URL: https://scholarworks.iu.edu/dspace/handle/2022/8777 (visited on 2022-07-14).">Byr09</a>]</span> shows that, for a sample program, non-relational features can be completely avoided. Cut can almost always be replaced with a tagging scheme that makes the matching clause unambiguous, or more expressive constraints. Byrd says there is no complete method for avoiding copy-term, but in his example it can be replaced by using templates with unique names and substituting these with logic variables.</p>
+<p>Overall it seems that relational programming covers all the cases of logic programming that people care about. Relational programming has much clearer semantics. These non-relational features are antipatterns: implementation hacks for cases where the compiler is not sufficiently smart or the constraint language is not sufficiently expressive. Mercury has eliminated impure features. <span id="id10">[<a class="reference internal" href="../zzreferences.html#id62" title="Fergus Henderson, Zoltan Somogyi, and Thomas Conway. Determinism analysis in the Mercury compiler. In In Proceedings of the Australian Computer Science Conference, 337–346. 1996.">HSC96</a>]</span></p>
+</section>
+<section id="modes">
+<h2>Modes<a class="headerlink" href="#modes" title="Permalink to this heading"></a></h2>
+<p>Mercury has <a class="reference external" href="https://www.mercurylang.org/information/doc-latest/mercury_ref/Modes.html#Modes">modes</a>. An instantiation state is either “free”, a unbound variable “distinct” in that it does not appear anywhere else, or “bound”, a mapping from possible function symbols to instantiation states of the symbols’ arguments. A mode is a mapping from initial instantiation states to final instantiation states, with the constraint that no node is transformed from bound to free. The two standard modes are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">in</span> <span class="pre">==</span> <span class="pre">ground</span> <span class="pre">&gt;&gt;</span> <span class="pre">ground.</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">==</span> <span class="pre">free</span> <span class="pre">&gt;&gt;</span> <span class="pre">ground.</span></code></p></li>
+</ul>
+<p>There are other states, e.g. <code class="docutils literal notranslate"><span class="pre">X</span></code> in the term <code class="docutils literal notranslate"><span class="pre">[X,X]</span></code> is neither free nor bound, hence Mercury’s mode system is incomplete.  I think this deficiency can be fixed by allowing constrained modes, at the expense of making the definition of modes even more complicated.</p>
+<p>Mercury also categorises each mode of a predicate according to how many times it can succeed:</p>
+<ul class="simple">
+<li><p>deterministic: exactly one solution</p></li>
+<li><p>semideterministic: no solutions or one solution</p></li>
+<li><p>multisolution: at least one solution</p></li>
+<li><p>nondeterministic: zero, one, or more solutions</p></li>
+<li><p>failure/erroneous: no solution, always fails/errors</p></li>
+</ul>
+<p>For example append can work in several modes:</p>
+<ul class="simple">
+<li><p>predicate (in, in, in), semideterministic: <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">[a,b]</span> <span class="pre">[c]</span> <span class="pre">[a,b,c]</span> <span class="pre">--&gt;</span> <span class="pre">yes</span></code></p></li>
+<li><p>function (in, in, out), deterministic: <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">[a,b]</span> <span class="pre">[c]</span> <span class="pre">Z</span> <span class="pre">--&gt;</span> <span class="pre">Z</span> <span class="pre">=</span> <span class="pre">[a,b,c]</span></code></p></li>
+<li><p>match left (out, in, in), semideterministic: <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">X</span> <span class="pre">[c]</span> <span class="pre">[a,b,c]</span> <span class="pre">--&gt;</span> <span class="pre">X</span> <span class="pre">=</span> <span class="pre">[a,b]</span></code></p></li>
+<li><p>match both (out, out, in), nondeterministic: <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">X</span> <span class="pre">Y</span> <span class="pre">[a,b,c]</span> <span class="pre">--&gt;</span> <span class="pre">X=[],Y=[a,b,c];X=[a],Y=[b,c];X=[a,b],Y=[c],X=[a,b,c],Y=[]</span></code></p></li>
+<li><p>match all (out, out, out), nondeterministic: <code class="docutils literal notranslate"><span class="pre">append</span> <span class="pre">X</span> <span class="pre">Y</span> <span class="pre">Z</span> <span class="pre">--&gt;</span> <span class="pre">X=[],Y=[],Z=[];...</span></code></p></li>
+</ul>
+<p>Each mode is a function from inputs to a set of outputs (or output / Maybe, in the deterministic/semideterministic case). So, characterizing all uses of predicates with mode declarations, predicates can be thought of as a collection of ad-hoc overloaded functions. Except it’s not ad-hoc, because they all represent the same logical relation. Anyways, we can embed functional programming into logic programming, by a mode declaration <code class="docutils literal notranslate"><span class="pre">(in,</span> <span class="pre">out),</span> <span class="pre">deterministic</span></code> for each function. Similarly we can embed term rewriting, by a mode declaration <code class="docutils literal notranslate"><span class="pre">(in,</span> <span class="pre">out),</span> <span class="pre">nondeterministic</span></code> for the rewrite relation. The reverse is not possible - we cannot get from the behavior on a specific mode to the overall behavior of the predicate. To support logic programming in an integrated manner everything must be interpretable as a logic program.</p>
+<p>Logic programming allows writing very concise code, although it can be unusably inefficient in some cases. For this, we can allow writing optimized imperative code, and asserting that this implements a specific mode of a predicate. Then the predicate becomes optimized. But with a smart compiler, the imperative code can be avoided most of the time, saving the need for duplication - just tune the hot cases. Similarly writing imperative code in the first place avoids the issue altogether, although it precludes most of the benefits of logic programming.</p>
+</section>
+<section id="unification">
+<h2>Unification<a class="headerlink" href="#unification" title="Permalink to this heading"></a></h2>
+<p>Unification is the problem of finding all solutions to equations <code class="docutils literal notranslate"><span class="pre">a1=b1,</span> <span class="pre">a2=b2,</span> <span class="pre">...</span></code> over tree terms and variables. This can be extended to the “dual unification” problem that also includes disequations <code class="docutils literal notranslate"><span class="pre">c1</span> <span class="pre">!=</span> <span class="pre">d1</span></code> in the list that must not be satisfied. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution. A substitution is a unification problem where the left sides are all variables and those variables do not appear in the right sides.</p>
+<p>Unification isn’t actually a core concept of logic programing AFAICT, as e.g. constraint logic programming on reals doesn’t use it (it uses systems of equalities of reals). But syntax trees require first-order unification to solve all the equalities that arise, so it’s a standard technique for implementing logic programming.</p>
+<p>The standard <a class="reference external" href="https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm">unification algorithm</a> <span id="id11">[<a class="reference internal" href="../zzreferences.html#id138" title="Petar Vukmirović, Alexander Bentkamp, and Visa Nummelin. Efficient Full Higher-Order Unification. Logical Methods in Computer Science, December 2021. URL: https://lmcs.episciences.org/8837/pdf (visited on 2022-06-14), doi:10.46298/lmcs-17(4:18)2021.">VBN21</a>]</span> works by applying reduction operations to various cases:</p>
+<ul class="simple">
+<li><p>delete: <code class="docutils literal notranslate"><span class="pre">s=s</span></code> is removed</p></li>
+<li><p>decompose: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">s1</span> <span class="pre">...</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tm</span></code> to equations <code class="docutils literal notranslate"><span class="pre">{s1</span> <span class="pre">=</span> <span class="pre">t1,</span> <span class="pre">...,</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">tm</span> <span class="pre">}</span></code></p></li>
+<li><p>rigid/rigid conflict: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">tn</span></code> fails if a and b are different rigid heads</p></li>
+<li><p>dereference: <code class="docutils literal notranslate"><span class="pre">F</span> <span class="pre">s1</span> <span class="pre">...</span> <span class="pre">sn</span> <span class="pre">=</span> <span class="pre">t</span></code> to <code class="docutils literal notranslate"><span class="pre">(F</span> <span class="pre">/.</span> <span class="pre">σ)</span> <span class="pre">...</span> <span class="pre">=</span> <span class="pre">t</span></code>, if the substitution σ from another equation maps F</p></li>
+<li><p>empty equation list: trivially soluble</p></li>
+<li><p>alpha/eta normalization: <code class="docutils literal notranslate"><span class="pre">λxm.s</span> <span class="pre">=</span> <span class="pre">λyn.t</span></code> to <code class="docutils literal notranslate"><span class="pre">λxm.s</span> <span class="pre">=</span> <span class="pre">λxm.t'</span> <span class="pre">xn+1</span> <span class="pre">.</span> <span class="pre">.</span> <span class="pre">.</span> <span class="pre">xm</span></code>, where <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">≥</span> <span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">xi</span></code> disjoint from <code class="docutils literal notranslate"><span class="pre">yj</span></code>, and <code class="docutils literal notranslate"><span class="pre">t'</span> <span class="pre">=</span> <span class="pre">t</span> <span class="pre">/.</span> <span class="pre">{y1</span> <span class="pre">→</span> <span class="pre">x1</span> <span class="pre">,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">yn</span> <span class="pre">→</span> <span class="pre">xn</span> <span class="pre">}</span></code></p></li>
+<li><p>beta normalization: reduce left/right to hnf</p></li>
+<li><p>under lambda: apply rule for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span></code> to <code class="docutils literal notranslate"><span class="pre">λx.</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">b</span></code></p></li>
+</ul>
+<p>There are more complex reductions for hard cases:</p>
+<ul class="simple">
+<li><p>oracle fail: <code class="docutils literal notranslate"><span class="pre">s=t</span></code> fails if oracle determines to be insoluble</p></li>
+<li><p>oracle success: <code class="docutils literal notranslate"><span class="pre">s=t</span></code> has finite CSU, branch to each solution σ_i</p></li>
+<li><p>bind: try projections with the following binding substitutions:</p>
+<ul>
+<li><p>flex-rigid <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">a</span> <span class="pre">t)</span></code>: try an imitation of a for F, if a is constant, and all Huet-style projections for F, if F is not an identification variable.</p></li>
+<li><p>flex-flex with different heads <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">G</span> <span class="pre">t)</span></code>: all identifications and iterations for both F and G, and all JP-style projections for non-identification variables among F and G.</p></li>
+<li><p>flex-flex with identical heads and the head is an elimination variable, <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">t)</span></code>: no bindings.</p></li>
+<li><p>flex-flex with identical heads, <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">F</span> <span class="pre">t)</span></code>: all iterations for F at arguments of functional</p></li>
+</ul>
+</li>
+</ul>
+<p>type and all eliminations for F.</p>
+<p>Trying all the bindings is slow, but a good set of oracles makes the algorithm efficient in practice. Of course it would be better to find reduction rules that solve things generally rather than oracles which work on specific cases, but this is hard.</p>
+</section>
+<section id="perspectives">
+<h2>Perspectives<a class="headerlink" href="#perspectives" title="Permalink to this heading"></a></h2>
+<p>Based on:
+* <a class="reference external" href="https://www.amzi.com/articles/prolog_under_the_hood.htm">Merritt</a>, user of Prolog for “serious applications”
+* <a class="reference external" href="https://stackoverflow.com/questions/28467011/what-are-the-main-technical-differences-between-prolog-and-minikanren-with-resp">Byrd</a>, author of miniKanren
+* <a class="reference external" href="https://www.reddit.com/r/ProgrammingLanguages/comments/9kb9z5/logic_programming_languages/">Reddit thread</a>, particularly Paul Bone who did his PhD “Automatic Parallelism in Mercury”)
+* <a class="reference external" href="https://news.ycombinator.com/item?id=14439137">HN thread</a></p>
+<p>Answer-set programming (ASP) rebases the solving process onto SMT/SAT-style propositional solvers. The semantics of ASP give a conventional first-order logical semantics to Prolog. Prolog’s semantics are a bit obscure, because it’s “whatever SLDNF gives you”, which includes things like queries not terminating.</p>
+<p>ASP is based on the “stable-model semantics”, which competed with the “well-founded semantics”. Existing practical tools only implement propositional solvers, not first-order logic - they work by first “grounding” the first-order formulae to a propositional representation, and then solving them. Compared to SLDNF this can cause blow-up or speed-up but under a finite domain assumption it gives the same results.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Logic.html" class="btn btn-neutral float-left" title="Logic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Macros.html" class="btn btn-neutral float-right" title="Macros" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

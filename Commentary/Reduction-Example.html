@@ -57,24 +57,26 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -109,7 +111,7 @@
              
   <section id="reduction-example">
 <h1>Reduction example<a class="headerlink" href="#reduction-example" title="Permalink to this heading"></a></h1>
-<p>To show how optimal reduction works, we step through the example term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id9" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
+<p>To show how optimal reduction works, we step through the example term <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">o</span> <span class="pre">$</span> <span class="pre">\h.</span> <span class="pre">o</span> <span class="pre">(h</span> <span class="pre">I)</span></code> from pages 26-35 of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id12" title="Andrea Asperti and Stefano Guerrini. The Optimal Implementation of Functional Programming Languages. Number 45 in Cambridge Tracts in Theoretical Computer Science. Cambridge University Press, USA, 1st edition, January 1999. ISBN 978-0-521-62112-0.">AG99</a>]</span>. To write the derivation tree we must define the recursive type <span class="math notranslate nohighlight">\(\Omega = \, !\Omega \to \Omega\)</span>.</p>
 <img alt="../_images/Stroscot_M_Proof_Tree.svg" src="../_images/Stroscot_M_Proof_Tree.svg" /><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Root</span><span class="w"> </span><span class="n">ret</span><span class="w"></span>
 <span class="w">  </span><span class="kt">Cut</span><span class="w"> </span><span class="n">o1</span><span class="w"> </span><span class="n">o1l</span><span class="w"></span>
 <span class="w">    </span><span class="n">o1</span><span class="o">/</span><span class="kt">[]</span><span class="o">/</span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">PiRight</span><span class="w"> </span><span class="o">^</span><span class="n">func</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="n">x_o1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="n">ret_o1</span><span class="p">],</span><span class="w"> </span><span class="kt">[]</span><span class="p">,</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
@@ -3550,7 +3552,7 @@ i_ret [label=&quot;I&quot;]
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

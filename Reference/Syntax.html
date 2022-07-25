@@ -72,7 +72,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#variadic-arguments">Variadic arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#concatenative-arguments">Concatenative arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inheritance">Inheritance</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Operators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Operators</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a><ul>
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -133,7 +134,7 @@
              
   <section id="syntax">
 <h1>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h1>
-<p>Almost everything in Stroscot is an expression. Values are numbers, booleans, and character strings of text. But there’s also block statements and layout.</p>
+<p>Almost everything in Stroscot is an expression. But there’s also block statements and layout.</p>
 <section id="unicode">
 <h2>Unicode<a class="headerlink" href="#unicode" title="Permalink to this heading"></a></h2>
 <p>Practically, most programs will use ASCII. But the Unicode algorithms are robust and supporting other languages isn’t too hard. <a class="reference external" href="https://rosettacode.org/wiki/Unicode_variable_names">Lots of languages</a> have support for Unicode, although the exact set of allowed characters varies.</p>
@@ -146,7 +147,7 @@
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, to determine hard / mandatory breaks)</p></li>
 <li><p><a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols</p></li>
-<li><p><a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters</p></li>
+<li><p><a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters. Go’s rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, but this excludes combining characters and Devanagari. Go’s upper case restriction means 日本語 cannot be exported, and instead X日本語 must be used.</p></li>
 </ul>
 <p>Stroscot is case-sensitive.</p>
 </section>
@@ -251,18 +252,21 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
+<p>Sequential matching:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Parallel matching:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
 <span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
 <span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Sequential matching:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sequential</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-</pre></div>
-</div>
+<p>The extra <code class="docutils literal notranslate"><span class="pre">;</span></code> is an escape to avoid sequential matching of a sequence; if you alternate clauses of different functions or define clauses in different files they will also be combined with parallel matching.</p>
 <p>Function application (juxtaposition) binds stronger than all operators and associates to the left, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">--&gt;</span> <span class="pre">(x</span> <span class="pre">y)</span> <span class="pre">z</span></code>.</p>
 <section id="patterns">
 <h3>Patterns<a class="headerlink" href="#patterns" title="Permalink to this heading"></a></h3>
@@ -307,7 +311,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <span class="c1">-- z a fresh symbol</span><span class="w"></span>
 </pre></div>
 </div>
-<p>To force a function definition you can use an as pattern, <a href="#id1"><span class="problematic" id="id2">``</span></a>_&#64;(,)</p>
+<p>To force a function definition you can use an as pattern, <code class="docutils literal notranslate"><span class="pre">_&#64;(,)</span></code></p>
 <p>To force interpretation as a variable you can use an anonymous as pattern, <code class="docutils literal notranslate"><span class="pre">(f&#64;_)</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span></code>. Then <code class="docutils literal notranslate"><span class="pre">f</span></code> is a variable and will match any symbol, rather just <code class="docutils literal notranslate"><span class="pre">f</span></code>. Example converting a function application to a list:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="p">((</span><span class="n">x</span><span class="o">@</span><span class="kr">_</span><span class="p">)</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">foo</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="w"></span>
 <span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="w"></span>
@@ -354,7 +358,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="non-linear-patterns">
 <h3>Non-linear patterns<a class="headerlink" href="#non-linear-patterns" title="Permalink to this heading"></a></h3>
-<p>Non-left-linear patterns such as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">a</span></code> are allowed, this is interpreted as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - rename variables and check for equality using <code class="docutils literal notranslate"><span class="pre">==</span></code>. See <span class="xref std std-ref">Equality and left-linearity</span> for a discussion.</p>
+<p>Non-left-linear patterns such as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">a</span></code> are allowed, this is interpreted as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - rename variables and check for equality using <code class="docutils literal notranslate"><span class="pre">==</span></code>. See <a class="reference internal" href="../Commentary/TermRewriting.html#trs-equality-linearity"><span class="std std-ref">Equality and left-linearity</span></a> for a discussion.</p>
 </section>
 <section id="pattern-synonyms">
 <h3>Pattern synonyms<a class="headerlink" href="#pattern-synonyms" title="Permalink to this heading"></a></h3>
@@ -591,8 +595,8 @@ supplied.</p>
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h3>Operators<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Operators<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>Operators are syntactic sugar for functions. Enclosing an operator
 in parentheses turns it into an ordinary function symbol, thus <code class="docutils literal notranslate"><span class="pre">x+y</span></code> is
 exactly the same as <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">x</span> <span class="pre">y</span></code>.</p>
@@ -855,7 +859,7 @@ Due to the fexpr semantics any expression can be used and pattern-matched, like 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

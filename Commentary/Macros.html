@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Macros &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Memory management" href="Memory-Management.html" />
+    <link rel="prev" title="Logic programming" href="LogicProgramming.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Macros</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#comparison">Comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#terminology">Terminology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hygiene">Hygiene</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Commentary</a> &raquo;</li>
+      <li>Macros</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Macros.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="macros">
+<h1>Macros<a class="headerlink" href="#macros" title="Permalink to this heading"></a></h1>
+<section id="comparison">
+<h2>Comparison<a class="headerlink" href="#comparison" title="Permalink to this heading"></a></h2>
+<p>Macros, micros, and fexprs are facilities to allows allow defining syntactic extensions to a programming language. Comparing them:</p>
+<ol class="arabic simple">
+<li><p>A (Scheme) macro is a function translating an AST node into an AST node. Macro substitution of an AST reduces away all macros and produces an AST.</p></li>
+<li><p>A micro <span id="id1">[<a class="reference internal" href="../zzreferences.html#id86" title="Shriram Krishnamurthi. Linguistic Reuse. PhD thesis, Rice University, 2001. URL: https://scholarship.rice.edu/handle/1911/17993 (visited on 2021-08-06).">Kri01</a>]</span> is a function translating from a source AST node and an environment to an expression in the intermediate language. Micro dispatch of an AST reduces away all micros and produces an intermediate representation.</p></li>
+<li><p>An f-expression (fexpr) <span id="id2">[<a class="reference internal" href="../zzreferences.html#id126" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span> is a function translating an AST node and an environment to a value. Fexpr evaluation of an AST reduces away all fexprs and produces a value.</p></li>
+</ol>
+<p>Fexprs are the most powerful: IR expressions and AST nodes are values, hence micros and macros can be implemented in terms of fexprs, but conversely fexprs can’t be emulated. E.g. we can implement a naive form of Scheme macros as f-expressions by computing the AST and evaluating, <code class="docutils literal notranslate"><span class="pre">defmacro</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">\vau</span> <span class="pre">$args</span> <span class="pre">$env</span> <span class="pre">-&gt;</span> <span class="pre">eval</span> <span class="pre">$env</span> <span class="pre">(f</span> <span class="pre">$args)</span></code>.</p>
+<p>Another advantage of fexprs is that there are no phases - the full language is always available and immediately executed. For example predicate dispatch of fexprs is possible - you just have to look up the argument values in the environment like with predicate dispatch on applicatives. In contrast macros can only overload on number of arguments because the precise values are not available in the preprocessing phase, and similar micros have a linking phase for the IR. Hence implementing the compiler using the Futamura projection of specializing an interpreter to a program is only sensible for fexprs.</p>
+</section>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this heading"></a></h2>
+<p><span id="id3">[<a class="reference internal" href="../zzreferences.html#id126" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span>’s terminology as follows:</p>
+<ul class="simple">
+<li><p>Evaluation is interpreting an AST node to produce a value.</p></li>
+<li><p>Values evaluate to themselves.</p></li>
+<li><p>The value of a variable is the result of looking up the variable’s symbol the current binding.</p></li>
+<li><p>A combination is an AST node <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span></code>, representing applying a symbol (operator) <code class="docutils literal notranslate"><span class="pre">f</span></code> to an operand AST <code class="docutils literal notranslate"><span class="pre">x</span></code>, usually composed of a list of operands.</p></li>
+<li><p>A combiner is the result of evaluating an operator; it is a special type of value</p></li>
+<li><p>An argument is the result of evaluating an operand, and may in general be any value</p></li>
+<li><p>An applicative or applicative combiner is a combiner that first evaluates all of its operands to arguments in the current environment, and only uses the arguments thereafter. The combination of the applicative is an applicative combination.</p></li>
+<li><p>An operative or operative combiner is a non-applicative combiner. The combination is an operative combination.</p></li>
+<li><p>A (Scheme) macro is an operative that uses its operands to derive a syntactic replacement for the entire combination of the macro call.</p></li>
+<li><p>A (Scheme) special form is a hard-coded operative accessed by a reserved symbol</p></li>
+<li><p>A (Kernel) fexpr is a non-macro operative that is expressed as a <code class="docutils literal notranslate"><span class="pre">$vau</span></code> lambda taking unevaluated operands and the dynamic environment where the function is called</p></li>
+</ul>
+<p>Although it gives each concept its own name, “fexpr” is an unusual word with no prior referent except maybe the old Lisp I fexpr which didn’t take an environment hence couldn’t implement lexical scope. So Stroscot’s terminology follows <a class="reference external" href="http://www.newlisp.org/index.cgi?page=Differences_to_Other_LISPs">newLISP</a>  and calls fexprs “macros”:</p>
+<ul class="simple">
+<li><p>A Stroscot function is a Shutt applicative</p></li>
+<li><p>A Stroscot macro is a Shutt fexpr</p></li>
+</ul>
+<p>The rationale is that Stroscot’s macros operate on ASTs like macros in other languages, so it’s clearer to the uninitiated to call them macros. But, they return a value instead of an AST, so they are more powerful than other languages’ macros.</p>
+</section>
+<section id="hygiene">
+<h2>Hygiene<a class="headerlink" href="#hygiene" title="Permalink to this heading"></a></h2>
+<p>Scheme macros are supposed to be “hygienic” in that they always evaluate expressions in the lexical environment of the macro’s definition site, as opposed to use site. But <span id="id4">[<a class="reference internal" href="../zzreferences.html#id83" title="Oleg Kiselyov. How to write seemingly unhygienic and referentially opaque macros with syntax-rules. In Third Workshop on Scheme and Functional Programming, 77. October 2002. URL: https://okmij.org/ftp/Scheme/Dirty-Macros.pdf.">Kis02</a>]</span> shows that in fact the environment of the use site is fully accessible through some tricks. The newer syntax-case allows explicit access through <code class="docutils literal notranslate"><span class="pre">datum-&gt;syntax</span></code>.</p>
+<p>Fexprs in contrast get an explicit environment. They can do staged lookup, <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">$env</span> <span class="pre">(eval</span> <span class="pre">$env</span> <span class="pre">(f</span> <span class="pre">$args))</span></code>, where an expression evaluates to an AST symbol and the AST symbol is looked up, and other weird things. <span id="id5">[<a class="reference internal" href="../zzreferences.html#id126" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span> chapter 5 discusses various hygiene-breaking problems and concludes they aren’t too worrisome.</p>
+<p><code class="docutils literal notranslate"><span class="pre">eval</span></code> is hard to compile, because it makes the full power of an interpreter available. But we can often simplify <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">(a</span> <span class="pre">+</span> <span class="pre">b)</span></code> to <code class="docutils literal notranslate"><span class="pre">eval</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">eval</span> <span class="pre">b</span></code>, reducing the amount of code that is evaluated each loop. If all of the variable lookups are static, we can furthermore optimize the environment to remove all unneeded variables. Hence we can recover macro-level performance on macros. Dynamic lookups need the full environment unfortunately. But dynamic lookups are essentially a REPL or debugging tool, so does not need to be too efficient, and we can warn that they are not optimized.</p>
+<p>Fexprs make the equational theory of ASTs trivial, (<span id="id6">[<a class="reference internal" href="../zzreferences.html#id126" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span>, chapter 15) in that ASTs can be completely deconstructed, so no two ASTS are behaviorally equivalent. But this is good, because it means the programmer’s intent can be fully examined. If <code class="docutils literal notranslate"><span class="pre">(\x.</span> <span class="pre">x)</span> <span class="pre">y</span></code> was equivalent to <code class="docutils literal notranslate"><span class="pre">y</span></code> then many DSL’s would not be possible. The behavior of programs containing fexprs is decidedly nontrivial and quite varied.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="LogicProgramming.html" class="btn btn-neutral float-left" title="Logic programming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Memory-Management.html" class="btn btn-neutral float-right" title="Memory management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

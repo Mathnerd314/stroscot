@@ -76,6 +76,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#logic">Logic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#debugger">Debugger</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#profiler">Profiler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ir-dump">IR dump</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Error messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
@@ -83,24 +86,26 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -144,7 +149,7 @@
 <h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this heading"></a></h2>
 <p>The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.</p>
 <p>Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.</p>
-<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id27" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
+<p>Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id40" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://doi.org/10.1145/3331545.3342594 (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>. Initially all user code starts out using one-argument functions.</p>
 <p>Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.</p>
 <p>Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.</p>
 </section>
@@ -169,19 +174,7 @@
 </section>
 <section id="optimization">
 <h2>Optimization<a class="headerlink" href="#optimization" title="Permalink to this heading"></a></h2>
-<p>The path from cloud to CPU is long, so there is a lot of caching in between:</p>
-<ul class="simple">
-<li><p>Physical registers (0.3 ns): managed by the CPU</p></li>
-<li><p>Logical registers (0.3 ns): assembly</p></li>
-<li><p>Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU</p></li>
-<li><p>Main Memory (0.1us-4us): assembly</p></li>
-<li><p>SSD (16us-62us): file APIs</p></li>
-<li><p>LAN (0.5-500ms): network stack</p></li>
-<li><p>HDD (3 ms): file APIs</p></li>
-<li><p>WAN (150ms): network stack</p></li>
-</ul>
-<p>Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application.</p>
-<p>For a lot of compilation decisions we don’t have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guide optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don’t use a code path very often, then we can de-optimize it and use a slow version. But if it’s a hot path then we want to streamline that path as much as possible.</p>
+<p>For a lot of compilation decisions we don’t have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guided optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don’t use a code path very often, then we can de-optimize it and use a slow version. But if it’s a hot path then we want to streamline that path as much as possible.</p>
 <p>With respect to optimization we have various criteria to minimize.
 * O0 - Compile time - when we are just running static verification
 * On - Run time - faster programs are more useful
@@ -237,7 +230,7 @@ the package set is also target-dependent</p>
 <li><p>stage 1: New compiler on old ABI <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code></p></li>
 <li><p>stage 2: New compiler on new ABI <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code></p></li>
 </ul>
-<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id102" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
+<p>We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. We can also run the test suite to compare outputs of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>. But we cannot compare performance of <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>, because they use different ABIs, and also <code class="docutils literal notranslate"><span class="pre">cB</span></code> may be buggy so <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code> may not behave exactly the same. We can also use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id143" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. Comment: PhD dissertation. Accepted by George Mason University, Fairfax, Virginia, USA's Volgenau School of Information Technology and Engineering in 2009. 199 single-side printed pages. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span>, compiling with multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, to increase our confidence in the correctness of the stage 2 compiler.</p>
 <p>For cross-compiling, we build stage 1 for the host and stage 2 for the target.</p>
 <p>The compiler depends on libraries. The bootstrap compiler does not provide updated libraries, so we must build the libraries for the Stage 1 compiler.</p>
 <p>build stage 2 compiler with the stage 1 compiler using the stage 1 package database ship with the stage 2 compiler). As such, the compiler is built with the identical libraries that it ships with. When running / interpreting byte code, we need to dynamically link packages and this way we can guarantee that the packages we link are identical to the ones the compiler was built with. This it is also the reason why we don’t have GHCi or Template Haskell support in the stage 1 compiler.</p>
@@ -357,6 +350,7 @@ So we would have to hack jupyter to get this to work.</p>
 </section>
 <section id="dynamic-execution">
 <h2>Dynamic execution<a class="headerlink" href="#dynamic-execution" title="Permalink to this heading"></a></h2>
+<p>benefit: erases distinction between compile time and execution time. Hence optimizes for compile+execute time.</p>
 <p>loading code at runtime
 - typecheck, JIT compile, return function pointer
 the function pointer doesn’t have to be machine code, it can be bytecode, so the function runs through an interpreter
@@ -394,6 +388,20 @@ then you change the head of the method to jump to the interpreter</p>
 <p>Creating the compiled file consumes extra CPU time and storage vs the interpreter. The compiled version runs more efficiently. Some errors are only detected during compilation.</p>
 <p>Julia - faster than Python, but JIT uses many slow trampolines</p>
 <p>Javascript - V8 is a fast modern JIT</p>
+<p>In a sea of nodes program dependence graph (PDG), nodes correspond to arithmetic/logic operations but also to control operations such as conditional jumps and loops. edges correspond to dependencies among operations.</p>
+<p>graphs corresponding to relatively small programs turn quickly into a tangle that is quite difficult to grasp. PDGs cannot be read directly without assistance; this affects debugging speed. PDGs remain an obscure topic in advanced compiler courses.</p>
+<p>In a CFG, nodes correspond to basic blocks, ordered sequences of operations that are always executed together. every operation belongs to a single basic block. edges correspond to control jumps across basic blocks. A CFG yields a structured, sequential view of the program that is easier to understand and debug, and is familiar for many systems engineers.</p>
+<p>To turn a PDG into a CFG, compute an assignment of operations to basic blocks (global schedule) and an ordering of operations within each basic block (local schedule).</p>
+<p>clustering basic blocks into (nested) loops, if-then-else structures, etc.
+coloring the basic blocks that are executed most often</p>
+<p>the value representation is optimized for the platform, and redundant checks are optimized out</p>
+<p>The Implementation of Functional Programming Languages
+Implementing functional languages: a tutorial
+Implementing Lazy Functional Languages on Stock Hardware: The Spineless Tagless G-Machine
+How to make a fast curry: push/enter vs eval/apply
+GHC also does strictness analysis and optimistic evaluation.</p>
+<p>a program is a dependency graph which is evaluated through a series of local reductions
+the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says “return the result.”</p>
 </section>
 <section id="logic">
 <h2>Logic<a class="headerlink" href="#logic" title="Permalink to this heading"></a></h2>
@@ -418,6 +426,35 @@ then you change the head of the method to jump to the interpreter</p>
 for functions, expressions, programs, etc.</p>
 <p>Use statistical sampling and hardware performance counters to avoid overhead.</p>
 </section>
+<section id="ir-dump">
+<h2>IR dump<a class="headerlink" href="#ir-dump" title="Permalink to this heading"></a></h2>
+<p>A good compiler can get 80% of the code to a fast-enough state. But nontrivial hot spots will still need hand-optimizing and tuning. At first it can be good to tweak the original code to get it to generate IR differently, but eventually the algorithm is set and the micro-optimizations matter, so you want to bake in the low-level implementation.</p>
+<p>With a wide-spectrum language the IR is the same language as the original, just using lower-level operations. So you can compile source-to-source or directly write in the IR. For example SQL is declarative but being able to write a functional program using the underlying sort, filter, merge anti-join, etc. operations would be useful.</p>
+<p>There are many levels to the pipeline, and each one is useful. For an interpreted program the only step that can’t be represented is actually running the program, e.g. converting <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;Hi&quot;</span> <span class="pre">exit</span></code> to output.</p>
+</section>
+<section id="id3">
+<h2>Error messages<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h2>
+<p>From <a class="reference external" href="https://elm-lang.org/news/compiler-errors-for-humans">Elm</a>:
+* prefer “runtime” errors of dynamically-typed languages
+* code location: show the line number, full line of input code, and mark range with <code class="docutils literal notranslate"><span class="pre">^^^`</span></code>
+* give every message a hint / suggested fix
+* color: red to draw attention to location, blue to separate messages
+* layout: general message above code, hints below code
+* VSCode integration</p>
+</section>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h2>
+<p>A feature is a distinct chunk of compiler functionality. A feature toggle allows turning on a feature conditionally in the code. This allows testing features and integrating them on the main branch while isolating them from other tests and software releases. Identifying the scope of a feature is simply searching for uses of the feature flag. The feature toggles are stored in a big record of booleans in one place, to make finding them easier.</p>
+<p>A feature can be alpha, beta, or stable.</p>
+<ul class="simple">
+<li><p>alpha: untested, may be changed or removed without automigration</p></li>
+<li><p>beta: well tested, details may change, automigration will be provided</p></li>
+<li><p>stable: beta but perceived as unlikely to change further</p></li>
+</ul>
+<p>Generally only alpha features need toggles, beta features have automigration so can be turned on all the time.</p>
+<p>All features should be documented in the commentary / reference in full detail, describing edge cases. Alpha features should be marked as alpha. Write a how-to if the feature is not obvious. Generally new features are advanced enough that they do not affect the tutorial.</p>
+<p>Moving a feature from alpha to beta should have a PR with documentation links and test case links. The actual process is to change the feature list to set the feature’s beta release date as the current date, so the compiler knows to warn that the feature declaration is no longer needed and to declare the feature when bootstrapping, and to modify all uses of the feature toggle in the code to the case where the feature is present (avoiding toggle debt).</p>
+</section>
 </section>
 
 
@@ -431,7 +468,7 @@ for functions, expressions, programs, etc.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

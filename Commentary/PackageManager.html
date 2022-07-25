@@ -23,7 +23,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Exemplary programs" href="Programs.html" />
+    <link rel="next" title="Comparison" href="Paradigms.html" />
     <link rel="prev" title="Objects" href="Objects.html" /> 
 </head>
 
@@ -57,13 +57,13 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="F2G2_example.html">F2 G2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Meta.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Package manager</a><ul>
@@ -83,14 +83,16 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="State.html">Imperative programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
@@ -133,18 +135,20 @@
 <section id="package-format">
 <h2>Package format<a class="headerlink" href="#package-format" title="Permalink to this heading"></a></h2>
 <p>One advantage of C/C++ is that it is the de-facto standard, so everyone has a method to distribute application binaries compiled in those languages. But this is only a small advantage as there is still no common format: there are self-extracting installers and then a variety of package formats. MSI and PKG are fiat standards for Windows and Mac, but they have been superseded by the stores and practically for programming people use application-specific package managers that don’t interface with the OS level package managers.</p>
+<p>Arch/pacman’s tar.xz seems fine.</p>
 </section>
 <section id="linux-distribution">
 <h2>Linux distribution<a class="headerlink" href="#linux-distribution" title="Permalink to this heading"></a></h2>
-<p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a system-level package manager must be built a bit more robustly to handle crashes/rollbacks. It also needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways as few people use it.</p>
-<p>The goal of the Linux distribution, compared to others, is automation and speed: all package updates are automatic, happening within 24 hours of release, and packaging new software is as simple as giving a package identifier / URL (and dependency information or build instructions, for C/C++ projects or custom build systems). Language-specific package repositories have grown to be bigger than most distros, so providing easy one-line installation of them is paramount.</p>
+<p>Once we have a package manager we can build a Linux distribution. Compared to a user-level package manager, a Linux distro package manager must be built a bit more robustly to handle crashes and allow rollbacks without breaking the system. It needs various build system hooks for dealing with tricky/non-standardized installation procedures, e.g. putting kernel/initrd images into the boot manager, building in a container with overlayfs to guard against untrustworthy packages, and using auditd to identify file dependencies in a bulletproof manner. As a basis for the distribution we can use small distros like LFS and Buildroot. It would also be good to figure out some way to import data from bigger distributions like Arch, Gentoo, or NixOS. Cross-compilation is a goal, but it isn’t strictly necessary and it’s easily broken anyways as few people use it.</p>
+<p>The goal of the Linux distribution, compared to others, is automation and speed. The package update process will be completely automated, including checking for releases, building, and testing. And this process should be fast so new versions of packages become widely available within 24 hours of release. This allows responding to security updates with the normal update cycle.</p>
+<p>Also, language-specific package formats and repositories have grown to be bigger than most distros, so providing easy installation of these kinds of packages is paramount. They should install via an identifier <code class="docutils literal notranslate"><span class="pre">pypi:pdfminer.six</span></code> or URL <code class="docutils literal notranslate"><span class="pre">https://pypi.org/project/pdfminer.six/</span></code> and not need any manual build instructions. Of course C/C++ projects will still need a machine-readable version of the dependency information and custom build systems will need manual build scripts to interface with them.</p>
 </section>
 <section id="upgrade-cycle">
 <h2>Upgrade cycle<a class="headerlink" href="#upgrade-cycle" title="Permalink to this heading"></a></h2>
 <p>A package has various versions. It also depends on other packages which can themselves be various versions.</p>
-<p>In a perfect world we would simply use the latest version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form “breakage: A-2 B-2 C-2”.</p>
-<p>There are in general two ways to resolve a breakage: either release new package versions that are compatible, or use old versions that work together. New versions require patch-writing, so cannot be automated. Hence the fast solution is to package old versions.</p>
-<p>Dependencies built with old versions can be handled in two ways. The platform/language may support side-by-side dependencies, where the version used by one dependency can be different from that used by other dependencies. But more commonly the symbols will conflict, and we have to use a version of each library that is compatible with all dependencies.</p>
+<p>In a perfect world we would simply use the latest “blessed” version of each package and they would all be compatible with each other. But there will inevitably be incompatible packages. Automated testing and manual marking will produce a list of breakages, of the form “combination A-2 B-2 C-2 fails”.</p>
+<p>Breakages can be resolved in two ways: either release new package versions that are compatible, or use old versions that work together. New versions are long-term the best solution but require patch-writing, so cannot be automated. Hence in the short term the only solution for a distro is to package old versions.</p>
+<p>Packaging old versions can be handled in two ways. The traditional way is that a dependency can only have one installed version, and we have to use a solver to find a version that is compatible with all applications. But often there is no solution - e.g. <code class="docutils literal notranslate"><span class="pre">python</span></code> cannot be both Python 2 and Python 3, so the packages using Python are split into two incompatible sets and one cannot mix them on a system. With side-by-side dependencies, the dependency lookup is modified to use additional data so that one application can use version A of a dependency and another application can use version B of a dependency in the same installation. E.g. applications lookup <code class="docutils literal notranslate"><span class="pre">python2</span></code> and <code class="docutils literal notranslate"><span class="pre">python3</span></code>.</p>
 </section>
 <section id="versioned-paths">
 <h2>Versioned paths<a class="headerlink" href="#versioned-paths" title="Permalink to this heading"></a></h2>
@@ -261,11 +265,11 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id74" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
+<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id99" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
 <p>For observations, if we assume that the probability of false positive / false success <span class="math notranslate nohighlight">\(P(p_k)\)</span> and false negative / false failure <span class="math notranslate nohighlight">\(P(n_k)\)</span> are fixed per commit, then the probability of observing <span class="math notranslate nohighlight">\(i\)</span> test failures and <span class="math notranslate nohighlight">\(j\)</span> test successes (in a given/fixed order) given that the build is broken / not broken is</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
-<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id104" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id103" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
+<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id145" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id144" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 17%" />
@@ -315,7 +319,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 </tr>
 </tbody>
 </table>
-<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id106" title="Celal Ziftci and Jim Reardon. Who broke the build? Automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
+<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id147" title="Celal Ziftci and Jim Reardon. Who broke the build? Automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
 The table treats the build as a unit; for added precision we should make one table for each failing test and a UI to aggregate them somehow. From this table, we can make decisions: reporting breakages, hiding flaky runs, blacklisting broken builds, blessing working revisions, etc. once a certainty threshold is reached.</p>
 <p>For deciding the next build, a simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; but this ignores flakiness. What we want is to maximize the expected <a class="reference external" href="https://en.wikipedia.org/wiki/Information_gain_in_decision_trees">information gain</a> from a run <span class="math notranslate nohighlight">\(X\)</span>.</p>
 <p>, i.e. something like</p>
@@ -393,13 +397,13 @@ If any test fails I bisect to figure out who should be rejected, but don’t rej
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Objects.html" class="btn btn-neutral float-left" title="Objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Programs.html" class="btn btn-neutral float-right" title="Exemplary programs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Paradigms.html" class="btn btn-neutral float-right" title="Comparison" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2020 Mathnerd314.</p>
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
