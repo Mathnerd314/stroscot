@@ -8,6 +8,17 @@ Justification
 
 The compiler needs a build system integrated so that intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.
 
+Also we need a way to do multi-language dependency management and ensure that there is a single version of each significant piece of code.
+
+Scale
+=====
+
+As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-sih files) on an isolated system, in around the same time.
+
+Of course this is not a from-scratch build - this is an incremental build, measuring the average build time for a small change to one file.
+
+No-op builds should be "instantaneous" (<100 milliseconds per `SO <https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria>`__), this is easy enough to do with a file change watcher.
+
 Overview
 ========
 

@@ -1,7 +1,7 @@
 Assembly
 ########
 
-A lot of languages aim for "no runtime overhead". But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat restrictive and assembly can be faster in some cases, so it would be nice to do assembly directly as well.
+A lot of languages aim for "no runtime overhead". But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat ill-defined and assembly can be faster in some cases, so it would be nice to do assembly directly as well.
 
 Architectures
 =============
@@ -18,20 +18,24 @@ Others to consider as well:
 * z/Architecture: really expensive, weird OS. Verdict: C backend.
 * SPARC: It's end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
 * 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
-* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority.
-* LLVM: The bitcode format is worth targeting at some point.
-* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures
+* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority. Verdict: Contributor.
+* LLVM: The bitcode format may be worth targeting at some point. Per blog posts the API is much more unstable than the IR, and generating the IR in memory and parsing it is about as fast as using the API. Verdict: Contributor.
+* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. And some things like tail calls are really hard to encode in C, or add significant compilation overhead, so it can't be the only option.
 
-From a design perspective supporting 2 architectures is not much different from supporting 10, it's just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
+From a design perspective supporting 2-4 architectures is not much different from supporting 10, it's just a larger set of cases, but 10 is more than twice the work of 4. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
 
 In addition to the basic ISAs, there are also extensions and `microarchitectures <https://en.wikipedia.org/wiki/Microarchitecture>`__ to consider. `PassMark <https://www.cpubenchmark.net/share30.html>`__ has a list of CPU shares, it's probably wildly skewed to gaming but it's better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I'll use my own CPU (AMD A6-3650 APU).
 
 Operating systems
 =================
 
-Linux for AMD64, Android for ARM, and later on Windows for AMD64.
+In planned order:
 
-We'll exclude Apple for now because its developer documentation sucks and its anti-competitive practices mean that getting Stroscot to work would require starting a war with Swift.
+1. Linux for AMD64, because it's what I'm typing on now
+2. Android for ARM, because it's my phone and it's easy to hook up
+3. Windows for AMD64, which I can emulate with WINE and get access to fairly easily
+
+We'll exclude Apple for now because their OS documentation sucks, they charge $100/year for a "developer license", and their anti-competitive practices mean that they would probably find some way to shut Stroscot down once Stroscot starts being a serious competitor with Swift. Of course someone who is willing to jump through all the hoops needed to placate Apple is welcome to try porting.
 
 Instruction database
 ====================
@@ -71,18 +75,18 @@ Definition of an instruction
 
 An instruction is a finite sequence of bytes (or bits, if there was a processor that did that). For a given instruction we can determine its length and index each byte. `sandsifter <https://github.com/xoreaxeaxeax/sandsifter>`__ determines the length of instructions by finding sequences ``seq`` for which ``seq|000`` does not trigger a page fault, but ``se|q00`` does (where ``|`` is a page boundary). `haruspex <https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/>`__ is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the instruction were speculated. Whatever the method, the general idea is that instructions are a level above bytes, like words in a character string.
 
-A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Running sandsifter and haruspex have found many undocumented instructions. Expecting to run these tools as part of a compiler build is pretty demanding; they take days. It's better to design for our validity database being inaccurate, and allow a syntax for writing undocumented instructions directly, ``instr('f0 0f')``. It's basically a ``.db`` statement, but whereas ``.db`` is used for file headers or data in the ``.data`` section, this is meant specifically for executable data.
+A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Sandsifter and haruspex have found many undocumented instructions. But expecting to run these tools as part of a compiler build is pretty demanding; they take days. It's better to design for our instruction database being inaccurate, and allow a syntax for writing undocumented instructions directly, ``instr('f0 0f')``. It's basically a ``.db`` statement, but whereas ``.db`` is used for file headers or data in the ``.data`` section, this is meant specifically for executable data.
 
-The issue with these literal instructions is that there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.
+Unfortunately with these literal instructions there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.
 
 Templates
 ---------
 
-The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addresses, and immediate values.
+The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values.
 
 The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.
 
-Intel has variable-length instructions and the docs seem to use byte-based templates, for example 64-bit ADCX is ``66 <REX.w> 0F 38 F6 <MODRM>``. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think dumping Xed's `iform list <https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html>`__ and using Xed directly for encoding is the way to go. It doesn't match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates.
+Intel has variable-length instructions and from the docs seems to use byte-based templates, for example 64-bit ADCX is ``66 <REX.w> 0F 38 F6 <MODRM>``. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think extracting Xed's `iform list <https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html>`__ and using Xed for encoding is the way to go. It doesn't match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates abstract over the complications of MODRM.
 
 ARM has fixed length instructions and uses a bit-based format, for example A64 ADDS is ``sf 0101011 shift* 0 Rm**** imm6***** Rn**** Rd****``. Here each name is an operand and the stars represent extra bits of the operand - the operand is a fixed-length bitstring. hs-arm `seems <https://github.com/nspin/hs-arm/blob/8f10870a4afbbba010e78bd98e452ba67adc34e0/nix-results/harm.harm-tables-src/gen/Harm/Tables/Gen/Insn.hs>`__ to pull out this information just fine, although its operand names are a little weird.
 
@@ -91,15 +95,19 @@ So the information for each template is:
 * form name (string)
 * explicit operands (list)
 
-  * name (dest, src1, xmm1, etc.) - optional
+  * name (dest, src1, xmm1, etc.)
   * type:
 
     * immediate (range/size b, z, etc.)
     * register class (class GPR8, GPRv, XMM, etc.)
     * memory (size b, v, etc.)
-* encoding function ``[Operands] -> Bits``
 
-We also want to store Xed's isa_set field, the condition on CPUID for this instruction to work, and the valid modes (32-bit, 64-bit, real, protected, etc.). There are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.
+* encoding function ``[Operands] -> Bits``
+* Xed's isa_set field
+* the condition on CPUID for this instruction to work
+* the valid modes (32-bit, 64-bit, real, protected, etc.)
+
+The isa_set field and friends are because there are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.
 
 Affected state
 --------------
@@ -110,13 +118,11 @@ The affected things depend on the instruction (and the operands). Where can we g
 
 It seems possible to automatically determine by fuzzing (weighted towards special cases like 0 and 1). But it's probably really slow and the result is somewhat suspect - it can't determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.
 
-From the Intel docs there is a little ``(r,w)`` or ``(r)`` after the operands. But this doesn't include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info.
-
-Xed has info on read/written flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has ``USES = [MXCSR]``. NASM and gas don't seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don't have MXCSR.
+In the Intel docs there is a little ``(r,w)`` or ``(r)`` after the operands. But this doesn't include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info. Xed has info on read/written standard flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has ``USES = [MXCSR]``. NASM and gas don't seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don't have MXCSR. So I guess Xed is the best data source but we will have to use EXEgesis somehow to scrape the affected flags, and then manually mark them as read/write/conditional or just leave it at coarse reordering information.
 
 For ARM modifying asl-interpreter should give info on flags etc.
 
-The schema:
+So the affected state database schema:
 
 * form name
 * affected things (list)
@@ -131,8 +137,8 @@ The schema:
   * read: read / not read / conditionally read / unknown
   * written:
 
-    * value: constant,  copied from input, read + constant, complex computation, undefined, ...
-    * not written, conditionally written, unknown
+    * value: constant,  copied from input, input + constant, undefined/reserved, complex computation
+    * written with value, not written, conditionally written with value, unknown
 
 * possible exceptions
 
@@ -147,7 +153,7 @@ Classification
 
 There are a lot of instructions. We can classify them based on their affected state:
 
-* data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions
+* data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). Memory prefetch/barrier are also data instructions.
 * call: reads the program counter
 * jump: sets the program counter to something other than the next instruction
 * branch: conditional jump depending on the state of various flags/registers
@@ -155,7 +161,7 @@ There are a lot of instructions. We can classify them based on their affected st
 * privileged: requires privileged processor state to execute successfully (e.g. ring 0)
 * nop: does nothing
 
-For code layout knowing the possible execution paths is important. non-data instructions have to be handled specifically.
+For code layout knowing the possible execution paths is important. Non-data instructions have to be handled specially.
 
 Performance
 -----------
@@ -164,7 +170,7 @@ the data present in LLVM for instruction scheduling (such as uops, execution por
 
 If PSTATE.DIT is 1 the execution time is independent of the values.
 
-Attributes / metadata
----------------------
+Memory model
+------------
 
-* concurrency / memory model
+A memory model is needed to determine if reordering data writes will change the behavior of a concurrent program.

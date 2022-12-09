@@ -9,7 +9,15 @@ Verification
 
    -- `Peter G. Neumann <https://www.technologyreview.com/2002/07/01/40875/why-software-is-so-bad/>`__
 
-Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior. Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a fairly natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazingly robust programs to emerge.
+.. epigraph::
+
+   Compile-time static checking is wonderful, and as much as possible should be done 100% statically so that people cannot write incorrect programs.
+
+   -- `Linus Torvalds <https://lkml.org/lkml/2022/9/19/1250>`__
+
+Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior, for example that array accesses are not out of bounds. In most cases these can be ensured statically by the verification system.
+
+Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazingly robust programs to emerge.
 
 Scalability
 ===========
@@ -18,41 +26,78 @@ Verification suffers from *extreme* scalability limitations. "State space explos
 
 To get around this there are various tricks:
 
-* coarsen: combine "equivalent" program states into abstract program states, where equivalence is defined relative to the properties we are checking
+* coarsen: combine "equivalent" states into abstract states, where equivalence is defined relative to the properties we are checking
 * approximate: check a property that implies or is implied by the property we interested in. Can give positive / negative result but failure provides no information.
 * optimization: check individual states really fast, so larger state spaces can be checked in a given amount of time
 * smart fuzzing: change the order states are explored. Speeds up verification of some properties, but verifying the negation still requires exploring the full state space.
 
 TLA+ can't check deep properties on 200KLOC, but can affordably verify them on 2KLOC. And meanwhile we can check "shallow" properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and clever design.
 
-This will likely be an area of development forever. There is no panacea: the properties we are interested in are non-trivial, so by Rice's theorem they are complexity at least :math:`\Sigma^0_1` and any specific algorithm will fail to produce an answer for some programs. We have options for the programmer:
+Rice's theorem and `halting problem approximation results <https://en.wikipedia.org/wiki/Halting_problem#Approximations>`__ show that no algorithm can evaluate a nontrivial property with perfect accuracy; there is an upper limit to accuracy (below 1) that no algorithm can surpass consistently. But these results do not prevent evaluating a nontrivial property with possible outputs Yes/No/IDK to a reasonable level of accuracy on practical programs, which have structure not found in random programs. Still, the verifier is developed on a "commercially reasonable effort" basis, where it is a bug in the compiler if the analysis returns IDK on a program, but the bug will only be fixed given sufficient funding and evidence of the usefulness of the program (e.g. that it works in other languages). So verification will likely be an area of development forever. There is no panacea, but we can provide options for the programmer if the analysis fails:
 
-* conservative: reject programs for which the algorithm fails as wrong (like ``-Werror``)
-* deferred: insert runtime checks if needed and throw an error when the property fails (like Haskell's ``-fdefer-type-errors``)
-* override: behave as if the algorithm gave answer A (could crash at runtime)
+* reject: reject programs for which the algorithm fails as wrong (like ``-Werror``)
+* defer: insert runtime checks if needed and throw an error when the property fails (like Haskell's ``-fdefer-type-errors``)
+* override: behave as if the algorithm gave answer A (could crash at runtime, but allows bypassing bugs). More complex is to make the verifier scriptable, so that tactics can be specified and the verifier does not have to search through exponentially large spaces.
 
 For definite bugs the options are similar, although the override option implies a somewhat foolish promise that "poison" inputs will be avoided, in exchange for a minimal speedup and the loss of safety.
+
+The seL4 microkernel (8700 lines of C) has been successfully statically modeled and verified. Linux is 7.9 million lines of C (>50% drivers) and has not been. But simple type-checking-like things are probably not the blocker; most effort in the seL4 verification went towards concurrency things like interrupts, data races, and IPC.
 
 Implementation
 ==============
 
-The implementation in Stroscot will be "from scratch" - custom SAT/SMT solver, custom state space explorer, etc. The main reason is to avoid the overhead present in existing tools of translating to/from the constraint specification languages such as SMTLIB or specialized XML formats. But it will use the techniques from various existing implementations.
+The implementation in Stroscot will be "from scratch" - custom SAT/SMT solver, custom state space explorer, etc. The main reasons are to avoid the overhead present in existing tools of translating to/from the constraint specification languages such as SMTLIB or specialized XML formats, and to allow Stroscot to be self-hosted. But the implementation will use the techniques from various existing implementations.
 
-model checkers:
-[CBMC](https://www.cprover.org/cbmc/)
+The field of verification is quite large but is centralized around various subjects/competitions:
 
-The state-of-the-art seems to be the ULTIMATE framework that does abstract interpretation of the program via Buchi automata. CPAChecker has also done well in SV-COMP using an extension of dataflow analysis.
+* model checkers: `CBMC <https://www.cprover.org/cbmc/>`__, Verdi, Ironfleet, JSCert, Cosette, FSCQ, Chapar, CertiKOS, Linksem, miTLS and HACL*, Versat and IsaSAT, CakeML
+* Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, KLEE, `NASA’s Java Pathfinder <https://github.com/javapathfinder>`__, jCUTE, SAGE
+* SV-COMP:
+
+    * Overall: `2LS <https://github.com/diffblue/2ls>`__, `CBMC/CProver-witness2test <https://www.cprover.org/cbmc/>`__, `CoVeriTeam-Verifier (AlgoSelection, ParallelPortfolio) <https://gitlab.com/sosy-lab/software/coveriteam>`__, `CPAchecker, CPALockator, CPA-BAM-BnB, CPA-BAM-SMG, CPA-witness2test <https://cpachecker.sosy-lab.org>`__, `DIVINE <https://divine.fi.muni.cz/>`__, `ESBMC-kind, ESBMC-incr <https://esbmc.org/>`__, `Goblint <https://goblint.in.tum.de/>`__, `Symbiotic, Symbiotic-Witch <https://github.com/staticafi/symbiotic>`__, `UAutomizer, UGemCutter, UKojak, UTaipan <https://ultimate.informatik.uni-freiburg.de>`__, `VeriFuzz/VeriAbs <https://www.tcs.com/designing-complex-intelligent-systems>`__
+    * Concurrency: `CSeq <https://gitlab.com/emersonwds/cseq>`__, `Lazy-CSeq <https://github.com/omainv/cseq/releases>`__, `Dartagnan <https://github.com/hernanponcedeleon/Dat3M>`__, `Deagle <https://github.com/thufv/Deagle>`__, `EBF <https://github.com/fatimahkj/EBF>`__, `Locksmith <http://www.cs.umd.edu/projects/PL/locksmith/>`__
+    * Java: `COASTAL <https://www.cs.sun.ac.za/coastal>`__, `GDart <https://github.com/tudo-aqua/gdart-svcomp>`__, `Java-Ranger <https://github.com/vaibhavbsharma/java-ranger>`__, `JayHorn <https://github.com/jayhorn/jayhorn>`__, `JBMC <https://github.com/diffblue/cbmc>`__, `JDart <https://github.com/tudo-aqua/jdart>`__, `SPF <https://github.com/SymbolicPathFinder/jpf-symbc>`__
+    * Reachability: `BRICK <https://github.com/brick-tool-dev/BRICK-2.0>`__, `Crux <https://crux.galois.com/>`__, `Theta <https://github.com/ftsrg/theta>`__, `Gazer-Theta <https://github.com/ftsrg/gazer>`__, `Graves-CPA <https://github.com/will-leeson/cpachecker>`__, `LART <https://github.com/xlauko/lart>`__, `Pinaka <https://github.com/sbjoshi/Pinaka>`__, `PeSCo <https://github.com/cedricrupb/cpachecker>`__
+    * Overflow checking: `Frama-C-SV <https://gitlab.com/sosy-lab/software/frama-c-sv>`__, `Infer <https://fbinfer.com/>`__
+    * Loop invariants: `Korn <https://github.com/gernst/korn>`__
+    * Memory safety: `PredatorHP <https://www.fit.vutbr.cz/research/groups/verifit/tools/predator-hp/>`__, `SESL <https://spencerl-y.github.io/SESL/>`__
+    * Software systems: `SMACK <https://smackers.github.io/>`__
+
+* `TermComp <https://termcomp.herokuapp.com/Y2022/>`__: TRS: `AProVE <https://aprove.informatik.rwth-aachen.de/references>`__, matchbox, MnM, `MU-TERM <http://zenon.dsic.upv.es/muterm/index.php/documentation/>`__, NaTT, NTI+cTI, TTT2 (Tyrolean Termination Tool 2); Higher-order: SOL, Wanda; C: irankfinder, LoAT; Complexity: tct_trs;
+* `Rewrite engines competitions <https://web.archive.org/web/20200516055926/http://rec.gforge.inria.fr/>`__
 
 
-Verdi, Ironfleet, JSCert, Cosette, FSCQ, Chapar, CertiKOS, Linksem, miTLS and HACL*, Versat and IsaSAT
-CakeML
+VU - Vrije Universiteit Amsterdam
 
-Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, KLEE, [NASA’s Java Pathfinder](https://github.com/javapathfinder), jCUTE, SAGE
+    Prof.dr. Jan Willem Klop (VU)
+    Dr. Roel de Vrijer (VU)
+    Drs. Jörg Endrullis (VU) - Jambox termination tool
+    Dr. Clemens Grabmayer (VU)
+    Drs. Helle Hvid Hansen (VU)
+    Dr. Dimitri Hendriks (VU)
+    Drs. Ariya Isihara (VU)
+    Femke van Raamsdonk (VU)
+
+UU - Universiteit Utrecht
+
+    Vincent van Oostrom (UU)
+    Albert Visser (UU)
+    Clemens Grabmayer (UU)
+    Jeroen Ketema
+
+CWI Amsterdam
+
+    Dr. Frank de Boer (CWI)
+    Drs. Clemens Kupke (CWI)
+    Prof.dr. Jan Rutten (VU/CWI)
 
 
-Another goal: allow creating custom optimizations with formal proofs of their correctness
 
-errors produce a concrete program trace of a failing path, which should be easy to turn into a good error message or even allow interactive debugging.
+
+
+
+
+
 
 Configurable Program Analysis
 =============================
@@ -104,10 +149,12 @@ which consists of
 
 * A set :math:`C` of concrete states. Many papers use a simple state model consisting of a program counter/location and a data store mapping variable names to integers.
 * A set :math:`Ops` of program operations (alphabet). Typical operations include:
+
   * Computation, where the state evolves with no input
-  * Unmodeled parts of the system; e.g. IO operations ``Read 1`` for a read that returned 1 or ``Write`` for a write.
-  * Havoc operations, similar to unmodeled operations
-* A concrete transition function :math:`\mathord{\transconc{}} \subseteq C \times Ops \times C` defining a (labeled) transition relation of how concrete states evolve into other concrete states. There is at most one concrete state succeeding a given concrete state and program operation, but we allow halting states with no available operations and a state to evolve differently with different operations. We define the notation :math:`\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}`. We write :math:`c \transconc{o} c'` if :math:`(c, o, c') \in \mathord{\transconc{}}` and :math:`c \transconc{} c'` if there exists an :math:`o` with :math:`c \transconc{o} c'`.
+  * External interactions of the system; e.g. IO operations ``Read 1`` for a read that returned 1 or ``Write`` for a write.
+  * Havoc operations, similar to external operations
+
+* A concrete transition function :math:`\mathord{\transconc{}} \subseteq C \times Ops \times C` defining a (labeled) transition relation of how concrete states evolve into other concrete states. Papers usually allow at most one concrete state succeeding a given concrete state and program operation, but it is possible to be nondeterministic, and we allow halting states with no available operations and a state to evolve differently with different operations. We define the notation :math:`\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}`. We write :math:`c \transconc{o} c'` if :math:`(c, o, c') \in \mathord{\transconc{}}` and :math:`c \transconc{} c'` if there exists an :math:`o` with :math:`c \transconc{o} c'`.
 
 A concrete path :math:`\sigma = \langle (c_1, o_1 , c_2 ), (c_2 , o_2 , c_3 ), \ldots , (c_{n-1} , o_{n-1} , c_n ) \rangle` is a sequence of consecutive concrete states. A concrete path is called a program path if it starts with the initial state :math:`c_I`. A path is called feasible if the transitions are concrete transitions, :math:`c_i \transconc{o_i} c_{i+1}`; paths are assumed to be feasible unless declared infeasible. A state :math:`c` is called reachable if there exists a feasible program path from :math:`c_I` to :math:`c`.
 
@@ -119,7 +166,7 @@ Dealing with concrete states will immediately lead to state explosion. So we int
 
 We have to tie this to our program. The domain *covers* the program if each reachable concrete state is contained in some abstract state in :math:`{\cal E}` and each operation encountered during a feasible path is contained in some abstract operation in :math:`G`. The domain is *compatible* with the program if :math:`(e,g,e')\in\leadsto \iff \exists c\ in e, c' \in e', o \in g. c,o,c' \in \mathord{\transconc{}}`.
 
-To support loop acceleration we could extend our notion of compatibility to allow mapping multiple concrete state transitions to one abstract transition. But which abstract state would the intermediate concrete states map to? It seems better to model loop acceleration as a transformation on the concrete state transition graph that is reflected into a transformation on the abstract state graph.
+To support loop acceleration we could extend our notion of compatibility to allow mapping multiple concrete state transitions to one abstract transition. But which abstract operation would the intermediate concrete operations map to? It seems better to model loop acceleration as a transformation on the concrete state transition graph that is reflected into a transformation on the abstract state graph.
 
 The simplest covering domain is :math:`({C},{Ops})`. Slightly more complicated is the domain containing an abstract state for each program location. But the real meat lies in creating an abstract domain with complicated predicates on concrete states.
 
@@ -135,8 +182,6 @@ CPAChecker algorithm
 Properties
 ==========
 
-Rice's theorem shows that a program cannot evaluate a nontrivial property of another program with perfect accuracy. But it does not prevent a program from evaluating a nontrivial property with possible outputs Yes/No/IDK to a reasonable level of accuracy. So all of these properties are done on a "best-effort" basis, where it is a bug in the compiler if the analysis returns IDK, but such bugs are unlikely to be fixed on a reasonable timeframe.
-
 The most common property is membership in a set (bound checks, type safety, etc.). But there are "temporal" properties which cannot be described as sets - liveness, termination etc.
 
 Reachability
@@ -149,9 +194,17 @@ To prove unreachability we exhibit a covering domain with no concrete error stat
 Assertions
 ~~~~~~~~~~
 
-Side-effect free.
+Assertions come in two flavors: true assertions, written inside the function for sanity-checking purposes, and contracts, which are external to the function and show up in the documentation. The difference is that contracts fail at the point of the contract definition, while true assertions only fail once the function is used. Technically a contract like ``a : Int -> Int`` is exercising a function over all possible integers.
 
-Assertions written inline, for sanity-checking. Not documented.
+If an assertion expression doesn't evaluate to true or false then the expression is not correct and has an error. The assertion condition must be side-effect free.
+
+For example, an algebraic data type declares a set of cases. With an assertion that the function produces a value of some type given the ADT, the compiler checks that every ADT case is covered by the code and produces the right value type.
+
+A dead code (coverage checking) pass checks that all the code is exercised by the assertions or by the program proper.
+
+Assertions are not required. They are useful, but the operational semantics depends on them only as part of the general exception-handling mechanism.
+
+
 
 assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
 assume expr - prunes traces where expression is false. backtracking implementation at runtime.
@@ -169,6 +222,13 @@ Invariants are just assertions in loop bodies.
 Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``.
 
 Java's complex form ``assert expr : exception`` that throws ``exception`` on failure seems pointless.
+
+Dead code
+~~~~~~~~~
+
+Reachability can also find dead (unreachable) code, like unused declarations, unused variables, or unsatisfiable conditions. Code is only dead if it is unreachable on all compilation configurations, so the build configurations must be interfaced.
+
+Many exceptions are unwanted, e.g. "no patterns matched in case". Reachability can verify these are dead code.
 
 Termination
 -----------
@@ -191,13 +251,15 @@ Both reachability and termination can be expressed in CTL*. There is an even mor
 Equivalence
 -----------
 
-Equivalence of pure programs is based on comparing results over all possible inputs.
+Since the semantics of method dispatch and concurrency are non-deterministic, we would like to verify that the program is well-defined. This takes the form of checking that all execution paths of a program produce equivalent results. It's similar to confluence but a little weaker.
+
+Equivalence of pure programs is based on comparing the return value, and discarding exceptions.
 
 Equivalence of I/O programs is based on comparing events: we represent all I/O actions in a datatype and then compare as for pure programs.
 
 In the literature there is a notion of bisimulation. But here our state transition graph includes computation transitions, while the amount of computation is not relevant for equivalence. But of course bisimulation implies equivalence.
 
-One use for equivalence is finding dead or redundant code. For example, if the program is equivalent when commenting out a line of code, or if a boolean expression is reversed.
+Equivalence gives a stronger notion of dead or redundant code. For example, if the program is equivalent when commenting out an I/O statement, or if all the paths of a conditional statement are the same.
 
 Supercompilation
 ----------------
@@ -212,18 +274,6 @@ Incremental program analysis
 Another issue is incremental analysis. Checking is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation :cite:`jakobsDifferentialModularSoftware` there doesn't seem to be any major breakthrough. Marking the analyzer's computation steps in the general incremental build framework is probably sufficient.
 
 since you can check all these conditions it's a very powerful analysis that can also check buffer overflows and array bounds and resource use :cite:`albertResourceAnalysisDriven2019` and things of that nature.
-
-Optimizations
-=============
-
-A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of the performance:
-
-* Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify opportunities for sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn't increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in :cite:`mauborgneRepresentationSetsTrees1999`.
-* Inlining - Going through :cite:`peytonjonesSecretsGlasgowHaskell2002`, a lot of the cases are handled by partial evaluation / optimal reduction that moves cuts down and exposes/eliminates case statements. But we also want to do it inside recursive functions etc., which means we need a strictness/termination analysis.
-* Constant Folding - partial evaluation of the code includes this
-* Loop unrolling, code motion - These are optimizations on mutable variables, so will have to wait until a mutability story is worked out. But unrolling recursive functions could prove useful, as part of inlining.
-* Dead code elimination - Unused expressions aren't connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.
-* Peephole - this is instruction selection for the backend. LLVM might help, or find a JIT library.
 
 SAT solving
 ===========

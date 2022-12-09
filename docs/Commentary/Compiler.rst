@@ -3,11 +3,6 @@ Compiler design
 
 Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly. Currently Stroscot is aiming for AOT with profiling.
 
-Scale
-=====
-
-As of 2016, The Google repo has 1 billion files, of which 9 million are code
-
 Pipeline
 ========
 
@@ -19,26 +14,83 @@ Currying is handled by a pass that creates partially-applied functions using the
 
 Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.
 
-Re LLVM IR vs API: the API is much more unstable than the IR. Also a blog post I read suggested that the IR and the API were about the same as far as performance.
+Error levels
+============
 
-Flags
-=====
+In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and either modifies the source file(s) in-place or outputs a patch. There is also the value 'default' to set it to the default of these 4 levels.
 
-In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and modifies the source file(s) in-place.
+Stroscot is designed so that as little as possible is a hard error. Warnings allow continuing with compilation and finding all the errors in a file, hence produce more information than errors that simply stop at the first one. This choice is inspired by the ``--keep-going`` option in many build systems and the ``-fdefer-type-errors`` flag in GHC. In both cases a hard error is turned into a diagnostic; this is clearly a trend.
 
-There is also the value 'default' to set it to the default.
+Onw reason to stop at the first error is to avoid wasted CPU cycles, but CPU is cheap these days and incremental building means going as far as possible is probably cheaper than rerunning from scratch each time. So Stroscot always processes as far as possible. Another reason is to avoid console scroll; for this there is a flag ``-ferror-limit=123`` to limit output.
+
+Werror
+------
+
+The traditional Werror that turns warnings into errors is still an option, for those who like rerunning builds by hand at the command line and don't want to scroll through pages of output. But it is not recommended for use in build scripts. The main issue is that it introduces a hard dependency on the compiler's set of warnings. For example, suppose:
+
+* Compiler version A has W1=ignore, W2=warning
+* Compiler version B has W1=warning, W2=ignore, W3=warning
+
+W2 is fine and will not cause any problems upgrading. But W1 and W3 will break the build when upgrading.
+
+To solve this Stroscot has warning presets so you can use a list of options like ``--warning-preset=A -W3=error -Werror`` and selectively enable new warnings, upgrading incrementally. Of course this doesn't help with downgrading to a compiler version where the preset is not available, and there is still the issue of individual compiler warnings becoming smarter and finding errors where they didn't before.
 
 Error messages
 ==============
 
-Since Stroscot uses model checking, most failures will end up producing a counterexample. The counterexample may not be minimal, but it is much easier to debug a concrete instance than to try to figure one out from contextual information.
+Error messages are the UI of the compiler. Languages such as `Elm <https://elm-lang.org/news/compiler-errors-for-humans>`__ and Rust claim to have invested significant effort into improving their error messages, so Stroscot probably should too. Fortunately this has been researched since 1965, with a recent literature survey in :cite:`beckerCompilerErrorMessages2019`, so we aren't going in blind.
 
-For source locations we produce the start/end span of two (filename, line number, column number) tuples. Go uses an efficient memory-map-like model from these tuples to integers, to avoid passing around strings. But it isn't clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash, byte offset) as a 64-bit code, since then we can compare before/after within files and quickly check if two locations are equal.
+A distinction that seems useful is malformed program vs violated contract.
 
-Werror
-======
+* A malformed program is outside the specifications of the language, e.g. an unbound identifier or syntactic error. With non-textual editing, it becomes impossible to insert malformed constructs, so the only malformed programs are incomplete programs. Programs are typically malformed due to "trivial" parse errors, so typically we would like to find a minimal correction to apply to make the program syntactically correct, so that we can find more interesting errors.
 
-Werror is an option, as usual. If you want a hard dependency on the compiler version, then feel free to use it, otherwise it's best to leave it unset so that users can use different compiler versions that emit different warnings.
+* A program with a violated contract is more interesting: it has a defined runtime semantics per the language semantics, but a type signature or assertion is violated, meaning that the programmer's intentions are not satisfied. Typically we want to output a "crippled" program that fails when it encounters the error, rather than attempting a fix.
+
+It is probably worth splitting the ID numbers into two separate sets, Mnnn vs Cnnn, for malformed vs contract.
+
+One issue is whether an error is reported (completeness) and if so when, either compile-time or runtime. Generally runtime errors have the execution trace available and produce more precise information, but are incomplete, while compile-time errors are reported earlier and are complete for some criteria. In Stroscot this distinction is muddied because we use model checking. Model checking essentially simulates all runs of a program at compile time, so is complete and reports back early. But a model checking failure will end up producing a counterexample, basically a failing runtime execution trace, so we get the precise information. This can be a bad example so we need to apply minimization. But generally, So Stroscot gets the best of both worlds. Of course the model checking itself is tricky to implement efficiently. But a small price to pay for avoiding confusing type inference errors.
+
+Two more issues are locality and source mapping, ensuring the error message is reported at the location where the fix should be directed. A missing close brace may lead to an error only at EOF. Indentation sensitivity mitigates this particular error. Another issue is something like ``a = <expr>; ...; assert (a != 0)``, where the assertion is much later than the creation of the value that caused the error. We need a summarizer that tries to guess the important variables and outputs the callstack or other traditional details. Macros have similar problems - is the error in the macro use site or definition site?
+
+Richer error handling such as a location system also introduces a performance concern, requiring more compiler engineering. For example we need an efficient mechanism for storing the start/end source location spans, consisting of two (filename, line number, column number) tuples, as passing around fully formatted strings would be slow. Go uses a map between locations and integers where file A maps to 1-100 and file B maps to 101-200, so that e.g. 150 maps to file B byte offset 50. But it isn't clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash : U32, byte offset : U32), since files are unlikely to be larger than 4 gigabytes. Whatever the solution, we should be able to compare same file, before/after within files, and if two locations are equal.
+
+The wording may be important. A Java editor called Decaf intercepted and re-worded 30 of the most frequent Java error messages, and was found to significantly reduce error frequency and indications of struggling students. However a different study did not, suggesting the effects are weak. Still, some basic attempt at clear and friendly language is appropriate. Specific guidelines from :cite:`beckerCompilerErrorMessages2019`:
+
+* Aim for readability and ensure comprehension by using plain/simple language, familiar vocabulary, and clear/concise/brief messages. Avoid cryptic jargon. There are multiple formal measures of readability for ‘normal’ prose, such as the Fry Readability Graph, Flesch formula, Dale-Chall formula, Farr-Jenkins-Paterson formula, Kincaid formula, Gunning Fog Index, and Linsear Write Index, but nobody has applied these to programming errors or devised a formal readability metric.
+
+* Reduce cognitive load: Include all relevant information and reduce redundancy so the user does not process the same information twice. Use multiple modalities to provide feedback. The error message should use the minimal amount of boilerplate so that a developer can process the information quickly. But there should also be enough that someone who has never seen the message before can understand it.
+
+* Provide context: Provide information about the relevant program code, such as the location of the error (explicitly or as an IDE annotation) and relevant symbols, identifiers, literals, and types involved in the error, as well as the program state such as variable values and stack traces. If an error message can appear in different contexts or could be sourced to multiple locations then disambiguate.
+
+* Use a positive tone, and generally aim for a consumer UX: Novices are shaken, confused, dismayed, and discouraged by violent, vague, or obscure phrasing. Messages should be polite, restrained, friendly, and encouraging, making the computer seem subservient. Negative words like incorrect, illegal, and invalid should be avoided. Also `general UX guidelines <https://www.oreilly.com/library/view/designed-for-use/9781680501902/f_0298.xhtml>`__ advise to not place fault or blame, scold, or condemn the user (programmer). Sarcastic humor also seems counter-productive, although minor 'fun' humor may be OK but runs against briefness. Another `study <https://faculty.washington.edu/ajko/papers/Lee2011Gidget.pdf>`__ found personified I-messages such as "I don’t know what this is, so I’ll just go on to the next step" improved novice's knowledge acquisition rates and thus amount of levels completed in a set time. Of course `others <https://www.codewithjason.com/whos-blame-bad-code-coders/>`__ argue the coders are objectively the ones at fault, but this seems to be an impossible to win argument, like arguing that your girlfriend is fat. Even if it's true winning the argument doesn't make anyone better off. Psychology is weird. For children, the computer should not appear as if it is a sentient human, so as to develop the correct mental model.
+
+* Provide a catalog of similar error examples (`Elm <https://github.com/elm/error-message-catalog>`__, `Rust <https://doc.rust-lang.org/error-index.html>`__): Providing handpicked, worked examples of how each error message is triggered can improve novices' understanding and also function as a compiler test suite. Particularly a side-by-side incorrect/correct layout with the differences highlighted has been studied and found helpful. However, brevity offers many advantages, and a study showed novice programmers can be confused as to whether the example code in the message is their code. There is also the issue of overdependence on programming by example. As such relegating the examples to a separate webpage, so there is a clear separation of example from actual, seems the best approach. For example, Rust and Microsoft give each error message a unique ID, and then has a page of all the IDs and their description. This catalog and ID mechanism has not been studied in the literature and poses a discoverability hazard, but a hyperlink in the error message seems sufficient - showing the catalog entry in the error message would be documentation overkill unless it is really short. The quintessential error catalog is Stack Overflow, which indexes both standard error messages and obscure library codes or memory addresses. Popular responses are upvoted and can be quite useful to both novices and experts. Compared to formal reference documentation, the catalog can provide briefer and more concrete and specific assistance. With a feedback loop between catalog and compiler, error message codes can be refined to cover common issues more precisely. However it should be noted that there is little point in trying to organize the catalog with categorization - agreement among category raters was only 60% in :cite:`mccallNewLookNovice2019`. It is better to use a flat list and focus effort on specific tricky error codes rather than attempting to find patterns among errors.
+
+* Show solutions: The actual intent of the programmer may not be clear, but the compiler can analogize from the error catalog or other sources to guess what the programmer likely intended, and either provide a literal solution or sketch the requirements a solution must satisfy. Although debatable, my definition of the difference between an example and a solution is that the solution is phrased using specific information from the actual code, whereas the example is generic to the error ID. Also, the solution is produced only when there is a high degree of certainty for its applicability, avoiding leading the user down the wrong path. When guided appropriately by solutions, novices can repair errors approximately as fast as experts. With IDE integration, solutions may be interactively accepted and applied automatically instead of being transcribed by the user, allowing even experts to benefit from faster fixing. Elm says that every error should have a solution - this is probably overkill. Solutions are doable for trivial errors like unbound identifiers or uncaught exceptions, but many semantic errors have no obvious solution and can take weeks to work out.
+
+* Allow dynamic interaction: A simple example is Rust's ``--explain`` flag that gives more context for some errors and for others reproduces the explanation from the catalog. This is a "tell-me-more" mechanism that allows requesting more error details. In Stroscot's case, where many contract errors take the form of failing program traces, another useful tool would be interactive omniscient debugging of these failing traces, so that the programmer can take a failure of ``assert (a != 0)`` and say "where did ``a`` come from?". Both of these cannot be the main interface, because the catalog is verbose and debugging is too time-consuming, but as options they are quite helpful.
+
+* Provide cognitive scaffolding: A user may form the wrong conceptual model and/or move too quickly through writing the program. They then have a false sense of accomplishment. It is then the error messages's job to dislodge incorrect conceptual models and point out hasty errors. The user may also have misread the problem, but solving the wrong problem is a general issue in cognition, including startups launching and failing due to market fit, so the compiler generally can't tell that the wrong problem is being solved. Anyways, the goal is to use sufficient verbiage that the user can notice their conceptual model is wrong and search out documentation to repair it. To this end, the message should mention the key constructs and relationships that must be understood, e.g. syntactic construct names, compiler terminology, and library functions.
+
+* Use logical argumentation (maybe): :cite:`barikHowShouldCompilers2018` analyzes error messages using Toulmin's argument model, which allows 6 components (extended to 7 by Barik):
+
+  * The claim is the main assertion to be proven.
+  * The grounds are evidence and facts that support the claim.
+  * The warrant links the grounds to the claim.
+  * The backing supports the warrant, usually by an example.
+  * The qualifier limits the claim, explaining words such as "presumably".
+  * The rebuttal acknowledges other valid views but explains why they are not appropriate.
+  * A resolution is a claim that a defect will be removed with a specific change. (Added by Barik)
+
+  StackOverflow and compiler error messages used 3 argument layouts: claim alone, a simple argument consisting of claim, grounds, and warrant, and an extended argument which is a simple argument plus backing. These layouts are multiplied times 2 depending on whether there was a resolution in the claim; my notation is that "claim" means a claim without resolution. The tested results were claim < {simple,extended}, extended < claim+resolution (claim+resolution being dubbed a non-logical "quick fix" instruction).
+
+  Per the thesis :cite:`barikErrorMessagesRational` extended arguments are mainly useful for novices and unfamiliar code. Theorizing, if the developer knows what's going on, they likely want brief messages and their preference is claim+resolution > simple > extended > others. But with an ``--explain`` flag their preference is more like extended+resolution > simple+resolution > claim+resolution > extended > simple > others. It's probably worth a survey comparing error messages of varying verbosities to confirm.
+
+* Report errors at the right time: Generally one wants to see as many errors as possible, because rerunning the compiler every time you fix an error is slow, and as soon as possible, using static analysis tools.
+
+Per Elm / `Tidyverse <https://style.tidyverse.org/error-messages.html>`__ the message should have a layout like "general summary, program code fragment (location),error details / hints / suggested fix". The general summary is shown on hover in VSCode, and can be expanded downwards to see the full message. The tooltip seems to be around 120 monospaced characters wide and 5 ish lines tall. The size differs based on popup type so recheck when developing for LSP; it used to be 50 characters wide for everything. There is `an old VSCode bug <https://github.com/microsoft/vscode/issues/14165>`__ open for expandable popups, and a `CSS hack <https://stackoverflow.com/questions/44638328/vs-code-size-of-description-popup>`__ that makes them larger, but probably Stroscot has to be designed to accommodate small popups.
+
+The code fragment shows the full line of input code with file/line number, and marks the failing expression with ``^^^```. The error and location marks should be colored red so they are easy to spot. Similarly Elm uses a blue separator line ``----`` to separate messages. With the LSP integration this is already taken care of because VSCode underlines the error location in the editor and has its own UI for browsing through errors.
 
 Fuel
 ====
@@ -50,65 +102,55 @@ For example instead of testing for stack overflow we can test for running out of
 Optimization
 ============
 
-For a lot of compilation decisions we don't have enough information - e.g. for overloading, how should we code the dispatch table? Profile-guided optimization is an effective solution to this: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different ways to get good coverage so we also need a way to combine profiles together. If the profile shows that we don't use a code path very often, then we can de-optimize it and use a slow version. But if it's a hot path then we want to streamline that path as much as possible.
+For a lot of compilation decisions we have several choices and want to pick the best one based on some measure of "performance". E.g. overloading/dispatch can be implemented in a variety of ways, specialized for call site - generally it boils down to branching on some condition (binary search), or doing a table lookup. The fastest solution depends on which clauses are relatively hot, but in general we don't know which clauses are hot.
 
-With respect to optimization we have various criteria to minimize.
-* O0 - Compile time - when we are just running static verification
-* On - Run time - faster programs are more useful
-* Og - Execute time (compile + run) - the edit-compile-test cycle for debug builds, and similarly REPL loops
-* Os/Oz - Output size - as binaries are often transferred across a network
-* O? - Other statistics for Compile/Run/Execute - memory usage, power usage
+Profile-guided optimization is an effective solution to this lack of information: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different times to get good coverage so we also need a way to combine profiles together, i.e. profiles form a commutative monoid. Profiles themselves introduce a "Heisenbug" problem: we cannot measure the detailed performance of an unprofiled program, and turning profiling off may change the performance significantly. The solution is to build with profiling support for almost all of the compilation pipeline. We should only omit profiling instructions for non-profiled builds at the assembly level. And if we use hardware-assisted sampling profiling then we don't even need profiling instructions, in many cases, so profiling can simply be always enabled.
 
-Profiles themselves introduce a "Heisenbug" problem: we cannot measure the detailed performance of an unprofiled program. The solution is to build with profiling support for almost all of the compilation pipeline. We should only omit profiling instructions for non-profiled builds at the assembly level. And if we use hardware-assisted sampling profiling then we don't even need profiling instructions, in many cases.
+When trying to do a quick compile-run cycle, we still want to streamline hot paths so that the binary is not unusably slow, but cold spots can use a straightforward boilerplate translation that doesn't require much CPU. More generally, there are various optimization criteria to minimize during compilation. Generally anything that can be measured is fair game:
 
-General purpose use
-Prepackaged software is very often expected to be executed on a variety of machines and CPUs that may share the same instruction set, but have different timing, cache or memory characteristics. As a result, the code may not be tuned to any particular CPU, or may be tuned to work best on the most popular CPU and yet still work acceptably well on other CPUs.
-Special-purpose use
-If the software is compiled to be used on one or a few very similar machines, with known characteristics, then the compiler can heavily tune the generated code to those specific machines, provided such options are available. Important special cases include code designed for parallel and vector processors, for which special parallelizing compilers are employed.
-Embedded systems
-These are a common case of special-purpose use. Embedded software can be tightly tuned to an exact CPU and memory size. Also, system cost or reliability may be more important than the code's speed. For example, compilers for embedded software usually offer options that reduce code size at the expense of speed, because memory is the main cost of an embedded computer. The code's timing may need to be predictable, rather than as fast as possible, so code caching might be disabled, along with compiler optimizations that require it.
+* Compile total elapsed time
+* Compile power usage
+* Compile memory usage
+* Runtime total time
+* Runtime memory usage
+* Runtime power usage
+* Runtime executable size
+* Runtime throughput
+* Runtime request latency
+* Other runtime service metrics
+
+These are generally not hard numbers but probabilistic variables, because computer performance depends on many uncontrollable factors hence is best treated is nondeterministic. A simple mean or median estimator is generally sufficient, but doing statistical hypothesis testing is more interesting. Worst case execution time is of interest in real-time systems. Execution time may be modeled by a Gumbel distribution (`ref <http://www.lasid.ufba.br/publicacoes/artigos/Estimating+Execution+Time+Probability+Distributions+in+Component-based+Real-Time+Systems.pdf>`__) or odd log-logistic generalized gamma (OLL-GG) or exponentiated Weibull (`ref <https://arxiv.org/pdf/2006.09864.pdf>`__), although these experiments should probably be redone as we are measuring different programs. The testbench is `here <https://mjsaldanha.com/sci-projects/3-prob-exec-times-1/>`__ and `here <https://github.com/matheushjs/ElfProbTET>`__ and could be extended with `gev <https://www.rdocumentation.org/packages/evd/versions/2.3-6/topics/gev>`__.
+
+Obviously these have tradeoffs, so we need an overall objective function. For a focused objective like running static verification, all we want to see the error messages so total elapsed compile time is the only measurement. For production binaries, there will likely be a complex function for various runtime measurements based on actual costs and requirements, but compile costs will be minimal or excluded. For debugging, running in a REPL, an edit-compile-test cycle, etc., both compile and runtime factors are important so the objective function becomes even more complex. gcc, clang, etc. have various optimization profiles like O0, O1, O2, O3, Og, On, Os, Oz, etc., which we can include presets for, but it's not clear these are sufficient.
+
+We use branch-and-bound to explore the possibilities. With good heuristics even the truncated search algorithm should give good results. The goal is to quickly find bottleneck code regions that have significant effects on performance and compute good optimizations quickly. Then another profiling build to test that the proposed changes were correct.
+
+There is also ISA selection and tuning for specific machines and CPUs. ISA, timing, cache, and memory characteristics are available for specific CPUs, but compiling specifically for a single CPU is not done often. Usually for x86 the code is compiled to work on SSE2 (since it's part of AMD64) and tuned for a "generic" CPU. The definition of this is vague - for `GCC <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81616>`__ and `LLVM <https://reviews.llvm.org/D118534>`__ it seems to be Haswell with a few slow cases on other architectures patched. It is supposed to be "an average of popular targets", so using a weighted sum of processors according to sales is most appropriate, but per-CPU-model sales data doesn't seem to be available easily. `PassMark <https://www.cpubenchmark.net/share30.html>`__, `3DMark <https://benchmarks.ul.com/compare/best-cpus?amount=0&sortBy=POPULARITY&reverseOrder=true&types=MOBILE,DESKTOP&minRating=0>`__, and `UserBenchmark <https://cpu.userbenchmark.com/>`__ publish their list of most benchmarked processors, which is probably good enough.
+
+Formally proving optimizations correct is a good idea, as they are often buggy.
 
 Need optimizations for:
 * avoiding intermediate structures and dead or redundantly duplicated computation
 * storing arrays on the heap in the most efficient of a few straightforward ways
-* boiling away higher-order functions into tedious boilerplate
+* boiling away higher-order functions into tedious boilerplate (inlining)
+* custom optimizations
 
-Output
-======
+A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of GCC/LLVM performance:
 
-The simplest compiler writes out a file like:
-
-::
-
-  -- This is generated code - see <file> for source
-  interpret = <boilerplate code for interpreter>
-  data = "<contents of source file>"
-  main = interpret data
-
-This amounts to using a no-op specializer. But we can use a more intelligent specializer to produce more efficient code.
-
-versioning of time/date
-identifier minimization/translation
-unit test
-random input testing
-quasiquotation
-typechecking
-
-RTS flags should be stored into ABI hashes in installed libraries to avoid mismatching incompatible code objects.
-
-Compilation models
-==================
-
-Separate compilation is really incremental compilation - avoiding re-doing work that doesn't depend on other files. The ``.o`` files are not useful by themselves, so the compile-link process can be replaced with an incremental compilation database and a command that directly produces an executable or DLL (assembly). If memory is a concern then results can be unloaded/loaded from the database.
-
-Executables and DLLs are defined by a stable ABI / set of entry points. Inlining depends on the content of the code, so we cannot inline, or in general do any optimizations across the ABI boundary.
+* Common subexpression elimination - This starts from atomic expressions / closed connected components and then works up to identify opportunities for sharing. Because of unsharing fans it can share parents regardless of their other children; this doesn't increase the graph size and may decrease code size/computation. Since the graph may be cyclic we need a partitioning algorithm like in :cite:`mauborgneRepresentationSetsTrees1999`.
+* Inlining - Going through :cite:`peytonjonesSecretsGlasgowHaskell2002`, this is basically just reducing reducible expressions. The reason it's hard is doing reduction across statement boundaries, inside recursive functions, etc., in combination with a strictness/termination analysis.
+* Constant Folding - more reduction of reducible expressions
+* Loop unrolling/vectorization - mutable variables can be normalized to SSA, so really this is about unrolling recursive functions. It's a code size vs. code quality optimization, heavily dependent on scheduling.
+* Loop-invariant code motion (hoisting) - this is just reducing in a certain order, i.e. scheduling again.
+* Dead code elimination - Unused pure expressions aren't connected to the main graph and so are trivially eliminated. But we also want to eliminate conditional branches that will never be taken; this requires a reachability analysis.
+* Peephole - this is instruction selection for the backend. We're going the Unison integrated constraint-satisfaction approach.
 
 Cross compilation
 =================
 
 In cross compilation we have not one system, but two systems. To use the newer `Clang <https://clang.llvm.org/docs/CrossCompilation.html>`__ terminology, there is the **host** system where the program is being built, and the **target** system where the program will run. When the host and target systems are the same, it's a native build; otherwise it's a cross build.
 
-The older `GNU terminology <https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html>`__ uses a triple, build/host/target; but the "target" there is really a configuration option, namely the supported target of the compiler that will run on the host. Only compilers need to specify supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.
+The older `GNU terminology <https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html>`__ uses a triple, build/host/target; but the "target" there is really a configuration option, namely the supported target of the compiler that will run on the host. Only gcc need to specify the supported target, as Clang is generally built to support all supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.
 
 the toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
 the package set is also target-dependent
@@ -181,17 +223,14 @@ Compile-time code execution
 
 We want to execute code that runs at compile time, e.g. reading a blob of data to be included as a literal. Clearly this code executes on the host, with the same filesystem as the rest of the source code.
 
-We may also want to read configuration, e.g. the target platform properties (word size, endianness, etc.).
-
+We also want to read configuration, e.g. the target platform properties (word size, endianness, etc.).
 
 Also we want to do computations with no runtime inputs, like 1+2.
-
 
 Compiler ways
 =============
 
-Some options are called "compiler ways". They can be combined (e.g.
-threaded + debugging). The main issue is they affect the ABI.
+GHC calls some options "compiler ways". They can be combined (e.g. threaded + debugging). The main issue is they affect the ABI, so ways need be stored into ABI hashes in installed libraries to avoid mismatching incompatible code objects.
 
 - use the multi-threaded runtime system or not
 - support profiling or not
@@ -199,16 +238,9 @@ threaded + debugging). The main issue is they affect the ABI.
 - use different heap object representation (e.g. ``tables_next_to_code``)
 - support dynamic linking or not
 
-Depending on the selected way, the compiler produces and links appropriate
-objects together. These objects are identified by a suffix: e.g. ``*.p_o`` for an
-object built with profiling enabled; ``*.thr_debug_p.a`` for an archive built with
-multi-threading, debugging, and profiling enabled. See the gory details on the
-`wiki <https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/compiler-ways>`__.
+Depending on the selected way, the compiler produces and links appropriate objects together. These objects are identified by a suffix: e.g. ``*.p_o`` for an object built with profiling enabled; ``*.thr_debug_p.a`` for an archive built with multi-threading, debugging, and profiling enabled. See the gory details on the `wiki <https://gitlab.haskell.org/ghc/ghc/wikis/commentary/rts/compiler-ways>`__.
 
-Installed packages usually don't provide objects for all the possible ways as it
-would make compilation times and disk space explode for features rarely used.
-The compiler itself and its boot libraries must be built for the target way.
-
+Installed packages usually don't provide objects for all the possible ways as it would make compilation times and disk space explode for features rarely used. The compiler itself and its boot libraries must be built for the target way.
 
 Compiler memory management
 ==========================
@@ -220,16 +252,16 @@ Overall I don't see much of an opportunity, SSD and network speeds are sufficien
 Documentation generator
 =======================
 
-The documentation generator provides a nice way to browse through a large codebase. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There's regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.
+The documentation generator provides a nice way to browse through a large codebase, ensuring that code is easy-to-read and searchable. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There's regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.
 
 As far as targets, only HTML seems particularly important.
+
+The notion of "well-documented" is hard to define. For one person the source code and function names may be sufficient, while for another a tutorial that has no relation to the codebase may be more useful.
 
 Refactorer / reformatter
 ========================
 
-The refactoring tool reduces the amount of effort it takes to maintain code. It reads a program from a source file, rewrites the code according to specified rules, and writes the program back to the file. It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert ``TODO: check rule XXX`` comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms.
-
-Theoretically we should provide both forward and backward compatibility for language versions via the refactoring tool, but practically I think only backwards compatibility (v1 -> v2) is relevant.
+The refactoring tool makes it easy to analyze source code, enabling tooling such as automatic code formatting and codebase maintenance. It reads a program from source file(s), rewrites the code according to specified rules, and writes the program back to the file(s). It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert ``TODO: check rule XXX`` comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms. The automated migration of code from old to new versions uses the refactoring API.
 
 With no rules, the refactoring tool functions as a reformatter. Python's Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that's used for the compiler.
 
@@ -359,25 +391,28 @@ Doing logic in Stroscot is confusing because the reduction semantics itself uses
 Debugger
 ========
 
-Need this. Reversible debugging.
+The debugger's view of the program's state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation. We allow reversible/omniscient debugging, meaning that one can step both forward from a state (the usual) and backward from a state (query on where a value came from etc.).
 
-* breakpoints: set/clear/list
-* backtrace of exception
-* stepping: single step, step out, continue until breakpoint, run ignoring breakpoints
-* evaluate pure expression
+Let's assume we have symbols, then there are lots of operations available from a debugger:
 
+* breakpoints: set/clear/list, essentially a breakpoint is a true/false query on a state. can be syscall, call, return, signal injection, etc.
+* queries: print backtrace / call stack, evaluate pure expression in context of state, dump state, dump memory, disassemble memory
+* stepping: single step, step out, continue thread / all threads until breakpoint, run ignoring breakpoints until stopped with interactive commnad
+* patching: replace definition, jump to address, return early from function, evaluate code in current context (e.g. set memory to value). The debugger can only run forward from the patched state because it has no history.
+* IPC: send signal, modify files
 
 Profiler
 ========
 
 Measure
+
 * time and memory usage.
 * throughput (calls/second)
 * A/B testing of multiple implementations
+
 for functions, expressions, programs, etc.
 
-Use statistical sampling and hardware performance counters to avoid overhead.
-
+Use statistical sampling and hardware performance counters to avoid overhead. Checkout criterion, papers on LLVM hardware sampling.
 
 IR dump
 =======
@@ -388,32 +423,23 @@ With a wide-spectrum language the IR is the same language as the original, just 
 
 There are many levels to the pipeline, and each one is useful. For an interpreted program the only step that can't be represented is actually running the program, e.g. converting ``print "Hi" exit`` to output.
 
-Error messages
-==============
+Evolution
+=========
 
-From `Elm <https://elm-lang.org/news/compiler-errors-for-humans>`__:
-* prefer "runtime" errors of dynamically-typed languages
-* code location: show the line number, full line of input code, and mark range with ``^^^```
-* give every message a hint / suggested fix
-* color: red to draw attention to location, blue to separate messages
-* layout: general message above code, hints below code
-* VSCode integration
+Try as we might, no language design is perfect. Langauges inevitably change or extend their semantics over time, resulting in ecosystem fragmentation where programs end up being written in different "dialects" of the language. The evolution process aims to minimize the disruption to existing code by evolving the language in a controlled manner, in particular in discrete units of "features". The process guarantees a "compatibility promise" that the source code of existing programs written for an old language version can be automatically migrated to a new language version. Because the language evolves towards a standardized set of features, the langauge should avoid fragmentation.
 
+A feature is a distinct chunk of compiler functionality, such as a change to the semantics of the language, a compiler plugin, or an external tool integration. A feature can be alpha, beta, or stable.
 
-Features
-========
+Alpha features are experimental features with little formal testing, released to get feedback. They may be documented informally or on an "alpha features" page. Alpha features have no compatibility guarantee and may be changed freely. Alpha features are kept behind feature toggles, which allow conditioning code on a feature. This allows testing features and integrating them on the main branch while isolating them from other tests and software releases. Alpha features will be removed from the compiler if they have not made any progress towards beta over the course of a year.
 
-A feature is a distinct chunk of compiler functionality. A feature toggle allows turning on a feature conditionally in the code. This allows testing features and integrating them on the main branch while isolating them from other tests and software releases. Identifying the scope of a feature is simply searching for uses of the feature flag. The feature toggles are stored in a big record of booleans in one place, to make finding them easier.
+Beta features are implemented features that may change further. They must have a reasonable test suite and be documented in the commentary / reference in full detail, describing edge cases. They must also have a how-to if the feature's usage is not obvious. Fundamental new features may affect the tutorial as well, although generally new features are too advanced. Beta features cannot be toggled off but have automigration functionality for old code that is enabled by specifying the language version. Automigration is distinct from a toggle because it is a source-to-source rewrite of the code. Beta features may still have significant bugs, such as the inability to migrate old code correctly, but these bugs should generate readable error messages mentioning the feature name rather than crashing the compiler or silently failing.
 
-A feature can be alpha, beta, or stable.
+Stable features are frozen features - further changes will be done as new features. They are considered to have reached a level of stability sufficient for long-term use. There is no visible difference in the implementation code between beta features and stable features and the distinction is mainly for marketing purposes.
 
-* alpha: untested, may be changed or removed without automigration
-* beta: well tested, details may change, automigration will be provided
-* stable: beta but perceived as unlikely to change further
+The list of features is centralized in the code to `this specific file <https://github.com/Mathnerd314/stroscot/blob/master/src/features.txt>`__, to make finding them easier and to standardize handling. The scope of a feature may be identified by grep'ing the code for its identifier.
 
-Generally only alpha features need toggles, beta features have automigration so can be turned on all the time.
+Moving a feature from alpha to beta should have a PR with documentation links and test case links. The PR should:
 
-All features should be documented in the commentary / reference in full detail, describing edge cases. Alpha features should be marked as alpha. Write a how-to if the feature is not obvious. Generally new features are advanced enough that they do not affect the tutorial.
-
-Moving a feature from alpha to beta should have a PR with documentation links and test case links. The actual process is to change the feature list to set the feature's beta release date as the current date, so the compiler knows to warn that the feature declaration is no longer needed and to declare the feature when bootstrapping, and to modify all uses of the feature toggle in the code to the case where the feature is present (avoiding toggle debt).
-
+* change the feature list to set the feature's status to beta released on the current date. This enables old code warnings, automigration, and compiler bootstrap workarounds.
+* implement automigration code if not already present
+* remove all uses of the feature toggle in the code by modifying to the case where the feature is present (avoiding toggle debt).

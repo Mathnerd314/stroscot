@@ -1,0 +1,23 @@
+/// check if a number is prime by trial division
+isPrime n | n <= 1 = false
+isPrime n =
+  // Iterate from 2 to sqrt n
+  // If n is divisible by any number between
+  // 2 and sqrt n, it is not prime
+  for i in [2..(sqrt n)]
+    if (n mod i == 0)
+      return false
+  return true
+
+// q: can compiler optimize this to the sieve of Eratosthenes?
+primes = filter isPrime [1..]
+
+/* more exercises:
+based on https://en.wikipedia.org/wiki/Primality_test:
+  do the 6k±1 optimization found in the example programs
+  implement the generic version that computes the first c primes, then checks the first c primes, then checks residues c#*k+i where c# is product of first c primes, and i is not divisible by any of the first c primes. Check whether checking [-c#/2,c#/2]\{0} instead of [1,c#-1] speeds up the algorithm. Find the c that optimizes for checking all n <1 million.
+
+implement the AKS primality test
+
+*/
+

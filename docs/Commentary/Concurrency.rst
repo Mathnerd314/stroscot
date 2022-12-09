@@ -1,24 +1,7 @@
 Concurrency
 ###########
 
-As Go says, the rise of multicore CPUs argues that a language should provide first-class support for concurrency and parallelism. Concurrency and multi-threaded programming have over time developed a reputation for difficulty.
-This is due to complex low-level designs such as pthreads, mutexes, condition variables, and memory barriers. Higher-level interfaces enable much simpler code, even if there are still mutexes and such under the covers.
-
-One of the most successful models for providing high-level linguistic support for concurrency comes from Hoare's Communicating Sequential Processes, or CSP. Occam and Erlang are two well known languages that stem from CSP. Go's concurrency primitives derive from a different part of the family tree whose main contribution is the powerful notion of channels as first class objects. Experience with several earlier languages has shown that the CSP model fits well into a procedural language framework.
-
-
-they have little overhead beyond the memory for the stack, which is just a few kilobytes.
-
-Go's run-time uses resizable, bounded stacks. A newly minted goroutine is given a few kilobytes, which is almost always enough. When it isn't, the run-time grows (and shrinks) the memory for storing the stack automatically, allowing many goroutines to live in a modest amount of memory. The CPU overhead averages about three cheap instructions per function call. It is practical to create hundreds of thousands of goroutines in the same address space. If goroutines were just threads, system resources would run out at a much smaller number.
-
-After long discussion it was decided that the typical use of maps did not require safe access from multiple goroutines, and in those cases where it did, the map was probably part of some larger data structure or computation that was already synchronized. Therefore requiring that all map operations grab a mutex would slow down most programs and add safety to few. This was not an easy decision, however, since it means uncontrolled map access can crash the program.
-
-The language does not preclude atomic map updates. When required, such as when hosting an untrusted program, the implementation could interlock map access.
-
-Map access is unsafe only when updates are occurring. As long as all goroutines are only reading—looking up elements in the map, including iterating through it using a for range loop—and not changing the map by assigning to elements or doing deletions, it is safe for them to access the map concurrently without synchronization.
-
-As an aid to correct map use, some implementations of the language contain a special check that automatically reports at run time when a map is modified unsafely by concurrent execution.
-
+As Go says, the rise of multicore CPUs means that a language should provide first-class support for concurrency and parallelism. But concurrency and multi-threaded programming have over time developed a reputation for difficulty. So let's get it right.
 
 Model
 =====
@@ -36,6 +19,17 @@ The general idea with concurrency is there are multiple threads of execution. Bu
 * A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (`contiguous stacks <https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub>`__). Per Microsoft, fibers in C do not provide many advantages over threads.
 
 A typical thread uses a combination of hardware and OS operations. In the cloud, a thread uses more network-centric operations.
+
+Concurrent operations
+=====================
+
+At the lowest level are:
+
+* explicit read/write operations on mutable shared memory
+* instruction set memory barriers
+* OS calls such as creating a thread
+
+There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, actors, transactional memory. Higher-level interfaces enable much simpler code, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot.
 
 Memory models and races
 =======================
@@ -89,6 +83,8 @@ Blocking
 ========
 
 Acquiring a lock blocks until the lock is released. This introduces the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders. With wait-free / atomic operations we never need to block.
+
+Go map operations do not grab a mutex and must be synchronized by some larger data structure or computation for access from multiple goroutines. This speeds up most programs but means some programs must add synchronization to avoid crashing. It is safe to use the map read-only, and a runtime check can report when a map is modified unsafely by concurrent execution.
 
 Simulation
 ==========

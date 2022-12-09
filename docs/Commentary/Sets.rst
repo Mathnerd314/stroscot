@@ -6,7 +6,7 @@ Stroscot allows specifying properties about execution, which the compiler then a
 Sets
 ====
 
-Sets in Stroscots are defined by a predicate ``a isElementOf S : Value -> Set -> Bool``, where ``Set = { s : Any | forall a : Any. (a isElemof s : Bool) }``. The predicate can describe any side effect free computation, so a set can describe any boolean function.
+Sets in Stroscots are defined by a predicate ``a isElementOf S : Value -> Set -> Bool``, where ``Set = { s : Any | forall a : Any. (a isElemof s : Bool) }``. The predicate can describe any side effect free computation, so a set can describe any boolean function. As described in :ref:`paradoxes` Stroscot avoids the set-theoretic paradoxes by requiring every set definition to be well-founded.
 
 Sets don't contain null by default, you have to add it to the predicate as an allowed value.
 
@@ -97,6 +97,8 @@ The basic idea is that any numeric set of integers can be given via a lower and 
   int = signed 32
   uint = unsigned 32
   // And so on ...
+
+We could have some shorthand syntax for ranges, like ``[1..n]``, but is the endpoint included? Swift says yes and has ``[1..<n]`` for right-exclusive ranges. Per `Ecstasy <https://github.com/xtclang/xvm/discussions/40>`__ this could be extended to "gremlin operators", left-exclusive ``[1>..n]`` and both-exclusive ``[1>..<n]``. There is also the `traditional interval notation <https://en.wikipedia.org/wiki/Interval_(mathematics)#Including_or_excluding_endpoints>`__ but this is hard to fit into the syntax.
 
 Dependent types are useful too with ranges. For example, say I have an array and want to pass an index whose range is guaranteed to be in-bounds. I can associate the upper bound of the number's range with the array length directly:
 
@@ -209,6 +211,8 @@ The main function type declaration restricts the definition of the function so i
 
 This behavior seems more similar to the type declarations found in other languages, hence why it is the default. E.g. in Rust ``i32 f(i32)`` cannot be applied to ``i64``, whereas with the ``check`` version ``f`` could be applied to ``i64``.
 
+Function types are powerful. For example formatted printing, buffered I/O, compression, and pipes can all use a single type ``Writer = ByteArray -> IO { bytes_written : int, 0 <= bytes_written < length p }``.
+
 Dependent types
 ---------------
 
@@ -296,30 +300,15 @@ Postconditions ("ensures") can be expressed as restrictions on the return type:
 
   total square : Int -> {x : Int | x >= 0}
 
-The curse of static typing
---------------------------
+The curse of restrictive type signatures
+----------------------------------------
 
 If a function ``foo`` does something unexpected, there are three possibilities:
 
-1. Some unusual overloading of foo was defined. That is that clause's problem. You shouldn't override equals to return true only if the square root of one is the same as the other, and similarly you shouldn't have overloaded foo and done something unexpected. Static verification can help with this by documenting the expected properties. The solutions are to verify, change the behavior, or split the behavior into a different function name.
+1. Some unusual implementation/overloading of foo was defined. That is that clause's problem. You shouldn't implement equals to return true only if the square root of one is the same as the other, and similarly you shouldn't have overloaded foo and done something unexpected. Static verification can help with this by documenting and checking the expected properties. Solutions for this case are to change the behavior or rename the function to make its semantics clearer.
 
-2. foo was defined with a reasonable clause but the clause relied on a contract that wasn't described. This is harder to catch as static verification usually only covers a subset of behavior, but the solution is to limit the clause with a signature / contract.
+2. foo was defined with a reasonable clause but the clause relied on a contract that wasn't described. This is harder to catch as static verification usually only covers a subset of behavior, but the solution is to limit the clause with a signature / contract. Type signatures are helpful here.
 
-3. foo would work, but its signature has been defined too narrowly so is undefined
+3. foo is undefined for the arguments you are calling with, because it has been defined with a restricted signature.
 
-Usually functions are clearly written and work as long as the functions they call work on the arguments. So it is this third case that bites, because you can overload the called functions but you can't relax the signature. So restrictive signatures are a curse in this example.
-
-Type synthesis
-==============
-
-Type synthesis is tricky, but with the termination checker we don't have any visible types. The optimizer does a form of type synthesis when it assigns formats to values, but the formats can be conditional on state, and the optimizer will use a catch-all format for hard cases, so the formats are complete but not sound. The only useful case for a complex type synthesis algorithm might be pretty-printed type signatures in documentation, but there having the developer specify type signatures is a viable option.
-
-But `dependent <https://github.com/UlfNorell/insane/>`__
-`circular <https://github.com/gelisam/circular-sig>`__ dependent types will presumably ruin all the fun and require type signatures.
-
-We could do synthesis at run time, e.g. the type of a list of values is the list type applied to the set of values contained in the list. This might be useful for resolving type-overloaded methods.
-
-Roles
-=====
-
-Roles are just an optimization for ``coerce``, but there are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.
+This last case is the "curse". Many functions are synonymous with their implementation and work as long as the functions they call work on the arguments. So it is better to use non-restrictive signatures, because the actual domain of the function stays as large as possible. When you write the non-restrictive signatures you are simply advertising that a particular domain is well-tested. In contrast a restrictive signature can't be extended except by duplicating the implementation of the function.

@@ -3,18 +3,92 @@ Introduction
 
 This is a 10-minute introduction of the main concepts of Stroscot.
 
-Secrets of matching
-===================
+Term rewriting
+==============
 
-Consider the program from `this old Usenet post <https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ>`__)::
+The execution of a Stroscot program is modeled as taking the main program as the starting term and applying rewrite rules until no more can be applied, resulting in the "value" or normal form of the program.
+
+A rewrite rule or clause is applied by matching the left hand side to the current term or one of its subterms and applying the resulting substitution to the right hand side. Stroscot supports predicate dispatch or conditional rewriting, meaning that a rewrite rule may have a condition - the rewrite rule is applicable only if its condition holds.
+
+In the debugger you can always see what the current term looks like and what rewrite rules are applied. For example, with the rules ``fact n | n > 0 = n * fact (n-1)`` and ``fact 0 = 1``, a possible reduction sequence is:
+
+::
+
+  fact 3
+  3 * fact (3-1)
+  3 * fact 2
+  3 * (2 * fact (2-1))
+  3 * (2 * fact 1)
+  3 * (2 * (1 * fact (1-1)))
+  3 * (2 * (1 * fact 0))
+  3 * (2 * (1 * 1))
+  3 * (2 * 1)
+  3 * 2
+  6
+
+We say that ``fact 3`` reduces to the value ``6``, written more concisely as the rewrite rule ``fact 3 = 6``.
+
+Parallel matching
+=================
+
+Stroscot's main reduction semantics is nondeterministic - all possible matches and rewrites are considered. It is an error if there is no unique answer. For example this is an error:
+
+::
+
+  f 1 = 1
+  ;
+  f y = 2
+
+  f 1
+  # Error: rule conflict for `f 1`
+
+But if the first clause was ``f 1 = 2`` it would be allowed:
+
+::
+
+  f 1 = 2
+  ;
+  f y = 2
+
+  f 1
+  # 2
+
+Since many programs are sequential there is a convenience syntax for making the cases non-overlapping:
+
+::
+
+  f 1 = 1
+  f y = 2
+
+  # equivalent to
+
+  f 1 = 1
+  ;
+  f y | y != 1 = 2
+
+
+But the parallel behavior is useful. For example you can write impromptu tests that Stroscot will verify give the same result:
+
+::
+
+  fib (-1) = 0
+  fib 0 = 1
+  fib n = fib (n-1) + fib (n-2)
+
+  # test
+  fib 5 = 5
+
+  # would give an error on fib 5 = 6
+
+Although writing ``assert (fib 5 == 5)`` might be clearer.
+
+Another useful application is specializing generic methods to high-performance implementations for specific types, and in general giving more freedom to the compiler to do evaluation. For example consider the idea of "parallel and" from `this old Usenet post <https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ>`__)::
 
   myand False x = False
   myand x False = False
   myand True True = True
 
-This syntax sequentially matches the clauses in order. Consider ``myand undefined False`` - matching the first clause evaluates ``False == undefined``. In Haskell ``undefined`` throws and evaluation results in an error. In Stroscot ``undefined`` is just a value, so this clause fails and the second clause gives ``myand undefined False = False``.
-
-Now this depends on proving ``False != undefined``. In this case they are both values this is trivial, but what about an ``expensive_undefined`` which is an expensive computation that never terminates? Well, Stroscot also allows parallel matching::
+With the sequential matching, matching ``myand True False`` tries the first clause and evaluates ``False == True``, which fails, so the second clause gives ``myand True False = False``. But this behavior depends on proving ``False != True``. In this case they are both values so it is trivial. But if instead of ``True`` we use a computation ``expensive_true`` that takes a long time to produce the value ``True``, then proving ``False != expensive_true`` takes a long time. Now consider parallel matching::
 
   myand False x = False
   ;
@@ -22,23 +96,11 @@ Now this depends on proving ``False != undefined``. In this case they are both v
   ;
   myand True True = True
 
-The semantics is based on term rewriting - all possible matches and rewrites are considered. It is an error if there is no unique answer. For this example, the system is weakly orthogonal so it is easy to analyze. Stroscot proves that the answer is unique because  in the one ambiguous case ``myand False False`` both clauses give ``False``, and selects the parallel outermost reduction strategy which will always succeed if there is an answer. Hence evaluating ``myand expensive_undefined False`` reduces ``expensive_undefined`` for a little bit, then evaluates ``False`` to completion and matches the second clause.
+Because the system is parallel, Stroscot can choose which term to evaluate first. It may evaluate ``expensive_true`` for a little bit, but then it can switch to evaluating ``False`` and immediately match the second clause without finishing evaluation of ``expensive_true``.
+
+Now in some cases the system can automatically be parallelized. In particular with this example, the one overlapping case is ``myand False False`` and it can be verified that both of the first two clauses give ``False``, hence the system is weakly orthogonal and can be parallelized. But in general identifying opportunities like this is hard, and also with sequential matching specializing generic methods would require careful priority management, so it is better to have an explicit syntax.
 
 Logic programming
 =================
 
-Sometimes the requirement that the return value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.
-
-Misquoting :cite:`iversonNotationToolThought1980`:
-
-    Users of computers and programming languages are often concerned primarily with the efficiency of execution of algorithms, and might, therefore, summarily dismiss [logic programming]. Such dismissal would be short-sighted since a clear statement [...] can usually be used as a basis from which one may easily derive a more efficient algorithm.
-
-    [...]
-
-    The practice of first developing a clear and precise definition [...] without regard to efficiency, and then using it as a guide and a test in exploring equivalent processes possessing other characteristics, such as greater efficiency, is very common in mathematics. It is a very fruitful practice which should not be blighted by premature emphasis on efficiency in computer execution.
-
-    [...]
-
-    Finally, overemphasis of efficiency leads to an unfortunate circularity in design: for reasons of efficiency early programming languages reflected the characteristics of the early computers, and each generation of computers reflects the needs of the programming languages of the preceding generation.
-
-Practically, logic programming is a great tool for naturally expressing computational tasks that use logical constraints. Large programs generally run into one or two of these tasks. Without logic programming these tasks must be solved in an ad-hoc and verbose way. Compare `Sudoku with Prolog <https://www.metalevel.at/sudoku/>`__ vs `Norvig's Sudoku solution <https://norvig.com/sudopy.shtml>`__. Other examples include parsers, typecheckers, and database queries.
+Sometimes the requirement that the value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.

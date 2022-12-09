@@ -19,11 +19,15 @@ Logic
 The logic proper
 ================
 
-The sequent calculus idea is inspired by :cite:`downenSequentCalculusCompiler2016`. But they use a weird nonstandard logic (Figures 4/5) to match GHC Core and its syntax. In a new language it seems better to use the standard logical derivation rules without messing with them, and worry about the syntax second. Stroscot's infinite tree representation with use-def is better than the MultiCut / Rec rules because it allows the graph reduction method used in GHC to work.
+The sequent calculus instead of natural deduction is inspired by :cite:`downenSequentCalculusCompiler2016`. But they use a weird nonstandard logic (Figures 4/5) to match GHC Core and its syntax. In a new language it seems better to use standard logical derivation rules, and worry about the syntax second. Stroscot's infinite tree representation with use-def is better than the MultiCut / Rec rules because it allows the graph reduction method used in GHC to work.
 
-For the base logic I went with linear logic because optimal reduction :cite:`guerriniTheoreticalPracticalIssues1996` is based on using the boxes of linear logic as markers. Without linear logic every sequent would be its own box, IDK if it could be made to work reasonably.
+For the deduction system I went with linear logic because optimal reduction :cite:`guerriniTheoreticalPracticalIssues1996` is based on using the boxes of linear logic as markers and classical / intuitionistic logic can be encoded in linear logic hence are special cases. Without linear logic every sequent would be its own box, which would be harder to handle.
 
-The logic is two-sided because it's more expressive to have the duals as part of the language. The one-sided logic with the duals and non-duals just seems like a way of encoding the left/right sides as a single list.
+The logic is two-sided because that's more expressive than one-sided. Omitting the left side reduces code verbosity, because a sequent is one list instead of a pair of lists, but the one-sided logic has the same number of connectives, and it's IMO confusing to always have to remember the duals - e.g. an application of identity looks like :math:`\vdash \Sigma X^\bot, \Pi X` instead of :math:`\Pi X \vdash \Pi X`. Taking the two-sided logic as basic, the one sided logic can still be formulated as a transformation of the two-sided logic that moves everything to the right side with negation and pushes down negations to atomic statements by applying duality theorems (inserted with cuts).
+
+There are also other presentations like deep inference. In one paper on deep inference they ended up adding the `mix rule <https://ncatlab.org/nlab/show/mix+rule>`__ which corresponds to assuming :math:`1 \leftrightarrow \bot`. This doesn't seem attractive compared to plain linear logic - it proves contradiction as a theorem, hence loses the embedding of classical logic. `This page <https://www.pls-lab.org/en/Mix_rule>`__ mentions that mix holds in various models of linear logic such as coherent spaces and the game-theoretic semantics, but models are usually a simplification and there are models such as the syntactic model where mix doesn't hold. :cite:`strassburgerDeepInferenceExpansion2019` presents a deep inference system for non-mix MLL but says extending it to full LL is future work.
+
+There is also the question of if the last remaining structural rules, the exchange and associativity rules, should be dropped, to obtain non-commutative or ordered logic and non-associative logic. Noncommutativity leads to a stack or list, and non-associativity leads to a tree-like semantics which can be quite complicated. Contrast this with the idea of the propositions being in named slots, where associativity and commutativity seem natural - e.g. ``{a = 1, b = 2}`` is for almost all purposes the same as ``{b = 2, a = 1}``, and only in some narrow cases would we want to differentiate them. But, there seem to be reasonable ways of embedding linear logic in non-associative / non-commutative logic by adding associative / commutative modalities. :cite:`blaisdellNonassociativeNoncommutativeMultimodal2022` If there was a popular logic with such an embedding, then we could switch from linear logic to that. But per :cite:`millerOverviewLinearLogic2004` "no single [non-commutative] proposal seems to be canonical at this point."
 
 Jumbo connectives
 =================
@@ -32,11 +36,13 @@ Based on :cite:`levyJumboLcalculus2006`, Stroscot aims for the largest allowable
 
 We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`[(m_i,n_i)]` the jumbo-arity.
 
-The dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For an ADTs, the RHS of the difference is empty, i.e. ``a A | b B1 B2 | C`` looks like :math:`\Sigma [(a, [A]-[]),(b, [B_1, B_2]-[]), (c,[]-[])]`. This follows :cite:`wadlerCallbyvalueDualCallbyname2003` :cite:`crolardFormulaeastypesInterpretationSubtractive2004`.
+The dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For an ADT, the RHS of the difference is empty, i.e. ``a A | b B1 B2 | C`` looks like :math:`\Sigma [(a, [A]-[]),(b, [B_1, B_2]-[]), (c,[]-[])]`. This follows :cite:`wadlerCallbyvalueDualCallbyname2003` and :cite:`crolardFormulaeastypesInterpretationSubtractive2004` but is flipped compared to Pi.
 
 When the RHS of :math:`\Sigma` is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
 
 The jumbo connectives have the nice "unpacking" property that any combination of :math:`\Sigma` connectives is equivalent to a single :math:`\Sigma` connective, and likewise for :math:`\Pi`.
+
+The index :math:`i` in Levy's presentation is a tag drawn from a finite subset of a countable set of labels. But we can draw it from a subset of the universal set and hence get dependent types that depend on terms. In particular :math:`\Pi` gives a dependent function type and :math:`\Sigma` gives a dependent pair type.
 
 Common connectives
 ==================
@@ -75,7 +81,7 @@ Instead of binary contraction we allow :math:`n`-ary contraction for :math:`n\ge
 Subexponentials
 ---------------
 
-In standard linear logic there are two S4 modalities !/bang/"of course" (positive) and the dual ?/whim/whimper/"why not" (negative). But if we introduce two modalities :math:`\bang_1, \bang_2` with separate rules we cannot prove :math:`\bang_1 A \equiv \bang_2 A`. So in keeping with the maximalist approach we present the logic with subexponentials. The subexponentials are like type annotations, in that we can erase all the subexponentials to a single standard exponential, and we can infer subexponentials, computing the minimal subexponential structure necessary for the program to work. Subexponentials whose only operations are promotion/dereliction can be deleted from the program.
+In standard linear logic there are two S4 modalities !/bang/"of course" (positive) and the dual ?/whim/whimper/"why not" (negative). But if we introduce two modalities :math:`\bang_1, \bang_2` with separate rules we cannot prove :math:`\bang_1 A \equiv \bang_2 A`. So in keeping with the maximalist approach we present the logic with subexponentials. The subexponentials are like type annotations, in that we can erase all the subexponential labels to a single standard exponential, and we can infer subexponentials, computing the minimal subexponential structure necessary for the program to work. Subexponentials whose only operations are promotion/dereliction can be deleted from the program.
 
 For notation, subexponentials look like :math:`\bang^x_m,\whim^x_m` where :math:`m` is in an index set :math:`M \supseteq \{\cdot\}` and :math:`x \in X, X = P(\{c, w, d\})`. :math:`m=\cdot` is written :math:`\bang^x,\whim^x`, and similarly :math:`x=\{\}` is written as :math:`\bang_m,\whim_m`, so that we recover the standard notation :math:`\bang,\whim` for :math:`m=\cdot,x=\{\}`. We can also write :math:`\bang_{(m,x)},\whim_{(m,x)}`, or more simply :math:`\bang_{m}` if the available operations are clear.
 
@@ -191,11 +197,13 @@ Similarly the identity rule is a theorem for propositional logic: we can produce
 Quantifiers
 ===========
 
-To move from propositional to first-order logic we must extend the identity rule to include axioms for terms. Some presentations therefore call the identity rule "ax", for axiom, but in general the identity rule is a theorem so this is foolish IMO.
+To move from propositional to first-order logic we must extend the identity rule to allow terms. Some presentations call the identity rule "ax", for identity axiom, but in general the identity rule is a theorem so this seems foolish. Instead we list the identity rule explicitly when needed.
 
-`nLab <https://ncatlab.org/nlab/show/sequent+calculus>`__ defines a substitution rule/theorem. There is a theorem that substitution rules can be eliminated from the proof tree, proven by taking the proof tree for :math:`\Gamma \vdash \Delta` and replacing all its identities :math:`x \vdash x` with identities :math:`t\ vdash t`.
+`nLab <https://ncatlab.org/nlab/show/sequent+calculus>`__ defines a substitution rule/theorem. There is a theorem that substitution rules can be eliminated from the proof tree, proven by taking the proof tree for :math:`\Gamma \vdash \Delta` and replacing all its identities :math:`x \vdash x` with identities :math:`t \vdash t`. This requires :math:`t \vdash t` to hold, hence we include it. If the identity rule is not used with ``x`` in the proof tree, then the identity rule is not needed for the substitution, but such a situation is unlikely.
 
-Unlike with sets, quantifiers have no problem with identity expansion because the substitution is always for a variable and hence the number of quantifiers decreases.
+Quantifiers also require the identity rule, because cut elimination applies substitution of ``x`` for ``t`` in the proof tree where ``x`` is a variable.
+
+Cut elimination for quantifiers is sound because the number of quantifiers in the sequent decreases.
 
 Logic translations
 ==================
@@ -226,13 +234,11 @@ Definitions
 
 I didn't find any relevant papers on defining new notation for expressions in the sequent calculus. So we have to prove consistency ourselves. But I think the cut elimination theorem poses no problem, the key and commutative cases are trivial.
 
-The identity theorem fails to complete if there is an infinite chain of definitions :math:`A_1 \defeq \ldots A_2 \ldots, A_2 \defeq \ldots A_3 \ldots, \ldots`. Hence we exclude that from the syntax, by requiring the identity theorem to complete for all propositions (i.e. the proposition has a "non-circular definition"). All non-definition identity steps decrease the size of the formula so it is only definitions that can make a formula circular. Technically there are more complex behaviors ruled out than the simple infinite definition expansion "circular" implies, but I figure the term is good enough.
+The identity rule fails if the notation expands via an infinite chain of definitions :math:`A_1 = \ldots A_2 \ldots, A_2 = \ldots A_3 \ldots = \ldots`. For example for Russell's paradox and the related :math:`\{x : x \in x\}  \in \{x : x \in x\} = \{x : x \in x\}  \in \{x : x \in x\} = \ldots`. Hence we exclude such circular definitions by requiring the identity theorem to complete for all notations.
 
-For the substitution theorem we must also limit our substitution to non-circular definitions. The proof works by replacing variable identities :math:`x \vdash x` with more complex identities :math:`A \vdash A`, and works fine so long as the proposition is non-circular.
+For the substitution theorem goes through with the same restriction on notation. The proof works by replacing variable identities :math:`x \vdash x` with more complex identities :math:`A \vdash A`.
 
-Non-circularity is a pretty loose restriction. If we know a definition is size-decreasing, we can induct as usual to prove the identity theorem: use the basic identity theorem on non-definition subtrees, use the definition rule on both sides for each definition, and continue switching between the two until it's built up.
-
-Hence we only have to be careful for definitions like sets that can increase size when expanded. In general it is undecidable if a particular proposition is circular (see :ref:`discussion of set paradoxes <paradoxes>`). But most definitions don't have a definition on the RHS hence are easy to check for circularity.
+Non-circularity is a pretty loose restriction. If we know a definition is size-decreasing, we can induct as usual to prove the identity theorem: use the basic identity theorem on non-definition subtrees, use the definition rule on both sides for each definition, and continue switching between the two until it's built up. Hence we only have to be careful for definitions like sets that can increase size when expanded.
 
 Set theory
 ==========
@@ -250,11 +256,12 @@ More formally, suppose the logic is inconsistent, i.e. there is a derivation :ma
 
 The question of whether a given set comprehension is defined is undecidable, as we can encode the lambda calculus and hence the halting problem - the beta rule :math:`(\lambda x. A) t` does the same substitution as :math:`t\in\{x\mid A\}`. We can approximate definedness with a termination checking algorithm, type system, or syntactic check:
 
-* Strict comprehension, i.e. the bound variable can only appear once in the formula :cite:`shirahataLinearSetTheory1998`
-* New Foundations's stratified formulas :cite:`forsterQuineNewFoundations2019` :cite:`holmesElementarySetTheory1998`
-* Hindley-Milner type inference (since the simply typed lambda calculus terminates)
-* A size-checking algorithm like in :cite:`jonesCallbyvalueTerminationUntyped2008`
-* Brute-force expansion
+* Strict comprehension, i.e. the bound variable can only appear once in the formula :cite:`shirahataLinearSetTheory1998` Very restrictive.
+* New Foundations's stratified formulas :cite:`forsterQuineNewFoundations2019` :cite:`holmesElementarySetTheory1998` NFU + Infinity + Choice is known to be consistent with the theory of types with the Axiom of Infinity, and is a subtheory of ZFC + "there is an n-Mahlo cardinal for each concrete natural number n". But the stratification is restrictive, e.g. we cannot define a set of sets that contain themselves even though this definition is well-founded.
+* Hindley-Milner type inference (since the simply typed lambda calculus terminates). Seems like a reasonable check.
+* A size-checking algorithm like in :cite:`jonesCallbyvalueTerminationUntyped2008`. Seems to have unpredictable behavior, but may solve some things HM can't.
+* Brute-force expansion. Also somewhat unpredictable.
+* Intersection type system. Typeable iff terminating, but undecidable in general and tricky to approximate. But should be strictly better than HM.
 
 There is also :cite:`shirahataLinearConservativeExtension1996` which allows sets built from ZF's axioms.
 

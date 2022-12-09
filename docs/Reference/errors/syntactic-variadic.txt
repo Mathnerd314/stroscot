@@ -1,0 +1,11 @@
+c = sum $arguments
+
+print ((c 1 2) 3)
+  # error: 3 3 is not reducible
+
+a = c 1
+b = a 2
+
+print b
+  # error: 1 2 is not reducible
+

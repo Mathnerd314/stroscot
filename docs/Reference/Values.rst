@@ -1,7 +1,7 @@
 Values
 ######
 
-In Stroscot values are defined to be expressions that are in normal form (strongly reduced). WHNF is not sufficient to ensure a value, e.g. ``[1,undefined]`` reduces to ``undefined`` hence is not a value.
+In Stroscot values are defined to be expressions that are in normal form (strongly reduced), i.e. they evaluate to themselves. WHNF is not sufficient to ensure a value, e.g. ``[1,undefined]`` reduces to ``undefined`` hence is not a value. Traditionally a function is only defined on values, but lazy evaluation allows functions to produce useful behavior for non-values as well.
 
 Values are immutable (as `Rich Hickey says <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg>`__) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.
 
@@ -10,7 +10,7 @@ For convenience, "value" really describes the equivalence class of expressions t
 Symbols
 =======
 
-Symbols are unique values defined in modules and addressed by strings. Bare symbols consist of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus ``foo``, ``Foo``, and ``FOO`` are distinct identifiers. Other strings can be turned into symbols with ``@``, for example ``@"null"``. In addition operator symbols can be defined with parentheses and a sequence of punctuation characters, e.g. ``(+)``. There is also the empty parentheses symbol ``()``, called "unit".
+Symbols or identifiers are unique values. Bare symbols can be either ordinary or extended, vaguely like `Raku <https://docs.raku.org/language/syntax#Identifiers>`__. However symbols defined in modules are qualified to that module, hence more specific.
 
 ::
 
@@ -20,12 +20,35 @@ Symbols are unique values defined in modules and addressed by strings. Bare symb
   (++)
   @"a long symbol"
 
-Examples of predefined symbols include ``null``, ``true``, and ``false`` - the latter two forming the boolean type.
+Ordinary
+--------
+
+An ordinary identifier matches the pattern ``alphanum (alphanum|((apostrophe|hyphen)alphanum))*``, i.e. a sequence of digits/letters/underscores and isolated/embedded apostrophes or hyphens.
+
+"Alphabetic" means Unicode General Category value Letter (L), and the underscore _. "Numeric" includes characters with the Unicode General Categories value Number and Decimal Digit (Nd).
+
+Case is significant, thus ``foo``, ``Foo``, and ``FOO`` are distinct identifiers.
+
+Extended
+--------
+
+Extended symbols use an escape sequence to allow more freedom. They have the form ``@"sym str"`` (from Zig), which allows spaces etc. following the syntax for a string. An extended symbol matches a corresponding ordinary symbol if that form exists, i.e. ``null == @"null"``.
+
+In addition parsing rules for operator symbols may be suppressed with parentheses. For example ``(+)`` is equivalent to ``@"+"``. There is also the empty parentheses symbol ``()``, called "unit".
+
+Qualified
+---------
+
+A qualified symbol is a bare symbol together with a module reference. A literal looks like ``qsym <module> sym123``. Normally you use the period operator ``.`` and write ``module.sym``, but the period operator is a function not a constructor.
+
+Examples of qualified symbols include the predefined symbols of the prelude, like ``null``, ``true``, and ``false`` - the latter two forming the boolean type.
+
+It is key to support side-by-side execution of multiple versions of the same functionality. So the module part of a qualified name includes a version number and a cryptographic hash.
 
 Namespacing
 -----------
 
-Identifiers can be qualified by periods: ``a.b.c``. ``.`` is an infix left-associative operator that binds tighter than juxtaposition.
+Identifiers can be qualified by periods: ``a.b.c``. ``.`` is an infix left-associative operator that binds tighter than juxtaposition. This gets resolved to a nondeterministic set of qualified names.
 
 Term
 ====
@@ -40,7 +63,7 @@ A term is a symbol applied to other values.
 
 Note that if there is an appropriate syntax rule the second example could also be written as ``a ++++ b``, but it would be an equivalent value.
 
-Terms subsume algebraic data types, since an ADT value is a symbol applied to other values.
+Terms subsume algebraic data types, since an ADT value is a symbol applied to other values. An ADT is a "free" term that has no reduction rules defined.
 
 Terms also include the other function syntax, keyword arguments and so on.
 
@@ -52,7 +75,7 @@ Sometimes it is useful to deal with terms that are solutions to a system of equa
 Numbers
 =======
 
-In the mathematical world the definition of `number <https://en.wikipedia.org/wiki/Number#Main_classification>`__ variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the "numeric tower") But most of these are composite structures. In the computer world the primitive notion of "number" is a literal that looks like a number.
+In the mathematical world the definition of `number <https://en.wikipedia.org/wiki/Number#Main_classification>`__ variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the "numeric tower") But in the computer world most of these are composite structures and the primitive notion of "number" is a literal that looks like a number.
 
 Integers
 --------
@@ -63,21 +86,33 @@ Integers
   4711L
   1.2e+3
 
-Notations for integers (decimal ``1000``, hexadecimal ``0x3e8``, octal ``0o1750``)  are provided.
-Integers can also be denoted in base 2 by using the ``0b``  prefix: ``0b1111101000``.
-Positive exponents with decimal (e) / hexadecimal (p) / binary (b), and ``_`` as digit separator.
-Leadings 0's are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. ``0001`` cannot be stored in a ``i8`` (type must be able to contain ``9999``).
-
-::
-
   base = 0[a-z]
   digit = [0-9a-fA-F_]
   pos_exponent = [a-zA-Z] +? [0-9_]+
   format = [a-zA-Z] identifier
 
-  integer = base? digit+ pos_exponent? format?
+  integer = base? digit+ pos_exponent? format{0}
 
-Really integers are just a special class of symbols.
+Really integers are just a special class of symbols. Different bases for integers are provided - decimal ``1000``, hexadecimal ``0x3e8``, octal ``0o1750``, binary ``0b1111101000``. Further bases may be added. Positive exponents with decimal (e) / hexadecimal (p) / binary (b) / user-defined are allowed.
+
+Leadings 0's are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. ``0001`` cannot be stored in a ``i8`` (type must be able to contain ``9999``). The old mistake of parsing leading ``0`` as octal is completely ignored. On the other hand trailing 0's are not significant - the decimal point should never be the last character in numeric literals (e.g. 1. is invalid, and must be written as 1 or 1.0).
+
+`Wikipedia <https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping>`__ lists the following commonly used digit grouping delimiters:
+
+* comma ","
+* dot "."
+* thin space " "
+* space " "
+* underscore "_"
+* apostrophe «'».
+
+Traditionally, English-speaking countries employ commas, and other European countries employ dots. This causes ambiguity as ``1.000`` could either be ``1`` or ``1000`` depending on country. To resolve this ambiguity, various standards organizations have advocated the thin space in groups of three since 1948, using a regular word space or no delimiter if not available. However these are already in use in programming languages as list separator, radix point, and token separator.
+
+Hence underscore and apostrophe have been used in PLs instead. Simon of `Core <https://github.com/core-lang/core/issues/52>`__ says quote is more readable. Underscore is also used in identifiers, which can confuse as to whether a symbol is an identifier or a numeric literal. But the underscore is the natural ASCII replacement for a space. 13+ languages have settled on underscore, `following <https://softwareengineering.stackexchange.com/questions/403931/which-was-the-first-language-to-allow-underscore-in-numeric-literals>`__ Ada that was released circa 1983. Only C++14, Rebol, and Red use the "Swiss" apostrophe/single quote instead.
+
+C++14 chose quote to solve an ambiguity in whether the ``_db`` in ``0xdead_beef_db`` is a user-defined format or additional hexadecimal digits, by making it ``0xdead'beef_db``. This could have been solved in the parser by specifying that the last group parses as a format if defined and digits otherwise, or parses as digits and requires ``__db`` to specify a format. But overall I think Stroscot doesn't need user-defined format suffixes; the prefix style ``i16 0xdead_beef`` is just fine.
+
+Rebol uses comma/period for decimal point so quote was a logical choice. There doesn't seem to be any reason underscore couldn't have been used. Red is just a successor of Rebol and copied many choices.
 
 Rationals
 ---------
@@ -89,11 +124,11 @@ Rationals
 
   rational = float | float '/' float
 
-Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, but liberalized. We allow floats to be the numerator/denominator because writing out ``1e99 / 1e-99`` would be tedious.
+Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, but liberalized. We allow exponential notation in the numerator/denominator because writing out ``1e99 / 1e-99`` would be tedious.
 
 The normal form of a rational is ``AeB / C`` where ``A`` and ``C`` are relatively prime integers, ``B`` is an integer, and ``C`` is an integer that is not zero and not divisible by 10.
 
-So a rational is a term with a nested term, ``(/) ((e) <int> <int>) <int>``.
+So the value a rational is a term with a nested term, ``(/) ((e) <int> <int>) <int>``.
 
 Reals
 -----
@@ -155,7 +190,9 @@ Arrays
 
 (Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example ``array (range_inclusive 1 3) [1,2,3]`` defines a 1-based array where ``arr[i] = i``. Maybe there is also an element type, ``typed_array int32 (range_inclusive 1 3) [1,2,3]``
 
-Mutable arrays are a reference pointing to an immutable array. There is also an array of mutable cells but this is not used often as mutable array operations are optimized to in-place operations. Mutable arrays are not C pointers - conceptually you are doing ``(read arr)[0]`` if you want the first element, as opposed to a pointer ``readOffset Int 0 ptr``. This is hidden normally because ``arr[0]`` and ``arr[0] := 1`` are overloaded to read/write mutable arrays.
+Mutable arrays are a reference pointing to an immutable array. Operations are optimized by the memory system, so it does in-place operations where possible but can still resize the array. Conceptually you are doing ``(read arr)[0]`` to get the first element, i.e. taking an immutable snapshot and then reading/modifying it. This is hidden normally because ``arr[0]`` and ``arr[0] := 1`` are overloaded to read/write mutable arrays.
+
+There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like ``readOffset Int 0 ptr``. You can read a different type than you wrote, and it doesn't have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.
 
 Tensors
 -------
@@ -290,19 +327,35 @@ Maps
 
 Maps are the same as records except the fields are not ordered (set of pairs).
 
+::
+
+  map {a = 1, b = 2, c = 3}
+
 Multimap
 --------
 
 A multimap is a map where the values are nonempty bags.
 
+::
+
+  multimap {a = 1, a = 1, b = 2, c = 2, c = 3}
+  -- same as
+  map {a = bag [1,1], b = bag [2], c = bag [2,3]}
+
 Sets
 ====
 
-Sets are unordered lists with no repeated values, similar to a map whose values are all the symbol ``present`` or a function ``isElemOf : Any -> {Present|Absent}``.
+Sets are the mathematical definition, i.e. a function ``isElemOf : Any -> {Present|Absent}``. They may be specified by logical formulas. Finite sets may be specified as lists with no repeated values, similar to a map whose values are all the symbol ``Present``.
 
 ::
 
-  set [1,2,3]
+  universalSet = set (\_ -> Present)
+  a = set [1,2,3]
+  -- equivalent to
+  b = map { 1 = Present, 2 = Present, 3 = Present }
+  a = set (\x -> lookup {default=Absent} b x)
+
+More notation for sets is discussed on the :ref:`Sets` page.
 
 Bags
 ====
@@ -318,15 +371,27 @@ Priority queue
 
 This is a bag plus an ordering operation.
 
-Functions
-=========
+Lambdas
+=======
 
-Functions are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare via alpha equivalence).
+Lambdas are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare modulo alpha equivalence).
 
 Modules
 =======
 
 Modules are also first class, they are discussed in their own page.
+
+Rewriting system
+================
+
+A rewriting system consists of a set of rewrite rules. They are defined over a fixed abstract rewriting system called the "substitution calculus" consisting of the proofs from Stroscot's core logic, where reduction is cut elimination. Free variables etc. are incorporated by extending the ``Use`` rule. Terms are representatives of equivalence classes of proofs under ``<->*`` of the substitution calculus. Contexts are similarly representatives of precontexts.
+
+A (conditional) rewrite rule has the form ``l -> r | C1, ..., Cn`` where ``l`` and ``r`` are both terms. The conditions take the form of predicates ``Pi(x1, ..., xm, ->)``, where the ``xi`` are the free variables of ``l`` and ``r``, and ``->`` is the rewrite relation of the system. An unconditional rewrite rule ``l -> r`` is one where the conditions ``Ci`` are always true. Example predicates are:
+
+* type predicates, term must be of a certain form
+* ``a`` joins with, rewrites to, or is convertible to ``b``
+
+A term ``M`` rewrites to a term ``N`` by a rewrite rule ``l -> r | Ci`` if, for some context ``C`` with one hole, and substitution ``σ``, the propositions ``M <->* C[l /. σ]``, ``C[r /. σ] <->* N``, and ``Ci /. σ`` all hold, where ``C[l]`` means ``C`` with the hole substituted by ``l``, and ``<->*`` is the relation of the substitution calculus.
 
 Pointers
 ========

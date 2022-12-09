@@ -1,108 +1,47 @@
 Logic programming
 #################
 
-Benefits
-========
+Motivation
+==========
 
-Prolog's Definite Clause Grammars, and library `pio <https://www.swi-prolog.org/pldoc/doc/_SWI_/library/pio.pl>`__, are a great parsing DSL.
+Misquoting :cite:`iversonNotationToolThought1980`:
 
-With typecheckers you can just directly translate the rules to Horn clauses and it runs. Similarly language interpreters are a direct translation of their operational semantics.
+    Users of computers and programming languages are often concerned primarily with the efficiency of execution of algorithms, and might, therefore, summarily dismiss [logic programming]. Such dismissal would be short-sighted since a clear statement [...] can usually be used as a basis from which one may easily derive a more efficient algorithm.
 
-Incomplete data structures are great. ``date(2018, month, 14)`` describes every 14th day in this year, and the month can be constrained or the set of dates extracted.
+    [...]
 
-Database queries are naturally expressed as logical operations on relations. For example pyDatalog and SQL can be called relational languages.
+    The practice of first developing a clear and precise definition [...] without regard to efficiency, and then using it as a guide and a test in exploring equivalent processes possessing other characteristics, such as greater efficiency, is very common in mathematics. It is a very fruitful practice which should not be blighted by premature emphasis on efficiency in computer execution.
 
-Syntax
-======
+    [...]
 
-Prolog uses Horn clauses of the form ``H :- A1, A2, A3``. This is read "The clause head ``H`` is implied by the body's goals ``A1``, ``A2`` and ``A3``." A fact is a clause with no goals, ``F.`` or ``F :- ``, equivalent to ``F :- true`` (since ``true && a = a``). The head and goals are predicates of various syntax. There are various goals; they can be predicate terms with variables and list patterns (Herbrand domain, original Prolog), linear logic formulas (`linear logic programming <https://www.youtube.com/watch?v=rICThUCtJ0k>`__), or constraints (constraint logic programming).
+    Finally, overemphasis of efficiency leads to an unfortunate circularity in design: for reasons of efficiency early programming languages reflected the characteristics of the early computers, and each generation of computers reflects the needs of the programming languages of the preceding generation.
 
-For example, reversing a list::
+Practically, logic programming is a great tool for naturally expressing computational tasks that use logical constraints. Large programs generally run into one or two of these tasks. Without logic programming these tasks must be solved in an ad-hoc and verbose way. Compare `Sudoku with Prolog <https://www.metalevel.at/sudoku/>`__ vs `Norvig's Sudoku solution <https://norvig.com/sudopy.shtml>`__. Other examples include parsers, typecheckers, and database queries. Specifically:
 
-  nrev([],[]).
-  nrev([H|T],L2) :- nrev(T,R), append(R,[H],L2).
+* Prolog's Definite Clause Grammars, and library `pio <https://www.swi-prolog.org/pldoc/doc/_SWI_/library/pio.pl>`__, are a great parsing DSL. Furthermore the relation ``X parses_to Y`` can be flipped to get ``Y prints_to X``, automatically generating serializers from deserializers.
 
-  :- nrev([1,2], X), write(X), nl
-  % [2,1]
+* With typecheckers you can just directly translate the rules to Horn clauses and it runs. Similarly language interpreters are a direct translation of their operational semantics.
 
+* Incomplete data structures are great. ``date(2018, month, 14)`` describes every 14th day in this year, and the month can be constrained or the set of dates extracted. Furthermore with constraint logic programming sets of dates can be manipulated.
 
-In practice Prolog syntax is pretty bad; programs are heavy on meaningless intermediate variables such as ``R`` in the above. There is a `func <https://www.swi-prolog.org/pack/list?p=func>`__ package that allows writing ``nrev $ T`` instead of ``nrev(T,R), R``. A "function" is defined as follows:
+* Database queries are naturally expressed as logical operations on relations. For example pyDatalog and SQL can be called relational languages.
 
-* Any predicate ``p(...in, out)`` is a function from ``in`` to ``out``
-* A dictionary is a function from keys to values
-* An arithmetic expression ``2*_+3`` is a function on numbers
-* A format string is a function from argument list to interpolated output
-* A term with a ``~`` is a function which takes no input values and produces an output at the ~ position. For example::
+Semantics
+=========
 
-  atom(atom_string(~,"hello world")).
+Relational
+----------
 
-  % is equivalent to
-
-  atom_string(X,"hello world"),atom(X).
-
-More generally we should be able to build compound expressions:
-*  ``z = append a (append b c)`` instead of ``append(a,b,temp),append(temp,c,z)``
-* ``t = f x + g x`` instead of ``f(x,y), g(x,z), t = y + z``
-* in general, ``pred (f x)`` instead of ``f x y, pred(y)``
-
-There is no issue with devising a consistent use of output variables for an expression syntax; Oz does this. In practice the "boring" deterministic code will take up 66%-95% of the program so special-casing familiar function syntax is important. Although it's not clear if Horn clauses are more readable, programmers have gotten used to skimming over assignment clauses and parsing parentheses and infix expressions.
-
-For relations like ``precedes(x,y)``, Horn clauses are not necessarily the optimal syntax either. But the predicate syntax is traditional in logic and unlike functions there is not a well-developed alternative syntax to use. Powerful high-level logic syntax is still an unexplored area.
-
-miniKanren :cite:`byrdRelationalProgrammingMinikanren2009` doesn't have a global clause database so clauses of the same predicate must be grouped, this gives a local "match" syntax::
-
-  nrev l1 l2 :-
-    matche l1 l2
-      [] [] -> true
-      (h . t) l2 -> fresh (\r -> conj
-        [ nrev t r
-        , append r [h] l2
-        ])
-
-  print (run (\x -> nrev [1,2] x)
-  -- [[2,1]]
-
-
-This seems helpful syntax-wise, but MiniKanren and Clojure core.logic are also quite tedious to use in practice.
-
-``matche`` and other syntax desugars into a small set of primitives: :cite:`hemannMicroKanrenMinimalFunctional2013`
-
-* ``fresh`` or ``exists (\x.<body>)``: true if ``body`` is true for some value of ``x``
-* ``unify x y`` / ``x == y``: true if ``x`` unifies with ``y``
-* ``disj [x,y,z]`` / ``conde [x,y,z]``: true if any of ``x,y,z`` are true (logical or / disjunction)
-* ``conj [x,y,z]``: true if all of ``x,y,z`` are true (logical and / conjunction)
-* ``run (\x y. <body>)`` delimits the boundary of the logic program. It returns the stream of substitutions of the given variables for which the body is true. Optionally the maximum length of the stream may be specified.
-
-The expansion of ``nrev`` is given in :cite:`hemannFrameworkExtendingMicrokanren2017` page 137 (``define-relation`` is just DSL fluff around ``define`` per the appendix)::
-
-  nrev l1 l2 =
-    disj
-      [ conj [ l1 == [], l2 == [] ]
-      , fresh (\h -> fresh (\t ->
-          conj
-            [ (h,t) == l1
-            ,fresh (\r -> conj [nrev t r, append r [h] l2])]
-            ]
-      ))]
-
-  print (run (\x -> nrev [1,2] x)
-  -- [[2,1]]
-
-Relational programming
-======================
-
-Simple logic programs have what :cite:`byrdRelationalProgrammingMinikanren2009` terms "relational" semantics. A state is a map from some set of nominal variables to their substitution, a set of ground terms. A goal is a logical predicate over some variables - applying it to a state that defines the relevant variables gives true or false. The way sub-predicates works is complicated slightly by :cite:`clarkNegationFailure1978`, basically we use iff. Running a program consists of computing the set of satisifable states, which may be empty or infinite.
+Logic programs over classical true, false, not, ∧, ∨, ⊃, ∀, and ∃ have what :cite:`byrdRelationalProgrammingMinikanren2009` terms "relational" semantics (to be confused with relational databases). A state is a map from some set of nominal variables to their substitution, a set of ground terms. A goal is a logical predicate over some variables - applying it to a state that defines the relevant variables gives true or false. Running a program consists of computing the set of satisifable states, which may be empty or infinite.
 
 Practically the execution engine does not return a set, but rather a finite or infinite stream of satisfying meta-states. Meta-states are states that include unbound variables representing any term, and (in constraint logic programming) constraints for these unbound variables. Ideally the stream would be a minimal completely-covering set of meta-states in some arbitrary order, but in practice implementations can return identical or overlapping results.
 
-miniKanren uses an "interleaving" search from :cite:`kiselyovBacktrackingInterleavingTerminating2005`, which is "complete" in the sense that it explores all branches fairly and will find all answers eventually. For relational programs the search strategy is irrelevant so long as it terminates, so there are many other choices; we can optimize the search, or dump the problem into an SMT solver and use its search strategy. CDCL with optimizations should be the fastest. This has been explored in the field of "answer set programming".
+miniKanren uses an "interleaving" search from :cite:`kiselyovBacktrackingInterleavingTerminating2005`, which is "complete" in the sense that it explores all branches fairly and will find all answers eventually. Generally the search strategy is irrelevant so long as it is fair, so there are many other choices; we can optimize the search, or dump the problem into an SMT solver and use its search strategy. CDCL with optimizations should be the fastest.
 
-By default Prolog does not use the `occurs check <https://en.wikipedia.org/wiki/Occurs_check>`__ in unification. This means for ``x == f x`` the substitution ``x -> f x`` is obtained. Denotationally this can be accommodated by allowing states to contain infinite terms, :cite:`weijlandSemanticsLogicPrograms1990` ``x = f (f (f (...)))`` in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. :cite:`aptWhyOccurcheckNot1992` Prolog defines a ``unify_with_occurs_check`` predicate for situations where logical soundness is desired, although the implicit unification when dispatching predicates is still unsound. miniKanren always uses the occurs check.
+Imperative
+----------
 
-Non-relational programming
-==========================
-
-"Logic programming" a la Prolog has extended the execution engine with non-relational predicates that expose details of the underlying implementation:
+Prolog has extended the execution engine with predicates that expose details of the underlying implementation:
 
 * Cut (!) which commits to choices made since the parent goal was unified with the left-hand side of the clause containing the cut. miniKanren similarly includes operators conda (soft-cut) and condu (committed choice). Concurrent logic programming also has committed choice which prunes off all other branches once it is known that a clause's guard goals all succeed.
 * ``var/1`` which checks if the variable is unbound
@@ -112,9 +51,9 @@ Non-relational programming
 * unfair search so that ``ancestor_of(A, P) :- ancestor_of(A, Parent), parent_of(Parent, P). :- ancestor_of(x,y)`` diverges e switching the order of the goals does not
 * Meta-programming which allows querying or modifying clauses at run time, such as nth_clause, assert, retract
 
-These features expose the search strategy's order of trying clauses and mean the denotational semantics of programs must include the search strategy's implementation and any goal side effects. Programs that heavily use non-relational features are best understood as an imperative execution model with embedded backtracking.Backtracking can re-execute side-effectful operations, so Prolog uses a simple depth-first search strategy in an effort to make the imperative semantics comprehensible.
+In particular these features expose Prolog's search strategy. Prolog uses a simple depth-first search strategy, "SLD resolution", to explore clauses. This means the denotational semantics of programs must include the search strategy's implementation and any goal side effects. SLD resolution is inefficient and biased compared to more modern logic search strategies such as DPLL or CDCL. But SLD's simplicity is the main reason imperative Prolog execution is comprehensible.
 
-`Merritt <https://www.amzi.com/articles/prolog_under_the_hood.htm>`__ presents an execution model as follows. A goal is of type ``Goal = {call : Entry, redo : Entry }; Entry = {exit: Entry, fail : Entry} -> Exit; Exit = IO ()``. The composition ``A ; B`` of two goals is::
+Programs that heavily use imperative features and SLD resolution are best understood using an imperative execution model with embedded backtracking commands that can re-execute side-effectful operations. The imperative "Byrd Box" execution model was first described in "Understanding the control flow of Prolog programs" by Lawrence Byrd. This paper is not available online but the idea is described in many other places, e.g. `Merritt <https://www.amzi.com/articles/prolog_under_the_hood.htm>`__, and is visible in Prolog debuggers. It goes as follows. A goal is of type ``Goal = {call : Entry, redo : Entry }; Entry = {exit: Entry, fail : Entry} -> Exit; Exit = IO ()``. The composition ``A , B`` of two goals is::
 
   comp A B = Goal { call = \exit fail -> a, redo = \exit fail -> d } where
     a = A.call b f
@@ -168,9 +107,27 @@ Various examples of goals::
         tryNext
     }
 
-The general advice is to use non-relational features `sparingly <http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/cut.html>`__ and only if you can justify the need based on performance. :cite:`byrdRelationalProgrammingMinikanren2009` shows that, for a sample program, non-relational features can be completely avoided. Cut can almost always be replaced with a tagging scheme that makes the matching clause unambiguous, or more expressive constraints. Byrd says there is no complete method for avoiding copy-term, but in his example it can be replaced by using templates with unique names and substituting these with logic variables.
+The general advice is to use imperative features `sparingly <http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/cut.html>`__ and only if you can justify the need based on performance. :cite:`byrdRelationalProgrammingMinikanren2009` shows that, for a sample program, these features can be completely avoided. Cut can almost always be replaced with a tagging scheme that makes the matching clause unambiguous, or more expressive constraints. Byrd says there is no complete method for avoiding copy-term, but in his example it can be replaced by using templates with unique names and substituting these with logic variables.
 
-Overall it seems that relational programming covers all the cases of logic programming that people care about. Relational programming has much clearer semantics. These non-relational features are antipatterns: implementation hacks for cases where the compiler is not sufficiently smart or the constraint language is not sufficiently expressive. Mercury has eliminated impure features. :cite:`hendersonDeterminismAnalysisMercury1996`
+Overall it seems that imperative features are antipatterns: band-aid implementation hacks that can be avoided by making the compiler smarter or the constraint language more expressive. Mercury has eliminated these features in favor of a state-token I/O system. :cite:`hendersonDeterminismAnalysisMercury1996`
+
+* XSB: http://xsb.sourceforge.net/manual1/manual1.pdf
+
+Proof-search
+------------
+
+A more general paradigm is sequent proof search, which allows all the connectives of linear logic and extensions such as infinite proof trees. A logic program consists of some list of program clauses (proof sequents) ∆ which can be seen as assumptions or axioms. There is then a goal sequent !∆, C −→ G representing a search state in which formulas ∆ are assumed, resources C are provided, and the goal is G. The logic engine then searches for proof trees which prove this sequent. Via the Curry-Howard correspondence, these proof trees correspond to programs of the type described by the sequent. As with relational programming a finite or infinite stream of satisfying programs is returned.
+
+Since programs such as ``undefined`` trivially satisfy all goals, restrictions must be made to the space of proofs to obtain useful results. The standard restriction is to finite "cut free" proofs, which by the cut elimination theorem can prove all sequents with finite proofs. Uniform proofs are cut-free sequent proofs P such that every subproof of P is uniform and also for every non-atomic formula occurrence B in the right-hand side of the end-sequent of P, there is a proof P0 equal to P up to permutation of inference rules such that P0's last inference rule is the right introduction rule for the top-level logical connective occurring in B. The existence of uniform proofs allow a goal-directed search which starts by logically decomposing goals. It is only when the goal formula is atomic that other proof methods are used ("backchaining"). An abstract logic programming language is a system of goals, formulas, and rules such that a sequent has a proof if and only if it has a uniform proof.
+
+Uniformity seems mainly useful for classical logic. In linear logic the dynamics of cut-free proof search can be described via Andreoli's focused proofs which alternate between "unfocused"/goal-reduction decomposition of all asynchronous formulas and "focused"/backchaining decomposition of some synchronous formula by using introduction rules for its top-level connective and all synchronous subformulas that might arise.
+
+Answer set
+----------
+
+Answer-set programming (ASP) rebases the solving process onto SMT/SAT-style propositional solvers. ASP is based on "stable-model semantics", which competes with "program completion" and the "well-founded semantics" to define the meaning of negation. Program completion :cite:`clarkNegationFailure1978` interprets as a clause ``p :- q, not r`` as "p if and only if q and not r". A stable model is a mapping ``Prop -> {T,F}`` such that for each clause ``A :- B1, …, Bm , not C1, …, not Cn`` either some proposition ``Ci`` is true or the negation-free sequent ``B1, …, Bm |- A`` holds.
+
+Although the semantics of ASP is conventional first-order logic, existing practical tools for ASP only implement propositional solvers, not first-order logic - they work by first "grounding" the first-order formulae to a propositional representation, and then solving them. Compared to SLDNF this can cause blow-up or speed-up but under a finite domain assumption it gives the same results.
 
 Modes
 =====
@@ -205,11 +162,11 @@ Logic programming allows writing very concise code, although it can be unusably 
 Unification
 ===========
 
-Unification is the problem of finding all solutions to equations ``a1=b1, a2=b2, ...`` over tree terms and variables. This can be extended to the "dual unification" problem that also includes disequations ``c1 != d1`` in the list that must not be satisfied. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution. A substitution is a unification problem where the left sides are all variables and those variables do not appear in the right sides.
+Unification is the problem of finding all solutions to a system of equations. First-order unification solves a set of equalities ``a1=b1, a2=b2, ...`` over tree terms and variables. This can be extended to the "dual unification" problem that also includes disequations ``c1 != d1`` in the list that must not be satisfied. Constraint logic programming requires solving systems of equations over reals or other sets. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution, together with constraints over those free variables. A substitution is a set of assignments from variables to expressions.
 
-Unification isn't actually a core concept of logic programing AFAICT, as e.g. constraint logic programming on reals doesn't use it (it uses systems of equalities of reals). But syntax trees require first-order unification to solve all the equalities that arise, so it's a standard technique for implementing logic programming.
+Unification isn't really part of the semantics of logic programming, as the semantics is phrased in terms of satisfiability. But it is a standard technique used in implementing logic programming, and in practice the implementation defines the semantics. Prolog only implements first-order unification. Teyjus / λProlog limit to higher-order "pattern lambdas". With ZipperPosition :cite:`vukmirovicEfficientFullHigherOrder2021` there is outlined a full higher-order unification algorithm extending Huet's semi-algorithm - the need to support multiple unifiers for a complete set complicates things a bit.
 
-The standard `unification algorithm <https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm>`__ :cite:`vukmirovicEfficientFullHigherOrder2021` works by applying reduction operations to various cases:
+The outline of every unification algorithm is that it randomly applies simplifying reduction operations to an equation until it results in a substitution, then applies the substitution to the remaining equations (dereferencing). Here we show :cite:`vukmirovicEfficientFullHigherOrder2021`'s, adapted to match the presentation on `Wikipedia <https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm>`__:
 
 * delete: ``s=s`` is removed
 * decompose: ``a s1 ... sm = a t1 ... tm`` to equations ``{s1 = t1, ..., sm = tm }``
@@ -220,7 +177,7 @@ The standard `unification algorithm <https://en.wikipedia.org/wiki/Unification_(
 * beta normalization: reduce left/right to hnf
 * under lambda: apply rule for ``a = b`` to ``λx. a = λx. b``
 
-There are more complex reductions for hard cases:
+ZipperPosition has more complex reductions for hard cases:
 
 * oracle fail: ``s=t`` fails if oracle determines to be insoluble
 * oracle success: ``s=t`` has finite CSU, branch to each solution σ_i
@@ -229,21 +186,19 @@ There are more complex reductions for hard cases:
   * flex-rigid ``P(λx. F s = λx. a t)``: try an imitation of a for F, if a is constant, and all Huet-style projections for F, if F is not an identification variable.
   * flex-flex with different heads ``P(λx. F s = λx. G t)``: all identifications and iterations for both F and G, and all JP-style projections for non-identification variables among F and G.
   * flex-flex with identical heads and the head is an elimination variable, ``P(λx. s = λx. t)``: no bindings.
-  * flex-flex with identical heads, ``P(λx. F s = λx. F t)``: all iterations for F at arguments of functional
-type and all eliminations for F.
+  * flex-flex with identical heads, ``P(λx. F s = λx. F t)``: all iterations for F at arguments of functional type and all eliminations for F.
 
-Trying all the bindings is slow, but a good set of oracles makes the algorithm efficient in practice. Of course it would be better to find reduction rules that solve things generally rather than oracles which work on specific cases, but this is hard.
+The flex-binding step is slow, but a good set of oracles makes the algorithm efficient for most practical cases. Of course it would be better to find reduction rules that solve things generally rather than oracles which work on specific cases, but this is hard.
 
-Perspectives
-============
+The unifier search can be integrated with the overall logical search for satisfiable formulas.
+
+By default Prolog does not use the `occurs check <https://en.wikipedia.org/wiki/Occurs_check>`__ in unification. This means for ``x == f x`` the substitution ``x -> f x`` is obtained. Denotationally this can be accommodated by allowing states to contain infinite rational terms, :cite:`weijlandSemanticsLogicPrograms1990` ``x = f (f (f (...)))`` in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. :cite:`aptWhyOccurcheckNot1992` Prolog defines a ``unify_with_occurs_check`` predicate, and has an option for doing the occurs check in the implicit unification when dispatching predicates. Meanwhile miniKanren always uses the occurs check. The occurs check is needed in first order logic theorem-proving, where skolemization turns quantifiers into variables and is sound only if the occurs check is used.
+
+
+Sources
+=======
 
 Based on:
-* `Merritt <https://www.amzi.com/articles/prolog_under_the_hood.htm>`__, user of Prolog for "serious applications"
 * `Byrd <https://stackoverflow.com/questions/28467011/what-are-the-main-technical-differences-between-prolog-and-minikanren-with-resp>`__, author of miniKanren
 * `Reddit thread <https://www.reddit.com/r/ProgrammingLanguages/comments/9kb9z5/logic_programming_languages/>`__, particularly Paul Bone who did his PhD "Automatic Parallelism in Mercury")
 * `HN thread <https://news.ycombinator.com/item?id=14439137>`__
-
-Answer-set programming (ASP) rebases the solving process onto SMT/SAT-style propositional solvers. The semantics of ASP give a conventional first-order logical semantics to Prolog. Prolog's semantics are a bit obscure, because it's "whatever SLDNF gives you", which includes things like queries not terminating.
-
-ASP is based on the "stable-model semantics", which competed with the "well-founded semantics". Existing practical tools only implement propositional solvers, not first-order logic - they work by first "grounding" the first-order formulae to a propositional representation, and then solving them. Compared to SLDNF this can cause blow-up or speed-up but under a finite domain assumption it gives the same results.
-

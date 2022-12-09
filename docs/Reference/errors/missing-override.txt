@@ -1,0 +1,14 @@
+module1 = module {
+  foo (x : i32) = 1
+}
+
+
+module2 = module {
+  import module1
+  foo (x : i16) = 2
+}
+
+import module1, module2
+
+f = force foo
+print (map foo [1,2])

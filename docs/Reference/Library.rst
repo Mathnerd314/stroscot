@@ -124,7 +124,7 @@ They are related by ``strictwo(x,y) = !totalpo(y,x)``, i.e. ``!(x < y) <-> y >= 
 Issues:
 * pathological arrays that expose worst-case quadratic behavior
 * "golden unit tests" that compare unstable sorted arrays for equality. Solved by defaulting to stable sort.
-* comparison functions that are not actually strict weak orders or total preorders (e.g. float comparison on NaN). Solved by randomized testing of triples.
+* comparison functions that are not actually strict weak orders or total preorders (e.g. IEEE NaN comparison). Solved by randomized testing of triples.
 * Memory allocation or concurrency primitives that rely on sorting algorithms and vice-versa which result in debugger loops
 
 Optimizations:
@@ -171,13 +171,18 @@ Part of the issue with the interface is whether executing an iterator multiple t
 
 In the general case the iterator cannot be reused - next should be treated as a linear value. But in other cases it's more specific.
 
-Iterators then implement a for-of loop:
+Iterators then implement a for-X loop. There is some issue as to which syntax to use:
 
 ::
 
-  for(x : getIterator) {
+  iter = 1:5
+  for(x : iter) {
+  for(x of iter) {
+  for(x in iter) {
+  for(x = iter) {
     act
   }
+
 
 Haskell's ``Traversable`` has ``traverse :: Applicative f => (a -> f b) -> t a -> f (t b)`` which extends this further, to for loops which return values:
 
@@ -230,7 +235,7 @@ The functions themselves are written in the token-passing style ``RealWorld, a -
 
 The standard library wraps all relevant functions in :ref:`finalizers <finalizers>` to ensure safety. But there is also a corresponding .Raw module which provides the unwrapped versions.
 
-Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API should have a warning.
+Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API documentation should have a warning.
 
 .. _concurrency-library:
 

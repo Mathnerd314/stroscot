@@ -1,14 +1,26 @@
-optional pattern
-many pattern -- zero or more repetitions
-some pattern -- one or more repetitions
-(pattern) -- grouping, no semantic meaning
-pat_1 <|> pat_2 -- nondeterministic choice
-not pat -- all sequences not matching PAT
-pat1 &&& pat2 - elements matching pat1 and pat2
-char "f" -- literal character
-oneOf "abc" -- A character set. Matches any one of the characters.
-(>*<) = liftA2 (,) -- parses left, then right, and returns both
-{ a; b } = a >*< b
+{-
+The syntax is specified using a variant of parser combinators, with an API similar to parsec.
+
+(<|>) is nondeterministic choice, there is no need for try.
+a >*< b and { a; b } parse a, then b, and return (a,b)
+satisfy f succeeds for any character for which the supplied function f returns True. Returns the character that is actually parsed.
+not pat = all sequences not matching PAT
+pat1 &&& pat2 = elements matching pat1 and pat2
+
+Parentheses group expressions as usual.
+Values are parsers which read no input and return themselves
+
+-}
+
+optional p = p <|> Nothing
+many p = p >*< many p <|> Nothing
+some p = p >*< many p <|> p
+
+-- A character set. Matches any one of the characters.
+oneOf cs = satisfy (\c -> elem c cs)
+-- literal character
+char c = satisfy (==c)
+
 
 allowImp syn = out { implicitAllowed = True, constraintAllowed = False }
 

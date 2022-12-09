@@ -1,0 +1,5 @@
+a = error "urk"
+b = case a of
+  (e : Exception) -> e
+  a -> a + 2
+main = print b

@@ -1,0 +1,1 @@
+Clauses 'c1' and 'c2' have equal declared priority, but neither is more specific than the other. Furthermore they conflict for the expression 'f 1 2'. Set one to have higher priority or fix the conflict.

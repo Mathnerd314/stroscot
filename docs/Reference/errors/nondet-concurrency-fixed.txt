@@ -1,0 +1,5 @@
+A = mut 0
+t1 = fork { A := 1 }
+t2 = fork { join t1; A := 2 }
+join (t1, t2)
+print A

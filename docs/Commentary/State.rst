@@ -1,32 +1,53 @@
 Stateful programming
 ####################
 
+In Stroscot there are shared non-global states (stores), and a non-shared global state (I/O). But there is no shared global state, as this leads to initialization races and non-reentrant operations. With the store mechanism a programmer is free to declare some variables and assign some state, and the store will be passed around automatically. But the store only contains a map from variables to data and it is instead the I/O mechanism which interacts with the file system, the network, and other resources.
+
 Limitations of purity
 =====================
 
-At present, destructive update is required to implement some algorithms efficiently. In particular consider some classes of language:
+At present, destructive update is required to implement some algorithms efficiently. In particular consider some languages:
 
 1. PURE: a "pure" CBV Lisp using a small set of primitive Lisp operations, ``ATOM EQ READ WRITE CONS CAR CDR`` assumed to be of constant cost, and "flow-chart style" control flow, assumed free
 2. IMPURE: the Lisp extended with destructive mutation operators ``RPLACA RPLACD`` also of constant cost
 3. HASK: a Haskell with lambdas, case, tuples, and lists
 4. CYCLE: PURE but with an operation to construct cyclic data structures, CYCLE
 
-It has been established that PURE <= CYCLE < HASK <= IMPURE as far as expressing efficient online programs.
+It has been established that PURE ⊆ CYCLE ⊊ HASK ⊆ IMPURE as far as expressing efficient online programs:
 
-For the first relation, PURE programs can be run unmodified in CYCLE with equivalent reduction steps, showing inclusion. :cite:`ben-amramNotesPippengerComparison1996` says that it is an open problem to demonstrate an advantage of CYCLE over PURE.
+* For the first relation, PURE programs can be run unmodified in CYCLE with equivalent reduction steps, showing inclusion. :cite:`ben-amramNotesPippengerComparison1996` says that it is an open problem to demonstrate an efficiency advantage of CYCLE over PURE.
 
-For the second relation, lazy languages allow cycles. :cite:`ben-amramNotesPippengerComparison1996` says that :cite:`pippengerPureImpureLisp1997` shows that for a specific online problem "perm" any CYCLE solution will require at least O(n log n) time. The proof depends on the property of CYCLE that a cons cell can refer only to itself or previously-constructed values. :cite:`birdMoreHasteLess1997` demonstrate that HASK can solve "perm" in amortized O(n) time, via the use of lazy streams, hence HASK is strictly more efficient than CYCLE.
+* For the second relation, lazy languages allow cycles, hence showing inclusion. :cite:`ben-amramNotesPippengerComparison1996` says that :cite:`pippengerPureImpureLisp1997` shows that for a specific online problem "perm" any CYCLE solution will require at least O(n log n) time. The proof depends on the property of CYCLE that a cons cell can refer only to itself or previously-constructed values, which does not hold for LAZY as it allows naming future computations. :cite:`birdMoreHasteLess1997` demonstrate that HASK can solve "perm" in amortized O(n) time, via the use of lazy streams, hence HASK is strictly more efficient than CYCLE.
 
-For the third relation, it should be clear that the thunk mechanism of HASK can be emulated in IMPURE. :cite:`ben-amramNotesPippengerComparison1996` theorizes that for IMPURE programs following a read-update-write structure, there is a correspondingly efficient HASK program. Since Haskell 1.0 programs use a lazy stream ``[Response] -> [Request]`` for I/O, this read-update-write model seems to encompass all programs, hence it seems likely that the two languages are of equal efficiency, although nobody has formally proved this (TODO). But until then it is safer to assume HASK < IMPURE and provide destructive update facilities.
+* For the third relation, the thunk mechanism of HASK can be emulated in IMPURE, showing inclusion. :cite:`ben-amramNotesPippengerComparison1996` theorizes that for IMPURE programs following a read-update-write structure, there is a correspondingly efficient HASK program. Since Haskell 1.0 programs use a lazy stream ``[Response] -> [Request]`` for I/O, this read-update-write model seems to encompass all programs, hence it seems likely that the two languages are of equal efficiency, although nobody has formally proved this (TODO).
 
-The log(n) gap is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. (:cite:`strakaFunctionalDataStuctures2013`, chapter 5) His implementation uses vEB trees which have a huge constant factor and space usage, maybe
+The log(n) gap between CYCLE and HASK is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. (:cite:`strakaFunctionalDataStuctures2013`, chapter 5) Straka's implementation uses vEB trees which have a huge constant factor and space usage, but y-fast trees probably work too for a practical implementation.
+
+Still though, a gap is a gap, so to get performance we must provide laziness or destructive update. And programming efficient amortized pure lazy data structures is quite complex, and not well-studied. It seems that any practical programming language will have to provide destructive update.
 
 Automatic destructive update
 ============================
 
-Although pure programs do not have operators for destructive update, they can still express similar programs using an update operation that traverses and copies the data. :cite:`hudakAggregateUpdateProblem1985` shows that with a compiler analysis a language can provide O(1) update operations. The compiler searches through possible evaluation orders for an evaluation order that never accesses the old version of data after updating, and transforms such "single-threaded" programs to destructively update, giving the speedup. Programming with pure arrays in a "single-threaded" style is at least as expressive as imperative arrays - per Hudak, all the natural translations of imperative algorithms are single-threaded. Some of :cite:`okasakiPurelyFunctionalData1998`'s lazy data structures have a similar single-threaded use condition for amortized good performance, so the single-threaded condition seems reasonable.
+Although pure programs do not have operators for destructive update, they can still express similar programs using a copying update operation that returns a new data structure with the relevant index modified. For `example <https://prog21.dadgum.com/41.html>`__ counting the frequency of byte values within a block of binary data:
 
-Haskell avoided automatic destructive update because it seemed too complicated, and instead relies on monads. Monadic style fixes an evaluation order hence guarantees single threading because the old version is inaccessible. Side effects like in Ocaml also are single-threaded. Clean has uniqueness types, which also enforce single threadedness. Uniqueness types disallow a simple example of implementing id in terms of const:
+::
+
+  freq (b : Binary) = scanr (\arr x -> update x (+1) arr) (repeat 256 0) b
+
+  -- expands to:
+
+  freq (b : Binary) = go b (repeat 256 0)
+    where
+      go (x:rest) arr = go rest (update x (+1) arr)
+      go [] arr = arr
+
+The issue is that a naive implementation of "update" copies the entire array, using O(n) memory and time. :cite:`hudakAggregateUpdateProblem1985` shows that with a compiler analysis (hereafter called "automatic destructive update") a language can provide O(1) update-copy operations. The compiler searches through possible evaluation orders for an evaluation order that never accesses the old version of data after updating, and transforms such "single-threaded" programs to destructively update, giving the speedup. Programming with pure arrays in a "single-threaded" style is at least as expressive as imperative arrays - per Hudak, all the natural translations of imperative algorithms are single-threaded. Some of :cite:`okasakiPurelyFunctionalData1998`'s lazy data structures have a similar single-threaded use condition for amortized good performance, so the single-threaded condition seems reasonable. Also well-defined Ocaml programs that use side effects must be single-threaded, else there is a race condition.
+
+Roc and Koka seem to be going down the automatic destructive update route via alias analysis and ref-counting optimizations. It seems like a great optimization and it does not seem too hard to allow marking array uses as single-threaded so the compiler warns if it has to copy.
+
+Haskell avoided automatic destructive update because per SPJ it seemed too complicated, and instead relies on monads. Monadic style fixes an evaluation order, hence guarantees single threading because the old version is inaccessible. Monadic style is verbose, because simple function applications require the use of Applicative like ``liftA (+) 1 2``. It also is not very composable because ``runST`` is required to escape from the monad and the phantom state token type prevents mixing certain computations.
+
+Clean has uniqueness types, which also enforce single threadedness. Uniqueness types disallow a simple example of implementing id in terms of const:
 
 ::
 
@@ -37,19 +58,75 @@ Haskell avoided automatic destructive update because it seemed too complicated, 
   b = id a
   b !! 10
 
-
-
-Roc and Koka seem to be going down the automatic destructive update route via alias analysis and ref-counting optimizations.
+Automatic destructive update may or may not work on this example depending on how smart the compiler is. But it definitely works on all uniqueness-typable programs, and is pretty much syntactically identical. So this is another case of tractable but incomplete vs difficult but complete - Stroscot aims for completeness.
 
 Store
 =====
 
-We can formalize destructive update with the notion of a store. An assignment statement ``a = b + c`` translates to ``write s "a" (read s "b" + read s "c")``. Store references allow deep updates in constant time.
+We can formalize traditional imperative programming with mutable variables using the notion of a store. A store is a first-class value representing a subset of computer memory. It is basically a map from identifiers to values, a little "bundle of state", but it's more complicated than just a hash table to as to support implicit concurrency in expressions. In particular a store is a per-variable ordered list of reads and writes so that read-write and write-write conflicts may be detected.
 
-State
-=====
+A function that uses the store is a value of the State monad, ``s -> (s, a)``, where ``s = Store``. For example an assignment statement ``a := f b + g c`` translates to
 
-Conceptually the state of a program could include a lot of things, including the state of the computer, the stock market, quantum fluctuations, etc. - all information within the chronological past of a program. But since we are running on hardware we only care about the hardware's state, and since the hardware is all digital it is deterministic and expressible as a long binary string. This string would include the kernel and peripheral devices and other processes not related to ours. If we assume we are running as a user process then we can limit ourselves to the process state. Conveniently the CRIU project has a `list <https://criu.org/Images>`__ of what's in the state of a Linux process. We reproduce it here:
+::
+
+  \s ->
+    (b, s1a) = read s "b"
+    (x, s1) = f b s1a
+    (c, s2a) = read s "c"
+    (y, s2) = g c s2a
+    s' = merge s [s1,s2]
+    a = x + y
+    update s' "a" a
+
+The store is passed into each function and returned as a result. The special ``merge`` operation combines concurrent stores and checks for conflicts by examining the list of operations - if there is a conflict, the variables involved are set to ``DataRace`` exceptions.
+
+:cite:`warthWorldsControllingScope2011` has an asymmetric commit operation instead of a merge operation. This takes a parent and a child and propagates child writes to the parent. This is impure, still requiring a global state (the root). For example the behavior of this program seems really unintuitive:
+
+::
+
+  x = 1
+  A = thisWorld.sprout()
+  x = 2
+  in A { print(x) }
+  -- prints 2, not 1
+
+IMO it is much more intuitive to have a "snapshot" model that merges immutable map-like structures, so that the program works like so:
+
+::
+
+  x = 1
+  A = currentState
+  x = 2
+  with state=A { print(x) }
+  -- prints 1
+
+The "worlds" approach seems to have adopted the asymmetric model based on Javascript's property lookup semantics. Per :cite:`morrisettRefiningFirstclassStores1993` the rollback and undo examples they give can be implemented just as easily using the snapshot model.
+
+The allowed "side effects" of stores are restricted to variable updates - I/O such as reading files and networking is not possible, because the program can't continue without external input, but it has already been given the full state of the store so there is no further place to insert this input. But per :cite:`johnsonStoresPartialContinuations1988` continuations and stores can coexist. The idea is that a continuation takes a result continuation and a store, operates on the store, then calls the result continuation with a final store and the result. So the type of a continuation returning ``a`` is ``(Store -> a -> r) -> Store -> r``. Written differently this is ``Store -> ((Store, a) -> r) -> r`` which is ``Store -> Cont r (Store, a)`` or ``StateT (Cont r) Store a``.
+
+In fact monads and continuation-based IO can express mutable variable programming directly, e.g. Haskell has the ``readIORef`` primitive. So first-class stores aren't actually necessary. But per :cite:`johnsonStoresPartialContinuations1988` "the resulting increase in power of the environment appears to be well worth the cost" (in complexity and implementation overhead). The store has several advantages:
+
+* The store is a first-class value similar to a dictionary, whereas a continuation is similar to a linked list. Thus variable values can be accessed in O(1) time from a store value, whereas a continuation value must be stepped through sequentially (simulated) to extract values, requiring O(n) time. Essentially, the store formalizes program data state, while continuations formalize program control state. Per :cite:`morrisettRefiningFirstclassStores1993`, continuations do not capture the state of mutable objects. For example, ``callCC (\c -> c; c); modify "a" (+1)`` increments by 2, rather than setting ``a`` twice.
+
+* It is much simpler semantically to use a store for implicitly concurrent computations. In the above example, where ``f b`` and ``g c`` run in parallel, if we used a monad we would have to sequence the operations ``x <- f b; y <- g c`` or use explicit ``fork``/ ``merge`` operations ``x_t <- fork (f b); y_t <- fork (g c); x <- wait x_t; y <- wait y_t``. In either case, the operations are not fully commutative: in the first we cannot swap the order of ``x`` and ``y`` if there is a data race, and in the second we cannot move a wait before a fork. In contrast the store's ``merge`` operation is fully commutative because the result of a data race is well-defined to be an exception. The ``wait/fork`` machinery is not needed as it is simply passing around a value. Essentially stores provide a transactional view of memory.
+
+* First-class stores allow manipulating the program data state in complex ways. Multiple stores may exist simultaneously, allowing isolated computations. In particular, the empty store value allows turning a stateful function into a pure function, without any type trickery like ``runST``. More generally the ability to apply a function to different explicitly-written store values allows program testing and debugging.
+
+The efficient implementation of stores is somewhat of a research area. Automatic destructive update should allow linear or non-conflicting usage of the store to translate to direct memory reads and writes. With non-linear usage, efficiently making copies and allowing persistent access to old stores may require some cleverness, for example a persistent hash map backed by the persistent array found in :cite:`strakaFunctionalDataStructures2013`. Per :cite:`johnsonFirstclassStoresPartial1994` the cost of a stack-based implementation is about 10% overhead on an ancient machine. Per :cite:`johnsonStoresPartialContinuations1988` this can be reduced through caching optimizations, so that if a variable is looked up and we know it has not been written then it does not need to be looked up again, i.e. ``lookup x (update s y yv) | x != y = lookup s x``. We also want to coalesce updates and reads so that new versions do not have to be created all the time.
+
+Store state
+-----------
+
+Most papers limit themselves to keeping the values of mutable variables in the store. But conceptually the state of a program could include the state of the computer, the stock market, quantum fluctuations, etc. - all information within the chronological past of a program. But practically we are limited to state that we can read and write deterministically. In particular the read operation must satisfy the associative array definition:
+
+::
+
+    read k (write j v D) = if k == j then v else read k D
+    read k emptyStore = MissingValue
+
+So one constraint to be a variable is that the state must be accessible. So for example the kernel limits us - we do not have full control over peripheral devices or processes not related to ours. We can represent this by using shadowing access-controlled variables and returning ``WriteFailed`` for inaccessible variables.
+
+Conveniently the CRIU project has a `list <https://criu.org/Images>`__ of what's in the state of a Linux user process. We reproduce it here:
 
 * Core process info
 
@@ -99,92 +176,126 @@ Conceptually the state of a program could include a lot of things, including the
   * IP addresses on network devices
   * Routing tables
 
-What operations are there on this state? Well, it is an aggregate value, so we can read and update fields to form a new state:
+Usually these are modeled using primitive operations, e.g. file descriptors are allocated with the open syscall rather than declaratively as ``{ fd1 = inode 1234 } ``. But the more state we model as state, the more powerful our debugging tools get. A traditional debugger has no way to undo closing a file. However, a filestate-aware debugger can reopen the file. The less we view the program as an I/O machine the easier it is to use high-bandwidth interfaces such as io_uring to perform bulk state changes - describing what rather than how is the hallmark of a high-level language. Of course, in most cases the program will use state in a single-threaded manner and it will simply be compiled to the primitive operation API by the automatic destructive update optimization.
 
-::
+I/O sequencing model showdown
+=============================
 
-  readField : Field -> State -> Any
-  setField : Field -> Any -> State -> State
+State accounts for a lot, but as said before we still need "change the world" operations like ``readLn :: IO String`` and ``print :: String -> IO ()``. Rather than side effects, following Haskell we would like the do-notation blocks that integrate statements as expressions. So a model must provide the basic monad operators ``>>=`` and ``return``. Another useful operation is recursion, in particular ``mfix :: MonadFix m => (a -> m a) -> m a``.
 
-But more interestingly we can load the state with CRIU (frozen), and attach a debugger. Let's assume we have symbols, then there are lots of operations available from a debugger:
+Monad transformers are overrated so not needed:
 
-* dump memory, disassemble memory, print backtrace, print call stack, evaluate (pure) expression in context
-* patch executable, jump to address, return early from function, send signal
-* run subset of threads until breakpoint (breakpoint can be syscall, call, return, signal injection, etc.)
-* evaluate code in current context (e.g. set memory to value)
+* StateT is handled by the store
+* AccumT / WriterT is a StateT that's not read
+* ReaderT is handled by implicit parameters / the store
+* MaybeT/ErrorT/ExceptT/MonadFail are handled by exceptions.
+* Select is handled by nondeterminism and exceptions.
+* These are all the standard transformers provided in `transformers <https://hackage.haskell.org/package/transformers>`__m, besides ContT.
 
-The dumping and patching are not too interesting as they are just extending the field get/set to language-specific data formats. But with the breakpoints, particularly by setting breakpoints on syscalls, we get a view of the program as an I/O machine:
-
-::
-
-  injectSysCallRet : [SysCallRet] -> State -> State
-
-  runToTimeout : State -> Timeout -> (State, [SysCallReq])
-
-  runSysCallsToSysCalls : [SysCallRet] -> State -> Timeout -> (State, [SysCallReq])
-  runSysCallsToSysCalls r s t = runToTimeout (injectSysCallRet r s) t
-
-There are multiple syscalls in flight because of multithreading. Technically we do not need ``[SysCallReq]`` because it can be determined from the state which threads are blocked on a syscall and what they requested, but the debugger knows this information from the breakpoint trap and it is clearer this way.
-
-Sequencing model showdown
-=========================
-
-You can define ``readLn :: IO String``, but what is the implementation semantics? Assuming monads you can compose ``readLn`` with ``print``, but how is the bind operation implemented? So let's consider the solutions.
-
-Free monad
-----------
-
-Monads consist of the operations ``>>=``, ``>>``, and ``return = pure``.
-
-Other operations include:
-
-* recursion: ``mfix :: MonadFix m => (a -> m a) -> m a``
-* exception handling: ``fail : String -> m a``, ``mempty = fail ""``, and ``a <|> b = a `catch` \_ -> b``
-
-Monad transformers are pretty much overrated:
-
-* ReaderT is handled by implicit parameters
-* StateT is a mutable reference
-* WriterT is a StateT that's not read
-* Error/Except are handled by exceptional values
-
-Codensity
----------
-
-Codensity is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__. In particular ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Furthermore all monads can be embedded in the type via ``\m -> m >>=`` and retrieved via ``\f -> f return``. That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
-
-Using the ``Codensity monad`` instead of a monad stack is often faster - the case analysis is pushed to the monad's operations, and there is no pile-up of binds. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity.
-
-Some instances of mfix for Codensity have been written (`Github <https://github.com/ekmett/kan-extensions/issues/64>`__), but not proven correct.
+So let's consider all the implementations of the I/O monad.
 
 Continuations
 -------------
 
-Removing the forall from Codensity, we obtain the ``ContT r`` monad and gain more expressiveness: callcc is implementable, and the type contains values such as ``\_ -> \s -> (Wrong, s)`` which ignore the continuation. (:cite:`wadlerEssenceFunctionalProgramming1992` section 3.4)
+The basic monad operations for continuations are well known::
 
-Continuations are the supercharged typed equivalent of a goto. A continuation is a function that takes as argument "the rest of the program", or "its future". Executing a continuation fills in a skeleton program with this future - or it can discard the future if it is not relevant. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple.
+  return x = \c -> c x
+  m >>= k = \c -> m (\x -> k x c)
+  fmap f m = \c -> m (\k -> c (f k))
 
-Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface.
+Some instances of mfix have been written for Codensity (`here <https://github.com/ekmett/kan-extensions/issues/64>`__), but not proven correct. :cite:`erkokValueRecursionMonadic2002` argues based on the types that no plausible definition exists. These observations are not in contradiction, as the types are different. Ignoring the types, we should be able to define ``mfix`` directly via higher-order pattern-matching::
 
-Streams
--------
+  mfix x c2 = case x of
+    -- purity
+    exists h. (\k c -> c (h k)) -> c2 (fix h)
+    -- left shrinking
+    exists f a. (\x c -> a (\l -> f x l c)) -> a (\l -> mfix (\x -> f x l) c2)
+    -- sliding (h is strict)
+    exists f h. (\x c -> f x (\k -> c (h k))) -> mfix (f . h) (\k -> c2 (h k))
+    -- nesting
+    exists f. (\x -> mfix (\y -> f x y)) -> mfix (\x -> f x x) c2
 
-Haskell 1.0 defined streams as primitive, and continuations in terms of them, even though continuations were considered easier to use for most purposes. The main reason is that, although streams can be defined to
+Typing continuations is a little hard because they allow answer-type modification, e.g. the type of ``reset (3 + shift \k -> k)`` is ``int -> int``. Using prefix syntax ``reset (liftA (+) 3 (shift (\k -> k)))`` this ability to change type is a little more obvious. Since the operators are lambdas, the principal intersection types will be the most general, since intersection types can type all strongly normalizing programs. In this case it turns out we do not need the intersection operator and the Hindley-Milner type signature is sufficient. To express the types it is helpful to define the indexed continuation type ``ICont r s a = (a -> s) -> r``. Then the most general simple types are::
 
+  return : a -> ICont b b a
+  (>>=) : ICont i j a -> (a -> x -> j) -> x -> i
 
-Conversely, with some cleverness it is also possi-
-ble to take continuations as primitive and define streams in terms
-of them (see (Hudak and Sundaresh, 1989), where the definition
-of streams in terms of continuations is attributed to Peyton Jones).
-However, the definition of streams in terms of continuations was
-inefficient, requiring linear space and quadratic time in terms of
-the number of requests issued, as opposed to the expected constant
-space and linear time. For this reason,
+A general chain ``a >>= b >>= c >>= d`` has ``a`` of type ``ICont i j a1``, ``b/c`` of type ``a1/b1 -> ICont j/k k/l b1/c1 ``, ``d`` of type ``c1 -> x -> l``, and returns a function ``x -> i``. So the last callback in a chain can be represented using tokens or other weird things - it's only when we bind the continuation to another continuation that it has to use a function type. This freedom is useful when writing I/O simulators. Ignoring this the usual indexed monad signature for ``(>>=)`` is ``ICont i j a -> (a -> ICont j k b) -> ICont i k b``.
+
+Using universal quantification and type constructors gives the `indexed codensity monad <https://www.reddit.com/r/haskell/comments/6vu2i4/fun_exploration_right_kan_extensions_swapped/>`__  or `right Kan extension <https://hackage.haskell.org/package/kan-extensions-5.2.5/docs/Data-Functor-Kan-Ran.html>`__ ``Ran m n a = forall r. (a -> n r) -> m r = forall r. ICont (m r) (n r) a``. ``ICont i j a = Ran (K i) (K j) a`` where ``K a b = a``.
+
+Due to the quantification, the operations on ``Ran`` are restricted.  In particular ``callCC f = \c -> f (\x _ -> c x) c`` has type ``((a -> p -> j) -> ICont i j a) -> ICont i j a``, which does not unify with the desired type ``((a -> Ran n o b) -> Ran m n a) -> Ran m n a``. :cite:`wadlerEssenceFunctionalProgramming1992` section 3.4 says that the lack of callCC is a good thing because it means every continuation corresponds to an ``m-n`` operation. It's a semantic distinction: are your values "special" values with known types, hence in the type ``M m = forall r. m r`` and possible to use with callCC, or are they "return" values that have unknown structure?
+
+We call the values in ``M m`` continuations, and the values in ``m r`` actions. A continuation represents "the future of the program". Executing a continuation plugs this future into a program description with a hole - usually there is one hole, but the continuation can discard the future or run it multiple times. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple. Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface. Continuations are more powerful than goto.
+
+Codensity is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__. In particular ``Codensity m a = forall b. (a -> m b) -> m b`` is a monad regardless of ``m``. (`See comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__) Furthermore all monads can be embedded in the type via ``(>>=)`` and retrieved via ``\f -> f return``. That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
+
+``Codensity`` is quite efficient - the case analysis is pushed to the monad's operations, and there is no pile-up of binds - all uses of the underlying monad's bind are right-associated. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity.
 
 Multi-prompt delimited continuations
 ------------------------------------
 
-Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations ``Cont b a = (a -> b) -> b``, but as the paper shows, multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique supply and a stack. The unique supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
+Multi-prompt delimited continuations are described in :cite:`dyvbigMonadicFrameworkDelimited2007` . These might appear more expressive than standard delimited continuations , but as the paper shows, multi-prompt continuations can be implemented as a monad and hence as a library to use with the standard continuations. So the simplicity of the standard continuations wins out. With the multi-prompt continuations you have to have a unique id supply and a stack. The unique id supply complicates multithreading, and the stack can overflow and requires care to handle tail recursion. Whereas standard continuations translate to pure lambdas, and tail recursion is dealt with by the host language's semantics.
+
+Streams
+-------
+
+With the stream I/O model a program is of type ``[Response] -> [Request]``, where ``[]`` is the type constructor of destructively updateable lists. With an unsafe lazy read operation we can write an interpreter with constant overhead like so:
+
+::
+
+  RList a = Ref (Bottom | Nil | Cons a (Rlist a))
+
+  c (prog : [Response] -> [Request])  =
+    lst = ref Bottom : RList Response
+    reqs = prog (unsafeLazyRead lst)
+    loop reqs lst where
+      loop [] _ = lst := Nil; return Done
+      loop ((ReadRequest name) : reqs') lst =
+        read name $ \contents ->
+          tl = ref Bottom : RList Response
+          lst := Cons (ReadResponse contents) tl
+          loop reqs' tl
+
+In a purely functional model, defining streams in terms of continuations requires linear space and quadratic time in terms of the number of requests issued. In particular, given ``prog [...xs,Bottom]) = [...as,newreq,Bottom]``, each request-response iteration has to evaluate ``head (drop (length as) (prog [...xs,newresp,bottom]))`` to get the new request, duplicating the evaluation of ``prog`` over the first ``xs`` elements. :cite:`hudakExpressivenessPurelyFunctional1989` Haskell 1.0 used streams as its I/O model due to this performance consideration. But given the destructive update implementation, I don't think this is an issue.
+
+Per :cite:`hudakHistoryHaskellBeing2007`, continuations are easier to use than streams and preferred by most programmers. With continuations, responses are localized to each request, whereas streams require careful pattern-matching to ensure that requests and responses are matched up.
+
+Free monad
+----------
+
+There are some definitions on Hackage of free monads:
+
+.. code-block:: haskell
+
+  -- free, control-monad-free, transformers-free
+  data Free f a = Pure a | Free (f (Free f a))
+  data FreeF f a b = Pure a | Free (f b)
+  type FreeT = m (FreeF f a (FreeT f m a))
+
+  -- indexed-free
+  data IxFree f i j x where
+      Pure :: a -> IxFree f i i a
+      Free :: f i j (IxFree f j k a) -> IxFree f i k a
+
+  -- free-operational
+  type ProgramT instr m a = FreeT (Coyoneda instr) m a
+  type Program instr = Free (Coyoneda instr) a
+
+  -- operational
+  data ProgramT instr m a where
+    Lift :: m a -> ProgramT instr m a
+    Bind :: ProgramT instr m b -> (b -> ProgramT instr m a) -> ProgramT instr m a
+    Instr :: instr a -> ProgramT instr m a
+
+  -- MonadPrompt, https://www.eyrie.org/%7Ezednenem/2013/06/prompt,
+  -- https://www.reddit.com/r/haskell/comments/5a5frc/a_correct_free_monad_and_free_monad_fix/
+  data Prompt p a = Done a | forall i. Prompt (p i) (i -> Prompt p a)
+  type Prompt p a  =  forall b. (forall i. p i -> (i -> b) -> b) -> (a -> b) -> b
+
+These are simple, but have drawbacks, per `Kmett <https://web.archive.org/web/20220124082435/http://comonad.com/reader/2011/free-monads-for-less/>`__. (>>=) used left-associatively has quadratic running time, as like (++) it must rescan the list of instructions with every bind. Every time you bind in a free monad, structure accumulates and this structure must be traversed past to deal with subsequent left-associated bind invocations. Free monads never shrink after a bind and the main body of the tree never changes.
+
+Due to this, free monads are spine-strict - instructions must always be evaluated. Similarly MonadFix is not possible.
 
 Yoneda
 ------
@@ -207,24 +318,24 @@ The instance for ``C`` is fewer characters.
 
 There is :cite:`rivasNotionsComputationMonoids2014` which derives the Codensity monad from the Yoneda lemma and the assumption that ``f`` is a small functor. Whereas the Yoneda-Rec seems to have no category theory behind it.
 
-Generally it seems that the Yoneda thing solves a problem Stroscot doesn't have.
+Generally it seems that Yoneda solves a different problem than an I/O monad.
 
 Algebraic effects
 -----------------
 
-Tasks and algebraic effects are quite similar, both using a data type to represent operations. But tasks are much simpler syntactically than the handler functionality. In the effect approach, computations are not first-class values.
+Codensity and algebraic effects are quite similar, both using a data type to represent operations. In fact the two are macro-expressively equivalent. :cite:`forsterExpressivePowerUserDefined2017` But Codensity doesn't require new syntax unlike the handler functionality. In the effect approach, computations are not first-class values.
 
-OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation.
+OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation and then pure code is the identity monad. This can be shoehorned into continuations too by using a symbol marker with cases for pure and impure but maybe it is not as nice.
 
 Call by push value
 ------------------
 
-CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation type is also a value type. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it seems to be a disguised version of monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbyPushValueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
+CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation is also a value. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it seems to be a disguised version of monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbyPushValueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
 
 Applicative
 -----------
 
-All uses of Applicative can be rewritten using the laws to be of the form ``pure f <*> a <*> b ... <*> d`` (where ``<*>`` is left associative), hence all uses can be rewritten to the idiom bracket syntax. And the idiom bracket syntax ``([ f a b c ])`` can always be replaced with variadic function syntax, ``apply_thing f a b c``. So variadic functions are sufficient.
+All uses of Applicative can be rewritten using the laws to be of the form ``pure f <*> a <*> b ... <*> d`` (where ``<*>`` is left associative), hence all uses can be rewritten to the idiom bracket syntax. And the idiom bracket syntax ``([ f a b c ])`` can be replaced with variadic function syntax, ``apply_thing f a b c``. So variadic functions are sufficient.
 
 Applicative can also be represented typeclass-free as functions using their Cayley representation and the Yoneda lemma, see :cite:`rivasNotionsComputationMonoids2014` and `this email <https://fa.haskell.narkive.com/hUgYjfKJ/haskell-cafe-the-mother-of-all-functors-monads-categories#post3>`__.
 
@@ -269,7 +380,7 @@ With the lazy identity monad you can recover lazy pure code, as if there was no 
   Action = m a = m Pure
   Pure = Any \ Action
 
-``Int`` is not ``m _``, so it is pure. ``m Int`` is therefore an action. Therefore ``m (m Int)`` is not an action, because to be an action it would have to return a pure value. Hence ``m (m Int)`` is pure, a surprising conclusion. Similarly ``m (m (m Int))`` is an action. We can convert between these with ``join`` and ``return``. This weirdness somewhat explains why JS felt the need to collapse nested promises and break the monad laws - it avoids checking the static type of the action.
+``Int`` is not ``m _``, so it is pure. ``m Int`` is therefore an action. Therefore ``m (m Int)`` is not an action, because to be an action it would have to return a pure value. Hence ``m (m Int)`` is pure, a surprising conclusion. Similarly ``m (m (m Int))`` is an action. We can convert between these with ``join`` and ``return``. This weirdness somewhat explains why JS felt the need to collapse nested promises and break the monad laws - it avoids the need to unroll the promise chain to deduce whether a value is an action.
 
 Async
 -----
@@ -286,11 +397,6 @@ In JavaScript
 Async/await notation requires marking core library calls with "await" and the whole call chain with "async", a tedious syntactic burden that Bob Nystrom calls `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ .
 
 It's better to make the async behavior automatic. Zig has done this but has `tons of bugs <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/>`__\ . Monads in general and continuations in particular seem like a more principled approach, e.g. there is a `JS CPS library <https://github.com/dmitriz/cpsfy/blob/master/DOCUMENTATION.md>`__\ .
-
-IO representation showdown
-==========================
-
-What type do we want for I/O? Let's look at the options.
 
 .. _tasks:
 
@@ -319,7 +425,13 @@ The datatype is similar to the "fudgets" mentioned in :cite:`erkokValueRecursion
 World token
 -----------
 
-Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the state tokens must be used linearly. Regardless, this approach seems quite awkward. Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse world tokens are broken and have to be forbidden. Similarly commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all. Ensuring that linearity holds during core-to-core transformations requires many hacks. Also, an I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
+Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, where ``s = World`` is a special zero-sized token type. Clean is similar but ``s = *World`` has the uniqueness type annotation so the tokens must be used linearly. Regardless, this approach is quite awkward:
+
+* Programs like ``(a,_) = getChar s; (b,s') = getChar s; putChar (a,b) s'`` that reuse tokens are broken and have to be forbidden. Similarly programs like ``(a,s2) = getChar s; (b,s) = getChar s2`` that pass the token back also have to be forbidden.
+* GHC requires many hacks to ensure that linearity holds during core-to-core transformations.
+* Commands like ``exit 0`` have to be modeled as returning a world token, even though they don't return at all.
+* It is not clear what the token represents: a thread? a core? a state? The semantics of an infinite program like ``x = write "x" >> x`` is tricky to specify - it is not really a function at all.
+* An I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
 
 Logic programming
 =================
@@ -331,23 +443,24 @@ In general running a relational program may produce infinite satisfying states. 
 Colored values
 ==============
 
-Let's revisit Bob Nystrom's traits of `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ . `tel on HN <https://news.ycombinator.com/item?id=8985436>`__ suggested using red = impure, and `Gavin <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/#review-of-function-colors>`__ suggested replacing "call" with "use". Most of it is then about "impure functions", which we can call actions. We allow running actions in a pure environment if you provide an I/O simulation. With these modifications the traits read:
+Often mentioned during I/O discussions are Bob Nystrom's traits of `function coloring <http://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>`__\ . `tel on HN <https://news.ycombinator.com/item?id=8985436>`__ suggested using red = impure, and `Gavin <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/#review-of-function-colors>`__ suggested replacing "call" with "use". Most of the traits are then about "impure functions", which Stroscot calls actions. Stroscot allows running actions in a pure environment using an I/O simulation. With these modifications the traits read:
 
 1. Values include pure functions and actions.
 2. The way you use a value depends on its type.
-3. You can only use an action from within another action, or within an action simulator.
+3. You can only use an action from within another action, or within an I/O simulator.
 4. Actions are more painful to use (than pure functions).
 5. Some core library members are actions.
 
-The only trait here that seems disadvantageous is 4. Nystrom lists the following pain points for JS:
+The only trait here that might be disadvantageous is 4. Nystrom lists the following pain points for JS async actions:
+
 * verbose to compose in expressions because of the callbacks / promise goop
 * annoying hoops to use error-handling
-* can’t be used with try/catch or inside a lot of other control flow statements.
+* can’t be used with try/catch or a lot of other control flow statements.
 * can't call a function that returns a future from synchronous code
 
-But then he says C# async-await "solves" all of these but the first - actions can be used similarly to pure functions, but require "a liberal garnish of await". But he seems to feel that requiring await is a deal-breaker. He further says the real solution is "threads/goroutines/coroutines/fibers. more precisely: multiple independent callstacks that can be switched between." In fact it is not threads but *continuations* that make callstacks first-class. By using continuations as the I/O abstraction there is no distinction between sync and async, or rather it is all async. Particularly, all low-level operations are implemented in async style (taking a callback). You can still write sequential code in sync style, but for more complex cases you have to drop back down to the callbacks/continuation model or compose sequential code with combinators.
+C# async-await solves all but the first, but the await keyword is still painful. Nystrom says the real solution is "multiple independent callstacks that can be switched between." Stroscot goes further than switching and makes I/O callstacks first-class continuations. With continuations as the I/O abstraction, there is no distinction between sync and async, or rather it is all async. In particular all low-level operations are implemented in async style (taking callbacks), and combinators must be written using the callback/continuation model. But simple sequential code can be written in sync style and this interoperates seamlessly with the async code. Thus Stroscot's I/O continuation model solves the distinction pain Nystrom was complaining about.
 
-But this only solves the async/sync distinction Nystrom was complaining about, not the pure/impure dichotomy. Regardless of clever syntactic tricks, impurity cannot be hidden completely. Actions will always have some conceptual overhead compared to pure functions because they are sensitive to execution order. I don't know if this will make anyone "spit in your coffee and/or deposit some even less savory fluids in it", but I/O is unfortunately awkward in a pure or mathematical world. A program that does no I/O must be an infinite loop (it cannot even exit, because that requires a syscall). :cite:`jonesTacklingAwkwardSquad2001` classifies I/O under the "awkward squad".
+There is still a pure/impure dichotomy though. Regardless of syntax, impurity cannot be hidden completely. Actions will always have some conceptual overhead compared to pure functions because they are sensitive to execution order. I don't know if this will make anyone "spit in your coffee and/or deposit some even less savory fluids in it" (Nystrom), but I/O is unfortunately awkward in a pure or mathematical world. A program that does no I/O must be an infinite loop (it cannot even exit, because that requires a syscall). :cite:`jonesTacklingAwkwardSquad2001` classifies I/O under the "awkward squad".
 
 "Unsafe" I/O
 ============
@@ -357,3 +470,10 @@ Haskell has ``runST`` and ``unsafePerformIO`` that allow turning impure computat
 If one wants to understand the evaluation order or is dealing with commutative operations, these functions are quite useful, e.g. Debug.Trace.trace looks like a non-I/O function but actually outputs something on the console, and allocation can be done in any order.
 
 The main things to avoid is global variables like ``var = unsafePerformIO (newIORef 1)`` pattern. Implicit parameters initialized in main compose much better. Similarly C's ``static`` variables inlined in functions should be forbidden. Although, optimal reduction should mean an unsafePerformIO is only evaluated once, hence reading a file or something should be fine.
+
+Top-level I/O
+-------------
+
+In Python we can write a simple script like ``print "hello world"``. In Haskell we must have the boilerplate ``main =``, which is more verbose. We can address this by allowing modules to be actions that return the actual record. The main issue is we must have an instance of MonadFix in order to tie the recursive knot. But fortunately there are `several implementations <https://github.com/ekmett/kan-extensions/issues/64>`__ of MonadFix for continuations; the only question is which one is correct.
+
+The other option is to restrict I/O outside of main, e.g. to only the main module, which means that e.g. mutable variables cannot exist between calls of a function. This seems too restrictive.

@@ -126,21 +126,30 @@ Direct importing is easier to understand conceptually but the recursive fixed po
 Overrides
 =========
 
-By default, methods are scoped to their module. Every definition ``foo = a`` binds the identifier ``Module.foo``, and each module creates a new identifier. The ``override`` statement prevents creating a new identifier, so that instead a base identifer can be extended.
+By default, methods are scoped to their module. Every definition ``foo = a`` binds the identifier ``Module.foo``, and each module creates a new identifier. This means a use ``Module.foo`` refers to only the declarations within that module.
 
-.. code-block:: python3
+Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example::
 
-  # module 1
-  foo 1 = 1
+  A = module
+    foo (x:{A}) = 1
+  B = module
+    foo (x:{B}) = 2
 
-  # module 2
-  import 1
-  override foo
-  foo 2 = 3
+  import A, B
+  print (map foo [A,B])
+  # [1,2]
+  # print (force foo)
 
-  # module 3
-  import 1, 2
-  foo 1 # 1
-  foo 2 # 3
 
-If the override statement was not in module 2, then using ``foo`` in module 3 would result in an ambiguous name resolution error.
+This defines two symbols ``A.foo : A -> {1}`` and ``B.foo : B -> {2}``, and resolves ``map foo [A,B]`` to ``[A.foo A, B.foo B]``. However, because the bare identifier ends up resolving to different symbols, there are cases where dispatch is not sufficient to resolve the ambiguity. In this example, ``force foo`` results in an error because it could be either ``A.foo`` or ``B.foo``.
+
+The ``override`` statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following::
+
+  A = module
+    foo (x:{A}) = 1
+  B = module
+    import A
+    override foo
+    foo (x:{B}) = 2
+
+defines one symbol ``A.foo : {A,B} -> {1,2}``. Thus ``force foo`` will resolve to the single symbol ``A.foo``.

@@ -12,5 +12,5 @@ Language Reference
   Modules
   Dispatch
   Memory
-  Posets
   BuildSystem
+  Errors

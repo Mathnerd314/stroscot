@@ -139,7 +139,7 @@ Implementation complexity
 -------------------------
 
 Compiling a subset of C is succinct, 2048 bytes for the `obfuscated tiny C compiler <https://bellard.org/otcc/>`__. It's essentially a macro assembler - each operation translates to an assembly sequence that uses the stack.
-I can make a similar compiler for STG (lazy functional language) with a similar macro translation - I'd just need to write a GC library as heap allocation is not built into the hardware, unlike stack allocation. Meanwhile production-quality compilers (GCC, clang/LLVM) are huge and do so many code transformations that the original code is unrecognizable. Similarly GHC is huge. So the argument that strict languages fit the hardware better than lazy is weak.
+I can make a similar compiler for STG (lazy functional language) with a similar macro translation - I'd just need to write a GC library as heap allocation is not built into the hardware, unlike stack allocation. Meanwhile production-quality compilers (GCC, clang/LLVM) are huge and do so many code transformations that the original code is unrecognizable. Similarly GHC is huge. So strict languages don't really fit the hardware any better than lazy - they're both significant overhead for naive translations and huge compilers to remove that overhead.
 
 Space complexity
 ----------------
@@ -148,22 +148,44 @@ The space complexity is very messy in a lazy language, whereas the stack in a st
 
 GHC's demand analysis works for ``sum``, but is still incomplete. Haskell has added workarounds "seq", the Strict Haskell extension, and bang markers, so strictness can be specified as part of the program. But this is not a solution - it means every basic function must come in several strictness variants.
 
-Space leaks in particular are hard to spot. The difficulty lies in characterizing the evaluatedness of arguments being passed around.
+Space leaks in particular are hard to spot. The difficulty lies in characterizing the evaluatedness of arguments being passed around. R fully evaluates expressions in a number of places which helps a lot, but there is still a lot of code that manually calls ``force`` and ``force_all`` to remove laziness, and each omission is a potential slowdown. And of course all this forcing means there are few libraries taking advantage of laziness. :cite:`goelDesignImplementationUse2019`
 
 Debugging
 ---------
 
-For debugging the logic, lazy and strict debugging can both be modeled as term reduction, so it's just a matter of tracking the term being reduced. The logic that tracks lazy reduction state is more complex, but not impossibly so.
+For debugging the logic, lazy and strict evaluation can both be modeled as term reduction, so it's just a matter of tracking the term being reduced. The logic that tracks lazy reduction state is more complex, hence is harder to show alongside the term, but not impossibly so.
 
-Parallelism
------------
+Parallelism and concurrency
+---------------------------
 
-Parallel execution is bound up with I/O operations, which are sequential, so the evaluation strategy doesn't have any room to play a role.
+Parallel execution is slightly better in a strict language, because expressions are known to be evaluated and can be immediately sent off to a worker thread. Lazy evaluation requires proving or waiting for demand which can be slow. But lenient evaluation is non-strict and eager, and gives more parallelism than either strict or lazy. Even more parallelism can be obtained from speculative execution.
+
+Concurrency is bound up with I/O operations, which are sequential, so the evaluation strategy doesn't have any room to play a role.
 
 Purity
 ------
 
-Laziness offers a form of "hair shirt", an excuse to keep the language pure. Strict languages are undisciplined in their use of effects.
+Laziness offers a form of "hair shirt", an excuse to keep the language pure. Strict languages are often undisciplined in their use of effects and have unclear semantics given by "whatever the compiler does".
+
+:cite:`jonesWearingHairShirt2003` concluded that laziness, in particular the purity that non-strictness requires, was jolly useful. I/O did cause prolonged embarrassment with a confusing variety of solutions (continuations, streams) but Haskell has settled on monads.
+
+Types
+-----
+
+In Ocaml, a simple list type ``List Nat`` is guaranteed to be finite. In Haskell, a list type ``List Nat`` instead accepts infinite lists like ``fib = [1,1,2,3,...]``. In the denotational semantics, however, infinite lists are still values. So we should be able to define types independent of the evaluation semantics, i.e. have both finite and infinite types in both strict and lazy languages.
+
+With strict languages, using the thunk simulation one gets a natural "thunk" constructor that marks infinite structures. So uList. (Nat + Thunk List) is an infinite list, while uList. (Nat + List) is a finite list, and this extends to more complicated data structures. With a subtyping coercion ``Thunk x < x`` one could use a finite list with an infinite list transformer, but it is not clear how to add such a coercion.
+
+With lazy languages, GHC has developed "strictness annotations" which seem about as useful. So uList. (Nat + List) is an infinite list, while uList. (Nat + !List) is a finite list. There is an alternate convention implied by StrictData which uses ``a`` to denote values of type a and ``~a`` to denote expressions evaluating to type ``a``.
+
+Pipes
+-----
+
+One practical case where laziness shows up is UNIX pipes. For finite streams the "strict" semantics of pipes suffices, namely that the first program generates all of its output, this output is sent to the next program, which generates all of its output that is then sent to the next program, etc., until the output is to the terminal. Most programs have finite output on finite input and block gracefully while waiting for input, so interleaved execution or laziness is not necessary.
+
+However, for long outputs, interleaved or "lazy" execution saves memory and improves performance dramatically. For example with ``cat large_file | less``, ``less`` can browse a bit without loading the file into memory. It is really just a generalization that infinite streams like ``yes fred | less`` work. Of course interleaving is not magic, and not all programs support interleaving. For example, ``cat large_file | sort | less`` is slow and ``yes fred | sort | less`` is an infinite loop, because ``sort`` reads all its input before producing any output.
+
+But laziness means you can implement interleaving once in the language (as the evaluation strategy) as opposed to piecemeal for each program.
 
 Lazy vs optimal
 ===============

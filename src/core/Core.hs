@@ -794,6 +794,8 @@ toDot graph rs = do
   graphs <- iterGraph graph rs
   pure $ map (\(g,a) -> (let ?lambdaStyle = False in mkDot g a, let ?lambdaStyle = True in mkDot g a)) graphs
 
+-- stroscot/Asperti_M_reduction.png
+
 writeGraphs :: State Int Graph -> String -> Integer -> IO ()
 writeGraphs graph name limit = do
   -- let Root b_t = fromJust $ find ((=="Root") . tagName) graph

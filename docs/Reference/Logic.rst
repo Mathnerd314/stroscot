@@ -222,39 +222,38 @@ Identity
 
   \rule{}{A \vdash A}{\text{id}}
 
-Quantifiers
-===========
+Higher-order logic
+==================
 
-Terms
------
+Predicates
+----------
 
-The set of terms consists of variables :math:`x`, named constants :math:`P()` (written simply as :math:`P`), and uninterpreted predicates :math:`P(t_1,\ldots,t_n)` where :math:`P` is a function symbol, :math:`n \geq 1`, and :math:`t_i` are terms.
+Terms consist of variables :math:`x`, literal values :math:`v`, and applications of terms to terms. Variables quantify over the universal set, smaller domains can be defined by the membership notation in :ref:`set-theory`.
+
+If the term is a predicate (set) then it may be used as an atomic formula. Such an atomic formula :math:`t` must satisfy the identity rule:
 
 .. math::
-  :nowrap:
 
-  \begin{array}{ccc}
-    \rule{}{x \vdash x}{\text{id}}
-    &
-    \rule{}{P(x_1,\ldots,x_n) \vdash P(x_1,\ldots,x_n)}{\text{id}}
-  \end{array}
+  \rule{}{t \vdash t}{\text{id}}
+
+Interpreted predicates may be defined using other rules so long as the identity rule is derivable and the rules are consistent.
 
 Substitution
 ------------
 
-:math:`A[\overrightarrow{x \mapsto t}]` stands for the proposition :math:`A` where all free occurrences of the variables :math:`\overrightarrow{x}` have been replaced by the propositions/terms :math:`\overrightarrow{t}` (and bound variables have been renamed to fresh ones when necessary).
+:math:`A[\overrightarrow{x \mapsto t}]` stands for the proposition :math:`A` where all free occurrences of the variables :math:`\overrightarrow{x}` have been replaced by terms :math:`\overrightarrow{t}` in the appropriate domains (and bound variables have been renamed to fresh ones when necessary).
 
   .. math::
     :nowrap:
 
     \begin{array}{c}
-      \rule{\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
+      \rule{t\vdash t\quad\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
     \end{array}
 
 Quantifiers
 -----------
 
-For these :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`.
+For these the variable :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`.
 
 .. math::
   :nowrap:
@@ -283,7 +282,7 @@ If we define some notation :math:`A\defeq B`, then this means adding a pair of r
       \rule{\Gamma, B \vdash \Delta}{\Gamma, A \vdash \Delta}{\text{def}_L}
     \end{array}
 
-These rules can only be applied if the proposition :math:`B` has a finite proof of its identity sequent :math:`B \vdash B`. Propositions without such a proof are said to have a circular definition.
+The notation and rules are valid only if there is a finite proof of the identity sequent :math:`B \vdash B`.
 
 .. _infinite:
 
@@ -300,19 +299,18 @@ These have "use" and "def" rules ("def" is short for definition). The use is a "
       \rule{\Gamma \vdash \Delta}{ X = }{\text{Def}}
     \end{array}
 
-.. _connectives:
+.. _set-theory:
 
 Set theory
 ==========
 
-We define :math:`t\in \{x\mid A\} \defeq A[x\mapsto t]`. Here the elements :math:`t` of the sets are propositions; e.g. we can prove :math:`\bot \in \{x\mid x \leftrightarrow \bot \}`. Usually the variables in set theory range over sets. Hence we introduce new variables :math:`x^S` which range over sets. Since all sets are of the form :math:`\{x\mid X\}` these can be translated as follows:
+We define :math:`t\in \{x\mid A\} \defeq A[x\mapsto t]`. Here the elements :math:`t` of the sets are propositions; e.g. we can prove :math:`\bot \in \{x\mid x \leftrightarrow \bot \}`. Usually the variables in set theory range over sets. Hence we introduce new variables :math:`x^S` which range over sets. Since all sets :math:`S` are of the form :math:`\{x\mid X_S \}` these can be translated as follows:
 
 .. math::
 
+  x^S \defeq \{x\mid X_S \}
 
-  x^S \defeq \{x\mid X\}
-
-  \{x^S\mid X\} \defeq \{X\mid X\}
+  \{x^S\mid X\} \defeq \{X_S \mid X\}
 
   \{x\mid X\} \in Y \defeq X \in Y
 
@@ -339,7 +337,7 @@ We define
 Comprehension
 -------------
 
-We can prove the axiom schema of comprehension for (non-circular) formulas :math:`\phi` with free variable :math:`x`:
+We can prove the axiom schema of comprehension for formulas :math:`\phi` with free variable :math:`x`:
 
 1. :math:`\vdash \phi \leftrightarrow \phi`
 2. :math:`\vdash x\in \{x\mid\phi\} \leftrightarrow \phi`
@@ -349,9 +347,11 @@ We can prove the axiom schema of comprehension for (non-circular) formulas :math
 Equality
 --------
 
+Equality on sets is defined as follows:
+
 :math:`A=B \defeq \forall x. (x \in A \leftrightarrow x \in B)`.
 
-We can easily prove
+We can easily prove that this equality is an equivalence relation:
 
 .. math::
 

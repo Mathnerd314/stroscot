@@ -80,7 +80,7 @@ The semantics is that ``free`` will be called as soon as it is known that ``use`
   transform : Task -> Task
   transform c =
     if will_call (UseForever f) c
-      c
+      reduce c
     else if will_call (Use f) c
       let c' = continuation c
       reduce (c { continuation = transform c' })

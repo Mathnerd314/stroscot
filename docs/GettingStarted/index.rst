@@ -7,3 +7,4 @@ Getting started
   About
   Introduction
   FAQ
+  StyleGuide

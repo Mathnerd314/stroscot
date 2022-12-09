@@ -1,6 +1,8 @@
 Memory management
 #################
 
+Values take up memory, so memory management needs special handling so it is automatic and fast. But underneath it is just resource management, so all of it translates into allocations and deallocations.
+
 The path from cloud to CPU is long, so there is a lot of caching in between. Some latency numbers and the programming API:
 
 * Physical registers (0.3 ns): managed by the CPU
@@ -439,7 +441,7 @@ For more advanced programming there is the need to avoid the use of slow storage
 
 Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.
 
-Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf). There is room for optimization but many algorithms work.
+Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf). There is room for optimization as many algorithms work.
 
 Polymorphism requires a uniform representation for types (pointer/box), or templates like C++. Functional languages use a uniform representation so pay an overhead for accessing via the indirection. Unboxing analysis reduces this cost for primitive types - it works pretty well. GHC doesn't have a particularly good data layout though, because it's all uniform.
 
@@ -457,11 +459,25 @@ Shenandoah "low pause" is 10ms which is the same order of magnitude as NUMA memo
 
 cache misses are the most important performance metric for memory management, but not usually measured
 
-escape detection - 70% of allocations on stack, not good enough to beat Azul
+escape detection - even with 70% of allocations on stack, not good enough to beat Azul
 escape analysis - all or nothing
 separate allocator has to be as fast as main allocator
 
 compile time garbage collection is detecting when an allocation becomes unused and freeing it
 structure reuse is detecting when an allocation becomes unused and reusing the memory for a new allocation
-destructive assignment is when allocated memory is passed in and modified by the function
+destructive assignment is when a memory address is passed in and modified by the function
 
+Goroutines have little overhead beyond the memory for the stack, which is just a few kilobytes. Go's run-time uses resizable, bounded stacks. A newly minted goroutine is given a few kilobytes, which is almost always enough. When it isn't, the run-time grows (and shrinks) the memory for storing the stack automatically, allowing many goroutines to live in a modest amount of memory. The CPU overhead averages about three cheap instructions per function call. It is practical to create hundreds of thousands of goroutines in the same address space. If goroutines were just threads, system resources would run out at a much smaller number.
+
+The programmer cannot generally predict whether a given code sample will allocate and hence potentially throw an OOM, because of implicit allocations. Here are some examples:
+
+* Implicit boxing, causing value types to be instantiated on the heap.
+* marshaling and unmarshaling for the FFI
+* immutable array operations
+* graph reduction
+* JITing a method or basic block, generating VTables or trampolines
+
+But if the compiler is able to eliminate all allocations and hence eliminate the possibility of OOM, then these will most likely be consistently eliminated on every compile. So asserting that a function or block can't OOM is possible. .NET had Constrained Execution Regions which implemented this, with various hacks such JITing the region at load time rather than when the region was first executed. So there's precedent.
+
+
+GCC (and later LLVM) added MemorySSA

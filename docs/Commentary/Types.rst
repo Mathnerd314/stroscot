@@ -21,36 +21,53 @@ Their definition
 
 Academics seem to have gravitated to the syntactic definition because it's easier to publish meaningless gibberish. Similarly Haskell, Java, and C++ use a syntactic definition AFAICT. I don't think there are many languages that use representation as this would imply that all pairs of floats are the same type.
 
-Stroscot follows Julia in using the "value space without behavior" definition. So it has types with meaning! Castagna calls them "set-theoretic types with semantic subtyping". A related approach is :cite:`dolanAlgebraicSubtyping2016`, which uses syntactic labels forming a distributive lattice. Although distributive lattices are isomorphic to collections of sets, this IMO falls on the syntactic side.
+Stroscot follows Julia in using the "value space without behavior" definition. Castagna calls them "set-theoretic types with semantic subtyping". A related approach is :cite:`dolanAlgebraicSubtyping2016`, which uses syntactic labels forming a distributive lattice. Although distributive lattices are isomorphic to collections of sets, Dolan's approach IMO falls on the syntactic side.
 
-`This post <https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/>`__ says "a type is something that describes a set of values that have a bunch of operations in common", i.e. value space plus behavior. Stroscot's sets don't have behavior so are not gradual types.
-
-There are also Curry-style types, called sorts in :cite:`pfenningChurchCurryCombining2008` to distinguish from Church-style types. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is unityped. Stroscot's sets do indeed seem to be sorts or Curry-style types.
+`This post <https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/>`__ says "a [gradual] type is something that describes a set of values that have a bunch of operations in common", i.e. value space plus behavior. Stroscot's sets don't have behavior so are not gradual types.
 
 Overall, while I would be justified in calling Stroscot's sets types, it's not perfectly consistent with the common usage today so it could invite a flamewar. It's easier to call them sets.
 
 What is a type system?
 ======================
 
-Wikipedia defines a type system as "a set of rules that assigns a property called a type to the various constructs of a computer program". In this sense Stroscot is unityped, because if you ignore all type warnings the program still compiles and runs and produces a value.
+Wikipedia defines a type system as "a set of rules that assigns a property called a type to the various constructs of a computer program". This phrasing assumes each construct has exactly one "principal" type. But more complex type systems don't have this property. For example with a Haskell GADT ``data R where R : { unR : Int } -> R Int``, ``unR`` may have the type ``forall a. R a -> a`` or ``forall a. R a -> Int``, and these have no unifying type. Haskell just picks a type ``unR : R Int -> Int`` in this case. Really the mapping from expressions to types is many-to-many.
 
-Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ the main point of a type system is to allow "stating and enforcing the invariant that the value at a particular program point must be a certain type" (e.g. an integer). Particularly this is to optimize inter-modular calls, so that the ABI is efficient. Stroscot's sets allow expressing this kind of invariant.
+Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ the main point of a type system is to allow "stating and enforcing the invariant that the value at a particular program point must be a certain type" (e.g. an integer), in the form of a type declarations. Particularly this is to optimize inter-modular calls, so that the ABI is efficient.
 
-Another definition is "something that allows catching errors quickly at compile time", where example errors per Cliff Click are calling a non-function or applying a primitive operation to the wrong type. Stroscot's static verification should catch these. Verification also allows catching "hard" program logic bugs, if you express invariants as assertions. This is IMO more natural in many cases than dependent and refinement types, although those are available with Stroscot's sets as well.
+ Stroscot's set membership assertions express these type declaration invariants and give the execution efficiency and safety of a "statically typed, compiled language".
+
+Cliff Click's even broader definition is "something that allows catching errors quickly at compile time", where example errors are calling a non-function or applying a primitive operation to the wrong type. Stroscot's static verification is more powerful than unit testing or type systems, and can catch hard bugs quickly and prove the absence of classes of bugs, allowing rapid development of quality software. The main interface is expresssing invariants as assertions, but type annotations can also be expressed as invariants.
+
+
+As far as the amount of type declarations, the `Zero one infinity rule <https://en.wikipedia.org/wiki/Zero_one_infinity_rule>`__ applies. A program should run without any type declarations, with one declaration for the root of the program, or with any amount of type declarations scattered through the program. The no type declarations is an "untyped" setting and ensures there is a complete operational semantics distinct from the type system. The one type declaration enables checking the program for bad behavior, and ruling out common errors such as typos. The infinite declarations allows using the power of static verification to its fullest, and may require many iterations of tweaked declarations to get right.
+
+
+Assertions are IMO more natural in many cases than types since they have an operational semantics, e.g. ``divide a b = assert (b != 0); ...`` rather than ``divide : Int -> Int\{0} -> Int``. Although, higher-order types can be somewhat more succinct than writing out logical set membership assertions by hand, ``f : (Int -> Int) -> Int`` vs ``{ s = arbElem; a = arbElem; assume(a isElemOf Int); assume(s a isElemOf Int); assert(f s isElemOf Int) }``.
 
 Type inference
 ==============
 
-It used to be that people preferred type systems that had only one principal type for a given expression, i.e. one where every other type signature was an instance of the principal type. Haskell has grown to a system where this is not the case. Specifically with a GADT ``data R where R : { unR : Int } -> R Int``, ``unR`` may have the type ``forall a. R a -> a`` or ``forall a. R a -> Int``, and these have no unifying type. Type inference would have to pick a type somehow, which would be visible in the ABI. The easier strategy is to give up type inference - Haskell requires a type signature.
+Type inference is often used with the idea that its failure means there is a type error in the program. But static verification finds those errors already and distinguishes between real errors and algorithm failures, whereas type inference failure could be either.
 
-Type inference is sometimes useful when playing around at the REPL, but with subtyping it is not as informative. Although ``1 : Int, 1 : Nat``, the principal type would be ``1 : {1}``. So overall it seems we can get away without any type inference.
+Type inference means many signatures can be omitted, like unityping with implicitly assigning the universal type. But type-inference algorithms are complex- they can fail, and even if they succeed their results are not obvious to humans. Unityping means the semantics doesn't depend on types at all, meaning one less thing to think about, hence making programming easier. Type inference allows writing some programs without thinking about types, but there is always the chance the program is untypeable - and there are many examples of untypeable programs, e.g. ``\z. (z 1, z "x")`` for H-M. Cliff Click's system can type this but fails on `a more complex program <https://github.com/cliffclick/aa/issues/28>`__ that runs fine in a unityped system. The errors on these untypeable programs will always be verbose (because of the inferred type) and confusing (because the programmer was not thinking about the inference algorithm).
 
-With a unityped type system, type inference is trivial - if no type annotations are given the universal type can be assumed.
+Types can used to describe the ABI, :cite:`jonesTypesAreCalling2009` hence type inference is a form of ABI selection. But the ABI selection is based on performance. Furthermore the ABI types can be conditioned on state, and there is a fallback catch-all format for hard cases. So overall ABI selection uses a separate notion of type based on representation, with no principality requirement like for normal type inference.
 
-Haskell has a `universal type <https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html>`__, but it can only contain monomorphic values due to lack of polymorphic ``Typeable`` instances. But this seems to just be a GHC limitation; Clean's dynamic can store polymorphic types.
+At the REPL systems such Haskell provide a command to display the inferred type of an expression, and similarly Haddock can show pretty-printed inferred type signatures. But this doesn't extend well to complex type systems:
+
+* :cite:`naikTypeSystemEquivalent2008` provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types. Stroscot could similarly be written to output Church-style types reflecting the properties it verifies for every expression. But the types would be complex and precise, e.g. ``length : (Nil-->0) & (Cons a b-->1+(length b))``, hence hard to interpret.
+* With subtyping the principal type would presumably be the minimal type containing the value, which is not very informative. E.g. instead of ``1 : Int`` or ``1 : Nat`` the inferred type would just be ``1 : {1}``.
+* It is of high complexity to infer `dependent <https://github.com/UlfNorell/insane/>`__ and `circular <https://github.com/gelisam/circular-sig>`__ types
+
+Maybe these issues can be solved by heuristics for inferring types. But it seems that we can solve it more easily:
+
+* REPL inferred types can be replaced by smarter value printing, e.g. ``:show id`` gives ``Prelude.id = \x -> x``, or ``:show [1..100]`` gives ``list of 100 integers``.
+* Documentation can simply show the list of developer-defined type signatures (``:t (+)`` giving ``Int -> Int -> Int`` and the other overloadings). Haddock has been able to use GHC's inferred type signatures `since 2008 <https://github.com/haskell/haddock/commit/d300632cbc2346f6d95188426e5db5fbeb7c9f34>`__, but it still encourages explicit type signatures.
+
+So overall it seems type inference is not necessary with the correct design.
 
 Soundness and completeness
---------------------------
+==========================
 
 Type soundness means "type preservation", i.e. if ``a : T`` then evaluating ``a`` must produce a value in the type's domain ``〚T〛`` in every denotational semantics. A sound type system rejects incorrect programs by pointing out their type  with a diagnostic. An example of an unsound type system feature is Java's covariant arrays. The program ``String[] strs = { "a" };Object[] objs = strs;objs[0] = 1;String one = strs[0];`` typechecks but produces an ArrayStoreException at ``objs[0] = 1``. Soundness is qualified to a subset of programs S of a language L. If L is unsound but L/S is sound we say L is sound up to S. Java is sound up to covariant arrays, null pointers, and a few other warts. TypeScript is sound up to first class functions and downcasts from the any type. Most type systems are also unsound with respect to nontermination - an infinite loop is of any type but does not produce a value of that type (modeling nontermination as evaluating to ⊥). Type systems sound with respect to nontermination, such as System F, are called "total".
 
@@ -61,14 +78,14 @@ Type completeness is a more vague notion; the common definition is that "all cor
 There is also soundness and completeness in logic, which is different:
 
 * A theory is logically sound (valid) if all of its theorems are tautologies, i.e. every formula that can be proved in the system is valid in every semantic interpretation of the language of the system.
-* A theory is logically satisfiable if it has a model, i.e., there exists an interpretation under which all provable formulas in the theory are true.
+* A theory is logically satisfiable if it has a model, i.e., there exists an interpretation in ZFC under which all provable formulas in the theory are true.
 * A theory is semantically complete when all its tautologies are theorems, i.e. every formula that is true under every interpretation of the language of the system can be proven using the rules of the system.
 * A theory is syntactically complete if, for each formula φ of the language of the system, either φ or ¬φ is a theorem. Alternately, for all unprovable sentences φ, φ ⊢ ⊥ is a theorem.
 * A theory is logically consistent if there is no formula φ such that both φ and its negation ¬φ are provable.
 
-Via the Curry-Howard correspondence we can interpret formulas as types and provability of a formula as a program term of that type existing. We restrict to semantic interpretations that map formulas/types to sets and evaluate terms to values in those sets. So then:
+Via the Curry-Howard correspondence we can interpret formulas as types and provability of a formula as a program term of that type existing. We restrict to the semantic interpretation that maps formulas/types to sets and evaluate terms to values in those sets. So then:
 
-* A TS is logically sound/valid if every inhabited type T in every semantic interpretation of the language has a  nonempty type domain 〚T〛.
+* A TS is logically sound/valid if every inhabited type T in the semantic interpretation of the language has a  nonempty type domain 〚T〛.
 * A TS is logically satisfiable if a semantics exists where all of its inhabited types have elements in their type domains.
 * A TS is semantically complete when all nonempty type domains 〚T〛 have program terms of type T (T inhabited).
 * A TS is syntactically complete if, for each type T, either T or ¬T is inhabited. Alternately, for all empty types T, there is a program of type T -> Void.
@@ -76,33 +93,38 @@ Via the Curry-Howard correspondence we can interpret formulas as types and prova
 
 Semantic completeness and logical soundness only care about types being inhabited and hence are weaker than type completeness/soundness which care about all specific programs.
 
+Java does not have a ``Void`` type (``void`` is a unit type), but if it did it would most likely be logically inconsistent because a nonterminating program could inhabit the function type ``A -> Void``. In general most type systems are logically inconsistent because a nonterminating loop inhabits all function types. However since all non-Void types are inhabited Java is syntactically complete. Furthermore we can likely formalize the execution model of Java and obtain that Java is logically satisfiable, logically sound, and semantically complete.
 
-The tension between consistency and completeness is key. A compiler can forgo some consistency while being sound and complete by using a forgiving type system. Or it can forgo completeness and use a sound type system that removes expressiveness but ensures type safety. The consistent type systems are generally more complex as they attempt to support patterns seen in the complete type systems, while complete type systems can simply make everything unityped.
+So the difficult property to ensure is logical consistency. By Godel's first incompleteness theorem there are no consistent, syntactically complete systems with inference rules of complexity at most :math:`\Delta_{1}^{0}` that contain integer arithmetic. For example System F is consistent and of complexity :math:`\Sigma_1^0 > \Delta_{1}^{0}` but still is incomplete and `cannot type some strongly normalizing terms <https://cstheory.stackexchange.com/questions/48884/are-there-strongly-normalizing-lambda-terms-that-cannot-be-given-a-system-f-type>`__. Intersection type systems extended with negation are complete but inconsistent due to ω. However they are consistent when extended with a complexity :math:`\Sigma_1^0` oracle that computes principal types such that the type contains ω iff the term is not strongly normalizing. :cite:`ghilezanStrongNormalizationTypability1996`
 
- but not complete. System F, which most type systems are based on, is sound but `cannot type some strongly normalizing terms <https://cstheory.stackexchange.com/questions/48884/are-there-strongly-normalizing-lambda-terms-that-cannot-be-given-a-system-f-type>`__, hence is incomplete. Similarly any decidable type system will be incomplete if it is sound and total. However, this is merely convention. Systems that are complete are:
+The simplest complete and consistent system is the unitype system. This consists of a universe type whose domain contains all values and its negation the empty type. To ensure consistency we must ensure that the empty type is uninhabited, so all programs must be of the universe type. This means nonterminating programs must have a value in the semantic domain. If we add termination checking we can put nonterminating programs in the empty type and restrict the universe to terminating programs, but this increases the complexity.
 
-* "unsound" type systems, which can be formalized as sound type systems with expanded type domains. For example Haskell's type system is sound but includes nontermination in all type domains.
-* Robert Harper's "unitype" or dynamic type system, an "unsound" type system consisting of a single universe type whose domain contains all values
-* intersection type systems, which is not "unsound": the principal type contains ω iff the term is not strongly normalizing. :cite:`ghilezanStrongNormalizationTypability1996`.  Similarly :cite:`naikTypeSystemEquivalent2008` provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types. Stroscot could be written to output Church-style types reflecting the properties it verifies for every expression, and those types would unquestionably be types, and very similar to the set annotations specified, although unlikely to exactly match a set annotation. But the types would be complex and precise, e.g. ``length : (Nil-->0) & (Cons a b-->1+(length b))``, and likely hard to interpret, so this will likely never be implemented.
+Unityped
+========
 
-Most type systems are logically inconsistent because an infinite nonterminating loop inhabits all types.
+Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ all type systems are static. So this is really about dynamic vs not. Harper has coined the phrase "unityped" to describe what is commonly known as a dynamic language. In Stroscot this word is short for "universally typed", i.e. the language has a universal type that can contain all values. This definition is slightly different from Harper's, who uses "unitype" to mean that there is only one type in the language. We will call Harper's definition "single-typed". If a language is single-typed it must be unityped, since all values are in the single universal type, but not every uni-typed language is single-typed.
 
-Static vs dynamic
------------------
+Consider the notion of Curry-style types, called sorts in :cite:`pfenningChurchCurryCombining2008`. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is unityped if it has a trivial sort that checks no properties. Even if the language is unityped, it doesn't have to be single-typed, because there can still be more than one type (sort) - in fact there can be a whole language of properties/sorts.
 
-Per Robert Harper all type systems are static. So this is really about unityped vs not.
+A unityped language means if you write zero type signatures and ignore all type warnings the program still compiles and runs and produces a value. The compiler starts with the universal sort and refines this as much as it can, but even if it fails there is still an operational semantics.
 
 Non-unityped programs are a subset of unityped programs. Every non-unityped program has a corresponding unityped program where the values are extended to contain the type information as a tag (reification). Often the operational semantics does not depend on the type and we can simply erase the type. In the specific case of return type overloaded type classes, where type inference is key, the semantics can be made nondeterministic and type annotations can be incorporated explicitly as pruning possibilities.
 
-Non-unityped is at most as expressive - there are programs which unityped allows which most non-unityped systems reject.
+Non-unityped is at most as expressive - there are programs which unityped allows which most non-unityped systems reject. Haskell has a `Dynamic type <https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html>`__ which allows expressing such programs. It seems to only be a GHC limitation that it can only contain monomorphic values. Clean's dynamic can store polymorphic types and presumably one could add polymorphic ``Typeable`` instances to GHC as well. But even though Dynamic can store all values it is not a universal type because ``a : Int`` and ``toDyn a : Dynamic`` are distinct values. So unityping also requires subtyping.
 
-As far as the amount of type declarations, the `Zero one infinity rule <https://en.wikipedia.org/wiki/Zero_one_infinity_rule>`__ applies. A program should run without any type declarations, with one declaration for the root of the program, or with any amount of type declarations scattered through the program. The no type declarations is an "untyped" setting and ensures there is a complete dynamic semantics, and that programs can evolve distinctly from types. The one type declaration enables checking the program for bad behavior, and ruling out common errors such as typos. The infinite declarations allows using the power of static verification to its fullest, and may require many iterations of tweaking to get right. But verification is more powerful than simply debugging or unit testing and can catch hard bugs quickly and prove the absence of classes of bugs, allowing rapid development of quality software.
+It complicates the language unnecessarily to have two values which can't be stored to the same variable or type tests which can't scrutinize some values.
+
+Overall unityping seems good, hence Stroscot is unityped.
+
+Static vs dynamic
+=================
+
 
 "Soft typing" is similar to the verification approach, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell's "deferred type errors" flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.
 
     Principle: Good type systems must balance permissiveness with strictness.
 
-Type systems must be permissive enough to allow useful programs to be written, and strict enough to catch useful errors. (One important aspect of permissiveness that we've already seen is polymorphism, which allows code to be written for an entire family of types, rather than for one type only.)
+Type systems must allow valid programs and catch errors.
 
     Principle: Even sound static type systems compromise on some "type-like" errors and check them dynamically.
 
@@ -146,3 +168,8 @@ how do you represent, check, remove, and apply the tag on the value each time it
         You know the argument is one of polar or rectangular, although which one is not known until runtime. You have ruled out all other values. With a unityped language you cannot express this restriction.
 
         Sufficiently fancy types can give enough information to write ‘obvious’ pieces of code automatically, and with proof assistants this can be a dialogue. An elementary example of this is Lennart Augustsson’s djinn, which will take types like ``fmap : (a -> b) -> Maybe a -> Maybe b``  or ``callCC : ((a -> Cont r b) -> Cont r a) -> Cont r a`` and write code that has the type. These can be non-trivial to write if you’re just thinking about how it should behave, but the type completely determines the implementation.
+
+Roles
+=====
+
+GHC's roles are just an optimization for ``coerce``. There are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.

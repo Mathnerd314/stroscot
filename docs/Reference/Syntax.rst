@@ -6,24 +6,18 @@ Almost everything in Stroscot is an expression. But there's also block statement
 Unicode
 =======
 
-Practically, most programs will use ASCII. But the Unicode algorithms are robust and supporting other languages isn't too hard. `Lots of languages <https://rosettacode.org/wiki/Unicode_variable_names>`__ have support for Unicode, although the exact set of allowed characters varies.
+The decoding algorithm is as follows: Start with bytes. Decode using UTF-8, replacing invalid bytes/characters with Unicode's REPLACEMENT CHARACTER U+FFFD. `NFC <http://unicode.org/reports/tr15/#Norm_Forms>`__ normalize the input, warning if input isn't already normalized. Then some combination of the following algorithms to do lexical analysis:
 
-* Start with bytes. Decode using UTF-8, replacing invalid bytes/characters with Unicode's REPLACEMENT CHARACTER U+FFFD.
-* `NFC <http://unicode.org/reports/tr15/#Norm_Forms>`__ normalize the input, warning if input isn't normalized. There is enough software that automatically normalizes to NFC (e.g. web browsers) that it seems safe to require NFC; bugs can be worked around by changing the input (inserting joiners) rather than modifying NFC.
-* A warning for weird scripts (listed in `TR31 <http://www.unicode.org/reports/tr31/#Table_Candidate_Characters_for_Exclusion_from_Identifiers>`__) or zero-width characters.
+* `line-breaking <https://www.unicode.org/reports/tr14/#BreakingRules>`__ (specifically, lines end at hard / mandatory breaks)
+* `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens
+* `extended grapheme clustering <https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries>`__ to split up tokens into characters
 
-Some combination of the following algorithms to do lexical analysis:
-
-* `line-breaking <https://www.unicode.org/reports/tr14/#BreakingRules>`__ (specifically, to determine hard / mandatory breaks)
-* `word-breaking <http://www.unicode.org/reports/tr29/#Word_Boundary_Rules>`__ to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols
-* `identifier syntax <https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax>`__, which specifies sets of valid identifier start/continue characters. Go's rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, but this excludes combining characters and Devanagari. Go's upper case restriction means 日本語 cannot be exported, and instead X日本語 must be used.
-
-Stroscot is case-sensitive.
+Stroscot is case-sensitive, i.e. it does not do any case transformations on identifiers, but it does not make any syntactic distinctions based on case.
 
 Layout
 ======
 
-The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't match with explicit braces.
+The most obvious instance of layout is the module declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't syntactically match with explicit braces, but are semantically identical.
 
 ::
 
@@ -40,7 +34,7 @@ Behavior of a new line depends on its indentation level, relative to the indenta
 
 * If it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
 * If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
-* If there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`offside rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
+* If there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`off-side rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
 * Incomparable levels are an error.
 
 Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.
@@ -132,7 +126,7 @@ Chained Comparison
 Variables
 =========
 
-Identifiers cannot be directly reassigned; you can shadow, which optionally generates a warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.
+Identifiers cannot be directly reassigned; you can shadow, which generates a warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.
 
 ::
 
@@ -140,7 +134,7 @@ Identifiers cannot be directly reassigned; you can shadow, which optionally gene
   a := 2
   raise a by 1
 
-Mutable assignment (``:=``) is completely distinct from name binding (``=``). They have distinct notation.
+Mutable assignment (``:=``) is completely distinct from name binding (``=``). They have distinct notation and mutable assignment cannot create new bindings.
 
 Functions
 =========
@@ -348,6 +342,16 @@ You can specify a subset of the arguments to generate a partially applied functi
   b == v
   # true
 
+Using the variable name in braces by itself uses the value of that variable in scope:
+
+::
+
+  y = 2
+  x = 4
+  w = 1
+  z = 0
+  v = foo {w,x,y,z}
+
 Positional arguments
 --------------------
 
@@ -373,6 +377,21 @@ Positional arguments support currying, for example:
 
   b 4
   # 1
+
+Positional arguments may be filled by the special syntax ``_`` to write a partial application:
+
+::
+
+  sub x y = x - y
+  sub1 = sub _ 1
+
+  # equivalent definition
+  sub1 x = sub x 1
+
+  sub1 3
+  # 2
+
+All the underscores of a call are regrouped to form the parameters of a unique function in the same order as the corresponding underscores.
 
 Implicit arguments
 ------------------
@@ -801,12 +820,31 @@ These are things that can show up in blocks and have blocks as arguments.
 
 More here: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
 
+Also the do-while block from `Rune <https://github.com/google/rune/blob/main/doc/rune4python.md#looping>`__:
+
+::
+
+  do
+    c = getNextChar()
+  while c != ‘\0’
+    processChar(c)
+
+The do-block always executes, and the while-block only executes if the condition is true, after which we jump to the start of the do-block. If the condition is false, the loop terminates. This avoids the common C/C++ assignment-in-condition hack:
+
+::
+
+  int c;
+  while ((c = getNextChar()) != '\0') {
+    processChar(c);
+  }
+
+
 Programs
 ========
 
 A program is a block, and every declaration is a macro or control structure.
 
-So for example you can implement a conditional definition:
+So top-level statements and function calls are allowed. For example you can implement a conditional definition:
 
 ::
 

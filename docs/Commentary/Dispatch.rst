@@ -1,6 +1,19 @@
 Dispatch
 #########
 
+Functions
+=========
+
+A function is a pattern ``f a b c = body`` that matches some parameters ``a,b,c`` and transforms it to the body, an expression possibly referring to the parameters.
+
+The parameters can either be bound positionally, meaning the syntactic position at the call site determines what formal parameter an argument is bound to, or with a keyword associating the argument with the formal parameter. Keywords allows reordering parameters. Also keyword parameters can have a default value (optional parameter).
+
+The arity of a function is how many positional parameters it has. A function with arity 0 is nullary, arity 1 is unary, arity 2 is binary, arity 3 is ternary, and in general arity n is n-ary. Functions with no fixed arity are called variadic functions.
+
+Functions are usually named with a function symbol identifying the function. There are also anonymous (nameless) lambda functions, which have somewhat restricted syntax compared to named functions.
+
+Functions that have functions as parameters or results are called higher-order functions. Functions that don’t are called first-order functions.
+
 Priorities
 ==========
 
@@ -29,48 +42,13 @@ Guards are handled by calling next-method on failure:
 Overloading
 ===========
 
-`The Go FAQ <https://go.dev/doc/faq#overloading>`__ says Go deliberately does not support overloading, but then it admits overloading is "occasionally useful". Actually, Go does support a limited form of overloading, in the form of interfaces - you can write ``a.area()`` and ``b.area()`` and these refer to different methods. But it's limited to dispatching on the self parameter's type.
+Overloading is having methods with the same name but different type signatures. A special case is operator overloading, so you can add both floats and ints with ``+``. Even `the Go FAQ <https://go.dev/doc/faq#overloading>`__, an opponent of overloading, admits that overloading is useful and convenient. Overloading enables ad-hoc polymorphism and solves the expression problem. It is incredibly useful.
 
-The Go FAQ says overloading is confusing and fragile. Life is confusing and fragile, but this does not mean eliminating all life is the solution.
+Although in many cases using separate function names can lead to a clearer API, supporting overloading does not prevent this. And there are cases where overloading is the right choice. Suppose you are trying to wrap a Java library that makes heavy use of overloading. Name mangling using simple rules will give relatively long names like ``divide_int_int``. More complicated rules will give shorter name like ``div_ii``, but the names will be hard to remember. Either way, overloading means no mangling is needed in the API at all, a strictly better alternative. Similarly the Go API is full of families of functions like ``FindAll : [Byte] -> [[Byte]], FindAllString : String -> [String]`` which differ only by their type. These additional name parts cannot be guessed easily and require looking up the API docs to determine the appropriate version. Overloading means only the base name needs to be remembered.
 
-The Go FAQ says naming separate functions leads to a clearer API. While separate functions can be clearer, supporting overloading does not prevent creating separate functions. And suppose you are trying to wrap a Java library that makes heavy use of overloading. Name mangling using simple rules will give relatively long names like ``divide_int_int``. More complicated rules will give shorter name like ``div_ii``, but the names will be hard to remember. Either way, overloading means no mangling is needed at all, a strictly better alternative.
+Per the FAQ, Go supposedly "does not support overloading" and restricts itself to matching only by name. Actually, overloading is `still possible <https://www.richyhbm.co.uk/posts/method-overloading-in-go/>`__ in Go by defining a function which takes variadic arguments of the empty interface type and manually dispatches with ``if`` statements and runtime type analysis. What's missing in Go is that the compiler does not implement an overloaded dispatch mechanism. The FAQ claims that implicit dispatch will lead to confusion about which function is being called. In particular `Ian Lance Taylor <https://github.com/golang/go/issues/21659#issuecomment-325382091>`__ brings up the situation where an overloaded function application could be resolved to multiple valid clauses. Any rule that assigns an implicit priority of clauses in going to be fragile in practice.
 
-The Go FAQ says leaving overloading out simplifies the type system and method dispatch. Overloading doesn't complicate a dynamic type system at all. It does complicate method dispatch, but in exchange overloading enables generic functions and solves the expression problem, so it's worth it.
-
-So the verdict here is that the Go developers were just too lazy to implement overloading.
-
-Default arguments
-=================
-
-Default arguments are very similar in expressiveness to overloading, so as one might expect `Rob Pike <https://talks.golang.org/2012/splash.article>`_ says Go deliberately does not support default arguments. Supposedly adding default arguments to a function results in interactions among arguments that are difficult to understand.
-
-Pike admits that it is really easy to patch API design flaws by adding a default argument. Expanding on this, it seems default arguments have a good place in the lifecycle of an API parameter:
-
-1. A new parameter can be added to a function, just give it a default value such that the function behavior is unchanged.
-2. The whole argument can be deprecated and removed on a major release, hard-coding the default value
-3. The default value can be deprecated and then removed on a major release, forcing the value to be specified.
-4. An existing parameter can be given a default value without breaking compatibility
-
-.. graphviz::
-
-  digraph {
-  rankdir=LR
-  Missing -> Defaulted [label="1"]
-  Defaulted -> Missing [label="2", color="blue"]
-  Defaulted -> Present [label="3", color="blue"]
-  Present -> Defaulted [label="4"]
-  }
-
-One side effect of this lifecycle is it gravitates towards default parameters, because those don't break compatibility. So programs accumulate many default parameters that should be made into required parameters or removed. This is probably why developers say default parameters are a code smell (nonwithstanding the internet's main opinion, which comes from C#'s implementation breaking ABI compatibility in a way that can be fixed by using regular overloading). But regular pruning should be possible, just do occasional surveys as to remove/make mandatory/leave alone. And, without default parameters, adding or removing a parameter immediately breaks the API without a deprecation window, so it is effectively impossible - you have to make a new method name. This is why Linux has the unimaginatively named syscalls ``dup``, ``dup2`` and ``dup3``. IMO having deprecated parameters is better than trying to come up with a new name or having version numbers in names.
-
-A `wartremover issue <https://github.com/wartremover/wartremover/issues/116>`__ provides 4 potentially problematic cases for default arguments. Going through them:
-
-* Automatically allocated resource arg - this is deallocated by the finalizer system in Stroscot, hence no resource management problem. To avoid statefulness, the pattern is to default to a special value like ``AutoAllocate`` and do the allocation in the method body.
-* Config - a big win convenience-wise for default arguments, only specify the parameters you care about.
-* Delegated parameter: this is nicely handled in Stroscot by implicit parameters. Hence a pattern like ``ingest {compressor = None} = ...; doIngestion = { log; ingest }; executeIngest = { prepare; doIngestion }; parseAndExec cmdline = { compressor = parse cmdline; executeIngest }`` is possible. Once you realize the compressor is important you can remove the default and make it a keyword parameter - the default can still be provided as a definition in an importable module, and you get an unset argument error if no implicit parameter is set.
-* Faux overloading like ``foo(i, name = "s")`` - useful just like overloading.
-
-The verdict here is that defaulting is a power vs predictability tradeoff. The obvious choice given Stroscot's principles is power. There are no easy solutions for adding new behavior to a function besides adding a default argument flag to modifying an API in a backwards-compatible way, so default arguments are necessary. And default arguments have been used in creative ways to make fluent interfaces, giving programmers the enjoyment of complex interface design. The added implementation complexity is small. Security concerns are on the level of misreading the API docs, which is possible in any case. Adding a warning that a default argument has not been specified, forcing supplying all parameters to every method, seems sufficient.
+Stroscot's solution is to require the system to produce a unique normal form. So it is an error if the multiple valid clauses produce different results, and otherwise the interpreter will pick an applicable clause at random. When compiling, the most efficient implementation will be chosen.
 
 Return type overloading
 =======================
@@ -134,7 +112,7 @@ Martin also says ``foo()::T`` should invoke the method ``foo()::S`` such that ``
 Inference
 ---------
 
-The case where dynamic typing falls down is when the type is not specified directly on the function but rather is inferred. For example ``(fromInteger 1 + fromInteger 2) :: Int``, the type is pushed down so that ``fromInteger 1 :: Int``. If we went with giving the type as a parameter we would have to write ``fromInteger Int 1 + fromInteger Int 2``, duplicating the type. With a function expression of fixed type ``let f = id :: Int -> Int in show (f $ read "1")`` or case statement ``show (case read "1" of (1 :: Int) -> "x")`` the type is far removed from the ambiguous ``read``.
+The case where a parameter approach falls down is when we desire an inferred type rather than specifying the type directly on the function. For example ``(fromInteger 1 + fromInteger 2) :: Int``, Haskell pushes the constraint down and deduces ``fromInteger 1 :: Int``. If we went with giving the type as a parameter we would have to write ``fromInteger Int 1 + fromInteger Int 2``, duplicating the type. With a function expression of fixed type ``let f = id :: Int -> Int in show (f $ read "1")`` or case statement ``show (case read "1" of (1 :: Int) -> "x")`` the type is far removed from the ambiguous ``read``.
 
 It is arguable whether inference is desirable. The programmer has to perform the same type inference in their head to follow the path the compiler is taken, which can make code tricky to understand. The meaning of an expression is context-dependent. But the original typeclasses paper :cite:`wadlerHowMakeAdhoc1989` mentions resolving overloaded constants based on the context as a feature. So this section discusses possible ways of implementing the context resolution.
 
@@ -144,7 +122,128 @@ A little simpler approach is to use a term, so e.g. ``read "x"`` is a normal for
 
 Another approach is to add type inference, but as a macro transformation. All it has to do is infer the types using Hindley Milner or similar and insert explicit type parameters for the RTOed functions. But this is really the opposite of what Stroscot aims for. Stroscot avoided static typing to begin with because there are no principal types if you have union types. For example a value of type ``A`` may take on the type ``(A|B)`` or ``(A|C)`` depending on context. The inserted types would have to be principal, negating the advantage of dynamic typing. Furthermore you'd have to use more macros to specify type instances and types of functions.
 
-My original idea is to use nondeterminism: an overloaded function ``f : Something a => a`` is interpreted as ``(f A) amb (f B) amb ...``, combining all the typeclass instances. Disambiguating types using annotations is then replaced with disambiguating the result using assertion failures. This actually preserves the semantics of the static typeclass resolution AFAICT. In the discussion `on Reddit <https://www.reddit.com/r/ProgrammingLanguages/comments/uynw2i/return_type_overloading_for_dynamic_languages/>`__, it was brought up that if there are a lot of overloadings or the overloadings are recursive, it would be slow, exponential in the number of function calls. That's for a quite naive implementation; I think the compiler could do a type analysis and give good performance for most cases. HM also has exponential blowup on pathological cases. Overall I think this approach is the best, but it is not clear if it is actually helpful because features like automatic promotion will make many programs ambiguous.
+Despite the naysayers I still like my original idea of using nondeterminism: an overloaded function ``f : Something a => a`` is interpreted as ``(f A) amb (f B) amb ...``, combining all the typeclass instances. Disambiguating types using annotations is then replaced with disambiguating the result using assertion failures. This actually preserves the semantics of the static typeclass resolution AFAICT. In the discussion `on Reddit <https://www.reddit.com/r/ProgrammingLanguages/comments/uynw2i/return_type_overloading_for_dynamic_languages/>`__, it was brought up that if there are a lot of overloadings or the overloadings are recursive, it would be slow, exponential in the number of function calls. That's for a quite naive implementation; I think the compiler could do a type analysis and give good performance for most cases. HM also has exponential blowup on pathological cases. Overall I think this approach is the best, but it is not clear if it is actually helpful because features like automatic promotion will make many programs ambiguous.
+
+Default arguments
+=================
+
+Default arguments are very similar in expressiveness to overloading, so as one might expect `Rob Pike <https://talks.golang.org/2012/splash.article>`_ says Go deliberately does not support default arguments. Supposedly adding default arguments to a function results in interactions among arguments that are difficult to understand.
+
+Pike admits that it is really easy to patch API design flaws by adding a default argument. Expanding on this, it seems default arguments have a good place in the lifecycle of an API parameter:
+
+1. A new parameter can be added to a function, just give it a default value such that the function behavior is unchanged.
+2. The whole argument can be deprecated and removed on a major release, hard-coding the default value
+3. The default value can be deprecated and then removed on a major release, forcing the value to be specified.
+4. An existing parameter can be given a default value without breaking compatibility
+
+.. graphviz::
+
+  digraph {
+  rankdir=LR
+  Missing -> Defaulted [label="1"]
+  Defaulted -> Missing [label="2", color="blue"]
+  Defaulted -> Present [label="3", color="blue"]
+  Present -> Defaulted [label="4"]
+  }
+
+One side effect of this lifecycle is it gravitates towards default parameters, because those don't break compatibility. So programs accumulate many default parameters that should be made into required parameters or removed. This is probably why developers say default parameters are a code smell (nonwithstanding the internet's main opinion, which comes from C#'s implementation breaking ABI compatibility in a way that can be fixed by using regular overloading). But regular pruning should be possible, just do occasional surveys as to remove/make mandatory/leave alone. And, without default parameters, adding or removing a parameter immediately breaks the API without a deprecation window, so it is effectively impossible - you have to make a new method name. This is why Linux has the unimaginatively named syscalls ``dup``, ``dup2`` and ``dup3``. IMO having deprecated parameters is better than trying to come up with a new name or having version numbers in names.
+
+A `wartremover issue <https://github.com/wartremover/wartremover/issues/116>`__ provides 4 potentially problematic cases for default arguments. Going through them:
+
+* Automatically allocated resource arg - this is deallocated by the finalizer system in Stroscot, hence no resource management problem. To avoid statefulness, the pattern is to default to a special value like ``AutoAllocate`` and do the allocation in the method body.
+* Config - a big win convenience-wise for default arguments, only specify the parameters you care about.
+* Delegated parameter: this is nicely handled in Stroscot by implicit parameters. Hence a pattern like ``ingest {compressor = None} = ...; doIngestion = { log; ingest }; executeIngest = { prepare; doIngestion }; parseAndExec cmdline = { compressor = parse cmdline; executeIngest }`` is possible. Once you realize the compressor is important you can remove the default and make it a keyword parameter - the default can still be provided as a definition in an importable module, and you get an unset argument error if no implicit parameter is set.
+* Faux overloading like ``foo(i, name = "s")`` - useful just like overloading.
+
+The verdict here is that defaulting, like overloading, is a power vs predictability tradeoff. The obvious choice given Stroscot's principles is power. There are no easy solutions for adding new behavior to a function besides adding a default argument flag to modifying an API in a backwards-compatible way, so default arguments are necessary. And default arguments have been used in creative ways to make fluent interfaces, giving programmers the enjoyment of complex interface design. The added implementation complexity is small. Security concerns are on the level of misreading the API docs, which is possible in any case. Adding a warning that a default argument has not been specified, forcing supplying all parameters to every method, seems sufficient.
+
+Currying
+========
+
+Per :cite:`kennawayComparingCurriedUncurried1995`, an uncurried function symbol has an arity n and a function application ``f(t1, ... , tn)`` is formed from ``f`` and n terms t1,...,tn. In a curried system there are no arities and function applications are formed starting from a nullary constant ``f`` and applying the binary "application" operator, like ``App(...App(App(f,t1),...),tn)`` but more concisely written as left-associative juxtaposition ``f t1 ... tn``. We ignore the partially-applied system mentioned by Kennaway here and just assume the use of term matching.
+
+Partial application creates a function that takes one or more omitted parameters and plugs them into f to produce a final result. Currying allows easy partial function application for lastmost positional parameters and keyword parameters, which in turn allows using higher-order functions more easily, e.g. passing a partially-applied function as the argument to map. For example ``map (add 2) [1,2] = [3,4]``. Without currying this would have to use a lambda to perform the partial application like ``map (\x. add 2 x)``. So in Stroscot positional parameters and keyword parameters are curried. This allows passing any function "directly", without "wrapping" it in an anonymous function.
+
+
+The parentheses for a curried function don't matter, e.g. all of the following are equivalent::
+
+  ((f 1) 2) 3
+  (f 1 2) 3
+  f 1 2 3
+
+Currying is independent of function call syntax, e.g. with C-style syntax we would write::
+
+  f(1)(2)(3)
+  f(1,2)(3)
+  f(1,2,3)
+
+for the various currying possibilities.
+
+R allows some kind of "partial matching" so you can write ``f(x, , y)`` instead of ``\a -> f(x, a, y)``. Seems stupid.
+
+Variadic arguments
+------------------
+
+A variadic function has no fixed arity. So can currying and variadic functions coexist? Well consider a variadic function ``sum``::
+
+  sum == 0
+  # true
+  sum + 1
+  # 1
+
+  g = sum 1 2 3
+  g == 6
+  # true
+  g 4 5
+  # 15
+
+So even though ``g == 6``, ``g`` is different from ``6`` - ``g`` is both a function and non-function at the same time. Similarly ``sum`` is both ``0`` and a function. This causes confusion. In particular the issue is there are multiple interpretations of a function call: it could be a partial application waiting for more arguments, or it could be a complete application with the intention to use defaults for default parameters and terminate the varargs list. To avoid this confusion we need to know when the function call is complete. It seems to be a common misconception (e.g. in the Flix principles) that this means currying and variadic functions cannot be in the same language. But there are several approaches:
+
+* nondeterminism: Just accept that the meaning of ``g``` depends on its usage. This is not a good option because it means things that look like values aren't actually values.
+
+* a special terminator value, function, or type. For example in `ReasonML <http://reasonmlhub.com/exploring-reasonml/ch_functions.html>`__ every function needs at least one positional parameter. There are no nullary functions; a definition or function call without any positional parameters is transformed to take or pass an empty tuple argument (). ReasonML accumulates parameters until it first encounters a positional parameter, then defaults all default parameters and (if it supported varargs) ends varargs, creating a partially-applied function taking only positional parameters. So ``add {x=0,y=0} () => x + y`` can be called as ``add {x=3} {y=3} () = 6`` or ``add {x=3} () = 3``, including splitting the intermediate values like ``plus3 = add {x=3}; result = plus3 ()``. Another example is `Haskell printf <https://hackage.haskell.org/package/base-4.9.0.0/docs/Text-Printf.html>`__ which can do ``finalize (printf "%d" 23)`` (In Haskell the finalize is implicit as a type constraint). Essentially we construct types ``T = end | (param -> T); finalize : end -> ...``. It is also possible to use a specific ``end`` value, like ``sum end = 0``, ``sum 1 2 3 end = 6``.
+
+* using a explicit length parameter. `SO <https://softwareengineering.stackexchange.com/questions/286231/is-it-possible-to-have-currying-and-variadic-function-at-the-same-time>`__ proposes passing the length as the first parameter, like ``sum 4 1 2 3 4 = 10``, but this is error-prone and inferior to just passing a list ``sum [1,2,3,4]``.
+
+* using the syntactic boundary: Arguably both of the previous are hacks. They do allow currying, but at the expense of exposing the dispatch machinery. Generally currying is not needed and the function is fully applied at its use site. Per :cite:`marlowMakingFastCurry2006` Figure 6, around 80% of calls are fully applied with known arguments. Finalizing varargs at the site of the function call is a simple and clear strategy:
+
+  ::
+
+    sum 1 2 3 = 1 + 2 + 3
+    (sum 1 2) 3 = (1+2) 3
+
+  This is the same behavior as languages without currying (``sum(1,2,3)`` vs ``sum(1,2)(3)``) and is only really complicated if you think too much about consistency. If we want more arguments we can use a lambda, or a builder DSL like ``finalize (f `add` a `add` b)``.
+
+Optional arguments
+------------------
+
+A similar issue is optional arguments - when do we decide to put in the default value? Again Stroscot's answer is it must be syntactically supplied.
+
+::
+
+  opt (a = 0) (b = 0) = a + b
+
+  opt 1 2 = 3
+  (opt 1) 2 = (1+0) 2
+
+Again a lambda or builder works for anything tricky.
+
+`ReasonML <reasonmlhub.com/exploring-reasonml/ch_functions.html>`__ uses an empty tuple to mark the end of supplied arguments.
+
+Keyword arguments
+-----------------
+
+Keyword arguments allow passing arguments without regards to the order in the function definition, making the code more robust to forgetting argument order. Of course keyword-only arguments do not work with currying either. But if they are mixed keyword-positional arguments then specifying most of them using keywords and leaving the rest as curried positional parameters can work::
+
+  kw a b c = a + b + c
+
+  zipWith (kw {b=1}) [1,2] [0,1]
+  --> [2,4]
+
+This kind of partial specification is possible to emulate with records and partial application logic, but since currying is built in, this dispatch logic also seems best to build into the language.
+
+Julia separates positional arguments from keyword arguments using a semicolon (;).
+
 
 Implementation
 ==============
