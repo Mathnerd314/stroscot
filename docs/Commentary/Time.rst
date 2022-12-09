@@ -92,6 +92,7 @@ A time record specifies an instant using a collection of fields from the prolept
 An un-normalized time record may have any real value for any of the fields, except for era for which only two values are defined (similar to a sign bit). Normalization calculates an instant as the sum associated left from least precise to most precise, e.g. ``{ year = 2006.6, month = 0, day = 3 }`` gives ``((RataDie + 2006.6*year)+0*month)+3*day``.
 
 After normalization the range and type of the fields of the result depend on which fields were included. The most precise field is a real in some range, while the other fields are integers, and the least precise field besides era is unbounded. There are also special types for some fields. And some fields are conventionally 1-indexed. The BC era is numbered backwards. Some examples:
+
 * year : int, month : Month, day : range int 1 32, hour : range real 0 24
 * year : int, day : range real 1 367
 * year : int, week : range int 1 54, day : DayOfWeek
@@ -125,6 +126,7 @@ Other calendars
 ---------------
 
 There are many other calendars besides Gregorian, e.g.:
+
 * Buddhist, Chinese lunar, Ethiopian, Hindu, Lunar Hijri (Islamic), Solar Hijri, ISO week date
 * Akan, Armenian, Assamese, Assyrian, Baháʼí, Balinese pawukon, Balinese saka, Bengali, Bangladeshi, Berber, Borana, Burmese, Coptic, Earthly Branches, Ethiopian,  Heavenly Stems, Minguo, Gaelic, Germanic heathen, Georgian, Hebrew / Jewish, Hindu, Vikram Samvat, Saka, Igbo, Zoroastrian, Fasli, Tabular, Jain, Japanese, Javanese, Korean, Juche, Julian, Kurdish, Lithuanian, Maithili, Malayalam, Mandaean, Mayan long count, Mayan Haab, MAyan Tzolkin, Meitei, Melanau, Mongolian, Nepal Sambat, Bikram Sambat, Yele Sambat, Nisg̱a'a, Odia, Punjabi, Nanakshahi, Romanian, Shona, Solar term, Somali, Sesotho, Slavic, Slavic Native Faith, Macedonian, Tamil, Thai lunar, Thai solar, Tibetan, Tripuri, Tulu, Vietnamese, Wicca, Xhosa, Yoruba, Zulu
 
@@ -142,6 +144,7 @@ A duration identifies a time difference as a collection of time fields. All the 
 The length of the fields varies by time standard, so that must also be specified. Although the primary use of a duration is to be added or subtracted from an instant, and some instant formats have standards associated with them which might allow avoiding the standard field in the duration, other instant types such as well-known fixed instants have no standard, so the instant's standard cannot be used in general.
 
 Examples:
+
 * years, months, days
 * months, days
 * weeks, days
@@ -270,6 +273,6 @@ OS interface
 
 A few functions:
 * guess civil time standard of the system (it's a guess because the system could be crazy)
-* get the current system time as an instant (possible because OS's have leap second APIs to allow converting to TAI)
+* guess the current system time as an instant (possible because OS's have leap second APIs to allow converting to TAI)
 
 System time formats are generally instants, but some don't specify enough information or are durations.

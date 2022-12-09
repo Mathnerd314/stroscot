@@ -11,9 +11,9 @@ Naming Guidelines
 * Module names should be lower_with_under (snake case), like Python.
 * Function, constant, and variable names should be snake_case (all lowercase), like Julia, or camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.
 * If an argument is unused use the wildcard pattern ``_`` or (less preferred) a name starting with ``_``
-* Whole words are preferred. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don't use abbreviations because they tend to be inconsistent and to abbreviated; use a text editor with autocomplete.
+* Whole words are preferred. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don't use abbreviations because they tend to be inconsistent and too terse; use a text editor with autocomplete.
 * Multi-word names are allowed, but consider whether the binding might be decomposable into separate values.
-* Bang convention: Append ``!`` to names of functions that modify their arguments. Not too sure about this, the ``Ref`` type that allows modification may be enough indication.
+* Bang convention: Append ``!`` to names of functions that modify their arguments. Not too sure about this, the ``Ref`` type that marks a value as allowing modification may be enough indication.
 
 Conversion into CamelCase follows the `Google Java styleguide algorithm <https://google.github.io/styleguide/javaguide.html#s5.3-camel-case>`__. First substitute accented characters such as ü -> ue and remove any apostrophes. Split into word-parts on spaces, hyphens, and camel-case (Ad-Words, but not i-OS). Lowercase everything (including acronyms), then uppercase the first letter of each word part. Join together; it is in upper CamelCase. Lowercase the first letter to get lowercase camelCase.
 
@@ -77,7 +77,7 @@ Whatever the auto-formatter gives is probably right. Guidelines for the auto-for
     // B
 
 
-  Generally the single newline style should be preferred, unless each group element takes up more than one screen (~50 lines). If a function exceeds about 40 lines, think about whether it can be broken up without harming the structure of the program. The multiple newline style suggests that your code is too complex and should be rewritten. The banner style is good for skimming and may be suitable if you have large sections of code, but splitting into more modules is probably better.
+Generally the single newline style should be preferred, unless each group element takes up more than one screen (~50 lines). If a function exceeds about 40 lines, think about whether it can be broken up without harming the structure of the program. The multiple newline style suggests that your code is too complex and should be rewritten. The banner style is good for skimming and may be suitable if you have large sections of code, but splitting into more modules is probably better.
 
 * Numeric literals: Common digit groupings are every 3 decimal digits, every 4 binary digits, and every 2 hex digits, omitting the separator if there are only two groups. Other groupings may be used if appropriate, e.g. a date YYYY_MM_DD, a postal code 12345_7890, a double separator at 8 bytes, or other formats.
 
