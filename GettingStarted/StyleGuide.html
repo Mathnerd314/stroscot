@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Style guide &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to" href="../HowTo/index.html" />
+    <link rel="prev" title="FAQ" href="FAQ.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Style guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#naming-guidelines">Naming Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comment-guidelines">Comment Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spacing-guidelines">Spacing Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-guidelines">Type Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scoping">Scoping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sources">Sources</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Getting started</a></li>
+      <li class="breadcrumb-item active">Style guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/GettingStarted/StyleGuide.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="style-guide">
+<h1>Style guide<a class="headerlink" href="#style-guide" title="Permalink to this heading"></a></h1>
+<p>This guide outlines general conventions for Stroscot code. It’s an evolving document though so nothing is final.</p>
+<section id="naming-guidelines">
+<h2>Naming Guidelines<a class="headerlink" href="#naming-guidelines" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Filenames should be meaningful and end in <code class="docutils literal notranslate"><span class="pre">.sct</span></code>. Use all-lowercase ASCII names, with words separated by underscores or dashes.</p></li>
+<li><p>Type names and constructor names should be CamelCase, like Haskell.</p></li>
+<li><p>Module names should be lower_with_under (snake case), like Python.</p></li>
+<li><p>Function, constant, and variable names should be snake_case (all lowercase), like Julia, or camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.</p></li>
+<li><p>If an argument is unused use the wildcard pattern <code class="docutils literal notranslate"><span class="pre">_</span></code> or (less preferred) a name starting with <code class="docutils literal notranslate"><span class="pre">_</span></code></p></li>
+<li><p>Whole words are preferred. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don’t use abbreviations because they tend to be inconsistent and to abbreviated; use a text editor with autocomplete.</p></li>
+<li><p>Multi-word names are allowed, but consider whether the binding might be decomposable into separate values.</p></li>
+<li><p>Bang convention: Append <code class="docutils literal notranslate"><span class="pre">!</span></code> to names of functions that modify their arguments. Not too sure about this, the <code class="docutils literal notranslate"><span class="pre">Ref</span></code> type that allows modification may be enough indication.</p></li>
+</ul>
+<p>Conversion into CamelCase follows the <a class="reference external" href="https://google.github.io/styleguide/javaguide.html#s5.3-camel-case">Google Java styleguide algorithm</a>. First substitute accented characters such as ü -&gt; ue and remove any apostrophes. Split into word-parts on spaces, hyphens, and camel-case (Ad-Words, but not i-OS). Lowercase everything (including acronyms), then uppercase the first letter of each word part. Join together; it is in upper CamelCase. Lowercase the first letter to get lowercase camelCase.</p>
+</section>
+<section id="comment-guidelines">
+<h2>Comment Guidelines<a class="headerlink" href="#comment-guidelines" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use proper English sentences with appropriate punctuation and case.</p></li>
+<li><p>TODO to mark todo comments</p></li>
+<li><p>XXX to mark comments about currently broken code</p></li>
+<li><p>The beginning of the module and every exported binding should have a documentation comment.</p></li>
+<li><p>Terminate lists with punctuation or not as randomly as possible</p></li>
+<li><p>Comments should explain the “why” not the “what” or “how”.</p></li>
+</ul>
+</section>
+<section id="spacing-guidelines">
+<h2>Spacing Guidelines<a class="headerlink" href="#spacing-guidelines" title="Permalink to this heading"></a></h2>
+<p>Whatever the auto-formatter gives is probably right. Guidelines for the auto-formatter:</p>
+<ul class="simple">
+<li><p>All files should have a newline character at the end of the file. (Git)</p></li>
+<li><p>Use spaces around binary operators (e.g. <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span></code> instead of <code class="docutils literal notranslate"><span class="pre">x+y</span></code>), unless you need to compact the expression so it fits on one line. Another exception is keyword arguments, which can be squashed to emphasize the atomic nature of the call.</p></li>
+<li><p>Use a single space after commas: <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></code>.</p></li>
+<li><p>Do not use extra spaces for unary operators, parentheses, or brackets. Use extra spaces for braces, <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">x</span> <span class="pre">}</span></code>.</p></li>
+<li><p>Use spaces around <code class="docutils literal notranslate"><span class="pre">=</span></code>, <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">y</span></code>, but only one pair (no <code class="docutils literal notranslate"><span class="pre">x</span>&#160; <span class="pre">=</span> <span class="pre">y</span></code> to make it horizontally line up with another line)</p></li>
+<li><p>Use 2 spaces for indentation; no tabs, ever.</p></li>
+<li><p>No hard line limit, but use an editor that soft-wraps lines to 100 characters. This fits comfortably on a modern screen with a reasonably sized font. Wrapping is a good indication that you should encapsulate some of the work in a separate line.</p></li>
+<li><p>Use semicolons to put multiple commands on one line only if they fit on one line.</p></li>
+<li><p>Function calls, lists, etc. can be spaced out so each element is on its own line, with a single level of indentation:</p></li>
+</ul>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">long_function_name</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">some_function</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;a long argument&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;another argument&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="s">&quot;another long argument&quot;</span><span class="w"></span>
+
+<span class="nf">long_assignment</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">break</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">assignment</span><span class="w"></span>
+<span class="w">  </span><span class="n">something</span><span class="w"> </span><span class="o">+</span><span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="n">break</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">symbol</span><span class="w"></span>
+<span class="w">  </span><span class="n">something_else</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<span class="w">  </span><span class="n">another_thing</span><span class="w"></span>
+
+<span class="nf">list</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="kt">Haskell</span><span class="w"> </span><span class="n">style</span><span class="w"></span>
+<span class="w">  </span><span class="p">[</span><span class="w"> </span><span class="n">elem1</span><span class="w"></span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">elem2</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Top-level assignments, definitions, and comment lines are written out using “logical groupings” of elements that are related by functionality or purpose. There are several styles for presenting these:</p>
+<ol class="arabic simple">
+<li><p>Separate group elements with a single newline, separate groups with two newlines (an empty line)</p></li>
+<li><p>Separate group elements with two newlines, separate groups with three or more newlines (2+ empty lines)</p></li>
+<li><p>Separate group elements with 1-2 newlines, and separate groups with banners:</p></li>
+</ol>
+</li>
+</ul>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="o">////////////</span><span class="w"></span>
+<span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
+<span class="w">  </span><span class="n">a1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">  </span><span class="n">a2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="w">  </span><span class="o">////////////</span><span class="w"></span>
+<span class="w">  </span><span class="o">//</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
+
+
+<span class="kt">Generally</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">single</span><span class="w"> </span><span class="n">newline</span><span class="w"> </span><span class="n">style</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">preferred</span><span class="p">,</span><span class="w"> </span><span class="n">unless</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="n">takes</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">screen</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="mi">50</span><span class="w"> </span><span class="n">lines</span><span class="p">)</span><span class="o">.</span><span class="w"> </span><span class="kt">If</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">function</span><span class="w"> </span><span class="n">exceeds</span><span class="w"> </span><span class="n">about</span><span class="w"> </span><span class="mi">40</span><span class="w"> </span><span class="n">lines</span><span class="p">,</span><span class="w"> </span><span class="n">think</span><span class="w"> </span><span class="n">about</span><span class="w"> </span><span class="n">whether</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">broken</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">harming</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">structure</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">program</span><span class="o">.</span><span class="w"> </span><span class="kt">The</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">newline</span><span class="w"> </span><span class="n">style</span><span class="w"> </span><span class="n">suggests</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">too</span><span class="w"> </span><span class="n">complex</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">rewritten</span><span class="o">.</span><span class="w"> </span><span class="kt">The</span><span class="w"> </span><span class="n">banner</span><span class="w"> </span><span class="n">style</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">skimming</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">suitable</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">large</span><span class="w"> </span><span class="n">sections</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">code</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">splitting</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">modules</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">probably</span><span class="w"> </span><span class="n">better</span><span class="o">.</span><span class="w"></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Numeric literals: Common digit groupings are every 3 decimal digits, every 4 binary digits, and every 2 hex digits, omitting the separator if there are only two groups. Other groupings may be used if appropriate, e.g. a date YYYY_MM_DD, a postal code 12345_7890, a double separator at 8 bytes, or other formats.</p></li>
+</ul>
+</section>
+<section id="type-guidelines">
+<h2>Type Guidelines<a class="headerlink" href="#type-guidelines" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use the largest types possible for type dispatch constraints. If the constraint were removed the function should not work as intended on value outside the type. If you want to document that a generic function works on some “known” types you should not use dispatch constraints but instead write separate type signature assertions.</p></li>
+<li><p>If you implicitly depend on values, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">=</span> <span class="pre">foldl</span> <span class="pre">(+)</span> <span class="pre">0</span></code>, then write those in the signature, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">:</span> <span class="pre">{</span> <span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a,</span> <span class="pre">0</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">[a]</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>.</p></li>
+<li><p>Avoid converting to a known type <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(x:Any)</span> <span class="pre">=</span> <span class="pre">convert</span> <span class="pre">Int</span> <span class="pre">x</span></code> and instead use a type constraint <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(x:Int)</span> <span class="pre">=</span> <span class="pre">x</span></code>. The conversion may fail, while the type constraint can be statically checked.</p></li>
+<li><p>Avoid writing large union types - define a new type.</p></li>
+<li><p>If an argument or field can be anything, explicitly annotate it with <code class="docutils literal notranslate"><span class="pre">:</span> <span class="pre">Any</span></code>.</p></li>
+<li><p>Assertions throw an exception and are enforced by the compiler pretty strongly so can be used for error handling/input checking/etc. It is better to prove the absence of errors than to try to handle them.</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<p>The standard library adheres to this general order as much as possible when calling functions to give a more consistent function call style:</p>
+<ul class="simple">
+<li><p>Output type: For a return-type-overloaded function such as <code class="docutils literal notranslate"><span class="pre">read</span></code> or <code class="docutils literal notranslate"><span class="pre">convert</span></code>, the output type must be specified. This comes early so that the function can be read as a single operation <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Float</span></code> or <code class="docutils literal notranslate"><span class="pre">convert(To)Float</span></code>.</p></li>
+<li><p>Arguments overriding defaults: In Stroscot arguments overriding defaults are usually listed first, because they have to be syntactically part of the function call. For example the I/O stream is an argument that defaults to stdout, so one would write <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">{stream=stderr}</span> <span class="pre">&quot;Hello</span> <span class="pre">error!&quot;</span></code>.</p></li>
+<li><p>Positional parameters should be the “primary data” that is operated on. There should be 3 or fewer positional parameters, otherwise positional-based calls become a big ball of mud. It’s OK to have no positional parameters. Examples in order include:</p>
+<ul>
+<li><p>Input list, array, reference, etc.</p></li>
+<li><p>Key or index</p></li>
+<li><p>Main value - If there is a main “data” positional parameter, it should be last, to support function composition pipelines.</p></li>
+<li><p>Varargs, which must be the last positional parameters in a function call.</p></li>
+</ul>
+</li>
+<li><p>Keyword arguments should ideally have a default, hence be listed first, but otherwise they can be positioned pretty much anywhere. Keyword-only parameters should define details or options of the computation.</p></li>
+<li><p>Overload functions only if the variants have the same semantic behavior, i.e. can be understood without knowing which variant was chosen. You should be able to document all variants with a single comment.</p></li>
+</ul>
+<p>As far as naming:</p>
+<ul class="simple">
+<li><p>The parameters should be labeled descriptively according to their nature, role, or both. The role is to be preferred, since an accompanying type signature will often show the nature.</p>
+<ul>
+<li><p>A sole positional parameter will probably have a nature/type label such as “filename”, “buffer”, etc. since the function name makes its role clear</p></li>
+<li><p>If there are two or more positional parameters, extra care should be put into finding distinct roles, for example addition takes the “augend” and “addend”.</p></li>
+<li><p>If the parameters are elements with the same nature and role, then they can be numbered, for example <code class="docutils literal notranslate"><span class="pre">a1,</span> <span class="pre">a2</span></code>, although varargs or a list argument may be more appropriate.</p></li>
+</ul>
+</li>
+</ul>
+<p>Common labels:</p>
+<ul class="simple">
+<li><p>f - a function to be applied</p></li>
+<li><p>position - a position in a string, array or byte sequence</p></li>
+<li><p>length - a length</p></li>
+<li><p>buffer - a byte sequence or string used as buffer</p></li>
+<li><p>source - the source of an operation</p></li>
+<li><p>destination - the destination of an operation</p></li>
+<li><p>initial - the initial value for an iterator</p></li>
+<li><p>comapre - a comparison function</p></li>
+<li><p>mode - an operation mode or a flag list</p></li>
+</ul>
+<p>Ideally, the function name, labels, and signature(s) should be enough to convey the function’s meaning and usage, because this information is easily available with the “all defs” page in the documentation index or at the REPL with <code class="docutils literal notranslate"><span class="pre">:browse</span></code>, whereas reading the full function documentation is more involved.</p>
+</section>
+<section id="scoping">
+<h2>Scoping<a class="headerlink" href="#scoping" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Generally naming functions is preferable as anonymous functions are implicitly converted to named functions anyways.</p></li>
+<li><p>For clarity, imports should bring only the module into scope, rather than its members, and one should write <code class="docutils literal notranslate"><span class="pre">module.function</span></code> every time. But this can get verbose so decide on some more relaxed criteria for member imports. Of course some modules such as CSV are intended to be used qualified and use vague names such as <code class="docutils literal notranslate"><span class="pre">CSV.read</span></code> so should never have their members imported directly.</p></li>
+<li><p>A module should export all bindings that are part of the module’s intended API. Non-exported bindings are typically internal and subject to change, unless the documentations states otherwise.</p></li>
+<li><p>Put code in a function instead of the top-level, to allow re-using it and testing it more easily</p></li>
+<li><p>Place code in a namespace, except if it is the main module of a throwaway script</p></li>
+<li><p>The main application or library module should be in in the root or <code class="docutils literal notranslate"><span class="pre">src/</span></code> directory.</p></li>
+<li><p>The imports should be in three groups, separated by a blank line: standard library, third-party libraries, project modules. Within each group the modules should be listed alphabetically.</p></li>
+</ul>
+</section>
+<section id="sources">
+<h2>Sources<a class="headerlink" href="#sources" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://reasonmlhub.com/exploring-reasonml/ch_functions.html">Exploring ReasonML</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jrevels/YASGuide#other-syntax-guidelines">Yet Another Style Guide For Julia</a></p></li>
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/manual/style-guide/">Julia Style Guide</a> (v1.8.2)</p></li>
+<li><p><a class="reference external" href="https://jump.dev/JuMP.jl/dev/developers/style/">JuMP Style Guide</a></p></li>
+<li><p><a class="reference external" href="https://github.com/google/styleguide/tree/0b003a9ae1de0bcacdf3232004bcc35df00faa51">Google Style Guides</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping">Wikipedia Digit Grouping</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FAQ.html" class="btn btn-neutral float-left" title="FAQ" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../HowTo/index.html" class="btn btn-neutral float-right" title="How to" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

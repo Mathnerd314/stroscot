@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control flow &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Intrinsics" href="Intrinsics.html" />
+    <link rel="prev" title="As fast as C" href="Fastest.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ir-style">IR Style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#llvm-ir-sucks">LLVM IR sucks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Control flow</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/IR.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="control-flow">
+<h1>Control flow<a class="headerlink" href="#control-flow" title="Permalink to this heading"></a></h1>
+<p>The ADD instruction is not so simple</p>
+<p>Control flow graph</p>
+</section>
+<section id="blocks">
+<h1>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h1>
+<p>A basic block (BB) is a sequence of instructions that is entered only from the top, and that contains no terminator instructions except for a single one at the end. The last instruction in a BB must be a terminator instruction, so execution cannot fall through the end of the BB but instead jumps to a new BB.</p>
+<p>Terminator instructions are unconditional branches.</p>
+<dl class="simple">
+<dt>EBB parameter</dt><dd><p>A formal parameter for an EBB is an SSA value that dominates everything
+in the EBB. For each parameter declared by an EBB, a corresponding
+argument value must be passed when branching to the EBB. The function’s
+entry EBB has parameters that correspond to the function’s parameters.</p>
+</dd>
+<dt>EBB argument</dt><dd><p>Similar to function arguments, EBB arguments must be provided when
+branching to an EBB that declares formal parameters. When execution
+begins at the top of an EBB, the formal parameters have the values of
+the arguments passed in the branch.</p>
+</dd>
+</dl>
+<p>A basic block is a mixture of jump and non-jump instructions that is complete, in the sense that any execution of the program will take one of the jumps. Any arbitrary sequence of instructions can be turned into a basic block by adding an unconditional jump at the end.</p>
+<p>Although phi nodes were an interesting idea all the <a class="reference external" href="https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes">cool kids</a> are now using block arguments. Blocks arguments fit better into various analysis passes.</p>
+</section>
+<section id="id1">
+<h1>Blocks<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>From a user perspective there are two types of jumpable addresses:</p>
+<p>memory - effective address computation
+SIB addressing form, where the index register is not used in address calculation, Scale is ignored. Only the base and displacement are used in effective address calculation.
+VSIB memory addressing</p>
+<p>Memory and the program counter are virtualized as well, using labels. A label refers to a memory location with a specific block of code loaded. The blocks are not ordered, so unconditional jumps must be inserted between blocks if necessary. The block order can be determined using profiling, removing the unconditional jump that is taken most often.</p>
+<p>Memory references should be virtualized as well, so we also have memory labels. The alignment and format of the memory address should be specified.</p>
+<p>Instructions and blocks are marked by the virtual registers they consume and use (input / output registers). The call and jump instructions are special in that a mapping may be given between the virtual registers and physical registers. Instruction constraints:
+* Output: the register must not contain a value used after the block
+* Output early clobber: output and the register must not be used for any inputs of the block
+* Input: the register is read but not written to. Multiple inputs may all be assigned to the same register, if they all contain the same value.
+* Tied input: register that is read and written
+* Tied input early clobber: register that is read and written and does not share a register with any other input
+* alignstack, sideeffect</p>
+<p>There are also constraints from the ABI calling convention: <a class="reference external" href="https://gitlab.com/x86-psABIs/x86-64-ABI">https://gitlab.com/x86-psABIs/x86-64-ABI</a></p>
+</section>
+<section id="ir-style">
+<h1>IR Style<a class="headerlink" href="#ir-style" title="Permalink to this heading"></a></h1>
+<p>Goals:</p>
+<ul class="simple">
+<li><p>represent non-local control flow (faults)</p></li>
+<li><p>optimizations are localized (read small portion, write small portion)</p></li>
+<li><p>all known optimizations can be implemented</p></li>
+<li><p>fixes evaluation order only for stateful operations</p></li>
+</ul>
+<p><a class="reference external" href="https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man">https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man</a></p>
+<section id="llvm-ir-sucks">
+<h2>LLVM IR sucks<a class="headerlink" href="#llvm-ir-sucks" title="Permalink to this heading"></a></h2>
+<p>LLVM IR contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Explicitly Target-specific features, like x86_fp80</p></li>
+<li><p>Target-specific ABI code, to interoperate with native C ABIs</p></li>
+<li><p>Implicitly Target-specific features, like Linkages.</p></li>
+<li><p>Target-specific limitations: alignment on alloca, supported integer types</p></li>
+<li><p>Undefined Behavior, with C “nasal demons” semantics and optimization passes that assume behavior</p></li>
+<li><p>Intentional vagueness and edge cases that no one is interested in fixing.</p></li>
+<li><p>Inconsistent IEEE-754 arithmetic</p></li>
+</ul>
+</div></blockquote>
+<p>Interpreting LLVM is slow. High level abstractions are chopped up into lots of small low-level instructions. The interpreter has to execute a relatively large number of instructions to do virtual method calls. Languages built for interpretation use fewer more expensive instructions, and have lower per-instruction overhead.</p>
+<p>JITing LLVM is faster than static C compilers, but it’s not fast compared to purpose-built JIT compilers. The verbose instruction set requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it’s more involved than a simple template generator.</p>
+<p>LLVM IR also isn’t capable of representing the necessary semantic information for high level languages such as Objective-C without embedding the information into it using hacky mechanisms. Objective-C works around this by reverse-engineering Objective C information out of the lowered code, which isn’t guaranteed to be safe by LLVM IR rules alone and only works because the Objective C frontend generated the IR.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Fastest.html" class="btn btn-neutral float-left" title="As fast as C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Intrinsics.html" class="btn btn-neutral float-right" title="Intrinsics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

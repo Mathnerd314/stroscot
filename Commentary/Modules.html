@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -49,14 +50,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -64,17 +72,21 @@
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ml">1ML</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dependency-hell">Dependency hell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module">Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functors">Functors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lexical-scoping">Lexical scoping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imports">Imports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-piracy">Type piracy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#speed">Speed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -101,9 +113,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Modules</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Modules</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Modules.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -115,34 +127,48 @@
              
   <section id="modules">
 <h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h1>
-<p>Java has four access modes:
-private - abstract data type, structure not accessible to the outside world. use exported functions to manipulate.
-public - All data is directly accessible
-protected - a variant of public, because anybody can access a protected member if he or she wants to, without much difficulty.
-package - a variant of private, limiting access to the package rather than the file. Intended to replace C++ “friendly”</p>
-<ul class="simple">
-<li><p>exports: we write: ‘export a, b, c;’ (with a, b, c, etc.  a list of
-exported names, possibly also: structure.field)</p></li>
-<li><p>the ordering of methods in interfaces is not relevant</p></li>
-</ul>
-<section id="ml">
-<h2>1ML<a class="headerlink" href="#ml" title="Permalink to this heading"></a></h2>
-<p>The module system is a superset of 1ML, MixML, Backpack, and Newspeak’s module system, so those don’t need to be considered further. (TODO: reread the papers to check this. but they’re mostly type systems, rather than functionality)</p>
-<p>Later in the pipeline:
-* A similarly-named identifiers warning based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a></p>
-<p>the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement</p>
-<p>how does module import work without “with”?</p>
+<p>Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction.</p>
+<p>Stroscot’s module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak’s module systems. (TODO: reread the systems to see if I missed anything. But they’re mostly type systems, rather than functionality)</p>
+<section id="module">
+<h2>Module<a class="headerlink" href="#module" title="Permalink to this heading"></a></h2>
+<p>A module is a set of definitions - a set rather than a list because the order is not relevant. Some definitions are declared “visible” and are exposed/exported in the signature. We write: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> at the top of the module, with <code class="docutils literal notranslate"><span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> a list of exported names.</p>
+<p>Definitions not in the signature are considered “internal”. Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these definitions through the <code class="docutils literal notranslate"><span class="pre">_internal</span></code> pseudo-module, like <code class="docutils literal notranslate"><span class="pre">a._internal.b</span></code>. Thus definitions are always accessible somehow. This avoids Java’s issue of reflection allowing access to “private” data. If you really want to lock an API down then use a secret password or crypto.</p>
+<p>Modules can be nested within other modules, to an arbitrary depth. Modules can also re-export other modules by importing the modules or by individual copy definitions using the dot syntax, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code>.</p>
 </section>
-<section id="dependency-hell">
-<h2>Dependency hell<a class="headerlink" href="#dependency-hell" title="Permalink to this heading"></a></h2>
-<p>It is key to support side-by-side execution of multiple versions of the same functionality. So names also include version numbers and a cryptographic hash.</p>
+<section id="functors">
+<h2>Functors<a class="headerlink" href="#functors" title="Permalink to this heading"></a></h2>
+<p>A function that produces a module is called a functor. Strictly speaking, a functor is not a module, they are distinct types. But the import system can resolve functors to modules - it binds imported modules (functor arguments) to actual modules, and ties recursive knots in the case of recursive imports. With pervasive and automatic import resolution, the distinction between functors and modules becomes blurred because functors with module arguments can be used in places where a module is expected.</p>
+<p>In practical programs most code is contained in functors. For example every package in Nixpkgs is a functor like <code class="docutils literal notranslate"><span class="pre">{pkgs}:</span> <span class="pre">pkgs.mkPackage</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>.</p>
 </section>
 <section id="lexical-scoping">
 <h2>Lexical scoping<a class="headerlink" href="#lexical-scoping" title="Permalink to this heading"></a></h2>
 <p>An identifier is visible from the point of its declaration to the end of the immediately surrounding block.
-Later identifiers shadow earlier identifiers with the same name; shadowing generates a warning.
-There is only one effective scope at any point in the code (for instance, variables and types are looked up in the same scope).</p>
-<p>Uniform scoping rules make programs easier to read and to understand.</p>
+There is only one effective scope at any point in the code (for instance, variables and types are looked up in the same scope), which pulls in variables from various lexical scopes. Uniform scoping rules make programs easier to read and to understand.</p>
+</section>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Permalink to this heading"></a></h2>
+<p>Importing a module, either top-level or within a block scope, imports all visible symbols in the module for that scope. The dot syntax <code class="docutils literal notranslate"><span class="pre">a.b</span></code> allows retrieving a specific symbol <code class="docutils literal notranslate"><span class="pre">b</span></code> within a module <code class="docutils literal notranslate"><span class="pre">a</span></code>, and extends to an expression level import, <code class="docutils literal notranslate"><span class="pre">a.(expr)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">import</span> <span class="pre">a;</span> <span class="pre">expr</span> <span class="pre">}</span></code>. There is also the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
+<p>Name lookup maps a name to the entities in various modules. Name lookup succeeds when it finds a single entity or multiple; multiple entities are called an overload set. Overload resolution occurs after name lookup and resolves the overload set to a single entity using the context in which the name appears.</p>
+<p>Lookup for a name n from a lexical scope s returns all entities such that there exists a name in the declaration space of s whose stem identifier is equal to the stem identifier of n. Outer scope entities are shadowed by inner scope entities, and later identifiers shadow earlier identifiers with the same name; shadowing generates a warning. Another warning checks for similarly-named identifiers based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a>.</p>
+</section>
+<section id="type-piracy">
+<h2>Type piracy<a class="headerlink" href="#type-piracy" title="Permalink to this heading"></a></h2>
+<p>Julia has “type piracy” where method definitions are visible even if you don’t import that module. For example</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">A</span><span class="w"></span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span><span class="w"></span>
+<span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="w"></span>
+<span class="nf">end</span><span class="w"></span>
+
+<span class="kr">module</span><span class="w"> </span><span class="nn">B</span><span class="w"></span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span><span class="w"></span>
+<span class="nf">test</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Apparently in Julia B will use A’s definition. This is not wanted, because it means there is a global rule definition space. In Stroscot only rules that are in the transitive closure of explicitly imported dependencies should apply.</p>
+</section>
+<section id="speed">
+<h2>Speed<a class="headerlink" href="#speed" title="Permalink to this heading"></a></h2>
+<p>Stroscot has no forward declarations and no header files; everything is declared exactly once. This is in contrast to C++ header includes which are slow because each include must be scanned every time it is included, as much as 30x in bad cases. This explodes code from 2000 files totaling 4.2 MB to 8 GB of disk usage. See for example how Go caches compiled files hence avoiding C++’s issues.</p>
 </section>
 </section>
 

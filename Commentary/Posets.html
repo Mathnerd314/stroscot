@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Posets &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exemplary programs" href="Programs.html" />
+    <link rel="prev" title="Package manager" href="PackageManager.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Posets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#laws">Laws</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#definition">Definition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#constraints">Constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#meet-and-join">Meet and join</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#combinations">Combinations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Posets</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Posets.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="posets">
+<h1>Posets<a class="headerlink" href="#posets" title="Permalink to this heading"></a></h1>
+<p>Posets are used in a few places in Stroscot (operator precedence, method combination).</p>
+<section id="laws">
+<h2>Laws<a class="headerlink" href="#laws" title="Permalink to this heading"></a></h2>
+<p>In Stroscot, a poset is defined by a “partial comparison operator”, a single function <code class="docutils literal notranslate"><span class="pre">comp</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{LessThan,Equal,GreaterThan,Incomparable}</span></code>, satisfying the requirements:</p>
+<ul class="simple">
+<li><p>symmetry: <code class="docutils literal notranslate"><span class="pre">comp</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">comp</span> <span class="pre">y</span> <span class="pre">x</span> <span class="pre">/.</span> <span class="pre">{</span> <span class="pre">LessThan</span> <span class="pre">-&gt;</span> <span class="pre">GreaterThan,</span> <span class="pre">GreaterThan</span> <span class="pre">-&gt;</span> <span class="pre">LessThan</span> <span class="pre">}</span></code></p></li>
+<li><p>transitivity:</p></li>
+</ul>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">forall</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="kt">Equal</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="kt">Equal</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="kt">LessThan</span><span class="p">,</span><span class="kt">LessThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">LessThan</span><span class="w"></span>
+<span class="w">  </span><span class="p">(</span><span class="kt">GreaterThan</span><span class="p">,</span><span class="kt">GreaterThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">GreaterThan</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Considering <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">comp</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">/.</span> <span class="pre">{</span> <span class="pre">GreaterThan</span> <span class="pre">-&gt;</span> <span class="pre">Incomparable,</span> <span class="pre">LessThan</span> <span class="pre">-&gt;</span> <span class="pre">Incomparable</span> <span class="pre">}</span></code>, we obtain a <a class="reference external" href="https://en.wikipedia.org/wiki/Partial_equivalence_relation">partial equivalence relation</a>, hence the name.</p>
+<p>We deliberately omit the reflexivity property <code class="docutils literal notranslate"><span class="pre">comp</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">Equal</span></code>. What extra freedom does omitting reflexivity give? Per symmetry, an element cannot be greater or less than itself, so can only be self-equal or self-incomparable. Self-equal elements can be in any relation to other elements. A self-incomparable element cannot be equal to any other element (quasi-reflexivity), but can be less than, greater than, or incomparable with other elements. If we set the element equal to itself <code class="docutils literal notranslate"><span class="pre">comp'</span> <span class="pre">A</span> <span class="pre">A</span> <span class="pre">=</span> <span class="pre">Equal;</span> <span class="pre">comp'</span> <span class="pre">=</span> <span class="pre">comp</span></code> or similarly incomparable to itself, we obtain another partial comparison operator. So we can obtain a reflexive partial order (traditional poset) as the reflexive closure, or an irreflexive partial order as the irreflexive kernel, or anything in between.</p>
+<p>The traditional definition of a poset is obtained by considering the set <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">comp</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">Equal</span> <span class="pre">}</span></code>. Thus we see that the domain of the poset is specified implicitly in a flexible way. Specifying the domain of the poset explicitly is not as extensible.</p>
+</section>
+<section id="definition">
+<h2>Definition<a class="headerlink" href="#definition" title="Permalink to this heading"></a></h2>
+<p>To specify a poset, we have to specify the relations between elements. The constraints are then checked/extended to satisfy the laws.</p>
+<p>Generally, ambiguity in the definition is an error. But it would be tedious to list every element not in the poset and say it is self-incomparable, so we want an overridable assumption that <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">~</span> <span class="pre">a</span></code>. Similarly <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">&lt;~</span> <span class="pre">2</span></code> should resolve to <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">~</span> <span class="pre">2</span></code> by default. Maybe this isn’t safe under extension and is too fragile. There seems to be no literature on syntax for specifying posets.</p>
+<section id="constraints">
+<h3>Constraints<a class="headerlink" href="#constraints" title="Permalink to this heading"></a></h3>
+<p>The simplest constraint is specifying the results of comparison. For flexibility one can specify any set of the 4 outcomes (2^4 possibilities, minus the trivial none/all, so 14).  The syntax is to combine characters in the order <code class="docutils literal notranslate"><span class="pre">&lt;&gt;=~</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://grouper.ieee.org/groups/msc/ANSI_IEEE-Std-754-2019/background/predicates.txt">IEEE 754</a> omits <code class="docutils literal notranslate"><span class="pre">=~</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> as “insufficiently useful to be mandatory”, but they seem worth including for completeness.</p>
+<p>Specifying inclusion in the poset is common, this is just reflexivity:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- equivalent to</span><span class="w"></span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Specifying each of the elements individually is tedious, so you can also define relations elementwise on two sets:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>We can specify some common properties this way:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- C total order/chain</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">&lt;&gt;=</span><span class="w"> </span><span class="kt">C</span><span class="w"></span>
+<span class="c1">-- C antichain</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">~=</span><span class="w"> </span><span class="kt">C</span><span class="w"></span>
+<span class="c1">-- g upper bound of A</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- m lower bound of A</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- g max of A</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- m min of A</span><span class="w"></span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>There’s also Zarf’s <a class="reference external" href="https://eblong.com/zarf/essays/rule-based-if/ruleday-log.html">Precedes thing</a>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">B</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">(</span><span class="kt">A</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">disjoint</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
+<span class="w">  </span><span class="kr">else</span><span class="w"></span>
+<span class="w">    </span><span class="ne">error</span><span class="w"> </span><span class="s">&quot;no idea what to do here&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>It’s so vague and “do what I mean” that I’m not sure it’s a real constraint.</p>
+<p>a covers b or is “right above” it (corresponding to a line from b to a in a Hasse diagram): a &gt; b and no element c exists such that a &gt; c &gt; b, i.e. forall c &gt; b, c &gt;=~ a.</p>
+</section>
+<section id="meet-and-join">
+<h3>Meet and join<a class="headerlink" href="#meet-and-join" title="Permalink to this heading"></a></h3>
+<p>We want to talk about meet and join, but those do not exist in every poset. But with the Dedekind-MacNeille completion every poset embeds into a complete lattice, in a way that preserves order / incomparability and any meets and joins that exist in the poset. Specifically, we consider subsets A such that <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">x,</span> <span class="pre">a</span> <span class="pre">in</span> <span class="pre">A.</span> <span class="pre">y</span> <span class="pre">&lt;=</span> <span class="pre">x,</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">a</span> <span class="pre">}</span></code>, and map elements s in the poset to <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">x.</span> <span class="pre">y</span> <span class="pre">&lt;=</span> <span class="pre">x,</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">s</span> <span class="pre">}</span></code>,</p>
+<p>So when we write <code class="docutils literal notranslate"><span class="pre">meet</span> <span class="pre">{a,b}</span></code> we are referring to a unique element in the completion that may or may not be in the poset, that is the upper bound of the lower bounds of <code class="docutils literal notranslate"><span class="pre">{a,b}</span></code>.</p>
+<p>To put the meet/join in the poset use something like</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">P</span><span class="w"></span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">meet</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
+</pre></div>
+</div>
+<p>There are also strict bounds, mainly defined for total orders / chains:
+* greatest element: upper bound of all elements of P
+* least element: lower bound of all elements of P</p>
+</section>
+<section id="combinations">
+<h3>Combinations<a class="headerlink" href="#combinations" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>lexicographical order <code class="docutils literal notranslate"><span class="pre">lex(A,B,C)</span></code></p></li>
+<li><p>product order <code class="docutils literal notranslate"><span class="pre">product(A,B,C)</span></code></p></li>
+<li><p>direct product <code class="docutils literal notranslate"><span class="pre">direct-product(A,B,C)</span></code></p></li>
+<li><p>ordinal sum <code class="docutils literal notranslate"><span class="pre">sum(A,B,C)</span></code></p></li>
+<li><p>disjoint union <code class="docutils literal notranslate"><span class="pre">union(A,B,C)</span></code></p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="PackageManager.html" class="btn btn-neutral float-left" title="Package manager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Programs.html" class="btn btn-neutral float-right" title="Exemplary programs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

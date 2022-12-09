@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -50,6 +51,9 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Values</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#symbols">Symbols</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ordinary">Ordinary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#extended">Extended</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#qualified">Qualified</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#namespacing">Namespacing</a></li>
 </ul>
 </li>
@@ -88,8 +92,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#priority-queue">Priority queue</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#modules">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rewriting-system">Rewriting system</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-structures">Data Structures</a></li>
@@ -100,8 +105,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -121,9 +157,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Values</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Values</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Values.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -135,12 +171,12 @@
              
   <section id="values">
 <h1>Values<a class="headerlink" href="#values" title="Permalink to this heading"></a></h1>
-<p>In Stroscot values are defined to be expressions that are in normal form (strongly reduced). WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value.</p>
+<p>In Stroscot values are defined to be expressions that are in normal form (strongly reduced), i.e. they evaluate to themselves. WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value. Traditionally a function is only defined on values, but lazy evaluation allows functions to produce useful behavior for non-values as well.</p>
 <p>Values are immutable (as <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">Rich Hickey says</a>) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.</p>
 <p>For convenience, “value” really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - they reduce to a value of the compiler’s preferred data structure implementation. Programs may define the syntax here to other values.</p>
 <section id="symbols">
 <h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h2>
-<p>Symbols are unique values defined in modules and addressed by strings. Bare symbols consist of a sequence of letters (including the underscore) and digits, starting with a letter. Case is significant, thus <code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">Foo</span></code>, and <code class="docutils literal notranslate"><span class="pre">FOO</span></code> are distinct identifiers. Other strings can be turned into symbols with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>, for example <code class="docutils literal notranslate"><span class="pre">&#64;&quot;null&quot;</span></code>. In addition operator symbols can be defined with parentheses and a sequence of punctuation characters, e.g. <code class="docutils literal notranslate"><span class="pre">(+)</span></code>. There is also the empty parentheses symbol <code class="docutils literal notranslate"><span class="pre">()</span></code>, called “unit”.</p>
+<p>Symbols or identifiers are unique values. Bare symbols can be either ordinary or extended, vaguely like <a class="reference external" href="https://docs.raku.org/language/syntax#Identifiers">Raku</a>. However symbols defined in modules are qualified to that module, hence more specific.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"></span>
 <span class="nf">underscore_symbol</span><span class="w"></span>
 <span class="nf">unícσdє</span><span class="o">-</span><span class="n">symβol</span><span class="w"></span>
@@ -148,10 +184,26 @@
 <span class="o">@</span><span class="s">&quot;a long symbol&quot;</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Examples of predefined symbols include <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">false</span></code> - the latter two forming the boolean type.</p>
+<section id="ordinary">
+<h3>Ordinary<a class="headerlink" href="#ordinary" title="Permalink to this heading"></a></h3>
+<p>An ordinary identifier matches the pattern <code class="docutils literal notranslate"><span class="pre">alphanum</span> <span class="pre">(alphanum|((apostrophe|hyphen)alphanum))*</span></code>, i.e. a sequence of digits/letters/underscores and isolated/embedded apostrophes or hyphens.</p>
+<p>“Alphabetic” means Unicode General Category value Letter (L), and the underscore _. “Numeric” includes characters with the Unicode General Categories value Number and Decimal Digit (Nd).</p>
+<p>Case is significant, thus <code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">Foo</span></code>, and <code class="docutils literal notranslate"><span class="pre">FOO</span></code> are distinct identifiers.</p>
+</section>
+<section id="extended">
+<h3>Extended<a class="headerlink" href="#extended" title="Permalink to this heading"></a></h3>
+<p>Extended symbols use an escape sequence to allow more freedom. They have the form <code class="docutils literal notranslate"><span class="pre">&#64;&quot;sym</span> <span class="pre">str&quot;</span></code> (from Zig), which allows spaces etc. following the syntax for a string. An extended symbol matches a corresponding ordinary symbol if that form exists, i.e. <code class="docutils literal notranslate"><span class="pre">null</span> <span class="pre">==</span> <span class="pre">&#64;&quot;null&quot;</span></code>.</p>
+<p>In addition parsing rules for operator symbols may be suppressed with parentheses. For example <code class="docutils literal notranslate"><span class="pre">(+)</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">&#64;&quot;+&quot;</span></code>. There is also the empty parentheses symbol <code class="docutils literal notranslate"><span class="pre">()</span></code>, called “unit”.</p>
+</section>
+<section id="qualified">
+<h3>Qualified<a class="headerlink" href="#qualified" title="Permalink to this heading"></a></h3>
+<p>A qualified symbol is a bare symbol together with a module reference. A literal looks like <code class="docutils literal notranslate"><span class="pre">qsym</span> <span class="pre">&lt;module&gt;</span> <span class="pre">sym123</span></code>. Normally you use the period operator <code class="docutils literal notranslate"><span class="pre">.</span></code> and write <code class="docutils literal notranslate"><span class="pre">module.sym</span></code>, but the period operator is a function not a constructor.</p>
+<p>Examples of qualified symbols include the predefined symbols of the prelude, like <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">false</span></code> - the latter two forming the boolean type.</p>
+<p>It is key to support side-by-side execution of multiple versions of the same functionality. So the module part of a qualified name includes a version number and a cryptographic hash.</p>
+</section>
 <section id="namespacing">
 <h3>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this heading"></a></h3>
-<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition.</p>
+<p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition. This gets resolved to a nondeterministic set of qualified names.</p>
 </section>
 </section>
 <section id="term">
@@ -163,7 +215,7 @@
 </pre></div>
 </div>
 <p>Note that if there is an appropriate syntax rule the second example could also be written as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">++++</span> <span class="pre">b</span></code>, but it would be an equivalent value.</p>
-<p>Terms subsume algebraic data types, since an ADT value is a symbol applied to other values.</p>
+<p>Terms subsume algebraic data types, since an ADT value is a symbol applied to other values. An ADT is a “free” term that has no reduction rules defined.</p>
 <p>Terms also include the other function syntax, keyword arguments and so on.</p>
 <section id="infinite-terms">
 <h3>Infinite terms<a class="headerlink" href="#infinite-terms" title="Permalink to this heading"></a></h3>
@@ -172,27 +224,36 @@
 </section>
 <section id="numbers">
 <h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this heading"></a></h2>
-<p>In the mathematical world the definition of <a class="reference external" href="https://en.wikipedia.org/wiki/Number#Main_classification">number</a> variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the “numeric tower”) But most of these are composite structures. In the computer world the primitive notion of “number” is a literal that looks like a number.</p>
+<p>In the mathematical world the definition of <a class="reference external" href="https://en.wikipedia.org/wiki/Number#Main_classification">number</a> variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the “numeric tower”) But in the computer world most of these are composite structures and the primitive notion of “number” is a literal that looks like a number.</p>
 <section id="integers">
 <h3>Integers<a class="headerlink" href="#integers" title="Permalink to this heading"></a></h3>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">4711</span><span class="w"></span>
 <span class="mi">4711</span><span class="kt">L</span><span class="w"></span>
 <span class="mf">1.2e+3</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Notations for integers (decimal <code class="docutils literal notranslate"><span class="pre">1000</span></code>, hexadecimal <code class="docutils literal notranslate"><span class="pre">0x3e8</span></code>, octal <code class="docutils literal notranslate"><span class="pre">0o1750</span></code>)  are provided.
-Integers can also be denoted in base 2 by using the <code class="docutils literal notranslate"><span class="pre">0b</span></code>  prefix: <code class="docutils literal notranslate"><span class="pre">0b1111101000</span></code>.
-Positive exponents with decimal (e) / hexadecimal (p) / binary (b), and <code class="docutils literal notranslate"><span class="pre">_</span></code> as digit separator.
-Leadings 0’s are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. <code class="docutils literal notranslate"><span class="pre">0001</span></code> cannot be stored in a <code class="docutils literal notranslate"><span class="pre">i8</span></code> (type must be able to contain <code class="docutils literal notranslate"><span class="pre">9999</span></code>).</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span><span class="w"></span>
+
+<span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span><span class="w"></span>
 <span class="nf">digit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span><span class="w"></span>
 <span class="nf">pos_exponent</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="o">+?</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span><span class="w"></span>
 <span class="nf">format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="n">identifier</span><span class="w"></span>
 
-<span class="nf">integer</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"> </span><span class="n">pos_exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="o">?</span><span class="w"></span>
+<span class="nf">integer</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"> </span><span class="n">pos_exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Really integers are just a special class of symbols.</p>
+<p>Really integers are just a special class of symbols. Different bases for integers are provided - decimal <code class="docutils literal notranslate"><span class="pre">1000</span></code>, hexadecimal <code class="docutils literal notranslate"><span class="pre">0x3e8</span></code>, octal <code class="docutils literal notranslate"><span class="pre">0o1750</span></code>, binary <code class="docutils literal notranslate"><span class="pre">0b1111101000</span></code>. Further bases may be added. Positive exponents with decimal (e) / hexadecimal (p) / binary (b) / user-defined are allowed.</p>
+<p>Leadings 0’s are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. <code class="docutils literal notranslate"><span class="pre">0001</span></code> cannot be stored in a <code class="docutils literal notranslate"><span class="pre">i8</span></code> (type must be able to contain <code class="docutils literal notranslate"><span class="pre">9999</span></code>). The old mistake of parsing leading <code class="docutils literal notranslate"><span class="pre">0</span></code> as octal is completely ignored. On the other hand trailing 0’s are not significant - the decimal point should never be the last character in numeric literals (e.g. 1. is invalid, and must be written as 1 or 1.0).</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping">Wikipedia</a> lists the following commonly used digit grouping delimiters:</p>
+<ul class="simple">
+<li><p>comma “,”</p></li>
+<li><p>dot “.”</p></li>
+<li><p>thin space ” “</p></li>
+<li><p>space ” “</p></li>
+<li><p>underscore “_”</p></li>
+<li><p>apostrophe «’».</p></li>
+</ul>
+<p>Traditionally, English-speaking countries employ commas, and other European countries employ dots. This causes ambiguity as <code class="docutils literal notranslate"><span class="pre">1.000</span></code> could either be <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">1000</span></code> depending on country. To resolve this ambiguity, various standards organizations have advocated the thin space in groups of three since 1948, using a regular word space or no delimiter if not available. However these are already in use in programming languages as list separator, radix point, and token separator.</p>
+<p>Hence underscore and apostrophe have been used in PLs instead. Simon of <a class="reference external" href="https://github.com/core-lang/core/issues/52">Core</a> says quote is more readable. Underscore is also used in identifiers, which can confuse as to whether a symbol is an identifier or a numeric literal. But the underscore is the natural ASCII replacement for a space. 13+ languages have settled on underscore, <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/403931/which-was-the-first-language-to-allow-underscore-in-numeric-literals">following</a> Ada that was released circa 1983. Only C++14, Rebol, and Red use the “Swiss” apostrophe/single quote instead.</p>
+<p>C++14 chose quote to solve an ambiguity in whether the <code class="docutils literal notranslate"><span class="pre">_db</span></code> in <code class="docutils literal notranslate"><span class="pre">0xdead_beef_db</span></code> is a user-defined format or additional hexadecimal digits, by making it <code class="docutils literal notranslate"><span class="pre">0xdead'beef_db</span></code>. This could have been solved in the parser by specifying that the last group parses as a format if defined and digits otherwise, or parses as digits and requires <code class="docutils literal notranslate"><span class="pre">__db</span></code> to specify a format. But overall I think Stroscot doesn’t need user-defined format suffixes; the prefix style <code class="docutils literal notranslate"><span class="pre">i16</span> <span class="pre">0xdead_beef</span></code> is just fine.</p>
+<p>Rebol uses comma/period for decimal point so quote was a logical choice. There doesn’t seem to be any reason underscore couldn’t have been used. Red is just a successor of Rebol and copied many choices.</p>
 </section>
 <section id="rationals">
 <h3>Rationals<a class="headerlink" href="#rationals" title="Permalink to this heading"></a></h3>
@@ -202,9 +263,9 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 <span class="nf">rational</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">float</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">float</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="w"> </span><span class="n">float</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, but liberalized. We allow floats to be the numerator/denominator because writing out <code class="docutils literal notranslate"><span class="pre">1e99</span> <span class="pre">/</span> <span class="pre">1e-99</span></code> would be tedious.</p>
+<p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, but liberalized. We allow exponential notation in the numerator/denominator because writing out <code class="docutils literal notranslate"><span class="pre">1e99</span> <span class="pre">/</span> <span class="pre">1e-99</span></code> would be tedious.</p>
 <p>The normal form of a rational is <code class="docutils literal notranslate"><span class="pre">AeB</span> <span class="pre">/</span> <span class="pre">C</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are relatively prime integers, <code class="docutils literal notranslate"><span class="pre">B</span></code> is an integer, and <code class="docutils literal notranslate"><span class="pre">C</span></code> is an integer that is not zero and not divisible by 10.</p>
-<p>So a rational is a term with a nested term, <code class="docutils literal notranslate"><span class="pre">(/)</span> <span class="pre">((e)</span> <span class="pre">&lt;int&gt;</span> <span class="pre">&lt;int&gt;)</span> <span class="pre">&lt;int&gt;</span></code>.</p>
+<p>So the value a rational is a term with a nested term, <code class="docutils literal notranslate"><span class="pre">(/)</span> <span class="pre">((e)</span> <span class="pre">&lt;int&gt;</span> <span class="pre">&lt;int&gt;)</span> <span class="pre">&lt;int&gt;</span></code>.</p>
 </section>
 <section id="reals">
 <h3>Reals<a class="headerlink" href="#reals" title="Permalink to this heading"></a></h3>
@@ -250,7 +311,8 @@ Leadings 0’s are significant - literals with leading zeros must be stored in a
 <section id="arrays">
 <h3>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h3>
 <p>(Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code> defines a 1-based array where <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">i</span></code>. Maybe there is also an element type, <code class="docutils literal notranslate"><span class="pre">typed_array</span> <span class="pre">int32</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code></p>
-<p>Mutable arrays are a reference pointing to an immutable array. There is also an array of mutable cells but this is not used often as mutable array operations are optimized to in-place operations. Mutable arrays are not C pointers - conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> if you want the first element, as opposed to a pointer <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
+<p>Mutable arrays are a reference pointing to an immutable array. Operations are optimized by the memory system, so it does in-place operations where possible but can still resize the array. Conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> to get the first element, i.e. taking an immutable snapshot and then reading/modifying it. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
+<p>There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. You can read a different type than you wrote, and it doesn’t have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.</p>
 </section>
 <section id="tensors">
 <h3>Tensors<a class="headerlink" href="#tensors" title="Permalink to this heading"></a></h3>
@@ -360,18 +422,31 @@ Escape sequences are defined:</p>
 <section id="maps">
 <h3>Maps<a class="headerlink" href="#maps" title="Permalink to this heading"></a></h3>
 <p>Maps are the same as records except the fields are not ordered (set of pairs).</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">map</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="multimap">
 <h3>Multimap<a class="headerlink" href="#multimap" title="Permalink to this heading"></a></h3>
 <p>A multimap is a map where the values are nonempty bags.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multimap</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+<span class="c1">-- same as</span><span class="w"></span>
+<span class="nf">map</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bag</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bag</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bag</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]}</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="sets">
 <h2>Sets<a class="headerlink" href="#sets" title="Permalink to this heading"></a></h2>
-<p>Sets are unordered lists with no repeated values, similar to a map whose values are all the symbol <code class="docutils literal notranslate"><span class="pre">present</span></code> or a function <code class="docutils literal notranslate"><span class="pre">isElemOf</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{Present|Absent}</span></code>.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<p>Sets are the mathematical definition, i.e. a function <code class="docutils literal notranslate"><span class="pre">isElemOf</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{Present|Absent}</span></code>. They may be specified by logical formulas. Finite sets may be specified as lists with no repeated values, similar to a map whose values are all the symbol <code class="docutils literal notranslate"><span class="pre">Present</span></code>.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">universalSet</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="kr">_</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Present</span><span class="p">)</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="w"></span>
+<span class="c1">-- equivalent to</span><span class="w"></span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Present</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Present</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Present</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">lookup</span><span class="w"> </span><span class="p">{</span><span class="kr">default</span><span class="ow">=</span><span class="kt">Absent</span><span class="p">}</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
+<p>More notation for sets is discussed on the <span class="xref std std-ref">Sets</span> page.</p>
 </section>
 <section id="bags">
 <h2>Bags<a class="headerlink" href="#bags" title="Permalink to this heading"></a></h2>
@@ -384,13 +459,23 @@ Escape sequences are defined:</p>
 <p>This is a bag plus an ordering operation.</p>
 </section>
 </section>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
-<p>Functions are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare via alpha equivalence).</p>
+<section id="lambdas">
+<h2>Lambdas<a class="headerlink" href="#lambdas" title="Permalink to this heading"></a></h2>
+<p>Lambdas are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare modulo alpha equivalence).</p>
 </section>
 <section id="modules">
 <h2>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h2>
 <p>Modules are also first class, they are discussed in their own page.</p>
+</section>
+<section id="rewriting-system">
+<h2>Rewriting system<a class="headerlink" href="#rewriting-system" title="Permalink to this heading"></a></h2>
+<p>A rewriting system consists of a set of rewrite rules. They are defined over a fixed abstract rewriting system called the “substitution calculus” consisting of the proofs from Stroscot’s core logic, where reduction is cut elimination. Free variables etc. are incorporated by extending the <code class="docutils literal notranslate"><span class="pre">Use</span></code> rule. Terms are representatives of equivalence classes of proofs under <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;*</span></code> of the substitution calculus. Contexts are similarly representatives of precontexts.</p>
+<p>A (conditional) rewrite rule has the form <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">C1,</span> <span class="pre">...,</span> <span class="pre">Cn</span></code> where <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code> are both terms. The conditions take the form of predicates <code class="docutils literal notranslate"><span class="pre">Pi(x1,</span> <span class="pre">...,</span> <span class="pre">xm,</span> <span class="pre">-&gt;)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">xi</span></code> are the free variables of <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code>, and <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is the rewrite relation of the system. An unconditional rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> is one where the conditions <code class="docutils literal notranslate"><span class="pre">Ci</span></code> are always true. Example predicates are:</p>
+<ul class="simple">
+<li><p>type predicates, term must be of a certain form</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">a</span></code> joins with, rewrites to, or is convertible to <code class="docutils literal notranslate"><span class="pre">b</span></code></p></li>
+</ul>
+<p>A term <code class="docutils literal notranslate"><span class="pre">M</span></code> rewrites to a term <code class="docutils literal notranslate"><span class="pre">N</span></code> by a rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">Ci</span></code> if, for some context <code class="docutils literal notranslate"><span class="pre">C</span></code> with one hole, and substitution <code class="docutils literal notranslate"><span class="pre">σ</span></code>, the propositions <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">C[l</span> <span class="pre">/.</span> <span class="pre">σ]</span></code>, <code class="docutils literal notranslate"><span class="pre">C[r</span> <span class="pre">/.</span> <span class="pre">σ]</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">N</span></code>, and <code class="docutils literal notranslate"><span class="pre">Ci</span> <span class="pre">/.</span> <span class="pre">σ</span></code> all hold, where <code class="docutils literal notranslate"><span class="pre">C[l]</span></code> means <code class="docutils literal notranslate"><span class="pre">C</span></code> with the hole substituted by <code class="docutils literal notranslate"><span class="pre">l</span></code>, and <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;*</span></code> is the relation of the substitution calculus.</p>
 </section>
 <section id="pointers">
 <h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this heading"></a></h2>

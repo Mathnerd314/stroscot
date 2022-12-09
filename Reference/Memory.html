@@ -19,10 +19,11 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Posets" href="Posets.html" />
+    <link rel="next" title="Build system" href="BuildSystem.html" />
     <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
 </head>
 
@@ -72,8 +73,39 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -93,9 +125,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Memory</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Memory</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Memory.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -107,7 +139,7 @@
              
   <section id="memory">
 <h1>Memory<a class="headerlink" href="#memory" title="Permalink to this heading"></a></h1>
-<p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id76" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
+<p>There are two main models of memory. The concrete model models memory as a an integer-indexed array of 2^32 or 2^64 words. The symbolic model models memory as an associative array from symbols (potentially infinite in number) to “cells”, arrays of words of various lengths. In Stroscot these models correspond to pointers and references respectively. Combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id82" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span></p>
 <section id="value-representation">
 <h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
 <p>We don’t consider memory a scarce resource, hence pure values can be created and destroyed as needed by the RTS. But the RTS allows controlling the in-memory representation with user-written code.</p>
@@ -163,7 +195,7 @@
 <span class="nf">transform</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Task</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Task</span><span class="w"></span>
 <span class="nf">transform</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
 <span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="n">c</span><span class="w"></span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
 <span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
@@ -302,7 +334,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Posets.html" class="btn btn-neutral float-right" title="Posets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

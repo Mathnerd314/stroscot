@@ -19,10 +19,11 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Code generation" href="Code-Generation.html" />
+    <link rel="next" title="Checklist" href="Checklist.html" />
     <link rel="prev" title="Assembly" href="Assembly.html" /> 
 </head>
 
@@ -50,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Build system</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#justification">Justification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scale">Scale</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tasks">Tasks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#task-names">Task names</a></li>
@@ -105,14 +107,21 @@
 <li class="toctree-l3"><a class="reference internal" href="#creating-a-build-system">Creating a build system</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -122,10 +131,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -152,9 +162,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Build system</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Build system</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/BuildSystem.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -170,6 +180,13 @@
 <section id="justification">
 <h2>Justification<a class="headerlink" href="#justification" title="Permalink to this heading"></a></h2>
 <p>The compiler needs a build system integrated so that intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.</p>
+<p>Also we need a way to do multi-language dependency management and ensure that there is a single version of each significant piece of code.</p>
+</section>
+<section id="scale">
+<h2>Scale<a class="headerlink" href="#scale" title="Permalink to this heading"></a></h2>
+<p>As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-sih files) on an isolated system, in around the same time.</p>
+<p>Of course this is not a from-scratch build - this is an incremental build, measuring the average build time for a small change to one file.</p>
+<p>No-op builds should be “instantaneous” (&lt;100 milliseconds per <a class="reference external" href="https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria">SO</a>), this is easy enough to do with a file change watcher.</p>
 </section>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
@@ -220,7 +237,7 @@
 </section>
 <section id="model">
 <h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
-<p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../zzreferences.html#id118" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
+<p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../zzreferences.html#id128" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
 <style>
   .shal-trace-example tr:nth-child(1) td,
   .shal-trace-example tr:nth-child(2) td,
@@ -405,7 +422,7 @@
 <section id="simulation">
 <h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h2>
 <p>It’s possible for a task to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged tasks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding task reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/issues/4012">randomized symbols names</a>), so picking the version influences the substitutability of other tasks.</p>
-<p>The problem is NP-hard since we can encode 3-SAT in the substitution versions <span id="id3">[<a class="reference internal" href="../zzreferences.html#id31" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>. Since it’s that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:</p>
+<p>The problem is NP-hard since we can encode 3-SAT in the substitution versions <span id="id3">[<a class="reference internal" href="../zzreferences.html#id33" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>. Since it’s that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:</p>
 <ul class="simple">
 <li><p>each task can be left alone, substituted, or built, and we can only do one: <code class="docutils literal notranslate"><span class="pre">t_leave</span> <span class="pre">+</span> <span class="pre">t_rebuild</span> <span class="pre">+</span> <span class="pre">t_v1</span> <span class="pre">+</span> <span class="pre">...</span> <span class="pre">+</span> <span class="pre">t_vn</span> <span class="pre">=</span> <span class="pre">1</span></code> (this is a pseudo-Boolean constraint that be easily encoded)</p></li>
 <li><p>For substitution, compatibility on the read/write values, <code class="docutils literal notranslate"><span class="pre">t_vj</span> <span class="pre">-&gt;</span> <span class="pre">(s_vx</span> <span class="pre">or</span> <span class="pre">s_vy</span> <span class="pre">or</span> <span class="pre">...)</span></code>, where t reads a value that s writes and vx,vy, etc. are the versions of s that are compatible with version vj of t.</p></li>
@@ -413,7 +430,7 @@
 </ul>
 <p>Then we have soft constraints for each variable weighted with the cost of using that option.</p>
 <p>To generate these constraints, Cot walks through the build graph and maintains a multi-valued state. So it would look like <code class="docutils literal notranslate"><span class="pre">Key</span> <span class="pre">i</span> <span class="pre">-&gt;</span> <span class="pre">[Value</span> <span class="pre">1</span> <span class="pre">S_1,</span> <span class="pre">Value</span> <span class="pre">1</span> <span class="pre">S_2,</span> <span class="pre">Value</span> <span class="pre">2</span> <span class="pre">S_3,</span> <span class="pre">Damaged</span> <span class="pre">S_leave]</span></code>. Then for each task (visited in normal traversal order) Cot generates the constraints for each possibility. Then Cot updates the possible values for the keys it writes.</p>
-<p>To deal with these constraints we need a MaxSAT solver - we can write a custom one or interface with an existing one. Using an off-the-shelf solver might save some effort, but there is significant overhead in serializing the constraints to an external solver, and this overhead can be avoided by using a native solver. The native solver will probably be naive and not have the finely tuned optimizations or heuristics of the off-the-shelf solvers, but most package version problems are very simple to solve. It’ll be easier to build the project with a native solver because all of the code will be in the same language (Haskell or Stroscot). In Cox’s list of package managers (at the end of <span id="id4">[<a class="reference internal" href="../zzreferences.html#id31" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>), the split is 9-5 in favor of a native solver (although 3 of the native-solver package managers allow using an external solver with an option, so more like 9-8). Overall it seems writing a native solver is the best course of action. But we don’t have to start from scratch as there is a Haskell MaxSAT solver in toysolver on Hackage.</p>
+<p>To deal with these constraints we need a MaxSAT solver - we can write a custom one or interface with an existing one. Using an off-the-shelf solver might save some effort, but there is significant overhead in serializing the constraints to an external solver, and this overhead can be avoided by using a native solver. The native solver will probably be naive and not have the finely tuned optimizations or heuristics of the off-the-shelf solvers, but most package version problems are very simple to solve. It’ll be easier to build the project with a native solver because all of the code will be in the same language (Haskell or Stroscot). In Cox’s list of package managers (at the end of <span id="id4">[<a class="reference internal" href="../zzreferences.html#id33" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>), the split is 9-5 in favor of a native solver (although 3 of the native-solver package managers allow using an external solver with an option, so more like 9-8). Overall it seems writing a native solver is the best course of action. But we don’t have to start from scratch as there is a Haskell MaxSAT solver in toysolver on Hackage.</p>
 <section id="wanted-files">
 <h3>Wanted files<a class="headerlink" href="#wanted-files" title="Permalink to this heading"></a></h3>
 <p>When using Cot as a package manager rather than a build system, we have lots of produced files that aren’t used by anything. Since Cot doesn’t see any users of the files it’ll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we’d run special tasks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These tasks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special tasks are actually the packages.</p>
@@ -564,7 +581,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 </ul>
 <section id="cached-build">
 <h3>Cached build<a class="headerlink" href="#cached-build" title="Permalink to this heading"></a></h3>
-<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../zzreferences.html#id97" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
+<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../zzreferences.html#id106" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">--cache-create <var>PATH</var></span></kbd></dt>
 <dd><p>Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.</p>
@@ -1493,7 +1510,7 @@ The usual behavior assumes that your purpose is to get the specified targets up 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Assembly.html" class="btn btn-neutral float-left" title="Assembly" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Code-Generation.html" class="btn btn-neutral float-right" title="Code generation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Checklist.html" class="btn btn-neutral float-right" title="Checklist" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -57,20 +58,27 @@
 <li class="toctree-l4"><a class="reference internal" href="#affected-state">Affected state</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#classification">Classification</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#performance">Performance</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#attributes-metadata">Attributes / metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#memory-model">Memory model</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -80,10 +88,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -110,9 +119,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Assembly</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Assembly</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Assembly.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -124,7 +133,7 @@
              
   <section id="assembly">
 <h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this heading"></a></h1>
-<p>A lot of languages aim for “no runtime overhead”. But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat restrictive and assembly can be faster in some cases, so it would be nice to do assembly directly as well.</p>
+<p>A lot of languages aim for “no runtime overhead”. But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat ill-defined and assembly can be faster in some cases, so it would be nice to do assembly directly as well.</p>
 <section id="architectures">
 <h2>Architectures<a class="headerlink" href="#architectures" title="Permalink to this heading"></a></h2>
 <p>The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn’t find a list of processor architectures by popularity, but from <a class="reference external" href="https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use">this quora answer</a> and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARMv8-A A64 (mobile devices).</p>
@@ -138,17 +147,22 @@
 <li><p>z/Architecture: really expensive, weird OS. Verdict: C backend.</p></li>
 <li><p>SPARC: It’s end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.</p></li>
 <li><p>32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.</p></li>
-<li><p>WASM: it still doesn’t support <a class="reference external" href="https://github.com/WebAssembly/proposals/issues/17">tail calls</a>. Given the lack of progress it seems like a low priority.</p></li>
-<li><p>LLVM: The bitcode format is worth targeting at some point.</p></li>
-<li><p>C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures</p></li>
+<li><p>WASM: it still doesn’t support <a class="reference external" href="https://github.com/WebAssembly/proposals/issues/17">tail calls</a>. Given the lack of progress it seems like a low priority. Verdict: Contributor.</p></li>
+<li><p>LLVM: The bitcode format may be worth targeting at some point. Per blog posts the API is much more unstable than the IR, and generating the IR in memory and parsing it is about as fast as using the API. Verdict: Contributor.</p></li>
+<li><p>C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. And some things like tail calls are really hard to encode in C, or add significant compilation overhead, so it can’t be the only option.</p></li>
 </ul>
-<p>From a design perspective supporting 2 architectures is not much different from supporting 10, it’s just a larger set of cases. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.</p>
+<p>From a design perspective supporting 2-4 architectures is not much different from supporting 10, it’s just a larger set of cases, but 10 is more than twice the work of 4. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.</p>
 <p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
 </section>
 <section id="operating-systems">
 <h2>Operating systems<a class="headerlink" href="#operating-systems" title="Permalink to this heading"></a></h2>
-<p>Linux for AMD64, Android for ARM, and later on Windows for AMD64.</p>
-<p>We’ll exclude Apple for now because its developer documentation sucks and its anti-competitive practices mean that getting Stroscot to work would require starting a war with Swift.</p>
+<p>In planned order:</p>
+<ol class="arabic simple">
+<li><p>Linux for AMD64, because it’s what I’m typing on now</p></li>
+<li><p>Android for ARM, because it’s my phone and it’s easy to hook up</p></li>
+<li><p>Windows for AMD64, which I can emulate with WINE and get access to fairly easily</p></li>
+</ol>
+<p>We’ll exclude Apple for now because their OS documentation sucks, they charge $100/year for a “developer license”, and their anti-competitive practices mean that they would probably find some way to shut Stroscot down once Stroscot starts being a serious competitor with Swift. Of course someone who is willing to jump through all the hoops needed to placate Apple is welcome to try porting.</p>
 </section>
 <section id="instruction-database">
 <h2>Instruction database<a class="headerlink" href="#instruction-database" title="Permalink to this heading"></a></h2>
@@ -181,21 +195,21 @@
 <section id="definition-of-an-instruction">
 <h3>Definition of an instruction<a class="headerlink" href="#definition-of-an-instruction" title="Permalink to this heading"></a></h3>
 <p>An instruction is a finite sequence of bytes (or bits, if there was a processor that did that). For a given instruction we can determine its length and index each byte. <a class="reference external" href="https://github.com/xoreaxeaxeax/sandsifter">sandsifter</a> determines the length of instructions by finding sequences <code class="docutils literal notranslate"><span class="pre">seq</span></code> for which <code class="docutils literal notranslate"><span class="pre">seq|000</span></code> does not trigger a page fault, but <code class="docutils literal notranslate"><span class="pre">se|q00</span></code> does (where <code class="docutils literal notranslate"><span class="pre">|</span></code> is a page boundary). <a class="reference external" href="https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/">haruspex</a> is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the instruction were speculated. Whatever the method, the general idea is that instructions are a level above bytes, like words in a character string.</p>
-<p>A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Running sandsifter and haruspex have found many undocumented instructions. Expecting to run these tools as part of a compiler build is pretty demanding; they take days. It’s better to design for our validity database being inaccurate, and allow a syntax for writing undocumented instructions directly, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code>. It’s basically a <code class="docutils literal notranslate"><span class="pre">.db</span></code> statement, but whereas <code class="docutils literal notranslate"><span class="pre">.db</span></code> is used for file headers or data in the <code class="docutils literal notranslate"><span class="pre">.data</span></code> section, this is meant specifically for executable data.</p>
-<p>The issue with these literal instructions is that there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.</p>
+<p>A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Sandsifter and haruspex have found many undocumented instructions. But expecting to run these tools as part of a compiler build is pretty demanding; they take days. It’s better to design for our instruction database being inaccurate, and allow a syntax for writing undocumented instructions directly, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code>. It’s basically a <code class="docutils literal notranslate"><span class="pre">.db</span></code> statement, but whereas <code class="docutils literal notranslate"><span class="pre">.db</span></code> is used for file headers or data in the <code class="docutils literal notranslate"><span class="pre">.data</span></code> section, this is meant specifically for executable data.</p>
+<p>Unfortunately with these literal instructions there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.</p>
 </section>
 <section id="templates">
 <h3>Templates<a class="headerlink" href="#templates" title="Permalink to this heading"></a></h3>
-<p>The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are themselves named templates of bitstrings/bytestrings and can refer to registers, addresses, and immediate values.</p>
+<p>The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values.</p>
 <p>The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.</p>
-<p>Intel has variable-length instructions and the docs seem to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think dumping Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed directly for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates.</p>
+<p>Intel has variable-length instructions and from the docs seems to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think extracting Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates abstract over the complications of MODRM.</p>
 <p>ARM has fixed length instructions and uses a bit-based format, for example A64 ADDS is <code class="docutils literal notranslate"><span class="pre">sf</span> <span class="pre">0101011</span> <span class="pre">shift*</span> <span class="pre">0</span> <span class="pre">Rm****</span> <span class="pre">imm6*****</span> <span class="pre">Rn****</span> <span class="pre">Rd****</span></code>. Here each name is an operand and the stars represent extra bits of the operand - the operand is a fixed-length bitstring. hs-arm <a class="reference external" href="https://github.com/nspin/hs-arm/blob/8f10870a4afbbba010e78bd98e452ba67adc34e0/nix-results/harm.harm-tables-src/gen/Harm/Tables/Gen/Insn.hs">seems</a> to pull out this information just fine, although its operand names are a little weird.</p>
 <p>So the information for each template is:</p>
 <ul class="simple">
 <li><p>form name (string)</p></li>
 <li><p>explicit operands (list)</p>
 <ul>
-<li><p>name (dest, src1, xmm1, etc.) - optional</p></li>
+<li><p>name (dest, src1, xmm1, etc.)</p></li>
 <li><p>type:</p>
 <ul>
 <li><p>immediate (range/size b, z, etc.)</p></li>
@@ -206,18 +220,20 @@
 </ul>
 </li>
 <li><p>encoding function <code class="docutils literal notranslate"><span class="pre">[Operands]</span> <span class="pre">-&gt;</span> <span class="pre">Bits</span></code></p></li>
+<li><p>Xed’s isa_set field</p></li>
+<li><p>the condition on CPUID for this instruction to work</p></li>
+<li><p>the valid modes (32-bit, 64-bit, real, protected, etc.)</p></li>
 </ul>
-<p>We also want to store Xed’s isa_set field, the condition on CPUID for this instruction to work, and the valid modes (32-bit, 64-bit, real, protected, etc.). There are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.</p>
+<p>The isa_set field and friends are because there are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.</p>
 </section>
 <section id="affected-state">
 <h3>Affected state<a class="headerlink" href="#affected-state" title="Permalink to this heading"></a></h3>
 <p>Another important piece of data is the affected state, i.e. the list of read/written flags/registers/etc. This is used in instruction reordering/scheduling and register allocation to minimize <a class="reference external" href="https://en.wikipedia.org/wiki/Hazard_(computer_architecture)#Data_hazards">data hazards</a>.</p>
 <p>The affected things depend on the instruction (and the operands). Where can we get this info?</p>
 <p>It seems possible to automatically determine by fuzzing (weighted towards special cases like 0 and 1). But it’s probably really slow and the result is somewhat suspect - it can’t determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.</p>
-<p>From the Intel docs there is a little <code class="docutils literal notranslate"><span class="pre">(r,w)</span></code> or <code class="docutils literal notranslate"><span class="pre">(r)</span></code> after the operands. But this doesn’t include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info.</p>
-<p>Xed has info on read/written flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR.</p>
+<p>In the Intel docs there is a little <code class="docutils literal notranslate"><span class="pre">(r,w)</span></code> or <code class="docutils literal notranslate"><span class="pre">(r)</span></code> after the operands. But this doesn’t include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info. Xed has info on read/written standard flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR. So I guess Xed is the best data source but we will have to use EXEgesis somehow to scrape the affected flags, and then manually mark them as read/write/conditional or just leave it at coarse reordering information.</p>
 <p>For ARM modifying asl-interpreter should give info on flags etc.</p>
-<p>The schema:</p>
+<p>So the affected state database schema:</p>
 <ul class="simple">
 <li><p>form name</p></li>
 <li><p>affected things (list)</p>
@@ -233,8 +249,8 @@
 <li><p>read: read / not read / conditionally read / unknown</p></li>
 <li><p>written:</p>
 <ul>
-<li><p>value: constant,  copied from input, read + constant, complex computation, undefined, …</p></li>
-<li><p>not written, conditionally written, unknown</p></li>
+<li><p>value: constant,  copied from input, input + constant, undefined/reserved, complex computation</p></li>
+<li><p>written with value, not written, conditionally written with value, unknown</p></li>
 </ul>
 </li>
 </ul>
@@ -249,7 +265,7 @@
 <h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h3>
 <p>There are a lot of instructions. We can classify them based on their affected state:</p>
 <ul class="simple">
-<li><p>data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). memory prefetch/barrier are also data instructions</p></li>
+<li><p>data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). Memory prefetch/barrier are also data instructions.</p></li>
 <li><p>call: reads the program counter</p></li>
 <li><p>jump: sets the program counter to something other than the next instruction</p></li>
 <li><p>branch: conditional jump depending on the state of various flags/registers</p></li>
@@ -257,18 +273,16 @@
 <li><p>privileged: requires privileged processor state to execute successfully (e.g. ring 0)</p></li>
 <li><p>nop: does nothing</p></li>
 </ul>
-<p>For code layout knowing the possible execution paths is important. non-data instructions have to be handled specifically.</p>
+<p>For code layout knowing the possible execution paths is important. Non-data instructions have to be handled specially.</p>
 </section>
 <section id="performance">
 <h3>Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h3>
 <p>the data present in LLVM for instruction scheduling (such as uops, execution ports/units, and latencies),</p>
 <p>If PSTATE.DIT is 1 the execution time is independent of the values.</p>
 </section>
-<section id="attributes-metadata">
-<h3>Attributes / metadata<a class="headerlink" href="#attributes-metadata" title="Permalink to this heading"></a></h3>
-<ul class="simple">
-<li><p>concurrency / memory model</p></li>
-</ul>
+<section id="memory-model">
+<h3>Memory model<a class="headerlink" href="#memory-model" title="Permalink to this heading"></a></h3>
+<p>A memory model is needed to determine if reordering data writes will change the behavior of a concurrent program.</p>
 </section>
 </section>
 </section>

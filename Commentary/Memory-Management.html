@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -49,14 +50,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -79,10 +87,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -109,9 +118,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Memory management</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Memory management</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Memory-Management.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -123,6 +132,7 @@
              
   <section id="memory-management">
 <h1>Memory management<a class="headerlink" href="#memory-management" title="Permalink to this heading"></a></h1>
+<p>Values take up memory, so memory management needs special handling so it is automatic and fast. But underneath it is just resource management, so all of it translates into allocations and deallocations.</p>
 <p>The path from cloud to CPU is long, so there is a lot of caching in between. Some latency numbers and the programming API:</p>
 <ul class="simple">
 <li><p>Physical registers (0.3 ns): managed by the CPU</p></li>
@@ -151,7 +161,7 @@ A scratch buffer, as exemplified by GNU C’s <a class="reference external" href
 * A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)</p>
-<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id109" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id30" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It’s whole program and undecidable, but Stroscot already has 3 or 4 of those planned.</p>
+<p>Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management <span id="id1">[<a class="reference internal" href="../zzreferences.html#id8" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work <span id="id2">[<a class="reference internal" href="../zzreferences.html#id119" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> <span id="id3">[<a class="reference internal" href="../zzreferences.html#id32" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> on “as static as possible” (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It’s whole program and undecidable, but Stroscot already has 3 or 4 of those planned.</p>
 <p>Why hasn’t anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it’s slow but there is a conceptual leap in going from program verification to program synthesis. It could have happened faster but I can see why it didn’t.</p>
 <ul class="simple">
 <li><p>The newly-dead set for a state transition <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">t</span></code> is all objects that are accessed before but not accessed later, <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{z</span> <span class="pre">|</span> <span class="pre">Access(s,z)</span> <span class="pre">=</span> <span class="pre">yes</span> <span class="pre">&amp;&amp;</span> <span class="pre">Access(t,z)</span> <span class="pre">=</span> <span class="pre">no}</span> <span class="pre">=</span> <span class="pre">L(s)</span> <span class="pre">intersect</span> <span class="pre">D(t)</span></code>.</p></li>
@@ -230,7 +240,7 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>locate memory leaks - places where allocated memory is never getting freed - memory usage profiling</p>
 <p>Handling OOM gracefully - non-allocating subset of language. Should be enough to implement “Release some resources and try again” and “Save the user’s work and exit” strategies. Dumping core is trivial so doesn’t need to be considered.</p>
 <p>Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly. Finally there is the use of pointers. It complicates the memory management a bit to handle non-contiguous memory layouts, but the algorithms all deal with pointer trees anyway so I don’t think it’s intractable.</p>
-<p>The pack/unpack idea is similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a> and the encode/decode functions used by Narcissus <span id="id4">[<a class="reference internal" href="../zzreferences.html#id33" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>.</p>
+<p>The pack/unpack idea is similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a> and the encode/decode functions used by Narcissus <span id="id4">[<a class="reference internal" href="../zzreferences.html#id35" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>.</p>
 <p>Narcissus is too complex IMO:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
 <span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
@@ -377,7 +387,7 @@ You can actually see this exact behavior when profiling Java applications with h
 <p>In Rust, this: let x = Vec::with_capacity(10000); for i in 0..10000 {c.push(x)}
 avoids resizing/reallocating the vec x because with_capacity specifies the size.
 for a_iter_source.iter().collect() there is an optional .size_hint function on the iter that tells how many items it has</p>
-<p>in practice asymptotics are BS, and performance depends strongly on memory management. Modeling memory access as O(1) is not correct, due to cache hierarchies - <span id="id6">[<a class="reference internal" href="../zzreferences.html#id74" title="Tomasz Jurkiewicz and Kurt Mehlhorn. The Cost of Address Translation. arXiv:1212.0703 [cs], April 2014. Comment: A extended abstract of this paper was published in the proceedings of ALENEX13, New Orleans, USA. URL: http://arxiv.org/abs/1212.0703 (visited on 2022-01-04), arXiv:1212.0703.">JM14</a>]</span> ends up with a log(n) overhead for random access, and similarly <a class="reference external" href="https://news.ycombinator.com/item?id=12388244">this thread</a> says it’s more like O(N^{1/3}) (3D memory architecture), until you near the Bekenstein bound at which point it’s O(N^{1/2}) by the holographic principle. Which of these approximations is right? Who knows, power law fitting is <a class="reference external" href="http://bactra.org//weblog/491.html">hard</a>, none of the articles does a convincing job with the empirical data. But generally, the point is that the effects of memory hierarchies can outweigh the asymptotics. Empirically trees are terrible for caches, indirect lookups hit memory hard.</p>
+<p>in practice asymptotics are BS, and performance depends strongly on memory management. Modeling memory access as O(1) is not correct, due to cache hierarchies - <span id="id6">[<a class="reference internal" href="../zzreferences.html#id80" title="Tomasz Jurkiewicz and Kurt Mehlhorn. The Cost of Address Translation. arXiv:1212.0703 [cs], April 2014. Comment: A extended abstract of this paper was published in the proceedings of ALENEX13, New Orleans, USA. URL: http://arxiv.org/abs/1212.0703 (visited on 2022-01-04), arXiv:1212.0703.">JM14</a>]</span> ends up with a log(n) overhead for random access, and similarly <a class="reference external" href="https://news.ycombinator.com/item?id=12388244">this thread</a> says it’s more like O(N^{1/3}) (3D memory architecture), until you near the Bekenstein bound at which point it’s O(N^{1/2}) by the holographic principle. Which of these approximations is right? Who knows, power law fitting is <a class="reference external" href="http://bactra.org//weblog/491.html">hard</a>, none of the articles does a convincing job with the empirical data. But generally, the point is that the effects of memory hierarchies can outweigh the asymptotics. Empirically trees are terrible for caches, indirect lookups hit memory hard.</p>
 <p>For pointers, can optimize Maybe&lt;T&gt; to still fit into a pointer (null). Then converting T[] to Maybe&lt;T&gt;[] is a no-op.</p>
 <p>The GC can use several pages of stack once it is triggered. It needs a separate stack. Similarly crawling the stack allocates on the stack. Again, use a separate stack, tighten up invariants, and add stack probes.</p>
 <p>stack is reserved when the thread is created, and can be committed as well. It’s inadequate to only reserve because Windows has the unfortunate behavior that committing a page of stack can fail even if plenty of memory is available. If the swap file needs to be extended on disk, the attempt to commit can actually time out during this period, giving you a spurious fault.  If you want a robust application, you should always commit your stack reservations eagerly.</p>
@@ -453,7 +463,7 @@ Virtual memory API
 <p>File and network APIs are generally managed by user-level code. So the point of the memory system is to assign a storage location for every value, insert moves / frees where necessary, and overall minimize the amount of resources consumed.</p>
 <p>For more advanced programming there is the need to avoid the use of slow storage mechanisms as much as possible by addressing the fast storage mechanisms directly. (Really?)</p>
 <p>Memory hierarchy - Place more commonly used items in faster locations - register/cache/memory/disk/recalculate. Items accessed closely together in time should be placed in related locations. Rematerialization recalculates a value instead of loading it from a slow location.</p>
-<p>Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (<a class="reference external" href="https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf">https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf</a>). There is room for optimization but many algorithms work.</p>
+<p>Higher order functions usually require some form of GC as the closures are allocated on the heap. But once you accept GC it is not too tricky, just perform closure conversion or lambda lifting (<a class="reference external" href="https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf">https://pp.ipd.kit.edu/uploads/publikationen/graf19sll.pdf</a>). There is room for optimization as many algorithms work.</p>
 <p>Polymorphism requires a uniform representation for types (pointer/box), or templates like C++. Functional languages use a uniform representation so pay an overhead for accessing via the indirection. Unboxing analysis reduces this cost for primitive types - it works pretty well. GHC doesn’t have a particularly good data layout though, because it’s all uniform.</p>
 <ul class="simple">
 <li><p>Alias analysis - changing memory references into values</p></li>
@@ -464,15 +474,26 @@ Virtual memory API
 * if you request more than is physically on the system, the request will fail immediately, because that much memory will never become available, barring hot-swapping RAM.
 * the API would have to ignore swapping. Otherwise, excessive paging occurs before actual memory exhaustion. So the request succeeds but because it’s backed by the disk performance completely tanks and the user ends up killing the process.
 Unfortunately, no OS APIs allow requesting memory asynchronously. The closest you get is Linux’s on-demand backing allocation.</p>
-<p>Azul GC: <span id="id7">[<a class="reference internal" href="../zzreferences.html#id27" title="Cliff Click, Gil Tene, and Michael Wolf. The pauseless GC algorithm. In Proceedings of the 1st ACM/USENIX International Conference on Virtual Execution Environments - VEE '05, 46. Chicago, IL, USA, 2005. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=1064979.1064988 (visited on 2021-04-25), doi:10.1145/1064979.1064988.">CTW05</a>]</span> <span id="id8">[<a class="reference internal" href="../zzreferences.html#id134" title="Gil Tene, Balaji Iyengar, and Michael Wolf. C4: the continuously concurrent compacting collector. ACM SIGPLAN Notices, 46(11):79–88, June 2011. URL: https://doi.org/10.1145/2076022.1993491 (visited on 2022-06-08), doi:10.1145/2076022.1993491.">TIW11</a>]</span>
+<p>Azul GC: <span id="id7">[<a class="reference internal" href="../zzreferences.html#id28" title="Cliff Click, Gil Tene, and Michael Wolf. The pauseless GC algorithm. In Proceedings of the 1st ACM/USENIX International Conference on Virtual Execution Environments - VEE '05, 46. Chicago, IL, USA, 2005. ACM Press. URL: https://static.usenix.org/events/vee05/full_papers/p46-click.pdf (visited on 2021-04-25), doi:10.1145/1064979.1064988.">CTW05</a>]</span> <span id="id8">[<a class="reference internal" href="../zzreferences.html#id147" title="Gil Tene, Balaji Iyengar, and Michael Wolf. C4: the continuously concurrent compacting collector. ACM SIGPLAN Notices, 46(11):79–88, June 2011. URL: https://doi.org/10.1145/2076022.1993491 (visited on 2022-06-08), doi:10.1145/2076022.1993491.">TIW11</a>]</span>
 Shenandoah “low pause” is 10ms which is the same order of magnitude as NUMA memory map stuff (&gt;10ms if misconfigured)</p>
 <p>cache misses are the most important performance metric for memory management, but not usually measured</p>
-<p>escape detection - 70% of allocations on stack, not good enough to beat Azul
+<p>escape detection - even with 70% of allocations on stack, not good enough to beat Azul
 escape analysis - all or nothing
 separate allocator has to be as fast as main allocator</p>
 <p>compile time garbage collection is detecting when an allocation becomes unused and freeing it
 structure reuse is detecting when an allocation becomes unused and reusing the memory for a new allocation
-destructive assignment is when allocated memory is passed in and modified by the function</p>
+destructive assignment is when a memory address is passed in and modified by the function</p>
+<p>Goroutines have little overhead beyond the memory for the stack, which is just a few kilobytes. Go’s run-time uses resizable, bounded stacks. A newly minted goroutine is given a few kilobytes, which is almost always enough. When it isn’t, the run-time grows (and shrinks) the memory for storing the stack automatically, allowing many goroutines to live in a modest amount of memory. The CPU overhead averages about three cheap instructions per function call. It is practical to create hundreds of thousands of goroutines in the same address space. If goroutines were just threads, system resources would run out at a much smaller number.</p>
+<p>The programmer cannot generally predict whether a given code sample will allocate and hence potentially throw an OOM, because of implicit allocations. Here are some examples:</p>
+<ul class="simple">
+<li><p>Implicit boxing, causing value types to be instantiated on the heap.</p></li>
+<li><p>marshaling and unmarshaling for the FFI</p></li>
+<li><p>immutable array operations</p></li>
+<li><p>graph reduction</p></li>
+<li><p>JITing a method or basic block, generating VTables or trampolines</p></li>
+</ul>
+<p>But if the compiler is able to eliminate all allocations and hence eliminate the possibility of OOM, then these will most likely be consistently eliminated on every compile. So asserting that a function or block can’t OOM is possible. .NET had Constrained Execution Regions which implemented this, with various hacks such JITing the region at load time rather than when the region was first executed. So there’s precedent.</p>
+<p>GCC (and later LLVM) added MemorySSA</p>
 </section>
 </section>
 

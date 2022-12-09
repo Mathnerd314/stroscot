@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,8 +55,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -75,8 +107,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Language Reference</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Language Reference</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/index.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -94,7 +126,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#jumbo-connectives">Jumbo connectives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#exponentials">Exponentials</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#structural-rules">Structural rules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html#quantifiers">Quantifiers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html#higher-order-logic">Higher-order logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#infinite-proof-structures">Infinite proof structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#set-theory">Set theory</a></li>
@@ -125,8 +157,9 @@
 <li class="toctree-l2"><a class="reference internal" href="Values.html#records">Records</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#sets">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#bags">Bags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Values.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#lambdas">Lambdas</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#rewriting-system">Rewriting system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#pointers">Pointers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#references">References</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Values.html#data-structures">Data Structures</a></li>
@@ -153,6 +186,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Dispatch.html">Dispatch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html#formal-definition">Formal definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html#conditions">Conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html#priorities">Priorities</a></li>
 </ul>
 </li>
@@ -161,12 +197,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Memory.html#pointers">Pointers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html#finalizers">Finalizers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Posets.html">Posets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html#constraints">Constraints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html#meet-and-join">Meet and join</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html#combinations">Combinations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a><ul>
@@ -182,6 +212,38 @@
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html#parallel-execution">Parallel Execution</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </div>
 </section>

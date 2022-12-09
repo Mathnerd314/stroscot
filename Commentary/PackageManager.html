@@ -19,11 +19,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Comparison" href="Paradigms.html" />
+    <link rel="next" title="Posets" href="Posets.html" />
     <link rel="prev" title="Objects" href="Objects.html" /> 
 </head>
 
@@ -50,14 +51,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -67,6 +75,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Package manager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#network">Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#archive-pruning">Archive pruning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#package-format">Package format</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linux-distribution">Linux distribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upgrade-cycle">Upgrade cycle</a></li>
@@ -83,10 +93,11 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -113,9 +124,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Package manager</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Package manager</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/PackageManager.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -129,9 +140,16 @@
 <h1>Package manager<a class="headerlink" href="#package-manager" title="Permalink to this heading"></a></h1>
 <p>A language also needs a package manager. When a task is requested, and package management is enabled, the task is checked against a list of prebuilt tasks and if so all of the task’s provided keys (files) are downloaded instead of the task being built, verifying their cryptographic hashes/signatures. We also need a way to create packages from a build tree.</p>
 <p>The list of provided files can be kept accurate by a filesystem access tracer or restricting the build scripts. A tracer will also pick up source files, intermediate object files, etc., but most people who use a package manager do not rebuild their intermediate steps and want the smallest possible package sizes. So we need some way to mark these scratch files; the easiest requirement is that the task delete all the junk data, as packaging a nonexistent file/directory is simply verifying that it doesn’t exist on the target system. Or we can ensure the build script places all of its provided files in a specific location.</p>
-<p>A useful feature not implemented in most package managers is P2P distribution, over Bittorrent or IPFS. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is <a class="reference external" href="https://wiki.debian.org/DebTorrent#line-42">not too great</a>). There are some notes <a class="reference external" href="https://github.com/ipfs-inactive/package-managers">from IPFS</a> and various half-baked package managers like <code class="docutils literal notranslate"><span class="pre">npm-on-ipfs</span></code>.</p>
+<section id="network">
+<h2>Network<a class="headerlink" href="#network" title="Permalink to this heading"></a></h2>
+<p>The default will have to be downloading via https, because firewalls prevent anything else and http is insecure. HTTPS enforces certificate validation, solving MITM. Another option is git over SSH or rsync, but these aren’t popular protocols.</p>
+<p>P2P distribution, over Bittorrent or IPFS, is attractive. Trust is an issue in theory, but in practice only a few nodes provide builds so a key ring is sufficient. Turning each tarball into a torrent file / IPFS CID and getting it to distribute is not too hard, the main issue seems to be scaling to thousands of packages as DHT performance is not too great (Bittorrent is <a class="reference external" href="https://wiki.debian.org/DebTorrent#line-42">not too great</a>). There are some notes <a class="reference external" href="https://github.com/ipfs-inactive/package-managers">from IPFS</a> and various half-baked package managers like <code class="docutils literal notranslate"><span class="pre">npm-on-ipfs</span></code>.</p>
+</section>
+<section id="archive-pruning">
+<h2>Archive pruning<a class="headerlink" href="#archive-pruning" title="Permalink to this heading"></a></h2>
 <p>In a long-running system, the number of prebuilt packages could grow without bound. We need a mechanism to clean out the archives when space becomes limited.</p>
-<p>Edges are bidirectional. To fix the GC problem, we use weak references for back edges, but strong references for memo table entries, so that from the GC’s point of view, all DCG nodes are always reachable. To implement safe space reclamation, we also implement reference counting of DCG nodes, where the counts reflect the number of strong edges reaching a node. When DCG edgesare deleted, the reference counts of target nodes are decremented. Nodes that reach zero are not immediately collected; thisallows thunks to be “resurrected” by the swapping pattern. Instead, we provide aflushoperation for memo tables that deletesthe strong mapping edge for all nodes with a count of zero, which means they are no longer reachable by the main program.Deletion is transitive: removing the node decrements the counts of nodes it points to, which may cause them to be deleted.An interesting question is how to decide when to invokeflush; this is the system’seviction policy. One obvious choice is toflush when the system starts to run short of memory (based on a signal from the GC), which matches the intended effect of theunsound weak reference-based approach. But placing the eviction policy under the program’s control opens other possibilities,e.g., the programmer could invokeflushwhen it is semantically clear that thunks cannot be restored. We leave to future work further exploration of sensible eviction policies</p>
+<p>Edges are bidirectional. To fix the GC problem, we use weak references for back edges, but strong references for memo table entries, so that from the GC’s point of view, all DCG nodes are always reachable. To implement safe space reclamation, we also implement reference counting of DCG nodes, where the counts reflect the number of strong edges reaching a node. When DCG edges are deleted, the reference counts of target nodes are decremented. Nodes that reach zero are not immediately collected; thisallows thunks to be “resurrected” by the swapping pattern. Instead, we provide a flush operation for memo tables that deletesthe strong mapping edge for all nodes with a count of zero, which means they are no longer reachable by the main program.Deletion is transitive: removing the node decrements the counts of nodes it points to, which may cause them to be deleted.An interesting question is how to decide when to invoke flush; this is the system’s eviction policy. One obvious choice is to flush when the system starts to run short of memory (based on a signal from the GC), which matches the intended effect of theunsound weak reference-based approach. But placing the eviction policy under the program’s control opens other possibilities,e.g., the programmer could invokeflushwhen it is semantically clear that thunks cannot be restored. We leave to future work further exploration of sensible eviction policies</p>
+</section>
 <section id="package-format">
 <h2>Package format<a class="headerlink" href="#package-format" title="Permalink to this heading"></a></h2>
 <p>One advantage of C/C++ is that it is the de-facto standard, so everyone has a method to distribute application binaries compiled in those languages. But this is only a small advantage as there is still no common format: there are self-extracting installers and then a variety of package formats. MSI and PKG are fiat standards for Windows and Mac, but they have been superseded by the stores and practically for programming people use application-specific package managers that don’t interface with the OS level package managers.</p>
@@ -265,11 +283,11 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id99" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
+<p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id108" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
 <p>For observations, if we assume that the probability of false positive / false success <span class="math notranslate nohighlight">\(P(p_k)\)</span> and false negative / false failure <span class="math notranslate nohighlight">\(P(n_k)\)</span> are fixed per commit, then the probability of observing <span class="math notranslate nohighlight">\(i\)</span> test failures and <span class="math notranslate nohighlight">\(j\)</span> test successes (in a given/fixed order) given that the build is broken / not broken is</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
-<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id145" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id144" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
+<p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id158" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id157" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 17%" />
@@ -319,7 +337,7 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 </tr>
 </tbody>
 </table>
-<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id147" title="Celal Ziftci and Jim Reardon. Who broke the build? Automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
+<p>Given a breakage, we can use the dependency graph traces to narrow a failure down to a specific build task, so most of the graph can be ruled out immediately and skipped during a rebuild. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id160" title="Celal Ziftci and Jim Reardon. Who broke the build? Automatically identifying changes that induce test failures in continuous integration at Google scale. In 2017 IEEE/ACM 39th International Conference on Software Engineering: Software Engineering in Practice Track (ICSE-SEIP), 113–122. Buenos Aires, May 2017. IEEE. URL: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/45794.pdf (visited on 2020-07-06), doi:10.1109/ICSE-SEIP.2017.13.">ZR17</a>]</span>
 The table treats the build as a unit; for added precision we should make one table for each failing test and a UI to aggregate them somehow. From this table, we can make decisions: reporting breakages, hiding flaky runs, blacklisting broken builds, blessing working revisions, etc. once a certainty threshold is reached.</p>
 <p>For deciding the next build, a simple heuristic is to find the build with <code class="docutils literal notranslate"><span class="pre">P(Broken)</span></code> closest to 50%; but this ignores flakiness. What we want is to maximize the expected <a class="reference external" href="https://en.wikipedia.org/wiki/Information_gain_in_decision_trees">information gain</a> from a run <span class="math notranslate nohighlight">\(X\)</span>.</p>
 <p>, i.e. something like</p>
@@ -397,7 +415,7 @@ If any test fails I bisect to figure out who should be rejected, but don’t rej
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Objects.html" class="btn btn-neutral float-left" title="Objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Paradigms.html" class="btn btn-neutral float-right" title="Comparison" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Posets.html" class="btn btn-neutral float-right" title="Posets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

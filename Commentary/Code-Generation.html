@@ -19,11 +19,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Compiler design" href="Compiler.html" />
-    <link rel="prev" title="Build system" href="BuildSystem.html" /> 
+    <link rel="prev" title="Checklist" href="Checklist.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,44 +50,28 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Code generation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#operations">Operations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#register-allocation">Register allocation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#instruction-selection">Instruction selection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#instruction-scheduling">Instruction Scheduling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#layout">Layout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#control-flow">Control flow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#blocks">Blocks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#symbols">Symbols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#relocations">Relocations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#linker">Linker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Blocks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#output-formats">Output formats</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#debugging-information">Debugging information</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#libc">libc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ffi-calls">FFI calls</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#linux-syscalls">Linux syscalls</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#non-executable-stack">Non-executable stack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#aslr">ASLR</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#abi">ABI</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#interpreter">Interpreter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#elf">ELF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#assembly">Assembly</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ir-style">IR Style</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#llvm-ir-sucks">LLVM IR sucks</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#c-target">C target</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -96,10 +81,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -126,9 +112,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Code generation</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Code generation</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Code-Generation.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -140,59 +126,19 @@
              
   <section id="code-generation">
 <h1>Code generation<a class="headerlink" href="#code-generation" title="Permalink to this heading"></a></h1>
-<p>The back-end is complicated. There are several steps to be taken here.</p>
+<p>The back-end is complicated. There are three main operations that need to be done.</p>
 <ol class="arabic simple">
 <li><p>Instruction selection</p></li>
 <li><p>Register allocation</p></li>
-<li><p>Peephole optimization</p></li>
 <li><p>Instruction scheduling</p></li>
 </ol>
-<section id="operations">
-<h2>Operations<a class="headerlink" href="#operations" title="Permalink to this heading"></a></h2>
-<p>To abstract the ISA we consider the instructions from a functional perspective - these functions are called “operations”. Operations are exposed in Stroscot as intrinsic functions. This allows using a familiar syntax.</p>
-<p>Operations don’t reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX).</p>
-<p>For example the operations corresponding to x86-64 DIV, ADD, and ADC with 64-bit operands look like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">divide</span><span class="w"> </span><span class="p">(</span><span class="n">src</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">high</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">low</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">divisor</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src</span><span class="w"></span>
-<span class="w">  </span><span class="n">dividend</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">high</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">low</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">src1</span><span class="w"></span>
-<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="o">^</span><span class="mi">64</span><span class="w"></span>
-<span class="w">      </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span><span class="w"></span>
-<span class="w">    </span><span class="kr">else</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">quotient</span><span class="p">,</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-
-<span class="nf">add</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"></span>
-<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-
-<span class="nf">adc</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">cf</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cf</span><span class="w"></span>
-<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Accessing memory is handled by a separate operation - but in the ISA x86 has combined read-add instructions:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">read</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">B64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B32</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B16</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B8</span><span class="p">}</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">noncanonical</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- https://stackoverflow.com/questions/25852367/x86-64-canonical-address</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">referencesSSsegment</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">SS</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">GP</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">unaligned</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="n">alignment_checking</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">AC</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not_in_physical_memory</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">PF</span><span class="p">(</span><span class="n">fault</span><span class="o">-</span><span class="n">code</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">memory</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"></span>
-</pre></div>
-</div>
-</section>
+<p>Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three criteria encompass many other optimizations, so solving them properly is worthwhile.</p>
+<ul class="simple">
+<li><p>Peephole optimization</p></li>
+<li><p>Code motion</p></li>
+<li><p>Block ordering</p></li>
+<li><p>Spilling, rematerialization</p></li>
+</ul>
 <section id="register-allocation">
 <h2>Register allocation<a class="headerlink" href="#register-allocation" title="Permalink to this heading"></a></h2>
 <p>Definitions:</p>
@@ -201,37 +147,34 @@
 </dd>
 <dt>virtual register</dt><dd><p>A temporary that has write access. Not used because the codegen uses SSA.</p>
 </dd>
-<dt>logical register</dt><dd><p>A register as used in an instruction</p>
+<dt>(logical) register</dt><dd><p>A register as used in an instruction</p>
 </dd>
 <dt>physical register</dt><dd><p>A CPU register in the hardware register file. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.</p>
 </dd>
-<dt>program point</dt><dd><p>location between consecutive instructions</p>
+<dt>program point</dt><dd><p>start of an instruction</p>
 </dd>
 <dt>live</dt><dd><p>An output t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i.</p>
 </dd>
 <dt>interference point</dt><dd><p>A program point where each of a set of output temporaries could be used later.</p>
 </dd>
-<dt>spilling</dt><dd><p>Spilling is assigning a temporary into memory. It requires the generation of spill codem, store/load instructions to move the value to and from memory.</p>
+<dt>spilling</dt><dd><p>Spilling is assigning a temporary into memory. It requires the generation of spill code, store/load instructions to move the value to and from memory.</p>
 </dd>
-<dt>register class</dt><dd><p>Most CPU’s contain registers grouped into classes. For example, there may be registers for floating point, and registers for integer operations.</p>
+<dt>register class</dt><dd><p>Most CPUs group registers into classes, such that a given instruction can only use a certain class of registers. For example, there may be floating point registers, scalar integer registers, and vector registers.</p>
 </dd>
-<dt>register alias</dt><dd><p>Some registers may alias to registers in another class. A good example are the x86 registers rax, eax, ax, al and ah.</p>
+<dt>register alias</dt><dd><p>Some registers may be aliases to parts of registers in another class. A good example are the x86 registers al and ah, which alias to the low/high part of ax, which in turn aliases to the low part of eax, itself the alias of the low part of rax.</p>
 </dd>
 </dl>
-<p>Processor registers have shorter access times, but they are limited in number, forcing some temporaries to be spilled. The surefire approach spill-everywhere is to store every temporary to memory. Then every operation is wrapped with spill instructions for each input/output. But it’s slow so the problem is modeled as applying optimizations to spill-everywhere.</p>
-<p>Register assignment allows the use of equivalent instructions with different registers, e.g. add a,a vs add b,b
-Live range splitting allocates temporaries to different locations in different parts of their live
-ranges.
-Multi-allocation allocates temporaries simultaneously to registers as well as memory, reduc-
-ing the overhead of spilling in certain scenarios [31].
-Load-store optimization avoids reloading spilled values by reusing values loaded in previous
-parts of the spill code.
-Rematerialization recomputes values at their use points rather than loading them from memory, when the
-recomputation instructions are deemed less costly than the load.
-Coalescing eliminates move instructions if the source and destination are the same.
-Register packing assigns temporaries of small bit-widths to different parts of larger-width
-registers (for processors supporting such assignments) to improve register utilization.</p>
-<p>At each program point there is a map from variables to registers or memory. Registers are limited but fast. Send variables that do not fit to memory, spilling the least used variables and filling them back when needed (copy to/from memory). Because of register renaming / memory buffering, the actual register / address assignment doesn’t matter, only the spill pattern. (TODO: check this with some benchmarks) Registers and memory have relatively similar APIs: read, and write.</p>
+<p>At each program point there is a map from variables to registers or memory. Registers and memory have relatively similar APIs: read and write. Processor registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach spill-everywhere is to store every temporary to memory, wrapping each instruction with spill instructions that store/load each input/output from memory. But it’s slow. So the problem is to apply various conflicting optimizations to spill-everywhere to get the fastest program:</p>
+<ul class="simple">
+<li><p>Register assignment: Preserve a temporary in a register</p></li>
+<li><p>Live range splitting: Map a temporary to different registers in different parts of its live range</p></li>
+<li><p>Multi-allocation: Map a temporary to a register as well as memory</p></li>
+<li><p>Load-store optimization: Reuse values loaded in previous parts of the spill code</p></li>
+<li><p>Rematerialization: Recompute values at their use points rather than loading them from memory</p></li>
+<li><p>Coalescing: eliminates move instructions by ensuring the source and destination are the same.</p></li>
+<li><p>Packing: assign temporaries of small bit-widths to different parts of larger-width registers</p></li>
+</ul>
+<p>There are various heuristics, e.g. assigning the most used variables to registers first. Because of register renaming / memory buffering, the actual register / address assignment doesn’t matter, only the spill pattern. (TODO: check this with some benchmarks)</p>
 </section>
 <section id="instruction-selection">
 <h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Permalink to this heading"></a></h2>
@@ -280,7 +223,7 @@ must satisfy instruction dependencies and constraints imposed by limited process
 <span class="nf">un</span><span class="o">-</span><span class="n">stall</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">stations</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">inputs</span><span class="w"> </span><span class="n">available</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">cycles</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">cross</span><span class="o">-</span><span class="n">station</span><span class="w"> </span><span class="kt">RAW</span><span class="w"> </span><span class="n">dependencies</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The instruction scheduler schedules the instructions intelligently such that they will arrive at the corresponding position in the pipeline at the exact cycle when the data will be available to them.</p>
+<p>The instruction scheduler schedules the instructions intelligently to avoid stalling, i.e. an instruction requesting data before it is available. Ideally each instruction arrives at the front of the pipeline at the exact cycle when the necessary data and execution station become available.</p>
 <p>Data hazards: RAW is unavoidable. WAR/WAW are eliminated in modern processors by renaming as in the <a class="reference external" href="https://en.wikipedia.org/wiki/Tomasulo_algorithm">Tomasulo algorithm</a>. WAW can be also ignored if the value isn’t used.</p>
 <p>timing of instructions - most are fixed. load operations depend on what’s cached.</p>
 <ul class="simple">
@@ -302,209 +245,11 @@ must satisfy instruction dependencies and constraints imposed by limited process
 </pre></div>
 </div>
 <p>even if the jump can’t be avoided, memory layout can affect program performance. see profile guided memory layout thesis</p>
+<p>Cliff says a list scheduler is generally sufficient</p>
 </section>
-<section id="control-flow">
-<h2>Control flow<a class="headerlink" href="#control-flow" title="Permalink to this heading"></a></h2>
-<p>The ADD instruction is not so simple</p>
-<p>Control flow graph</p>
-</section>
-<section id="blocks">
-<h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h2>
-<p>A basic block (BB) is a sequence of instructions that is entered only from the top, and that contains no terminator instructions except for a single one at the end. The last instruction in a BB must be a terminator instruction, so execution cannot fall through the end of the BB but instead jumps to a new BB.</p>
-<p>Terminator instructions are unconditional branches.</p>
-<dl class="simple">
-<dt>EBB parameter</dt><dd><p>A formal parameter for an EBB is an SSA value that dominates everything
-in the EBB. For each parameter declared by an EBB, a corresponding
-argument value must be passed when branching to the EBB. The function’s
-entry EBB has parameters that correspond to the function’s parameters.</p>
-</dd>
-<dt>EBB argument</dt><dd><p>Similar to function arguments, EBB arguments must be provided when
-branching to an EBB that declares formal parameters. When execution
-begins at the top of an EBB, the formal parameters have the values of
-the arguments passed in the branch.</p>
-</dd>
-</dl>
-<p>A basic block is a mixture of jump and non-jump instructions that is complete, in the sense that any execution of the program will take one of the jumps. Any arbitrary sequence of instructions can be turned into a basic block by adding an unconditional jump at the end.</p>
-<p>Although phi nodes were an interesting idea all the <a class="reference external" href="https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes">cool kids</a> are now using block arguments. Blocks arguments fit better into various analysis passes.</p>
-</section>
-<section id="symbols">
-<h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h2>
-<p>Jump/branch instructions take an address as a parameter. These addresses can be specified as an absolute memory location or relative to the program counter. Both of these require knowing the memory layout of the program. However, the addresses are stored in most object files as symbols and are not resolved until link time or load time. The actual value stored is a placeholder and it is fixed up by relocations.</p>
-<p>When building a shared library the assembly is generated to minimize the number of relocations which must be applied, since they take time when starting the program. Position independent code will call non-static functions via the Procedure Linkage Table and reference global/static variables through Global Offset Tables. Local program counter-relative references do not need entries. The PLT and GOT tables are different for each process, but the actual code of the library is shared across all the processes. The indirection via the table <a class="reference external" href="https://bugs.python.org/issue38980">slowed down Python</a> by <a class="reference external" href="https://fedoraproject.org/wiki/Changes/PythonNoSemanticInterpositionSpeedup">27%</a> and is optimized away for non-extern functions in LLVM.</p>
-<p>A symbol is a name and a value. In a C object file, there will be a symbol for each function and for each global and static variable, named similarly. These symbol’s values will roughly be the address of the variable, i.e. the result of <code class="docutils literal notranslate"><span class="pre">&amp;my_global_var</span></code>.</p>
-<p>Object files contain a table of references to all the symbols used by the code, as well as the locations in the code that the references are made, classified by type of reference (e.g. absolute vs relative references). The object file also contains a table of defined symbols, all the symbols which it exports. there can also be references to symbol names defined in a different object file, known as an undefined symbol.</p>
-<p>Symbols also have versions, which are effectively part of the name of the symbol. But looking up an unversioned symbol resolves to the default versioned symbol.</p>
-</section>
-<section id="relocations">
-<h2>Relocations<a class="headerlink" href="#relocations" title="Permalink to this heading"></a></h2>
-<p>During the linking process, the linker will assign an address to each defined symbol, and will resolve each undefined symbol by finding a defined symbol with the same name. Then it will perform relocations, modifications to the assembly code. A simple, and commonly used, relocation is “set this location in the contents to the value of this symbol plus this addend.” There are different kinds of relocations for different modes of addressing in the machine code.</p>
-<p>The linker does not reorder sections of code, so relative jumps can be inserted fairly easily if you know the basic block sizes. The locations of absolute offsets need to be marked in the final executable so that the operating system loader can adjust them if it needs to load the executable somewhere other than its preferred address.</p>
-<p>A relocation in an object file may refer to an undefined symbol. If the linker is unable to resolve that symbol, it will normally issue an error (but not always: for some symbol types or some relocation types an error may not be appropriate).</p>
-<p>The linker also does some optimizations known as relaxation based on knowing final addresses. The most common type of relaxation is shrinking call instructions, e.g. replacing a 32-bit offset with a 16-bit offset. When the linker relaxes a relocation in the middle of the code, it may need to adjust any PC relative references which cross the point of the relaxation. Therefore, when relaxing, the assembler needs to generate relocation entries for all PC relative references. If the instruction size doesn’t change these relocations are not required.</p>
-</section>
-<section id="linker">
-<h2>Linker<a class="headerlink" href="#linker" title="Permalink to this heading"></a></h2>
-<p>There are actually two linkers: the static linker, which creates a shared object or executable, and the dynamic linker or loader, which finalizes addresses and performs relocations. Ignoring relocations, the role of a static linker is essentially <code class="docutils literal notranslate"><span class="pre">cat</span></code>, while the loader is more like <code class="docutils literal notranslate"><span class="pre">unzip</span></code>. Although the loader also has to search through the filesystem for all the shared objects, again similar to <code class="docutils literal notranslate"><span class="pre">cat</span></code>. The static linker mostly deals with sections while the dynamic linker uses segments; there are only a few types of segments but lots of section types.</p>
-<p>The static linker can be replaced after a lot of work by a language-specific linker and object format. For example the Go project uses its own linker and object format (bastardized ELF). This allows more freedom in defining symbols and for additional metadata to be stored in the objects. We can also completely get rid of object files and store the information in a database. The database would allow using the same incremental build system that the compiler uses. But for a first pass it might be a bit much; GHC uses the system assembler and linker.</p>
-<p>The loader is much harder to replace, in terms of inertia; although it can be changed to a non-standard path, distributing it would be difficult, and using a different shared object format would likely go the way of <a class="reference external" href="https://icculus.org/finger/icculus?date=2009-11-03&amp;time=19-08-04">FatELF</a> (nowhere). Plus there are features like ASLR and lazy loading that would have to be reimplemented. So Stroscot should definitely produce outputs that the loader can understand.</p>
-<p>A linker needs to:</p>
-<blockquote>
-<div><p>Find all symbol definitions that live in each object file and library.
-Assign each symbol a final, absolute, address.
-Find all symbol references in each object file and library.
-Replace all symbol references with the absolute address of that symbol.
-Write completed executable to memory (loader) or file (linker).</p>
-</div></blockquote>
-</section>
-<section id="id1">
-<h2>Blocks<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
-<p>From a user perspective there are two types of jumpable addresses:</p>
-<p>memory - effective address computation
-SIB addressing form, where the index register is not used in address calculation, Scale is ignored. Only the base and displacement are used in effective address calculation.
-VSIB memory addressing</p>
-<p>Memory and the program counter are virtualized as well, using labels. A label refers to a memory location with a specific block of code loaded. The blocks are not ordered, so unconditional jumps must be inserted between blocks if necessary. The block order can be determined using profiling, removing the unconditional jump that is taken most often.</p>
-<p>Memory references should be virtualized as well, so we also have memory labels. The alignment and format of the memory address should be specified.</p>
-<p>Instructions and blocks are marked by the virtual registers they consume and use (input / output registers). The call and jump instructions are special in that a mapping may be given between the virtual registers and physical registers. Instruction constraints:
-* Output: the register must not contain a value used after the block
-* Output early clobber: output and the register must not be used for any inputs of the block
-* Input: the register is read but not written to. Multiple inputs may all be assigned to the same register, if they all contain the same value.
-* Tied input: register that is read and written
-* Tied input early clobber: register that is read and written and does not share a register with any other input
-* alignstack, sideeffect</p>
-<p>There are also constraints from the ABI calling convention: <a class="reference external" href="https://gitlab.com/x86-psABIs/x86-64-ABI">https://gitlab.com/x86-psABIs/x86-64-ABI</a></p>
-</section>
-<section id="output-formats">
-<h2>Output formats<a class="headerlink" href="#output-formats" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p>native binary</p></li>
-<li><p>shared object / DLL (main difference is position-independent code)</p></li>
-<li><p>static object file</p></li>
-</ul>
-</section>
-<section id="debugging-information">
-<h2>Debugging information<a class="headerlink" href="#debugging-information" title="Permalink to this heading"></a></h2>
-<p>Debugging information is essentially a complete fiction. After optimization and transformation the output machine code bears no resemblance to the original program. But debuggers needs to know which machine code instruction corresponds to which source code location. So DWARF information should be generated as early as possible, ideally right after parsing, and then propagated through each transformation.</p>
-<p>DWARF is oriented around traditional compilation units and thus it might not quite flexible enough for our purposes. But it’s a standard and GHC does it so it should be reasonable.</p>
-<p>the linker performs a global program analysis to find all reachable interface types and discard methods that don’t match any signatures in reachable interface types and cannot be called via reflection.</p>
-<p>A key structural issue with the current linker is that it expects to do everything in memory. It deserializes all of the input objects into the heap and produces the output in memory as well. As a result, its peak memory footprint includes the entirety of the inputs (even if it eliminates most symbols as unreachable). Many of the linker’s issues revolve around this design choice.</p>
-<p>Remove/cache work on the critical path (linker is critical). Use incremental build system with fingerprinting.</p>
-<p>linker algorithm:
-* goal: avoid deserializing relocs/metadata if possible
-* (in parallel) mmap the inputs read-only</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>mmap manager to avoid mmap-ing too many files</p></li>
-</ul>
-</div></blockquote>
-<ul class="simple">
-<li><p>(mapreduce) build global symbol table</p>
-<ul>
-<li><p>while we can read the input symbol tables in any order, we must add them to the global symbol table in the order given on the command line.</p></li>
-</ul>
-</li>
-<li><p>(in parallel) build bitmap of reachable symbol names by DFS through symbol table / inputs. Bias priority towards staying in package.</p></li>
-<li><p>don’t compact reachable symbols, because keeping a simple mapping to the original symbol indexes is likely more valuable.</p></li>
-<li><p>mmap the output file read/write</p></li>
-<li><p>(in parallel) copy symbol data to output</p>
-<ul>
-<li><p>store symbol data in temporary scratch with minimal lifetime</p></li>
-</ul>
-</li>
-<li><p>apply relocations directly to the mmapped output.</p></li>
-</ul>
-<p>new object format:
-* symbol index
-* fixed width
-* pack byte data so mmap can skip over it
-* int-indexed symbol table - global table built by the linker</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>native Go reference (import index, symbol index)</p>
-<ul>
-<li><p>imported package table in referencing code unit</p></li>
-<li><p>exported symbol definition table in each package</p></li>
-</ul>
-</li>
-<li><p>Linknamed symbols - symbols defined in assembly that can only be resolved via their names.</p>
-<ul>
-<li><p>identified at their definition site, discard after object loading.</p></li>
-</ul>
-</li>
-<li><p>“Dupok” symbols - coalesced/deduplicated symbols. content-addressed and deduplicated via a separate table.</p></li>
-</ul>
-</div></blockquote>
-<p>directly load a Go object file into its running image
-link and execute a test in a single step, rather than producing a binary that will be discarded almost immediately</p>
-<p>if all code is position-independent and we retain entire packages, then all regular symbol references can be done with nothing more than the base address of the package that contains the symbol, by statically baking in the offsets of all the symbols. This would make offset tables incredibly small, though would make cross-package symbol references more expensive.</p>
-<p>processing relocations should be a fundamental part of any package for working with object files.</p>
-</section>
-<section id="libc">
-<h2>libc<a class="headerlink" href="#libc" title="Permalink to this heading"></a></h2>
-<p>libc is not really part of the system proper, but in practice a lot of programs end up depending on it anyway.</p>
-<p>Reason one is that libc wraps all the syscalls. To avoid this, the pioneer here is Go with their own syscall implementation. OTOH the implementation exposes <a class="reference external" href="https://marcan.st/2017/12/debugging-an-evil-go-runtime-bug">bugs</a>. This means that reimplementing syscalls will probably run into more bugs, but if the implementation follows Go’s closely this might not be an issue. And it should be faster / less register pressure to do syscalls in assembly than to set up a C stack and call into libc. But on various systems (<a class="reference external" href="https://utcc.utoronto.ca/~cks/space/blog/programming/Go116OpenBSDUsesLibc">OpenBSD</a>, Illumos, Solaris) avoiding libc isn’t possible because system calls must be made through the system libc.</p>
-<p>Reason two is compatibility; a lot of programs interface with C by calling C libraries. Facilities such as malloc and errno can be avoided / reimplemented but in general the only way to get a working program is to use the C runtime.</p>
-<p>Overall, it seems to a first approximation that small executables on Linux are the only C-free possibility. In particular Go’s net package depends on system C APIs everywhere except Linux. But these toy Linux programs are the kind of programs that people use for comparisons on system programming, so it still seems to be worth implementing. There’s that “cool factor” of one less dependency. For example Zig uses direct syscalls, but also implements a link_libc flag that turns it off.</p>
-<p>The syscalls themselves take / modify C structs. So regardless of whether we link with libc, we still need a C parser / ABI to get anywhere.</p>
-<p>compile to C - you’re only compiling to a subset, since C includes inline assembly. It’s a design choice that saves some implementation complexity by adding a big/slow dependency. Better to make it optional.</p>
-</section>
-<section id="ffi-calls">
-<h2>FFI calls<a class="headerlink" href="#ffi-calls" title="Permalink to this heading"></a></h2>
-<p>The semantics of a call are inherently system/ABI dependent, to the point of not being captured in a target triple. The semantics thus have to be described at the call site. But the data format doesn’t really matter as the call instruction will most likely be wrapped / generated. Maybe libffi can help.</p>
-<p>basic FFI types: <code class="docutils literal notranslate"><span class="pre">()</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">int8</span></code>, <code class="docutils literal notranslate"><span class="pre">int16</span></code>, <code class="docutils literal notranslate"><span class="pre">int32</span></code>, <code class="docutils literal notranslate"><span class="pre">int64</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">double</span></code>, <code class="docutils literal notranslate"><span class="pre">pointer</span></code>
-Process C/C++ headers with clang, or inspect LLVM bitcode, to identify FFI types</p>
-<p>symbols can be statically or dynamically linked</p>
-<p>you can also just enclose foreign code in <code class="docutils literal notranslate"><span class="pre">extern</span> <span class="pre">C</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>.
-this goes through clang to identify its FFI signature</p>
-<section id="linux-syscalls">
-<h3>Linux syscalls<a class="headerlink" href="#linux-syscalls" title="Permalink to this heading"></a></h3>
-<p>Parsing all the syscalls requires either manually writing them out / copying them from <a class="reference external" href="https://filippo.io/linux-syscall-table/">somewhere</a> or doing a lot of kernel source spelunking. Go has some stuff <a class="reference external" href="https://pkg.go.dev/golang.org/x/sys/unix?utm_source=godoc">here</a> (<a class="reference external" href="https://cs.opensource.google/go/x/sys/+/master:unix/linux/mkall.go">script</a>): it generates syscall numbers and constants / <a class="reference external" href="https://utcc.utoronto.ca/~cks/space/blog/programming/GoCGoCompatibleStructs">struct definitions</a> from the headers.</p>
-<p>The only place the syscall arguments are defined is in individual files with macros from the family <a class="reference external" href="https://lwn.net/Articles/604287/">SYSCALL_DEFINEx</a> (e.g. <a class="reference external" href="https://github.com/torvalds/linux/blob/141415d7379a02f0a75b1a7611d6b50928b3c46d/fs/io_uring.c#L9737">io_uring_setup</a>). We have to run the preprocessor for true correctness; the best option seems to be hooking the macro to print out the arguments with <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas">diagnostic pragmas</a>. Although scraping the files directly with grep + parentheses matching seems like it would work alright.</p>
-<p>The actual convention is documented <a class="reference external" href="https://stackoverflow.com/questions/2535989/what-are-the-calling-conventions-for-unix-linux-system-calls-and-user-space-f/2538212#2538212">here</a> and <a class="reference external" href="https://manpages.debian.org/unstable/manpages-dev/syscall.2.en.html">here</a>. The syscall number is expected in rax, return values in rax and rdx. otherwise all registers, segments and eflags are saved. Arguments left to right are rdi, rsi, rdx, r10, r8, r9.</p>
-<p>Signed range of -4096 &lt; eax &lt; 0 is an error code, anything else may be a normal return value. (“A.2 AMD64 Linux Kernel Conventions” of <a class="reference external" href="https://gitlab.com/x86-psABIs/x86-64-ABI/-/jobs">System V Application Binary Interface AMD64 Architecture Processor Supplement</a>)</p>
-</section>
-<section id="non-executable-stack">
-<h3>Non-executable stack<a class="headerlink" href="#non-executable-stack" title="Permalink to this heading"></a></h3>
-<p>When the Linux kernel starts a program, it looks for a PT_GNU_STACK segment. If it does not find one, it sets the stack to be executable (if appropriate for the architecture). If it does find a PT_GNU_STACK segment, it marks the stack as executable if the segment flags call for it. (It’s possible to override this and force the kernel to never use an executable stack.) Similarly, the dynamic linker looks for a PT_GNU_STACK in any executable or shared library that it loads, and changes the stack to be executable if any of them require it. When this all works smoothly, most programs wind up with a non-executable stack. The most common reason this fails is that part of the program is written in assembler, and the assembler code does not create a .note.GNU_stack section. If you write assembler code for GNU/Linux, you must always be careful to add the appropriate line to your file. For most targets, the line you want is <code class="docutils literal notranslate"><span class="pre">.section</span> <span class="pre">.note.GNU-stack,&quot;&quot;,&#64;progbits</span></code> There are some linker options to control this. The -z execstack option tells the linker to mark the program as requiring an executable stack, regardless of the input files. The -z noexecstack option marks it as not requiring an executable stack. The gold linker has a –warn-execstack option which will cause the linker to warn about any object which is missing a .note.GNU-stack option or which has an executable .note.GNU-stack option. The execstack program may also be used to query whether a program requires an executable stack, and to change its setting.</p>
-</section>
-<section id="aslr">
-<h3>ASLR<a class="headerlink" href="#aslr" title="Permalink to this heading"></a></h3>
-<p>Modern ELF systems can randomize the address at which shared libraries are loaded. This is generally referred to as Address Space Layout Randomization, or ASLR. Shared libraries are always position independent, which means that they can be loaded at any address. Randomizing the load address makes it slightly harder for attackers of a running program to exploit buffer overflows or similar problems, because they have no fixed addresses that they can rely on. ASLR is part of defense in depth: it does not by itself prevent any attacks, but it makes it slightly more difficult for attackers to exploit certain kinds of programming errors in a useful way beyond simply crashing the program.</p>
-<p>Although it is straightforward to randomize the load address of a shared library, an ELF executable is normally linked to run at a fixed address that can not be changed. This means that attackers have a set of fixed addresses they can rely on. Permitting the kernel to randomize the address of the executable itself is done by generating a Position Independent Executable, or PIE.</p>
-<p>It turns out to be quite simple to create a PIE: a PIE is simply an executable shared library. To make a shared library executable you just need to give it a PT_INTERP segment and appropriate startup code. The startup code can be the same as the usual executable startup code, though of course it must be compiled to be position independent.</p>
-<p>When compiling code to go into a shared library, you use the -fpic option. When compiling code to go into a PIE, you use the -fpie option. Since a PIE is just a shared library, these options are almost exactly the same. The only difference is that since -fpie implies that you are building the main executable, there is no need to support symbol interposition for defined symbols. In a shared library, if function f1 calls f2, and f2 is globally visible, the code has to consider the possibility that f2 will be interposed. Thus, the call must go through the PLT. In a PIE, f2 can not be interposed, so the call may be made directly, though of course still in a position independent manner. Similarly, if the processor can do PC-relative loads and stores, all global variables can be accessed directly rather than going through the GOT.</p>
-<p>Other than that ability to avoid the PLT and GOT in some cases, a PIE is really just a shared library. The dynamic linker will ask the kernel to map it at a random address and will then relocate it as usual.</p>
-<p>This does imply that a PIE must be dynamically linked, in the sense of using the dynamic linker. Since the dynamic linker and the C library are closely intertwined, linking the PIE statically with the C library is unlikely to work in general. It is possible to design a statically linked PIE, in which the program relocates itself at startup time. The dynamic linker itself does this. However, there is no general mechanism for this at present.</p>
-</section>
-<section id="abi">
-<h3>ABI<a class="headerlink" href="#abi" title="Permalink to this heading"></a></h3>
-<p>Swift 5 has a stable ABI, which has been <a class="reference external" href="https://gankra.github.io/blah/swift-abi/">praised</a>. This allows dynamic linking to system-wide libraries. Dynamic linking means that the ABI (method signatures) is provided at compile time but the actual methods are only available at runtime via the system dynamic linker.</p>
-<p>An ABI consists of the names of some symbols together with their calling convention, which specifies the layout of types and return values. It is a property of the platform and toolchain. Linux C uses the Itanium ABI, Windows has MSVC (supported by LLVM) and also gcc can use Itanium. There are split conventions for 64-bit vs 32-bit.</p>
-<p>C++ templated and Rust generic functions <code class="docutils literal notranslate"><span class="pre">template</span> <span class="pre">&lt;typename</span> <span class="pre">T&gt;</span> <span class="pre">bool</span> <span class="pre">process(T</span> <span class="pre">value)</span></code> generate symbols for each type (monomorphization) but have no direct ABI.</p>
-<p>ABI should follow API, nothing can save API-breaking changes. Annotations optimize the ABI, at the cost of adding more ways to break compatibility. Swift made adding some annotations backwards-compatible. Example annotations are frozen (non-resilient) layout, exhaustively matchable, inlineable, non-subclassable, non-escaping.</p>
-<p>Example: we change <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">path</span> <span class="pre">:</span> <span class="pre">ptr</span> <span class="pre">char</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">Maybe</span> <span class="pre">{size</span> <span class="pre">:</span> <span class="pre">int64_t}</span></code> to <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">path</span> <span class="pre">:</span> <span class="pre">ptr</span> <span class="pre">char</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">Maybe</span> <span class="pre">{last_modified_time</span> <span class="pre">:</span> <span class="pre">int64_t,</span> <span class="pre">size</span> <span class="pre">:</span> <span class="pre">int64_t}</span></code>. In Swift this only breaks ABI if the <code class="docutils literal notranslate"><span class="pre">frozen</span></code> annotation is present. By default types are resilient, meaning they are passed by reference and the size, alignment, stride, and extra inhabitants of types are looked up from the type’s witness table at runtime. But this is only outside the ABI boundary, inside the dynamic library it can assume the representation. And pointers have uniform layout hence don’t need the witness table. Swift compiles polymorphic APIs to a generic ABI, rather than monomorphizing. Also fields of resilient types are only exposed as getters and setters, so can be computed instead of being stored fields.</p>
-<p>Reabstraction thunks wrap closures with the wrong ABI.</p>
-<p>ownership is part of the calling convention:</p>
-<ul class="simple">
-<li><p>function stores value and will release it</p></li>
-<li><p>functions borrows value and does not keep it</p></li>
-</ul>
-<p>exceptions use a special calling convention with the error type boxed in a register. The caller initializes the “swift error” register to 0, and if there’s an exception the callee sets that register to hold the boxed error’s pointer. This makes error propagation really fast.</p>
-<p>binary compatibility - changes will not break memory-safety or type-safety. Observable behavior may change, and preconditions, postconditions, and invariants may break. If a value is inlined, the old value will be used in existing compiled objects. Removing functionality has the expectation that the functionality is unused - if a client attempts to use the removed functionality it will get an error.</p>
-<p>“fragile” or “frozen” describes C structs, which have very strict binary compatibility rules. Swift has “resilient” structs which store a witness table with metadata on their interpretation.</p>
-<p>The following changes are binary compatible:</p>
-<ul class="simple">
-<li><p>Changing the body/value/initial value of a function, constant, or variable</p></li>
-<li><p>Adding, changing, or removing a default argument</p></li>
-<li><p>Changing a variable to a constant or vice versa</p></li>
-<li><p>Adding, reordering, or removing members of resilient structs.</p></li>
-<li><p>Adding, reordering, or removing cases of a resilient enum.</p></li>
-<li><p>Changing parsing rules</p></li>
-</ul>
-</section>
-</section>
-<section id="interpreter">
-<h2>Interpreter<a class="headerlink" href="#interpreter" title="Permalink to this heading"></a></h2>
-<p>LuaJIT’s interpreter is fast, because:</p>
+<section id="c-target">
+<h2>C target<a class="headerlink" href="#c-target" title="Permalink to this heading"></a></h2>
+<p>When we compile to C it is quite similar to writing an interpreter in C with specialized opcodes. So LuaJIT is relevant. LuaJIT’s interpreter is fast, because:</p>
 <ul class="simple">
 <li><p>It uses indirect threading (aka labeled goto in C).</p></li>
 <li><p>It has a very small I-cache footprint (the core of the interpreter fits in 6K).</p></li>
@@ -516,10 +261,9 @@ this goes through clang to identify its FFI signature</p>
 <li><p>It uses NaN tagging for object references. This allows unboxed FP numbers with a minimal cache footprint for stacks/arrays. FP stores are auto-tagging.</p></li>
 <li><p>It inlines all fast paths.</p></li>
 <li><p>It uses special calling conventions for built-ins (fast functions).</p></li>
-<li><p>Tons more tuning in the VM … and the JIT compiler has it’s own bag of tricks.</p></li>
+<li><p>Tuning and tricks.</p></li>
 </ul>
-<p>The control-flow graph of an interpreter with C switch-based
-dispatch looks like this:</p>
+<p>The control-flow graph of an interpreter with C switch-based dispatch looks like this:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">repeat</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="n">load</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
 <span class="w">  </span><span class="n">dispatch</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
@@ -534,7 +278,7 @@ dispatch looks like this:</p>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p>There are dozens of instructions and hundreds of slow paths. The compiler doesn’t know which paths are fast. Even if it did, it’s still a single giant loop body. The standard register allocation heuristics fail at this scale, so the compiler has trouble keeping important variables in registers. There’s just no way to give it a goal function like “I want the same register assignment before each goto”. Diamond-shaped control-flow is known to be the worst-case scenario for most optimizations and for register alloction. Nested diamond-shaped control-flow is even worse. Tail-merging and CSE will happily join all these common tails of each instruction and generate a single dispatch point. Ick. You can try to disable some optimizations for this piece of code, but this will negatively impact all paths. Almost nothing can be hoisted or eliminated, because there will be a slow path where an aliasing store kills all opportunities.. The slow paths kill the opportunities for the fast paths and the complex instructions kill the opportunities for the simpler instructions.</p>
+<p>There are dozens of instructions and hundreds of slow paths. The compiler doesn’t know which paths are fast. Even if it did, it’s still a single giant loop body. The standard register allocation heuristics fail at this scale, so the compiler has trouble keeping important variables in registers. There’s just no way to give it a goal function like “I want the same register assignment before each goto”. Diamond-shaped control-flow is known to be the worst-case scenario for most optimizations and for register allocation. Nested diamond-shaped control-flow is even worse. Tail-merging and CSE will happily join all these common tails of each instruction and generate a single dispatch point. Ick. You can try to disable some optimizations for this piece of code, but this will negatively impact all paths. Almost nothing can be hoisted or eliminated, because there will be a slow path where an aliasing store kills all opportunities.. The slow paths kill the opportunities for the fast paths and the complex instructions kill the opportunities for the simpler instructions.</p>
 <p>We can use direct or indirect threading with computed goto. clang/LLVM optimizes the looped switch to indirect threading at <code class="docutils literal notranslate"><span class="pre">-O</span></code>. (<a class="reference external" href="https://internals.rust-lang.org/t/computed-gotos-tco-threaded-interpreters-experiments-and-findings/4668/6">ref</a>)</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">static</span><span class="w"> </span><span class="n">void</span><span class="o">*</span><span class="w"> </span><span class="n">dispatch_table</span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP2</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
 
@@ -555,63 +299,17 @@ dispatch looks like this:</p>
 </div>
 <p>This effectively replicates the load and the dispatch, which helps
 the CPU branch predictors.</p>
-<p>If you write an interpreter loop in assembler, you can do better:
-* Keep a fixed register assignment for all instructions.
-* Only a single fast path in every bytecode instruction
-* Keep all important state in registers for the fast paths. Spill/reload only in the slow paths. (No C compiler manages to do that on x86.)
-* The fast paths are always the straight line fall-through paths.
-* Move the slow paths elsewhere, to help with I-Cache density.
-* Pre-load instructions and pre-decode operands.
-* Remove stalls. Interleave operations based on the data dependencies.</p>
-</section>
-<section id="elf">
-<h2>ELF<a class="headerlink" href="#elf" title="Permalink to this heading"></a></h2>
-<p>The kernel/loader only uses segments when loading executables into memory. So we don’t need to bother with sections. Ignoring one-offs and notes (comments), there is only one segment <a class="reference external" href="http://www.sco.com/developers/gabi/latest/ch5.pheader.html#p_type">type</a>, , a loadable segment PT_LOAD. The attributes are <code class="docutils literal notranslate"><span class="pre">flags,</span> <span class="pre">offset,</span> <span class="pre">vaddr,</span> <span class="pre">filesz,</span> <span class="pre">memsz,</span> <span class="pre">align</span></code>. <code class="docutils literal notranslate"><span class="pre">filesz</span> <span class="pre">&lt;=</span> <span class="pre">memsz</span></code>. <code class="docutils literal notranslate"><span class="pre">filesz</span></code> bytes starting from offset from the file are mapped to memory starting at <code class="docutils literal notranslate"><span class="pre">vaddr</span></code>. If <code class="docutils literal notranslate"><span class="pre">memsz</span> <span class="pre">&gt;</span> <span class="pre">filesz</span></code>, the extra bytes are defined to hold the value 0 and to follow the segment’s initialized area. <code class="docutils literal notranslate"><span class="pre">vaddr</span> <span class="pre">-</span> <span class="pre">offset</span> <span class="pre">mod</span> <span class="pre">align</span> <span class="pre">==</span> <span class="pre">0</span></code>; <code class="docutils literal notranslate"><span class="pre">align</span></code> is usually the page size. <code class="docutils literal notranslate"><span class="pre">flags</span></code> defines the permissions that mmap uses and can be any combination of read/write/execute.</p>
-<p>So ignoring the file format / alignment / special handling of ending with 0’s, a loadable segments is <code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">{flags,</span> <span class="pre">vaddr,</span> <span class="pre">contents</span> <span class="pre">:</span> <span class="pre">[Byte]}</span></code>.</p>
-<p><a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/debug/pe-format">PE</a> is similar, the handling of alignment is different. Mach-O doesn’t even have a man page currently available from Apple so who cares.</p>
-</section>
-<section id="assembly">
-<h2>Assembly<a class="headerlink" href="#assembly" title="Permalink to this heading"></a></h2>
-<p>A segment may have executable pieces but <a class="reference external" href="https://stackoverflow.com/questions/55607052/why-do-compilers-put-data-inside-textcode-section-of-the-pe-and-elf-files-and">also</a> pieces of non-executed data: this is used with GHC’s <a class="reference external" href="https://lists.llvm.org/pipermail/llvm-dev/2012-February/047555.html">tables-next-to-code layout</a> and also ARM’s “constant islands” or <a class="reference external" href="https://en.wikipedia.org/wiki/Literal_pool">literal pools</a>. Conceptually the pieces are just smaller segments, but an actual segment is sized to a multiple of the page size. So to convert pieces to segments we would start with single-page segments with permissions the union of the permissions of the contained pieces, zeroing the memory if no piece defines it, and then merge together adjacent segments with the same permissions.</p>
-<p>We can write executable pieces using our instruction templates, <code class="docutils literal notranslate"><span class="pre">Piece</span> <span class="pre">=</span> <span class="pre">[{flags</span> <span class="pre">|</span> <span class="pre">executable,</span> <span class="pre">vaddr,</span> <span class="pre">contents</span> <span class="pre">:</span> <span class="pre">[Instruction]}]</span></code>, where <code class="docutils literal notranslate"><span class="pre">Instruction</span> <span class="pre">=</span> <span class="pre">(InstructionTemplate,</span> <span class="pre">Operands)</span></code> (or actually an ADT because the number of operands is fixed by the template).</p>
-<p>Labels: we split <code class="docutils literal notranslate"><span class="pre">[Instruction]</span></code> in each executable piece into blocks, <code class="docutils literal notranslate"><span class="pre">(Label,Block)</span> <span class="pre">where</span> <span class="pre">Block</span> <span class="pre">=</span> <span class="pre">[Instruction]</span></code>. To form a piece the labels are erased and the blocks concatenated.</p>
-<p>determine the size of all the assembled code and data
-generate code using symbol addresses
-code’s size cannot depend on the value of a symbol declared after the code in question.</p>
-<p>Code layout: a little 1D <a class="reference external" href="https://developer.android.com/reference/androidx/constraintlayout/widget/ConstraintLayout">constraint language</a>:
-* fixed address
-* start/end of A is eq/leq/geq/lt/gt a constant plus start/end of B
-* align x A, ensure start of A is a multiple of x.</p>
-<p>Generally the smallest layout wins, but the layout is also optimized for cache coherence.</p>
-</section>
-<section id="ir-style">
-<h2>IR Style<a class="headerlink" href="#ir-style" title="Permalink to this heading"></a></h2>
-<p>Goals:</p>
+<p>If you compile directly to assembly, you can do better:</p>
 <ul class="simple">
-<li><p>represent non-local control flow (faults)</p></li>
-<li><p>optimizations are localized (read small portion, write small portion)</p></li>
-<li><p>all known optimizations can be implemented</p></li>
-<li><p>fixes evaluation order only for stateful operations</p></li>
+<li><p>Total control over the register assignment</p></li>
+<li><p>Can fix the calling convention and keep all important state in registers for the fast paths. Spill/reload only in the slow paths. (No C compiler manages to do that on x86.)</p></li>
+<li><p>Only a single fast path in every bytecode instruction</p></li>
+<li><p>The fast paths are always the straight line fall-through paths.</p></li>
+<li><p>Move the slow paths elsewhere, to help with I-Cache density.</p></li>
+<li><p>Pre-load instructions and pre-decode operands.</p></li>
+<li><p>Remove stalls. Interleave operations based on the data dependencies.</p></li>
 </ul>
-<p><a class="reference external" href="https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man">https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man</a></p>
-<section id="llvm-ir-sucks">
-<h3>LLVM IR sucks<a class="headerlink" href="#llvm-ir-sucks" title="Permalink to this heading"></a></h3>
-<p>LLVM IR contains:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Explicitly Target-specific features, like x86_fp80</p></li>
-<li><p>Target-specific ABI code, to interoperate with native C ABIs</p></li>
-<li><p>Implicitly Target-specific features, like Linkages.</p></li>
-<li><p>Target-specific limitations: alignment on alloca, supported integer types</p></li>
-<li><p>Undefined Behavior, with C “nasal demons” semantics and optimization passes that assume behavior</p></li>
-<li><p>Intentional vagueness, and edge cases that no one is interested in fixing.</p></li>
-<li><p>Inconsistent IEEE-754 arithmetic</p></li>
-</ul>
-</div></blockquote>
-<p>Interpreting LLVM is slow. High level abstractions are chopped up into lots of small low-level instructions. The interpreter has to execute a relatively large number of instructions to do virtual method calls. Languages built for interpretation use fewer more expensive instructions, and have lower per-instruction  overhead.</p>
-<p>JITing LLVM is faster than static C compilers, but it’s not fast compared to real JIT compilers. It requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it’s more involved than a simple template generator.</p>
-<p>LLVM IR isn’t capable of representing necessary semantic information for high level languages such as Objective-C without embedding the information into it using hacky mechanisms. Existing transformations reverse-engineer Objective C out of the lowered code, which isn’t guaranteed to be safe by LLVM IR rules alone and only works if the Objective C frontend generated the IR.</p>
-</section>
+<p>The C compiler does have these optimizations but figuring out the right C code to generate so that the program will optimize properly is hard.</p>
 </section>
 </section>
 
@@ -619,7 +317,7 @@ code’s size cannot depend on the value of a symbol declared after the code in 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="BuildSystem.html" class="btn btn-neutral float-left" title="Build system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Checklist.html" class="btn btn-neutral float-left" title="Checklist" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Compiler.html" class="btn btn-neutral float-right" title="Compiler design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

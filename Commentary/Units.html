@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -49,14 +50,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -66,10 +74,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -115,9 +124,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Units</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Units</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Units.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -149,9 +158,9 @@
 </section>
 <section id="angles">
 <h3>Angles<a class="headerlink" href="#angles" title="Permalink to this heading"></a></h3>
-<p>Radians are better off as a base unit, because then degrees can be converted naturally to radians, instead of being shoehorned in as a multiplicative factor. See <span id="id2">[<a class="reference internal" href="../zzreferences.html#id111" title="Paul Quincey and Richard J. C. Brown. Implications of adopting plane angle as a base quantity in the SI. Metrologia, 53(3):998–1002, June 2016. Comment: 9 pages; accepted by Metrologia. URL: http://arxiv.org/abs/1604.02373 (visited on 2022-04-08), arXiv:1604.02373, doi:10.1088/0026-1394/53/3/998.">QB16</a>]</span> or <a class="reference external" href="https://arxiv.org/pdf/2203.12392.pdf">https://arxiv.org/pdf/2203.12392.pdf</a> for how formulas adjust to accommodate angles as a dimension with an explicit dimensional constant. For example torque and work (energy) in a conventional setting are both force times length and have the same type and unit, but in fact they are not equivalent in two ways:
+<p>Radians are better off as a base unit, because then degrees can be converted naturally to radians, instead of being shoehorned in as a multiplicative factor. See <span id="id2">[<a class="reference internal" href="../zzreferences.html#id121" title="Paul Quincey and Richard J. C. Brown. Implications of adopting plane angle as a base quantity in the SI. Metrologia, 53(3):998–1002, June 2016. Comment: 9 pages; accepted by Metrologia. URL: http://arxiv.org/abs/1604.02373 (visited on 2022-04-08), arXiv:1604.02373, doi:10.1088/0026-1394/53/3/998.">QB16</a>]</span> or <a class="reference external" href="https://arxiv.org/pdf/2203.12392.pdf">https://arxiv.org/pdf/2203.12392.pdf</a> for how formulas adjust to accommodate angles as a dimension with an explicit dimensional constant. For example torque and work (energy) in a conventional setting are both force times length and have the same type and unit, but in fact they are not equivalent in two ways:
 * In a geometric algebra setting, torque is a 2-vector (exterior product) while energy is a scalar (dot or inner product). So the numeric types are different.
-* The proper unit for torque is <code class="docutils literal notranslate"><span class="pre">N*m/rad</span></code>, rather than <code class="docutils literal notranslate"><span class="pre">N*m</span></code>. <span id="id3">[<a class="reference internal" href="../zzreferences.html#id113" title="Paul Quincey. Reply to Comment on `Angles in the SI: a detailed proposal for solving the problem'. Metrologia, 59(3):038002, May 2022. URL: https://doi.org/10.1088/1681-7575/ac5434 (visited on 2022-05-21), doi:10.1088/1681-7575/ac5434.">Qui22</a>]</span></p>
+* The proper unit for torque is <code class="docutils literal notranslate"><span class="pre">N*m/rad</span></code>, rather than <code class="docutils literal notranslate"><span class="pre">N*m</span></code>. <span id="id3">[<a class="reference internal" href="../zzreferences.html#id123" title="Paul Quincey. Reply to Comment on `Angles in the SI: a detailed proposal for solving the problem'. Metrologia, 59(3):038002, May 2022. URL: https://doi.org/10.1088/1681-7575/ac5434 (visited on 2022-05-21), doi:10.1088/1681-7575/ac5434.">Qui22</a>]</span></p>
 <p>To return to SI you can do <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">radian_convention</span> <span class="pre">{</span> <span class="pre">}</span></code>, which sets <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">rad</span> <span class="pre">=</span> <span class="pre">1</span></code> in the block. Conventions are discussed more later on.</p>
 <p>As far as types of angles, there are a lot:
 * Rotational angles, normal numeric type plus an angle unit

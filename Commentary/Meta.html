@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,14 +51,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -65,16 +73,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Meta</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#motivation">Motivation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#principles">Principles</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#non-principles">Non-principles</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#goals">Goals</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#the-ultimate">The ultimate</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#global-maximum">Global maximum</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#world-domination">World domination</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#tagline">Tagline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logo">Logo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#choices">Choices</a><ul>
@@ -92,10 +90,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
@@ -122,9 +121,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Meta</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Meta</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Meta.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -164,101 +163,15 @@ programs are freed to be idealized to their purest form. Abstractions reach thei
 </dd>
 </dl>
 </section>
-<section id="principles">
-<h2>Principles<a class="headerlink" href="#principles" title="Permalink to this heading"></a></h2>
-<p>Paradigms are vague and only express common patterns; they cannot be used to design a programming language. So instead we have principles.</p>
-<ul class="simple">
-<li><p>Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)</p></li>
-<li><p>Make the irreducible basic elements as simple and as few as possible without having to surrender the adequate representation of a single datum of experience. (Albert Einstein)</p></li>
-<li><p>Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (<a class="reference external" href="https://en.wikipedia.org/wiki/Branch_and_bound">Branch and bound</a>)</p></li>
-<li><p>Never finished, never complete, but tracking the progress of technology (Lennart Poettering)</p></li>
-<li><p>Code can be used as data, data can be used as code (Lisp)</p></li>
-<li><p>Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)</p></li>
-<li><p>As size and complexity increase, architectural design dominates materials. Create durable, non-leaky, beautiful interfaces. (<a class="reference external" href="http://www.vpri.org/pdf/tr2011004_steps11.pdf">VPRI</a>, <a class="reference external" href="https://blog.regehr.org/archives/666">John Regehr</a>)</p></li>
-<li><p>If it isn’t documented, it doesn’t exist (Coding Horror)</p></li>
-<li><p>Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)</p></li>
-<li><p>People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)</p></li>
-<li><p>Better depends on your goodness metric (<a class="reference external" href="http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807">Jim Waldo</a>)</p></li>
-<li><p>The shorter the [edit-test] cycle, the happier the programmer. (<a class="reference external" href="https://tripack45.github.io/2018/11/03/edit-compile-run/">Yue Yao</a>)</p></li>
-<li><p>Do all things without grumbling or complaining (Philippians 2:14)</p></li>
-<li><p>Secure by default: The default level of access should have the least privilege and the most number of checks. (OpenBSD)</p></li>
-<li><p>Organize functions by functionality into expressive components. (<a class="reference external" href="https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/">Uli Weltersbach</a>)</p></li>
-<li><p>When two elements of an interface conflict, or are ambiguous, the behavior should be that which will least surprise the user; in particular a programmer should try to think of the behavior that will least surprise someone who uses the program, rather than that behavior that is natural from knowing the inner workings of the program. (<a class="reference external" href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>)</p></li>
-</ul>
-<p>What are these principles useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons.</p>
-<section id="non-principles">
-<h3>Non-principles<a class="headerlink" href="#non-principles" title="Permalink to this heading"></a></h3>
-<section id="readability">
-<h4>Readability<a class="headerlink" href="#readability" title="Permalink to this heading"></a></h4>
-<p>Readability is a function of the program, not so much the programming language. Liberal comments can make even Brainfuck programs quite readable. So readability is only a consideration for the compiler - but even there, the extensive documentation means that few people will actually read the compiler code. So readability isn’t a principle for Stroscot.</p>
-<p>But cutting the time needed to understand code results in a shorter edit-test cycle so is often a win for that principle (the split is 5% New Code, 25% Modifying Existing Code, 70% Understanding Code from <a class="reference external" href="https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx">here</a>).</p>
-</section>
-<section id="turtles-all-the-way-down">
-<h4>Turtles all the way down<a class="headerlink" href="#turtles-all-the-way-down" title="Permalink to this heading"></a></h4>
-<p>“Turtles all the way down” only makes sense in the context of a directional layout, such as inheritance or composition. Stroscot has <a class="reference internal" href="Objects.html#no-inheritance"><span class="std std-ref">no inheritance</span></a>, so it must be composition. But an infinite object tree would require infinite space - there has to be a trick to allow compressing it, e.g. that the objects at some point refer back to themselves. This pointer trick is the principle, much more useful than the idea that all objects “look the same”, and is covered by the productivity principle.</p>
-</section>
-<section id="the-vasa">
-<h4>The Vasa<a class="headerlink" href="#the-vasa" title="Permalink to this heading"></a></h4>
-<p>Bjarne Stroustrup <a class="reference external" href="https://www.stroustrup.com/P0977-remember-the-vasa.pdf">seems fond</a> of the phrase “Remember the Vasa” to warn against large last-minute changes. According to <a class="reference external" href="https://en.wikipedia.org/wiki/Vasa_(ship)">Wikipedia</a>, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship design “didn’t have enough belly”. So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot’s principle to steal from great poets.</p>
-</section>
-<section id="hungarian-notation">
-<h4>Hungarian notation<a class="headerlink" href="#hungarian-notation" title="Permalink to this heading"></a></h4>
-<p>Hungarian notation puts types in variable names, so humans can check that the types are correct. But the compiler already checks types, and much more precisely. So in the end it is noise. Mathematicians do use single-letter variables with subscripts, but these do not encode types, they are just abbreviations - <code class="docutils literal notranslate"><span class="pre">x</span></code> stands for “first coordinate”, etc.</p>
-</section>
-</section>
-</section>
-<section id="goals">
-<h2>Goals<a class="headerlink" href="#goals" title="Permalink to this heading"></a></h2>
-<section id="the-ultimate">
-<h3>The ultimate<a class="headerlink" href="#the-ultimate" title="Permalink to this heading"></a></h3>
-<p>Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the <a class="reference external" href="https://www.youtube.com/watch?v=HDXYfulsRBA">ultimate showdown of ultimate destiny</a> w.r.t. programming languages. This has been called “silly” by Dennis Ritchie (author of C) and “the dream of immature programmers” by Bjarne Stroustrup (author of C++), <span id="id3">[<a class="reference internal" href="../zzreferences.html#id133" title="Herb Sutter. The C Family of Languages. Java Report, July 2000. URL: http://www.gotw.ca/publications/c_family_interview.htm (visited on 2021-10-28).">Sut00</a>]</span> but I think it can be made to work. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.</p>
-<p>Stroustrup claims there are “genuine design choices and tradeoffs” to consider, which I agree with to a point. Many queries in a compiler are too expensive to compute exactly and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and don’t affect the overall design of the language. While there may not be a best solver, there is a best set of syntax and features.</p>
-</section>
-<section id="global-maximum">
-<h3>Global maximum<a class="headerlink" href="#global-maximum" title="Permalink to this heading"></a></h3>
-<p>Stroscot aims to be a global maximum of features and syntax, based on the following optimization criteria in order:</p>
-<section id="functionality">
-<h4>Functionality<a class="headerlink" href="#functionality" title="Permalink to this heading"></a></h4>
-<p>Stroscot is a <a class="reference external" href="https://en.wikipedia.org/wiki/Wide-spectrum_language">wide-spectrum language</a>. If the language can’t do X, then people will choose to use another language that can do X. Many languages suffer from “idea envy”, where they try to retrofit new ideas from other languages. For example C++ and Java have recently added lambdas. This retrofitting is due to a shallow intellectual base. No idea is original, and lambdas are quite old. With sufficient research these ideas can be uncovered and incorporated.</p>
-<p>Stroscot is based on a survey of the academic literature and uses ideas and techniques mainly from decades ago but also a few published in the past few years. It is actually really hard to come up with better ideas than these papers. I’m not aware of any other programming languages that have tried to do a systematic search through the literature for features; academic languages are narrowly focused and practical languages do not innovate much.</p>
-<p>By preferring coverage of all functionality, we ensure a future-proof design, as new ideas are generally small tweaks on old ideas. When a programming language changes significantly, it loses its identity - for example, Python 2 and Python 3 are effectively separate programming languages, as are Perl 5 and Raku (Perl 6). A new language needs new tools and new libraries, so minimizing the number of new languages (breaking changes due to added features) is best.</p>
-<p>You may point to INTERCAL’s COMEFROM as something best avoided, but it’s not hard to implement. The trickier parts are actually at the low level, interfacing memory management and calling conventions, and the value proposition there for a powerful interface should be clear. Another theory is that, even if Stroscot fails as a language, implementing lots of features will make people copy Stroscot’s list of features.</p>
-</section>
-<section id="minimum-set-of-built-in-features">
-<h4>Minimum set of built-in features<a class="headerlink" href="#minimum-set-of-built-in-features" title="Permalink to this heading"></a></h4>
-<p>Programming features overlap and solve particular needs, so we need to select a consistent set of features to implement. Fortunately there are only so many ways to implement a given feature. The compiler will provide the smallest set of features that can satisfy all functionality needs in a straightforward manner, trivializing them. E.g. because COMEFROM can be implemented with continuations and macros, we implement continuations and macros, rather than COMEFROM. By selecting the minimum, we ensure the built-in features are a “basis” in the sense that none are redundant. Fewer concepts simplifies the whole language. Also it ensures stability - write the compiler once and then go do something else.</p>
-</section>
-<section id="learnability">
-<h4>Learnability<a class="headerlink" href="#learnability" title="Permalink to this heading"></a></h4>
-<p>It’s often not that easy to learn a language. Google searches will often yield irrelevant results. Official documentation can be useful, but is often filled with terse wording, links to lengthy discussions containing irrelevant detail, and TODOs. The truth can be found in the source code, but this often has one-letter variable names, very few comments, and an assumption that you know the coding style and meaning of the language constructs used. Prioritizing learnability will make it easier for generations of beginners. There is some amount of English discrimination involved, as the learnability studies’ “beginners” are limited to English speakers in Western colleges, but English is the most popular language, and there is the functionality to translate Stroscot to other languages.</p>
-</section>
-<section id="concision">
-<h4>Concision<a class="headerlink" href="#concision" title="Permalink to this heading"></a></h4>
-<p>If there is a verbose syntax and a terse syntax (as measured by characters or screen space usage), both equally learnable, then the terse syntax is better, because the program can be more cheaply printed out and literate documentation ends up primarily being English prose comments rather than code. The only issue with APL is that, like Chinese, it has a lot of symbols and <a class="reference external" href="https://en.wikipedia.org/wiki/Character_amnesia">character amnesia</a> is a (learnability) issue, whereas English has a small alphabet hence its input method is easier to remember.</p>
-</section>
-<section id="performance">
-<h4>Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h4>
-<p>Stroscot aims for C-like performance on C-like programs, and similarly to match or exceed the performance of other styles of programming on their compilers. Beyond that, it is hard to make guarantees about the performance of any of the more expressive features. Since the algorithms used are best-in-class, Stroscot will likely give acceptable performance, but some problems are undecidable and the heuristics used may not be sufficient to prevent a combinatorial explosion; such explosions are of course bugs and patches fixing them will be accepted.</p>
-<p>In the near term, since there is no compiler or interpreter fully implemented, performance is not measurable and hence is not a consideration. Once the interpreter can pass the tower of interpreters test, that will be the main performance criterion for it. For compilation, besides optimizing the generated code, the main performance-focused feature will be fine-grained incremental compilation to reduce compile times.</p>
-<p>“Slow” is relative - if you can do 100x speedups then slow becomes fast and it’s a qualitative difference. Features can’t be gated on performance - implement first, speed up later. A lot of the time programs aren’t written for speed. Most programmers can’t even measure performance correctly - compiled for debug instead of release, etc. Programmers want a convenient language however slow, and for the better programmers a way to speed up their programs when they’re slow (profiling, performance-optimized code). Researchers prefer an inefficient language for which it is easy to devise optimizations and improvements. Similarly programmers don’t want reliable code - they prefer convenience and don’t want to learn new concepts. They will ship when their management says “ship!”</p>
-</section>
-</section>
-<section id="world-domination">
-<h3>World domination<a class="headerlink" href="#world-domination" title="Permalink to this heading"></a></h3>
-<p>Stroscot aims to replace all the programming languages in use today. Mainly this involves improving FFI support and interoperability with C and C++. In particular we need to be able to parse headers and use data from them with Stroscot. Since headers include code we need to be able to fully compile C/C++, so that Stroscot is the sole compiler and all of its global optimizations can be used (<a class="reference external" href="https://andrewkelley.me/post/zig-cc-powerful-drop-in-replacement-gcc-clang.html">zig cc</a> is an example of how this works). The linkage is asymmetric - you can export specific C-style constructs back to C, but C can’t use functions that depend on more advanced features.</p>
-<p>Once the C/C++ implementation is stable enough for production use, focus will shift to developing automated conversion tools for other languages like Python and Java, so that the surface syntax can be changed to Stroscot’s. And yes, this is the <a class="reference external" href="https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish">E-E-E strategy</a>, but Stroscot is open source so it’s all OK.</p>
-<p>Standardization doesn’t seem necessary, a popular language builds its own standard and Python, the world’s most popular language as of <a class="reference external" href="https://www.tiobe.com/tiobe-index/">July 2022</a>, has <a class="reference external" href="https://stackoverflow.com/questions/1535702/python-not-a-standardized-language">never been</a> formally standardized. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new best language every 3-5 years.</p>
-</section>
-</section>
 <section id="tagline">
-<span id="inspiring-projects"></span><h2>Tagline<a class="headerlink" href="#tagline" title="Permalink to this heading"></a></h2>
+<h2>Tagline<a class="headerlink" href="#tagline" title="Permalink to this heading"></a></h2>
 <p>The tagline for Stroscot is “an imperative programming language for modern processors”. The breakdown:</p>
 <dl class="simple">
 <dt>Stros</dt><dd><p>This is a vague reference to Charles Stross, author of the sci-fi book “Accelerando”. In particular Stroscot aims to speed up the pace of technological development.</p>
 </dd>
 <dt>cot</dt><dd><p>Similar to how the “trek” in “Star Trek” expresses a journey to find new worlds, the cot here expresses that Stroscot provides comfortable support while still being flexible, lightweight, portable, and compact.</p>
 </dd>
-<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id4">[<a class="reference internal" href="../zzreferences.html#id73" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
+<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id77" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
 </dd>
 <dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 / ARM and then later add a mode to generate LLVM IR.</p>
 </dd>
@@ -311,8 +224,8 @@ programs are freed to be idealized to their purest form. Abstractions reach thei
 <ul>
 <li><p>dynamically typed - “unityped” (short for “has a universal type”).</p></li>
 <li><p>dynamic library - shared library</p></li>
-<li><p>dynamic linking - linking at program startup</p></li>
-<li><p>dynamic loading - run-time loading</p></li>
+<li><p>dynamic linking - shared library linking</p></li>
+<li><p>dynamic loading - run-time library loading</p></li>
 </ul>
 </li>
 <li><p>static - similar to dynamic, too many overloaded meanings to be usable.</p>
@@ -326,11 +239,14 @@ programs are freed to be idealized to their purest form. Abstractions reach thei
 <li><p>static linking - compile time binding, resolving memory addresses at compile time</p></li>
 </ul>
 </li>
-<li><p>pure - prefer the proposition that all expressions have values</p></li>
+<li><p>pure - prefer the proposition that all expressions have a unique value. So instead of “impure expression” refer to an expression that has no value or multiple values.</p></li>
 <li><p>strongly typed - <a class="reference external" href="https://perl.plover.com/yak/12views/samples/slide045.html">8 definitions</a>, all different. It’s the semantic equivalent of “amazing”, i.e. “My language is strongly typed” == “My language is amazing”.</p></li>
-<li><p>undecidable - people use this word to imply that it’s unimplementable, when there are working solvers like the ones in <a class="reference external" href="https://termination-portal.org/wiki/Termination_Competition">termCOMP</a> that solve many useful cases. Prefer “complexity at least <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span>”, where <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> is in the <a class="reference external" href="https://en.wikipedia.org/wiki/Arithmetical_hierarchy">arithmetic hierarchy</a>, or a more precise class if known. Note that decidable problems / computable sets are in <span class="math notranslate nohighlight">\(\Delta_{1}^{0} \subset \Sigma^0_1\)</span>.</p></li>
+<li><p>undecidable - people use this word to imply that it’s unimplementable, when there are working solvers like the ones in <a class="reference external" href="https://termination-portal.org/wiki/Termination_Competition">termCOMP</a> that solve many useful cases. Godel’s theorem only means that pathological examples exist for each specific implementation, which is true even with Hindley-Milner (linear for real-world programs, worst-case exponential). Prefer “complexity at least <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span>”, where <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> is in the <a class="reference external" href="https://en.wikipedia.org/wiki/Arithmetical_hierarchy">arithmetic hierarchy</a>, or a more precise class if known. Note that decidable problems / computable sets are in <span class="math notranslate nohighlight">\(\Delta_{1}^{0} \subsetneq \Sigma^0_1\)</span>.</p></li>
 <li><p>primitive - as per <a class="reference external" href="https://en.wikipedia.org/wiki/Primitive_data_type">Wikipedia</a>, primitive is ambiguous and can mean “the base cases of an inductive definition”, in which case use “base”, or “whatever is provided by a particular processor or compiler”, in which case use “built-in”. Note that built-in does not mean base, e.g. integers can be defined in terms of booleans hence are not base cases.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\subset\)</span> - per <a class="reference external" href="https://en.wikipedia.org/wiki/Subset#%E2%8A%82_and_%E2%8A%83_symbols">Wikipedia</a> this is ambiguous, use <span class="math notranslate nohighlight">\(\subsetneq\)</span> and <span class="math notranslate nohighlight">\(\subseteq\)</span></p></li>
+<li><p>abomination - a fun word, but basically meaningless</p></li>
 </ul>
+<p>Avoiding this terminology is easy to forget so is enforced by periodic grep’s of the code.</p>
 </section>
 <section id="open-source">
 <h3>Open source<a class="headerlink" href="#open-source" title="Permalink to this heading"></a></h3>

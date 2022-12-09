@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -81,8 +82,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -102,9 +134,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Library</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Library</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Library.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -206,7 +238,7 @@ grid point. Thus, e.g., <code class="docutils literal notranslate"><span class="
 <p>Issues:
 * pathological arrays that expose worst-case quadratic behavior
 * “golden unit tests” that compare unstable sorted arrays for equality. Solved by defaulting to stable sort.
-* comparison functions that are not actually strict weak orders or total preorders (e.g. float comparison on NaN). Solved by randomized testing of triples.
+* comparison functions that are not actually strict weak orders or total preorders (e.g. IEEE NaN comparison). Solved by randomized testing of triples.
 * Memory allocation or concurrency primitives that rely on sorting algorithms and vice-versa which result in debugger loops</p>
 <p>Optimizations:
 * Profiling the comparison function to see if it is expensive or cheap
@@ -244,8 +276,12 @@ Java: <a class="reference external" href="https://docs.oracle.com/javase/8/docs/
 </pre></div>
 </div>
 <p>In the general case the iterator cannot be reused - next should be treated as a linear value. But in other cases it’s more specific.</p>
-<p>Iterators then implement a for-of loop:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">getIterator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<p>Iterators then implement a for-X loop. There is some issue as to which syntax to use:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">iter</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="kt">:</span><span class="mi">5</span><span class="w"></span>
+<span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="nf">for</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="n">act</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </pre></div>
@@ -288,7 +324,7 @@ Unboxed packed representation for short strings.</p>
 We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
 <p>The functions themselves are written in the token-passing style <code class="docutils literal notranslate"><span class="pre">RealWorld,</span> <span class="pre">a</span> <span class="pre">-o</span> <span class="pre">RealWorld,</span> <span class="pre">b</span></code>, passing around the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token.</p>
 <p>The standard library wraps all relevant functions in <a class="reference internal" href="Memory.html#finalizers"><span class="std std-ref">finalizers</span></a> to ensure safety. But there is also a corresponding .Raw module which provides the unwrapped versions.</p>
-<p>Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API should have a warning.</p>
+<p>Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API documentation should have a warning.</p>
 </section>
 <section id="concurrency">
 <span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this heading"></a></h2>
@@ -323,7 +359,7 @@ We also need datatypes for dealing with streaming I/O, but continuations work fo
 <section id="thread-pool">
 <h3>Thread pool<a class="headerlink" href="#thread-pool" title="Permalink to this heading"></a></h3>
 <p>A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core.</p>
-<p>A task represents an asynchronous operation. Tasks don’t block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark <span id="id1">[<a class="reference internal" href="../zzreferences.html#id135" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)</p>
+<p>A task represents an asynchronous operation. Tasks don’t block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark <span id="id1">[<a class="reference internal" href="../zzreferences.html#id148" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)</p>
 <p>Tasks are queued. They run in fibers which run in the thread pool, but are even lighter memory-wise than fibers.</p>
 <p>It’s a proven model for maximizing throughput for CPU-bound tasks (high performance computing), and allows very fast context switches to other tasks on the same scheduler thread (zero overhead) - socket servers with only negligible server-side computations. There is not much overhead to start/finish a task besides cache pollution, the need to use memory locations instead of registers, and synchronization. Also tasks are unfair - on a multi-core system, tasks spawn on the same CPU, using an M:N user-mode cooperative scheduler. This improves locality.</p>
 <p>Maybe the build system is sufficient for this. Also an event loop for asynchronous network I/O. IOCP on Windows, io_uring on Linux.
@@ -331,7 +367,7 @@ libuv is significantly slower than blocking I/O for most common cases; for examp
 <p>Design questions:
 * How do threads get work - pull from single FIFO/priority queue, push to thread’s individual queue, or some other approach
 * Where to store task-local data</p>
-<p>Relevant: work stealing queues <span id="id2">[<a class="reference internal" href="../zzreferences.html#id88" title="Doug Lea. A Java fork/join framework. In Proceedings of the ACM 2000 Conference on Java Grande, JAVA '00, 36–43. New York, NY, USA, June 2000. Association for Computing Machinery. URL: https://doi.org/10.1145/337449.337465 (visited on 2021-07-09), doi:10.1145/337449.337465.">Lea00</a>]</span> used in Java, <a class="reference external" href="https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf">A Java Fork/Joint Blunder</a>, criticizing Java’s framework</p>
+<p>Relevant: work stealing queues <span id="id2">[<a class="reference internal" href="../zzreferences.html#id95" title="Doug Lea. A Java fork/join framework. In Proceedings of the ACM 2000 Conference on Java Grande, JAVA '00, 36–43. New York, NY, USA, June 2000. Association for Computing Machinery. URL: https://doi.org/10.1145/337449.337465 (visited on 2021-07-09), doi:10.1145/337449.337465.">Lea00</a>]</span> used in Java, <a class="reference external" href="https://web.archive.org/web/20210305122741/http://coopsoft.com/dl/Blunder.pdf">A Java Fork/Joint Blunder</a>, criticizing Java’s framework</p>
 </section>
 </section>
 <section id="algorithms">

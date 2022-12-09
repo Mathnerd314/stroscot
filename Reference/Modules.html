@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -65,8 +66,39 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -86,9 +118,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Modules</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Modules</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Modules.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -196,22 +228,30 @@ with D { with C { a } }
 </section>
 <section id="overrides">
 <h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this heading"></a></h2>
-<p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement prevents creating a new identifier, so that instead a base identifer can be extended.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># module 1</span>
-<span class="n">foo</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">1</span>
+<p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. This means a use <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code> refers to only the declarations within that module.</p>
+<p>Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>A = module
+  foo (x:{A}) = 1
+B = module
+  foo (x:{B}) = 2
 
-<span class="c1"># module 2</span>
-<span class="kn">import</span> <span class="mi">1</span>
-<span class="n">override</span> <span class="n">foo</span>
-<span class="n">foo</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="c1"># module 3</span>
-<span class="kn">import</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-<span class="n">foo</span> <span class="mi">1</span> <span class="c1"># 1</span>
-<span class="n">foo</span> <span class="mi">2</span> <span class="c1"># 3</span>
+import A, B
+print (map foo [A,B])
+# [1,2]
+# print (force foo)
 </pre></div>
 </div>
-<p>If the override statement was not in module 2, then using <code class="docutils literal notranslate"><span class="pre">foo</span></code> in module 3 would result in an ambiguous name resolution error.</p>
+<p>This defines two symbols <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">A</span> <span class="pre">-&gt;</span> <span class="pre">{1}</span></code> and <code class="docutils literal notranslate"><span class="pre">B.foo</span> <span class="pre">:</span> <span class="pre">B</span> <span class="pre">-&gt;</span> <span class="pre">{2}</span></code>, and resolves <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">foo</span> <span class="pre">[A,B]</span></code> to <code class="docutils literal notranslate"><span class="pre">[A.foo</span> <span class="pre">A,</span> <span class="pre">B.foo</span> <span class="pre">B]</span></code>. However, because the bare identifier ends up resolving to different symbols, there are cases where dispatch is not sufficient to resolve the ambiguity. In this example, <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> results in an error because it could be either <code class="docutils literal notranslate"><span class="pre">A.foo</span></code> or <code class="docutils literal notranslate"><span class="pre">B.foo</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>A = module
+  foo (x:{A}) = 1
+B = module
+  import A
+  override foo
+  foo (x:{B}) = 2
+</pre></div>
+</div>
+<p>defines one symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">{A,B}</span> <span class="pre">-&gt;</span> <span class="pre">{1,2}</span></code>. Thus <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> will resolve to the single symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span></code>.</p>
 </section>
 </section>
 

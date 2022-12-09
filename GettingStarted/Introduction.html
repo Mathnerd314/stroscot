@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,11 +47,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#secrets-of-matching">Secrets of matching</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#term-rewriting">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-matching">Parallel matching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logic-programming">Logic programming</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="StyleGuide.html">Style guide</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
@@ -72,9 +75,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Getting started</a> &raquo;</li>
-      <li>Introduction</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Getting started</a></li>
+      <li class="breadcrumb-item active">Introduction</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/GettingStarted/Introduction.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -87,16 +90,76 @@
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
 <p>This is a 10-minute introduction of the main concepts of Stroscot.</p>
-<section id="secrets-of-matching">
-<h2>Secrets of matching<a class="headerlink" href="#secrets-of-matching" title="Permalink to this heading"></a></h2>
-<p>Consider the program from <a class="reference external" href="https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ">this old Usenet post</a>):</p>
+<section id="term-rewriting">
+<h2>Term rewriting<a class="headerlink" href="#term-rewriting" title="Permalink to this heading"></a></h2>
+<p>The execution of a Stroscot program is modeled as taking the main program as the starting term and applying rewrite rules until no more can be applied, resulting in the “value” or normal form of the program.</p>
+<p>A rewrite rule or clause is applied by matching the left hand side to the current term or one of its subterms and applying the resulting substitution to the right hand side. Stroscot supports predicate dispatch or conditional rewriting, meaning that a rewrite rule may have a condition - the rewrite rule is applicable only if its condition holds.</p>
+<p>In the debugger you can always see what the current term looks like and what rewrite rules are applied. For example, with the rules <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">n</span> <span class="pre">|</span> <span class="pre">n</span> <span class="pre">&gt;</span> <span class="pre">0</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">fact</span> <span class="pre">(n-1)</span></code> and <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">0</span> <span class="pre">=</span> <span class="pre">1</span></code>, a possible reduction sequence is:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fact</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="mi">6</span><span class="w"></span>
+</pre></div>
+</div>
+<p>We say that <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">3</span></code> reduces to the value <code class="docutils literal notranslate"><span class="pre">6</span></code>, written more concisely as the rewrite rule <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">3</span> <span class="pre">=</span> <span class="pre">6</span></code>.</p>
+</section>
+<section id="parallel-matching">
+<h2>Parallel matching<a class="headerlink" href="#parallel-matching" title="Permalink to this heading"></a></h2>
+<p>Stroscot’s main reduction semantics is nondeterministic - all possible matches and rewrites are considered. It is an error if there is no unique answer. For example this is an error:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="n">conflict</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="p">`</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="p">`</span><span class="w"></span>
+</pre></div>
+</div>
+<p>But if the first clause was <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">1</span> <span class="pre">=</span> <span class="pre">2</span></code> it would be allowed:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Since many programs are sequential there is a convenience syntax for making the cases non-overlapping:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">to</span><span class="w"></span>
+
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="p">;</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>But the parallel behavior is useful. For example you can write impromptu tests that Stroscot will verify give the same result:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">test</span><span class="w"></span>
+<span class="nf">fib</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">would</span><span class="w"> </span><span class="n">give</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="ne">error</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
+<p>Another useful application is specializing generic methods to high-performance implementations for specific types, and in general giving more freedom to the compiler to do evaluation. For example consider the idea of “parallel and” from <a class="reference external" href="https://groups.google.com/g/comp.lang.functional/c/sb76j3UE5Zg/m/h1ps0wEaTckJ">this old Usenet post</a>):</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">myand</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
 <span class="nf">myand</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
 <span class="nf">myand</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">True</span><span class="w"></span>
 </pre></div>
 </div>
-<p>This syntax sequentially matches the clauses in order. Consider <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">undefined</span> <span class="pre">False</span></code> - matching the first clause evaluates <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">==</span> <span class="pre">undefined</span></code>. In Haskell <code class="docutils literal notranslate"><span class="pre">undefined</span></code> throws and evaluation results in an error. In Stroscot <code class="docutils literal notranslate"><span class="pre">undefined</span></code> is just a value, so this clause fails and the second clause gives <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">undefined</span> <span class="pre">False</span> <span class="pre">=</span> <span class="pre">False</span></code>.</p>
-<p>Now this depends on proving <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">!=</span> <span class="pre">undefined</span></code>. In this case they are both values this is trivial, but what about an <code class="docutils literal notranslate"><span class="pre">expensive_undefined</span></code> which is an expensive computation that never terminates? Well, Stroscot also allows parallel matching:</p>
+<p>With the sequential matching, matching <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">True</span> <span class="pre">False</span></code> tries the first clause and evaluates <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">==</span> <span class="pre">True</span></code>, which fails, so the second clause gives <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">True</span> <span class="pre">False</span> <span class="pre">=</span> <span class="pre">False</span></code>. But this behavior depends on proving <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">!=</span> <span class="pre">True</span></code>. In this case they are both values so it is trivial. But if instead of <code class="docutils literal notranslate"><span class="pre">True</span></code> we use a computation <code class="docutils literal notranslate"><span class="pre">expensive_true</span></code> that takes a long time to produce the value <code class="docutils literal notranslate"><span class="pre">True</span></code>, then proving <code class="docutils literal notranslate"><span class="pre">False</span> <span class="pre">!=</span> <span class="pre">expensive_true</span></code> takes a long time. Now consider parallel matching:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">myand</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
 <span class="p">;</span><span class="w"></span>
 <span class="nf">myand</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">False</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">False</span><span class="w"></span>
@@ -104,20 +167,12 @@
 <span class="nf">myand</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="kt">True</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">True</span><span class="w"></span>
 </pre></div>
 </div>
-<p>The semantics is based on term rewriting - all possible matches and rewrites are considered. It is an error if there is no unique answer. For this example, the system is weakly orthogonal so it is easy to analyze. Stroscot proves that the answer is unique because  in the one ambiguous case <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">False</span> <span class="pre">False</span></code> both clauses give <code class="docutils literal notranslate"><span class="pre">False</span></code>, and selects the parallel outermost reduction strategy which will always succeed if there is an answer. Hence evaluating <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">expensive_undefined</span> <span class="pre">False</span></code> reduces <code class="docutils literal notranslate"><span class="pre">expensive_undefined</span></code> for a little bit, then evaluates <code class="docutils literal notranslate"><span class="pre">False</span></code> to completion and matches the second clause.</p>
+<p>Because the system is parallel, Stroscot can choose which term to evaluate first. It may evaluate <code class="docutils literal notranslate"><span class="pre">expensive_true</span></code> for a little bit, but then it can switch to evaluating <code class="docutils literal notranslate"><span class="pre">False</span></code> and immediately match the second clause without finishing evaluation of <code class="docutils literal notranslate"><span class="pre">expensive_true</span></code>.</p>
+<p>Now in some cases the system can automatically be parallelized. In particular with this example, the one overlapping case is <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">False</span> <span class="pre">False</span></code> and it can be verified that both of the first two clauses give <code class="docutils literal notranslate"><span class="pre">False</span></code>, hence the system is weakly orthogonal and can be parallelized. But in general identifying opportunities like this is hard, and also with sequential matching specializing generic methods would require careful priority management, so it is better to have an explicit syntax.</p>
 </section>
 <section id="logic-programming">
 <h2>Logic programming<a class="headerlink" href="#logic-programming" title="Permalink to this heading"></a></h2>
-<p>Sometimes the requirement that the return value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.</p>
-<p>Misquoting <span id="id1">[<a class="reference internal" href="../zzreferences.html#id68" title="Kenneth E. Iverson. Notation as a tool of thought. Communications of the ACM, 23(8):444–465, August 1980. URL: https://doi.org/10.1145/358896.358899 (visited on 2022-07-18), doi:10.1145/358896.358899.">Ive80</a>]</span>:</p>
-<blockquote>
-<div><p>Users of computers and programming languages are often concerned primarily with the efficiency of execution of algorithms, and might, therefore, summarily dismiss [logic programming]. Such dismissal would be short-sighted since a clear statement […] can usually be used as a basis from which one may easily derive a more efficient algorithm.</p>
-<p>[…]</p>
-<p>The practice of first developing a clear and precise definition […] without regard to efficiency, and then using it as a guide and a test in exploring equivalent processes possessing other characteristics, such as greater efficiency, is very common in mathematics. It is a very fruitful practice which should not be blighted by premature emphasis on efficiency in computer execution.</p>
-<p>[…]</p>
-<p>Finally, overemphasis of efficiency leads to an unfortunate circularity in design: for reasons of efficiency early programming languages reflected the characteristics of the early computers, and each generation of computers reflects the needs of the programming languages of the preceding generation.</p>
-</div></blockquote>
-<p>Practically, logic programming is a great tool for naturally expressing computational tasks that use logical constraints. Large programs generally run into one or two of these tasks. Without logic programming these tasks must be solved in an ad-hoc and verbose way. Compare <a class="reference external" href="https://www.metalevel.at/sudoku/">Sudoku with Prolog</a> vs <a class="reference external" href="https://norvig.com/sudopy.shtml">Norvig’s Sudoku solution</a>. Other examples include parsers, typecheckers, and database queries.</p>
+<p>Sometimes the requirement that the value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.</p>
 </section>
 </section>
 

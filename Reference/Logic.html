@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -66,10 +67,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#identity">Identity</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#quantifiers">Quantifiers</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#terms">Terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#higher-order-logic">Higher-order logic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#predicates">Predicates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#substitution">Substitution</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Quantifiers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quantifiers">Quantifiers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#definitions">Definitions</a></li>
@@ -88,8 +89,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -109,9 +141,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Logic</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Logic</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Logic.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -338,29 +370,28 @@
 \[\rule{}{A \vdash A}{\text{id}}\]</div>
 </section>
 </section>
-<section id="quantifiers">
-<h2>Quantifiers<a class="headerlink" href="#quantifiers" title="Permalink to this heading"></a></h2>
-<section id="terms">
-<h3>Terms<a class="headerlink" href="#terms" title="Permalink to this heading"></a></h3>
-<p>The set of terms consists of variables <span class="math notranslate nohighlight">\(x\)</span>, named constants <span class="math notranslate nohighlight">\(P()\)</span> (written simply as <span class="math notranslate nohighlight">\(P\)</span>), and uninterpreted predicates <span class="math notranslate nohighlight">\(P(t_1,\ldots,t_n)\)</span> where <span class="math notranslate nohighlight">\(P\)</span> is a function symbol, <span class="math notranslate nohighlight">\(n \geq 1\)</span>, and <span class="math notranslate nohighlight">\(t_i\)</span> are terms.</p>
+<section id="higher-order-logic">
+<h2>Higher-order logic<a class="headerlink" href="#higher-order-logic" title="Permalink to this heading"></a></h2>
+<section id="predicates">
+<h3>Predicates<a class="headerlink" href="#predicates" title="Permalink to this heading"></a></h3>
+<p>Terms consist of variables <span class="math notranslate nohighlight">\(x\)</span>, literal values <span class="math notranslate nohighlight">\(v\)</span>, and applications of terms to terms. Variables quantify over the universal set, smaller domains can be defined by the membership notation in <a class="reference internal" href="#set-theory"><span class="std std-ref">Set theory</span></a>.</p>
+<p>If the term is a predicate (set) then it may be used as an atomic formula. Such an atomic formula <span class="math notranslate nohighlight">\(t\)</span> must satisfy the identity rule:</p>
 <div class="math notranslate nohighlight">
-\begin{array}{ccc}
-  \rule{}{x \vdash x}{\text{id}}
-  &amp;
-  \rule{}{P(x_1,\ldots,x_n) \vdash P(x_1,\ldots,x_n)}{\text{id}}
-\end{array}</div></section>
+\[\rule{}{t \vdash t}{\text{id}}\]</div>
+<p>Interpreted predicates may be defined using other rules so long as the identity rule is derivable and the rules are consistent.</p>
+</section>
 <section id="substitution">
 <h3>Substitution<a class="headerlink" href="#substitution" title="Permalink to this heading"></a></h3>
-<p><span class="math notranslate nohighlight">\(A[\overrightarrow{x \mapsto t}]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variables <span class="math notranslate nohighlight">\(\overrightarrow{x}\)</span> have been replaced by the propositions/terms <span class="math notranslate nohighlight">\(\overrightarrow{t}\)</span> (and bound variables have been renamed to fresh ones when necessary).</p>
+<p><span class="math notranslate nohighlight">\(A[\overrightarrow{x \mapsto t}]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variables <span class="math notranslate nohighlight">\(\overrightarrow{x}\)</span> have been replaced by terms <span class="math notranslate nohighlight">\(\overrightarrow{t}\)</span> in the appropriate domains (and bound variables have been renamed to fresh ones when necessary).</p>
 <blockquote>
 <div><div class="math notranslate nohighlight">
 \begin{array}{c}
-  \rule{\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
+  \rule{t\vdash t\quad\Gamma \vdash \Delta}{\Gamma[\overrightarrow{x \mapsto t}] \vdash \Delta[\overrightarrow{x \mapsto t}]}{\text{sub}}
 \end{array}</div></div></blockquote>
 </section>
-<section id="id1">
-<h3>Quantifiers<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>For these <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>.</p>
+<section id="quantifiers">
+<h3>Quantifiers<a class="headerlink" href="#quantifiers" title="Permalink to this heading"></a></h3>
+<p>For these the variable <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>.</p>
 <div class="math notranslate nohighlight">
  \begin{array}{cc}
     \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
@@ -380,7 +411,7 @@
     \rule{\Gamma \vdash B, \Delta}{\Gamma \vdash A, \Delta}{\text{def}_R}
     &amp;
     \rule{\Gamma, B \vdash \Delta}{\Gamma, A \vdash \Delta}{\text{def}_L}
-  \end{array}</div><p>These rules can only be applied if the proposition <span class="math notranslate nohighlight">\(B\)</span> has a finite proof of its identity sequent <span class="math notranslate nohighlight">\(B \vdash B\)</span>. Propositions without such a proof are said to have a circular definition.</p>
+  \end{array}</div><p>The notation and rules are valid only if there is a finite proof of the identity sequent <span class="math notranslate nohighlight">\(B \vdash B\)</span>.</p>
 </section>
 <section id="infinite-proof-structures">
 <span id="infinite"></span><h2>Infinite proof structures<a class="headerlink" href="#infinite-proof-structures" title="Permalink to this heading"></a></h2>
@@ -393,10 +424,10 @@
 \end{array}\]</div>
 </section>
 <section id="set-theory">
-<span id="connectives"></span><h2>Set theory<a class="headerlink" href="#set-theory" title="Permalink to this heading"></a></h2>
-<p>We define <span class="math notranslate nohighlight">\(t\in \{x\mid A\} \defeq A[x\mapsto t]\)</span>. Here the elements <span class="math notranslate nohighlight">\(t\)</span> of the sets are propositions; e.g. we can prove <span class="math notranslate nohighlight">\(\bot \in \{x\mid x \leftrightarrow \bot \}\)</span>. Usually the variables in set theory range over sets. Hence we introduce new variables <span class="math notranslate nohighlight">\(x^S\)</span> which range over sets. Since all sets are of the form <span class="math notranslate nohighlight">\(\{x\mid X\}\)</span> these can be translated as follows:</p>
+<span id="id1"></span><h2>Set theory<a class="headerlink" href="#set-theory" title="Permalink to this heading"></a></h2>
+<p>We define <span class="math notranslate nohighlight">\(t\in \{x\mid A\} \defeq A[x\mapsto t]\)</span>. Here the elements <span class="math notranslate nohighlight">\(t\)</span> of the sets are propositions; e.g. we can prove <span class="math notranslate nohighlight">\(\bot \in \{x\mid x \leftrightarrow \bot \}\)</span>. Usually the variables in set theory range over sets. Hence we introduce new variables <span class="math notranslate nohighlight">\(x^S\)</span> which range over sets. Since all sets <span class="math notranslate nohighlight">\(S\)</span> are of the form <span class="math notranslate nohighlight">\(\{x\mid X_S \}\)</span> these can be translated as follows:</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}x^S \defeq \{x\mid X\}\\\{x^S\mid X\} \defeq \{X\mid X\}\\\{x\mid X\} \in Y \defeq X \in Y\\\forall x^S. X \defeq \forall X. X\\\{x^S\mid X\} \subseteq \{x^S\mid Y\} \defeq X \to Y\end{aligned}\end{align} \]</div>
+\[ \begin{align}\begin{aligned}x^S \defeq \{x\mid X_S \}\\\{x^S\mid X\} \defeq \{X_S \mid X\}\\\{x\mid X\} \in Y \defeq X \in Y\\\forall x^S. X \defeq \forall X. X\\\{x^S\mid X\} \subseteq \{x^S\mid Y\} \defeq X \to Y\end{aligned}\end{align} \]</div>
 <p>So for example <span class="math notranslate nohighlight">\(t^S\in \{x^S\mid x^S \in x^S \}\)</span> expands to <span class="math notranslate nohighlight">\(T \in \{X \mid X \in \{x\mid X\} \}\)</span></p>
 <p>We can also define set-builder notation <span class="math notranslate nohighlight">\(\{a_1,\ldots,a_n\} = \{x\mid x = a_1 \lor \ldots \lor x=a_n\}\)</span>.</p>
 <p>We define</p>
@@ -404,7 +435,7 @@
 \[ \begin{align}\begin{aligned}a \ocin B = \bang(a \in B)\\\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\\\exists x\in A. P(x) = \exists x. \bang(x \in A) \otimes P(x)\\\forall x\in A. P(x) = \forall x. (\bang(x\in A) \multimap P(x)\end{aligned}\end{align} \]</div>
 <section id="comprehension">
 <h3>Comprehension<a class="headerlink" href="#comprehension" title="Permalink to this heading"></a></h3>
-<p>We can prove the axiom schema of comprehension for (non-circular) formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>:</p>
+<p>We can prove the axiom schema of comprehension for formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>:</p>
 <ol class="arabic simple">
 <li><p><span class="math notranslate nohighlight">\(\vdash \phi \leftrightarrow \phi\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(\vdash x\in \{x\mid\phi\} \leftrightarrow \phi\)</span></p></li>
@@ -414,8 +445,9 @@
 </section>
 <section id="equality">
 <h3>Equality<a class="headerlink" href="#equality" title="Permalink to this heading"></a></h3>
+<p>Equality on sets is defined as follows:</p>
 <p><span class="math notranslate nohighlight">\(A=B \defeq \forall x. (x \in A \leftrightarrow x \in B)\)</span>.</p>
-<p>We can easily prove</p>
+<p>We can easily prove that this equality is an equivalence relation:</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\vdash A=A\\A=B\vdash B=A\\A=B,B=C\vdash A=C\end{aligned}\end{align} \]</div>
 <p>For substitution, we can prove <span class="math notranslate nohighlight">\(!(A=B), \phi \vdash \phi[A/B]\)</span> for any specific proposition <span class="math notranslate nohighlight">\(\phi\)</span>.</p>

@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,8 +55,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -75,9 +107,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Metaprogramming</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Metaprogramming</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Fexprs.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -89,7 +121,7 @@
              
   <section id="metaprogramming">
 <span id="fexprs"></span><h1>Metaprogramming<a class="headerlink" href="#metaprogramming" title="Permalink to this heading"></a></h1>
-<p>In Stroscot, as in Kernel <span id="id1">[<a class="reference internal" href="../zzreferences.html#id126" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span>, fexprs are functions that take code AST’s and a lexical environment instead of evaluated values. So when you write <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">f</span></code> is an operative, then <code class="docutils literal notranslate"><span class="pre">f</span></code> has a type like <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">:</span> <span class="pre">Env</span> <span class="pre">-&gt;</span> <span class="pre">Ast</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>. The <code class="docutils literal notranslate"><span class="pre">Env</span></code> is an opaque map that might or might not have bindings for <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>, and the AST is fragment like <code class="docutils literal notranslate"><span class="pre">((Sym</span> <span class="pre">'f')</span> <span class="pre">`App`</span> <span class="pre">(Sym</span> <span class="pre">'a'))</span> <span class="pre">`App`</span> <span class="pre">(Sym</span> <span class="pre">'b')</span></code>. Then <code class="docutils literal notranslate"><span class="pre">f</span></code> can do arbitrary operations with those, with the full power of the programming language, and in particular <code class="docutils literal notranslate"><span class="pre">f</span></code> can <code class="docutils literal notranslate"><span class="pre">eval</span></code> AST fragments with the env it’s given (or with envs from elsewhere).</p>
+<p>In Stroscot, as in Kernel <span id="id1">[<a class="reference internal" href="../zzreferences.html#id136" title="John N Shutt. Fexprs as the Basis of Lisp Function Application or \$vau : The Ultimate Abstraction. PhD thesis, WORCESTER POLYTECHNIC INSTITUTE, August 2010. URL: https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/.">Shu10</a>]</span>, fexprs are functions that take code AST’s and a lexical environment instead of evaluated values. So when you write <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">f</span></code> is an operative, then <code class="docutils literal notranslate"><span class="pre">f</span></code> has a type like <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">:</span> <span class="pre">Env</span> <span class="pre">-&gt;</span> <span class="pre">Ast</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>. The <code class="docutils literal notranslate"><span class="pre">Env</span></code> is an opaque map that might or might not have bindings for <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>, and the AST is fragment like <code class="docutils literal notranslate"><span class="pre">((Sym</span> <span class="pre">'f')</span> <span class="pre">`App`</span> <span class="pre">(Sym</span> <span class="pre">'a'))</span> <span class="pre">`App`</span> <span class="pre">(Sym</span> <span class="pre">'b')</span></code>. Then <code class="docutils literal notranslate"><span class="pre">f</span></code> can do arbitrary operations with those, with the full power of the programming language, and in particular <code class="docutils literal notranslate"><span class="pre">f</span></code> can <code class="docutils literal notranslate"><span class="pre">eval</span></code> AST fragments with the env it’s given (or with envs from elsewhere).</p>
 <p>The main power fexprs give over macros is that there’s no phase distinction. A macro is like an fexpr that builds up a single AST and calls eval at the end. But fexprs can call eval multiple times, and these can depend on the results of previous evaluations, so for example you can lookup a variable name stored in an argument and evaluate that name.</p>
 </section>
 

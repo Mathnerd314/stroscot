@@ -19,6 +19,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,6 +55,9 @@
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Dispatch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#formal-definition">Formal definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditions">Conditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#priorities">Priorities</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#next-method">Next method</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#list-methods">List methods</a></li>
@@ -61,8 +66,39 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -82,9 +118,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Dispatch</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Dispatch</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Dispatch.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -96,33 +132,49 @@
              
   <section id="dispatch">
 <h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this heading"></a></h1>
-<p>Stroscot supports pattern matching as well as predicate dispatch:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Dispatch cases are not ordered - they overlap and run in parallel. All cases are tried nondeterministically and run. If multiple predicates succeed, it is required that they produce the same result. For example if we were to modify the last case:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-
-<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="kt">Error:</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="n">conflict</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="p">`</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="p">`</span><span class="w"></span>
-</pre></div>
-</div>
-<p>But if the first clause was <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">1</span> <span class="pre">=</span> <span class="pre">2</span></code> it would be allowed. This behavior is useful for creating generic implementations that have optimized methods for specific types, and also for tests:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fib</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="nf">fib</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">fib</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fib</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
-
-<span class="o">#</span><span class="w"> </span><span class="n">test</span><span class="w"></span>
-<span class="nf">fib</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-</pre></div>
-</div>
-<p>Although writing <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">(fib</span> <span class="pre">5</span> <span class="pre">==</span> <span class="pre">5)</span></code> might be clearer.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
+<p>Stroscot is based on a term rewriting formalism and supports higher order terms, pattern matching, and predicate dispatch (conditional rewriting). In general rules are not ordered - they overlap and run in parallel. If multiple rules match, all cases are tried nondeterministically and run. It is required that for each possibility the program either throws an exception or produces the same output.</p>
 <p>Local functions are applied in the same way as global ones, i.e., the argument patterns of each rule are matched against the actual function arguments nondeterministically and optimal reduction is performed.</p>
 <p>If none of the rules match then the term does not reduce (it becomes a normal form) - to raise an exception a catch-all clause must be defined.</p>
+</section>
+<section id="formal-definition">
+<h2>Formal definition<a class="headerlink" href="#formal-definition" title="Permalink to this heading"></a></h2>
+<p>The substitution calculus consists of:</p>
+<ul class="simple">
+<li><p>A set A of preterms, defined to be the sequent trees of Stroscot’s core logic.</p></li>
+<li><p>The binary relation <code class="docutils literal notranslate"><span class="pre">R1</span> <span class="pre">:</span> <span class="pre">A</span> <span class="pre">times</span> <span class="pre">A</span></code> of cut elimination (actually a function), forming an abstract rewriting system on the preterms.</p></li>
+<li><p>A countably infinite subset <code class="docutils literal notranslate"><span class="pre">V</span></code> of preterms called variables, in particular applications of the Use rule.</p></li>
+<li><p>A substitution operation <code class="docutils literal notranslate"><span class="pre">sθ</span></code> taking a preterm <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">:</span> <span class="pre">A</span></code> and a mapping <code class="docutils literal notranslate"><span class="pre">θ</span> <span class="pre">:</span> <span class="pre">V</span> <span class="pre">-&gt;</span> <span class="pre">A</span></code> and producing another preterm. A finite mapping which maps variables <code class="docutils literal notranslate"><span class="pre">xi</span></code> to preterms <code class="docutils literal notranslate"><span class="pre">ti</span></code> and leaves all other variables unchanged is written as <code class="docutils literal notranslate"><span class="pre">[x1</span> <span class="pre">:=</span> <span class="pre">t1,</span> <span class="pre">...,</span> <span class="pre">xn</span> <span class="pre">:=</span> <span class="pre">tn]</span></code>. The substitution should be a homomorphism on <code class="docutils literal notranslate"><span class="pre">A</span></code>, i.e. for each syntactic construct of <code class="docutils literal notranslate"><span class="pre">A</span></code> such as <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">a</span></code> (application) or <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> (abstraction) we should have <code class="docutils literal notranslate"><span class="pre">sθ</span> <span class="pre">=</span> <span class="pre">(fθ)</span> <span class="pre">(aθ)</span> <span class="pre">``</span> <span class="pre">or</span> <span class="pre">``sθ</span> <span class="pre">=</span> <span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">aθ</span></code>.</p></li>
+</ul>
+<p>Finite terms <code class="docutils literal notranslate"><span class="pre">T_f</span></code> are representatives of equivalence classes of preterms under equivalence <code class="docutils literal notranslate"><span class="pre">E</span> <span class="pre">=</span> <span class="pre">(R1</span> <span class="pre">union</span> <span class="pre">R1</span> <span class="pre">inverse)*</span></code> of the substitution calculus. A variable <code class="docutils literal notranslate"><span class="pre">x</span></code> is free in a term <code class="docutils literal notranslate"><span class="pre">t</span></code> if <code class="docutils literal notranslate"><span class="pre">t[x:=s]</span> <span class="pre">!=</span> <span class="pre">t</span></code> for some preterm <code class="docutils literal notranslate"><span class="pre">s</span></code>. A term with no free variables is called closed, otherwise open. A context is a term with a distinguished free variable <code class="docutils literal notranslate"><span class="pre">□</span></code> called the hole. The notation <code class="docutils literal notranslate"><span class="pre">C[x]</span></code> where <code class="docutils literal notranslate"><span class="pre">C</span></code> is a context means <code class="docutils literal notranslate"><span class="pre">C[□</span> <span class="pre">:=</span> <span class="pre">x]</span></code>.</p>
+<p>The set of terms <code class="docutils literal notranslate"><span class="pre">T</span></code> includes both finite and infinite terms, and is defined as the <a class="reference external" href="https://en.wikipedia.org/wiki/Complete_metric_space#Completion">metric completion</a> of finite terms with a distance function <span class="math notranslate nohighlight">\(2^{-n}\)</span> if the n-th level of the terms is the first level where a difference appears and 0 if the terms are equal. As a convention the top level is level zero.</p>
+<p>A rewriting system consists of a substitution calculus and a set of conditional rewrite rules <code class="docutils literal notranslate"><span class="pre">RL</span> <span class="pre">:</span> <span class="pre">T</span> <span class="pre">times</span> <span class="pre">P</span> <span class="pre">times</span> <span class="pre">T</span></code>, where <code class="docutils literal notranslate"><span class="pre">P</span></code> are predicates <code class="docutils literal notranslate"><span class="pre">(T</span> <span class="pre">times</span> <span class="pre">T)</span> <span class="pre">times</span> <span class="pre">T</span> <span class="pre">times</span> <span class="pre">(V</span> <span class="pre">-&gt;</span> <span class="pre">A)</span></code> depending on the rewrite relation, left hand side, and match substitution.</p>
+<p>The single-step rewrite relation <code class="docutils literal notranslate"><span class="pre">R2</span> <span class="pre">:</span> <span class="pre">(T</span> <span class="pre">times</span> <span class="pre">T)</span> <span class="pre">-&gt;</span> <span class="pre">T</span> <span class="pre">times</span> <span class="pre">T</span></code> is defined as <code class="docutils literal notranslate"><span class="pre">\R</span> <span class="pre">-&gt;</span> <span class="pre">{</span> <span class="pre">(t,C[rθ])</span> <span class="pre">|</span> <span class="pre">C</span> <span class="pre">:</span> <span class="pre">context,</span> <span class="pre">θ</span> <span class="pre">:</span> <span class="pre">V</span> <span class="pre">-&gt;</span> <span class="pre">A,</span> <span class="pre">t</span> <span class="pre">E</span> <span class="pre">C[lθ],</span> <span class="pre">(R,t,θ)</span> <span class="pre">in</span> <span class="pre">p,</span> <span class="pre">(l,p,r)</span> <span class="pre">in</span> <span class="pre">RL</span> <span class="pre">}</span></code>. The reflexive transitive closure of reduction <code class="docutils literal notranslate"><span class="pre">R2*</span></code> is defined as, given <code class="docutils literal notranslate"><span class="pre">R</span></code>, the smallest set containing <code class="docutils literal notranslate"><span class="pre">R2</span></code> that is reflexively, transitively, and topologically closed.</p>
+<p>We then condense the relation: an SCC is a set S of terms such that for all s in S and terms t, <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">R2*</span> <span class="pre">t</span></code> and <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">R2*</span> <span class="pre">s</span></code> implies t in S. We define a new condensed reduction relation <code class="docutils literal notranslate"><span class="pre">R3</span></code> on terms, such that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">R3</span> <span class="pre">y</span></code> given <code class="docutils literal notranslate"><span class="pre">R</span></code> iff, letting A be the SCC of x and B the SCC of y, exists a in A, b in B such that a R2* b, A neq B. <code class="docutils literal notranslate"><span class="pre">R3</span></code> is acyclic, since the condensed terms are maximal, and transitively but not reflexively closed.</p>
+<p>The set of meaningless terms <code class="docutils literal notranslate"><span class="pre">U</span> <span class="pre">subset</span> <span class="pre">T</span></code> is defined w.r.t. <code class="docutils literal notranslate"><span class="pre">R3</span></code> given <code class="docutils literal notranslate"><span class="pre">R</span></code> to be the smallest set with the following properties:</p>
+<ul class="simple">
+<li><p>Contains all root-active terms. A term t is root-active if every reduct of t can be reduced to a term with a top-level redex.</p></li>
+<li><p>Closure under reduction. If <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">→</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>.</p></li>
+<li><p>Closure under substitution. For all <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">/.</span> <span class="pre">σ</span> <span class="pre">∈</span> <span class="pre">U</span></code></p></li>
+<li><p>Overlap. If a redex t overlaps a subterm, and this subterm is in U, then t in U.</p></li>
+<li><p>Indiscernibility - the meaningfullness of a term does not depend on its meaningless subterms. For all M, N, if N can be obtained from M by replacing a set of pairwise disjoint subterms in U with other terms of U, then M ∈ U if and only if N ∈ U.</p></li>
+<li><p>Topological closure</p></li>
+</ul>
+<p>We extend <code class="docutils literal notranslate"><span class="pre">R3</span></code> with reductions from meaningless terms to the <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code> exception to obtain <code class="docutils literal notranslate"><span class="pre">R4</span></code> given <code class="docutils literal notranslate"><span class="pre">R</span></code>. This is our final relation <code class="docutils literal notranslate"><span class="pre">Rf</span></code>.</p>
+<p>So far <code class="docutils literal notranslate"><span class="pre">R</span></code> been a parameter, so <code class="docutils literal notranslate"><span class="pre">Rf</span></code> is a function <code class="docutils literal notranslate"><span class="pre">(T</span> <span class="pre">times</span> <span class="pre">T)</span> <span class="pre">-&gt;</span> <span class="pre">T</span> <span class="pre">times</span> <span class="pre">T</span></code>. We take the “optimal prefixedpoint”, the intersection of the maximal prefixedpoints. I.e. we find the sets <code class="docutils literal notranslate"><span class="pre">Pre</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">:</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">Rf(R)</span> <span class="pre">},</span> <span class="pre">PreMax</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">in</span> <span class="pre">Pre</span> <span class="pre">:</span> <span class="pre">forall</span> <span class="pre">R'</span> <span class="pre">in</span> <span class="pre">Pre,</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">R'</span> <span class="pre">implies</span> <span class="pre">R=</span> <span class="pre">R'</span> <span class="pre">},</span> <span class="pre">R</span> <span class="pre">=</span> <span class="pre">intersection</span> <span class="pre">PreMax</span></code>. We warn on all the reductions in <code class="docutils literal notranslate"><span class="pre">Rf(R)</span> <span class="pre">\</span> <span class="pre">R</span></code> that are missing from <code class="docutils literal notranslate"><span class="pre">R</span></code> and make <code class="docutils literal notranslate"><span class="pre">R</span></code> not a fixed point of <code class="docutils literal notranslate"><span class="pre">Rf</span></code>.</p>
+<p>Evaluation an expression <code class="docutils literal notranslate"><span class="pre">e</span></code> first computes its set of normal forms <code class="docutils literal notranslate"><span class="pre">NF(e)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">e</span> <span class="pre">R</span> <span class="pre">x,</span> <span class="pre">not(exists</span> <span class="pre">y.</span> <span class="pre">x</span> <span class="pre">R</span> <span class="pre">y)</span> <span class="pre">}</span></code>. If there are any non-exception values in <code class="docutils literal notranslate"><span class="pre">NF(e)</span></code>, then the result is <code class="docutils literal notranslate"><span class="pre">{x</span> <span class="pre">in</span> <span class="pre">NF(e)</span> <span class="pre">|</span> <span class="pre">not(x</span> <span class="pre">:</span> <span class="pre">Exception)</span> <span class="pre">}</span></code>. Otherwise if there are one or more exceptions the compiler arbitrarily chooses an exception value. If the result of evaluation is a set with one element, that element is said to be the value of the expression.</p>
+<p>It is an error if the top-level expression does not evaluate to a value.</p>
+</section>
+<section id="conditions">
+<h2>Conditions<a class="headerlink" href="#conditions" title="Permalink to this heading"></a></h2>
+<p>For the TRS we have defined a condition as a predicate, but syntactically it is more limited. I’m thinking these forms:</p>
+<ul class="simple">
+<li><p>a boolean guard <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">condexpr</span></code> - the predicate holds if the expression reduces to true and does not reduce to false.</p></li>
+<li><p>a pattern guard <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">pat</span> <span class="pre">&lt;-</span> <span class="pre">exp</span></code> - the predicate holds if <code class="docutils literal notranslate"><span class="pre">exp</span></code> reduces to a form that is matched by <code class="docutils literal notranslate"><span class="pre">pat</span></code> and does not evaluate to a form not matching <code class="docutils literal notranslate"><span class="pre">pat</span></code>. A boolean guard is almost a pattern guard <code class="docutils literal notranslate"><span class="pre">True</span> <span class="pre">&lt;-</span> <span class="pre">g</span></code> but will match values like <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">amb</span> <span class="pre">true</span></code>.</p></li>
+<li><p>a non-linear pattern like <code class="docutils literal notranslate"><span class="pre">[x,x]</span></code> - this is converted to a linear pattern like <code class="docutils literal notranslate"><span class="pre">[x,y]</span></code>, and the predicate holds if <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are in normal form and syntactically identical.</p></li>
+</ul>
+</section>
 <section id="priorities">
 <h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this heading"></a></h2>
 <p>The way sequential matching expands is that there is a chain of priorities.</p>

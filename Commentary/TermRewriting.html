@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -50,14 +51,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -67,15 +75,15 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Term rewriting</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#rewrite-rules">Rewrite rules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#higher-order-rewriting">Higher-order rewriting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#currying">Currying</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#conditional-rewriting">Conditional rewriting</a></li>
@@ -83,17 +91,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#nondeterminism">Nondeterminism</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#infinite-reduction">Infinite reduction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#meaningless-terms">Meaningless terms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#equality-and-left-linearity">Equality and left-linearity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#left-nonlinearity">Left-nonlinearity</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#confluence">Confluence</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#normalization">Normalization</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#modularity">Modularity</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#hors">HORS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#concrete-strategies">Concrete strategies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-strategy">Evaluation strategy</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-matching">Higher-order matching</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#verifying-confluence">Verifying confluence</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
@@ -118,9 +125,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Term rewriting</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Term rewriting</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/TermRewriting.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -132,52 +139,37 @@
              
   <section id="term-rewriting">
 <h1>Term rewriting<a class="headerlink" href="#term-rewriting" title="Permalink to this heading"></a></h1>
-<section id="rewrite-rules">
-<h2>Rewrite rules<a class="headerlink" href="#rewrite-rules" title="Permalink to this heading"></a></h2>
-<p>A rewrite rule or clause is applied by matching the left hand side to the term or one of its subterms and applying the resulting substitution to the right hand side. As in predicate dispatch, we consider conditional TRSs so rewrite rules also have conditions - the rewrite rule can only be applied if its condition holds. The execution of a Stroscot program is modeled as applying rewrite rules until no more can be applied. A “value” in a TRS refers to a normal form, a term that cannot be reduced further.</p>
-<p>For example, with the rules <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">n</span> <span class="pre">|</span> <span class="pre">n</span> <span class="pre">&gt;</span> <span class="pre">0</span> <span class="pre">=</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">fact</span> <span class="pre">(n-1)</span></code> and <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">0</span> <span class="pre">=</span> <span class="pre">1</span></code>, we get the reduction sequence</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fact</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fact</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="mi">6</span><span class="w"></span>
-</pre></div>
-</div>
-<p>We say that <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">3</span></code> reduces to the value <code class="docutils literal notranslate"><span class="pre">6</span></code>, written more concisely as the rewrite rule <code class="docutils literal notranslate"><span class="pre">fact</span> <span class="pre">3</span> <span class="pre">=</span> <span class="pre">6</span></code>.</p>
-</section>
 <section id="higher-order-rewriting">
 <h2>Higher-order rewriting<a class="headerlink" href="#higher-order-rewriting" title="Permalink to this heading"></a></h2>
-<p>A higher order rewriting system (HORS) consists of a substitution calculus and a set of rewrite rules.</p>
-<p>A substitution calculus is an abstract rewriting system on a set of preterms. We assume an infinite number of atomic preterms, including variables, holes, symbols, and constants, indexed by integers, with holes being considered a subset of variables. We assume a substitution operation that renames bound variables as needed. A preterm is closed if it contains no free variables. A m-ary precontext is a preterm with holes 1 through m. It is linear if every hole occurs exactly once.</p>
-<p>Terms are representatives of equivalence classes of preterms under <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;*</span></code> of the substitution calculus. Contexts are similarly representatives of precontexts.</p>
-<p>A rewrite rule is of the form <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> where <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code> are both closed terms. The rewriting relation on terms is defined by <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">-&gt;</span> <span class="pre">N</span></code> if <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">C[l]</span></code> and <code class="docutils literal notranslate"><span class="pre">C[r]</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">N</span></code> for some rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> and context <code class="docutils literal notranslate"><span class="pre">C</span></code> containing a hole; <code class="docutils literal notranslate"><span class="pre">C[l]</span></code> means <code class="docutils literal notranslate"><span class="pre">C</span></code> with the hole substituted by <code class="docutils literal notranslate"><span class="pre">l</span></code>. Closed terms suffice because binders are in the substitution calculus, e.g. <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">plus</span> <span class="pre">x</span> <span class="pre">y</span></code> can be written as <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">y.</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">\x</span> <span class="pre">y.</span> <span class="pre">plus</span> <span class="pre">x</span> <span class="pre">y</span></code>.</p>
-<p>An example is the lambda calculus. The set of preterms is built from nullary symbols (variables, holes, symbols, and constants), applications of two preterms, and abstractions of a variable and a preterm. The substitution calculus rewriting rules are beta reduction and alpha renaming. Eta reduction can be added but makes the system only weakly orthogonal. <span id="id1">[<a class="reference internal" href="../zzreferences.html#id46" title="Jörg Endrullis, Dimitri Hendriks, and Jan Willem Klop. Highlights in infinitary rewriting and lambda calculus. Theoretical Computer Science, 464:48–71, December 2012. URL: https://www.sciencedirect.com/science/article/pii/S030439751200792X (visited on 2022-07-02), doi:10.1016/j.tcs.2012.08.018.">EHK12</a>]</span></p>
+<p>The definition is vaguely based on <span id="id1">[]</span>. But Ooostrom’s HORS definition, like Terese, uses closed terms and no separate substitution, avoiding free variables by adding additional binders, e.g. he writes the rule <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span></code> as <code class="docutils literal notranslate"><span class="pre">\x.</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">\x.</span> <span class="pre">1</span></code>. I don’t like this because it’s unclear how it interacts with currying, eta reduction, and conditional rewriting, so I added the substitution back.</p>
+<p>There is some question of whether context substitution is capture-avoiding, i.e. does <code class="docutils literal notranslate"><span class="pre">(\x.</span> <span class="pre">□)[□</span> <span class="pre">:=</span> <span class="pre">x]</span></code> not resolve to <code class="docutils literal notranslate"><span class="pre">(\x.</span> <span class="pre">x)</span></code>. Terese says it captures. With Oostrom this substitution is forbidden since <code class="docutils literal notranslate"><span class="pre">x</span></code> is not a closed term. In our more liberal definition this resolves to <code class="docutils literal notranslate"><span class="pre">(\y.</span> <span class="pre">x)</span></code> by alpha-renaming the variable.</p>
+<p>An example substitution calculus is the lambda calculus. The set of preterms is built from nullary symbols (variables, holes, symbols, and constants), applications of two preterms, and abstractions of a variable and a preterm. The substitution calculus rewriting rules are beta reduction and alpha renaming. Eta reduction can be added but makes the system only weakly orthogonal. <span id="id2">[<a class="reference internal" href="../zzreferences.html#id49" title="Jörg Endrullis, Dimitri Hendriks, and Jan Willem Klop. Highlights in infinitary rewriting and lambda calculus. Theoretical Computer Science, 464:48–71, December 2012. URL: https://www.sciencedirect.com/science/article/pii/S030439751200792X (visited on 2022-07-02), doi:10.1016/j.tcs.2012.08.018.">EHK12</a>]</span></p>
 </section>
 <section id="currying">
 <h2>Currying<a class="headerlink" href="#currying" title="Permalink to this heading"></a></h2>
-<p>In the literature TRS definitions are usually presented in a “functional” form where n-ary function symbols are applied to terms, forming <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">tn)</span></code> from n terms t1,…,tn and a function symbol f. In a curried system, also called “applicative”, function symbols are just nullary constants and there is only one form for combining terms, binary application, written as left-associative juxtaposition. Any TRS can be curried by rewriting <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">tn)</span></code> to <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tn</span></code> in the LHS and RHS of each rule.</p>
-<p>When compiling currying we translate the curried system to a set of partially applied function symbols, so that if <code class="docutils literal notranslate"><span class="pre">f</span></code> is the original binary function symbol and <code class="docutils literal notranslate"><span class="pre">f_0</span></code> is the nullary symbol in the curried system, then <code class="docutils literal notranslate"><span class="pre">f_0</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f_1(a)</span></code> and <code class="docutils literal notranslate"><span class="pre">f_1(a)</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">f(a,b)</span></code>, hence <code class="docutils literal notranslate"><span class="pre">f_0</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">f(a,b)</span></code>.</p>
+<p>Per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id84">KKSV95</a>]</span> there are three related TRSs:</p>
+<ul class="simple">
+<li><p>The standard uncurried system where a function application <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">tn)</span></code> is formed from an n-ary function symbol <code class="docutils literal notranslate"><span class="pre">f</span></code> and n terms t1,…,tn.</p></li>
+<li><p>A curried system where a function application <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tn</span></code> is formed from a nullary constant <code class="docutils literal notranslate"><span class="pre">f</span></code> and many application of the binary “application” operator, written as left-associative juxtaposition or more verbosely <code class="docutils literal notranslate"><span class="pre">App(f,x)</span></code>.</p></li>
+<li><p>A “partially parameterized” (PP) system containing <code class="docutils literal notranslate"><span class="pre">App</span></code> and, for each n-ary function symbol in the uncurried system, n-1 partial application symbols and “uncurrying” rules <code class="docutils literal notranslate"><span class="pre">App(f_i(...),</span> <span class="pre">x)</span> <span class="pre">=</span> <span class="pre">f_i+1</span> <span class="pre">(...,</span> <span class="pre">x)</span></code>. GHC does something similar with a <code class="docutils literal notranslate"><span class="pre">PAP</span></code> constructor, so it is <code class="docutils literal notranslate"><span class="pre">PAP</span> <span class="pre">1</span> <span class="pre">f_2</span> <span class="pre">a</span></code> instead of <code class="docutils literal notranslate"><span class="pre">f_1(a)</span></code>. This allows combining all the partial-application rules into one handler, but forces a uniform representation for partial applications.</p></li>
+</ul>
+<p>The uncurried system embeds in the curried system, i.e. for every uncurried term t there is a unique corresponding curried term t’, and every reduct of t corresponds to a reduct of t’ and vice-versa. Hence we lose no expressiveness by currying, and gain some expressiveness because only the curried system can express partially applied terms.</p>
+<p>The PP system is an extension of the uncurried system, and is isomorphic to the curried system. The normal forms of PP and curried are in a bijection, and each curried reduction step corresponds to one or more PP steps. The curried system is simpler than the PP system, so we use the curried definition for the language syntax and semantics. But the PP system may be useful for compilation. It’s easy to break the isomorphism though, e.g. <code class="docutils literal notranslate"><span class="pre">printf</span> <span class="pre">&quot;%i&quot;</span> <span class="pre">1</span></code> can be defined in the curried system but not in the PP system because the arity is variable.</p>
 </section>
 <section id="conditional-rewriting">
 <h2>Conditional rewriting<a class="headerlink" href="#conditional-rewriting" title="Permalink to this heading"></a></h2>
-<p>A conditional rewrite rule has the form <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">C1,</span> <span class="pre">...,</span> <span class="pre">Cn</span></code>. It consists of an unconditional rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> and conditions <code class="docutils literal notranslate"><span class="pre">Ci</span></code>. The conditions take the form of predicates <code class="docutils literal notranslate"><span class="pre">Pi(x1,</span> <span class="pre">...,</span> <span class="pre">xm,</span> <span class="pre">-&gt;)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">xi</span></code> are the free variables of <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code>, and <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is the rewrite relation of the system. Example predicates are:</p>
-<ul class="simple">
-<li><p>type predicates, term must be of a certain form</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">a</span></code> joins with, rewrites to, or is convertible to <code class="docutils literal notranslate"><span class="pre">b</span></code></p></li>
-</ul>
-<p>Ideally the rewrite relation would be defined as the fixed point of the rewrite rules. In particular letting <code class="docutils literal notranslate"><span class="pre">S</span></code> be the system we define <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> as a relation <code class="docutils literal notranslate"><span class="pre">R</span></code> such that <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">S(R)</span></code>. Terese presents the least fixed point. However, no fixed point may exist, for example with a rule <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">normal</span> <span class="pre">form</span></code>. In this case <code class="docutils literal notranslate"><span class="pre">S({})</span> <span class="pre">=</span> <span class="pre">{(a,a)}</span></code> and <code class="docutils literal notranslate"><span class="pre">S({a,a})</span> <span class="pre">=</span> <span class="pre">{}</span></code>. We solve this similarly to the optimal fixed point by using the intersection of the maximal prefixedpoints, in this case giving <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">{}</span></code>. We find the sets <code class="docutils literal notranslate"><span class="pre">Pre</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">:</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">S(R)</span> <span class="pre">},</span> <span class="pre">PreMax</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">in</span> <span class="pre">Pre</span> <span class="pre">:</span> <span class="pre">forall</span> <span class="pre">R'</span> <span class="pre">in</span> <span class="pre">Pre,</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">R'</span> <span class="pre">implies</span> <span class="pre">R=</span> <span class="pre">R'</span> <span class="pre">},</span> <span class="pre">R</span> <span class="pre">=</span> <span class="pre">intersection</span> <span class="pre">PreMax</span></code>. The choice is correct in that reductions must satisfy conditions, conservative in that systems which have multiple consistent interpretations, like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">if</span> <span class="pre">not(c</span> <span class="pre">-&gt;</span> <span class="pre">d);</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">d</span> <span class="pre">if</span> <span class="pre">not(a</span> <span class="pre">-&gt;</span> <span class="pre">b)</span></code>, do not reduce, but it still is not the least fixed point as it allows <code class="docutils literal notranslate"><span class="pre">a</span></code> to reduce in <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">if</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code> .</p>
-<p>We can add a form of logic programming by allowing conditions to mention variables not in the LHS or RHS, e.g. <code class="docutils literal notranslate"><span class="pre">precedes</span> <span class="pre">x</span> <span class="pre">z</span> <span class="pre">|</span> <span class="pre">precedes</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">&amp;&amp;</span> <span class="pre">precedes</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">=</span> <span class="pre">true</span></code> quantifies over all <code class="docutils literal notranslate"><span class="pre">y</span></code>. This further extends to allowing variables on the RHS not present on the LHS. Some syntax like <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">x.</span> <span class="pre">C</span> <span class="pre">=</span> <span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">=</span> <span class="pre">exists</span> <span class="pre">x.</span> <span class="pre">r</span></code> might make this easier to follow.</p>
+<p>In a general CTRS the reduction rules are of the form <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">|</span> <span class="pre">P</span> <span class="pre">-&gt;</span> <span class="pre">s</span></code>, where <code class="docutils literal notranslate"><span class="pre">P</span></code> is a predicate. The allowed rewrites of a conditional rule are the unconditional rewrites <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">-&gt;</span> <span class="pre">s</span></code> that satisfy the condition <code class="docutils literal notranslate"><span class="pre">P</span></code>. We can add a form of logic programming by allowing conditions to use variables not in the LHS, e.g. <code class="docutils literal notranslate"><span class="pre">precedes</span> <span class="pre">x</span> <span class="pre">z</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">y.</span> <span class="pre">precedes</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">&amp;&amp;</span> <span class="pre">precedes</span> <span class="pre">y</span> <span class="pre">z</span> <span class="pre">=</span> <span class="pre">true</span></code>. This further extends to allowing variables on the RHS not present on the LHS. A further extension allows LHSs that are a single variable but have a condition - some authors disallows variables LHSs. Some syntax like <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">x.</span> <span class="pre">C</span> <span class="pre">=</span> <span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">=</span> <span class="pre">exists</span> <span class="pre">x.</span> <span class="pre">r</span></code> might make this easier to follow.</p>
+<p>The definition of a CTRS is complicated by allowing predicates to refer to the rewrite relation <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>. Ideally the rewrite relation would be defined as a fixed point of the rewrite rules. I.e. letting <code class="docutils literal notranslate"><span class="pre">S</span></code> be the system as a function of the rewrite relation <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>, we would define <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> to be a relation <code class="docutils literal notranslate"><span class="pre">R</span></code> such that <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">S(R)</span></code>. Terese presents the least fixed point. However, with badly-behaved conditions, no fixed point may exist, so instead we use the “optimal prefixedpoint”, the intersection of the maximal prefixedpoints. I.e. we find the sets <code class="docutils literal notranslate"><span class="pre">Pre</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">:</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">S(R)</span> <span class="pre">},</span> <span class="pre">PreMax</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">R</span> <span class="pre">in</span> <span class="pre">Pre</span> <span class="pre">:</span> <span class="pre">forall</span> <span class="pre">R'</span> <span class="pre">in</span> <span class="pre">Pre,</span> <span class="pre">R</span> <span class="pre">subseteq</span> <span class="pre">R'</span> <span class="pre">implies</span> <span class="pre">R=</span> <span class="pre">R'</span> <span class="pre">},</span> <span class="pre">R</span> <span class="pre">=</span> <span class="pre">intersection</span> <span class="pre">PreMax</span></code>. We warn on all the reductions in <code class="docutils literal notranslate"><span class="pre">S(R)</span> <span class="pre">\</span> <span class="pre">R</span></code> that make it not a fixed point.</p>
+<p>For example, with a system with the single rule <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">normal</span> <span class="pre">form</span></code>, <code class="docutils literal notranslate"><span class="pre">S({})</span> <span class="pre">=</span> <span class="pre">{(a,a)}</span></code> and <code class="docutils literal notranslate"><span class="pre">S({a,a})</span> <span class="pre">=</span> <span class="pre">{}</span></code>. There is no fixed point, so the naive definition doesn’t work. The optimal prefixedpoint is <code class="docutils literal notranslate"><span class="pre">{}</span></code> so <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">{}</span></code>. But we warn that the reduction <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> is not included. As another example, take <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">if</span> <span class="pre">not(c</span> <span class="pre">-&gt;</span> <span class="pre">d);</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">d</span> <span class="pre">if</span> <span class="pre">not(a</span> <span class="pre">-&gt;</span> <span class="pre">b)</span></code>. The maximal (pre)fixedpoints are <code class="docutils literal notranslate"><span class="pre">{(a,b)}</span></code> and <code class="docutils literal notranslate"><span class="pre">{(c,d)}</span></code>, but their intersection is <code class="docutils literal notranslate"><span class="pre">{}</span></code> so the optimal prefixedpoint is <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">{}</span></code>. We warn that <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">d</span></code> are not included (extra diagnostics could show they are mutually exclusive). Lastly, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span> <span class="pre">if</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code> allows the reduction <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">b</span></code> as it is the maximal (pre)fixedpoint.</p>
+<p>The optimal prefixedpoint is correct in that reductions must satisfy conditions, conservative in that systems which have multiple differing interpretations do not reduce, but also a bit generous since it is maximal instead of least, and robust because independent rules are processed independently.</p>
+<p>As far as terminology, the literature uses “term rewriting” to refer to unconditional term rewriting and “conditional term rewriting” otherwise. But many popular programming languages such as Haskell have conditional dispatch (guards, patterns, etc.), so we instead use “term rewriting” to refer to conditional and unconditional systems, and we refer to “unconditional TRSs” when necessary.</p>
 </section>
 <section id="cycles">
 <h2>Cycles<a class="headerlink" href="#cycles" title="Permalink to this heading"></a></h2>
-<p>The untyped lambda calculus has cycles, e.g. <code class="docutils literal notranslate"><span class="pre">Omega</span> <span class="pre">=</span> <span class="pre">let</span> <span class="pre">w=\x.x</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">w</span> <span class="pre">w</span></code> reduces to itself and <span id="id2">[<a class="reference internal" href="../zzreferences.html#id136" title="Marissa Venturini Zilli. Reduction graphs in the lambda calculus. Theoretical Computer Science, 29(3):251–275, January 1984. URL: https://www.sciencedirect.com/science/article/pii/0304397584900021 (visited on 2022-06-08), doi:10.1016/0304-3975(84)90002-1.">VZ84</a>]</span> shows a 6-cycle <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">M</span> <span class="pre">I</span></code>. Similarly commutativity <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">a</span></code> generates cycles.</p>
-<p><span id="id3">[<a class="reference internal" href="../zzreferences.html#id35" title="Nachum Dershowitz and Jean-Pierre Jouannaud. Rewrite systems. In Handbook of Theoretical Computer Science (Vol. B): Formal Models and Semantics, pages 243–320. MIT Press, Cambridge, MA, USA, January 1991.">DJ91</a>]</span>’s notion of a congruence-class rewriting system is helpful - the rewrite rules are split into rules R and reversible equations S, and we consider the system R/S (R mod S). A term where only S rules apply (no R rules apply) is considered a normal form. So similarly we consider the <a class="reference external" href="https://en.wikipedia.org/wiki/Strongly_connected_component#Definitions">condensation</a> of the rewrite graph, condensing each SCC to a single term. A term is a “condensed normal form” if it has no reduction out of its SCC. Hence <code class="docutils literal notranslate"><span class="pre">Omega</span></code>,  <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">M</span> <span class="pre">I</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></code> would be condensed normal forms since their SCC contains themselves and they have no further reductions. We could further specify the normal form to be a canonical representative of the SCC, e.g. taking the smallest and lexicographically first element of the SCC, but leaving input unchanged seems better.</p>
+<p>The untyped lambda calculus has cycles, e.g. <code class="docutils literal notranslate"><span class="pre">Omega</span> <span class="pre">=</span> <span class="pre">let</span> <span class="pre">w=\x.x</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">w</span> <span class="pre">w</span></code> reduces to itself and <span id="id4">[<a class="reference internal" href="../zzreferences.html#id149" title="Marissa Venturini Zilli. Reduction graphs in the lambda calculus. Theoretical Computer Science, 29(3):251–275, January 1984. URL: https://www.sciencedirect.com/science/article/pii/0304397584900021 (visited on 2022-06-08), doi:10.1016/0304-3975(84)90002-1.">VZ84</a>]</span> shows a 6-cycle <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">M</span> <span class="pre">I</span></code>. Similarly commutativity <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">a</span></code> generates cycles.</p>
+<p><span id="id5">[<a class="reference internal" href="../zzreferences.html#id37" title="Nachum Dershowitz and Jean-Pierre Jouannaud. Rewrite systems. In Handbook of Theoretical Computer Science (Vol. B): Formal Models and Semantics, pages 243–320. MIT Press, Cambridge, MA, USA, January 1991. URL: https://www.cs.tau.ac.il/~nachum/papers/survey-draft.pdf (visited on 2022-02-25).">DJ91</a>]</span>’s notion of a congruence-class rewriting system is helpful - the rewrite rules are split into rules R and reversible equations S, and we consider the system R/S (R mod S). A term where only S rules apply (no R rules apply) is considered a normal form. So similarly we consider the <a class="reference external" href="https://en.wikipedia.org/wiki/Strongly_connected_component#Definitions">condensation</a> of the rewrite graph, condensing each SCC to a single term. This does away with the “rewriting modulo equations” formalism while still maintaining its power.</p>
+<p>A term is a “condensed normal form” if it has no reduction out of its SCC. Hence <code class="docutils literal notranslate"><span class="pre">Omega</span></code>,  <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">M</span> <span class="pre">I</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span></code> would be condensed normal forms since their SCC contains themselves and they have no further reductions. We could further specify the normal form to be a canonical representative of the SCC, e.g. taking the smallest and lexicographically first element of the SCC, but leaving input unchanged seems better.</p>
+<p>Orthogonal higher-order TRSs that are weakly head normalizing are acyclic, per <span id="id6">[<a class="reference internal" href="../zzreferences.html#id87" title="Jeroen Ketema, Jan Willem Klop, and Vincent van Oostrom. Vicious Circles in Rewriting Systems. In 5th International Workshop on Reduction Strategies in Rewriting and Programming, 20. Nara, Japan, April 2005. URL: https://www.dicosmo.org/WRS05/proceedings/jeroen.pdf.">KKvanOostrom05</a>]</span>, so the cycle condensation doesn’t affect standard functional programming because condensing acyclic rewriting systems gives back the same system. So the cycle detector doesn’t have to be that great, even supporting associativity/commutativity is going into PhD territory.</p>
 </section>
 <section id="nondeterminism">
 <h2>Nondeterminism<a class="headerlink" href="#nondeterminism" title="Permalink to this heading"></a></h2>
@@ -194,123 +186,124 @@
 </pre></div>
 </div>
 <p>However, top-level method dispatch nondeterminism is unresolvable. E.g. <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">a</span></code> with this example is an error  - there is no way to reconcile <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">c</span></code>, because the user can only see one output.</p>
-<p>Exceptions complicate the semantics. We want our reduction strategy to be normalizing, so that if there is any reduction sequence that produces a non-exception value, Stroscot evaluates to that non-exception value, rather than an exception. So <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">amb</span> <span class="pre">(throw</span> <span class="pre">b)</span></code> should reduce to 1. This provides the benefits of lazy evaluation.</p>
-<p>Also, exception propagation is nondeterministic. For example <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">=</span> <span class="pre">throw</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">c</span></code> will throw either <code class="docutils literal notranslate"><span class="pre">b</span></code> or <code class="docutils literal notranslate"><span class="pre">c</span></code> depending on which is evaluated first, and the choice is observable in a program with <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">catch</span> <span class="pre">print</span></code>. Exception nondeterminism is a different category from method dispatch nondeterminism and by default is considered benign, i.e. the compiler will not output a diagnostic and will resolve the <code class="docutils literal notranslate"><span class="pre">catch</span></code> using the exception that is most efficient to dispatch. But you can enable an error or warning that ensures thrown exceptions are unique. Regardless, the verification system will verify properties for all choices of exception, i.e. <code class="docutils literal notranslate"><span class="pre">(case</span> <span class="pre">e</span> <span class="pre">of</span> <span class="pre">Exc</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">1;</span> <span class="pre">Exc</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">&quot;a&quot;)</span> <span class="pre">:</span> <span class="pre">Int</span></code> will fail but <code class="docutils literal notranslate"><span class="pre">(case</span> <span class="pre">(throw</span> <span class="pre">b)</span> <span class="pre">of</span> <span class="pre">Exc</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">1;</span> <span class="pre">Exc</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">&quot;a&quot;)</span> <span class="pre">:</span> <span class="pre">Int</span></code> will not because <code class="docutils literal notranslate"><span class="pre">c</span></code> is unreachable.</p>
+<p>Exceptions complicate the semantics. The literature speaks of “normalizing” strategies that will eventually find a normal form if one exists, but otherwise are allowed to loop forever. In Stroscot non-termination is an exception, so the corresponding property is that if there is any reduction sequence that produces a non-exception value, Stroscot evaluates to that non-exception value, rather than an exception. So <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">amb</span> <span class="pre">(throw</span> <span class="pre">b)</span></code> should reduce to 1. This provides the benefits of lazy evaluation.</p>
+<p>The alternative “strict” evaluation strategy would be what the literature calls a “perpetual” strategy - if any strategy diverges, then a perpetual strategy diverges. With a perpetual strategy inlining etc. hold only if reduction of the expression terminates, i.e. one must keep track of termination properties. A perpetual strategy gives the wrong behavior for if-then-else and short-circuit functions, so strict languages special-case these to ensure they don’t cause nontermination. Perpetual strategies are antagonistic, “I’ll crash your program if I can”. The evaluation strategies article discusses strict vs lazy more - overall lazy seems better.</p>
+<p>Also, exception propagation is nondeterministic. For example <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">=</span> <span class="pre">throw</span> <span class="pre">b</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">c</span></code> will throw either <code class="docutils literal notranslate"><span class="pre">b</span></code> or <code class="docutils literal notranslate"><span class="pre">c</span></code> depending on which is evaluated first, and the choice is observable in a program with <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">catch</span> <span class="pre">print</span></code>. Exception nondeterminism is a different category from method dispatch nondeterminism and generally seems benign. So the compiler will not output a diagnostic and will resolve the <code class="docutils literal notranslate"><span class="pre">catch</span></code> using the exception that is most efficient to dispatch. But you can enable an error or warning that ensures caught exceptions are unique. Regardless, the verification system will verify properties for all choices of exception, i.e. <code class="docutils literal notranslate"><span class="pre">(case</span> <span class="pre">e</span> <span class="pre">of</span> <span class="pre">Exc</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">1;</span> <span class="pre">Exc</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">&quot;a&quot;)</span> <span class="pre">:</span> <span class="pre">Int</span></code> will fail but <code class="docutils literal notranslate"><span class="pre">(case</span> <span class="pre">(throw</span> <span class="pre">b)</span> <span class="pre">of</span> <span class="pre">Exc</span> <span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">1;</span> <span class="pre">Exc</span> <span class="pre">c</span> <span class="pre">-&gt;</span> <span class="pre">&quot;a&quot;)</span> <span class="pre">:</span> <span class="pre">Int</span></code> will not because <code class="docutils literal notranslate"><span class="pre">c</span></code> is unreachable.</p>
 </section>
 <section id="infinite-reduction">
 <h2>Infinite reduction<a class="headerlink" href="#infinite-reduction" title="Permalink to this heading"></a></h2>
-<p>Infinite reduction is useful because it is “smoother” than finite reduction - normal forms exist more often, and there are fewer non-converging reduction sequences. For example <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">x</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">fib</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">2</span> <span class="pre">::</span> <span class="pre">zipWith</span> <span class="pre">(+)</span> <span class="pre">fib</span> <span class="pre">(head</span> <span class="pre">fib)</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">fib</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">2</span> <span class="pre">::</span> <span class="pre">3</span> <span class="pre">::</span> <span class="pre">...</span></code>, and <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">let</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">\x.</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">t</span> <span class="pre">t</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">t</span> <span class="pre">t</span> <span class="pre">t</span> <span class="pre">t</span></code>. With infinite reduction all of these terms have a proper denotation, instead of having to work with head normal forms and partially evaluated terms. Also I/O can be modeled as an infinite value with sub-terms for each outcome of the I/O operation.</p>
-<p>The idea is to extend our set of terms to include infinite terms, defined as the <a class="reference external" href="https://en.wikipedia.org/wiki/Complete_metric_space#Completion">metric completion</a> of finite terms with a distance function <span class="math notranslate nohighlight">\(2^{-n}\)</span> if the n-th level of the terms is the first level where a difference appears and 0 if the terms are equal. As a convention the top level is level zero.</p>
-<p>The literature <span id="id4">[<a class="reference internal" href="../zzreferences.html#id127" title="Jakob Grue Simonsen. Weak Convergence and Uniform Normalization in Infinitary Rewriting. In Christopher Lynch, editor, Proceedings of the 21st International Conference on Rewriting Techniques and Applications, volume 6 of Leibniz International Proceedings in Informatics (LIPIcs), 311–324. Dagstuhl, Germany, 2010. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik. \subsection Other We study infinitary term rewriting systems containing finitely many rules. For these, we show that if a weakly convergent reduction is not strongly convergent, it contains a term that reduces to itself in one step (but the step itself need not be part of the reduction). Using this result, we prove the starkly surprising result that for any orthogonal system with finitely many rules, the system is weakly normalizing under weak convergence if\f\ it is strongly normalizing under weak convergence if\f\ it is weakly normalizing under strong convergence if\f\ it is strongly normalizing under strong convergence. As further corollaries, we derive a number of new results for weakly convergent rewriting: Systems with finitely many rules enjoy unique normal forms, and acyclic orthogonal systems are confluent. Our results suggest that it may be possible to recover some of the positive results for strongly convergent rewriting in the setting of weak convergence, if systems with finitely many rules are considered. Finally, we give a number of counterexamples showing failure of most of the results when infinite sets of rules are allowed. URL: http://drops.dagstuhl.de/opus/volltexte/2010/2660 (visited on 2022-07-25), doi:10.4230/LIPIcs.RTA.2010.311.">Sim10</a>]</span> defines the transitive closure of reduction <span class="math notranslate nohighlight">\(\overset{*}{\to}\)</span> using ordinals, with the identity relation <span class="math notranslate nohighlight">\(\{x\|(x,x)\}\)</span>, the successor relation <span class="math notranslate nohighlight">\(\overset{*}{\to} \circ \to\)</span>, and a limit operation. Some confusion arises because there are multiple definitions for the limit, “weak” convergence which is the standard metric space definition and a newer “strong” convergence which requires that the depth of the redexes contracted in the successive steps tends to infinity. There is the additional complication that reductions may happen after the limit is taken, e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">x)</span> <span class="pre">a</span></code> has <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">a</span> <span class="pre">-ω&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">b</span></code>, <span id="id5">[<a class="reference internal" href="../zzreferences.html#id34" title="Nachum Dershowitz, Stéphane Kaplan, and David A. Plaisted. Rewrite, rewrite, rewrite, rewrite, rewrite, …. Theoretical Computer Science, 83(1):71–96, June 1991. URL: https://www.sciencedirect.com/science/article/pii/0304397591900409 (visited on 2022-07-02), doi:10.1016/0304-3975(91)90040-9.">DKP91</a>]</span> so a reduction sequence must be defined to be of any ordinal length.</p>
-<p>I think strong convergence is the wrong direction. If there is a reduction that switches heads, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">X</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">(c</span> <span class="pre">X);</span> <span class="pre">b</span> <span class="pre">X</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">(c</span> <span class="pre">X)</span></code>, then I don’t want to say that there are no w-reductions, as with weak or strong convergence, but instead I want <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">e</span> <span class="pre">-w&gt;</span> <span class="pre">a</span> <span class="pre">(mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x)</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">e</span> <span class="pre">-w&gt;</span> <span class="pre">b</span> <span class="pre">(mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x)</span></code>. TRSs are in general nondeterministic, so definitions requiring a single limit to exist are too strong - the convergence condition should actually be weakened further. For cycle condensation we would like to equate as many terms as possible, so the reduction relation should be as big as possible.</p>
-<p>So rather than a single, unique limit, we instead want to define the transitive closure of reduction as the topological closure of the set <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">b</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;&gt;</span> <span class="pre">b</span> <span class="pre">}</span></code>. Thus <code class="docutils literal notranslate"><span class="pre">b</span></code> is a w-reduct of <code class="docutils literal notranslate"><span class="pre">a</span></code> if it is an <a class="reference external" href="https://en.wikipedia.org/wiki/Adherent_point">adherent point</a>. In particular each w-reduct is either an accumulation point, i.e. a limit of a sequence of distinct reducts (possibly from different reduction sequences), or an isolated point which can be reached in a finite number of reductions from <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p>
-<p>This allows obtaining all infinite reducts without ordinals, because this definition of infinite reduction is transitive. Proof: a reduction <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-w&gt;</span> <span class="pre">b</span> <span class="pre">-w&gt;</span> <span class="pre">c</span></code> means for all depths  <span class="math notranslate nohighlight">\(d_1,d_2 \in \mathbb{N}\)</span> there exists some <span class="math notranslate nohighlight">\(b_c \in \{ b' : b \twoheadleftarrow b' \}\)</span>, <span class="math notranslate nohighlight">\(a_b \in \{ a' : a \twoheadleftarrow a' \}\)</span> such that <span class="math notranslate nohighlight">\(c\)</span> matches <span class="math notranslate nohighlight">\(b_c\)</span> to depth <span class="math notranslate nohighlight">\(d_1\)</span> and <span class="math notranslate nohighlight">\(b\)</span> matches <span class="math notranslate nohighlight">\(a_b\)</span> to depth <span class="math notranslate nohighlight">\(d_2\)</span>. Then for any depth <span class="math notranslate nohighlight">\(d\)</span>, we can set <span class="math notranslate nohighlight">\(d_1=d\)</span> to obtain a term <span class="math notranslate nohighlight">\(b_c\)</span> matching <span class="math notranslate nohighlight">\(c\)</span> to depth <span class="math notranslate nohighlight">\(d\)</span> for which there is a finite reduction <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">-&gt;&gt;</span> <span class="pre">b_c</span></code>. Then we can compute the highest depth of <code class="docutils literal notranslate"><span class="pre">b</span></code> used during this reduction - set <span class="math notranslate nohighlight">\(d_2\)</span> to the maximum of this and <span class="math notranslate nohighlight">\(d\)</span>, obtaining a term <code class="docutils literal notranslate"><span class="pre">a_b</span></code> for which there is a finite reduction <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;&gt;</span> <span class="pre">a_b</span></code> that matches <code class="docutils literal notranslate"><span class="pre">b``to</span> <span class="pre">depth</span> <span class="pre">:math:`d_2`.</span> <span class="pre">Then</span> <span class="pre">replacing</span> <span class="pre">the</span> <span class="pre">subterms</span> <span class="pre">of</span> <span class="pre">``b</span></code> below depth <span class="math notranslate nohighlight">\(d_2\)</span> with those from <code class="docutils literal notranslate"><span class="pre">a_b</span></code> in the reduction <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">-&gt;&gt;</span> <span class="pre">b_c</span></code>, we obtain a reduction <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;&gt;</span> <span class="pre">a_b</span> <span class="pre">-&gt;&gt;</span> <span class="pre">b_c'</span></code> where <code class="docutils literal notranslate"><span class="pre">b_c'</span></code> matches <code class="docutils literal notranslate"><span class="pre">c</span></code> to at least depth <span class="math notranslate nohighlight">\(d\)</span>. Hence <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-w&gt;</span> <span class="pre">c</span></code>.</p>
-<p>Using the previous example, with <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">a</span> <span class="pre">-ω&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">b</span></code>, let’s say we want an approximation of depth 2. <code class="docutils literal notranslate"><span class="pre">b_c</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">b</span></code> and matches <code class="docutils literal notranslate"><span class="pre">c</span></code> exactly. The highest depth of <code class="docutils literal notranslate"><span class="pre">b</span></code> used in the reduction <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">b_c</span></code> is 1, so <span class="math notranslate nohighlight">\(d_2\)</span> is the approximation depth 2. <code class="docutils literal notranslate"><span class="pre">a_b</span> <span class="pre">=</span>&#160; <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">c))</span> <span class="pre">a</span></code>. Our final reduction is then <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">c))</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">c))</span> <span class="pre">b</span></code>.</p>
-<p>The theorem only works if the rules are limited to finite depth, a common restriction in infinitary TRSs. The main place this might bite is conditional TRSs, where e.g. equality can inspect infinite terms. Equality and type membership have natural approximations of examining to a depth, which can probably be worked into the fixpoint, taking the intersection of the closure of the finite approximations of the prefixedpoints. Other predicates might not be so well behaved, but the infinite reduction is mainly to smooth finite terms so weird behavior on infinite terms doesn’t matter too much.</p>
+<p>Infinite reduction is useful because it is “smoother” than finite reduction - normal forms exist more often. For example <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">x</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">fib</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">2</span> <span class="pre">::</span> <span class="pre">zipWith</span> <span class="pre">(+)</span> <span class="pre">fib</span> <span class="pre">(head</span> <span class="pre">fib)</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">fib</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">2</span> <span class="pre">::</span> <span class="pre">3</span> <span class="pre">::</span> <span class="pre">...</span></code>, and <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">let</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">\x.</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">t</span> <span class="pre">t</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">t</span> <span class="pre">t</span> <span class="pre">t</span> <span class="pre">t</span></code>. With finite reduction we would have to use head normal forms and partially evaluated terms. With infinite reduction all of these terms have a proper denotation. Also I/O can be modeled as an infinite value with sub-terms for each outcome of the I/O operation.</p>
+<p>The idea is to extend our set of terms to include infinite terms, defined as the <a class="reference external" href="https://en.wikipedia.org/wiki/Complete_metric_space#Completion">metric completion</a> of finite terms with a distance function <span class="math notranslate nohighlight">\(2^{-n}\)</span> if the n-th level of the terms is the first level where a difference appears and 0 if the terms are equal. By convention the top level is level zero. This definition is equivalent to a co-inductive definition of terms, i.e. the largest set consisting of term-parts whose subterms are co-inductive terms.</p>
+<p>This set, like the real numbers, is uncountably large and includes terms with no finite description. A more tractable subset is the rational terms, finite cyclic structures (called rational because rational numbers have the similar property that their decimal expansion repeats when written out), but these can’t represent non-repeating structures like the list of fibonacci numbers. The implementation will have to use some computable approximation. Practically most programs will only deal with finite or rational terms so performance on other types of terms is not critical.</p>
+<p>There are various extensions of the transitive closure to infinitary reduction, so the question arises as to which one to use. <span id="id7">[]</span> discusses several and provides an ordering so that each is mostly a proper subset of the next (not sure about P* subset bi-infinite). Many of these use the monotonic closure X*, which is the least fixedpoint of the function G defined as G(R) = X(R) union R, which by the (transfinite) Kleene fixed-point theorem exists and is the limit/union of the sequence <span class="math notranslate nohighlight">\(X^0 = \emptyset, X^{n+1} = G(X^n), X^\delta = \bigcup_{\alpha &lt; \delta} X^\alpha\)</span>.</p>
+<ul class="simple">
+<li><p>S*, the monotonic closure of strongly converging reduction sequences, “strong” being a requirement that the depth of the redexes contracted in successive steps tends to infinity. S=S* for “compatible” TRSs, ones where t R u imply C[t] R C[u] for any context C, which all iTRSs satisfy.</p></li>
+<li><p>W*=A=A*, the monotonic closure of weakly converging reduction sequences, and also the <a class="reference external" href="https://en.wikipedia.org/wiki/Adherent_point">adherent points</a> of reduction sequences in the metric space. Weak convergence by itself is not transitively closed, e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">x)</span> <span class="pre">a</span></code> has <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">a</span> <span class="pre">-ω&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">(g</span> <span class="pre">...)))</span> <span class="pre">b</span></code> <span id="id8">[]</span> <span id="id9">[<a class="reference internal" href="../zzreferences.html#id137" title="Jakob Grue Simonsen. Weak Convergence and Uniform Normalization in Infinitary Rewriting. In Christopher Lynch, editor, Proceedings of the 21st International Conference on Rewriting Techniques and Applications, volume 6 of Leibniz International Proceedings in Informatics (LIPIcs), 311–324. Dagstuhl, Germany, 2010. Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik. \subsection Other We study infinitary term rewriting systems containing finitely many rules. For these, we show that if a weakly convergent reduction is not strongly convergent, it contains a term that reduces to itself in one step (but the step itself need not be part of the reduction). Using this result, we prove the starkly surprising result that for any orthogonal system with finitely many rules, the system is weakly normalizing under weak convergence if\f\ it is strongly normalizing under weak convergence if\f\ it is weakly normalizing under strong convergence if\f\ it is strongly normalizing under strong convergence. As further corollaries, we derive a number of new results for weakly convergent rewriting: Systems with finitely many rules enjoy unique normal forms, and acyclic orthogonal systems are confluent. Our results suggest that it may be possible to recover some of the positive results for strongly convergent rewriting in the setting of weak convergence, if systems with finitely many rules are considered. Finally, we give a number of counterexamples showing failure of most of the results when infinite sets of rules are allowed. URL: http://drops.dagstuhl.de/opus/volltexte/2010/2660 (visited on 2022-07-25), doi:10.4230/LIPIcs.RTA.2010.311.">Sim10</a>]</span>, hence the need for closure. By definition of adherent point, each w-reduct is either an accumulation point, i.e. a appears arbitrarily close infinitely often in a reduction sequence, or an isolated point which can be reached in a finite number of reductions.</p></li>
+<li><p>P*: the monotonic closure of the pointwise closure of the reflexive transitive closure (finite multi-step relation).</p></li>
+<li><p>bi-infinite rewriting, defined in <span id="id10">[]</span> Section 6.2 as the greatest relation R such that R = the reflexive transitive closure of single-step rewriting union R lifted to apply to subterms.</p></li>
+<li><p>T*: the monotonic closure of T, the topological closure of the reflexive transitive closure. T itself is not transitively closed, e.g. <code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">0</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">true;</span> <span class="pre">leq</span> <span class="pre">(s</span> <span class="pre">x)</span> <span class="pre">(s</span> <span class="pre">y)</span> <span class="pre">=</span> <span class="pre">leq</span> <span class="pre">x</span> <span class="pre">y;</span> <span class="pre">inf</span> <span class="pre">=</span> <span class="pre">s</span> <span class="pre">inf</span></code> has <code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">inf</span> <span class="pre">inf</span> <span class="pre">T</span> <span class="pre">leq</span> <span class="pre">(mu</span> <span class="pre">x.</span> <span class="pre">s</span> <span class="pre">x)</span> <span class="pre">(mu</span> <span class="pre">y.</span> <span class="pre">s</span> <span class="pre">y)</span> <span class="pre">T</span> <span class="pre">true</span></code> (by topological closure of finite approximations of the S towers) but not <code class="docutils literal notranslate"><span class="pre">leq</span> <span class="pre">inf</span> <span class="pre">inf</span> <span class="pre">T</span> <span class="pre">true</span></code> (because the terms are of finite depth). Alternatively I have defined T* as the smallest relation M such that M is reflexively, transitively, and topologically closed and contains the single-step relation, which I think is equivalent.</p></li>
+</ul>
+<p>S* is the standard in the literature but doesn’t have much going for it besides that. If there is a reduction that switches heads, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">X</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">(c</span> <span class="pre">X);</span> <span class="pre">b</span> <span class="pre">X</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">(c</span> <span class="pre">X)</span></code>, then S* says there are no w-reductions. W* has <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">e</span> <span class="pre">-w&gt;</span> <span class="pre">a</span> <span class="pre">(mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x)</span></code> and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">e</span> <span class="pre">-w&gt;</span> <span class="pre">b</span> <span class="pre">(mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x)</span></code>. TRSs are in general nondeterministic, so the “strong” definition that requires a single limit to exist is too strong.</p>
+<p>For cycle condensation we would like to equate as many terms as possible to get large SCCs, and similarly a large reduction relation means there will be an escape from infinite regresses. As an example, with bi-infinite rewriting or T*, the hypercollapsing term <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">C</span> <span class="pre">x</span></code> with rule <code class="docutils literal notranslate"><span class="pre">C</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">x</span></code> will reduce to every term (limit of approximations <code class="docutils literal notranslate"><span class="pre">C^n</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">f</span></code>), making it ambiguous, while with W* and P* the hypercollapsing term only reduces to itself hence is a condensed normal form. Similarly with <code class="docutils literal notranslate"><span class="pre">C</span> <span class="pre">A</span> <span class="pre">=</span> <span class="pre">A</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a constant, <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">C</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">A</span></code> with bi-infinite/T* but W*/P* don’t reduce at all. Bi-infinite and T* seem equally simple to formalize since they are both single fixed points, so it seems T* wins because it’s larger.</p>
+<p>Also conditional rewriting can interact with infinite reduction and cause unwanted behavior with a weak closure. For example consider the system <code class="docutils literal notranslate"><span class="pre">ds</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">e</span></code> and reducing the infinite term <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">ds</span> <span class="pre">G</span> <span class="pre">G</span></code> (in <span id="id11">[<a class="reference internal" href="../zzreferences.html#id91" title="Jan Willem Klop. Combinatory Reduction Systems. PhD thesis, Rijksuniversiteit Utrecht, June 1980. URL: https://eprints.illc.uva.nl/id/eprint/1876/ (visited on 2022-09-24).">Klo80</a>]</span> this is achieved by the system <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span> <span class="pre">a;</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">ds</span> <span class="pre">x</span> <span class="pre">(c</span> <span class="pre">x)</span></code>). Since <code class="docutils literal notranslate"><span class="pre">e</span></code> is a normal form hence equal to itself, all finite terms defined by <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">e</span> <span class="pre">or</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">ds</span> <span class="pre">T</span> <span class="pre">T</span> <span class="pre">}</span></code> reduce to <code class="docutils literal notranslate"><span class="pre">e</span></code>. So using a bi-infinite closure, <code class="docutils literal notranslate"><span class="pre">G</span></code> uniquely reduces to <code class="docutils literal notranslate"><span class="pre">e</span></code>. But with a weak closure <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">=</span> <span class="pre">ds</span> <span class="pre">e</span> <span class="pre">X</span></code> is a normal form and the system becomes nondeterministic. Similarly with <code class="docutils literal notranslate"><span class="pre">dk</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">e</span> <span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">dk</span> <span class="pre">G</span> <span class="pre">G</span></code>, we should get <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">(e</span> <span class="pre">(e</span> <span class="pre">...))</span></code> as the unique result, but with a weak closure we don’t. Another tricky system is <code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e;</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">c</span> <span class="pre">b</span></code> - the obvious reduction is <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e</span></code>, but this system has a hidden circularity of the form <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e</span></code> if <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e</span></code>.</p>
+<p>The common notions of an ARS carry over to infinitary reductions: <span id="id12">[]</span></p>
+<ul class="simple">
+<li><p>transitive reduction: irreflexive kernel of reduction closure</p></li>
+<li><p>normal form: irreducible term</p></li>
+<li><p>strongly normalizing (terminating): every infinite reduction sequence has a limit</p></li>
+<li><p>nonterminating reduction: infinite reduction sequence with no limit or that does not reduce to its limit</p></li>
+<li><p>weakly normalizing (normalizing): every term has a reduction to a normal form</p></li>
+<li><p>confluence: if t reduces to t1 and t2, then there is a common term s such that t1 and t2 reduce to s.</p></li>
+<li><p>Church-Rosser: if t1 is equivalent to t2, then there is a common term s such that t1 and t2 reduce to s.</p></li>
+<li><p>normal form property w.r.t. reduction:: if u reduces to t and s, and s is a normal form, then t reduces to s</p></li>
+<li><p>normal form property: if t is equivalent to s and s is a normal form, then t reduces to s</p></li>
+<li><p>unique normalization w.r.t. reduction: if t reduces to t1 and t2, and t1, t2 are normal forms, then t1=t2</p></li>
+<li><p>unique normalization: if t1 is equivalent to t2, and t1, t2 are normal forms, then t1=t2</p></li>
+</ul>
+<p>However common theorems such as Newman’s lemma do not, so it is not clear how useful these are.</p>
 </section>
 <section id="meaningless-terms">
 <h2>Meaningless terms<a class="headerlink" href="#meaningless-terms" title="Permalink to this heading"></a></h2>
-<p>If a term never reaches a normal form, then there’s not much semantic meaning in it.  We could compute equivalence classes of these terms but it is easier to define them all away. <span id="id6">[<a class="reference internal" href="../zzreferences.html#id79" title="R. Kennaway, V. van Oostrom, and F.-J. de Vries. Meaningless terms in rewriting. Artificial Intelligence Preprint Series, May 1999. URL: https://dspace.library.uu.nl/handle/1874/26465 (visited on 2022-07-09).">KvOdV99</a>]</span> defines the set of “mute” terms, the smallest set with the following properties:</p>
+<p>If a term never reaches a normal form, then there’s not much semantic meaning in it.  We could compute equivalence classes of these terms but it is easier to define them all away.:cite:<cite>kennawayMeaninglessTermsRewriting1999</cite> defines criteria for a set of meaningless terms:</p>
 <ul class="simple">
 <li><p>Contains all root-active terms. A term t is root-active if every reduct of t can be reduced to a term with a top-level redex.</p></li>
 <li><p>Closure under reduction. If <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">→</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>.</p></li>
 <li><p>Closure under substitution. For all <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">/.</span> <span class="pre">σ</span> <span class="pre">∈</span> <span class="pre">U</span></code></p></li>
-<li><p>Overlap. For all <code class="docutils literal notranslate"><span class="pre">(\x.M)</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">(\x.M)</span> <span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>. More generally if M nontrivially matches a subterm of the LHS of some rule, i.e. for some position <code class="docutils literal notranslate"><span class="pre">u</span></code> and substitution <code class="docutils literal notranslate"><span class="pre">σ</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">subterm</span> <span class="pre">(l</span> <span class="pre">/.</span> <span class="pre">σ)</span> <span class="pre">u</span></code> and <code class="docutils literal notranslate"><span class="pre">subterm</span> <span class="pre">l</span> <span class="pre">u</span></code> is not a variable, then the overall LHS is in U, <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">/.</span> <span class="pre">σ</span> <span class="pre">∈</span> <span class="pre">U</span></code>.</p></li>
+<li><p>Overlap. If a redex t overlaps a subterm, and this subterm is in U, then t in U. More specifically, if M nontrivially matches a subterm of the LHS of some rule, i.e. for some position <code class="docutils literal notranslate"><span class="pre">u</span></code> and substitution <code class="docutils literal notranslate"><span class="pre">σ</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">subterm</span> <span class="pre">(l</span> <span class="pre">/.</span> <span class="pre">σ)</span> <span class="pre">u</span></code> and <code class="docutils literal notranslate"><span class="pre">subterm</span> <span class="pre">l</span> <span class="pre">u</span></code> is not a variable, then the overall LHS is in U, <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">/.</span> <span class="pre">σ</span> <span class="pre">∈</span> <span class="pre">U</span></code>. Specifically for the lambda calculus, if <code class="docutils literal notranslate"><span class="pre">(\x.M)</span> <span class="pre">∈</span> <span class="pre">U</span></code> then <code class="docutils literal notranslate"><span class="pre">(\x.M)</span> <span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>. Another way of looking at it is that we want to ensure adding rules <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">Meaningless</span></code> preserves confluence.</p></li>
 <li><p>Indiscernibility - the meaningfullness of a term does not depend on its meaningless subterms. For all M, N, if N can be obtained from M by replacing a set of pairwise disjoint subterms in U with other terms of U, then M ∈ U if and only if N ∈ U.</p></li>
 </ul>
-<p>There is also closure under expansion introduced in <span id="id7">[<a class="reference internal" href="../zzreferences.html#id116" title="Paula Severi and Fer-Jan de Vries. Decomposing the Lattice of Meaningless Sets in the Infinitary Lambda Calculus. In Lev D. Beklemishev and Ruy de Queiroz, editors, Logic, Language, Information and Computation, Lecture Notes in Computer Science, 210–227. Berlin, Heidelberg, 2011. Springer. doi:10.1007/978-3-642-20920-8_22.">SdeVries11</a>]</span>: if <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">→</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>. This makes the set easier to reason about, but we want <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">amb</span> <span class="pre">meaningless</span></code> to reduce to 1, so <code class="docutils literal notranslate"><span class="pre">t</span></code> can’t be meaningless itself, hence we don’t want this property.</p>
-<p>Mute terms form an easy set, <span id="id8">[<a class="reference internal" href="../zzreferences.html#id20" title="A. Bucciarelli, A. Carraro, G. Favro, and A. Salibra. Graph easy sets of mute lambda terms. Theoretical Computer Science, 629:51–63, May 2016. URL: https://www.sciencedirect.com/science/article/pii/S0304397515011858 (visited on 2022-07-01), doi:10.1016/j.tcs.2015.12.024.">BCFS16</a>]</span> meaning we can safely equate all mute terms to an exception term without changing the semantics of normal terms. In particular we can equate them to a <code class="docutils literal notranslate"><span class="pre">NonTermination</span></code> or <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code> exception.</p>
-<p>Every TRS with unique normal forms (UN=) can be extended to a confluent TRS with the same set of normal forms by adding bottom terms and reductions to normal forms and bottoms that preserve the equivalence classes of terms. <span id="id9">[<a class="reference internal" href="../zzreferences.html#id96" title="Aart Middeldorp. Modular aspects of properties of term rewriting systems related to normal forms. In G. Goos, J. Hartmanis, D. Barstow, W. Brauer, P. Brinch Hansen, D. Gries, D. Luckham, C. Moler, A. Pnueli, G. Seegmüller, J. Stoer, N. Wirth, and Nachum Dershowitz, editors, Rewriting Techniques and Applications, volume 355, pages 263–277. Springer Berlin Heidelberg, Berlin, Heidelberg, 1989. URL: http://link.springer.com/10.1007/3-540-51081-8_113 (visited on 2021-09-14), doi:10.1007/3-540-51081-8_113.">Mid89</a>]</span> It’s not clear if meaningless terms accomplish this extension.</p>
-</section>
-<section id="equality-and-left-linearity">
-<span id="trs-equality-linearity"></span><h2>Equality and left-linearity<a class="headerlink" href="#equality-and-left-linearity" title="Permalink to this heading"></a></h2>
-<p>There are several notions of equality, here presented in the order of decreasing strength (earlier implies later):</p>
+<p><span id="id13">[<a class="reference internal" href="../zzreferences.html#id126" title="Paula Severi and Fer-Jan de Vries. Decomposing the Lattice of Meaningless Sets in the Infinitary Lambda Calculus. In Lev D. Beklemishev and Ruy de Queiroz, editors, Logic, Language, Information and Computation, Lecture Notes in Computer Science, 210–227. Berlin, Heidelberg, 2011. Springer. doi:10.1007/978-3-642-20920-8_22.">SdeVries11</a>]</span> adds closure under expansion: if <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">∈</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">→</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">∈</span> <span class="pre">U</span></code>. This makes the set easier to reason about, but we want <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">amb</span> <span class="pre">Meaningless</span></code> to evaluate to 1, so <code class="docutils literal notranslate"><span class="pre">t</span></code> can’t be meaningless itself, hence we don’t want this property.</p>
+<p>We do add topological closure as a property of the mute terms, to preserve the property that the infinitary rewriting relation is closed. Essentially we are constructing a relation <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">(u,Meaningless)</span> <span class="pre">:</span> <span class="pre">u</span> <span class="pre">in</span> <span class="pre">U</span> <span class="pre">}</span></code>; it is easy to to see from our metric definition that this is closed iff U is closed. Then our new relation is <code class="docutils literal notranslate"><span class="pre">R'</span> <span class="pre">=</span> <span class="pre">R</span> <span class="pre">union</span> <span class="pre">M</span></code> which is closed because the union of two closed sets is closed.</p>
+<p>There are various sets of meaningless terms, going roughly in decreasing size as follows:</p>
 <ul class="simple">
-<li><p>strict equality <code class="docutils literal notranslate"><span class="pre">eq_s</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">y</span></code> - require all variables to be in normal form, reduce both sides to normal form, then compare with syntactic equality.</p></li>
-<li><p>syntactic equality matches unreduced terms, hence can match even if the term doesn’t have a normal form. It is the notion used for non-linear TRS in the literature.</p></li>
+<li><p>not head normalizing - head active or infinite left spine form or infinite abstraction</p></li>
+<li><p>head active or infinite left spine form x1 … xn -&gt; (…P2)P1.</p></li>
+<li><p>head active or infinite abstraction x1 -&gt; x2 -&gt; …</p></li>
+<li><p>head active - x1 … xn -&gt; R P1 … Pk where R is root-active</p></li>
+<li><p>not weak head normalizing - strong active or strong infinite left spine form (…P2) P1</p></li>
+<li><p>strong active - R P1 … Pk where R is root-active</p></li>
+<li><p>mute / root-active = not top normalizing</p></li>
+</ul>
+<p>Root-active or the set of “mute” terms is the smallest set (included by definition), and seems fine. It satisfies all the other properties, meaning we just have to check root-activeness.</p>
+<p>A meaningless term set forms an easy set, <span id="id14">[<a class="reference internal" href="../zzreferences.html#id21" title="A. Bucciarelli, A. Carraro, G. Favro, and A. Salibra. Graph easy sets of mute lambda terms. Theoretical Computer Science, 629:51–63, May 2016. URL: https://www.sciencedirect.com/science/article/pii/S0304397515011858 (visited on 2022-07-01), doi:10.1016/j.tcs.2015.12.024.">BCFS16</a>]</span> meaning we can safely equate all meaningless terms to an exception term without changing the semantics of normal terms. In particular we can equate them to a <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code> exception.</p>
+<p>With these reductions every term has a normal form. Proof <span id="id15">[]</span>: A term t is either meaningless or not (ignoring reductions to <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code>). If it is meaningless, it reduces to the normal form <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code>. If it is not, then it can be reduced to a root-stable term <code class="docutils literal notranslate"><span class="pre">s</span></code>. Repeating the construction recursively on the subterms of s at depth 1 constructs a reduction of t to a term which is stable at every depth, i.e. a normal form.</p>
+<p>Every TRS with unique normal forms (UN=) can be extended to a confluent TRS with the same set of normal forms by adding bottom terms and reductions to normal forms and bottoms that preserve the equivalence classes of terms. <span id="id16">[<a class="reference internal" href="../zzreferences.html#id104" title="Aart Middeldorp. Modular aspects of properties of term rewriting systems related to normal forms. In G. Goos, J. Hartmanis, D. Barstow, W. Brauer, P. Brinch Hansen, D. Gries, D. Luckham, C. Moler, A. Pnueli, G. Seegmüller, J. Stoer, N. Wirth, and Nachum Dershowitz, editors, Rewriting Techniques and Applications, volume 355, pages 263–277. Springer Berlin Heidelberg, Berlin, Heidelberg, 1989. URL: http://link.springer.com/10.1007/3-540-51081-8_113 (visited on 2021-09-14), doi:10.1007/3-540-51081-8_113.">Mid89</a>]</span> Meaningless terms don’t accomplish this extension because a term <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">amb</span> <span class="pre">meaningless</span></code> can reduce to <code class="docutils literal notranslate"><span class="pre">Meaningless</span></code> instead of <code class="docutils literal notranslate"><span class="pre">1</span></code> hence breaking even UNR.</p>
+</section>
+<section id="left-nonlinearity">
+<span id="trs-equality-linearity"></span><h2>Left-nonlinearity<a class="headerlink" href="#left-nonlinearity" title="Permalink to this heading"></a></h2>
+<p>There are several notions of equality that could be used for non-linear patterns, here presented in the order of decreasing strength (earlier implies later):</p>
+<ul class="simple">
+<li><p>strict equality <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - true if both sides reduce to same unique normal form, false if reduce to different unique normal forms, indeterminate if could reduce to same or different normal forms.</p></li>
+<li><p>syntactic equality <code class="docutils literal notranslate"><span class="pre">syn_eq</span> <span class="pre">a</span> <span class="pre">b</span></code> matches terms (reduced or unreduced) that are syntactically identical. It can match even if the term doesn’t have a normal form. It is the notion commonly used for non-left-linear TRSs in the literature.</p></li>
+<li><p>oriented equality <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;*</span> <span class="pre">b</span></code> holds if <code class="docutils literal notranslate"><span class="pre">a</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">b</span></code>.</p></li>
 <li><p>join equality <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">↓</span> <span class="pre">b</span></code> means that a common reduct exists, i.e. there is a term <code class="docutils literal notranslate"><span class="pre">c</span></code> such that <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">-&gt;</span> <span class="pre">c</span></code>.</p></li>
 <li><p>semi-equational equality <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">≈</span> <span class="pre">b</span></code> means that <code class="docutils literal notranslate"><span class="pre">a</span></code> can be rewritten to <code class="docutils literal notranslate"><span class="pre">b</span></code> via rewrites and inverse rewrites.</p></li>
 </ul>
-<p>Computing any of these equalities is of complexity at least <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> because it is a nontrivial property of the reduction relation.</p>
-<p>Consider <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span> <span class="pre">a;</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">d</span> <span class="pre">x</span> <span class="pre">(c</span> <span class="pre">x);</span> <span class="pre">d</span> <span class="pre">x</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e</span></code>. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">c</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">x</span> <span class="pre">x</span></code>. Abbreviate <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">x</span> <span class="pre">x</span></code>. For the different equalities:</p>
+<p>Computing any of these equalities is of complexity <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> - at least <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> because it is a nontrivial property of the reduction relation, but at most <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> because for equal terms there is a finite rewrite sequence as proof. If reduction is convergent, then for strict equality this reduction sequence can be computed straightforwardly by reducing to normal form, whereas the others involve a brute force search.</p>
+<p>Semi-equational equality has “spooky action at a distance” when non-deterministic terms are involved. Consider the system <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c;</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">(not</span> <span class="pre">x)</span> <span class="pre">=</span> <span class="pre">d</span></code> and the terms <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">{a,b,c}</span> <span class="pre">{a,b,c}</span></code>.</p>
 <ul class="simple">
-<li><p>strict equality denies reducing <code class="docutils literal notranslate"><span class="pre">G</span></code>, because if <code class="docutils literal notranslate"><span class="pre">G</span></code> is reducible then it is not a normal form and equality does not hold. Hence <code class="docutils literal notranslate"><span class="pre">G</span></code> is a normal form and <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">G</span></code>.</p></li>
-<li><p>syntactic equality and join equality allow the reductions <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">e</span></code> and <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">e</span> <span class="pre">x</span></code>, but <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">e</span> <span class="pre">x</span> <span class="pre">!=</span> <span class="pre">e</span></code> so the system is nondeterministic for <code class="docutils literal notranslate"><span class="pre">a</span></code>.</p></li>
-<li><p>semi-equational equality concludes from the nondeterministic reduction that <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">e</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">e</span></code>, so the reduction <code class="docutils literal notranslate"><span class="pre">mu</span> <span class="pre">x.</span> <span class="pre">d</span> <span class="pre">e</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">e</span></code> holds and <code class="docutils literal notranslate"><span class="pre">a</span></code> reduces deterministically to <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p></li>
+<li><p>For semi-equational equality, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">a</span></code> reduces to the 4 combinations <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">{b,c}</span> <span class="pre">{b,c}</span></code>, but the “spooky” equality <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">≈</span> <span class="pre">c</span></code> holds, so the <code class="docutils literal notranslate"><span class="pre">f</span></code> rule does not apply. Hence these 4 combinations are the normal forms.</p></li>
+<li><p>For strict, syntactic, oriented, and join equalities, <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">!=</span> <span class="pre">c</span></code> so the two heterogeneous combinations <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">b</span> <span class="pre">c</span></code> and <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">b</span></code> reduce to <code class="docutils literal notranslate"><span class="pre">d</span></code>. The <code class="docutils literal notranslate"><span class="pre">f</span></code> rule does not apply to <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">b</span> <span class="pre">b</span></code>, or <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">c</span> <span class="pre">c</span></code>.</p></li>
 </ul>
-<p>More generally, syntactic equality and join equality are not stable, meaning if the terms involved are reduced then they may not be equal anymore (Terese 4.11.1, page 145 / PDF page 165). This instability means that the CTRS may not be confluent even if the unconditional TRS is. Strict equality and semi-equational equality are stable. For a confluent rewriting system semi-equational equality is equivalent to join equality, it just allows more reductions.</p>
-<p>As another example, consider a nondeterministic term <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span></code>. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">a</span></code> reduces to both <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">c</span></code>. With semi-equational equality, <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">c</span></code> is actually true, so <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">a</span></code> only reduces to true. Hence <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">!=</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">...</span></code> would not reduce <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">a</span></code>. With strict equality <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">==</span> <span class="pre">a</span></code> reduces to both true and false, hence reducing <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">a</span></code> would reduce <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">b</span> <span class="pre">c</span></code>. Semi-equational equality seems to have the wrong behavior here because it equates all reducts of a nondeterministic term. Strict equality seems easier to understand in the context of nondeterminism.</p>
-<p>Overall, strict equality is the most conservative, the choice used in traditional programming languages, and the one whose behavior seems easiest to understand. It does reduce the laziness of the language a bit but even Haskell’s equality is strict.</p>
+<p>To ensure convergence we have to have stable conditions, meaning if the terms involved are reduced then they are still equal (Terese 4.11.1, page 145 / PDF page 165). For example consider the system <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">f</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span></code> and the term <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code>.</p>
 <ul class="simple">
-<li><p>convergent (confluent and terminating) - These include typed systems such as the simply typed lambda calculus. For these, the result is the same no matter how they are reduced. So the focus is on do the reduction efficiently, compiling to fast assembly via a state machine and data format analysis and/or doing optimal reduction to reduce in the smallest number of steps.</p></li>
+<li><p>For strict, join, and semi-equational equality, we have that <code class="docutils literal notranslate"><span class="pre">(a</span> <span class="pre">==</span> <span class="pre">a)</span> <span class="pre">=</span> <span class="pre">(a</span> <span class="pre">==</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">(b</span> <span class="pre">==</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">true</span></code> so <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">c</span></code> and also <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span></code> directly.</p></li>
+<li><p>For syntactic and oriented equality, we do not have <code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">==</span> <span class="pre">a</span></code>, so <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code> reduces to both <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">c</span></code> and the system is nondeterministic.</p></li>
 </ul>
+<p>Terese’s example 4.11.5 that join equality is not confluent does not work because with the optimal prefixedpoint we have <code class="docutils literal notranslate"><span class="pre">c</span> <span class="pre">e</span> <span class="pre">=</span> <span class="pre">e</span></code>. Still, join equality is unstable in a non-confluent system. For example <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">x;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">c</span></code> and the term <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span></code>:</p>
+<ul class="simple">
+<li><p>With strict, syntactic, and oriented equality, there are only 2 NFs: <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">b</span></code>, and <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">c</span></code>.</p></li>
+<li><p>With join and semi-equational equality, there is a third reduction pattern <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">b/c</span></code>, giving the additional normal form <code class="docutils literal notranslate"><span class="pre">c</span></code>.</p></li>
+</ul>
+<p>Overall strict equality is the most conservative (least accepting), and the one whose behavior seems easiest to understand. It does reduce the laziness of the language a bit but even Haskell’s <code class="docutils literal notranslate"><span class="pre">==</span></code> function is strict. So we’ll go with strict equality.</p>
+<p>There is some question about reducible expressions as patterns, e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">f</span> <span class="pre">a&#64;x</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">x</span></code>. I think this can be handled separately from non-linear patterns.</p>
 <section id="confluence">
 <h3>Confluence<a class="headerlink" href="#confluence" title="Permalink to this heading"></a></h3>
-<p>Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem:  Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. <span id="id10">[<a class="reference internal" href="../zzreferences.html#id85" title="Jan Willem Klop and Roel de Vrijer. Extended term rewriting systems. In S. Kaplan and M. Okada, editors, Conditional and Typed Rewriting Systems, Lecture Notes in Computer Science, 26–50. Berlin, Heidelberg, 1991. Springer. doi:10.1007/3-540-54317-1_79.">KdeVrijer91</a>]</span> So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.</p>
+<p>Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem:  Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. <span id="id17">[<a class="reference internal" href="../zzreferences.html#id92" title="Jan Willem Klop and Roel de Vrijer. Extended term rewriting systems. In S. Kaplan and M. Okada, editors, Conditional and Typed Rewriting Systems, Lecture Notes in Computer Science, 26–50. Berlin, Heidelberg, 1991. Springer. URL: https://ir.cwi.nl/pub/20015/20015A.pdf, doi:10.1007/3-540-54317-1_79.">KdeVrijer91</a>]</span> So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.</p>
 <p>Confluence avoids situations where a system may branch into two distinct diverging states. It makes finding a normalizing strategy much easier as the strategy only has to avoid getting stuck evaluating a term infinitely (using the same rule infinitely often), as opposed to UN→ where the strategy must avoid using the wrong reduction rule at every step.</p>
 <p>The Knuth-Bendix algorithm produces a confluent system from a set of non-oriented equations, but the rules in programs are oriented, so using this would be confusing. Not to mention that the algorithm fails often. So that’s out.</p>
-<p>A necessary condition for confluence is weak/local confluence, i.e. each critical pair is convergent. But this is not sufficient. Newman’s lemma is that a terminating locally confluent TRS is confluent. But termination is quite strong. A generalization is a critical pair system <span id="id11">[<a class="reference internal" href="../zzreferences.html#id63" title="Nao Hirokawa and Aart Middeldorp. Decreasing Diagrams and Relative Termination. arXiv:0910.2853 [cs], October 2009. Comment: v3: missing references added. URL: http://arxiv.org/abs/0910.2853 (visited on 2021-09-14), arXiv:0910.2853.">HM09</a>]</span> (also called decreasingly confluent): the system must be left-linear, locally confluent, and its critical pair steps must be <em>relatively terminating</em>, i.e. the relation ‘arbitrary steps followed by a critical pair step followed by arbitrary steps’ is terminating. Trivial critical pair steps can be excluded, hence this includes weakly orthogonal TRSs. For a terminating TRS the TRS syntactic equality notion is equivalent to strict equality, hence the system is left linear in the CTRS sense, hence why this includes Newman’s lemma.</p>
+<p>A necessary condition for confluence is weak/local confluence, i.e. each critical pair is convergent. But this is not sufficient. Newman’s lemma is that a terminating locally confluent TRS is confluent. But termination is quite strong. A generalization is a critical pair system <span id="id18">[<a class="reference internal" href="../zzreferences.html#id67" title="Nao Hirokawa and Aart Middeldorp. Decreasing Diagrams and Relative Termination. arXiv:0910.2853 [cs], October 2009. Comment: v3: missing references added. URL: http://arxiv.org/abs/0910.2853 (visited on 2021-09-14), arXiv:0910.2853.">HM09</a>]</span> (also called decreasingly confluent): the system must be left-linear, locally confluent, and its critical pair steps must be <em>relatively terminating</em>, i.e. the relation ‘arbitrary steps followed by a critical pair step followed by arbitrary steps’ is terminating. Trivial critical pair steps can be excluded, hence this includes weakly orthogonal TRSs. For a terminating TRS the TRS syntactic equality notion is equivalent to strict equality, hence the system is left linear in the CTRS sense, hence why this includes Newman’s lemma.</p>
 <p>We say → has random descent (RD), if for each R:a ↔∗b with b in normal form, all maximal reductions from a have length d(R) and end in b. Systems with random descent are confluent.</p>
 </section>
 <section id="normalization">
 <h3>Normalization<a class="headerlink" href="#normalization" title="Permalink to this heading"></a></h3>
 <p>A hypernormalizing strategy is a strategy that is normalizing even if arbitrary reduction steps are taken before and after steps of the strategy. This allows the compiler to make optimizations without changing the behavior of the program. A hypernormalizing strategy allows aggressive optimizations and program transforms.</p>
-<p>Leftmost outermost reduction is the basis of lazy evaluation and is hypernormalizing for the lambda calculus. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated - the simplest example is parallel outermost) - it’s hypernormalizing for critical pair TRSs (decreasingly confluent TRSs), in particular weakly orthogonal TRSs. <span id="id12">[<a class="reference internal" href="../zzreferences.html#id64" title="Nao Hirokawa and Aart Middeldorp. Strategies for Decreasingly Confluent Rewrite Systems. Reduction Strategies in Rewriting and Programming, pages 23, 2011.">HM11</a>]</span></p>
 <p>There are also stronger properties than normalization. A Church-Rosser strategy is one with common reducts, i.e. there exist m and n, such that <span class="math notranslate nohighlight">\(F^m(t)=F^n(u)\)</span> for every t and u equal via forward/backward evaluation. A normalizing strategy is Church-Rosser if the system is confluent and weakly normalizing (i.e. all objects have a normal form). In general a many-step CR strategy exists for effective ARS’s, i.e. countable (in a computable fashion) and with a computable reduction relation. But the strategy is quite hard to compute, as it has to synchronize reducing subterms so that all components are reduced the same amount. And it’s not clear that this synchronization offers anything to the programmer.</p>
 <p>Cofinal strategies are weaker than Church-Rosser but stronger than normalizing: for every term a, if a reduces in a finite number of steps to b, then there is an object c obtained by applying the strategy some number of times to a such that b reduces to c. For critical pair TRSs any “fair” strategy that ensures every redex is eventually contracted is cofinal. The cofinal property provides slick proofs - it ensures every redex not part of a cycle is contracted. But at runtime non-normalizing terms have indistinguishable behavior (infinite loop), hence this means the cofinal strategy is doing unnecessary work.</p>
 <p>There are also termination properties like strong convergence that ensure that for every term, there exists some number of reduction steps after which the head cannot be rewritten.
 To ensure that term rewriting halts we probably also want a property like strong convergence, but this is a property of the rewriting strategy, not the TRS proper.</p>
-<p>A perpetual strategy is the opposite of normalizing - if any strategy diverges, then perpetual strategy diverges. Leftmost-innermost is close to the strategies commonly used in strict languages and is perpetual. With a perpetual strategy inlining etc. hold only if reduction of the expression terminates, i.e. one must keep track of termination properties. A perpetual strategy gives the wrong behavior for if-then-else and short-circuit functions, so strict languages special-case these to ensure they don’t cause nontermination. Perpetual strategies are antagonistic, “I’ll crash your program if I can”.</p>
 </section>
 </section>
-<section id="modularity">
-<h2>Modularity<a class="headerlink" href="#modularity" title="Permalink to this heading"></a></h2>
-<p>A property is modular if the disjoint union of two systems with the property has the property.</p>
-<p>Left linearity, confluence, weak normalization, unique normal forms (w.r.t. equivalence), and consistency (w.r.t. equivalence) are modular for first-order systems. Modularity of left linearity, confluence, and unique normal forms extend to semi-equational CTRSs. Confluence also extends to join CTRSs. In fact if the disjoint union is confluent then the component systems must be confluent. Confluence is not modular for higher-order TRSs but confluence plus left linearity is.</p>
-<p>Weak termination, weak innermost termination, and strong innermost termination are modular for CTRSs in combination with confluence or the property that there are no extra variables in the conditions.</p>
-<p>NF, unique normal forms with respect to reduction, and consistency with respect to reduction are modular in combination with left linearity. Consistency w.r.t. reduction means that there is no term reducing to two distinct variables; it is implied by the unique normal form property w.r.t. reduction as variables are normal forms.</p>
-<p>Strong normalization plus consistency w.r.t. reduction plus left linearity is modular. This likely holds for CTRSs without extra variables as well.</p>
-</section>
-<section id="hors">
-<h2>HORS<a class="headerlink" href="#hors" title="Permalink to this heading"></a></h2>
-<p>A HORS is orthogonal if:</p>
-<p>A1 the substitution calculus is complete
-A2 the substitution calculus is only needed for gluing
-A4 the substitution calculus is a descendant rewriting system
-A5 the substitution calculus is parametric and rules are head-defined
-A7 the substitution calculus is naturally closed under substitution</p>
-<p>A3 parallel rewrite steps can be serialised
-A6 left-hand sides of rules are linear
-A8 every set of redexes is pairwise simultaneous</p>
-</section>
-<section id="concrete-strategies">
-<h2>Concrete strategies<a class="headerlink" href="#concrete-strategies" title="Permalink to this heading"></a></h2>
-<p>So: strategy must normalizing. Now, which strategy?</p>
-<p>For terminating programs, all strategies are normalizing. Hence we want to infer termination and use this to optimize the strategy - leftmost innermost ensures “complete development”, i.e. a subterm is reduced completely before the outer term, hence we can store the subterm using an optimized representation of the normal form.
-But strongly normalizing implies not Turing complete, hence the typechecker that ensures termination will cause problems for complex programs. We need a fallback for non-terminating programs.</p>
-<p>The simplest fallback is outermost-fair, it’s a reasonable default and terminates on critical pair TRSs. But there are hand-written examples where it fails.</p>
+<section id="evaluation-strategy">
+<h2>Evaluation strategy<a class="headerlink" href="#evaluation-strategy" title="Permalink to this heading"></a></h2>
+<p>For convergent (confluent and strongly normalizing) programs, such as the simply typed lambda calculus, all strategies are normalizing and the result is the same no matter how they are reduced. So the focus is on inferring convergence and doing reduction efficiently. “In the small” leftmost innermost ensures “complete development”, i.e. a subterm is reduced completely before the outer term, hence we can compute the subterm fully and only store an optimized representation of the normal form. So we can compile to fast assembly like a state machine. “In the large” optimal reduction ensures the smallest number of steps so we can avoid duplicating work and performing unneeded work.</p>
+<p>But strongly normalizing implies not Turing complete, hence the termination verification will cause problems for complex programs. We need a fallback for these complex programs. Leftmost outermost reduction is the basis of lazy evaluation and is hypernormalizing for the lambda calculus. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated - the simplest example is parallel outermost) - it’s hypernormalizing for critical pair TRSs (decreasingly confluent TRSs), in particular weakly orthogonal TRSs. <span id="id19">[<a class="reference internal" href="../zzreferences.html#id68" title="Nao Hirokawa and Aart Middeldorp. Strategies for Decreasingly Confluent Rewrite Systems. Reduction Strategies in Rewriting and Programming, pages 23, 2011. URL: http://elp.webs.upv.es/workshops/wrs2011/pre-proceedings.pdf#page=31.">HM11</a>]</span> So outermost fair seems a reasonable default, but there are non-orthogonal systems where it fails. The optimal reduction stuff is defined for match sequential TRSs but is a normalizing strategy that computes a result in the smallest number of reduction steps.</p>
 <p>We could do user-specified strategies like Stratego, but then how would we know that they’re normalizing.</p>
-<p>The optimal reduction stuff is defined for match sequential TRSs.</p>
-<p>non-strict strategies:
-* Lenient evaluation - computation rule [Traub, FPCA 89], where all redexes are evaluated in parallel except inside the arms of conditionals and inside lambdas.
-* extra memory overhead for parameter passing (inefficient)
-* strictness analysis to optimize to eager (which has identical semantics to lazy 99% of the time)</p>
+<p>There are is also lenient evaluation which evaluates all redexes in parallel except inside the arms of conditionals and inside lambdas, but it adds extra memory overhead for parameter passing.</p>
 <p>Now, one can argue about which computational strategy is better (time, space, parallelism, …)
 Stroscot: be accepting of programs, ensure a normalizing strategy. But after that aim for most efficient in time/space for strict programs.</p>
 <p>Q: can normalizing be as efficient as strict
 profiling, other optimization tricks</p>
-<p>A list List[Nat]. In a strict language ADTs are finite. In lazy, we might accept infinite lists (generators). We want precise types: the finite data structure and its infinite counterpart ARE DIFFERENT DATATYPES. Only discardable (weakenable) boxes can contain infinite structures, so uList. (Nat + !w List) is an infinite list, while uList. (Nat + List) is a strict list. Extends to more complicated data structures. With subtyping you can use a finite list with an infinite list transformer.</p>
-<p>UNIX pipes. “yes fred | less” works fine, but “yes fred | sort | less” is an infinite loop, because yes fred is infinite and sort is strict. For finite streams the simple semantics of pipes, namely
-1) First program generates output
-2) This output is sent to next program
-….
-n) This output is sent to next program
-n+1) This output is sent to terminal
-suffices.
-Most programs have finite output on finite input and block gracefully. Thus for MOST programs you need not worry about whether the execution of pipes is interleaved or not. The interleaving matters for long outputs because it saves memory (=time w/gc) and improves performance dramatically.
-That interleaving works with certain infinite streams is just a natural generalization. The slow behavior of sort is also visible with long lists.
-Laziness means you can implement interleaving once in the language (as the evaluation strategy) as opposed to piecemeal for each program.</p>
-<p>Condensing acyclic rewriting systems gives back the same system. Orthogonal higher-order TRSs that are weakly head normalizing are acyclic, per <span id="id13">[<a class="reference internal" href="../zzreferences.html#id81" title="Jeroen Ketema, Jan Willem Klop, and Vincent van Oostrom. Vicious Circles in Rewriting Systems. In 5th International Workshop on Reduction Strategies in Rewriting and Programming, 20. Nara, Japan, April 2005. URL: https://www.dicosmo.org/WRS05/proceedings/jeroen.pdf.">KKvanOostrom05</a>]</span>.</p>
 <p>So The way we handle cycles in the rewrite engine is something like:</p>
 <ul class="simple">
 <li><p>detect cyclic term via rule cycle detection or presence of AC operator</p></li>
@@ -322,7 +315,7 @@ Laziness means you can implement interleaving once in the language (as the evalu
 <section id="higher-order-matching">
 <h3>Higher-order matching<a class="headerlink" href="#higher-order-matching" title="Permalink to this heading"></a></h3>
 <p>If the substitution calculus is convergent, then terms can be represented by preterms in normal form.</p>
-<p>Handling lambdas in RHSs is fairly straightforward, just beta-reduce as much as possible when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction. Executing a rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> on a term <code class="docutils literal notranslate"><span class="pre">t</span></code> solves the equation <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">C[lθ]</span></code> and replaces it with <code class="docutils literal notranslate"><span class="pre">C[rθ]</span></code>.</p>
+<p>Handling lambdas in RHSs is fairly straightforward, just beta-reduce as much as possible when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction.</p>
 <p>Finding the contexts <code class="docutils literal notranslate"><span class="pre">C</span></code> is fairly straightforward, just enumerate all the subterms of <code class="docutils literal notranslate"><span class="pre">t</span></code>. But solving the equation <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">lθ</span></code> is an instance of higher-order unification (specifically higher-order matching).  The λ-superposition calculus relies on complete sets of unifiers (CSUs). The
 CSU for s and t, with respect to a set of variables V , denoted by CSUV (s, t), is a
 set of unifiers such that for any unifier % of s and t, there exists a σ ∈ CSUV (s, t)
@@ -333,7 +326,868 @@ between important and auxiliary variables. We can normally leave it implicit</p>
 <p>It is not clear if there is a way to do untyped higher order matching for general lambda patterns.</p>
 <p>As a consequence of confluence each rewrite step is composed of an expansion in the substitution calculus, a replacement by applying some rule, and a reduction in the substitution calculus, so it is M &lt;&lt;- C[l] and C[r] -&gt;&gt; N</p>
 <p>If reduction does not end in a condensed normal form, then the sequence of terms must be infinitely expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s. Otherwise, assuming a finite number of term symbols, there are only finitely many terms of size &lt; s, so there would be a cycle in the reduction and reduction would end in a condensed normal form.</p>
+<p>A context is linear if every hole occurs exactly once.</p>
 </section>
+</section>
+<section id="verifying-confluence">
+<h2>Verifying confluence<a class="headerlink" href="#verifying-confluence" title="Permalink to this heading"></a></h2>
+<p>We often want to prove confluence. There are some key algorithms:</p>
+<ul>
+<li><p>The decreasing diagrams technique is a complete method for confluence on countable abstract rewrite systems.</p></li>
+<li><p>Computing critical pairs. A non-joinable critical pair means the system is not confluent. If all critical pairs are joinable the system is said to be locally confluent. An orthogonal system is one with no critical pairs, while a weakly orthogonal system is one with critical pairs that are trivially joinable. For an HORS there are more constraints to be orthogonal in addition to no critical pairs (“every set of redexes is pairwise simultaneous”). The substitution calculus must be complete, only needed for gluing, a descendant rewriting system, parametric, have head-defined rules, and be naturally closed under substitution. Parallel rewrite steps must be serializable and left-hand sides of rules must be linear.</p>
+<p>V. van Oostrom. Developing developments. TCS, 175(1):159–181, 1997.
+V. van Oostrom and F. van Raamsdonk. Weak orthogonality implies confluence: The higher order case. In Proc. 3rd LFCS, volume 813 of LNCS, pages 379–392, 1994.</p>
+</li>
+<li><p>Proving termination. The Knuth Bendix Criterion (Newmann’s lemma) says a terminating system is confluent iff it is locally confluent. Termination can be shown by exhibiting a well-ordering, such as recursive path ordering, dependency graph decomposition, and the subterm criterion.</p>
+<p>WANDA has more advanced techniques. Cynthia Kop. Higher Order Termination. PhD thesis, Vrije Universiteit, Amsterdam, 2012</p>
+<p>TTT2 also has some good techniques.</p>
+<p>Gramlich–Ohlebusch’s criterion says for innermost-terminating TRSs R with no innermost critical pairs, R is confluent if and only if all critical pairs are joinable by innermost reduction. There are innermost terminating systems that aren’t terminating so this criterion can prove some systems that Knuth-Bendix can’t.</p>
+</li>
+<li><p>Decomposition: Several properties allow dividing the system into smaller, more tractable systems. First is modularity, that the disjoint union of two systems with the property has the property. We also usually have the converse, the disjoint union has the property only if the subsystems have the property.</p>
+<ul class="simple">
+<li><p>Weak normalization and consistency (w.r.t. equivalence) are modular for first-order systems.</p></li>
+<li><p>Left linearity, confluence, and unique normal forms (w.r.t. equivalence) are modular for semi-equational CTRSs.</p></li>
+<li><p>Confluence is modular for join and semi-equational CTRSs. In fact if the disjoint union is confluent then the component systems must be confluent.</p></li>
+<li><p>Confluence plus left linearity is modular for higher-order TRSs.</p></li>
+<li><p>Weak termination, weak innermost termination, and strong innermost termination are modular for CTRSs in combination with confluence or the property that there are no extra variables in the conditions.</p></li>
+<li><p>NF, unique normal forms with respect to reduction, and consistency with respect to reduction are modular in combination with left linearity. Consistency w.r.t. reduction means that there is no term reducing to two distinct variables; it is implied by the unique normal form property w.r.t. reduction as variables are normal forms.</p></li>
+<li><p>Strong normalization plus consistency w.r.t. reduction plus left linearity is modular. This likely holds for CTRSs without extra variables as well.</p></li>
+</ul>
+<p>Order-sorted decomposition uses persistence of confluence. If sorts can be assigned to all terms and rule variables such that all rules don’t increase the sort, then confluence can be separately considered for each sort and confluence as a whole follows from confluence on well-sorted terms.</p>
+<p>Decreasing diagrams allows decomposing a left-linear TRS into duplicating and non-duplicating rules. The TRS is confluent if all critical peaks are decreasing with respect to a rule labeling and the duplicating rules are terminating relative to the non-terminating rules.</p>
+<p>Layer-preserving decomposition decomposes TRSs into minimal pieces such that taking pieces pairwise they form layer-preserving combinations, i.e. rules in one piece operate only on terms of that piece. It is used in CSI.</p>
+</li>
+<li><ol class="upperalpha simple" start="10">
+<li><p>Nagele, B. Felgenhauer, and A. Middeldorp. Improving automatic confluence analysis of rewrite systems by redundant rules. In Proc. 26th RTA, volume 36 of LIPIcs, pages 257–268, 2015.</p></li>
+</ol>
+</li>
+</ul>
+<p>References
+[1] C. Appel, V. van Oostrom, and J. G. Simonsen. Higher-order (non- )modularity. In Proc. 21st RTA,
+volume 6 of LIPIcs, pages 17–32, 2010.
+[3] R. Mayr and T. Nipkow. Higher-order rewrite systems and their confluence. TCS, 192(1):3–29, 1998.
+[4]
+[5] T. Nipkow. Higher-order critical pairs. In Proc. 6th LICS, pages 342–349, 1991.
+[6] Tobias Nipkow. Functional unification of higher-order patterns. In Proc. 8th LICS, pages 64–74,
+1993.</p>
+<p>CoLL
+FORT-h, FORTify
+CSI+CeTA
+ACP+CeTA
+CONFident
+CO3
+AGCP
+infChecker
+NaTT</p>
+<p>The confluence tool CoLL uses a version of Newman’s lemma adapted for rewriting modulo, i.e. requires proving termination and local confluence.</p>
+<p>a minimal complete set of A-unifiers need not to be finite, and thus enumeration may not terminate. In
+fact there is a one-rule TRS that admits infinitely many A-critical pairs. However every left-linear TRS has a finite set.</p>
+<p>Note that our tool uses the algorithm in [16] for AC unification and flattened
+term representation for overcoming the coherence problem of AC-rewriting. Since</p>
+<p><a class="reference external" href="http://cops.uibk.ac.at/">http://cops.uibk.ac.at/</a></p>
+<blockquote>
+<div><p><a class="reference external" href="http://www.jaist.ac.jp/project/saigawa/">http://www.jaist.ac.jp/project/saigawa/</a></p>
+</div></blockquote>
+<p>20. Durán, F., Meseguer, J.: A Church-Rosser checker tool for conditional order-sorted
+equational maude specifications. In: Rewriting Logic and Its Applications. (2010)
+69–85</p>
+<p>CRC is a powerful
+Church-Rosser checker for Maude and supports the Church-Rosser modulo the-
+orem for any combination of associativity, commutativity, and/or identity the-
+ories, except associativity theory.</p>
+<blockquote>
+<div><p>Zankl, H., Felgenhauer, B., Middeldorp, A.: CSI — a confluence tool. In: Proc.</p>
+</div></blockquote>
+<p>23rd CADE. Springer (2011) 499–505</p>
+<p>ACP and CSI [18]
+employ layer-preserving decomposition [17] to split a TRS into subsystems.</p>
+<p>Ohlebusch, E.: Modular Properties of Composable Term Rewriting Systems. PhD
+thesis, Universität Bielefeld (1994)</p>
+<p>When handling TRSs that contain reversible
+rules, ACP [9] employs reduction-preserving completion [21]. This method effec-
+tively works for C and AC rules, but not for associativity rules.</p>
+<p>Peterson, G., Stickel, M.: Complete sets of reductions for some equational theories.
+Journal of the ACM 28(2) (1981) 233–264</p>
+<p>Aoto, T., Toyama, Y.: A reduction-preserving completion for proving confluence
+of non-terminating term rewriting systems. LMCS 8(1) (2012) 1–29</p>
+<p>CoLL was designed to complement Saigawa. The two tools will be
+merged in the next version.</p>
+<ul>
+<li><p>Huet–Toyama–van Oostrom’s criterion [20]</p></li>
+<li><p>Huet’s strong-closedness criterion[7]</p></li>
+<li><p>Non-confluence: A term s is non-confluent if it fails unique normal forms with respect to reductions (UNR), i.e. a term s reduces to terms t and t’, and one of the following holds: <span id="id20">[]</span></p>
+<ul class="simple">
+<li><p>t,t’ in normal form and not equal</p></li>
+<li><p>t,t’ in head normal form and heads not equal. HNF is approximated by replacing redexes with variables and ensuring no rules unify.</p></li>
+</ul>
+<p>Maude has two commands “reduce” and “search”. Reduce assumes confluence and just applies rules randomly. Search actually explores the full reduction tree and finds all final states.</p>
+</li>
+</ul>
+<p>References
+1. Hindley, J.R.: The Church-Rosser Property and a Result in Combinatory Logic.
+PhD thesis, University of Newcastle-upon-Tyne (1964)
+2. Baader, F., Nipkow, T.: Term rewriting and all that. Cambridge University Press
+(1998)
+3. Jouannaud, J.P., Kirchner, H.: Completion of a set of rules modulo a set of equa-
+tions. SIAM Journal on Computing 15(4) (1986) 1155–1194
+4. Rubio, A.: A fully syntactic AC-RPO. Information and Computation 178(2)
+(2002) 515–533
+5. Plotkin, G.: Building in equational theories. Machine Intelligence 7 (1972) 73–90
+6. Schulz, K.: Word unification and transformation of generalized equations. In: Word
+Equations and Related Topics. Volume 677 of LNCS. (1993) 150–176
+7. Schmidt, R.: E-unification for subsystems of s4. In: Proc. 9th RTA. Volume 1379
+of LNCS. (1998) 106–120
+8.
+9. Aoto, T., Yoshida, J., Toyama, Y.: Proving confluence of term rewriting systems
+automatically. In: RTA 2009. Volume 5595 of LNCS. (2009) 93–102
+10. Huet, G.: Confluent reductions: Abstract properties and applications to term
+rewriting systems. Journal of the ACM 27(4) (1980) 797–821
+11. Toyama, Y.: Commutativity of term rewriting systems. In Fuchi, K., Kott, L., eds.:
+Programming of Future Generation Computers II. North-Holland (1988) 393–407
+12. van Oostrom, V.: Developing developments. Theoretical Computer Science 175(1)
+(1997) 159–181
+13. van Oostrom, V.: Confluence by decreasing diagrams converted. In Voronkov, A.,
+ed.: Proc. 19th RTA. Volume 5117 of LNCS. (2008) 306–320
+14. Aoto, T.: Automated confluence proof by decreasing diagrams based on rule-
+labelling. In: Proc. 21st RTA. Volume 6 of LNCS. (2010) 7–16
+15. Baader, F., Nipkow, T.: Term Rewriting and All That. Cambridge University
+Press (1998)
+16. Pottier, L.: Minimal solutions of linear diophantine systems: Bounds and algo-
+rithms. In: Proc. 4th RTA. Volume 488 of LNCS. (1991) 162–173
+17.
+18.
+19. Hirokawa, N., Middeldorp, A.: Decreasing diagrams and relative termination. Jour-
+nal of Automated Reasoning 47(4) (2011) 481–501
+21.
+22. Toyama, Y.: On the Church-Rosser property for the direct sum of term rewriting
+systems. Journal of the ACM 34(1) (1987) 128–143</p>
+<blockquote>
+<div><p>For this example, the system is weakly orthogonal so it is easy to analyze. Stroscot proves that the answer is unique because in the one ambiguous case <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">False</span> <span class="pre">False</span></code> both clauses give <code class="docutils literal notranslate"><span class="pre">False</span></code>. Stroscot then selects the parallel outermost reduction strategy which will always succeed if there is an answer. Hence evaluating <code class="docutils literal notranslate"><span class="pre">myand</span> <span class="pre">expensive_undefined</span> <span class="pre">False</span></code> reduces <code class="docutils literal notranslate"><span class="pre">expensive_undefined</span></code> for a little bit, then evaluates <code class="docutils literal notranslate"><span class="pre">False</span></code> to completion and matches the second clause.</p>
+</div></blockquote>
+<p>the parallel outermost strategy assumes an oracle finding the redexes of a term. With a CTRS determining whether a term is a redex is of complexity Sigma_0^1.</p>
+<blockquote>
+<div><p>In the case of UNR for ground TRSs, R. Verma. Complexity of normal form properties and reductions for term rewriting problems. Fundamenta</p>
+</div></blockquote>
+<p>Informaticae, 92(1–2):145–168, 2009. doi: 10.3233/FI-2009-0070. and G. Godoy and F. Jacquemard. Unique normalization for shallow TRS. In Proc. 20th International
+Conference on Rewriting Techniques and Applications, volume 5595 of Lecture Notes in Computer Science,
+pages 63–77, 2009. doi: 10.1007/978-3-642-02348-4_5.
+have established that polynomial time algorithms exist, using tree automata techniques. No
+precise bound is given by these authors. In Section 5 we present an O(R^3 log R) time
+algorithm for deciding UNR, where R denotes the sum of the sizes of the rules of R, and the size of a rule is the sum of the sizes of its left-hand side and
+right-hand side.</p>
+<p>In the complexity analysis we make use of the fact that systems of Horn clauses can
+be solved in linear time, see Dowling and Gallier [5]. Their procedure finds the smallest
+solution of a set of Horn clauses, in the sense that as few atoms as possible become true,
+in time linear in the total size of the clauses. In our implementation, we do not generate these Horn clauses explicitly.
+Instead, whenever we make a new inference p → q ∈ F, we check all possible rules that
+involve p → q ∈ F as a premise. The result is an incremental algorithm (see Listing 6).
+From an abstract point of view, however, this is essentially the same as solving the Horn
+clauses as stated above. This remark also applies to inference rules presented later.</p>
+<p>Some of the algorithms presented in this article use maximally shared terms for efficiency;
+this idea is also known as hash consing. In a maximally shared representation, each ground
+term f (t1 , … , tn ) is represented by a unique identifier (e.g., a natural number, or a pointer
+into memory), which can be mapped to f and the identifiers of t1, … , tn . In order to
+maintain maximal sharing, a lookup table mapping f and identifiers of t1, … , tn to the
+identifier of f (t1, … , tn) is required. If the arity of f is bounded, constructing maximally
+shared terms incurs a logarithmic overhead compared to a direct construction. Crucially
+though, comparing two maximally shared terms takes constant time.</p>
+<p>The set of normal forms of a ground system is a regular
+language; in fact this is true for left-linear systems [2]. The idea is that the state [*] accepts those R-normal forms s that are not subterms of R, while normal form subterms are accepted in state [s].</p>
+<p>curry TS to bound arity
+compute the automaton N that accepts the R-normal forms (Section 3.3),
+compute the rewrite closure (F, E) that allows checking reachability. The point of the rewrite closure is that reachability can be decomposed into a decreasing sequence of steps in E and F, followed by an increasing sequence of steps in E− and F.</p>
+<p>A ground term is flat if it is either a constant or a function symbol applied to constants. A rule is flat if its LHS and RHS are flat. The idea of flattening goes back to Plaisted [17]. It makes all rules flat and sets up a bijection E between terms and flat terms. Subterms become constants in Σ[].</p>
+<dl>
+<dt>flatten(R):</dt><dd><p>E ← ∅, R’ ← ∅
+for all l → r ∈ R◦ do</p>
+<blockquote>
+<div><p>add mk(l) → mk(r) to R’</p>
+</div></blockquote>
+</dd>
+<dt>mk (App a b) =</dt><dd><p>c1 = mk a
+c2 = mk b
+return $ lookupOrInsert (App c1 c2) (fresh constant)</p>
+</dd>
+</dl>
+<p>If UNR does not hold, then distinct normal forms s and t. Assume WLOG minimum total size. If the peak has no root step then we can project it to the arguments, and obtain a smaller counterexample, hence the peak has a root step in its left part. Using the rewrite closure (cf. Lemma 3.19), the peak can be decomposed as
+s →E∪F− · ←E∪F · →E∪F · ←E∪F− t</p>
+<p>The left part has a root step. This means that there is a constant p such that s →E∪F− p and p ←E∪F · →E∪F · ←E∪F− t. First we consider the special case p ←E∪F− t. We define the first UNR-condition as that if for all R◦ -normal forms s, t and p ∈ Σ[], s →E∪F- p E∪F← t implies s = t. If the first UNR-condition is violated, then UNR clearly does not hold. If the first UNR-condition is satisfied, then we can define a partial function w(p) = t ⇐⇒ t is a normal form and t →∗E∪F− p.</p>
+<p>Now considering ←E∪F · →E∪F, every forward E step is preceded by an inverse E step at the same position, inducing a peak between two constants from Σ[]. Define that p, q ∈ Σ[] are meetable if p E∪F← · →E∪F q.
+Using the parallel closure of the meetable relation, q ←E∪F · →E∪F · ←E∪F− t iff there is a multi-hole context C and constants q1 , … , qn, p1, … , pn such that q ←E∪F C[q1, … , qn ], C[q1, … , qn ] ↑∥ C[p1 , … , pn ], and C[p1 , … , pn ] ←E∪F− t. Note that because s and t are normal forms, we have  s →E∪F− p , s = w(q) and t = C[w(p1), … , w(pn )].</p>
+<p>Define the second UNR-condition as if (5.2) for R◦-normal forms s, t ∈ T (Σ◦ )
+implies s = t. A curried ground TRS is UNR if and only if the first and second UNR-
+conditions are satisfied.</p>
+<p>Theorem:</p>
+<dl class="simple">
+<dt>DECIDING CR, NFP, UNC, AND UNR FOR GROUND TRSs</dt><dd><p>17</p>
+</dd>
+<dt>p ∈ Σ[]</dt><dd><p>p1 ◦ p2 → p ∈ E
+p1 ↑ q1 p2 ↑ q2
+q1 ◦ q2 → q ∈ E</p>
+</dd>
+<dt>refl</dt><dd><p>cong</p>
+</dd>
+<dt>p ↑ p</dt><dd><p>p ↑ q</p>
+</dd>
+<dt>q → p ∈F</dt><dd><p>q ↑ r
+r ∈ Σ[]
+p ∈ Σ[]
+p ↑ q q → r ∈F</p>
+</dd>
+<dt>step l</dt><dd><p>step r</p>
+</dd>
+<dt>p ↑ r</dt><dd><p>p ↑ r</p>
+</dd>
+</dl>
+<p>Lemma 5.4.
+5.2. Computing Meetable Constants. The meetable constant relation ↑ can be com-
+puted in a way similar to the rewrite closure from Section 3.5, using the inference rules in
+Figure 9. So for this subsection, let ↑ be defined by those inference rules. The following
+lemma shows that ↑ coincides with the meetable constants relation, justifying the symbol.
+Lemma 5.5. For p, q ∈ Σ[], p ↑ q if and only if p E∪F ∗ ← · →∗E∪F q.
+Proof. The proof follows the same principles as that of Lemma 3.20, so let us be brief.
+First note that all rules in Figure 9 are consistent with the requirement that p ↑ q implies
+p E∪F ∗← · →∗E∪F q.
+On the other hand, assume that there is peak p E∪F ∗← · →∗E∪F q such that p ↑ q
+does not hold. Choose such a peak of minimal length. Then either p = q, and (refl )
+applies, or p F ← p0 ↑ q and (stepl ) applies, or p ↑ q0 →F q and (stepr ) applies, or
+p E ← p1 ◦ p2 ↑∥ q1 ◦ q2 →E q, in which case (cong) applies. In each case, p ↑ q follows,
+contradicting the assumption.
+Note that as in the case of the rewrite closure, there is no (cong) rule for constants
+c ∈ Σ◦ , because they would be instances of (refl ). There are O(kRk) instances of (refl ),
+There are O(kRk2 ) instances of (cong) (because p and q determine p1 , p2 , q1 , and q2), and
+O(kRk3 ) instances each of (step l ) and (step r ). Using Horn inference with p ↑ q as atoms,
+the computation of ↑ takes O(kRk3) time.
+Example 5.6 (continued from Example 3.21). In the same spirit as Example 3.21, we
+present the relations ↑U and ↑V as tables, with the entries indicating rules and stage numbers.
+f</p>
+<blockquote>
+<div><p>a
+fa
+b
+fb ffb fffb</p>
+</div></blockquote>
+<p>f r 0
+f a fa b
+0</p>
+<blockquote>
+<div><p>a
+r0
+s1 l
+s1 l
+s1 l
+s1 l
+s1 l</p>
+</div></blockquote>
+<p>f r 0
+fa</p>
+<blockquote>
+<div><p>s1 r
+r s1 s1 l
+s1 s1↑U = a
+r0 s1 l s2 r
+↑V =
+l
+l
+l</p>
+</div></blockquote>
+<dl class="simple">
+<dt>0 b</dt><dd><p>s1 r
+s1 r
+r0
+s1 l
+s1 l
+s1 l</p>
+</dd>
+<dt>fa</dt><dd><p>s1 r r s1 r</p>
+</dd>
+<dt>fb</dt><dd><p>s1 r
+s1 r
+s1 r
+r0
+s1 l
+s1 l</p>
+</dd>
+<dt>b</dt><dd><p>s2 s1 r0</p>
+</dd>
+<dt>l l ffb</dt><dd><p>s1 r
+s1 r
+s1 r
+s1 r
+r0
+s1 l</p>
+</dd>
+<dt>fffb</dt><dd><p>s1 r
+s1 r
+s1 r
+s1 r
+s1 r
+r 0</p>
+</dd>
+<dt>18</dt><dd><p>BERTRAM FELGENHAUER</p>
+</dd>
+<dt>c E R◦ c normal form</dt><dd><p>s ∈ W (p, q) p0 → p ∈ F</p>
+</dd>
+<dt>base</dt><dd><p>stepF</p>
+</dd>
+<dt>c ∈ W ([c], [c])</dt><dd><p>s ∈ W (p0 , q)</p>
+</dd>
+<dt>s1 ∈ W (p1 , q1 )</dt><dd><p>s2 ∈ W (p2 , q2) p1 ◦ p2 → p ∈ E
+q1 ◦ q2 → q ∈ N</p>
+</dd>
+</dl>
+<p>stepE
+s1 ◦ s2 ∈ W (p, q)
+Figure 10: Inference rules for s ∈ W (p, q)
+1: compute rewrite closure (F, E) and a representation of N
+2: let w(p) and n(p) be undefined for all p ∈ Σ[] (to be updated below)
+3: for all constants c E R◦ that are normal forms do
+4:</p>
+<blockquote>
+<div><p>push ([c], [c], c) to worklist
+— (base)</p>
+</div></blockquote>
+<p>5: while worklist not empty do
+6:</p>
+<blockquote>
+<div><p>(p, q, s) ← pop worklist
+— s ∈ W (p, q)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>7:</dt><dd><p>if w(p) = t is defined then
+— t ∈ W (p, n(p))</p>
+</dd>
+<dt>8:</dt><dd><p>if s 6= t then</p>
+</dd>
+</dl>
+<p>9:
+10:
+11:
+12:
+13:
+14:
+15:
+16:
+17:
+return UNR(R) is false</p>
+<blockquote>
+<div><p>— first UNR-condition violated by s and t</p>
+</div></blockquote>
+<p>continue at 5
+w(p) ← s, n(p) ← q
+for all rules p1 ◦ p2 → pr ∈ E with p ∈ {p1, p2 } do
+if w(p1 ) = s1 and w(p2 ) = s2 are defined then
+if there is a transition n(p1 ) ◦ n(p2 ) → qr ∈ N then
+push (pr , qr , s1 ◦ s2) to worklist</p>
+<blockquote>
+<div><p>— (stepE )</p>
+</div></blockquote>
+<p>for all rules p0 → p ∈ F do
+push (p0, q, s) to worklist</p>
+<blockquote>
+<div><p>— (stepF )</p>
+</div></blockquote>
+<p>Listing 11: Checking the first UNR-condition and computing w and n.
+5.3. Checking UNR. We start by checking the first UNR-condition. To perform this
+computation efficiently, we make use of the automaton N that recognizes normal forms,
+cf. Section 3.3. The fact that s is a R◦ -normal form is witnessed by a run s →∗N q. Let
+W (p, q) = {s | s ∈ T (Σ◦), s →∗E∪F − p ∈ Σ[] and s →∗N q ∈ ΣN }
+Lemma 5.7. The predicate s ∈ W (p, q) is characterized by the inference rules in Figure 10.
+Proof. The inference rules follow by an inductive analysis of the last step of the s →∗E∪F − p
+reduction, where s →∗N q. Recall that N is deterministic, so q is determined by s.
+(base) If there is a single step, then it must be using a rule s = c → [c] = p from E, where
+c ∈ Σ, and c is a R◦ -normal form, which ensures that c → [c] = q ∈ N as well.
+(stepF ) If the last step is an F − step, then s →∗E∪F − p0 →F − p, and there is a q with
+s ∈ W (p, q).
+(stepE ) If the last step is an E step but s is not a constant, then s = s1 ◦s2 →∗E∪F − p1 ◦p2 →E p,
+and there are q1 , q2 with s1 ∈ W (p1 , q1 ) and s2 ∈ W (p2, q2 ).
+Conversely, each derivation of s ∈ W (p, q) by these three inference rules gives rise to rewrite
+sequences s →∗E∪F − p and s →∗N q.
+The corresponding code is given in Listing 11. In addition to w(q) (which we introduced
+immediately after Definition 5.1) we also compute a partial function n(q) which returns the
+DECIDING CR, NFP, UNC, AND UNR FOR GROUND TRSs</p>
+<blockquote>
+<div><p>19</p>
+</div></blockquote>
+<p>state of N that accepts w(q) if the latter is defined. The computed witnesses may have
+exponential size (see Example 5.9), so in order to make the check on line 8 efficient, it is
+crucial to use maximal sharing.
+Example 5.8 (continued from Example 3.11). Let us check the first UNR-condition for
+U ◦ = {fa → a, fa → b, a → a} according to Listing 11. The constant normal forms are f and
+b, so we add ([f], [f], f) and ([b], [b], b) to the worklist. Then we enter the main loop. We may
+ignore duplicate entries on the worklist, because they are skipped on line 10. Taking this
+into account, the main loop is executed 3 times.
+(1) ([f], [f], f) is taken from the worklist, and we assign w([f]) = f and n([f]) = f. The
+conditions on lines 12 and 13 are never satisfied. Because [f] → [f] ∈ FU , ([f], [f], f) is
+added to the worklist again by the final loop (lines 16 and 17).
+(10</p>
+<blockquote>
+<div><p>) ([f], [f], f) (which is a duplicate) is taken from the worklist, but now w([f]) = f is defined</p>
+</div></blockquote>
+<p>and we reach line 10.
+(2) ([b], [b], b) is taken from the worklist, and we assign w([b]) = b and n([b]) = [b]. Line 15
+is not reached. Line 17 is reached for [b] → [b] ∈ FU and [fa] → [b] ∈ FU and we add
+([b], [b], b) (a duplicate) and ([fa], [b], b) to the worklist.
+(3) ([fa], [b], b) is taken from the worklist, and we assign w([fa]) = b and n([fa]) = [b].
+([fa], [b], b) (a duplicate) is added to the worklist on line 17, because [fa] → [fa] ∈ FU .
+The loop terminates without reaching line 9, so the first UNR-condition is satisfied for U.
+We have derived the following exhaustive list of instances of s ∈ W (p, q) derivable by the
+rules in Figure 10, corresponding to the normal forms f and b.
+f ∈ W ([f], [f])</p>
+<blockquote>
+<div><p>b ∈ W ([b], [b])
+b ∈ W ([fa], [b])</p>
+</div></blockquote>
+<p>For V, there is only one constant normal form, namely f. Hence, initially, we add
+([f]R , [f], f) to the worklist. Then we enter the main loop (lines 5–17). On line 11, w([f]) is
+set to f and n([f]) is assigned [f]. The only way that the check on line 10 could succeed
+would be having a rule with left-hand side [f] ◦ [f] in EV , which is not the case. On line 17,
+we add ([f]R , [f], f) to the worklist again, but in the next loop iteration, line 10 is reached.
+The loop terminates, having recorded the normal form f with f ∈ W ([f], [f]).
+Example 5.9. We exhibit a class of TRSs with exponential witness size. To this end, fix
+k &gt; 0 and consider the rules
+ak → b</p>
+<blockquote>
+<div><p>ai → ai−1 ◦ ai−1</p>
+</div></blockquote>
+<p>where 0 &lt; i ≤ k. The check of the first UNR-condition will find the two normal forms b and
+tk of ak , where t0 = a0 and ti+1 = ti ◦ ti for 0 &lt; i ≤ k. The term tk has size 2k+1 − 1, but
+only k − 1 distinct subterms.
+Remark 5.10. The check of the first UNR-condition (Listing 11) is similar to the check of
+UNC (Listing 8), with a few crucial differences:
+• First, we use the automaton A = (Σ[], Σ[] , E ∪ F −) instead of C.
+• Because A is not deterministic (the rules of F − are -transitions), different runs may
+result in the same term. Hence the check on line 8 is needed, and witnesses need to be
+stored, using maximal sharing for efficient equality tests.
+• Furthermore, in addition to lines 10–13 in Listing 8, which correspond to lines 12–15 in
+Listing 11, we need a similar loop processing the -transitions from F − , cf. lines 16–17 in
+Listing 11. The latter change increases the complexity from O(kRk log kRk) to O(kRk2 ).
+20</p>
+<blockquote>
+<div><p>BERTRAM FELGENHAUER</p>
+</div></blockquote>
+<dl class="simple">
+<dt>s ∈ W (p0 , q) p ↑ p0</dt><dd><p>s ∈ W 0(p, q) p → p0 ∈ F</p>
+</dd>
+<dt>0 base0</dt><dd><p>0 step0F</p>
+</dd>
+<dt>s ∈ W (p, q)</dt><dd><p>s ∈ W (p0 , q)</p>
+</dd>
+<dt>s1 ∈ W 0(p1 , q1 )</dt><dd><p>s2 ∈ W 0 (p2 , q2) p1 ◦ p2 → p ∈ E
+q1 ◦ q2 → q ∈ N</p>
+</dd>
+</dl>
+<p>step0E
+s1 ◦ s2 ∈ W 0(p, q)
+Figure 12: Inference rules for s ∈ W 0 (p, q)
+1: check first UNR-condition (obtaining w(·) and n(·)), and compute ↑
+2: let w 0 (p, q) be undefined for all p ∈ Σ[] , q ∈ Σ[] ∪ {[?]} (to be updated below)
+3: for all p, q with p ↑ q and w(q) defined do
+4:</p>
+<blockquote>
+<div><p>push (p, n(q), w(q)) to worklist
+— (base0 )</p>
+</div></blockquote>
+<p>5: while worklist not empty do
+6:</p>
+<blockquote>
+<div><p>(p, q, s) ← pop worklist
+— s ∈ W 0(p, q)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>7:</dt><dd><p>if w 0
+(p, q) = t is defined then
+— t ∈ W 0(p, q)</p>
+</dd>
+<dt>8:</dt><dd><p>if s = t or t = ∞ then</p>
+</dd>
+<dt>9:</dt><dd><p>continue at 5</p>
+</dd>
+<dt>10:</dt><dd><p>w 0 (p, q) ← ∞, s ← ∞
+— <a href="#id24"><span class="problematic" id="id25">|W 0 (p, q)|</span></a> ≥ 2</p>
+</dd>
+<dt>11:</dt><dd><p>else</p>
+</dd>
+<dt>12:</dt><dd><p>w 0 (p, q) ← s</p>
+</dd>
+<dt>13:</dt><dd><p>if w(p) = t is defined and t 6= s then</p>
+</dd>
+<dt>14:</dt><dd><p>return UNR(R) is false
+— second UNR-condition violated by t and s</p>
+</dd>
+<dt>15:</dt><dd><p>for all p1 ◦ p2 → pr ∈ E and states q1 , q2 of N with (p, q) ∈ {(p1, q1 ), (p2 , q2)} do</p>
+</dd>
+<dt>16:</dt><dd><p>if w0 (p1 , q1) = s0 1 and w0 (p2 , q2) = s0 2 are defined then</p>
+</dd>
+<dt>17:</dt><dd><p>if there is a transition q1 ◦ q2 → qr ∈ N then</p>
+</dd>
+<dt>18:</dt><dd><p>push (pr , qr , s0 1 ◦ s0 2) to worklist
+— (step0E )</p>
+</dd>
+<dt>19:</dt><dd><p>for all rules p → p0
+∈ F do</p>
+</dd>
+<dt>20:</dt><dd><p>push (p0, q, s) to worklist
+— (step0F )</p>
+</dd>
+</dl>
+<p>21: return UNR(R) is true
+Listing 13: Checking the second UNR-condition.
+For the second UNR-condition, let W 0 (p, q) be the set of R◦ -normal forms t ∈ T (Σ◦)
+that are accepted by N in state q and satisfy the right part of (5.2), i.e.,
+∗</p>
+<blockquote>
+<div><p>∗
+∗</p>
+</div></blockquote>
+<dl class="simple">
+<dt>p ←−−− C[p1 , … , pn ] ↑∥ C[q1, … , qn ] ←−−−− t −→ q</dt><dd><p>(5.3)</p>
+</dd>
+<dt>E∪F</dt><dd><p>E∪F −
+N</p>
+</dd>
+</dl>
+<p>Lemma 5.11. The predicate s ∈ W 0 (p, q) is characterized by the inference rules in Figure 12.
+Proof. The inference rules follow by an inductive analysis on the left-most step of the
+p E∪F ∗← C[p1 , … , pn ] subreduction of (5.3):
+(base0 ) If the sequence is empty, we have p = p1 , p1 ↑ q1, and t ∈ W (q1 , q). Conversely, we
+have t ∈ W 0(p, q) whenever t ∈ W (p0, q) and p ↑ p0.
+(step0F ) If the leftmost step is an F step, we have p F ← p0 E∪F ∗← C[q1 , … , qn ], and
+t ∈ W 0 (p, q) for some q; in that case, t ∈ W 0(p0 , q) follows.
+(step0E ) If the leftmost step is an E step, then either p E ← t ∈ Σ, but that case is already
+covered by (base0 ), or p E ← p1 ◦p2, t = t1 ◦t2 , and there are states q1 , q2 with t1 ∈ W 0 (p1 , q1 ),
+t2 ∈ W 0(p2 , q2), and a transition q1 ◦ q2 → qr ∈ N .
+DECIDING CR, NFP, UNC, AND UNR FOR GROUND TRSs</p>
+<blockquote>
+<div><p>21</p>
+</div></blockquote>
+<p>Because W 0 (p, q) may be an infinite set, we instead compute the partial function w0 (p, q) that
+returns s if W 0(p, q) = {s} is a singleton set, or the special value ∞ if W 0 (p, q) has at least
+two elements, where ∞ is distinct from any term and satisfies ∞ ◦ t = t ◦ ∞ = ∞ ◦ ∞ = ∞
+for all terms t. The system has the UNR property if w0 (p, q) = w(p) whenever w0(p, q) and
+w(p) are both defined.
+The procedure is given in Listing 13. It maintains a worklist of tuples (p, q, s) where
+s is either a term with s ∈ W 0 (p, q), or has the special value s = ∞. Note that each value
+w 0 (p, q) may be updated up to two times: it starts out as undefined, may be updated to an
+element of W 0 (p, q), and later ∞ 0to if W (p, q) has at least two elements. These updates are
+performed by lines 7–12.</p>
+<p>In order to achieve the desired complexity, care must be taken with the enumeration
+on line 15: instead of iterating over all elements of E, an index mapping p to the rules
+p1 ◦ p2 → pr ∈ E with p ∈ {p1 , p2} should be used.
+The following two lemmas establish key invariants for showing that the procedures in
+Listings 11 and 13 faithfully implement the inference rules in Figures 10 and 12, respectively.
+Lemma 5.13. Whenever line 5 is reached in Listing 11, we have
+(1) If (p, q, s) ∈ worklist or s = w(p) is defined and q = n(p), then s ∈ W (p, q) holds.
+(2) Assume that ŝ ∈ W (p̂, q̂) can be inferred using an inference rule from Figure 10 with
+premises P1 , … , Pn . Then either (p̂, q̂, ŝ) ∈ worklist, or ŝ = w(p̂) and q̂ = n(p̂), or there
+is a premise Pi = s0 ∈ W (p0 , q0) such that w(p0 ) is undefined or s0 6= w(p0 ).
+Proof. For the first invariant, first note that w(p) and n(p) are updated simultaneously
+on line 11 with values that are taken from the worklist on line 6, so we may focus on the
+addition of items to the worklist, which happens on lines 4, 15 and 17. On line 4, c is a
+22</p>
+<blockquote>
+<div><p>BERTRAM FELGENHAUER</p>
+</div></blockquote>
+<p>normal form, and c ∈ W ([c], [c]) holds by rule (base). On line 15, we have s1 ∈ W (p1 , q1)
+and s2 ∈ W (p2 , q2 ), and rules p1 ◦ p2 → pr ∈ E and q1 ◦ q2 → qr ∈ N , allowing us to infer
+s1 ◦ s2 ∈ W (pr , qr ) by (stepE ). Similarly, on line 17, we have s ∈ W (p, q) and p0 → p ∈ F,
+and s ∈ W (p0, q) follows by (stepF ).
+Consider the second invariant immediately after the loop on lines 1–4. If ŝ ∈ W (p̂, q̂)
+can be derived by (base), then it is put on the worklist by that loop. All other inferences
+have a premise s0 ∈ W (p0 , q0 ) for which w(p0 ) is undefined, since w(·) is nowhere defined.
+So initially, the invariant holds. Noting that once w(p̂) is set, it will never be changed, the
+invariant can be invalidated in only two ways.
+(1) (p̂, q̂, ŝ) ∈ worklist is the item taken from the worklist on line 6. In this case, either
+the algorithm aborts early on line 9, or we reach line 10, which ensures w(p̂) = ŝ and
+n(p̂) = q̂ since ŝ determines q̂, or we reach line 11, which assigns w(p̂) = ŝ and n(p̂) = q̂.
+So the invariant is maintained.
+(2) There is a premise s0 ∈ W (p0 , q0) and w(p0) is assigned s0 on line 11; in that case, (p0 , q 0, s0 )
+must be the most recent item taken from the worklist on line 6. This can only happen if
+ŝ ∈ W (p̂, q̂) is derived by one of the rules (stepE ) or (stepF ) in the last step.
+If the (stepE ) rule is used, let us assume that s0 = s1 , p0 = p1 and q 0 = q1 (the case
+that s0 = s2, p0 = p2 and q 0 = q2 is completely analogous). So s1 ∈ W (p1, q1 ) holds.
+If the other premise s2 ∈ W (p2 , q2) does not satisfy w(p2) = s2 , then the invariant
+remains true. If both w(p1 ) = s1 and w(p2 ) = s2, then n(p1) = q1 and n(p2 ) = q2 follow
+(because N is deterministic); since ŝ ∈ W (p̂, q̂) is derivable by (stepE ), there must also
+be rules p1 ◦ p2 → p̂ ∈ E (where (p0, q 0 ) is one of (p1, q1 ) or (p2 , q2)) and q1 ◦ q2 → q̂ ∈ N .
+Consequently, (p̂ = pr , q̂ = qr , ŝ = s1 ◦ s2 ) will be added to the worklist on line 15.
+If the (stepF ) is used, q̂ = q0 holds and there must be a step p̂ → p0 ∈ F; hence (p̂, q̂, ŝ)
+will be put on the worklist on line 17.
+Lemma 5.14. Whenever line 5 is reached in Listing 13, we have
+(1) If (p, q, s) ∈ worklist or s = w0(p, q) is defined, then s ∈ W 0(p, q) or s = ∞ and
+<a href="#id26"><span class="problematic" id="id27">|W 0 (p, q)|</span></a> &gt; 1.
+(2) Assume that ŝ ∈ W 0 (p̂, q̂) can be inferred using an inference rule from Figure 12 with
+premises P1, … , Pn . Then (p̂, q̂, ŝ) ∈ worklist, w0 (p̂, q̂) = ŝ, w 0 (p̂, q̂) = ∞, or there is a
+premise Pi = s0 ∈ W 0 (p0 , q0) such that w 0(p0, q 0 ) is not equal to s0 or ∞.
+Proof. Consider the first invariant. First note that w0 (p, q) is only updated on lines 10
+and 12. In this case, (p, q, s) ∈ worklist was true at the beginning of the loop, so s ∈ W 0 (p, q)
+or s = ∞ and <a href="#id28"><span class="problematic" id="id29">|W 0(p, q)|</span></a> &gt; 1. This justifies setting w0 (p, q) = s on line 12. On line 10, we
+additionally have t ∈ W 0 (p, q); we conclude that <a href="#id30"><span class="problematic" id="id31">|W 0 (p, q)|</span></a> &gt; 1 (justifying w 0 (p, q) = ∞)
+because either s = ∞, or s 6= t and s, t ∈ W 0 (p, q).
+Hence we may focus on the items put on the worklist. On line 4, since w(q) ∈ W (q, n(q))
+and p ↑ q, w(q) ∈ W 0(p, n(q)) follows. On line 18, we have p1 ◦ p2 → pr ∈ E and
+q1 ◦ q2 → qr ∈ E. Moreover, we have either s0 1 ∈ W 0(p1 , q1 ) or s0 1 = ∞ and <a href="#id32"><span class="problematic" id="id33">|W 0(p1 , q1 )|</span></a> &gt; 1;
+and either s0 2 ∈ W 0 (p2, q2 ) or s0 2 = ∞ and <a href="#id34"><span class="problematic" id="id35">|W 0(p2 , q2 )|</span></a> &gt; 1. If neither s0 1 = ∞ nor s0 2 = ∞,
+then we have s0 1 ◦ s0 2 ∈ W 0 (p, q) by (stepE ). Otherwise, since we can derive t1 ◦ t2 ∈ W 0(p, q)
+by (stepE ) for any t1 ∈ W 0(p1 , q1) and t2 ∈ W 0(p2 , q2 ), <a href="#id36"><span class="problematic" id="id37">|W 0(p, q)|</span></a> &gt; 1 follows, and s0 1 ◦s0 2 = ∞.
+So the invariant holds. Finally, on line 20, we have p → p0 ∈ F, and either s ∈ W 0(p, q) or
+s = ∞ and <a href="#id38"><span class="problematic" id="id39">|W 0 (p, q)|</span></a> &gt; 1. In the former case, s ∈ W 0(p0, q) by (stepF ), while in the latter
+case, t ∈ W 0 (p0 , q) for any t ∈ W 0 (p, q); either way, the invariant holds.
+DECIDING CR, NFP, UNC, AND UNR FOR GROUND TRSs</p>
+<blockquote>
+<div><p>23</p>
+</div></blockquote>
+<p>Next we consider the second invariant. Immediately after the loop on lines 3–4, if
+ŝ ∈ W 0(p̂, q̂) follows by (base0 ) then (p̂, q̂, ŝ) will be on the worklist. For all other inferences of
+some ŝ ∈ W 0 (p̂, q̂), there is a premise s0 ∈ W 0 (p0, q 0 ) such that w 0(p0, q 0 ) is undefined, because
+initially, w 0 is nowhere defined. The invariant for ŝ ∈ W 0 (p̂, q̂) may be invalidated in three
+ways.
+(1) (p̂, q̂, ŝ) is the item taken from the worklist on line 6. In this case, lines 7–12 ensure that
+w 0 (p̂, q̂) = ŝ or w 0 (p̂, q̂) = ∞ at the next loop iteration.
+(2) w 0 (p̂, q̂) = ŝ holds and the value of w 0 (p̂, q̂) is updated; this may only happen on line 10,
+and the invariant still holds with w0(p̂, q̂) = ∞.
+(3) There is a premise s0 ∈ W 0 (p0, q 0 ), and w0 (p0 , q0) is set to s0 or ∞ on line 10 or 12. This
+means that the item taken from the worklist on line 6 satisfies p = p0 , q = q 0 , and s = s0
+or s = ∞. Note that s = w 0 (p, q) holds at line 13.
+If (step0E ) is used to infer ŝ ∈ W 0 (p̂, q̂), let us assume that s0 = s1, p0 = p1 and q 0 = q1 ;
+(the case that s0 = s2 , p0 = p2 and q 0 = q2 is analogous). If w 0 (p2, q2 ) is not equal
+to s2 nor ∞, then the invariant is maintained. Note that we have p1 ◦ p2 → p̂ ∈ E
+and q1 ◦ q2 → q̂ ∈ N , with (p0, q 0 ) ∈ {(p1 , q1 ), (p2, q2 )}. Hence line 18 is reached with
+pr = p̂, qr = q̂. At that point, s1 = w0(p1 , q1 ), s2 = w0 (p2 , q2). So either s1 ◦ s2 = ŝ, or
+s1 ◦ s2 = ∞ so putting the item (pr , qr , s1 ◦ s2) on the worklist restores the invariant.
+If (step0F ) is used to infer ŝ ∈ W 0 (p̂, q̂), then q 0 = q̂ and there must be a rule
+p0</p>
+<blockquote>
+<div><p>→ p̂ ∈ F. Hence line 20 will put (p̂, q̂, s) with s = ŝ or s = ∞ on the worklist,</p>
+</div></blockquote>
+<p>restoring the invariant.
+Theorem 5.15. The procedure in Figures 11 and 13 is correct and takes O(kRk3 log kRk)
+time.
+Proof. Consider the check of the first UNR-condition (Listing 11). Note that by the first
+invariant of Lemma 5.13, the check on line 8 succeeds only if the first UNR-condition is
+violated, since at that point s ∈ W (p, q), t ∈ W (p, n(q)) and s 6= t, so s →∗E∪F − p E∪F − ∗← t
+and s and t are R◦ -normal forms. When the main loop exits, the worklist is empty, making
+the case that (p, q, s) ∈ worklist in the second invariant impossible. Therefore, we can show
+by induction on the derivation that for any derivation of s ∈ W (p, q) by the inference rules
+in Figure 10, w(p) = s holds, using the second invariant. Consequently, the resulting partial
+function w witnesses the fact that the first UNR-condition holds. Therefore, the check of
+the first UNR-condition is correct.
+Now look at the check of the second UNR-condition (Listing 13). Using the first invariant
+of Lemma 5.14, we see that the check on line 13 succeeds only if the second UNR-condition
+is violated, since at that point, either s ∈ W 0 (p, q) and s 6= w(p), or <a href="#id40"><span class="problematic" id="id41">|W 0(p, q)|</span></a> &gt; 1, ensuring
+that W 0 (p, q) contains an element distinct from w(p). On the other hand, if we reach
+line 21, the worklist is empty, and by induction on the derivation we can show that for all
+derivations of s ∈ W 0(p, q) using the rules in Figure 12, either w 0 (p, q) = s or w0 (p, q) = ∞,
+using the second invariant. Furthermore, the check on line 13 has failed for all defined
+values of w0 (p, q), which means that whenever both w 0 (p, q) and w(p) are defined, then
+they are equal; in particular, w 0 (p, q) 6= ∞. Therefore, in (5.3), if w(p) is defined, we must
+have t = w0(p, q) = w(p) = s, and the second UNR-condition follows, establishing UNR by
+Lemma 5.4.
+Next we establish the complexity bound. Let n = kRk. We claim that the check of
+the first UNR-condition (Listing 11) takes O(n3 ) time. First note that the precomputation
+24</p>
+<blockquote>
+<div><p>BERTRAM FELGENHAUER</p>
+</div></blockquote>
+<p>(line 1) can be performed cubic time. Moreover, the bottom part of the main loop (lines 11–
+17) is executed at most O(n) times, once for each possible value of p. So even without
+indexing the rules of E, the bottom part takes at most O(n2 log n) time, where the log n
+factor stems from the query of N and the maintenance of maximal sharing when constructing
+s1 ◦ s2 . Furthermore, only O(n2 ) items are ever added to the worklist, so the top part of the
+loop (lines 5–10) also takes O(n2 ) time. Overall, the check of the first UNR-condition is
+dominated by the cubic time precomputation.
+For the complexity second UNR-condition (Listing 13), note that computation of ↑
+takes O(n3) time. We focus on the main loop (lines 4–20). Because w0 (p, q) is updated at
+most twice for each combination (p, q), lines 13–20 are executed at most O(n) times for each
+possible value of p, for a total of O(n2 ) times. By indexing the rules of E we can perform the
+enumeration on line 16 in a total O(n3 ) time, accounting for O(n2) selected rules of E (each
+of which is used for at most two values of p), and O(n) possible values for q1 or q2 , depending
+on whether (p, q) = (p1 , q1 ) or (p, q) = (p2 , q2 ). By the same analysis, lines 17–18 are also
+executed O(n3 ) time in total, for a total runtime of O(n3 log n) (as for the first check, the
+log n factor stems from the query of N and the maximal sharing of s1 ◦ s2). Lines 19–20 are
+also executed O(n3) times. Overall at most O(n3 ) items are added to worklist, so lines 6–14,
+which are executed once per worklist item, take O(n3 ) time. In summary, the complexity is
+O(n3 log n) as claimed.</p>
+<p>finding normal forms requires knowing if a term is a normal form. As <span id="id21">[]</span> points out this is in general complexity <span id="id22">[]</span>, because the conditions are programs. But the unconditional system is a good approximation, and checking the conditions can be done with a time limit for a further improved approximation. The distinction Lucas et al. draw between irreducible terms (no b such that a -&gt; b) and normal forms (irreducible and operationally 1-terminating) seems contrived - it is true that the operationally terminating systems they define are easier to analyze, but as they admit, if “the interpreter implements some reachability checking” you can see some results on non-operationally-terminating systems. Hence their categorization of non-operationally-terminating systems as “useless” and “abnormal” is quite insulting.</p>
+<p>For the unconditional system we can construct an automaton,</p>
+<p>To each non-variable subterm v of t we associate a state qv . In addition
+we have a state q⊤. The only accepting state is qt. The transition rules are:
+• f (q⊤, … , q⊤) → q⊤ for all function symbols.
+• f (qt1 , … , qtn ) → qf (t1,…,tn ) if f (t1, … , tn) is a subterm of t and qti is
+actually q⊤ if ti is a variable.
+• f (q⊤ … , q⊤, qt, q⊤, … , q⊤) → qt for all function symbols f whose arity is
+at least 1.
+The proof that this automaton indeed recognizes the set of terms that encompass
+t is left to the reader.</p>
+<p>Per <span id="id23">[]</span> programs using nondeterminism still spend a large part of reduction steps in deterministic evaluations. For example, constraint solvers do a nondeterministic choice followed by lots of deterministic propagation. So efficient implementation of deterministic computations is important regardless, and the efficiency of nondeterminism is less important.</p>
+<p>The compiler creates an evaluation function that takes one argument (a term) and returns the resulting normal forms. This works particularly well for convergent systems where the result is a unique normal form, as subsystems are simply more evaluation functions.</p>
+<p>In the nondeterministic case several results may be returned and the situation is more complicated. Backtracking works well.</p>
+<p>A TRS is strongly descending if there is an ordering &gt; such that t1 &gt; t2 for every reduction t1 → t2 that belongs to a critical pair. Theorem: strongly descending and locally confluent implies confluent.</p>
+<p>The proof that SN implies WN goes as follows: Assume term t SN and not WN. Then for every term s in the reduction closure of t, exists f(s) s.t. s -&gt; f(s). Take smallest set containing t, closed under f, and topologically closed. By SN in reduction closure of t.</p>
+<p>Then infinite reduction. Then limit exists by SN. Cannot be normal form. So continue reduction.</p>
+<p>Proving a single term has SN and CR is Σ^0_1 and Π^0_2 respectively. Proving SN/CR for a system is Π^0_2.
+WCR is Σ^0_1. The special halting problem “halts on the blank tape” is Σ^0_1. The general halting problem “halts on all inputs” is Π^0_2.</p>
+<p>SN is in Σ01 because we can enumerate all reductions in order of length and if we halt then the term is SN.</p>
+<p>for infinitary rewriting, SN is in Π11. A term is a function from positions to term-parts and an infinite reduction is a function from natural numbers to terms satisfying a Π11 predicate that each term rewrites to the next term.</p>
+<ol class="lowerroman simple">
+<li><p>σ(β) rewrites to σ(β + 1) for all β &lt; α, and</p></li>
+</ol>
+<p>(ii) for all limit ordinals β &lt; α, and γ approaching β from below, we have:
+– σ(γ) converges to σ(β), and
+– the depth of the γ-th rewrite steps tends to infinity.
+If condition (ii) holds for all limit ordinals β ≤ α then the rewrite sequence σ is
+called strongly convergent. An ordinal α can be viewed as a well-founded relation
+α ⊆ N × N. The property of a relation to be well-founded can be expressed by
+a  -formula, and the above properties on rewrite sequences are arithmetic.
+By [4] the property SN∞</p>
+<blockquote>
+<div><p>R (s) holds if and only if all reductions admitted by s are</p>
+</div></blockquote>
+<dl class="simple">
+<dt>strongly convergent. Hence SN∞</dt><dd><p>R and SNR ∞
+(s) can be expressed by a Π1 1
+-formula</p>
+</dd>
+</dl>
+<p>since the above conditions (i) and (ii) are arithmetic.</p>
+<p>we have two reductions starting from a term t. By Lemma
+46(iii) they can be put into the form t -!f-c_t so and t -&gt;!f-‘f s1.
+We then construct Fig. 10. The top left square exists by Theorem 57. The top right
+and bottom left are given by Lemma 45. The remaining squares follow from Lemma 60</p>
+<p>Since October 2005 we have started our three year project sponsored by Dutch NWO in the FOCUS/BRICKS framework with the title Infinite objects, computation, modeling, and reasoning (BRICKS project page). Our informal name for the project is INFINITY. There are three sites involved:</p>
+<p>As to our subjects and methods, we focus on term (graph) rewriting (including infinitary lambda calculus, infinitary and higher-order rewriting) for the computational aspect, on coalgebraic techniques for the modeling aspect, and on proof theory for the reasoning aspect. Our aim is to study infinite objects, such as streams, infinite trees and terms, infinite term graphs or infinite processes, along the lines of these methods and develop relations between the three methods. Often these exhibit a regular or cyclic nature, but we are also interested in general infinite objects. A paradigm example is the coalgebra of infinite bitstreams. Several operators can be defined on these objects, such as the operator zip that zips two streams alternatingly into one. Defining ones = 1:ones, zeros = 0:zeros, and alt = 0:1:alt, we have equations such as zip(zeros,ones) = alt. The equations holding in this coalgebra between these objects and their operators can be proved in three different ways: by coalgebraic techniques, by proof theory, and by infinitary term rewriting. Up to now, these three methods have been developed in isolation. This project investigates the relations between these approaches, and aims to design methods such as new proof systems to deal with the infinite objects and their equations. Issues are well-definedness criteria, completeness of the methods, decidability and implementation.</p>
+<p>for matchbox, the constraints are really
+QF_NIA (polynomial integer arithmetic, standard matrices) and QF_LRA (arctic numbers)
+but the Boolean aspect seems to dominate, so
+instead I am using an (eager) bit-blasting translation to SAT,
+with the Ersatz library <a class="reference external" href="https://hackage.haskell.org/package/ersatz-0.4.12">https://hackage.haskell.org/package/ersatz-0.4.12</a>
+which neatly solves the memoization problem with hidden unsafePerformIO
+so I can write the constraints in a functional way
+(e.g., unknown numbers, and matrices, are instances of Num,
+so <cite>sum</cite> automatically works, etc.)</p>
+<p>For actual SMT writing, a nicely typed embedded DSL is
+<a class="reference external" href="https://hackage.haskell.org/package/smtlib2-1.0/docs/Language-SMTLib2.html">https://hackage.haskell.org/package/smtlib2-1.0/docs/Language-SMTLib2.html</a>
+but it seems unmaintained, and I found it hard to add patches
+(necessary because of changes in SMTLIB format specs)
+I recently looked into <a class="reference external" href="https://hackage.haskell.org/package/simple-smt">https://hackage.haskell.org/package/simple-smt</a>
+but it requires some ugly monadic code, cf. evaluate_rule(_arc)
+<a class="reference external" href="https://gitlab.imn.htwk-leipzig.de/waldmann/pure-matchbox/-/blob/457-find-ar">https://gitlab.imn.htwk-leipzig.de/waldmann/pure-matchbox/-/blob/457-find-ar</a>…</p>
+<p>in MU-TERM, we generate first-order formulae that are translated into
+constraints following this article (interpretations are given for
+function symbols and relations):</p>
+<p><a class="reference external" href="https://link.springer.com/article/10.1007/s10817-017-9419-3">https://link.springer.com/article/10.1007/s10817-017-9419-3</a></p>
+<p>all this process from the generation of the fist-order formulae to the
+application of the Farkas’ Lemma is implemented using MU-TERM internal
+libraries.</p>
+<p>We translate these constraints from our internal format to SMTLIB2
+format using the logic QF_NIA and setting the variables into the Int domain.</p>
+<p>The result is a ByteString that is sent to a temporary file and an
+external call is executed. The result is stored in a new temporary file
+that is parsed by MU-TERM.</p>
+<p>When we want to use finite rational domains (for example, if we want
+only 1, 1/2 and 2 as coefficients), we still use nlsol (in this case,
+relations are interpreted in the classical way):</p>
+<p><a class="reference external" href="https://www.cs.upc.edu/%7Ealbert/nonlinear.html">https://www.cs.upc.edu/%7Ealbert/nonlinear.html</a></p>
+<p>LoAT has a custom, minimalistic interface for SMT solvers [1].
+Currently, there are two implementations, based on the C(++) APIs of Z3
+and Yices (there was a third one for CVC4 in the past, and I plan to
+integrate CVC5 in the future).</p>
+<p>It uses the logics QF_LIA, QF_NIA, and QF_NIA + exponentials (which is
+not yet standardized, as far as I know, but Z3 can at least handle the
+trivial cases). Yices is used for QF_LIA and Z3 is used for QF_NIA.</p>
+<p>For managing resources, I use Z3’s timeout parameter, and Yices is
+called in its own thread and stopped via the corresponding API-call
+(yices_stop_search) when the timeout expires. For QF_NIA, that does not
+work reliably, which is one of the reasons why LoAT uses Z3 instead of
+Yices for QF_NIA.</p>
+<p>The majority of the SMT calls are needed to check satisfiability of the
+guards of transitions (to remove inapplicable transitions which arise
+due to LoAT’s underapproximations), and to check the preconditions of
+LoAT’s loop acceleration and non-termination techniques [2,3].</p>
+<p>[1] <a class="reference external" href="https://github.com/LoAT-developers/LoAT/blob/master/src/smt/smt.hpp">https://github.com/LoAT-developers/LoAT/blob/master/src/smt/smt.hpp</a>
+[2] <a class="reference external" href="https://link.springer.com/chapter/10.1007/978-3-030-45190-5_4">https://link.springer.com/chapter/10.1007/978-3-030-45190-5_4</a>
+[3] <a class="reference external" href="https://arxiv.org/abs/2111.13952">https://arxiv.org/abs/2111.13952</a></p>
+<p>In AProVE, arithmetic constraints are created programmatically and represented using recursive data structures, without an explicit intermediate language. These data structures are then either exported to SMT-LIB2 strings or bit-blasted to propositional formulas.</p>
+<p>For RPO, a dedicated propositional encoding is used:</p>
+<p>Michael Codish, Jürgen Giesl, Peter Schneider-Kamp, René Thiemann:
+SAT Solving for Termination Proofs with Recursive Path Orders and Dependency Pairs. J. Autom. Reason. 49(1): 53-93 (2012)</p>
+<p><a class="reference external" href="http://verify.rwth-aachen.de/giesl/papers/RPO-Journal-distribute.pdf">http://verify.rwth-aachen.de/giesl/papers/RPO-Journal-distribute.pdf</a></p>
+<p>The representation of propositional formulas allows for arbitrary nesting of connectives. Formula construction uses structural hashing (aka sharing of subformulas), implemented via suitable instances of the Factory pattern. Formulas are converted to CNF via the implementation of Tseitin’s equisatisfiable encoding in SAT4J.
+…</p>
+<p>Beyond propositional logic:</p>
+<p>– QF_NIA is used for arithmetic interpretations that are at least as expressive as linear polynomial interpretations (max-polynomials, matrix interpretations, non-linear polynomials, …); carriers of these interpretations are the naturals, the integers, and the non-negative rationals.</p>
+<p>Solved via bit-blasting with structural hashing/sharing of subformulas and several simplifications during formula construction, using the encoding in</p>
+<p>Carsten Fuhs, Jürgen Giesl, Aart Middeldorp, Peter Schneider-Kamp, René Thiemann, Harald Zankl:
+SAT Solving for Termination Analysis with Polynomial Interpretations. SAT 2007: 340-354</p>
+<p><a class="reference external" href="https://www.dcs.bbk.ac.uk/%7Ecarsten/papers/SAT07-satpolo.pdf">https://www.dcs.bbk.ac.uk/%7Ecarsten/papers/SAT07-satpolo.pdf</a></p>
+<p>Experiments with Z3 v3.2 in 2011 (for a talk at a Z3 workshop) showed that solving QF_NIA formulas from the search for linear polynomial interpretations with /unbounded/ arithmetic variables was very slow.</p>
+<p>However, adding constraints a_i &lt;= N for variables a_i and small values for a constant bound N led to a performance that was only slightly worse than that of AProVE’s dedicated SAT encoding for the same bound N. QF_NIA has the benefit over QF_BV that no overflow-related issues can occur, and internally SMT solvers can make use of the bound N.</p>
+<p>(Rerunning such experiments with /current/ versions of Z3, Yices, CVC5, … might be interesting.)</p>
+<p>– QF_LIA is used for linear polynomials with hard-coded coefficient 1, where only the additive weight is needed, and for KBO following the encoding in</p>
+<p>Harald Zankl, Nao Hirokawa, Aart Middeldorp:
+KBO Orientability. J. Autom. Reason. 43(2): 173-201 (2009)</p>
+<p><a class="reference external" href="http://cl-informatik.uibk.ac.at/users/hzankl/new/publications/ZA09_01.pdf">http://cl-informatik.uibk.ac.at/users/hzankl/new/publications/ZA09_01.pdf</a></p>
+<p>– Quantifier-free arctic naturals/integers (as pointed out earlier, closely related to QF_LIA/QF_LRA, but with an additional -infty value) are used in the search for arctic matrix interpretations. AProVE uses a variant of the unary order encoding described in Section 5.3 of</p>
+<p>Carsten Fuhs:
+SAT encodings: from constraint-based termination analysis to circuit synthesis. RWTH Aachen University, 2012, pp. 1-188</p>
+<p><a class="reference external" href="http://sunsite.informatik.rwth-aachen.de/Publications/AIB/2011/2011-17.pdf">http://sunsite.informatik.rwth-aachen.de/Publications/AIB/2011/2011-17.pdf</a>
+…</p>
+<p>– External solvers called via Java API: SAT4J, SMTInterpol.</p>
+<p>For quick queries on very small inputs (e.g., checking validity of conditional polynomial constraints from concrete max-polynomial interpretations or checking effectiveness of a semantic labelling), SAT4J is used - the overhead of spawning an external process is avoided.</p>
+<p>This matters in particular for JVM-based termination tools: creating a new process first makes a copy of the parent process - with all its used memory - and only then runs the called program, with undesired effects (even if the process copy is actually created lazily by the OS):</p>
+<p><a class="reference external" href="https://www.tapatalk.com/groups/starexec/strange-memouts-t106.html">https://www.tapatalk.com/groups/starexec/strange-memouts-t106.html</a></p>
+<p>In this sense, for “heavy-duty” constraint solving in a competitive setting, also systems-level considerations matter.</p>
+<p>– External solvers used as processes: MiniSat, Yices, Z3.</p>
+<p>MiniSat 2.2 is arguably not the most recent solver (last update in 2008?), so improvements via (suitably configured) more modern SAT solvers may be possible. According to Section 4 of</p>
+<p>Emre Yolcu, Scott Aaronson, Marijn J. H. Heule:
+An Automated Approach to the Collatz Conjecture. CADE 2021: 468-484</p>
+<p><a class="reference external" href="https://link.springer.com/content/pdf/10.1007/978-3-030-79876-5_27.pdf">https://link.springer.com/content/pdf/10.1007/978-3-030-79876-5_27.pdf</a></p>
+<p>a suitable configuration for modern solvers may be to change the solver’s branching behaviour from phase-saving (default in many recent solvers) to negative branching (default in MiniSat - always try ‘false’ before ‘true’).</p>
+<p>AProVE kills external processes on OS level if either their timer (configured in the strategy language) has elapsed or separate progress in the termination proof makes the remaining computation by the process unnecessary: for example, when AProVE searches for an RPO and a polynomial interpretation with two running MiniSat instances in parallel, and an RPO that simplifies the termination problem is found, then the search for a polynomial interpretation, along with its MiniSat process, are aborted immediately. Being able to abort computations immediately, also in a parallel setting, is a motivation to use external processes rather than a solver API.</p>
+<p>An overview of AProVE’s constraint solving automation via SAT and SMT solving with further pointers is available in Section 4 of</p>
+<p>Jürgen Giesl, Cornelius Aschermann, Marc Brockschmidt, Fabian Emmes, Florian Frohn, Carsten Fuhs, Jera Hensel, Carsten Otto, Martin Plücker, Peter Schneider-Kamp, Thomas Ströder, Stephanie Swiderski, René Thiemann:
+Analyzing Program Termination and Complexity Automatically with AProVE. J. Autom. Reason. 58(1): 3-31 (2017)</p>
+<p><a class="reference external" href="https://www.dcs.bbk.ac.uk/%7Ecarsten/papers/JAR-AProVE.pdf">https://www.dcs.bbk.ac.uk/%7Ecarsten/papers/JAR-AProVE.pdf</a></p>
+<p>NaTT requires an SMT solver that can read SMT-LIB 2.0 queries via stdin,
+e.g. and by default, “z3 -smt2 -in”. The communication doesn’t go via
+filesystem and I don’t feel need for making API calls.</p>
+<p>The theory is usually QF-LR(I)A. Coefficients are usually (ite b 0 1) or
+(ite b 1 2), linearized by distribution. Probably more importantly, NaTT
+uses incremental feature (push/pop).</p>
+<p>Above are described in a publication:
+<a class="reference external" href="https://doi.org/10.1007/978-3-319-08918-8_32">https://doi.org/10.1007/978-3-319-08918-8_32</a>, and later presented at
+WST: <a class="reference external" href="https://akihisayamada.github.io/NaTT2016.pptx">https://akihisayamada.github.io/NaTT2016.pptx</a></p>
+<p>It also does a partly lazy encoding, so that x in (x &amp;&amp; false) etc. will
+not be fully generated.</p>
+<blockquote>
+<div><p>improvements via (suitably configured) more modern SAT solvers</p>
+</div></blockquote>
+<p>may be possible.</p>
+<p>Yes. E.g., Kissat has lots of parameters,
+and provides a uniform interface (command line and API)
+My optimizer computed this
+<a class="reference external" href="https://gitlab.imn.htwk-leipzig.de/waldmann/pure-matchbox/-/blob/master/strat/std.strat#L7">https://gitlab.imn.htwk-leipzig.de/waldmann/pure-matchbox/-/blob/master/strat/std.strat#L7</a>
+but the search space is huge, and my optimizer is naive
+See also <a class="reference external" href="https://github.com/arminbiere/kissat/issues/25">https://github.com/arminbiere/kissat/issues/25</a>
+There’s room for at least one Bachelor’s thesis here.</p>
+<ul class="simple">
+<li><p>AProVE kills external processes on OS level …</p></li>
+</ul>
+<p>I struggle with this (cf. <a class="reference external" href="https://github.com/yav/simple-smt/issues/21">https://github.com/yav/simple-smt/issues/21</a>)
+but this may be a Haskell/libraries problem (lazy IO).
+Stopping Kissat via API just works. (I think it sets some flag
+that the solver’s main loop checks often enough.)</p>
+<p>(Akihisa, on NaTT)</p>
+<ul class="simple">
+<li><p>Coefficients are usually (ite b 0 1) or (ite b 1 2),</p></li>
+</ul>
+<p>Interesting! So it’s actually a finite-domain constraint.
+There are classical (non-SMT) solvers for these,
+e.g. <a class="reference external" href="https://www.gecode.org/">https://www.gecode.org/</a> Did any-one try this?
+Possibly via the mini/flatzinc language?
+<a class="reference external" href="https://www.minizinc.org/doc-2.6.4/en/part_4_reference.html">https://www.minizinc.org/doc-2.6.4/en/part_4_reference.html</a></p>
+<p>no, I mean constant parts are left unbounded. Interpretations look like
+(ite b 0 1) * x + (ite b 0 1) * y + w</p>
 </section>
 </section>
 

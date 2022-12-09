@@ -19,6 +19,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -99,8 +100,39 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Ambiguous identifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#default-arguments">Default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#failed-assert">Failed assert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#missing-override">Missing override</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-nfc">Non-NFC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-argument">Unused argument</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-import">Unused import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-result">Unused result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#unused-definition">Unused definition</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -120,9 +152,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Language Reference</a> &raquo;</li>
-      <li>Syntax</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
+      <li class="breadcrumb-item active">Syntax</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Syntax.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -137,23 +169,17 @@
 <p>Almost everything in Stroscot is an expression. But there’s also block statements and layout.</p>
 <section id="unicode">
 <h2>Unicode<a class="headerlink" href="#unicode" title="Permalink to this heading"></a></h2>
-<p>Practically, most programs will use ASCII. But the Unicode algorithms are robust and supporting other languages isn’t too hard. <a class="reference external" href="https://rosettacode.org/wiki/Unicode_variable_names">Lots of languages</a> have support for Unicode, although the exact set of allowed characters varies.</p>
+<p>The decoding algorithm is as follows: Start with bytes. Decode using UTF-8, replacing invalid bytes/characters with Unicode’s REPLACEMENT CHARACTER U+FFFD. <a class="reference external" href="http://unicode.org/reports/tr15/#Norm_Forms">NFC</a> normalize the input, warning if input isn’t already normalized. Then some combination of the following algorithms to do lexical analysis:</p>
 <ul class="simple">
-<li><p>Start with bytes. Decode using UTF-8, replacing invalid bytes/characters with Unicode’s REPLACEMENT CHARACTER U+FFFD.</p></li>
-<li><p><a class="reference external" href="http://unicode.org/reports/tr15/#Norm_Forms">NFC</a> normalize the input, warning if input isn’t normalized. There is enough software that automatically normalizes to NFC (e.g. web browsers) that it seems safe to require NFC; bugs can be worked around by changing the input (inserting joiners) rather than modifying NFC.</p></li>
-<li><p>A warning for weird scripts (listed in <a class="reference external" href="http://www.unicode.org/reports/tr31/#Table_Candidate_Characters_for_Exclusion_from_Identifiers">TR31</a>) or zero-width characters.</p></li>
+<li><p><a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, lines end at hard / mandatory breaks)</p></li>
+<li><p><a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens</p></li>
+<li><p><a class="reference external" href="https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries">extended grapheme clustering</a> to split up tokens into characters</p></li>
 </ul>
-<p>Some combination of the following algorithms to do lexical analysis:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://www.unicode.org/reports/tr14/#BreakingRules">line-breaking</a> (specifically, to determine hard / mandatory breaks)</p></li>
-<li><p><a class="reference external" href="http://www.unicode.org/reports/tr29/#Word_Boundary_Rules">word-breaking</a> to split up lines into tokens - it needs to be extended to account for program identifiers / multicharacter symbols</p></li>
-<li><p><a class="reference external" href="https://www.unicode.org/reports/tr31/#Default_Identifier_Syntax">identifier syntax</a>, which specifies sets of valid identifier start/continue characters. Go’s rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, but this excludes combining characters and Devanagari. Go’s upper case restriction means 日本語 cannot be exported, and instead X日本語 must be used.</p></li>
-</ul>
-<p>Stroscot is case-sensitive.</p>
+<p>Stroscot is case-sensitive, i.e. it does not do any case transformations on identifiers, but it does not make any syntactic distinctions based on case.</p>
 </section>
 <section id="layout">
 <h2>Layout<a class="headerlink" href="#layout" title="Permalink to this heading"></a></h2>
-<p>The most obvious is the initial declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t match with explicit braces.</p>
+<p>The most obvious instance of layout is the module declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don’t syntactically match with explicit braces, but are semantically identical.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">assertEqual</span><span class="w"></span>
 <span class="w">  </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">a</span><span class="w"></span>
@@ -168,7 +194,7 @@
 <ul class="simple">
 <li><p>If it is indented more, it’s a sequence given as an argument to the previous line, so a virtual open brace is inserted</p></li>
 <li><p>If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted</p></li>
-<li><p>If there is a line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">offside rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
+<li><p>If there is a line at lower indentation (or EOF), the sequence is ended as it’s a new declaration (<a class="reference external" href="https://en.wikipedia.org/wiki/Off-side_rule">off-side rule</a>). A virtual close brace is inserted at the start of the line.</p></li>
 <li><p>Incomparable levels are an error.</p></li>
 </ul>
 <p>Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.</p>
@@ -242,13 +268,13 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="variables">
 <h2>Variables<a class="headerlink" href="#variables" title="Permalink to this heading"></a></h2>
-<p>Identifiers cannot be directly reassigned; you can shadow, which optionally generates a warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.</p>
+<p>Identifiers cannot be directly reassigned; you can shadow, which generates a warning, but once an identifier is declared in a scope, that’s what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="nf">a</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="nf">raise</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Mutable assignment (<code class="docutils literal notranslate"><span class="pre">:=</span></code>) is completely distinct from name binding (<code class="docutils literal notranslate"><span class="pre">=</span></code>). They have distinct notation.</p>
+<p>Mutable assignment (<code class="docutils literal notranslate"><span class="pre">:=</span></code>) is completely distinct from name binding (<code class="docutils literal notranslate"><span class="pre">=</span></code>). They have distinct notation and mutable assignment cannot create new bindings.</p>
 </section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
@@ -358,7 +384,7 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 </section>
 <section id="non-linear-patterns">
 <h3>Non-linear patterns<a class="headerlink" href="#non-linear-patterns" title="Permalink to this heading"></a></h3>
-<p>Non-left-linear patterns such as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">a</span></code> are allowed, this is interpreted as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - rename variables and check for equality using <code class="docutils literal notranslate"><span class="pre">==</span></code>. See <a class="reference internal" href="../Commentary/TermRewriting.html#trs-equality-linearity"><span class="std std-ref">Equality and left-linearity</span></a> for a discussion.</p>
+<p>Non-left-linear patterns such as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">a</span></code> are allowed, this is interpreted as <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">==</span> <span class="pre">b</span></code> - rename variables and check for equality using <code class="docutils literal notranslate"><span class="pre">==</span></code>. See <a class="reference internal" href="../Commentary/TermRewriting.html#trs-equality-linearity"><span class="std std-ref">Left-nonlinearity</span></a> for a discussion.</p>
 </section>
 <section id="pattern-synonyms">
 <h3>Pattern synonyms<a class="headerlink" href="#pattern-synonyms" title="Permalink to this heading"></a></h3>
@@ -418,6 +444,14 @@ unmatched parentheses, or run the code formatter which will add them.</p>
 <span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Using the variable name in braces by itself uses the value of that variable in scope:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
+<span class="nf">w</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="nf">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="nf">v</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">{</span><span class="n">w</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="positional-arguments">
 <h3>Positional arguments<a class="headerlink" href="#positional-arguments" title="Permalink to this heading"></a></h3>
@@ -439,6 +473,18 @@ assigned to whatever is not a keyword argument.</p>
 <span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 </pre></div>
 </div>
+<p>Positional arguments may be filled by the special syntax <code class="docutils literal notranslate"><span class="pre">_</span></code> to write a partial application:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sub</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<span class="nf">sub1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sub</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">definition</span><span class="w"></span>
+<span class="nf">sub1</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sub</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="nf">sub1</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+</pre></div>
+</div>
+<p>All the underscores of a call are regrouped to form the parameters of a unique function in the same order as the corresponding underscores.</p>
 </section>
 <section id="implicit-arguments">
 <h3>Implicit arguments<a class="headerlink" href="#implicit-arguments" title="Permalink to this heading"></a></h3>
@@ -796,11 +842,25 @@ Expressions are lifted leftmost innermost.</p>
 </pre></div>
 </div>
 <p>More here: <a class="reference external" href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions">https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions</a></p>
+<p>Also the do-while block from <a class="reference external" href="https://github.com/google/rune/blob/main/doc/rune4python.md#looping">Rune</a>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>do
+  c = getNextChar()
+while c != ‘\0’
+  processChar(c)
+</pre></div>
+</div>
+<p>The do-block always executes, and the while-block only executes if the condition is true, after which we jump to the start of the do-block. If the condition is false, the loop terminates. This avoids the common C/C++ assignment-in-condition hack:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>int c;
+while ((c = getNextChar()) != &#39;\0&#39;) {
+  processChar(c);
+}
+</pre></div>
+</div>
 </section>
 <section id="programs">
 <h2>Programs<a class="headerlink" href="#programs" title="Permalink to this heading"></a></h2>
 <p>A program is a block, and every declaration is a macro or control structure.</p>
-<p>So for example you can implement a conditional definition:</p>
+<p>So top-level statements and function calls are allowed. For example you can implement a conditional definition:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">condition</span><span class="w"></span>
 <span class="w">   </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
 <span class="kr">else</span><span class="w"></span>

@@ -19,11 +19,12 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Stateful programming" href="State.html" />
-    <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
+    <link rel="prev" title="Resource management" href="Resource-Management.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,14 +50,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -66,10 +74,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Paradigms.html">Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Sets</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Sets</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#definition-by-overloading">Definition by overloading</a></li>
@@ -90,11 +99,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#check">Check</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#total-check">Total check</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#contracts">Contracts</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#the-curse-of-static-typing">The curse of static typing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-curse-of-restrictive-type-signatures">The curse of restrictive type signatures</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#type-synthesis">Type synthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#roles">Roles</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
@@ -122,9 +129,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Commentary</a> &raquo;</li>
-      <li>Sets</li>
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Sets</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Sets.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -139,7 +146,7 @@
 <p>Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see <a class="reference internal" href="Verification.html#verification"><span class="std std-ref">Verification</span></a>). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.</p>
 <section id="id1">
 <h2>Sets<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
-<p>Sets in Stroscots are defined by a predicate <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">isElementOf</span> <span class="pre">S</span> <span class="pre">:</span> <span class="pre">Value</span> <span class="pre">-&gt;</span> <span class="pre">Set</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code>, where <code class="docutils literal notranslate"><span class="pre">Set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Any.</span> <span class="pre">(a</span> <span class="pre">isElemof</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Bool)</span> <span class="pre">}</span></code>. The predicate can describe any side effect free computation, so a set can describe any boolean function.</p>
+<p>Sets in Stroscots are defined by a predicate <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">isElementOf</span> <span class="pre">S</span> <span class="pre">:</span> <span class="pre">Value</span> <span class="pre">-&gt;</span> <span class="pre">Set</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code>, where <code class="docutils literal notranslate"><span class="pre">Set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Any.</span> <span class="pre">(a</span> <span class="pre">isElemof</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Bool)</span> <span class="pre">}</span></code>. The predicate can describe any side effect free computation, so a set can describe any boolean function. As described in <a class="reference internal" href="Logic.html#paradoxes"><span class="std std-ref">Paradoxes</span></a> Stroscot avoids the set-theoretic paradoxes by requiring every set definition to be well-founded.</p>
 <p>Sets don’t contain null by default, you have to add it to the predicate as an allowed value.</p>
 <section id="definition-by-overloading">
 <h3>Definition by overloading<a class="headerlink" href="#definition-by-overloading" title="Permalink to this heading"></a></h3>
@@ -213,6 +220,7 @@
 <span class="o">//</span><span class="w"> </span><span class="kt">And</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
 </pre></div>
 </div>
+<p>We could have some shorthand syntax for ranges, like <code class="docutils literal notranslate"><span class="pre">[1..n]</span></code>, but is the endpoint included? Swift says yes and has <code class="docutils literal notranslate"><span class="pre">[1..&lt;n]</span></code> for right-exclusive ranges. Per <a class="reference external" href="https://github.com/xtclang/xvm/discussions/40">Ecstasy</a> this could be extended to “gremlin operators”, left-exclusive <code class="docutils literal notranslate"><span class="pre">[1&gt;..n]</span></code> and both-exclusive <code class="docutils literal notranslate"><span class="pre">[1&gt;..&lt;n]</span></code>. There is also the <a class="reference external" href="https://en.wikipedia.org/wiki/Interval_(mathematics)#Including_or_excluding_endpoints">traditional interval notation</a> but this is hard to fit into the syntax.</p>
 <p>Dependent types are useful too with ranges. For example, say I have an array and want to pass an index whose range is guaranteed to be in-bounds. I can associate the upper bound of the number’s range with the array length directly:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">get</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">forall</span><span class="w"> </span><span class="kt">T</span><span class="o">.</span><span class="w"> </span><span class="p">(</span><span class="n">array</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Array</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="n">array</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"></span>
 <span class="nf">get</span><span class="w"> </span><span class="n">array</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="w"></span>
@@ -250,7 +258,7 @@
 <span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
-<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id38" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
+<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id40" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
 </section>
 <section id="records">
 <h3>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h3>
@@ -299,6 +307,7 @@
 </pre></div>
 </div>
 <p>This behavior seems more similar to the type declarations found in other languages, hence why it is the default. E.g. in Rust <code class="docutils literal notranslate"><span class="pre">i32</span> <span class="pre">f(i32)</span></code> cannot be applied to <code class="docutils literal notranslate"><span class="pre">i64</span></code>, whereas with the <code class="docutils literal notranslate"><span class="pre">check</span></code> version <code class="docutils literal notranslate"><span class="pre">f</span></code> could be applied to <code class="docutils literal notranslate"><span class="pre">i64</span></code>.</p>
+<p>Function types are powerful. For example formatted printing, buffered I/O, compression, and pipes can all use a single type <code class="docutils literal notranslate"><span class="pre">Writer</span> <span class="pre">=</span> <span class="pre">ByteArray</span> <span class="pre">-&gt;</span> <span class="pre">IO</span> <span class="pre">{</span> <span class="pre">bytes_written</span> <span class="pre">:</span> <span class="pre">int,</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">bytes_written</span> <span class="pre">&lt;</span> <span class="pre">length</span> <span class="pre">p</span> <span class="pre">}</span></code>.</p>
 <section id="dependent-types">
 <h3>Dependent types<a class="headerlink" href="#dependent-types" title="Permalink to this heading"></a></h3>
 <p>The types can bind the value, so Stroscot can express dependent types. And the values are in scope in the type, so even <a class="reference external" href="https://github.com/UlfNorell/insane/">insanely dependent types</a> can be defined:</p>
@@ -367,27 +376,16 @@
 </pre></div>
 </div>
 </section>
-<section id="the-curse-of-static-typing">
-<h3>The curse of static typing<a class="headerlink" href="#the-curse-of-static-typing" title="Permalink to this heading"></a></h3>
+<section id="the-curse-of-restrictive-type-signatures">
+<h3>The curse of restrictive type signatures<a class="headerlink" href="#the-curse-of-restrictive-type-signatures" title="Permalink to this heading"></a></h3>
 <p>If a function <code class="docutils literal notranslate"><span class="pre">foo</span></code> does something unexpected, there are three possibilities:</p>
 <ol class="arabic simple">
-<li><p>Some unusual overloading of foo was defined. That is that clause’s problem. You shouldn’t override equals to return true only if the square root of one is the same as the other, and similarly you shouldn’t have overloaded foo and done something unexpected. Static verification can help with this by documenting the expected properties. The solutions are to verify, change the behavior, or split the behavior into a different function name.</p></li>
-<li><p>foo was defined with a reasonable clause but the clause relied on a contract that wasn’t described. This is harder to catch as static verification usually only covers a subset of behavior, but the solution is to limit the clause with a signature / contract.</p></li>
-<li><p>foo would work, but its signature has been defined too narrowly so is undefined</p></li>
+<li><p>Some unusual implementation/overloading of foo was defined. That is that clause’s problem. You shouldn’t implement equals to return true only if the square root of one is the same as the other, and similarly you shouldn’t have overloaded foo and done something unexpected. Static verification can help with this by documenting and checking the expected properties. Solutions for this case are to change the behavior or rename the function to make its semantics clearer.</p></li>
+<li><p>foo was defined with a reasonable clause but the clause relied on a contract that wasn’t described. This is harder to catch as static verification usually only covers a subset of behavior, but the solution is to limit the clause with a signature / contract. Type signatures are helpful here.</p></li>
+<li><p>foo is undefined for the arguments you are calling with, because it has been defined with a restricted signature.</p></li>
 </ol>
-<p>Usually functions are clearly written and work as long as the functions they call work on the arguments. So it is this third case that bites, because you can overload the called functions but you can’t relax the signature. So restrictive signatures are a curse in this example.</p>
+<p>This last case is the “curse”. Many functions are synonymous with their implementation and work as long as the functions they call work on the arguments. So it is better to use non-restrictive signatures, because the actual domain of the function stays as large as possible. When you write the non-restrictive signatures you are simply advertising that a particular domain is well-tested. In contrast a restrictive signature can’t be extended except by duplicating the implementation of the function.</p>
 </section>
-</section>
-<section id="type-synthesis">
-<h2>Type synthesis<a class="headerlink" href="#type-synthesis" title="Permalink to this heading"></a></h2>
-<p>Type synthesis is tricky, but with the termination checker we don’t have any visible types. The optimizer does a form of type synthesis when it assigns formats to values, but the formats can be conditional on state, and the optimizer will use a catch-all format for hard cases, so the formats are complete but not sound. The only useful case for a complex type synthesis algorithm might be pretty-printed type signatures in documentation, but there having the developer specify type signatures is a viable option.</p>
-<p>But <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a>
-<a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> dependent types will presumably ruin all the fun and require type signatures.</p>
-<p>We could do synthesis at run time, e.g. the type of a list of values is the list type applied to the set of values contained in the list. This might be useful for resolving type-overloaded methods.</p>
-</section>
-<section id="roles">
-<h2>Roles<a class="headerlink" href="#roles" title="Permalink to this heading"></a></h2>
-<p>Roles are just an optimization for <code class="docutils literal notranslate"><span class="pre">coerce</span></code>, but there are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.</p>
 </section>
 </section>
 
@@ -395,7 +393,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Resource-Management.html" class="btn btn-neutral float-left" title="Resource management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="State.html" class="btn btn-neutral float-right" title="Stateful programming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
