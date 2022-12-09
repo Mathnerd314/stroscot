@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ambiguous identifier &mdash; Stroscot  documentation</title>
+  <title>Errors &mdash; Stroscot  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -56,38 +56,41 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Ambiguous identifier</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#automatic-error-propagation">Automatic error propagation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bad-indentation">Bad indentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#shadowing-in-a-block">Shadowing in a block</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#confusuable-unicode">Confusuable Unicode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#default-arguments">Default arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#deprecated-default-arguments">Deprecated default arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#equal-priority-clauses">Equal priority clauses</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#failed-assert">Failed assert</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#implicit-argument-not-passed">Implicit argument not passed</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#inapplicable-to-type">Inapplicable to type</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#invalid-utf8">Invalid UTF8</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#map-on-non-collection">Map on non-collection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#meaningless-term">Meaningless term</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#missing-override">Missing override</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#shadowing-nested-block">Shadowing nested block</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#no-fixed-point">No fixed point</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#applying-a-non-function">Applying a non-function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#non-nfc">Non-NFC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#too-many-arguments">Too many arguments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#typos-in-variable-name">Typos in variable name</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unhandled-exception">Unhandled exception</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unreachable-case">Unreachable case</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unreducible-expression">Unreducible expression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unused-argument">Unused argument</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unused-import">Unused import</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unused-result">Unused result</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unused-definition">Unused definition</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Errors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ambiguous-identifier">Ambiguous identifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-error-propagation">Automatic error propagation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bad-indentation">Bad indentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shadowing-in-a-block">Shadowing in a block</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#confusuable-unicode">Confusuable Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-arguments">Default arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deprecated-default-arguments">Deprecated default arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#equal-priority-clauses">Equal priority clauses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#failed-assert">Failed assert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implicit-argument-not-passed">Implicit argument not passed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inapplicable-to-type">Inapplicable to type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalid-utf8">Invalid UTF8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#map-on-non-collection">Map on non-collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#meaningless-term">Meaningless term</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#missing-override">Missing override</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shadowing-nested-block">Shadowing nested block</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#no-fixed-point">No fixed point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nondeterministic-use-of-concurrency">Nondeterministic use of concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nondeterministic-use-of-exceptions">Nondeterministic use of exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#top-level-non-deteterministic-dispatch">Top-level non-deteterministic dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#applying-a-non-function">Applying a non-function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-nfc">Non-NFC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-syntactic-use-of-variadic-arguments">Non-syntactic use of variadic arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#too-many-arguments">Too many arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typos-in-variable-name">Typos in variable name</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unhandled-exception">Unhandled exception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unreachable-case">Unreachable case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unreducible-expression">Unreducible expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unused-argument">Unused argument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unused-import">Unused import</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unused-result">Unused result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unused-definition">Unused definition</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -109,7 +112,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
-      <li class="breadcrumb-item active">Ambiguous identifier</li>
+      <li class="breadcrumb-item active">Errors</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Reference/Errors.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -119,8 +122,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ambiguous-identifier">
-<h1>Ambiguous identifier<a class="headerlink" href="#ambiguous-identifier" title="Permalink to this heading"></a></h1>
+  <section id="errors">
+<h1>Errors<a class="headerlink" href="#errors" title="Permalink to this heading"></a></h1>
+<section id="ambiguous-identifier">
+<h2>Ambiguous identifier<a class="headerlink" href="#ambiguous-identifier" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -151,7 +156,7 @@
 Please remove one import or disambiguate using qualified names.</p>
 </section>
 <section id="automatic-error-propagation">
-<h1>Automatic error propagation<a class="headerlink" href="#automatic-error-propagation" title="Permalink to this heading"></a></h1>
+<h2>Automatic error propagation<a class="headerlink" href="#automatic-error-propagation" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -181,7 +186,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Exception “urk” may be thrown by ‘a’ and automatically propagated out of ‘b’. Consider adding explicit exception handling or marking with the function ‘rethrowing’.</p>
 </section>
 <section id="bad-indentation">
-<h1>Bad indentation<a class="headerlink" href="#bad-indentation" title="Permalink to this heading"></a></h1>
+<h2>Bad indentation<a class="headerlink" href="#bad-indentation" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -215,7 +220,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Mismatched indentation: line 2 uses 2 spaces, but line 3 uses 1 tab. Use consistent indentation.</p>
 </section>
 <section id="shadowing-in-a-block">
-<h1>Shadowing in a block<a class="headerlink" href="#shadowing-in-a-block" title="Permalink to this heading"></a></h1>
+<h2>Shadowing in a block<a class="headerlink" href="#shadowing-in-a-block" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -244,7 +249,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Second declaration of ‘a’ shadows earlier declaration. I suggest renaming or deleting one of the declarations.</p>
 </section>
 <section id="confusuable-unicode">
-<h1>Confusuable Unicode<a class="headerlink" href="#confusuable-unicode" title="Permalink to this heading"></a></h1>
+<h2>Confusuable Unicode<a class="headerlink" href="#confusuable-unicode" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -272,7 +277,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Identifiers ‘µ’ (MICRO SIGN) and ‘μ’ (GREEK SMALL LETTER MU) look very similar in common fonts. Change them to be more visually distinct.</p>
 </section>
 <section id="default-arguments">
-<h1>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this heading"></a></h1>
+<h2>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -300,7 +305,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Function ‘a’ is called using default values of parameters ‘x’, ‘y’. Please call the function using explicit values ‘a {x=1,y=2}’.</p>
 </section>
 <section id="deprecated-default-arguments">
-<h1>Deprecated default arguments<a class="headerlink" href="#deprecated-default-arguments" title="Permalink to this heading"></a></h1>
+<h2>Deprecated default arguments<a class="headerlink" href="#deprecated-default-arguments" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -328,7 +333,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>The default value of argument ‘x’ of function ‘a’ has been deprecated and may be removed in a future release. Please add the explicit value ‘{x = 2}’.</p>
 </section>
 <section id="equal-priority-clauses">
-<h1>Equal priority clauses<a class="headerlink" href="#equal-priority-clauses" title="Permalink to this heading"></a></h1>
+<h2>Equal priority clauses<a class="headerlink" href="#equal-priority-clauses" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -367,7 +372,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Clauses ‘c1’ and ‘c2’ have equal declared priority, but neither is more specific than the other. Furthermore they conflict for the expression ‘f 1 2’. Set one to have higher priority or fix the conflict.</p>
 </section>
 <section id="failed-assert">
-<h1>Failed assert<a class="headerlink" href="#failed-assert" title="Permalink to this heading"></a></h1>
+<h2>Failed assert<a class="headerlink" href="#failed-assert" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -395,7 +400,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Assertion ‘a != 0’ failed. ‘a’ received its value ‘0’ at line 1. You may change the assertion or ensure ‘a’ receives a different value.</p>
 </section>
 <section id="implicit-argument-not-passed">
-<h1>Implicit argument not passed<a class="headerlink" href="#implicit-argument-not-passed" title="Permalink to this heading"></a></h1>
+<h2>Implicit argument not passed<a class="headerlink" href="#implicit-argument-not-passed" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -425,7 +430,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Argument ‘k’ of function ‘b’ was not passed implicitly to ‘a’, leading to it being undefined. I suggest passing it explicitly.</p>
 </section>
 <section id="inapplicable-to-type">
-<h1>Inapplicable to type<a class="headerlink" href="#inapplicable-to-type" title="Permalink to this heading"></a></h1>
+<h2>Inapplicable to type<a class="headerlink" href="#inapplicable-to-type" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -455,7 +460,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Function foo does not have any rules for value ‘i16 1’. The most similar rule is ‘foo (n : i32)’. Consider modifying the type of ‘a’ or adding another reduction rule.</p>
 </section>
 <section id="invalid-utf8">
-<h1>Invalid UTF8<a class="headerlink" href="#invalid-utf8" title="Permalink to this heading"></a></h1>
+<h2>Invalid UTF8<a class="headerlink" href="#invalid-utf8" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -789,7 +794,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Invalid UTF-8 byte sequence replaced.</p>
 </section>
 <section id="map-on-non-collection">
-<h1>Map on non-collection<a class="headerlink" href="#map-on-non-collection" title="Permalink to this heading"></a></h1>
+<h2>Map on non-collection<a class="headerlink" href="#map-on-non-collection" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -813,7 +818,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Value ‘1’ is not iterable, so ‘map’ is not defined. Try wrapping the value in a list.</p>
 </section>
 <section id="meaningless-term">
-<h1>Meaningless term<a class="headerlink" href="#meaningless-term" title="Permalink to this heading"></a></h1>
+<h2>Meaningless term<a class="headerlink" href="#meaningless-term" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -842,7 +847,7 @@ Please remove one import or disambiguate using qualified names.</p>
 <p>Term ‘foo 10’ is meaningless (perpetually reduces). Maybe you forgot a base case?</p>
 </section>
 <section id="missing-override">
-<h1>Missing override<a class="headerlink" href="#missing-override" title="Permalink to this heading"></a></h1>
+<h2>Missing override<a class="headerlink" href="#missing-override" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -893,7 +898,7 @@ print (map foo [1,2])
 <p>Identifier ‘foo’ could refer to ‘module1.foo’ or ‘module2.foo’ and is ambiguous. Specify the module or use ‘override’ to combine the identifiers.</p>
 </section>
 <section id="shadowing-nested-block">
-<h1>Shadowing nested block<a class="headerlink" href="#shadowing-nested-block" title="Permalink to this heading"></a></h1>
+<h2>Shadowing nested block<a class="headerlink" href="#shadowing-nested-block" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -923,7 +928,7 @@ print (map foo [1,2])
 <p>Function declaration ‘f’ on lines 2-3 shadows variable declaration on line 1. I suggest renaming it.</p>
 </section>
 <section id="no-fixed-point">
-<h1>No fixed point<a class="headerlink" href="#no-fixed-point" title="Permalink to this heading"></a></h1>
+<h2>No fixed point<a class="headerlink" href="#no-fixed-point" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -951,7 +956,7 @@ print (map foo [1,2])
 <p>Rule ‘a | a != b’ contradicts itself and has been ignored. Either simplify the condition or remove the rule.</p>
 </section>
 <section id="nondeterministic-use-of-concurrency">
-<h1>Nondeterministic use of concurrency<a class="headerlink" href="#nondeterministic-use-of-concurrency" title="Permalink to this heading"></a></h1>
+<h2>Nondeterministic use of concurrency<a class="headerlink" href="#nondeterministic-use-of-concurrency" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -983,7 +988,7 @@ print (map foo [1,2])
 <p>Variable ‘A’ may have multiple values due to concurrent execution. Insert synchronization operations or otherwise ensure that the program is deterministic.</p>
 </section>
 <section id="nondeterministic-use-of-exceptions">
-<h1>Nondeterministic use of exceptions<a class="headerlink" href="#nondeterministic-use-of-exceptions" title="Permalink to this heading"></a></h1>
+<h2>Nondeterministic use of exceptions<a class="headerlink" href="#nondeterministic-use-of-exceptions" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1012,7 +1017,7 @@ print (map foo [1,2])
 <p>Multiple exceptions may be caught in expression ‘try e’. Use ‘force’ to fix the evaluation order.</p>
 </section>
 <section id="top-level-non-deteterministic-dispatch">
-<h1>Top-level non-deteterministic dispatch<a class="headerlink" href="#top-level-non-deteterministic-dispatch" title="Permalink to this heading"></a></h1>
+<h2>Top-level non-deteterministic dispatch<a class="headerlink" href="#top-level-non-deteterministic-dispatch" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1040,7 +1045,7 @@ print (map foo [1,2])
 <p>Unresolved nondeterminism at top-level: ‘a’ may evaluate to ‘b’ or ‘c’. Remove the nondeterminism by modifying reduction rules or using a meta-evaluation function such as ‘allValuesOf’.</p>
 </section>
 <section id="applying-a-non-function">
-<h1>Applying a non-function<a class="headerlink" href="#applying-a-non-function" title="Permalink to this heading"></a></h1>
+<h2>Applying a non-function<a class="headerlink" href="#applying-a-non-function" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1066,7 +1071,7 @@ print (map foo [1,2])
 <p>“x” is not a function. Maybe you forgot a symbol?</p>
 </section>
 <section id="non-nfc">
-<h1>Non-NFC<a class="headerlink" href="#non-nfc" title="Permalink to this heading"></a></h1>
+<h2>Non-NFC<a class="headerlink" href="#non-nfc" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1090,7 +1095,7 @@ print (map foo [1,2])
 <p>Text “à” is not in Unicode Normal Form C. Automatically normalizing.</p>
 </section>
 <section id="non-syntactic-use-of-variadic-arguments">
-<h1>Non-syntactic use of variadic arguments<a class="headerlink" href="#non-syntactic-use-of-variadic-arguments" title="Permalink to this heading"></a></h1>
+<h2>Non-syntactic use of variadic arguments<a class="headerlink" href="#non-syntactic-use-of-variadic-arguments" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1131,7 +1136,7 @@ print (map foo [1,2])
 <p>Function ‘a’ applied variadic function ‘c’ but did not return a function, so expression cannot be applied to argument ‘2’ in function ‘b’. I suggest adding a parameter to ‘a’.</p>
 </section>
 <section id="too-many-arguments">
-<h1>Too many arguments<a class="headerlink" href="#too-many-arguments" title="Permalink to this heading"></a></h1>
+<h2>Too many arguments<a class="headerlink" href="#too-many-arguments" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1158,7 +1163,7 @@ print (map foo [1,2])
 Try deleting the extra arguments.</p>
 </section>
 <section id="typos-in-variable-name">
-<h1>Typos in variable name<a class="headerlink" href="#typos-in-variable-name" title="Permalink to this heading"></a></h1>
+<h2>Typos in variable name<a class="headerlink" href="#typos-in-variable-name" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1193,7 +1198,7 @@ Try deleting the extra arguments.</p>
 <p>Unbound identifier ‘example’. Did you mean ‘exmple’?</p>
 </section>
 <section id="unhandled-exception">
-<h1>Unhandled exception<a class="headerlink" href="#unhandled-exception" title="Permalink to this heading"></a></h1>
+<h2>Unhandled exception<a class="headerlink" href="#unhandled-exception" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1223,7 +1228,7 @@ Try deleting the extra arguments.</p>
 <p>Unhandled exception ‘Error’. Add a try or catch handler.</p>
 </section>
 <section id="unreachable-case">
-<h1>Unreachable case<a class="headerlink" href="#unreachable-case" title="Permalink to this heading"></a></h1>
+<h2>Unreachable case<a class="headerlink" href="#unreachable-case" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1252,7 +1257,7 @@ Try deleting the extra arguments.</p>
 <p>Case ‘foo 2’ is dead code (unreachable). Either remove it or add it to the control flow.</p>
 </section>
 <section id="unreducible-expression">
-<h1>Unreducible expression<a class="headerlink" href="#unreducible-expression" title="Permalink to this heading"></a></h1>
+<h2>Unreducible expression<a class="headerlink" href="#unreducible-expression" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1288,7 +1293,7 @@ Try deleting the extra arguments.</p>
 <p>Consider adding a reduction rule.</p>
 </section>
 <section id="unused-argument">
-<h1>Unused argument<a class="headerlink" href="#unused-argument" title="Permalink to this heading"></a></h1>
+<h2>Unused argument<a class="headerlink" href="#unused-argument" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1312,7 +1317,7 @@ Try deleting the extra arguments.</p>
 <p>Argument ‘b’ in function declaration ‘k’ is unused. Replace it with a wildcard pattern (‘_’).</p>
 </section>
 <section id="unused-import">
-<h1>Unused import<a class="headerlink" href="#unused-import" title="Permalink to this heading"></a></h1>
+<h2>Unused import<a class="headerlink" href="#unused-import" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1338,7 +1343,7 @@ Try deleting the extra arguments.</p>
 <p>Module import ‘module’ is unused. Remove it.</p>
 </section>
 <section id="unused-result">
-<h1>Unused result<a class="headerlink" href="#unused-result" title="Permalink to this heading"></a></h1>
+<h2>Unused result<a class="headerlink" href="#unused-result" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1370,7 +1375,7 @@ Try deleting the extra arguments.</p>
 <p>Unused result. Try using ‘void’.</p>
 </section>
 <section id="unused-definition">
-<h1>Unused definition<a class="headerlink" href="#unused-definition" title="Permalink to this heading"></a></h1>
+<h2>Unused definition<a class="headerlink" href="#unused-definition" title="Permalink to this heading"></a></h2>
 <table class="docutils align-left">
 <colgroup>
 <col style="width: 50%" />
@@ -1397,6 +1402,7 @@ Try deleting the extra arguments.</p>
 </tbody>
 </table>
 <p>Unused variable ‘b’. Try removing it.</p>
+</section>
 </section>
 
 
