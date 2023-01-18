@@ -515,6 +515,7 @@ Data Structures
       Merkle tree
     Multi-way trees
       Ternary tree
+      Ternary search tree
       K-ary tree
       And–or tree
       (a,b)-tree

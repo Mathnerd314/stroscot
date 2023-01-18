@@ -3,6 +3,9 @@ Exemplary programs
 
 A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged, but there is also a "halo effect" of "I like program X, therefore I like programming language L that X is written in". Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.
 
+* Fibonacci: The Best Benchmark Ever. Every new language announce uses it. Bonus points if recursive is faster than iterative.
+
+
 Social network
 --------------
 

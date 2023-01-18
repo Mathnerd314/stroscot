@@ -26,7 +26,7 @@ Another line of motivation comes from `XKCD <https://xkcd.com/927/>`__ (paraphra
   Soon: There are 15 competing programming languages.
 
 Stroscot aims to be that universal language. The shackles of languages past are no more, and
-programs are freed to be idealized to their purest form. Abstractions reach their highest level and coding is automated as far as possible.
+programs are freed to be written in their most pure and ideal form. Abstractions reach their highest level and coding is automated as far as possible.
 
 .. [#tractable] Notably omitted here is Brooks's assertion that programming is a "tractable medium". It is not tractable. Programming is hard. :cite:`beckerWhatDoesSaying2021` questions this, but IMO fails quite badly - although incomplete, all the evidence available shows that programming is hard. The only positive contribution of the article is a reminder to focus on computer education and usability.
 
@@ -121,13 +121,14 @@ A fair amount of terminology in programming seem to be meaningless or ambiguous.
 * primitive - as per `Wikipedia <https://en.wikipedia.org/wiki/Primitive_data_type>`__, primitive is ambiguous and can mean "the base cases of an inductive definition", in which case use "base", or "whatever is provided by a particular processor or compiler", in which case use "built-in". Note that built-in does not mean base, e.g. integers can be defined in terms of booleans hence are not base cases.
 * :math:`\subset` - per `Wikipedia <https://en.wikipedia.org/wiki/Subset#%E2%8A%82_and_%E2%8A%83_symbols>`__ this is ambiguous, use :math:`\subsetneq` and :math:`\subseteq`
 * abomination - a fun word, but basically meaningless
+* etc or ... - it's just too imprecise. usually if it's a list, it can just omitted. If there is a clear omission it can be replaced with an angle bracket construction like ``<more numbers>``, or the ambiguity erased with set-builder notation.
 
 Avoiding this terminology is easy to forget so is enforced by periodic grep's of the code.
 
 Open source
 -----------
 
-The license is still undecided, so set to WTFPL to annoy people.
+The license is still undecided, so set to WTFPL to annoy people. Apache 2.0, MIT, and BSD are all good candidates.
 
 Real "open source" goes beyond a LICENSE file: (per `Luke Plant <https://lukeplant.me.uk/blog/posts/why-im-leaving-elm/>`__)
 
@@ -157,4 +158,4 @@ As far as the "ping bot" that closes issues if they are not active, it seems lik
 * Risks: What concerns have been raised about this goal?
 * Blockers: What resources or leadership decisions are needed, besides someone implementing it?
 
-The summary doesn't need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then "The previous summary is accurate" is fine as the summary.
+The summary doesn't need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then "The previous summary is accurate" is fine as the summary. There should be an exponential backoff on pings if the issue is still active but has not changed.

@@ -10,21 +10,21 @@ The first step in dealing with assembly is to decide which instruction set archi
 
 Others to consider as well:
 
-* ARMv9-A A64: It's released, devices expected in 2022. Very similar to v8 so should be able to share the code. Verdict: on the roadmap
-* 32-bit ARM: Old phones, the Raspberry Pi Zero. The XML database is similar. Verdict: Contributor.
+* ARMv9-A A64: It's released, devices expected in 2022. Very similar to v8 so should be able to share the code as a microarchitecture. Verdict: on the roadmap
+* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. And some things like tail calls are really hard to encode in C, or add significant compilation overhead, so it can't be the only option.
+* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority. Verdict: Contributor.
+* LLVM: The bitcode format may be worth targeting at some point. Per blog posts the API is much more unstable than the IR, and generating the IR in memory and parsing it is about as fast as using the API. Verdict: Contributor.
 * RISC-V: There are $100-ish dev boards listed at https://riscv.org/exchange/boards/. No non-dev systems yet. It's a relatively simple ISA, similar to ARM. Verdict: Contributor
-* POWER: `Raptor <https://secure.raptorcs.com/content/base/products.html>`__ sells expensive systems. Even more niche than RISC-V. Verdict: C backend.
+* 32-bit ARM: Old phones, the Raspberry Pi Zero. The XML database is similar. Verdict: Contributor.
+* 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
+* POWER: `Raptor <https://secure.raptorcs.com/content/base/products.html>`__ sells expensive systems. Much more niche than RISC-V. Verdict: C backend.
 * MIPS: the company that develops it went bankrupt and is now doing RISC-V. There are consumer systems available in China (Loongson), but the rumor is that they too are moving to RISC-V or else to their own architecture LoongArch. Verdict: C backend.
 * z/Architecture: really expensive, weird OS. Verdict: C backend.
 * SPARC: It's end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.
-* 32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.
-* WASM: it still doesn't support `tail calls <https://github.com/WebAssembly/proposals/issues/17>`__. Given the lack of progress it seems like a low priority. Verdict: Contributor.
-* LLVM: The bitcode format may be worth targeting at some point. Per blog posts the API is much more unstable than the IR, and generating the IR in memory and parsing it is about as fast as using the API. Verdict: Contributor.
-* C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. And some things like tail calls are really hard to encode in C, or add significant compilation overhead, so it can't be the only option.
 
-From a design perspective supporting 2-4 architectures is not much different from supporting 10, it's just a larger set of cases, but 10 is more than twice the work of 4. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
+From a design perspective supporting 2 architectures is not much different from supporting 10, it's just a larger set of cases, but 10 is 5x the work of 2. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.
 
-In addition to the basic ISAs, there are also extensions and `microarchitectures <https://en.wikipedia.org/wiki/Microarchitecture>`__ to consider. `PassMark <https://www.cpubenchmark.net/share30.html>`__ has a list of CPU shares, it's probably wildly skewed to gaming but it's better than nothing. The data on CPU cycles, ports, etc. is rather detailed so it will probably depend on user submissions; for now I'll use my own CPU (AMD A6-3650 APU).
+In addition to the basic ISAs, there are also extensions and `microarchitectures <https://en.wikipedia.org/wiki/Microarchitecture>`__ to consider. `PassMark <https://www.cpubenchmark.net/share30.html>`__ has a list of CPU shares, it's probably wildly skewed to gaming but it's better than nothing. The data on CPU cycles, ports, etc. is rather detailed and has to be generated by running benchmarking programs, so it will probably depend on user submissions; for now I'll use my own CPU (AMD A6-3650 APU).
 
 Operating systems
 =================
@@ -35,7 +35,7 @@ In planned order:
 2. Android for ARM, because it's my phone and it's easy to hook up
 3. Windows for AMD64, which I can emulate with WINE and get access to fairly easily
 
-We'll exclude Apple for now because their OS documentation sucks, they charge $100/year for a "developer license", and their anti-competitive practices mean that they would probably find some way to shut Stroscot down once Stroscot starts being a serious competitor with Swift. Of course someone who is willing to jump through all the hoops needed to placate Apple is welcome to try porting.
+We'll exclude Apple for now because their OS documentation sucks, they charge $100/year for a "developer license", and their anti-competitive practices mean that they would probably find some way to shut Stroscot down once Stroscot starts being a serious competitor with Swift. Of course there is nothing stopping someone else from jumping through all the hoops needed to placate Apple and making a port.
 
 Instruction database
 ====================
@@ -43,16 +43,15 @@ Instruction database
 Data sources
 ------------
 
-In terms of data sources for ISAs, for x86 the official sources are `Intel's SDM <https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html>`__ / `AMD's Architecture Programmer's Manual <https://developer.amd.com/resources/developer-guides-manuals/>`__, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. `EXEgesis <https://github.com/google/EXEgesis>`__ uses a hacky Xpdf parser but has some amount of effort invested by Google. `x86doc <https://github.com/HJLebbink/x86doc/tree/master/Python>`__ uses pdfminer to generate HTML which seems like a more friendly starting point.
+The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly. In terms of data sources for ISAs, for x86 the official sources are `Intel's SDM <https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html>`__ / `AMD's Architecture Programmer's Manual <https://developer.amd.com/resources/developer-guides-manuals/>`__, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. `EXEgesis <https://github.com/google/EXEgesis>`__ uses a hacky Xpdf parser but has some amount of effort invested by Google. `x86doc <https://github.com/HJLebbink/x86doc/tree/master/Python>`__ uses pdfminer to generate HTML which seems like a more friendly starting point.
 
-More structured are x86 instruction databases:
+More structured but less official are x86 instruction databases:
 
-* `Intel XED <https://intelxed.github.io/>`__ (`file <https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt>`__).
+* `Intel XED <https://intelxed.github.io/>`__ (`file <https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt>`__). This might as well be official, although it is technically its own open-source project I think Intel uses it internally.
 * LLVM `x86 tables <https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/X86/X86.td>`__
 * NASM `instruction table <https://github.com/netwide-assembler/nasm/blob/master/x86/insns.dat>`__
 * `GNU Assembler (gas) <https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/i386-opc.tbl;h=b0530e5fb82f4f4cd85d67f7ebf6ce6ebf9b45b5;hb=HEAD>`__
 * `iced <https://github.com/icedland/iced/blob/65d1f49584247a09dcc2559727936a53014268f5/src/csharp/Intel/Generator/Tables/InstructionDefs.txt>`__
-* The K Framework `formal X86 semantics <https://github.com/kframework/X86-64-semantics>`__ contains most of the Haswell instructions. It was manually written, but checked with fuzzing. It probably could generate good data, but it requires parsing the K syntax.
 * `OSACA <https://github.com/RRZE-HPC/OSACA/tree/master/osaca/data/isa>`__ is AGPL licensed and very incomplete
 * `Ghidra <https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Processors/x86/data/languages/ia.sinc#L1594>`__, seems to have semantics
 * emulators: https://github.com/colejohnson66/rbx86, https://bochs.sourceforge.io/
@@ -60,29 +59,32 @@ More structured are x86 instruction databases:
 * Go assembler https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&ss=go
 * https://github.com/Barebit/x86reference/blob/master/x86reference.xml
 
-For ARM we have XML `Machine Readable Architecture instruction tables <https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools>`__, which is nice-ish XML, and the code has been validated against ARM's conformance suite. There is a toy disassembler `hs-arm <https://github.com/nspin/hs-arm>`__ using the tables. EXEgesis also parses the XML. `asl-interpreter <https://github.com/alastairreid/asl-interpreter>`__ runs the descriptions.
+Semantics:
+
+* For ARM, we have official XML `Machine Readable Architecture instruction tables <https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools>`__, which is nice-ish XML, and the code has been validated against ARM's conformance suite. There is a toy disassembler `hs-arm <https://github.com/nspin/hs-arm>`__ using the tables. EXEgesis also parses the XML. `asl-interpreter <https://github.com/alastairreid/asl-interpreter>`__ runs the descriptions which are written in a special language.
+
+* For x86-64 some academics have created a `formal X86-64 semantics <https://github.com/kframework/X86-64-semantics>`__ containing most of the userspace Haswell instructions. It was mostly manually written and has been checked with fuzzing. It is written in the K Framework syntax. It is missing concurrency, crypto (AES), supervisor/privileged, x87 floating-point, MMX, and also has a bug where it rounds too much with fused multiply-add floating point precision.
+
 
 Timing:
 
 * https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions
+* I think EXEgesis or llvm-exegesis generates timings on the current x86 CPU
 * ARM: ?
-
-
-The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly.
 
 Definition of an instruction
 ----------------------------
 
-An instruction is a finite sequence of bytes (or bits, if there was a processor that did that). For a given instruction we can determine its length and index each byte. `sandsifter <https://github.com/xoreaxeaxeax/sandsifter>`__ determines the length of instructions by finding sequences ``seq`` for which ``seq|000`` does not trigger a page fault, but ``se|q00`` does (where ``|`` is a page boundary). `haruspex <https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/>`__ is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the instruction were speculated. Whatever the method, the general idea is that instructions are a level above bytes, like words in a character string.
+An instruction is a finite sequence of binary data (generally some number of bytes). The general idea is that instructions are a syntactic unit above bits, like words in a character string. Except unlike words, there's no instruction separator character; instructions are all run together like ``afewinstructions``. Segmenting ARM instructions is simple because they are all 32 or 64 bits. For x86, the length varies from 1 to 15 bytes and is affected by almost all parts of the instruction. `sandsifter <https://github.com/xoreaxeaxeax/sandsifter>`__ can determine the length of the first instruction in some bytes by finding an index for which ``seq|uence`` does not trigger a page fault, but ``se|quence`` does (where ``|`` is a page boundary). `haruspex <https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/>`__ is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the byte sequence were speculated. With these tools we can segment arbitrary data into x86 instructions, assuming access to the processor.
 
-A lot of instructions simply generate undefined instruction (#UD) traps, so we want to limit ourselves to valid instructions. But valid does not mean documented or present in the database. Sandsifter and haruspex have found many undocumented instructions. But expecting to run these tools as part of a compiler build is pretty demanding; they take days. It's better to design for our instruction database being inaccurate, and allow a syntax for writing undocumented instructions directly, ``instr('f0 0f')``. It's basically a ``.db`` statement, but whereas ``.db`` is used for file headers or data in the ``.data`` section, this is meant specifically for executable data.
+We cannot build a 100% complete and verified list of instructions. As far as verification, there are simply too many; sandsifter/haruspex take days to run and do not even explore the full instruction space, making assumptions about the format of instructions. As far as completeness, these tools have been run on various processors and confirmed that there are many undocumented instructions, and there are likely more instructions that will be found in the future. But building a database that is 99% complete and probabilistically verified is not too hard; we take the officially documented instruction patterns, manually add whatever undocumented instructions we can find, and fuzz it a bit with sandsifter to check decoding.
 
-Unfortunately with these literal instructions there is nothing the compiler can do besides pass it through. Normally we want to run a lot of optimizations: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata.
+Still though, we should design for our instruction database being incomplete, and allow a syntax for writing raw instructions, ``instr('f0 0f')`` or similar. It's similar to a ``.db`` statement that allows include file headers or data in the ``.data`` section, but is meant specifically for executable data. Unfortunately with these raw instructions, if they are not in the database, many compiler optimizations are useless: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata, like clobbered registers, cycles, possible traps, etc. There are generally sensible defaults in the absence of information (all registers clobbered, no reordering, all traps possible, etc.), but specifying this information allows optimizing raw instructions just as well as database instructions.
 
 Templates
 ---------
 
-The most basic data is a list of all valid instructions. Listing them out exhaustively would be too much so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values.
+Listing instructions out exhaustively one-per-line would be too much data due to combinatorial explosion, so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in "explicit operands". The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values. We choose each template so that it has similar behavior regardless of what is chosen for its explicit operands.
 
 The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.
 
@@ -107,7 +109,7 @@ So the information for each template is:
 * the condition on CPUID for this instruction to work
 * the valid modes (32-bit, 64-bit, real, protected, etc.)
 
-The isa_set field and friends are because there are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.
+The isa_set field and fields after are because there are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.
 
 Affected state
 --------------
@@ -151,17 +153,10 @@ Pseudo-resource includes things like load-link/store-conditional. LDXR sets moni
 Classification
 --------------
 
-There are a lot of instructions. We can classify them based on their affected state:
+We can classify instructions:
 
-* data: reads and writes only flags/general-purpose registers/stack pointer/memory (does not read/write the program counter or other state). Memory prefetch/barrier are also data instructions.
-* call: reads the program counter
-* jump: sets the program counter to something other than the next instruction
-* branch: conditional jump depending on the state of various flags/registers
-* interrupt: unconditionally throws an exception
-* privileged: requires privileged processor state to execute successfully (e.g. ring 0)
-* nop: does nothing
-
-For code layout knowing the possible execution paths is important. Non-data instructions have to be handled specially.
+* Data usage: does it read or write flags/general-purpose registers/stack pointer/memory/FP regs/SIMD regs/program counter?
+* Category: nop, movement, arithmetic, logic, floating point, string, cryptography, SSE, AVX, control flow, I/O, system call/privilege rings/virtualization, concurrency, (atomics, fences), cache control (prefetch/barrier), performance monitoring/debugging, virtual memory, interrupts/exceptions/traps,
 
 Performance
 -----------

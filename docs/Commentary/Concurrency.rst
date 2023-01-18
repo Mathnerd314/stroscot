@@ -50,9 +50,9 @@ The smallest examples of races runtimewise just have memory access. For example 
 Here the threads are provided by the C stdlib's pthreads, and the operations are hardware load/store instructions.
 This program has a race condition, i.e. the order of writing and reading from A, B, x and u is not fixed.
 
-At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot.
+At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot by having non-atomic shared variables.
 
-Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be ``(1,1)``, ``(1,0)``, ``(0,1)``, or ``(0,0)``, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding memory models, x86-TSO :cite:`sewellX86TSORigorousUsable2010` for x86 and multicopy atomicicity (MCA) :cite:`pulteSimplifyingARMConcurrency2017` for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs ('litmus tests') and appear to be generally accepted by the processor vendors as standard.
+Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be ``(1,1)``, ``(1,0)``, ``(0,1)``, or ``(0,0)``, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding "relaxed memory models", such as x86-TSO :cite:`sewellX86TSORigorousUsable2010` for x86 and multicopy atomicicity (MCA) :cite:`pulteSimplifyingARMConcurrency2017` for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs ('litmus tests') and appear to be accepted by the processor vendors as standard.
 
 Another example is independent reads of independent writes (IRIW):
 
@@ -65,7 +65,20 @@ Another example is independent reads of independent writes (IRIW):
 
 Here the initial state is ``(X,Y)=(0,0)``, and the final state can be ``(a,b,c,d)=(1,0,1,0)`` under POWER. But both ARMv8 and x86 forbid this outcome.
 
-Now there have been attempts to make cross-platform memory models, e.g. there is a C++11 memory model, a Java memory model, a Linux kernel memory memory model, etc. But each of these models has been a poor match on hardware - either it prevents outcomes possible in hardware, or allows outcomes that hardware would not (e.g. reading values out of thin air), or requires too many fences and is slow. So Stroscot uses the hardware models. For cross-platform programming, instead of a cross-platform model, Stroscot encourages checking platform compatibility of the program, i.e. that the two memory models make the program produce equivalent results.
+Now there have been attempts to make cross-platform memory models, e.g. there is a C++11 memory model, a Java memory model, a Linux kernel memory memory model, etc. But each of these models is a poor match for hardware - the non-relaxed modes prevent outcomes possible in hardware, and require too many fences and are slow, and the relaxed mode is just the hardware but without fences. Early specifications of these models even allowed outcomes that hardware would not (e.g. reading values out of thin air). So Stroscot avoids all this abstraction overhead by using the target hardware's memory model. This does mean some more work to implement a new platform, but I think it's worth it. Weaker fences are more performant, and you'll have the wrong cost model if you aren't optimizing using the processor's memory model. For example x86's TSO model means that concurrent memory writes don't need a fence at all.
+
+Now for cross-platform programming, there are tricky cases. For example LDRD on ARM is atomic `only if <https://gcc.gnu.org/pipermail/gcc-patches/2017-April/471979.html>`__ LPAE (large physical address extension) is supported by the processor, and even then LDRD is atomic only if it is naturally aligned. For this the cross-platform memory models are useful. But we don't need to implement the whole model, we just have to use the fairly well-defined assembly instruction translations, for example `C/C++ <https://www.cl.cam.ac.uk/~pes20/cpp/cpp0xmappings.html>`__ and `Java <https://gee.cs.oswego.edu/dl/jmm/cookbook.html>`__. Then we can use the processor memory model to optimize.
+
+
+So overall, determining whether a synchronization pattern is correct requires checking many cases and conditions - exactly what static verification using a memory model can help with.
+
+
+
+ the easy strateg is to just do a strong fence every time you perform a concurrent operation, such as dmb on ARM. This ensures sequential consistency which is essentially everyone's intuitive memory model.
+
+
+
+ instead of a cross-platform model, Stroscot encourages checking platform compatibility of the program, i.e. that the two memory models make the program produce equivalent results.
 
 Other types of races
 ====================

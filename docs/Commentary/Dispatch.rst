@@ -261,22 +261,9 @@ The full dispatch mechanism is as follows:
        call clause = clause args { next-method = callParallel (find_covering methods clause) }
        lubAll = fold lub DispatchError
 
-This depends on the ``lub`` primitive defined in `Conal's post <http://conal.net/blog/posts/merging-partial-values>`__. Since strict evaluation of ``(1,undefined)`` gives ``undefined``, ``lub`` instead works on expressions. Expressions with little information content are in the set Bottom or ⊥, such as predicate failure, failed assertions, exceptions, and nontermination. Values are normal forms excluding bottoms, ``NF \ Bottom``. Aggregate expressions can be partially evaluated and hence neither bottoms nor values, such as the aforementioned ``(1,undefined)``.
+This depends on the ``lub`` primitive defined in `Conal's post <http://conal.net/blog/posts/merging-partial-values>`__. ``lub`` evaluates both sides to HNF, in a timeboxed fashion. If both sides are exceptions then an exception is returned. If one side gives an exception but the other doesn't, then the other side is returned. If both sides evaluate to HNF and the heads are equal, the result is the head followed by the lub of the sub-arguments. Otherwise the context is used, ``f (a `lub` b) = f a `lub` f b``. ``lub`` is an oracle, analyzing the whole program - we want return type overloading, and that return values not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.
 
-
-One of the clever ideas of the theory of semantic domains (“domain theory”) is to place a partial ordering on values (domain members), based on information content. Values can not only be equal and unequal, they can also have more or less information content than each other.
-
-Structured types are not flat. For instance, the meaning of (i.e., the domain corresponding to) the Haskell type (Bool,Integer) contains five different kinds of values, as shown in the figure. Each arrow leads from a less-defined (less informative) value to a more-defined value.
-
-Define an operation ``lub :: HasLub a => a -> a -> a``.
-
-If the arguments are consistent, i.e. have a common upper bound, then that is the result.
-Otherwise the context is used, ``f (a `lub` b) = f a `lub` f b``
-
-The dispatch semantics is that all methods are run in parallel using the .  Furthermore ``lub`` is an oracle, analyzing the whole program - we want return type overloading, return values that are not accepted by the surrounding context are discarded.
-
-This falls out naturally from doing the analysis on the CPS-transformed version of the program.
-
+The dispatch semantics is that all methods are run in parallel using lub.
 
 The way Stroscot optimizes dispatch is:
 * eliminate all the statically impossible cases (cases that fail)
@@ -284,6 +271,12 @@ The way Stroscot optimizes dispatch is:
 * build a hot-biased dispatch tree
 * use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)
 
-The standard vtable implementation of Java/C++ is out. TODO: check out pattern dispatch paper
+The standard vtable implementation of Java/C++ arises naturally as a table dispatch on a method name. It looks like 'load klass pointer from object; load method from klass-vtable (fixed offset from klass pointer); load execution address from method (allows you to swap execution strategies, like interp-vs-C1-vs-C2, or multiple copies of C2 jit'd depending on context); jump'. But usually we can do better by building a custom table and fast-pathing the hot cases.
+
+Cliff says what we do for overloaded calls doesn't matter so long as in practice, >90% of calls are statically resolved to one clause.
+
+THe inline-cache hack observes that, while in theory many different things might get called here, in practice there's one highly dominant choice.  Same for big switches: you huffman-encode by execution frequency.
+
+ TODO: check out pattern dispatch paper
 
 Karnaugh map with profiling data

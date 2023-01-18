@@ -10,7 +10,7 @@ Module
 
 A module is a set of definitions - a set rather than a list because the order is not relevant. Some definitions are declared "visible" and are exposed/exported in the signature. We write: ``export a, b, c`` at the top of the module, with ``a, b, c`` a list of exported names.
 
-Definitions not in the signature are considered "internal". Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these definitions through the ``_internal`` pseudo-module, like ``a._internal.b``. Thus definitions are always accessible somehow. This avoids Java's issue of reflection allowing access to "private" data. If you really want to lock an API down then use a secret password or crypto.
+Definitions not in the signature are considered "internal". Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these definitions through the ``_internal`` pseudo-module, like ``a._internal.b``. Thus definitions are always accessible somehow. This avoids Java's issue of reflection allowing access to "private" data. If you really want to lock an API down then you can clear out ``_internal`` by defining an immediately invoked function expression that first computes the module as a value and then returns a separate module that only re-exports the public definitions. But it is probably better to make the methods themselves use a secret password, token, crypto, etc. to prevent unauthorized access.
 
 Modules can be nested within other modules, to an arbitrary depth. Modules can also re-export other modules by importing the modules or by individual copy definitions using the dot syntax, ``a = C.a``.
 

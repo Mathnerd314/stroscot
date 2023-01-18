@@ -398,6 +398,11 @@ Async/await notation requires marking core library calls with "await" and the wh
 
 It's better to make the async behavior automatic. Zig has done this but has `tons of bugs <https://gavinhoward.com/2022/04/i-believe-zig-has-function-colors/>`__\ . Monads in general and continuations in particular seem like a more principled approach, e.g. there is a `JS CPS library <https://github.com/dmitriz/cpsfy/blob/master/DOCUMENTATION.md>`__\ .
 
+Futures
+-------
+
+According to Erik Meijer, futures are kind of like comonads. A comonad has three operations: fmap, extract, and duplicate. Fmap make sense for a future, you can apply a function on the result. Duplicate is a little pointless but also possible, you can make a future that returns a future. There is the question of why not just the monadic ``return`` but it sort of makes sense, a future is delayed whereas a value is not. Finally you can ``extract`` the value from a future. This one is really pushing it though because the extract operation blocks, and can throw a deadlock exception, so it's not pure. We have to model extract more carefully as ``Future a -> M a`` for some monad. :cite:`uustaluComonadicNotionsComputation2008` called this kind of comonad-monad function a "BiKleisli category", i.e. the category ``BiKlesli Future M a b = Future a -> M b``. So rather than the comonad structure, we just have the identity and composition operations of the category, and arrow stuff. So really we aren't talking about comonads at all but rather arrows.
+
 .. _tasks:
 
 Tasks

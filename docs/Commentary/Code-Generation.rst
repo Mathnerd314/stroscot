@@ -7,61 +7,74 @@ The back-end is complicated. There are three main operations that need to be don
 #. Register allocation
 #. Instruction scheduling
 
-Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three criteria encompass many other optimizations, so solving them properly is worthwhile.
+Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three tasks encompass many optimizations, such as:
 
 * Peephole optimization
 * Code motion
 * Block ordering
-* Spilling, rematerialization
+* Spilling
+* Rematerialization
+* Common subexpression elimination
+
+Stroscot uses assembly instruction intrinsics in the language and IR. It doesn't provide "inline assembly", meaning literal blocks of texual assembly code - the closest is writing the hexadecimal machine code and pretending it's a single instruction. So it makes sense to provide a performance guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code. Unison can do a search over the complete space of instruction sequences, hence can actually find the optimal solution and satisfy this guarantee.
 
 Register allocation
 ===================
 
 Definitions:
 
-temporary
-  A location storing a bitstring, mapped to a logical register or memory location.
-virtual register
-  A temporary that has write access. Not used because the codegen uses SSA.
-(logical) register
-  A register as used in an instruction
-physical register
-  A CPU register in the hardware register file. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.
 program point
   start of an instruction
+temporary
+  A location storing a bitstring value. At the start of each instruction that uses the temporary as input, this value must be materialized in a physical location (logical register or memory location) supported by the instruction.
+virtual register
+  A temporary that has write access. Eliminated by the codegen's SSA pass.
+(logical) register
+  A register as encoded in an instruction.
+physical register
+  A storage location in the microarchitecture's physical register file. Per `Anandtech <https://www.anandtech.com/show/3922/intels-sandy-bridge-architecture-exposed/3T>`__ Sandy Bridge has 160 physical integer registers. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.
 live
   An output t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i.
 interference point
   A program point where each of a set of output temporaries could be used later.
 spilling
-  Spilling is assigning a temporary into memory. It requires the generation of spill code, store/load instructions to move the value to and from memory.
+  Spilling is materializing a temporary in memory. It requires the generation of spill code, instructions that store/load the value in memory.
 register class
-  Most CPUs group registers into classes, such that a given instruction can only use a certain class of registers. For example, there may be floating point registers, scalar integer registers, and vector registers.
-register alias
-  Some registers may be aliases to parts of registers in another class. A good example are the x86 registers al and ah, which alias to the low/high part of ax, which in turn aliases to the low part of eax, itself the alias of the low part of rax.
+  The set of logical registers that can be used for a specific operand for a specific instruction. Usually an architecture has only a few register classes. For example, on x86 instructions operate on floating point registers, (scalar) integer registers, or vector registers.
+subregister
+  Mainly in x86, some logical "registers" are really parts of a larger register. For example, on x86-64, rax has subregisters eax, ax, al, ah. These allow some instruction encoding tricks for sub-64-bit bitstrings, but have to be specially handled to detect conflicts.
 
-At each program point there is a map from variables to registers or memory. Registers and memory have relatively similar APIs: read and write. Processor registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach spill-everywhere is to store every temporary to memory, wrapping each instruction with spill instructions that store/load each input/output from memory. But it's slow. So the problem is to apply various conflicting optimizations to spill-everywhere to get the fastest program:
+At each program point there is a multimap from temporaries to registers or memory, and a 1-1 map from registers and memory locations to bitstrings. Registers and memory have relatively similar APIs: read and write. Registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach "spill-everywhere" is to wrapping each instruction with spill instructions that load each input from memory and then store each output to memory, and then use standard memory allocation techniques. But it's slow. So the problem is to apply various conflicting optimizations to get the fastest program:
 
-* Register assignment: Preserve a temporary in a register
+* Register assignment: Store a temporary in a register and use that register instead of reading from memory
 * Live range splitting: Map a temporary to different registers in different parts of its live range
 * Multi-allocation: Map a temporary to a register as well as memory
 * Load-store optimization: Reuse values loaded in previous parts of the spill code
 * Rematerialization: Recompute values at their use points rather than loading them from memory
-* Coalescing: eliminates move instructions by ensuring the source and destination are the same.
-* Packing: assign temporaries of small bit-widths to different parts of larger-width registers
+* Coalescing: Eliminate move instructions by ensuring the source and destination are the same.
+* Packing: assign temporaries of small bit-widths to subregisters of larger-width registers
 
 There are various heuristics, e.g. assigning the most used variables to registers first. Because of register renaming / memory buffering, the actual register / address assignment doesn't matter, only the spill pattern. (TODO: check this with some benchmarks)
 
 Instruction selection
 =====================
 
-The IR is split into a series of instruction patterns, a forest of trees. Usually a tree rewrite system is used - bottom up rewrite generator (BURG). See pyburg.
+Instruction selection transforms a sequence of IR instructions into the cheapest/shortest sequence of processor-specific instructions.
 
-One way is to write a lot of patterns and try all these patterns in turn. If a pattern matches a specific sequence of instructions, the pattern can be applied, and the instructions are substituted by the pattern substitute. Another way, is to define per instruction the effects of the instruction, and for each pair of instructions that are evaluated, combine the effects of these instructions. If there exist an instruction which has the same effect as the combined effect of the two original instructions, the substitution can be made. This is the combiner approach as described by [Davidson1980].
+Blindell's universal instruction selection thesis is the main reference here. STOKE can find probabilistically optimal straightline assembly sequences using a specialized search algorithm, which is also a form of instruction selection so should be integrated.
 
-The advantage of having the combiner, is that only per instructions the effects of the instruction must be defined. After this, all instructions with effects can be potentially combined. This reduces the amount of work to define peephole optimization patterns from N * N to N. Namely, not all instruction combinations must be described, but only the effects per instruction.
 
-* Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.
+for literal assembly, we can either emit it as-is or try to optimize it. If we can actually optimize it to a faster but equivalent sequence, great, but we don't want to transform a compound operation into several simpler instructions, fuse the simpler instructions with nearby instructions from other operations, fail to identify the compound operation due to the fusion, and lose performance.
+
+
+The IR is split into a series of instruction patterns, a forest of trees. Usually a tree rewrite system is used - bottom up rewrite generator (BURG). See pyburg. One way is to write a lot of patterns and try all these patterns in turn. If a pattern matches a specific sequence of instructions, the pattern can be applied, and the instructions are substituted by the pattern substitute.
+
+The combiner approach per :cite:`davidsonDesignApplicationRetargetable1980` integrates peephole optimizations. The effects of instructions are specified in a machine-independent register transfer language ISP. The definition of ISP is somewhat vague but basically you have read and assign register/memory, literals, conditionals, and math.
+A compiler can directly emit ISP or you can start with assembly instructions and convert one-at-a-time into ISP using the effect descriptions. Then there are standard optimization like dead store elimination.
+
+ Another way, is to define per instruction the effects of the instruction, and a combiner that specifies how to combine two instructions given their effects, if there exist an instruction which has the same effect as the combined effect of the two original instructions. This is the combiner approach as described by [Davidson1980]. The advantage of specifying effects is that the amount of work to define peephole optimization patterns is N * N + M rather than M * M, where N is the number of effect patterns and M=81 is the number of instructions.
+
+*
 * Peephole optimizations / strength reduction - like ``x*2`` by ``x << 1``/``x+x``, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.
 * Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation
 * Partial evaluation
@@ -207,3 +220,35 @@ If you compile directly to assembly, you can do better:
 * Remove stalls. Interleave operations based on the data dependencies.
 
 The C compiler does have these optimizations but figuring out the right C code to generate so that the program will optimize properly is hard.
+
+More on optimization
+====================
+
+https://mastodon.social/@zwarich@hachyderm.io/109559009711883166
+
+high-performance programming
+
+coroutine switching and resource competition (I/uop cache, D cache, BTB) makes it slow - use buffering
+SIMD/AVX2 branch-free code
+avoid branch mispredictions. Branch mispredicts are highly data dependent so it's all about your use case. There's a lot of variance. The more you micro-optimize for one case, the bigger the variance gets for others. Part of optimizing is building an understanding of the empirical statistics of your data so you can make the right optimization trade-offs. Reducing L1D pressure while increasing branch mispredicts can be a net win (L1 load latency 4-6 cycles).
+
+"hot state" should be in registers at all times. Store non-hot state in memory. Register allocators can really only be trusted to do two things: move spill code out of loops and reduce the impact of calling conventions. Register allocation in handwritten bytecode interpreters often relies on reasoning of the form "this opcode is going to be slower anyways, so it's okay to put the spill code there", which is not captured by most register allocators. The compiler is not perfect. In some cases better usage of profile info by the register allocator would suffice. In other cases, a better cost model for spill code would be required, e.g. Proebsting & Fischer's work on "probabilistic" register allocation: https://dl.acm.org/doi/abs/10.1145/143103.143142 Once you are trying to optimize things to this level you really want control. Systems languages should really have more ways of constraining the compiler (best-effort constraints as well constraints that generate compile-time errors if they can't be satisfied). From a constraint solving perspective it should be exactly as easy/hard as constraining the hot state to be in the ABI argument registers and ABI register targeting for function calls is already a core competency of any usable register allocator.
+
+This affects coding style for dispatch loops:
+
+* a loop with a big switch statement. In theory, the loop-switch gives the compiler the ability to look at the whole block graph and make optimal decisions about register allocation, hoisting, etc. In practice, the compiler will make terrible decisions (e.g. register pressure on one rare branch will screw all the other branches) and there's no tools available to control the compiler's register allocation.
+* unchecked table load - you can compress an 8 byte pointer to a 2 byte offset. You just have to use a separate linker section so you can guarantee they're physically clustered. Only the "head blocks" that are targeted by a jump table need to be in the section. So most space-efficient option.
+* tailcalls - can let you control the convention at the IR level, but still no control at language level
+* inline assembly. you can specify the register convention with input/output constraints. But not really maintainable.
+* computed goto - sort of like tailcalls + asm - decoupling of having separate functions, maintainable and reliable
+
+The intrinsic branch mispredict penalty (IBMP) is the minimum time it takes from when a mispredicted control dependency retires to when the first uops from the correct PC can retire. It is always <= to the minimum pipeline depth starting at the uop cache and finishing at retirement; the pipeline depth may be larger because there are additional "clean-up" cycles that have to be serialized with the pipeline redirect and restart. For x86 the penalty is around 20 cycles, although some say it can be as low as 15. I always use 20 cycles as a round number regardless of uarch.
+
+If a dependency chain is only consumed as a control dependency, its latency essentially doesn't matter (within limits) if the branch never mispredicts. But as soon as the consuming branch mispredicts, you end up paying for that latency in full. In two versions of the same code where you add 10 extra cycles of latency to a mispredicted control dependency for one version but not the other, the effective mispredict penalty increases by 10 cycles because you discover the mispredict 10 cycles later than in the other version. So I define the effective mispredict penalty, effective_penalty = IBMP + control_latency. But it doesn't always work like that because control latency is affected by other things. However, you often find that, if I reduce the latency of this control dependency by 10 cycles, it should reduce the effective mispredict penalty by 10 cycles.
+
+ops already in flight, from before the mispredicted branch, will have IBMP cycles of free time relative to the same path if the branch had been correctly predicted. Or to put it differently, when you restart at a PC after a mispredict, reading a register for the result of a pre-branch mid-latency op like an L2 load is effectively zero latency. So before you take a hard-to-predict branch, you really want to issue as many of these medium latency ops as you can, even speculatively hoisting those ops from different successors into the common predecessor, so long as you have free pipeline slots to spare. branch-free computations are inherently latency sensitive, so need the data preloaded. This preloading idea is effective both in the ideal dependency graph sense (which assumes infinite pipeline width and lookahead) and also that after restarting from a branch mispredict the scheduling window starts out very narrow and so as a programmer if you manually kick off critical ops early like you were on an in-order machine, it's going to reduce latency.
+
+A high fan-out jump table is the most efficient when a branch is really unpredictable e.g. 8 choices with 1/8 probability. For more skewed conditions use a series of conditional tests.
+
+uica analysis
+

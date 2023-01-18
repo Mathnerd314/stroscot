@@ -8,9 +8,9 @@ The stuff here is mostly a dumping ground of ideas while the rest of the languag
 
 Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
 
-Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization so choices could be A/B tested.
+Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization so choices could be compared and tested. Basically we store code as base64 or a Lisp-like AST dump, and then the formatter produces/consumes this like any other code style. Then people get an initial randomized style, but can customize it to their liking, and once we reach 100 users we have a syntax battle.
 
-Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
+Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR parser) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
 
 Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird function call syntax may lose too many users)
 
@@ -43,7 +43,7 @@ Spacing helps identify boundaries:
 
 Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line.
 
-Maximum line length is an open question. Diff programs seem like the limiting factor, but on my monitor I can fit 2 108-character texts at the default font size side-by-side along with a space in the middle and the taskbar. Rounding this down to 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt / 24px I can fit 97 characters, while a little less (17.25pt / 23px) fits 102 characters. The standard is 80 characters but monitors are wider now, so again 100 seems plausible. This can really only be tested by finding long lines of code and asking what line-breaking placement is most readable.
+Maximum line length is an open question. Diff programs seem like the limiting factor, but on my monitor I can fit 2 108-character texts at the default font size side-by-side along with a space in the middle and the taskbar. Rounding this down to 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt / 24px I can fit 97 characters, while a little less (17.25pt / 23px) fits 102 characters. The standard is 80 characters but monitors are wider now than they were in teletype days, so again 100 seems plausible. This can really only be tested by finding long lines of code and asking what line-breaking placement is most readable; code is not read like a block of prose so studies on column widths on the web are not applicable.
 
 Code legibility
 ---------------
@@ -56,13 +56,13 @@ Unicode can improve legibility when the character is standard (e.g. θ for angle
 
 When the convention is established, short names are clearer than long names. Writing ``(+) { augend = 1, addend = 2 }`` is less clear than the simple ``1+2`` - the long names are not commonly used. But it is arguably still useful to include the long names, e.g. for currying.
 
-A study :cite:`dossantosImpactsCodingPractices2018` found the following conventions were helpful for readability:
+A study :cite:`dossantosImpactsCodingPractices2018` found the following conventions were helpful for Java code readability:
 
 * Putting opening braces in a line of their own (C# convention), as opposed to the same line of the statement, improved readability. The extra white space and matching vertical alignment of related curly braces makes blocks clearer. Closing curly braces terminating code blocks should be on their own line, except for secondary paths of execution, e.g.: closing brace of if statements followed by an else; closing braces of try statements followed by a catch.
 * 80 character line lengths were helpful, although they did not test other lengths such as 100 or 120
 * Each statement should be in a line of its own; do not separate multiple statements by a ‘‘;’’ in a single line.
 * Use import clauses instead of qualified names to reference names in code.
-* Frequent calls to sub-properties of class member properties should be made storing a reference to that sub-property, avoiding multiple statements containing long chains of objects and sub-properties;
+* Frequent calls to sub-properties of class member properties should be made by storing a reference to that sub-property, avoiding multiple statements containing long chains of objects and sub-properties;
 * Identifier names should use dictionary words.
 
 These conventions were inconclusive:
@@ -109,39 +109,30 @@ The constraint algorithm allows aligning the ends of text by justifying, so e.g.
 
 TODO: test it out by modifying https://github.com/isral/elastic_tabstops_mono.vsce
 
-The advantage of tablike spaces over elastic tabstops is that the underlying text file is just indenting with spaces in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
+The advantage of tablike spaces over elastic tabstops is that the underlying text file looks fine when viewed in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
 
-Familiarity
-===========
+Learning
+========
 
-C’s operator precedence, C++’s use of ``<>`` for generics, and C#’s design of properties are all "legacy" decisions. They were designed based on limited information and are kept for compatibility reasons even though in hindsight it has become clear that better choices exist.
-
-So when designing a new language, is it worth repeating these mistakes for the benefit of "familiarity"? Familiarity will not help when novice programmers are learning your language - they will instead become confused because the design is mistaken. Copying mistakes increases perceived language complexity.
-
-Aiming for a coherent, simple design will allow for a level playing field, regardless of experience, schooling or language history. Some experts may become discomfited by different choices, but their "ragequit" posts will most likely serve to draw positive attention to the language, as long as there is a solid basis for the design. Anybody who uses the languages will get used to it. What is more important to aim for being intuitive, in particular cloze completion - allowing someone to come back to a codebase after 6 months and correctly type out a new function with only half-remembered syntax.
-
-Now, learning a language takes time and effort. Self-taught novices might want to start with a book. How long should it be? A `121 page Python book (60 pages double spaced) <https://www.amazon.com/Python-Programming-Beginners-Comprehensive-Hands/dp/B0BFV21L24/>`__ is derided as terse and useless, requiring to google every new keyword. `K&R C <https://www.amazon.com/C-Programming-Language-2nd-Edition/dp/0131103628/>`__ has 272 pages, but is "not beginner friendly". The `C# Programming Yellow Book <http://www.csharpcourse.com/>`__  is 217 8.5x11 pages or about 322 of the standard 7x9 pages. `Python for Kids <https://www.amazon.com/Python-Kids-Playful-Introduction-Programming/dp/1593274076/>`__ clocks in at 344 pages but is still missing critical functions such as the input command. On the other hand some chapters such as turtle graphics, tkinter, and classes/objects can be skipped (74 pages). My first programming book `Beginning Programming with Java For Dummies <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computers/dp/0764526464/>`__ had 408 pages. The `5th edition <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computer/dp/1119235537/>`__ is the most popular and has 560 pages. But it still only covers the basics. `Head First Java <https://www.amazon.com/Head-First-Java-2nd-Edition/dp/0596009208/>`__ is recommended by the r/learnprogramming subreddit and has 688 pages.
+Learning a language takes time and effort. Self-taught novices might want to start with a book. How long should it be? A `121 page Python book (60 pages double spaced) <https://www.amazon.com/Python-Programming-Beginners-Comprehensive-Hands/dp/B0BFV21L24/>`__ is derided as terse and useless, requiring to google every new keyword. `K&R C <https://www.amazon.com/C-Programming-Language-2nd-Edition/dp/0131103628/>`__ has 272 pages, but is "not beginner friendly". The `C# Programming Yellow Book <http://www.csharpcourse.com/>`__  is 217 8.5x11 pages or about 322 of the standard 7x9 pages. `Python for Kids <https://www.amazon.com/Python-Kids-Playful-Introduction-Programming/dp/1593274076/>`__ clocks in at 344 pages but is still missing critical functions such as the input command. On the other hand some chapters such as turtle graphics, tkinter, and classes/objects can be skipped (74 pages). My first programming book `Beginning Programming with Java For Dummies <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computers/dp/0764526464/>`__ had 408 pages. The `5th edition <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computer/dp/1119235537/>`__ is the most popular and has 560 pages. But it still only covers the basics. `Head First Java <https://www.amazon.com/Head-First-Java-2nd-Edition/dp/0596009208/>`__ is recommended by the r/learnprogramming subreddit and has 688 pages.
 
 Others recommend skipping the "dead tree" format altogether and watching videos on YouTube or doing educational courses on edX, Udacity, and Coursera. On YouTube `MIT
 6.0001 <https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/video_galleries/lecture-videos/>` is around 12x45=540 minutes. `CS50P <https://www.youtube.com/playlist?list=PLhQjrBD2T3817j24-GogXmWqO5Q5vYy0V>`__ is 14x1.2=1005 minutes. The amateur `CS Dojo <https://www.youtube.com/playlist?list=PLBZBJbE_rGRWeh5mIBhD-hhDwSEDxogDg>` is 16x~13=217 minutes. `Digilent Inc.'s course <https://www.youtube.com/playlist?list=PL0845FEB57E5894C2>`__ is 87x6.5=561 minutes. Coursera's `Learn to program <https://www.coursera.org/learn/learn-to-program>`__ course is 291 minutes or less than 5 hours of video content but there are 43 readings and Coursera says it will take 25 hours to complete.
 
-Learning a new language can be faster if you already know a language, but you can also bring over preconceptions. For example in :cite:`joostenTeachingFunctionalProgramming1993`, imperative gotchas became misconceptions in functional programming: variables can be defined after they are used, operators like ``tail``, ``take``, ``drop``, ``remove``, ``filter`` do not mutate their arguments, and there is no need to clone results to prevent them from being mutated and corrupted. It's not clear what can be done - people hate UI changes, and will complain when their cherished workarounds no longer work, even if they are now unnecessary. `Dijkstra <https://www.cs.utexas.edu/users/EWD/ewd04xx/EWD498.PDF>`__ similarly stated that COBOL "cripples the mind" and BASIC "mentally mutilates programmers beyond hope of regeneration", presumably because they give the programmer the wrong impression of what programming is. Maybe there is hope for a "Stroscot for Y programmers" series or maybe it will just make people's brains explode.
+Learning a new language can be faster if you already know a language, but you can also bring over preconceptions. For example in :cite:`joostenTeachingFunctionalProgramming1993`, imperative gotchas became misconceptions in functional programming: variables can be defined after they are used, operators like ``tail``, ``take``, ``drop``, ``remove``, ``filter`` do not mutate their arguments, and there is no need to clone results to prevent them from being mutated and corrupted. It's not clear what can be done - people hate UI changes, and will complain when their cherished workarounds no longer work, even if they are now unnecessary. `Dijkstra <https://www.cs.utexas.edu/users/EWD/ewd04xx/EWD498.PDF>`__ similarly stated that COBOL "cripples the mind" and BASIC "mentally mutilates programmers beyond hope of regeneration", presumably because they give the programmer the wrong impression of what programming is. Still though, Dijkstra is too pessimistic - a simple "Stroscot for Y programmers" guide series should be sufficient to retrain programmers away from their bad habits.
 
 
-If your language is too different from other languages, not enough people may be willing to invest the time to give it a try.
 
-it’s important to be considerate of how many things in your language will be strange for your target audience, because if you put too many strange things in, they won’t give it a try.
+Even if the learning material is there, what will convince people to invest the time to give it a try?
 
-You can see us pandering to our major target audiences - C uses curly braces, so we do too.
-
-If you include no new features, then there’s no incentive to use your language.  Language designers should give careful thought to how strange their langauge is, and choose the right amount to accomplish what they’re trying to accomplish.
+ Language designers should give careful thought to how strange their langauge is, and choose the right amount to accomplish what they’re trying to accomplish.
 
 
 Therefore, it’s best to treat familiarity as a tie-breaker: to be used sparingly, only when the pros and cons of different design options have been fully explored, and it has been determined that no design has an edge above the other.
 
 But if one design has arguments for it, and another design has only familiarity on its side, language designers of the future are implored to pick the former to stop propagating the same language design mistakes further and further into the future.6
 
-According to `this <https://soc.me/languages/familiarity>`__ the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with the `notion <https://steveklabnik.com/writing/the-language-strangeness-budget>`__ of Rust's "strangeness budget", where a language can only be so weird before it gets discarded from consideration and can never become standard.
+ the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with the `notion <https://steveklabnik.com/writing/the-language-strangeness-budget>`__ of Rust's "strangeness budget", where a language can only be so weird before it gets discarded from consideration and can never become standard.
 
 As Randomo shows, the choice of characters for operators is arbitrary. Using familiar syntax at least benefits existing programmers, while new programmers will be confused regardless.
 
@@ -362,10 +353,10 @@ TR31
 
 * R7. Filtered Case-Insensitive Identifiers: Specify that identifiers must be invariant under toNFKC_Casefold. Except for identifiers containing excluded characters, allowed identifiers must be in the specified case folded form. Note: filtering involves disallowing any characters in the set \p{NFKC_QuickCheck=No}, or equivalently, \P{isNFKC}, as well as any characters in the set \p{Changes_When_Casefolded}.
 
-Case
-----
+Case restrictions
+-----------------
 
-Go's rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, excluding combining characters and Devanagari. But this upper case restriction means 日本語 cannot be exported, and instead X日本語 must be used.
+Go's rule is that identifier characters must be letters or digits as defined by Unicode, and exported identifiers must start with an upper-case letter, excluding combining characters and Devanagari. Haskell has a similar type/value distinction. But these sorts of restrictions mean 日本語 cannot be exported, and instead X日本語 must be used.
 
 Generally it seeems that case distinctions only work for English, and are somewhat hard to get right. So we don't put it in the syntax and leave case as a style guideline.
 
@@ -761,17 +752,6 @@ This gives 5 comment types: EOL impl, block impl, EOL doc, block doc, and block 
 
 Comments at the beginning of the file are a little special and can be forbidden or restricted to specific types such as documentation comments or shebangs.
 
-Common choices
---------------
-
-Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
-
-* For EOL impl, C++ style ``//``
-* For block impl, C style ``/* */``
-* For EOL doc, D style ``///``.
-* For block doc, Javadoc style ``/** */``
-* For code comments (nesting block), Pascal style ``(* *)``
-
 Parsing
 -------
 
@@ -790,10 +770,15 @@ OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
 
-Indendation sensitivity
+Indentation sensitivity
 =======================
 
 Indentation-sensitivity like Python and Haskell seems great. It requires less typing, fewer lines of code (no line for closing brace), and when copy-pasting code you only have to fix up the indentation by moving the block left/right (supported by all modern code editors) instead of messing with braces.
+
+
+More discussion: https://www.reddit.com/r/ProgrammingLanguages/comments/uo0nq7/end_keywords_vs_pythonstyle_blocks_for_beginners/
+https://unspecified.wordpress.com/2011/10/18/why-pythons-whitespace-rule-is-right/
+https://wiki.python.org/moin/Why%20separate%20sections%20by%20indentation%20instead%20of%20by%20brackets%20or%20%27end%27
 
 Mixing tabs and spaces can lead to errors, but erroring on this is fine.
 
@@ -815,9 +800,33 @@ Although the parentheses make this unambiguous, Haskell requires indenting a lot
 
 Per `anecdote of Kmett <https://stackoverflow.com/a/2149878>`__ this requirement makes Haskell's layout rules too complex for blind people because it requires lining up columns.
 
+Similarly https://www.youtube.com/watch?v=SUIUZ09mnwM says to avoid a layout like this:
+
+::
+
+  unstable someExpresssion
+           anotherExpression
+
+because renaming ``unstable`` will require reindenting the rest of the expression. Prefer:
+
+::
+
+  stable
+    someExpresssion
+    anotherExpression
+
+  // or
+
+  stable someExpresssion
+    anotherExpression
+
+
 Rob Pike says indentation sensitivity "is nice for small programs" but causes issues with embedding. For example, "a Python snippet embedded in another language, for instance through a SWIG invocation, is subtly and invisibly broken by a change in the indentation of the surrounding code." This seems like an issue caused by the embedding style - if the snippet was in a separate file then the tools might deal with it better. Haskell defines a translation from indentation style to brace syntax, and just requiring brace syntax in these embeddings might be sufficient.
 
-Blind programmers have diverse opinions. The majority seem to use screen readers, and per `this HN comment <https://news.ycombinator.com/item?id=11419478>`__ "almost all" screen readers have a setting to report the indentation of the current line, and this is relatively easy to use. For example per `this video <https://www.youtube.com/watch?v=qvg-uo_I7JM>`__ NVDA can be set up to automatically switch between different profiles for different tasks based on the focused window / process, and can announce indentation level using both beep tones and a TTS description of the number of spaces or tabs when navigating. Per `this <https://github.com/microsoft/vscode/issues/147386>`__ JAWS provides similar functionality. Roughly the experiences can be compared like this:
+Blind community
+---------------
+
+Blind programmers have diverse opinions. I don't know a significant number of them so this is all anecdotes. Per `this HN comment <https://news.ycombinator.com/item?id=11419478>`__ the majority seem to use screen readers and "almost all" screen readers have a setting to report the indentation of the current line, and this is relatively easy to use. For example per `this video <https://www.youtube.com/watch?v=qvg-uo_I7JM>`__ NVDA can be set up to automatically switch between different profiles for different tasks based on the focused window / process, and can announce indentation level using both beep tones and a TTS description of the number of spaces or tabs when navigating. Per `this <https://github.com/microsoft/vscode/issues/147386>`__ JAWS provides similar functionality. Roughly the experiences can be compared like this:
 
 ::
 
@@ -856,6 +865,7 @@ Some people turn on indentation even for brace languages, because knowing the in
 Another option for blind people is the Braille display, but it is expensive and only shows at most 80 characters. Per `this user <https://stackoverflow.com/a/148880>`__ it can help with both indentation and complex punctuation, particularly lines with many nested parentheses. But the screen reader is usually faster. Comparing wpm, Braille is around 150 wpm starting out going up to 250 wpm, a physical limit of how fast fingers can run over the dots. 150 wpm is also about what TTS does by default but TTS can be sped up to around 500 wpm as the user becomes more accustomed to the synthesizer, :cite:`stentIntelligibilityFastSynthesized2011` and even at 900 wpm experienced users can still transcribe gibberish text with 50% accuracy. So TTS has markedly more bandwidth.
 
 `emacspeak <http://tvraman.github.io/emacspeak/manual/emacspeak_002dpython.html>`__ has speech-enabled python-mode and `per ML thread <https://groups.google.com/g/comp.lang.python/c/Dm-qTzO8Db8?hl=en#3216b7a02047873a>`__ reads things like "closes block <block's opening line>" on dedent. But it seems like it is hard to install and not really that popular.
+
 
 Braces and brackets
 ===================
@@ -1039,8 +1049,63 @@ Pattern matching / conditionals
 
 The condition can be split between a common discriminator and individual cases. This requires doing away with mandatory parentheses around the conditions. This strongly suggests using a keyword (then) to introduce branches, instead of using curly braces, based on readability considerations.
 
+Assignment
+==========
+
+`Discussion <https://craftofcoding.wordpress.com/2021/02/19/evolution-of-the-assignment-operator/>`__. Stroscot's assignment syntax is complicated because I want separate initialization (declarative assignment) and reassignment (mutating assignment).
+
+.. list-table:: Comparison
+   :header-rows: 1
+
+   * - Language
+     - Initialization
+     - Reassignment
+     - Equality
+   * - Mathematics
+     - ``=``
+     - ``⟹`` or ``=>``
+     - ``=``
+   * - Algol
+     - ``:=``
+     - ``:=``
+     - ``=``
+   * - Fortran
+     - ``=``
+     - ``=``
+     - ``.EQ.``
+   * - PL/I
+     - ``=``
+     - ``=``
+     - ``=``
+   * - BCPL
+     - ``=``
+     - ``:=``
+     - ``=``
+   * - B
+     - ``=``
+     - ``:=``
+     - ``==``
+   * - C
+     - ``=``
+     - ``=``
+     - ``==``
+   * - APL
+     - ``←``
+     - ``←``
+     - ``=``
+   * - R
+     - ``<-``
+     - ``<-``
+     - ``==``
+   * - J
+     - ``=:``
+     - ``=:``
+     - ``=``
+
+Looking at precedents, the only languages with distinct initialization and reassignment are B and BCPL, so reassignment should definitely be ``:=``. Then we can either follow mathematical convention and PL/I in making initialization and comparison use the same symbol, or simplify parsing by making equality ``==``. Quorum uses the same symbol and apparently this is what novices expect. :cite:`stefikEmpiricalInvestigationProgramming2013`
+
 Chained assignment
-==================
+------------------
 
 Chained assignment is an expression like ``w = x = y = z``. The value of ``z`` is assigned to multiple variables ``w``, ``x``, and ``y``. The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution - C's "the assignment returns the lvalue" semantics seems contrived.
 
@@ -1051,7 +1116,7 @@ Chained update with ``:=``, like ``a := b := 2``, seems the most useful to short
 There is an issue with running I/O multiple times. For example if you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable, but in Stroscot ``[]`` is pure so this is fine.
 
 Embedded assignment
-===================
+-------------------
 
 This embeds assignments in expressions, like
 
@@ -1217,11 +1282,18 @@ The expansion of ``nrev`` is given in :cite:`hemannFrameworkExtendingMicrokanren
   print (run (\x -> nrev [1,2] x)
   -- [[2,1]]
 
+Functional programming
+======================
+
+
+In a true empirical comparison study :cite:`pankratiusCombiningFunctionalImperative2012`, Scala programs ended up taking a lot longer to write than Java - 72 hours vs 43 hours, with no working Scala programs submitted until the third week, versus a working Java program submitted the first week. The reasons given in the paper were Scala's complex type system, poor documentation, poor IDE/debugging support, complex memory model, and complex parallel programming abstractions. That gives an idea of what the important factors are in cycle time: making programming language features more intuitive so that they can be used correctly with little study, and implementing "creature comforts" to help to write and test code. For example, according to ChatGPT, Scala's FP features are complex and make programs less readable to newcomers, but once you have learned Scala's FP syntax and nomenclature, the FP style makes programs more readable because they are more concise. This suggests that redesigning the FP paradigm to use intuitive naming and syntax will improve readability. But it may be that no concise and understandable FP design exists and there will always be a learning curve for FP features.
+
+
 Go syntax notes
 ===============
 
 small set of keywords, without filler keywords (such as 'of', 'to', etc.) or other gratuitous syntax
-slight preference for expressive keywords (e.g.  'function') over operators or other syntactic mechanisms
+prefer keywords (e.g.  'function') over operators or blocks
 variables, simple control flow are expressed using a light-weight notation (short keywords, little syntax)
 
 DSLs
@@ -1267,3 +1339,84 @@ Scala and JS have support for native XML literals. Scala had one syntax in 2 and
   );
 
  All these support interpolation, so that's clearly a necessary feature.
+
+Identifier conventions
+======================
+
+Per Binkley, a study of real-world code found identifiers were 43.8% 1 part, 29.5% 2 parts, 16.4% 3 parts, 6.2% 4 parts, and then we can calculate that 5+ parts were 4.1%. Longer identifiers require more time to read, due to requiring more fixations - Binkley found that going from 2 to 3 identifier parts increased the cloud word recognition task time by 0.981 seconds. For identifiers of one part there is only uppercase vs lowercase (ignoring stUDly CaPs), but for more parts we can choose how to join them: snake case (underscore style), camel case, kebab case (hyphen style), or Unicode characters like a shaded box ░ or half box ▆.
+
+* The shaded box performed well in Epelboim's study, being only 4% harder to read than normal text in conditions such as "░this░ ░is░" and "░░an░░example░░". Unfortunately the pattern of interest "some░filler" was untested, but just reading it with my eyes it doesn't seem too hard to read. Visually, a shaded box should allow easily distinguishing the extent of an identifier. Of course typing the shaded box character is somewhat difficult as it's not on standard keyboards.
+
+* The underscore style provides clear separation between parts when looking at the top, but may require a little work to see the underscore and identify the extent of an identifier. Sharif's figure 4 of underscore fixations suggests that underscore-trained programmers do not need any extra fixations to see the underscores, but that the last identifier part may have a longer fixation. There is also a "bumpy case" variation that uses double underscores, I don't think this improves readability.
+
+* Kebab case moves the line upwards, closer to the centers of the fixations, and may thus make it easier to determine identifier extents. The half box could provide a similar benefit. Searching Google Scholar for kebab case produced no academic studies on readability.
+
+* Camel case requires identifying parts by letter height variation, which is visually difficult and requires longer or multiple fixations. Camel case does however provide good extent identification. In long lines of identifiers it is probably as bad as text with no spaces, which takes 44% mean percent longer to read. Binkley and Sharif found 13.5% and 20% longer times with camel case over underscores for the cloud task. 2-part identifiers take approximately the same time as underscores - it is 3-part identifiers that lose big.
+
+* Whitespace - there are ways to allow true multi-word identifiers using the space character, but these suffer greatly from extent identification because there is visual indication at all.
+
+When reading there is an accuracy vs speed tradeoff. If something is really easy to read, one tends to just skim it and gloss over small mispellings. Because camel case is harder to read, in Binkley's studies the participants took longer to answer the questions and had slightly improved accuracy overall compared to snake case. There was however one contrary question: ``attackerHealth/attackedHealth`` was easily confused in camel case but in snake case ``attacker_health/attacked_health`` it was more distinguishable due to the stem of the d.
+
+ so far have not had enough statistical power to state any effects. Binkley found, if there are effects, in his studies they were most likely that training on an identifier style increased the speed of reading that style but made it harder to read other styles. Training on a style may also make it harder to read normal prose that had been randomly chunked into identifiers of that style.
+
+:cite:`walkerFontTuningReview2008` found it is 2% faster (15ms) to read a word if the preceding word is in the same font. :cite:`beierHowDoesTypeface2013` found that this "font tuning" adaptation increases, so that reading the same font for 20 minutes improves the speed of reading paragraphs by 6.3% (0.43 paragraphs or 11wpm). Even after significant font exposure there is also a "familiarity" effect where common fonts such as Times and Helvetica do 9.4% better (0.64 paragraphs or 16wpm) than novel fonts.
+
+There may also be an effect on longer timescales, where exposure to a font increases reading speed in that font weeks or years later, but the 20-minute exposure effect was only
+
+ There is probably a similar effect for 20-minute exposure to a given identifier convention (TODO: conifrm with formal study). Since long-term memory is anything longer than 30 seconds and observers can fairly accurately pick out a photo exposed for 3 seconds, even hours or days later, any training effect can probably be entirely explained as a function of the exposure to the visual patterns of letters.
+
+
+There is also a short-term memory "font tuning" effect where one adapts to the glyphs of a specific font and slows down if a glyph from a random readable font is inserted, but this mainly means to avoid a mixture of identifier styles. It's worth checking if there is a tuning effect only for mixing identifiers of the same syntactic category or if having module names in camel case is slower if variables are in snake case vs camel case.
+
+The actual names also affect readability. Binkley found that the phrases likely to be found in programs were answered incorrectly more often than prose phrases. This is likely due to the phrases being less memorable, e.g. it seems like it would be easier to confuse "full pathname" with "full pathnum" than "river bank" with "river tank" (unfortunately the most common distractor is not reported).
+
+Theoretically, the best identifier style could vary by individual and depend on external factors such as font or eye correction. It's unlikely, because the eye-tracking data says that camel case needs more eye fixations, and that's a physical constraint of the human visual system that probably doesn't change by individual. But, automatically translating between different identifier styles is possible, so identifier style could be yet another option in the code formatter, along with a compile option to translate the style of libraries.
+
+Even so, just letting people pick a style would not work. Wallace found that people's preferred font (as found by asking "which font is this paragraph more readable in?") has no correlation with their fastest font among 5 fonts, and that the best font among 16 tested varied randomly per individual. So an actual timed test is really the only option to obtain optimal performance. Wallace found a 14% improvement in WPM reading speed over the subjectively preferred font and 35% over the worst font. Unfortunately Wallace's study did not control for exposure so they may just be measuring noise. Exposure accounted for 30ish wpm in Beier's study and in Wallace's study the difference between fastest and preferred was 39wpm.
+
+
+This doesn't solve the issue of picking a default style for the standard library though. Non-programmers prefer the underscore style, and it's more readable, so that's probably what common variables should use. Since that puts us in the Python camp and Python is the most popular language we should probably just follow Python's identifier conventions uniformly.
+
+Choices
+=======
+
+At the end of the day syntax is about picking a choice and sticking to it. There are many ways to do this. For example, take comments. Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
+
+* For EOL impl, C++ style ``//``
+* For block impl, C style ``/* */``
+* For EOL doc, D style ``///``.
+* For block doc, Javadoc style ``/** */``
+* For code comments (nesting block), Pascal style ``(* *)``
+
+But is this the best choice? There are lots of other options, an EOL impl comment can be ``;`` or ``#`` or  ``->``. Similarly there are many choices for other syntactic elements:  "not equal" can be ``/=``, ``!=``, or ``~=``. Power can be ``**`` or ``^``. Xor can be ``^`` or ``xor``. In Stroscot, since syntax is pluggable, these are really standard library questions, but a default syntax is necessary for writing the compiler, so we have to figure it out first in order to bootstrap.
+
+The Quorum approach is to design a survey and ask novices what they think is most intuitive. Choices ranked highly by self-reported experienced programmers but not chosen by novices are likely mistakes in PL design. Stefik used CS university students (freshman year novices vs junior/senior year programmers). Since we're designing for novices we don't actually care about or need to measure experienced programmers. So using a convenience sample by posting a Google Form / SurveyMonkey / LimeSurvey to r/learnprogramming isn't that hard - polls need approval but this seems like it might be allowed. (TODO: there is probably a better place on the internet to find programming novices). The questions are basically:
+
+* Title: "Never programmed? Help design a new programming language! (Survey)"
+* Demographics: age, gender, native English speaker. These are mentioned as questions in Stefik's survey :cite:`stefikEmpiricalInvestigationProgramming2013`, but aren't mentioned as having any statistically significant correlations, so can probably be left out to make people less worried about giving out personal information. :cite:`dossantosImpactsCodingPractices2018` did find statistically significant differences for females to prefer multiple statements on one line and more intermedate variable assignments, but there were only 7 females so this is probably noise. OTOH, it would be useful to have demographics to compare to large surveys like the `Stack Overflow Developer Survey <https://insights.stackoverflow.com/survey/2021>`__.
+* years of programming experience. Stefik found that programmers will list experience with individual languages even when reporting no experience total, so it is probably best to ask individually with a language matrix and have an "All others" at the end. Design buckets based on mean / standrd deviation of languages.
+
+* Have you heard of the Stroscot programming language before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results.
+* "how do you think <english description of PL task> should look?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. The concept descriptions are the meat of the survey and Stefik pilot-tested these several times and had them reviewed by expert programmers. Probably ChatGPT can help a lot here to devise standardized wording that avoids prompting with the answer.
+
+The PL tasks themselves should come from an initial survey of expert programmers that is designed to identify key operations and data structures such as lists, function applications, etc.
+
+
+educational research
+
+, such as Tew and Guzdial’s excellent FCS1 instrument [Tew and Guzdial 2011].
+The FCS1 has a very different purpose than our surveys, and Tew and Guzdial’s procedures for statistical validation differ from those we used in pilot studies [Stefik and Gellenbeck 2011], but the level of care in design holds similarities.
+
+
+
+Immersion is by far the best way to learn anything. And as research shows, it turns out that humans retain:
+
+    5% of what they learn when they’ve learned from a lecture.
+    10% of what they learn when they’ve learned from reading.
+    20% of what they learn from audio-visual.
+    30% of what they learn when they see a demonstration
+    50% of what they learn when engaged in a group discussion.
+    75% of what they learn when they practice what they learned.
+    90% of what they learn when they use it immediately.
+
+Think back to how you learned to play basketball, ride a bicycle, or swim. Instead of watching tutorial videos or reading a textbook on how to do something, the way to learn faster is to get into the trenches and gain experience through making mistakes.

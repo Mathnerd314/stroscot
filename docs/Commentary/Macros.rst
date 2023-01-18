@@ -1,10 +1,12 @@
 Macros
 ######
 
+Macros are a facility that allows defining syntactic extensions to a programming language. Macros implement the essence of Lisp: code can be used as data, and data can be used as code. Although in Lisp the transformation of code into data (specifically, an AST tree) is obvious as the S-expression syntax is just nested lists, in Stroscot we choose to have more complex syntax and accompanying mental overhead. It should be noted that even McCarthy the inventor of Lisp intended to use an M-expression (mathematical expression) syntax and S-expressions were only a matter of convenience.
+
 Comparison
 ==========
 
-Macros, micros, and fexprs are facilities to allows allow defining syntactic extensions to a programming language. Comparing them:
+Macros, micros, and fexprs are all possibilities. Comparing them:
 
 0. A (C) macro is a function translating text into text. Textual macros suffer from the scoping/name capture problem. Applying a macro ``double x=x+x`` to a side-effectful expression like ``double(i++)`` executes the side effect twice. They allow unbalanced/incorrect expansions like ``startLoop = while(true) {`` and ``double(+) = +++``. One often can't easily determine the expanded expression due to multiple layers of macros. Furthermore looking for control flow paths is hard.
 1. A (Scheme) macro is a function translating an AST node into an AST node. Macro substitution of an AST reduces away all macros and produces an AST. Scheme macros have a complex hygiene system to make naive macros handle scoping correctly and avoid name capture.

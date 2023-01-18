@@ -1,7 +1,7 @@
 Introduction
 ############
 
-This is a 10-minute introduction of the main concepts of Stroscot.
+This is a 10-minute (2000 word) introduction of the main concepts of Stroscot.
 
 Term rewriting
 ==============

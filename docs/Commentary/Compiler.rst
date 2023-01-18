@@ -1,103 +1,30 @@
 Compiler design
 ###############
 
-Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation is possible as well but not explored, and needs profile data to work properly. Currently Stroscot is aiming for AOT with profiling.
+Dynamically typed languages are tricky to compile efficiently. There’s been lots of research on efficient JIT compilers for dynamic languages - SELF, Javascript, PyPy, Java - but these are quite involved, and still slower than C. Ahead-of-time compilation for dynamic languages is possible as well but not explored, and needs profile data to work properly. Currently Stroscot is aiming for AOT and JIT compilers with profiling.
 
-Pipeline
-========
+Structure
+=========
 
-The start is a parser - this will be written later once partial evaluation is sufficient to specialize naive parsers efficiently. For now the code is input using ADTs and parentheses. The parser will also add file and line number information, token start/end, call stack, and other debugging information.
+The interpreter:
 
-Next is the fexpr interpreter loop. This starts with the ADT tree and produces evaluated code. Parts of the evaluator include turning name-strings into direct evaluation graph references and compiling pattern matching to tag scrutinization.
+* A parser - this is written using nondeterminism. Likely the full syntax will not be fast enough for practical purposes until late in the project, so for now the parser uses a deterministic Lisp-like syntax. The parser records file and line number information, token start/end, call stack, and other debugging information.
+* Fexpr interpreter loop - this starts with the AST and produces a value. The main part is dispatching pattern matches. Uses the eval-apply model, similar to :cite:`downenMakingFasterCurry2019`.
+* Logic prover - a CDCL satisfiability search algorithm, handles nondeterminism such as dispatch, checking if a value is a member of a type (checking functions etc. is nondeterministic), explicit lub, etc.
+* Memory management
+* A dynamic assembler / JIT code generator
 
-Currying is handled by a pass that creates partially-applied functions using the eval-apply model, similar to :cite:`downenMakingFasterCurry2019`. Initially all user code starts out using one-argument functions.
+The specializer:
 
-Currently there are no code targets implemented - the main interactive element is an interpreter. There are some papers on partial evaluation and supercompilation that will probably get used for a C backend or a JIT or something.
+* Supercompiler / partial evaluator: computes possible states of the program
+* Figures out how to represent space of program states efficiently (to avoid state explosion)
+* Code generation: converts state transition relation to assembly instructions of the code target
+* Static verification: Warns if error states are reachable, checks other specified properties to generate warnings
 
-Error levels
-============
+The JIT:
 
-In general flags can take 4 levels: ignore, warn, error, and fix. Ignore ignores the issue as much as possible. Warn issues a warning but otherwise ignores the issue. Error stops the compiler from continuing. Fix automatically constructs a fix for the issue and either modifies the source file(s) in-place or outputs a patch. There is also the value 'default' to set it to the default of these 4 levels.
-
-Stroscot is designed so that as little as possible is a hard error. Warnings allow continuing with compilation and finding all the errors in a file, hence produce more information than errors that simply stop at the first one. This choice is inspired by the ``--keep-going`` option in many build systems and the ``-fdefer-type-errors`` flag in GHC. In both cases a hard error is turned into a diagnostic; this is clearly a trend.
-
-Onw reason to stop at the first error is to avoid wasted CPU cycles, but CPU is cheap these days and incremental building means going as far as possible is probably cheaper than rerunning from scratch each time. So Stroscot always processes as far as possible. Another reason is to avoid console scroll; for this there is a flag ``-ferror-limit=123`` to limit output.
-
-Werror
-------
-
-The traditional Werror that turns warnings into errors is still an option, for those who like rerunning builds by hand at the command line and don't want to scroll through pages of output. But it is not recommended for use in build scripts. The main issue is that it introduces a hard dependency on the compiler's set of warnings. For example, suppose:
-
-* Compiler version A has W1=ignore, W2=warning
-* Compiler version B has W1=warning, W2=ignore, W3=warning
-
-W2 is fine and will not cause any problems upgrading. But W1 and W3 will break the build when upgrading.
-
-To solve this Stroscot has warning presets so you can use a list of options like ``--warning-preset=A -W3=error -Werror`` and selectively enable new warnings, upgrading incrementally. Of course this doesn't help with downgrading to a compiler version where the preset is not available, and there is still the issue of individual compiler warnings becoming smarter and finding errors where they didn't before.
-
-Error messages
-==============
-
-Error messages are the UI of the compiler. Languages such as `Elm <https://elm-lang.org/news/compiler-errors-for-humans>`__ and Rust claim to have invested significant effort into improving their error messages, so Stroscot probably should too. Fortunately this has been researched since 1965, with a recent literature survey in :cite:`beckerCompilerErrorMessages2019`, so we aren't going in blind.
-
-A distinction that seems useful is malformed program vs violated contract.
-
-* A malformed program is outside the specifications of the language, e.g. an unbound identifier or syntactic error. With non-textual editing, it becomes impossible to insert malformed constructs, so the only malformed programs are incomplete programs. Programs are typically malformed due to "trivial" parse errors, so typically we would like to find a minimal correction to apply to make the program syntactically correct, so that we can find more interesting errors.
-
-* A program with a violated contract is more interesting: it has a defined runtime semantics per the language semantics, but a type signature or assertion is violated, meaning that the programmer's intentions are not satisfied. Typically we want to output a "crippled" program that fails when it encounters the error, rather than attempting a fix.
-
-It is probably worth splitting the ID numbers into two separate sets, Mnnn vs Cnnn, for malformed vs contract.
-
-One issue is whether an error is reported (completeness) and if so when, either compile-time or runtime. Generally runtime errors have the execution trace available and produce more precise information, but are incomplete, while compile-time errors are reported earlier and are complete for some criteria. In Stroscot this distinction is muddied because we use model checking. Model checking essentially simulates all runs of a program at compile time, so is complete and reports back early. But a model checking failure will end up producing a counterexample, basically a failing runtime execution trace, so we get the precise information. This can be a bad example so we need to apply minimization. But generally, So Stroscot gets the best of both worlds. Of course the model checking itself is tricky to implement efficiently. But a small price to pay for avoiding confusing type inference errors.
-
-Two more issues are locality and source mapping, ensuring the error message is reported at the location where the fix should be directed. A missing close brace may lead to an error only at EOF. Indentation sensitivity mitigates this particular error. Another issue is something like ``a = <expr>; ...; assert (a != 0)``, where the assertion is much later than the creation of the value that caused the error. We need a summarizer that tries to guess the important variables and outputs the callstack or other traditional details. Macros have similar problems - is the error in the macro use site or definition site?
-
-Richer error handling such as a location system also introduces a performance concern, requiring more compiler engineering. For example we need an efficient mechanism for storing the start/end source location spans, consisting of two (filename, line number, column number) tuples, as passing around fully formatted strings would be slow. Go uses a map between locations and integers where file A maps to 1-100 and file B maps to 101-200, so that e.g. 150 maps to file B byte offset 50. But it isn't clear how to make this incremental, as removing a file causes all the integers to change. One idea is to store (filename hash : U32, byte offset : U32), since files are unlikely to be larger than 4 gigabytes. Whatever the solution, we should be able to compare same file, before/after within files, and if two locations are equal.
-
-The wording may be important. A Java editor called Decaf intercepted and re-worded 30 of the most frequent Java error messages, and was found to significantly reduce error frequency and indications of struggling students. However a different study did not, suggesting the effects are weak. Still, some basic attempt at clear and friendly language is appropriate. Specific guidelines from :cite:`beckerCompilerErrorMessages2019`:
-
-* Aim for readability and ensure comprehension by using plain/simple language, familiar vocabulary, and clear/concise/brief messages. Avoid cryptic jargon. There are multiple formal measures of readability for ‘normal’ prose, such as the Fry Readability Graph, Flesch formula, Dale-Chall formula, Farr-Jenkins-Paterson formula, Kincaid formula, Gunning Fog Index, and Linsear Write Index, but nobody has applied these to programming errors or devised a formal readability metric.
-
-* Reduce cognitive load: Include all relevant information and reduce redundancy so the user does not process the same information twice. Use multiple modalities to provide feedback. The error message should use the minimal amount of boilerplate so that a developer can process the information quickly. But there should also be enough that someone who has never seen the message before can understand it.
-
-* Provide context: Provide information about the relevant program code, such as the location of the error (explicitly or as an IDE annotation) and relevant symbols, identifiers, literals, and types involved in the error, as well as the program state such as variable values and stack traces. If an error message can appear in different contexts or could be sourced to multiple locations then disambiguate.
-
-* Use a positive tone, and generally aim for a consumer UX: Novices are shaken, confused, dismayed, and discouraged by violent, vague, or obscure phrasing. Messages should be polite, restrained, friendly, and encouraging, making the computer seem subservient. Negative words like incorrect, illegal, and invalid should be avoided. Also `general UX guidelines <https://www.oreilly.com/library/view/designed-for-use/9781680501902/f_0298.xhtml>`__ advise to not place fault or blame, scold, or condemn the user (programmer). Sarcastic humor also seems counter-productive, although minor 'fun' humor may be OK but runs against briefness. Another `study <https://faculty.washington.edu/ajko/papers/Lee2011Gidget.pdf>`__ found personified I-messages such as "I don’t know what this is, so I’ll just go on to the next step" improved novice's knowledge acquisition rates and thus amount of levels completed in a set time. Of course `others <https://www.codewithjason.com/whos-blame-bad-code-coders/>`__ argue the coders are objectively the ones at fault, but this seems to be an impossible to win argument, like arguing that your girlfriend is fat. Even if it's true winning the argument doesn't make anyone better off. Psychology is weird. For children, the computer should not appear as if it is a sentient human, so as to develop the correct mental model.
-
-* Provide a catalog of similar error examples (`Elm <https://github.com/elm/error-message-catalog>`__, `Rust <https://doc.rust-lang.org/error-index.html>`__): Providing handpicked, worked examples of how each error message is triggered can improve novices' understanding and also function as a compiler test suite. Particularly a side-by-side incorrect/correct layout with the differences highlighted has been studied and found helpful. However, brevity offers many advantages, and a study showed novice programmers can be confused as to whether the example code in the message is their code. There is also the issue of overdependence on programming by example. As such relegating the examples to a separate webpage, so there is a clear separation of example from actual, seems the best approach. For example, Rust and Microsoft give each error message a unique ID, and then has a page of all the IDs and their description. This catalog and ID mechanism has not been studied in the literature and poses a discoverability hazard, but a hyperlink in the error message seems sufficient - showing the catalog entry in the error message would be documentation overkill unless it is really short. The quintessential error catalog is Stack Overflow, which indexes both standard error messages and obscure library codes or memory addresses. Popular responses are upvoted and can be quite useful to both novices and experts. Compared to formal reference documentation, the catalog can provide briefer and more concrete and specific assistance. With a feedback loop between catalog and compiler, error message codes can be refined to cover common issues more precisely. However it should be noted that there is little point in trying to organize the catalog with categorization - agreement among category raters was only 60% in :cite:`mccallNewLookNovice2019`. It is better to use a flat list and focus effort on specific tricky error codes rather than attempting to find patterns among errors.
-
-* Show solutions: The actual intent of the programmer may not be clear, but the compiler can analogize from the error catalog or other sources to guess what the programmer likely intended, and either provide a literal solution or sketch the requirements a solution must satisfy. Although debatable, my definition of the difference between an example and a solution is that the solution is phrased using specific information from the actual code, whereas the example is generic to the error ID. Also, the solution is produced only when there is a high degree of certainty for its applicability, avoiding leading the user down the wrong path. When guided appropriately by solutions, novices can repair errors approximately as fast as experts. With IDE integration, solutions may be interactively accepted and applied automatically instead of being transcribed by the user, allowing even experts to benefit from faster fixing. Elm says that every error should have a solution - this is probably overkill. Solutions are doable for trivial errors like unbound identifiers or uncaught exceptions, but many semantic errors have no obvious solution and can take weeks to work out.
-
-* Allow dynamic interaction: A simple example is Rust's ``--explain`` flag that gives more context for some errors and for others reproduces the explanation from the catalog. This is a "tell-me-more" mechanism that allows requesting more error details. In Stroscot's case, where many contract errors take the form of failing program traces, another useful tool would be interactive omniscient debugging of these failing traces, so that the programmer can take a failure of ``assert (a != 0)`` and say "where did ``a`` come from?". Both of these cannot be the main interface, because the catalog is verbose and debugging is too time-consuming, but as options they are quite helpful.
-
-* Provide cognitive scaffolding: A user may form the wrong conceptual model and/or move too quickly through writing the program. They then have a false sense of accomplishment. It is then the error messages's job to dislodge incorrect conceptual models and point out hasty errors. The user may also have misread the problem, but solving the wrong problem is a general issue in cognition, including startups launching and failing due to market fit, so the compiler generally can't tell that the wrong problem is being solved. Anyways, the goal is to use sufficient verbiage that the user can notice their conceptual model is wrong and search out documentation to repair it. To this end, the message should mention the key constructs and relationships that must be understood, e.g. syntactic construct names, compiler terminology, and library functions.
-
-* Use logical argumentation (maybe): :cite:`barikHowShouldCompilers2018` analyzes error messages using Toulmin's argument model, which allows 6 components (extended to 7 by Barik):
-
-  * The claim is the main assertion to be proven.
-  * The grounds are evidence and facts that support the claim.
-  * The warrant links the grounds to the claim.
-  * The backing supports the warrant, usually by an example.
-  * The qualifier limits the claim, explaining words such as "presumably".
-  * The rebuttal acknowledges other valid views but explains why they are not appropriate.
-  * A resolution is a claim that a defect will be removed with a specific change. (Added by Barik)
-
-  StackOverflow and compiler error messages used 3 argument layouts: claim alone, a simple argument consisting of claim, grounds, and warrant, and an extended argument which is a simple argument plus backing. These layouts are multiplied times 2 depending on whether there was a resolution in the claim; my notation is that "claim" means a claim without resolution. The tested results were claim < {simple,extended}, extended < claim+resolution (claim+resolution being dubbed a non-logical "quick fix" instruction).
-
-  Per the thesis :cite:`barikErrorMessagesRational` extended arguments are mainly useful for novices and unfamiliar code. Theorizing, if the developer knows what's going on, they likely want brief messages and their preference is claim+resolution > simple > extended > others. But with an ``--explain`` flag their preference is more like extended+resolution > simple+resolution > claim+resolution > extended > simple > others. It's probably worth a survey comparing error messages of varying verbosities to confirm.
-
-* Report errors at the right time: Generally one wants to see as many errors as possible, because rerunning the compiler every time you fix an error is slow, and as soon as possible, using static analysis tools.
-
-Per Elm / `Tidyverse <https://style.tidyverse.org/error-messages.html>`__ the message should have a layout like "general summary, program code fragment (location),error details / hints / suggested fix". The general summary is shown on hover in VSCode, and can be expanded downwards to see the full message. The tooltip seems to be around 120 monospaced characters wide and 5 ish lines tall. The size differs based on popup type so recheck when developing for LSP; it used to be 50 characters wide for everything. There is `an old VSCode bug <https://github.com/microsoft/vscode/issues/14165>`__ open for expandable popups, and a `CSS hack <https://stackoverflow.com/questions/44638328/vs-code-size-of-description-popup>`__ that makes them larger, but probably Stroscot has to be designed to accommodate small popups.
-
-The code fragment shows the full line of input code with file/line number, and marks the failing expression with ``^^^```. The error and location marks should be colored red so they are easy to spot. Similarly Elm uses a blue separator line ``----`` to separate messages. With the LSP integration this is already taken care of because VSCode underlines the error location in the editor and has its own UI for browsing through errors.
-
-Fuel
-====
-
-A technique for testing the compiler and systems in general is to use a "fuel" counter that decrements every time a certain operation is performed, and do something interesting when the counter reaches 0 such as finishing the optimizations or throwing an exception.
-
-For example instead of testing for stack overflow we can test for running out of fuel. Stroscot's execution context doesn't involve a stack.
+* Interleaves specialized generated code and the interpreter
+* Counts state repetitions and specializes hot loops
 
 Optimization
 ============
@@ -108,20 +35,14 @@ Profile-guided optimization is an effective solution to this lack of information
 
 When trying to do a quick compile-run cycle, we still want to streamline hot paths so that the binary is not unusably slow, but cold spots can use a straightforward boilerplate translation that doesn't require much CPU. More generally, there are various optimization criteria to minimize during compilation. Generally anything that can be measured is fair game:
 
-* Compile total elapsed time
-* Compile power usage
-* Compile memory usage
-* Runtime total time
-* Runtime memory usage
-* Runtime power usage
+* Compile/runtime total elapsed time, power usage, memory usage
 * Runtime executable size
-* Runtime throughput
-* Runtime request latency
-* Other runtime service metrics
+* Throughput at runtime
+* Request-response latency at runtime  - can be conditional, e.g. latency for a stop loss order on trading platform but latency for other types is not as important
 
 These are generally not hard numbers but probabilistic variables, because computer performance depends on many uncontrollable factors hence is best treated is nondeterministic. A simple mean or median estimator is generally sufficient, but doing statistical hypothesis testing is more interesting. Worst case execution time is of interest in real-time systems. Execution time may be modeled by a Gumbel distribution (`ref <http://www.lasid.ufba.br/publicacoes/artigos/Estimating+Execution+Time+Probability+Distributions+in+Component-based+Real-Time+Systems.pdf>`__) or odd log-logistic generalized gamma (OLL-GG) or exponentiated Weibull (`ref <https://arxiv.org/pdf/2006.09864.pdf>`__), although these experiments should probably be redone as we are measuring different programs. The testbench is `here <https://mjsaldanha.com/sci-projects/3-prob-exec-times-1/>`__ and `here <https://github.com/matheushjs/ElfProbTET>`__ and could be extended with `gev <https://www.rdocumentation.org/packages/evd/versions/2.3-6/topics/gev>`__.
 
-Obviously these have tradeoffs, so we need an overall objective function. For a focused objective like running static verification, all we want to see the error messages so total elapsed compile time is the only measurement. For production binaries, there will likely be a complex function for various runtime measurements based on actual costs and requirements, but compile costs will be minimal or excluded. For debugging, running in a REPL, an edit-compile-test cycle, etc., both compile and runtime factors are important so the objective function becomes even more complex. gcc, clang, etc. have various optimization profiles like O0, O1, O2, O3, Og, On, Os, Oz, etc., which we can include presets for, but it's not clear these are sufficient.
+Obviously these have tradeoffs, so we need an overall objective function. For a focused objective like running static verification, all we want to see the error messages so total elapsed compile time is the only measurement. For production binaries, there will likely be a complex function for various runtime measurements based on actual costs and requirements, but compile time will be excluded from the criteria or minimally penalized. For debugging, running in a REPL, an edit-compile-test cycle, etc., both compile and runtime factors are important so the objective function becomes even more complex. gcc, clang, etc. have various optimization profiles like O0, O1, O2, O3, Og, On, Os, Oz, etc., which we can include presets for, but it's not clear these are sufficient.
 
 We use branch-and-bound to explore the possibilities. With good heuristics even the truncated search algorithm should give good results. The goal is to quickly find bottleneck code regions that have significant effects on performance and compute good optimizations quickly. Then another profiling build to test that the proposed changes were correct.
 
@@ -153,7 +74,7 @@ In cross compilation we have not one system, but two systems. To use the newer `
 The older `GNU terminology <https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html>`__ uses a triple, build/host/target; but the "target" there is really a configuration option, namely the supported target of the compiler that will run on the host. Only gcc need to specify the supported target, as Clang is generally built to support all supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.
 
 the toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
-the package set is also target-dependent
+the package set is also target-dependent. some packages that are pure data are target-independent
 
 Bootstrapping
 =============
@@ -249,63 +170,6 @@ For the compiler itself, a trivial bump or arena allocator is sufficient for mos
 
 Overall I don't see much of an opportunity, SSD and network speeds are sufficient to make virtual memory and compile farms usable, so the maximum memory is some large number of petabytes. The real issue is not total usage but locality, because compilers need to look up information about random methods, blocks, types etc. very often. But good caching/prefetching heuristics should not be too hard to develop. In practice the programs people compile are relatively small, and the bottleneck is the CPU because optimizations are similar to brute-force searching through the list of possible programs. Parallelization is still useful. Particularly when AMD has started selling 64-core desktop processors, it's clear that optimizing for some level of that, maybe 16 or 32 cores, is worthwhile.
 
-Documentation generator
-=======================
-
-The documentation generator provides a nice way to browse through a large codebase, ensuring that code is easy-to-read and searchable. The documentation comments, type annotations, and argument names are pulled out for each function, and the code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There's regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.
-
-As far as targets, only HTML seems particularly important.
-
-The notion of "well-documented" is hard to define. For one person the source code and function names may be sufficient, while for another a tutorial that has no relation to the codebase may be more useful.
-
-Refactorer / reformatter
-========================
-
-The refactoring tool makes it easy to analyze source code, enabling tooling such as automatic code formatting and codebase maintenance. It reads a program from source file(s), rewrites the code according to specified rules, and writes the program back to the file(s). It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert ``TODO: check rule XXX`` comment markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms. The automated migration of code from old to new versions uses the refactoring API.
-
-With no rules, the refactoring tool functions as a reformatter. Python's Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that's used for the compiler.
-
-Inspired by gofix / `gofmt <https://go.dev/blog/gofmt>`__ .
-
-Language server
-===============
-
-For integration with VSCode and other IDEs.
-
-Interactive shell
-=================
-
-A REPL loop based on eval. Available from command line as bare ``stroscot`` or ``stroscot -i files``, and from API as a library function ``replLoop env`` or similar. Supports expressions and block syntax from the main language, and commands. Commands are built-in functions to the interpreter, like ``shell clear`` which runs ``clear`` in the shell. Or maybe the syntax should be ``:shell clear`` to avoid clashing with whatever is loaded. But namespaces are a thing, ``repl.shell clear``. The syntax will have to be worked out.
-
-Full command list:
-* shell, run shell thing
-
-  * change/print current directory
-  * list files
-
-* show information about symbol
-* push/pop level of interactive environment (source files are level 0, IE starts at level 1, and more can be added)
-* clear definitions for specified symbols or current level of interactive environment
-* load file
-* dump/load interactive environment to/from text file
-* reset - clear IE, load sources file from disk
-* reload - dump IE, load sources file from disk, load IE dump
-* quit process
-* debugger commands
-* profiler commands
-
-Notebooks
-=========
-
-Ideally, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs.
-
-But, jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code" REPL, no information on what cell it's from.
-So we would have to hack jupyter to get this to work.
-
-The simplest hack is concatenate all the cells to be executed into a string, and then each code execution is independent. Another idea is to add a "soft_reset" message. Then the frontend sends a soft reset followed by each executed code cell. More advanced is sending the execution number in the code execute message and omitting the code if it's the same as the previous execution - I don't know if sending all the code is much of a bottleneck.
-
-For now living with REPL behavior seems fine.
-
 Dynamic execution
 =================
 
@@ -383,15 +247,23 @@ GHC also does strictness analysis and optimistic evaluation.
 a program is a dependency graph which is evaluated through a series of local reductions
 the graph itself can be represented as code. In particular, we can represent a node as a function that when invoked, returns the desired value. The first time it is invoked, it asks the subnodes for their values and then operates on them, and then it overwrites itself with a new instruction that just says "return the result."
 
-Logic
-=====
 
-Doing logic in Stroscot is confusing because the reduction semantics itself uses logic. The proof tree in the reduction semantics is the program being executed, while the proof tree in type theory is automatically deduced from the type (formula) by a meta-program (theorem prover).
+JIT cache: need >90% hit rate to pay off vs just doing normal JIT path of interpeting bytecode and optimizing. need profile data, otherwise optimizations will be different. The profile is a few megabytes but the compiled code may be 100s of megabytes since it has a lot of metadata.
+
+rare methods don't show up in the profile, but may still need to be fast.
+
+the c2 strategy is a counter with an absolute threshold. so eventually, as long it is not dead code, it will be JITed. it guarantees enough samples so that you have a good profile. trying to do an exponential decay so only hot methods
+
+L1 cache is cheaper than memory, so clean up bytecode as soon as it is generated
 
 Debugger
 ========
 
-The debugger's view of the program's state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation. We allow reversible/omniscient debugging, meaning that one can step both forward from a state (the usual) and backward from a state (query on where a value came from etc.).
+The debugger's view of the program's state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation.
+
+We allow reversible/omniscient debugging, meaning that one can step both forward from a state (the usual) and backward from a state (query on where a value came from etc.).
+
+One debugging technique useful in combination with reversible debugging is to use a step counter that starts at 0 at the beginning of the program and increments every time a reduction step is performed. The exact step that triggers a behavior can be determined by binary search. When we are debugging a phase of the compiler, we can use "fuel" for each phase - this specifies how many transformations can be performed during the phase of interest before moving on to the next phase.
 
 Let's assume we have symbols, then there are lots of operations available from a debugger:
 
@@ -426,7 +298,7 @@ There are many levels to the pipeline, and each one is useful. For an interprete
 Evolution
 =========
 
-Try as we might, no language design is perfect. Langauges inevitably change or extend their semantics over time, resulting in ecosystem fragmentation where programs end up being written in different "dialects" of the language. The evolution process aims to minimize the disruption to existing code by evolving the language in a controlled manner, in particular in discrete units of "features". The process guarantees a "compatibility promise" that the source code of existing programs written for an old language version can be automatically migrated to a new language version. Because the language evolves towards a standardized set of features, the langauge should avoid fragmentation.
+Try as we might, no language design is perfect. Languages inevitably change or extend their semantics over time, resulting in ecosystem fragmentation where programs end up being written in different "dialects" of the language. The evolution process aims to minimize the disruption to existing code by evolving the language in a controlled manner, in particular in discrete units of "features". The process guarantees a "compatibility promise" that the source code of existing programs written for an old language version can be automatically migrated to a new language version. Because the language evolves towards a standardized set of features, the langauge should avoid fragmentation.
 
 A feature is a distinct chunk of compiler functionality, such as a change to the semantics of the language, a compiler plugin, or an external tool integration. A feature can be alpha, beta, or stable.
 
@@ -443,3 +315,29 @@ Moving a feature from alpha to beta should have a PR with documentation links an
 * change the feature list to set the feature's status to beta released on the current date. This enables old code warnings, automigration, and compiler bootstrap workarounds.
 * implement automigration code if not already present
 * remove all uses of the feature toggle in the code by modifying to the case where the feature is present (avoiding toggle debt).
+
+Incremental compilation
+=======================
+
+Incremental compilation reduces rebuild time. With a good incremental build system, optimizations can be rechecked rather than rediscovered, so that the program
+
+Hot reloading
+=============
+
+Hot reloading or "edit and continue" is the ability to change code and resources of a live application without restarting it. It speeds up the edit-test cycle because you can stay on a certain state of the program without needing to spend time to recreate it. It can be useful for games, UI design, or data analysis.
+
+Edit and continue is really a debugger feature, because usually you edit the code while paused on a breakpoint, rather than while the program is actually running. Integrating with omniscient debugging is probably best, so you can manually select an old state and then evolve it using the new transition rules. For example when editing the jump height for a jump'n'run game, you probably don't want to continue from the game's start, or even the first jump input, but rather to just before the one tricky jump in the middle of the level. There is no indication of this magic location in the code or program state besides the player's x-coordinate being a certain value.
+
+Erlang has hot code swapping, Smalltalks and Lisps have "live programming." Assisting System Evolution: A Smalltalk Retrospective is a recommended read.
+
+The most basic implementation is to patch functions calls so they call a new function instead of an old one. A JIT already does this kind of patching when switching from interpreted to optimized code, so can do it easily. With ahead-of-time you can compile a new DLL, duplicate it to avoid locking, load it, and swap out the function pointer, but it requires specially marking the hot-reloadable methods.
+
+Functions generally assume a fixed set of types and a fixed memory representation for all types. Changing the types or their representation can break program invariants and cause memory corruption. But it is possible - there are some projects for live kernel patching that can patch in-memory data structures to the correct format.
+
+State is also an issue because the memory manager must be aware of the local state of a piece that reloaded and avoid leaking memory. In the case of handles such as an OpenGL context the desirable behavior is to transfer them over to the new code, but if the initialization code is changed then the handle should instead be closed and re-initialized. So we see some sort of incremental program execution going on.
+
+
+Literal VM
+==========
+
+A virtual machine (VM) is a big while-switch-loop that reading opcodes and executes them. VMs are slow, because they’re interpreted - executing an opcode takes many machine code instructions. A literal VM is a VM where each opcode represents one machine code instruction. Because of this 1-1 mapping, functions can be easily JITed to machine code with little overhead. You might alternately call it an "assembler" because it takes an "assembly" language and generates machine code, but LLVM started using the term VM a long time ago. Also, unlike most traditional assemblers, a literal VM allows dynamic loading of new code, interpreting code and running it at a REPL, and introspection such as listing constants and functions from imports. It makes learning assembly pretty fun.
