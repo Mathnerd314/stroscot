@@ -1,0 +1,142 @@
+type A + B = Block { prefix : A, main : B }
+
+lookup x (Block {prefix,main})
+  | x in main = lookup x main
+  | otherwise = lookup x prefix
+
+qualified_lookup x ty (Block {prefix,main})
+  | main : ty = lookup x main
+  | otherwise = lookup x prefix
+
+// Lifting operators
+
+flip (.) fst : (a -> x) -> (a+b) -> x
+flip (.) snd : (b -> x) -> (a+b) -> x
+(***) = \f g -> over _1 f . over _2 g : (a -> a') -> (b -> b') -> (a+b) -> (a'+b')
+_1 : Lens (a+b) (a'+b) a a'
+  view _1 = fst : (a+b) -> a
+  set _1 : a' -> (a+b) -> (a'+b)
+  over _1 = first : (a -> a') -> (a+b) -> (a'+b)
+_2 : Lens (a+b) (a+b') b b'
+  view _2 = snd :: (a+b) -> b
+  set _2 :: b' -> (a+b) -> (a+b')
+  over _2 = second : (b -> b') -> (a+b) -> (a+b')
+
+// Now the Simula example, section 7 in :cite:`dahlClassSubclassDeclarations1967`
+
+type linkage = Record { suc, pred : ref linkage }
+type link = linkage
+type list = linkage
+
+// remove a link
+out (l : link) | l.suc != None =
+  l.pred.suc := l.suc
+  l.suc.pred := l.pred
+  l.suc := l.pred := None
+
+// add a link to the beginning of the list
+in (l : link) (L : list) =
+  if l.suc != none
+    out l
+  l.suc := L
+  l.pred := L.pred
+  l.suc.pred := l.pred.suc := l
+
+// then your standard OO-style objects/records
+
+type vehicle = Record { license_number : integer, weight : real }
+type truck = vehicle + Record { load : ref list }
+type bus = vehicle + Record { capacity : integer }
+type bridge = Record { load : real }
+
+// then the goal - gluing these together
+
+type truck_link = link + truck
+type bus_link = link + bus
+type bridge_list = list + bridge
+
+// Virtual methods and convenience function for creating objects
+
+extends : (self -> super -> thislvl -> thislvl) -> (self -> super) -> self -> (super + thislvl)
+extends f rattrs self =
+  super = rattrs self
+  thislvl = f self super thislvl
+  return (Block { prefix = super, main = thislvl })
+
+mkObject xs = fix (foldr extends (const {}) xs)
+
+// Type for mkObject
+
+catTy = foldl (+) {}
+
+mkList self [] = []
+mkList self (t:ts) = (self -> catTy ts -> t -> t) : mkList ts
+
+mkObject : forall (ts : [Type]). mkList (catTy ts) ts -> catTy ts
+
+// mkObject example
+
+mkObject ts : self where
+  ts =
+    [subClassConst : self -> (({} + ft) + gt) -> ht -> ht
+    ,middleClassConstr : self -> ({} + ft) -> gt -> gt
+    ,superClassConstr : self -> {} -> ft -> ft
+    ]
+  self = ((({} + ft) + gt) + ht)
+
+
+// Virtual methods via single dispatch masquerading as multiple dispatch
+
+postfix or_subclass
+type T or_subclass = T | for_some S. (T+S) or_subclass
+
+type P = P { p1 : T_P1, p2 : T_P2, ... }
+
+prio obj {
+  method1 (self : P or_subclass) = \x1 x2 -> ...
+  method2 (self : P or_subclass) = \x1 -> ...
+}
+
+type C = P + C { c1 : T_C1, c2 : T_C2, ... }
+
+prio obj {
+  method1 (self : C or_subclass) = \x1 x2 -> ...
+  method2 (self : C or_subclass) = \x1 -> ...
+}
+
+// ColorPoint example with true multiple dispatch
+
+
+type Point = Point { x : float }
+
+prio obj
+equal (p1 : Point or_subclass) (p2 : Point or_subclass) = p1.x == p2.x
+
+type ColorPoint = Point + (ColorPoint { color : Color })
+
+prio obj {
+  equal (p1 : ColorPoint or_subclass) (p2 : ColorPoint or_subclass) = p1.x == p2.x && p1.color == p2.color
+  equal (p1 : ColorPoint or_subclass) (p2 : Point or_subclass) = false
+  equal (p1 : Point or_subclass) (p2 : ColorPoint or_subclass) = false
+}
+
+// Multiple inheritance
+
+As *+ B = Block { prefixes : As, main : B }
+
+lookup x (Block {prefixes,main})
+  | x in main = lookup x main
+  | otherwise = merge $ map (lookup x) prefixes
+
+merge v v = v
+merge v1 v2 | path v1 isPrefixOf path v2 = v2
+merge _ _ = error
+
+qualified_lookup x path (Block {prefixes,main})
+  | [] <- path = lookup x main
+  | [Superclass n,..path2] <- path = qualified_lookup x path2 (prefixes !! n)
+
+extends_n f rattrs_n self =
+  supers = map (\rattrs_i -> rattrs_i self) rattrs_n
+  thislvl = f self supers thislvl
+  return (Block { prefixes = supers, main = thislvl})

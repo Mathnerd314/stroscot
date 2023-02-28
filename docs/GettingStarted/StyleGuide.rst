@@ -11,7 +11,7 @@ Naming Guidelines
 * Module names should be lower_with_under (snake case), like Python.
 * Function, constant, and variable names should be snake_case (all lowercase), like Julia, or camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.
 * If an argument is unused use the wildcard pattern ``_`` or (less preferred) a name starting with ``_``
-* Whole words are preferred. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don't use abbreviations because they tend to be inconsistent and too terse; use a text editor with autocomplete.
+* Use whole words unless you have a good reason. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don't use abbreviations, because they tend to be inconsistent and too terse; use a text editor with autocomplete.
 * Multi-word names are allowed, but consider whether the binding might be decomposable into separate values.
 * Bang convention: Append ``!`` to names of functions that modify their arguments. Not too sure about this, the ``Ref`` type that marks a value as allowing modification may be enough indication.
 
@@ -144,6 +144,11 @@ Scoping
 * The main application or library module should be in in the root or ``src/`` directory.
 * The imports should be in three groups, separated by a blank line: standard library, third-party libraries, project modules. Within each group the modules should be listed alphabetically.
 
+Structuring
+===========
+
+* Only create an intermediate variable if it has a meaningful name. But if an expression has a meaningful name, then put it in a variable.
+* Refactor a case list with 15 or more cases to use a table or loop. `10 percentage cases <https://github.com/MinBZK/woo-besluit-broncode-digid-app/blob/master/Source/DigiD.iOS/Services/NFCService.cs#L182>`__ is pushing it but probably OK, but 100 Fizzbuzz cases written out is definitely a maintenance burden.
 
 Sources
 =======

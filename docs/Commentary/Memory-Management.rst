@@ -1,7 +1,45 @@
 Memory management
 #################
 
+Unsafe
+======
+
+Rust locks all its memory APIs behind the "unsafe" keyword, as if using the underlying computer hardware is inherently unsafe. It's only certain tasks that are unsafe. And with the proper API for low-level systems programming, those tasks can be statically checked. These sorts of memory APIs are necessary for writing your own operating system or memory allocator. "unsafe" is an anti-pattern - either a feature is useful or it isn't, and if it isn't useful then don't provide it. Nanny-state "yes I really want to do this" prompts are just a waste of everyone's time.
+
+Location vs allocation
+======================
+
+Memory management is usually presented as two operations, allocation and deallocation/freeing. But really there is a whole page-level memory API, managed by the OS, 
+
+
+the costs of these operations is hard to measure. All allocation and freeing do is update metadata, so depending on the metadata model an operation may be unexpectedly cheap or expensive. Usually there is a buffering effect, so for example a scratch buffer page with many objects can be allocated/freed in around the same amount of time as a single object. Similarly it is slightly faster to call ``close_range`` to close several open FD's than to iterate over them individually in user space. Also, to improve this metadata buffering effect, allocations can be pushed forward, and frees can be delayed, as long as there is sufficient memory or resource capacity available.
+
+An alternative model removes ``free`` as a user-visible operation. Instead, allocation scans a list of blocks, and "magically" knows if each block is never going to be used again, and hence can be freed and made available for allocation. In special cases, such as fixed memory usage and fixed address assignments, allocation can be hard coded and zero cost memory allocation overall can actually be achieved. In many practical applications, however, variable allocations will need to be tracked, and determining if an allocation will no longer be used can take a fair amount of computation.
+
+The alternative model allows optimizing the common case of re-using already-allocated memory for another purpose - the memory is simply returned. Similarly with the ``dup2`` syscall, file descriptor numbers can be reused. In contrast the malloc/free requires an explicit free call, and hence two traversals of the allocation list. In the case where resources may be scarce, such as file descriptors, the OS-level free call is delayed to the next allocation. Generally a program allocates frequently so this will not be too long - the only way this could cause problems is if another program needs to allocate a million FDs in the short span of time.
+
+
 Values take up memory, so memory management needs special handling so it is automatic and fast. But underneath it is just resource management, so all of it translates into allocations and deallocations.
+
+
+There are many places to store a value, but storing every in the cloud or hard drives is too slow for an executing program. The issue is cache locality. Examples:
+
+
+Memory errors
+=============
+
+Per Wikipedia there are a few types of memory errors:
+
+* Memory leak: now-unused memory is not freed
+* Use-after-free: attempt to use freed memory
+* Double free: attempt to free freed memory
+
+Inspired by ASAP, we can solve all these errors by inserting frees automatically. In particular, as defined in the semantics of finalizers, we insert a free for a piece of memory promptly after the last access. This avoids all the above errors. Such an analysis is more precise than traditional GC, because GC looks at what references are "in scope" and cannot free an unused subpart of a structure. But semantics-wise, memory management is a static, completely solvable problem. It is just of a high complexity :math:`\Sigma^0_1`. So if we are willing to accept potentially long compile times, we can eliminate memory errors.
+
+There are also "space leaks" where memory could be freed earlier by evaluating expressions in a specific order but some other order is chosen. Certainly there is some evaluation order that results in minimum RAM usage, but maybe a less compact order is more time-efficient. So there is some amount of time-space tradeoff for this category.
+
+
+
 
 The path from cloud to CPU is long, so there is a lot of caching in between. Some latency numbers and the programming API:
 
@@ -17,23 +55,9 @@ The path from cloud to CPU is long, so there is a lot of caching in between. Som
 
 Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application. The memory management system combines all of these into a single "storage" abstraction and moves data between locations as appropriate.
 
-Unsafe
-======
-
-Rust locks all its memory APIs behind the "unsafe" keyword, as if using the underlying computer hardware is inherently unsafe. It's only certain tasks that are unsafe. And with the proper API for low-level systems programming, those tasks can be statically checked. These sorts of memory APIs are necessary for writing your own operating system or memory allocator. "unsafe" is an anti-pattern - either a feature is useful or it isn't, and if it isn't useful then don't provide it. Nanny-state "yes I really want to do this" prompts are just a waste of everyone's time.
-
-Memory errors
-=============
-
-Unfreed memory, use-after-free, and double free can all be statically checked, so are basically a solved problem. Hence Stroscot frees automatically, in particular immediately after the last access.
-
-Wikipedia says a memory leak occurs when memory which is no longer needed is not released. Stroscot's analysis is more precise than traditional GC, so assuming Stroscot's definition of "needed" is accurate, Stroscot's analysis eliminates memory leaks. But it's up to dead code elimination to decide that since the result is discarded the data access can be ignored and hence the memory is not "needed", so there are still corner cases.
-
-There's also "space leaks" where memory could be freed by evaluating a computation earlier. In general this has no solution besides profiling and refactoring the program or buying more RAM.
 
 
 
-The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
 * A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)
@@ -536,3 +560,18 @@ memory access optimizations: (unconditionally safe only for unshared RAM, but ma
 - Dead Store Elimination (per :cite:`yangDeadStoreElimination2017` need to have "secret variables" that can be cleared using "scrubbing stores" that don't get DSE'd)
 - turning loads and stores into a memcpy call
 - introducing loads and stores along a codepath where they would not otherwise exist
+
+Counting Immutable Beans: Reference Counting Optimized for Purely Functional Programming
+https://arxiv.org/abs/1908.05647
+Perceus: Garbage Free Reference Counting with Reuse
+https://www.microsoft.com/en-us/research/uploads/prod/2020/11/perceus-tr-v1.pdf
+Perceus was inspired by the Counting Immutable Beans paper.
+Both system uses reference counting with static analysis to find reusable memory cells.
+Perceus algorithm is used in the Koka language https://github.com/koka-lang/koka
+ASAP (As Static As Possible) is a compile-time automatic memory management system using whole program analysis.
+https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf
+Micro-mitten: ASAP implementation for a simple Rust like language. Some promising results but his implementation was quite flawed so overall results were negative.
+https://github.com/doctorn/micro-mitten
+ASAP is not ready for production use, it needs more research.
+But it fills a hole in the memory management design space.
+

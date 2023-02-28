@@ -176,7 +176,7 @@ ________
 
 ::
 
-  x = mut [0,0]
+  x = variable [0,0]
   x := [1,2]
   read x # [1,2]
 
@@ -187,6 +187,19 @@ ________
 A variable is a thread-local reference that can store arbitrary packable values. Thread local means that reading/writing from a different thread than the owning thread returns an error. You can get/set the owner with ``getOwner/setOwner``. Initially the thread that allocates the variable owns it.
 
 Reading elides the copy if the reference is dead after the read, otherwise copies.
+
+Stroscot does not allow uninitialized variables, but the semantics of a variable whose value is an exception are a bit like uninitialized variables in other languages. We can make this even stronger by having a special ``Uninitialized`` exception. Usage:
+
+::
+
+  x = variable Uninitialized
+  1 + read x # exception: x is Uninitialized
+  x := 2
+  1 + read x # 2
+  x := Uninitialized
+  1 + read x # exception again
+
+``x = variable Uninitialized`` is a bit longer than a simple ``var x``, but clearer, and if you want it shorter you can define macros so that ``var x`` and ``vars [x,y,z]`` are valid syntax.
 
 Shared memory
 _____________

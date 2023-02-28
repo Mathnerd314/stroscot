@@ -1,38 +1,36 @@
 Checklist
 #########
 
-This page goes through the `programming language checklist <https://www.mcmillen.dev/language_checklist.html>`__ and discusses things not discussed elsewhere.
+This page goes through programming paradigms, principles of language design, and discusses a selection of other programming languages.
 
 Paradigms
 =========
 
-The checklist has a few paradigms: functional, imperative, object-oriented, procedural, stack-based, "multi-paradigm". In linguistics, a paradigm is "a set of linguistic items that form mutually exclusive choices in particular syntactic roles," specifically "a table of all the inflected forms of a particular verb, noun, or adjective." This seems to be a usable definition of a PL paradigm - you have all related versions of a semantic entity.
+The programming languages checklist has a few paradigms: functional, imperative, object-oriented, procedural, stack-based, "multi-paradigm". In linguistics, a paradigm is "a set of linguistic items that form mutually exclusive choices in particular syntactic roles," specifically "a table of all the inflected forms of a particular verb, noun, or adjective." This seems to be a usable definition of a PL paradigm - you have all related versions of a semantic entity.
 
-Unfortunately people seem to use paradigms as labels of entire languages, rather than classifications of their features. Stroscot, like every other language, is "multi-paradigm" - even assembly is multi-paradigm since it is imperative (syscalls) and structured (conditional jump). So the adjectives "object-oriented", "functional", etc. are best avoided in favor of discussing whether a language has specific semantic constructs, since "functional object-oriented language" sounds weird. Still, it's good to have a map of which paradigms embed into which other paradigms. This list is based on Wikipedia's list of paradigms:
+Unfortunately people seem to use paradigms as labels of entire languages, rather than to refer to individual syntactic features. Stroscot, like every other language, is "multi-paradigm" - even assembly is multi-paradigm since it is imperative (syscalls) and structured (conditional jump). So the adjectives "object-oriented", "functional", etc. are avoided outside of this page in favor of the specific semantic constructs, since "functional object-oriented language" sounds weird. Still, it's good to have a map from paradigms to constructs, and to know which constructs embed into which other constructs. This list is based on Wikipedia's `list of paradigms <https://en.wikipedia.org/w/index.php?title=Template:Programming_paradigms&oldid=1114006717>`__:
 
 * Action: `action descriptions <https://en.wikipedia.org/wiki/Action_language>`__ are given by the state trajectory relation
 * Array-oriented functions are still functions
 * Automata-based:
 
-  * Nondeterministic automata are given by the transition relation
-  * Deterministic automata are given by the transition function
+  * Nondeterministic automata are given by a transition relation.
+  * Deterministic automata are given by a transition relation that is a function.
 
-* concurrency operations decompose into OS calls which are I/O operations
+* concurrency - concurrent programs are given as imperative programs that use concurrent operations
 
-  * agents/actors/flow-based processes are threads with a dispatch loop
+  * agents/actors/flow-based processes are threads with a main dispatch loop
 
 * data-driven programming is a main loop over condition-action pairs
 * declarative is a logical relation or a function
 
-  * functional
+  * functional - functions are total functional binary relations
 
     * lambas are anonymous functions
-    * functions are total functional binary relations
 
-  * logic
+  * logic - a logical relation is a set of tuples
 
-    * a relation is a set of tuples
-    * boolean operations are logical constraints
+    * boolean operations are logical constraints, i.e. relations over a certain domain
 
   * constraint: constraints are 0-1 loss functions in an optimization problem
   * dataflow is a block in single static assignment form
@@ -41,13 +39,12 @@ Unfortunately people seem to use paradigms as labels of entire languages, rather
 
 * differentiable: the `derivative <https://en.wikipedia.org/wiki/Fr%C3%A9chet_derivative>`__ is a function mapping a function :math:`f` to a linear operator :math:`A` such that :math:`\lim _{\|h\|\to 0}{\frac {\|f(x+h)-f(x)-Ah\|}{\|h\|}}=0`.
 * dynamic: eval is a function from strings to values (and optionally with an environment)
-
 * event driven: an ED program is some event handler functions, data binding event handlers to events, and a main loop function (provided by a library) that repeatedly checks for events and calls the matching event handler
-* generic functions are just functions
+* generic functions are just functions over a large domain
 * imperative programing:
 
   * commands can be represented as a tag (payload) plus a callback function returning another command
-  * mutable variables are using read and write functions on an implicitly passed/returned store.
+  * mutable variables are using read and modify functions on an implicitly passed/returned store.
   * procedures are functions from arguments to commands
 
 * Metaprogramming:
@@ -78,7 +75,7 @@ Unfortunately people seem to use paradigms as labels of entire languages, rather
 * Symbolic: an AST is a value
 * Value-level: types are sets
 
-In addition there are some other paradigms:
+In addition I've found some other paradigms too obscure for the WP list:
 
 * term rewriting systems are given by the rewriting relation
 * optimization problems are relations based on on objective functions
@@ -148,30 +145,33 @@ Graph of paradigms
     optimization -> function
   }
 
-Graphviz has chosen "function" as the root paradigm. This agrees well with experience. Quoting `Spivak <https://www.google.com/books/edition/Calculus/7JKVu_9InRUC?hl=en&gbpv=1&bsq=central%20objects>`__, "the most important concept in all of mathematics is that of a function - in almost every branch of modern mathematics functions turn out to be the central objects of investigation." Looking closer, function is part of an SCC ``function, relation, set, boolean, constraint, optimization``. Although lambdas naturally express functions, the mathematical notion of function is broader than just lambdas, and can be specified as a logical relation using a predicate. So we need constraint logic programming as well to get the full notion of "function". Hence the ultimate paradigm is functional logic programming.
+Graphviz has chosen "function" as the central paradigm. This agrees well with experience. Quoting `Spivak <https://www.google.com/books/edition/Calculus/7JKVu_9InRUC?hl=en&gbpv=1&bsq=central%20objects>`__, "the most important concept in all of mathematics is that of a function - in almost every branch of modern mathematics functions turn out to be the central objects of investigation." Looking closer, function is part of an SCC ``function, relation, set, boolean, constraint, optimization``. Although lambdas provide a natural way to express many functions, the mathematical notion of function is broader than just lambdas - some mathematically definable functions have no efficient/constructive algorithm and are instead specified as a logical relation or optimization predicate. So we need constraint logic programming as well to get the full notion of "function". Hence the ultimate paradigm is functional logic programming. Thus, Stroscot is at its core designed to be a functional logic programming language, but with support for many other programming paradigms implemented via the embeddings described above.
 
 Principles
 ==========
 
-Paradigms are vague and only express common patterns or features; they cannot be used to determine the specific design of those features. So instead we have principles.
+Paradigms are vague and only express common patterns or features; they cannot be used to determine the specific design of those features. So instead we have principles. What are these principles actually useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons and these general principles are hard to apply.
 
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
 * Make the irreducible basic elements as simple and as few as possible without having to surrender the adequate representation of a single datum of experience. (Albert Einstein)
 * Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (`Branch and bound <https://en.wikipedia.org/wiki/Branch_and_bound>`__)
 * Never finished, never complete, but tracking the progress of technology (Lennart Poettering)
-* Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)
+* Design to do the hard things every day. Take all the common daily tasks considered to be painful and hard, and figure out a design that will allow each task to be accomplished efficiently in a few seconds of actual work. It is unacceptable to require detailed pre-planning or coordination for each task. The biggest overheads should be testing the result and writing documentation. (Linus on `why Git works so well <https://web.archive.org/web/20170920135205/https://www.linuxfoundation.org/blog/10-years-of-git-an-interview-with-git-creator-linus-torvalds/>`__)
 * As size and complexity increase, architectural design dominates materials. Create durable, non-leaky, beautiful interfaces. (`VPRI <http://www.vpri.org/pdf/tr2011004_steps11.pdf>`__, `John Regehr <https://blog.regehr.org/archives/666>`__)
 * If it isn't documented, it doesn't exist (Coding Horror). Corollary: There is no undefined behavior, only undocumented behavior.
 * Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)
 * People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)
 * Better depends on your goodness metric (`Jim Waldo <http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807>`__)
 * The shorter the [edit-test] cycle, the happier the programmer. (`Yue Yao <https://tripack45.github.io/2018/11/03/edit-compile-run/>`__)
+
+  Per `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__, the cycle time can be broken down into 70% Understanding Code, 25% Modifying Existing Code, 5% Writing New Code. In particular we estimate that there is 14x as much read time as write time. But this estimate is probably only appropriate for application code - the true average varies depending on scenario. Per APL, if a language is quick to program in, it may be faster to write small programs from scratch than to read and understand another person's program. So the 70/25/5 may turn into something more like 50/20/30 in a scripting context, only a 1.6x read-write factor. On the other hand, common library functions may be read many times but only modified or added rarely, giving read/write factors of 100x, 1000x, or more.
+
 * Do all things without grumbling or complaining (Philippians 2:14)
 * Secure by default: The default level of access should have the least privilege and the most number of checks. (OpenBSD)
 * Organize functions by functionality into expressive components. (`Uli Weltersbach <https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/>`__)
-* When an interface has multiple possibilities, and other principles conflict or are ambiguous, the behavior should be that which will least surprise most new users. In particular the behavior is not necessarily the behavior that would be the most easily implemented. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
+* When an interface has multiple possibilities, and other principles conflict or are ambiguous, the behavior should be that which will least surprise most new novice users. In particular the behavior is not necessarily the behavior that would be the most easily implemented. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
 
-What are these principles useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons.
+  This principle varies from the original in specifically defining a target audience (new novice users). Targeting other audiences such as existing programmers would make the language highly dependent upon the whims of culture, and create a vicious circle of learning ("To understand recursion, you must first understand recursion"). For contrast, per Matsumoto's `interview <https://www.artima.com/articles/the-philosophy-of-ruby>`__, Ruby was designed for *his* least surprise. That means that, in order to feel comfortable with Ruby, one must learn all of Ruby, program a few large programs in Ruby, and then constantly re-read the Ruby manual to refresh what has been forgotten. And even then you are not Matsumoto so there may be something that surprises you. Focusing on novices means that all an expert has to do is "think like an idiot" and the solution will be at hand. The expectations of novices are essentially constant over time, because they depend on human psychology rather than experience. This principle is essentially the approach taken in designing the Quorum programming language. Every person goes through a short "what is this feature" phase, which novice-friendly syntax will make straightforward, followed by a much longer cycle of routine reading and writing for which the syntax makes no difference.
 
 Non-principles
 --------------
@@ -220,9 +220,7 @@ There is another sense of familiarity though in the sense of creating a "brand" 
 Readability
 ~~~~~~~~~~~
 
-Using the literal definition, "ease of understanding code", readability is included as part of the edit-test cycle time principle: per `here <https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx>`__, the cycle time can be broken down into 70% Understanding Code, 25% Modifying Existing Code, 5% Writing New Code. It is worth noting that this breakdown is probably domain-specific though - per APL, if a language is quick to program in, it may be faster to write small programs from scratch than to read and understand another person's program. So the 70/25/5 may turn into something more like 50/20/30 in a scripting context.
-
-Cycle time has the benefit of being a lot more empirical. Most articles that discuss readability go on to describe "readable code", defined by various properties:
+Using the literal definition, "ease of understanding code", readability is included as part of the edit-test cycle time principle. Cycle time has the benefit of being a lot more empirical. Most articles that discuss readability go on to describe "readable code", defined by various properties:
 
 * Meaningful variable and function names ("self-commenting")
 * Consistent identifier style, indentation, and spacing
@@ -328,7 +326,7 @@ Standardization doesn't seem necessary, a popular language builds its own standa
 Criticisms
 ==========
 
-These criticisms from the checklist seem valid.
+These criticisms from the `programming language checklist <https://www.mcmillen.dev/language_checklist.html>`__ seem valid.
 
 * Stroscot lacks reflection.
 * Stroscot relies on an optimization which has never been shown possible
@@ -339,12 +337,25 @@ These criticisms from the checklist seem valid.
 Other programming languages
 ===========================
 
-There are many existing programming languages to learn from. All of them have had effort put into their design so their features should be considered. But the disadvantages to a feature are not obvious and generally can only be found by examining complexities in large software projects in the language. The trick is to isolate the use case and cut the Gordian knot in a surgical manner.
+There are many existing programming languages to learn from. All of them have had effort put into their design so their features should be considered. Unfortunately there is not enough time to learn every language in depth and use it for 10 years to get an idea of its strengths and weaknesses, so we must rely on reports of other users on the web. Also even searching on the web for detailed reports of complexities encountered in large software projects is quite time-consuming, so we mainly examine popular languages.
 
-Since we aim to be a popular language we list the languages in `TIOBE index <https://www.tiobe.com/tiobe-index/>`__ order (as of December 2022), so that trends in features vs popularity can be discerned.
+Since we aim to be a popular language, we list the languages in order of popularity, so that more attention is focused on the earlier languages. There are several indexes with different measures of popularity (as of January 2023):
 
-Top 50
-------
+* `TIOBE <https://www.tiobe.com/tiobe-index/>`__ measures the quantity of search engine hits for "X programming"
+* `PYPL <http://pypl.github.io/PYPL.html>`__ measures how often language tutorials are Googled.
+* `Github Collection <https://github.com/collections/programming-languages>`__ measures stars and forks of implementation
+* `GitHut 2.0 <https://madnight.github.io/githut/>` measures GitHub PRs, stars, forks, issues of language-detected repos
+* `Languish <https://tjpalmer.github.io/languish/>`__ measures Github and Stackoverflow metrics
+* `Github Octoverse <https://octoverse.github.com/2022/top-programming-languages>`__ measures amount of Github code written
+* `RedMonk <https://redmonk.com/sogrady/2022/10/20/language-rankings-6-22/>`__ measures Github repositories and StackOverflow questions
+* StackOverflow survey measures
+* `IEEE Spectrum <https://spectrum.ieee.org/top-programming-languages-2022>`__ ranks 57 languages by 9 different measurements
+* Google Trends
+
+Out of these the PYPL index is probably most suited for designing a new language, because the tutorial measurement approximates the new PLs with features that programmers want. But it only has 28 languages - the TIOBE index is more complete with 50 languages ranked and 50 more languages listed. We also want to check that the top 20 PLs from the other rankings are also included.
+
+PyPL index (top 28)
+-------------------
 
 1. Python
 
@@ -358,24 +369,7 @@ Top 50
 * unintuitive "double underscore"/"dunder" method names like ``__getitem__`` and ``__str__``, C++'s ``operator[]`` and Java's ``toString`` are clearer
 * paradigm: impure functional
 
-2. C
-
-* most portable/widespread language. runs on just about every piece of silicon (although some require specialized compilers)
-* language of most OS's, hence used for FFI stuff
-* statically compiled, compilers are very efficient.
-* unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these with great difficulty. Also there is the Boehm GC, used by many people who don't want to deal with memory management.
-* header files slow down compilation as they have to be read many times during compilation
-* paradigm: imperative
-
-3. C++
-
-* many features, which interact in messy/complex ways making C++ take a long time to learn
-* fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)
-* templates, efficient at runtime but slow at compile time
-* memory unsafe like C, although smart pointers and RAII make this a little better.
-* paradigm: imperative
-
-4. Java
+2. Java
 
 * Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top
 * Compromises between performance and expressiveness such as covariant arrays
@@ -391,23 +385,194 @@ Top 50
 * Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, around 15% overhead on wall clock time. :cite:`caiDistillingRealCost2022`
 * paradigm: OO
 
-5. C#
+3. JavaScript
+
+* second-best JIT after Java, optimized for startup time - fast bytecode interpreters
+* many strange features such as implicit type conversion, ``with`` statement, and ``eval``
+* paradigm: impure functional
+
+4. C#
 
 * best designed C-style syntax - e.g. introduced async/await
 * wide usage - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)
 * paradigm: OO
 
-6. Visual Basic
+5. C
+
+* most portable/widespread language. runs on just about every piece of silicon (although some require specialized compilers)
+* language of most OS's, hence used for FFI stuff
+* statically compiled, compilers are very efficient.
+* unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these with great difficulty. Also there is the Boehm GC, used by many people who don't want to deal with memory management.
+* header files slow down compilation as they have to be read many times during compilation
+* paradigm: imperative
+
+5. C++
+
+* many features, which interact in messy/complex ways making C++ take a long time to learn
+* fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)
+* templates, efficient at runtime but slow at compile time
+* memory unsafe like C, although smart pointers and RAII make this a little better.
+* paradigm: imperative
+
+6. PHP
+
+* Initial design was hacked together quickly, inconsistent API design. Could be fixed but backwards compatibility was held to be more important.
+* Like JS, several features with huge security or performance impact: eval, weak typing
+* paradigm: imperative
+
+7. R
+
+* numerous libraries for statistics and data analysis
+* lazy evaluation
+* paradigm: functional
+
+8. TypeScript
+
+* `near superset <https://stackoverflow.com/questions/29918324/is-typescript-really-a-superset-of-javascript>`__ of JavaScript with an unsound type system
+* doesn't really add anything besides the types, so only useful for ideas on gradual typing. Also the type inference is not too good.
+* paradigm: OO
+
+9. Swift
+
+* Automatic reference counting, interesting but not something I want to copy
+* syntax for exception handling, if let/guard let
+* `exponentially slow <https://www.cocoawithlove.com/blog/2016/07/12/type-checker-issues.html>`__ type inference for numeric expressions, with bad heuristics
+* paradigm: OO
+
+10. Objective C
+
+* deprecated by Apple in favor of Swift, but good to compare against C++
+* paradigm: OO
+
+11. Go
+
+* opinionated design, touts meaningless features such as "strong typing"
+* goroutines, killer feature - but stackless continuations are better
+* finally added generics after a long time
+* supposedly a Python replacement, but TensorFlow is mainly in Python and the Go binding `isn't officially supported <https://github.com/tensorflow/build/tree/master/golang_install_guide>`__
+* paradigm: actor model
+
+12. Rust
+
+* good standard library design and documentation, probably worth copying
+* voted "most loved" by StackOverflow
+* ownership model/borrow checker has been found difficult to use by several studies :cite:``. Also it is incomplete - can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. In practice Rust programmers `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting or GC to ensure memory safety
+* concurrency safe, but async suffers from "borrow checker"-itis and uses atomic reference counting
+* paradigm: imperative
+
+13. Kotlin
+
+* JVM language with features tastefully copied from Groovy and Scala
+* val keyword instead of final, null safety, extension methods, first-class type parameters
+* coroutines
+* mainly getting traction due to Google pushing it for Android
+* paradigm: OO
+
+14. MATLAB
+
+* extensive numerical libraries
+* array syntax confuses people, ``[1 [2 3]]`` is a flat array because ``[A B]`` means concatenate A&B. there is `no literal syntax <https://www.mathworks.com/help/matlab/math/multidimensional-arrays.html>`__ for 3D or higher dimension arrays.
+* paradigm: imperative
+
+15. Ruby
+
+* weird syntax, e.g. expression by itself is return value - causes mistakes. Per Matsumoto `interview <https://www.artima.com/articles/the-philosophy-of-ruby>`__, Ruby was designed for *his* least surprise, and maybe for least surprise after memorizing the language, not for novice programmers or programmers familiar with other languages, so has many idiosyncrasies.
+* complex library, e.g. both find_all and select methods that do the exact same thing
+* Rails is `(still) <https://www.jetbrains.com/lp/devecosystem-2021/ruby/#Ruby_what-web-development-tools-and-or-frameworks-do-you-regularly-use-if-any>`__ the most popular framework. Requires reading the Rails guide to learn things like models having singular class names with capitals and no underscores but db tables with plurals, lower case and underscores. Or how in controllers you just reference params without anything suggesting if params is a variable, method, how its populated, where its scoped, etc. As compared to Django where novices can figure out the basics easily without needing a guide.
+* slow, `YJIT <https://github.com/ruby/ruby/blob/master/doc/yjit/yjit.md>`__ added in 3.1
+* paradigm: OO
+
+16. (also 21) VBA / Visual Basic
 
 * "mentally mutilates" programmers (according to Dijkstra)
 * runs on .NET, so very similar to C# in semantics. There is also "Classic Visual Basic" but the differences are small.
 * paradigm: imperative
 
-7. JavaScript
+17. Ada
 
-* second-best JIT after Java, optimized for startup time - fast bytecode interpreters
-* many strange features such as implicit type conversion, ``with`` statement, and ``eval``
+* Still in use in aviation and DoD applications
+* Considered somewhat legacy, but has many useful features
+* SPARK language is a dialect which extends contract support
+* paradigm: imperative
+
+18. Dart
+
+* targets JS, WASM (in progress), and native ARM/x86 with AOT and JIT, a pretty reasonable set of targets
+* tied to Flutter UI framework, which is mostly for creating mobile apps but also supports desktop and web
+* main advantage is sharing code between client and server
+* sentiment seems to be that Kotlin is about the same language-wise and the JVM is better for enterprise work
+* they have a package manager, but it doesn't support automatic vendoring so there are many version solving conflicts
+* concurrency model is an async-await event loop similar to node plus actor-style "isolates"
+* Google has been funding it, FUD about whether Google will kill it. It is an Ecma `standard <https://dart.dev/guides/language/spec>`__ though, probably will stick around for a decade regardless.
+* paradigm: OO
+
+19. Scala
+
+* Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
+* complex type system: implicit conversions, subtyping
 * paradigm: impure functional
+
+20. Lua
+
+* Use of "tables" for everything is interesting
+* LuaJIT was fast but the main developer left due to lack of income. Stroscot needs to avoid the same fate.
+* paradigm: impure functional
+
+
+22. ABAP (Advanced Business Application Programming)
+
+* proprietary PL developed by SAP in 1983, only available as part of NetWeaver ERP suite.
+* "German COBOL", popular in Eastern Europe / Germany.
+* odd niche language, but with even bigger footprint than COBOL, gradually being phased out with Java/JS/etc.
+* weird combination of BASIC and SQL. built-in SQL syntax.
+* all code is stored in databases, thousands of tables
+* OOP extensions that make everything terrible to maintain
+* good debugger
+* paradigm: procedural/imperative
+
+23. Julia
+
+* good support for concurrency/parallelism
+* C+Fortran+Python FFIs and syntax
+* JIT design goes through LLVM and requires trampolines between functions, performance barrier
+* paradigm: multiple dispatch
+
+24. Groovy
+
+* most "batteries included" JVM language... even has YAML support in the standard library.
+* "kitchen sink" approach to language design, e.g. can declare variable bare, with var, or typed
+* scripting language feel, more dynamic than Kotlin, also older
+* good at DSLs, e.g. SQL DSL, used as Grails/Gradle configuration language
+* starting to decline in popularity, even though it's still active
+* paradigm: OO
+
+25. Haskell
+
+* "finest imperative programming language"
+* small community, few core/maintenance developers (mainly SPJ) compared to size of codebase
+* good in benchmarks and scripting but GC is still not usable in production
+* poor library design, e.g. verbose naming conventions
+* paradigm: pure functional
+
+26. Perl
+
+* A mess with the Raku split
+* Various libraries on CPAN are good
+* Contexts and sigils, terrible syntax for beginners
+* paradigm: impure functional
+
+27. COBOL
+
+* staying far away from this
+* paradigm: imperative
+
+28. Delphi / Object Pascal
+
+* still kicking, but proprietary
+* paradigm: OO
+
+TIOBE Top 22
+------------
 
 8. SQL
 
@@ -424,150 +589,34 @@ Top 50
 * repetitive and tedious, too many side effects, not at all intuitive, full of many inconsistencies
 * paradigm: imperative
 
-10. PHP
-
-* Initial design was hacked together quickly, inconsistent API design. Could be fixed but backwards compatibility was held to be more important.
-* Like JS, several features with huge security or performance impact: eval, weak typing
-* paradigm: imperative
-
-11. R
-
-* numerous libraries for statistics and data analysis
-* lazy evaluation
-* paradigm: functional
-
-12. Go
-
-* opinionated design, touts meaningless features such as "strong typing"
-* goroutines, killer feature - but stackless continuations are better
-* finally added generics after a long time
-* supposedly a Python replacement, but TensorFlow is mainly in Python and the Go binding `isn't officially supported <https://github.com/tensorflow/build/tree/master/golang_install_guide>`__
-* paradigm: actor model
-
-14. MATLAB
-
-* extensive numerical libraries
-* array syntax confuses people, ``[1 [2 3]]`` is a flat array because ``[A B]`` means concatenate A&B. there is `no literal syntax <https://www.mathworks.com/help/matlab/math/multidimensional-arrays.html>`__ for 3D or higher dimension arrays.
-* paradigm: imperative
-
-15. Swift
-
-* Automatic reference counting, interesting but not something I want to copy
-* syntax for exception handling, if let/guard let
-* `exponentially slow <https://www.cocoawithlove.com/blog/2016/07/12/type-checker-issues.html>`__ type inference for numeric expressions, with bad heuristics
-* paradigm: OO
-
-16. Delphi / Object Pascal
-
-* still kicking
-* proprietary, so not worth looking at too closely
-* paradigm: OO
-
-17. Ruby
-
-* weird syntax, e.g. expression by itself is return value - causes mistakes. Per Matsumoto `interview <https://www.artima.com/articles/the-philosophy-of-ruby>`__, Ruby was designed for *his* least surprise, and maybe for least surprise after memorizing the language, not for novice programmers or programmers familiar with other languages, so has many idiosyncrasies.
-* complex library, e.g. both find_all and select methods that do the exact same thing
-* Rails is `(still) <https://www.jetbrains.com/lp/devecosystem-2021/ruby/#Ruby_what-web-development-tools-and-or-frameworks-do-you-regularly-use-if-any>`__ the most popular framework. Requires reading the Rails guide to learn things like models having singular class names with capitals and no underscores but db tables with plurals, lower case and underscores. Or how in controllers you just reference params without anything suggesting if params is a variable, method, how its populated, where its scoped, etc. As compared to Django where novices can figure out the basics easily without needing a guide.
-* slow, `YJIT <https://github.com/ruby/ruby/blob/master/doc/yjit/yjit.md>`__ added in 3.1
-* paradigm: OO
-
-18. Perl
-
-* A mess with the Raku split
-* Various libraries on CPAN are good
-* Contexts and sigils, terrible syntax for beginners
-* paradigm: impure functional
-
-19. Objective C
-
-* deprecated by Apple in favor of Swift, but a good comparison against C++
-* paradigm: OO
-
-20. Rust
-
-* good standard library design and documentation, probably worth copying
-* voted "most loved" by StackOverflow
-* borrow checker, can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. They `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting as a substitute for GC to ensure memory safety
-* concurrency safe, but async suffers from "borrow checker"-itis and uses atomic reference counting
-* paradigm: imperative
-
-21. Scratch
+18. Scratch
 
 * Block-black visual programming language for children
 * Essentially procedural, it has conditionals, loops, and functions
 * paradigm: block-based
 
-22. SAS
+21. SAS
 
 * Another statistics language, less popular than R and proprietary
 * paradigm: data-driven
 
-23. Kotlin
+22. (Visual) FoxPro
 
-* JVM languages with improved features compared to Java
-* val keyword instead of final, null safety, extension methods, first-class type parameters
-* coroutines
-* paradigm: OO
+* commercial language, don't know much about it
+* paradigm: imperative
 
-24. Julia
-
-* good support for concurrency/parallelism
-* C+Fortran+Python FFIs and syntax
-* JIT design goes through LLVM and requires trampolines between functions, performance barrier
-* paradigm: multiple dispatch
-
-25. Lua
-
-* Use of "tables" for everything is interesting
-* LuaJIT was fast but the main developer left due to lack of income. Stroscot needs to avoid the same fate.
-* paradigm: impure functional
-
-26. Fortran
+24. Fortran
 
 * call-by-reference calling convention, avoids copying arrays but hard to program with
 * still used for some numerical code
 * handles floating point exceptions via signals
 * paradigm: imperative
 
-27. COBOL
-
-* staying far away from this
-* paradigm: imperative
-
-28. Lisp
+25. Lisp
 
 * Easily parsable syntax, originator of macros
 * Racket is probably the most popular Lisp now
 * paradigm: functional
-
-29. (Visual) FoxPro
-
-* commercial language, don't know much about it
-* paradigm: imperative
-
-30. Ada
-
-* Still in use in aviation and DoD applications
-* Considered somewhat legacy, but has many useful features
-* SPARK language is a dialect which extends contract support
-* paradigm: imperative
-
-31. Dart
-
-* targets JS, WASM (in progress), and native ARM/x86 with AOT and JIT, a pretty reasonable set of targets
-* tied to Flutter UI framework, which is mostly for creating mobile apps but also supports desktop and web
-* main advantage is sharing code between client and server
-* sentiment seems to be that Kotlin is about the same language-wise and the JVM is better for enterprise work
-* they have a package manager, but it doesn't support automatic vendoring so there are many version solving conflicts
-* concurrency model is actor-style plus async-await event loop, similar to node
-* unclear future, Google has been funding it but they kill projects frequently. It is an Ecma `standard <https://dart.dev/guides/language/spec>`__ though.
-* paradigm: OO
-
-32. Scala
-
-* Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
-* complex type system: implicit conversions, subtyping
-* paradigm: impure functional
 
 33. Prolog
 
@@ -582,7 +631,7 @@ Top 50
 
 35. PL/SQL is a dialect of of SQL
 
-36. Bash
+36. Bash shell
 
 * Common on Unix systems, but I think Python is more useful when you're doing anything complex
 * paradigm: imperative
@@ -591,14 +640,6 @@ Top 50
 
 * Equivalent of Bash on Windows - I don't think there's much inspiring
 * paradigm: imperative
-
-38. Haskell
-
-* "finest imperative programming language"
-* small community, few core/maintenance developers (mainly SPJ) compared to size of codebase
-* good in benchmarks and scripting but GC is still not usable in production
-* poor library design, e.g. verbose naming conventions
-* paradigm: pure functional
 
 39. Logo
 
@@ -609,16 +650,6 @@ Top 50
 * paradigm: block-based
 
 40. Transact-SQL is a dialect of SQL
-
-41. TypeScript
-
-* `near superset <https://stackoverflow.com/questions/29918324/is-typescript-really-a-superset-of-javascript>`__ of JavaScript with an unsound type system
-* doesn't really add anything besides the types, so only useful for ideas on gradual typing. Also the type inference is not too good.
-* paradigm: OO
-
-42. ABAP (Advanced Business Application Programming)
-
-* paradigm: imperative
 
 43. F#
 
@@ -647,10 +678,6 @@ Top 50
 * Pretty nice GUI approach to programming
 * Lots of wires, and if you get a complicated enough program the auto wire layout command gives up
 * paradigm: dataflow
-
-49. Groovy
-
-* paradigm: OO
 
 50. ML
 

@@ -2,89 +2,63 @@ Evaluation strategy
 ###################
 
 
-This page summarizes the arguments for strict vs lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this Stroscot will special-case optimization for C-like programs to give the expected performance.
+This page summarizes the arguments for different types of evaluation strategies:
 
-Strict vs lazy
-==============
+* strict vs non-strict - whether to allow a function to return a result without fully evaluating its arguments
+* eager vs lazy - whether to make arguments non-strict by default
+* call-by-need vs optimal - if arguments are non-strict, whether to evaluate once per closure or do deeper sharing
 
-Referential transparency
-------------------------
+ lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this Stroscot will special-case optimization for C-like programs to give the expected performance.
 
-Common subexpression elimination "pulls out" a repeated expression by giving it a fresh name and generally improves performance by sharing the result (although it could be a tie with the compiler inlining the expression again if it is really cheap). For instance ``e + e`` is the same as ``(\x -> x + x) e``, but in the second ``e`` is only evaluated once.
-
-In a strict language this transformation can only be performed if the expression is guaranteed to be evaluated. E.g. ``if c then undefined else f`` to ``let e = undefined in if c then e else f``, the second version always evalautes ``e`` and throws ``undefined`` whereas the original could succeed with ``f``. This is a form of speculative execution hazard.
-
-In a lazy language, this can be performed unconditionally because the expression will not be evaluated if it is not used. Similarly adding or removing unused expressions does not change the semantics, ``e`` versus ``let x= y in e``. Nontermination has the semantics of a value.
-
-A win for laziness.
+Strict vs non-strict
+====================
 
 Control constructs
 ------------------
 
-Laziness allows defining if-then-else and short-circuit functions without special handling. E.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` evaluates its arguments first and throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``.
-
-This advantage doesn't extend to ``while``, because the condition and body must be evaluated multiple times. So in general we need `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__, macros, fexprs, monads, etc. to define control constructs.
-
-::
-
-  while condition body =
-    c <- condition
-    if c then
-      body
-      while condition body
-    else return ()
-
-  i = 2
-  while (i > 0) {
-    println(i)
-    i -= 1
-  }
-
-Hence this is only a partial win for laziness.
+Non-strictness allows defining if-then-else and short-circuit functions. So generally non-strictness is required in a language, if you want to avoid giving control constructs special handling. E.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` evaluates its arguments first and throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x`` - Haskell has put non-strictness to good use.
 
 Function composition
 --------------------
 
-Consider the ``any`` function, which scans the list from the head forwards and as soon as an element that fulfills the predicate is found it returns true and stops scanning the list, otherwise returns false. It's quite natural to express the ``any`` function by reusing the ``map`` and ``or`` functions, ``any p = or . map p``. All the functions involved need to be lazy to get the desired semantics, processing the list in constant memory.
+Consider the ``any`` function, which scans the list from the head forwards and as soon as an element that fulfills the predicate is found it returns true and stops scanning the list, otherwise returns false. It's quite natural to express the ``any`` function by reusing the ``map`` and ``or`` functions, ``any p = or . map p``. All the functions involved need to be non-strict to get the desired semantics, processing the list in constant memory.
 
 Unfortunately, it doesn't behave like we would wish in a strict language. The predicate ``p`` will be applied to every element before the ``or`` examines the elements, creating a new fully-evaluated intermediate list the size of the entire list, using lots of memory. To address this we have to expand out ``or``, ``map``, and ``foldr``, producing ``any p = \case { [] -> False; (y:ys) -> y || any p ys }``, invent a new version of foldr that delays the recursive call, or use a streaming abstraction. Either way function reuse becomes much harder.
 
 Similarly there is ``within eps (improve (differentiate h0 f x))`` in :cite:`hughesWhyFunctionalProgramming1989`.
 
-The related deforestation optimization removes all intermediate cons cells from the lazy definition of ``any``, making it as efficient as the expanded strict version. In a strict language deforestation can have the effect of making an undefined program defined, hence is invalid. More careful handling of termination can fix this for strict programs (says a random comment in a blog post).
+The related deforestation optimization removes all intermediate cons cells from the non-strict definition of ``any``, making it as efficient as the expanded strict version. In a strict language deforestation can have the effect of making an undefined program defined, hence is invalid. More careful handling of termination can fix this for strict programs (says a random comment in a blog post).
 
 Win for laziness.
 
 Partial evaluation
 ------------------
 
-``snd (undefined,3)`` only works in a lazy language - ``undefined`` would throw in a strict language. So strict languages must do strictness analysis to discard any code as unneeded.
+``snd (undefined,3)`` only works in a non-strict language - ``undefined`` would throw in a strict language. So strict languages must do strictness analysis to discard any code as unneeded.
 
-:cite:`filinskiDeclarativeContinuationsCategorical1989` says the transformation from ``if e then (1,3) else (2,3)`` to ``(if e then 1 else 2, 3)`` is valid in a strict language, but not in a lazy language, because ``e`` could diverge. The point is that some transformations are valid in a strict language but in a lazy language need a divergence analysis. But this example is rather fragile, e.g. the transformation from ``3`` to ``if e then 3 else 3`` is invalid in strict and lazy, but only if ``e`` can diverge. And as Conal `writes <http://conal.net/blog/posts/lazier-functional-programming-part-2>`__ we can define a laxer pattern match which allows the transformation in all cases, ``ifThenElse c a b = (a glb b) lub (\True -> a) c lub (\False -> b) c``.
+:cite:`filinskiDeclarativeContinuationsCategorical1989` says the transformation from ``if e then (1,3) else (2,3)`` to ``(if e then 1 else 2, 3)`` is valid in a strict language, but not in a non-strict language, because ``e`` could diverge. But this example is rather fragile, e.g. the transformation from ``3`` to ``if e then 3 else 3`` is invalid in strict and lazy, but only if ``e`` can diverge. And as Conal `writes <http://conal.net/blog/posts/lazier-functional-programming-part-2>`__ we can define a laxer pattern match which allows the transformation in all cases, ``ifThenElse c a b = (a glb b) lub (\True -> a) c lub (\False -> b) c``.
 
-Overall, a win for laziness, and an argument for lax pattern match semantics and termination checking.
+Overall, a win for non-strictness, and an argument for lax pattern match semantics and termination checking.
 
 Totality
 --------
 
-In a total language all evaluation strategies give the same result, so referential transparency and function composition hold. But since strict evaluation must work also, totality gives up all the benefits of laziness. Meanwhile the actual evaluation strategy is compiler-specified. In practice, this strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and lazy backends), so this doesn't resolve the question. The number of times an expression is evaluated is still observable via the performance.
+In a total language all evaluation strategies give the same result. But since in particular, strict evaluation must work, totality gives up all the benefits of non-strictness - exceptions and failing conditionals are simply forbidden. Meanwhile the actual evaluation strategy is compiler-specified. In practice, the strategy still has to be decided (e.g. Idris is strict, Agda/Coq have both strict and call-by-need backends), so this doesn't resolve the question. The number of times an expression is evaluated is still observable via the performance.
 
-Arguments in a lazy language are passed as computations, so they can include non-terminating computations, whereas in a strict language arguments are evaluated values. But when we actually use a value it gets evaluated, so these computations resolve themselves. There is no way in a lazy language (barring runtime reflection or exception handling) to observe that an argument is non-termination as opposed to a real value, i.e. to make a function ``f _|_ = 0, f () = 1``. So stating that non-termination or ``undefined`` is a value in lazy languages is wrong. Similarly ``Succ undefined`` is not a value - it is WHNF but not normal form. These are programs (unevaluated expressions) that only come up when we talk about totality.
-
-Conclusion: totality is a compromise that means the worst of strict and lazy, and in practice is a Trojan horse for strictness. Some people have confused the notions of "value" and "argument" in lazy languages. The term "laziness" has a lot of baggage, perhaps it is better to market the language as "normal order".
+Conclusion: totality is a compromise that means the worst of strict and non-strict, and in practice is a Trojan horse for strictness.
 
 Simulation
 ----------
 
-Running lazy code in a strict language, there are three options:
+To emulate non-strict argument passing in a strict language, there are three options:
 
-* unmodified: can lead to non-termination, slowdowns, and space leaks. For example anything with infinite lists will break as it tries to construct the infinite list.
-* call-by-name: To limit infinite evaluation, expressions must be passed as thunks ``\() -> e`` to avoid evaluation. Augustss has called this `"too ugly to even consider" <http://augustss.blogspot.com/2011/05/more-points-for-lazy-evaluation-in.html>`__, but fortunately many languages have introduced special support for wrapping arguments as thunks, such as Swift's lightweight closure syntax ``{e}`` and annotation ``@autoclosure``, and Scala's automatic call-by-name types, ``(\(x : CallByName Int) -> x + x) e``. Passing thunks removes nontermination but can still introduce slowdowns and space leaks as expressions are evaluated multiple times.
-* thunk data type: To fully mimic lazy semantics, a new type ``Thunk a = Var (Evaluated a | Unevaluated (() -> a))`` can be introduced with operations force/delay. Then one does ``(\x -> force x + force x) (delay {e})``. There is a lot of syntactic overhead, but it is a faithful emulation of the lazy implementation.
+* don't modify the code and just see if it works: can lead to non-termination, slowdowns, and space leaks. For example anything with infinite lists will break as it tries to construct the infinite list.
+* call-by-name: Pass expressions as thunks ``\() -> e``. Augustss has called this `"too ugly to even consider" <http://augustss.blogspot.com/2011/05/more-points-for-lazy-evaluation-in.html>`__, but fortunately many languages have introduced special support for wrapping arguments as thunks, such as Swift's lightweight closure syntax ``{e}`` and annotation ``@autoclosure``, and Scala's automatic call-by-name types, ``(\(x : CallByName Int) -> x + x) e``. Passing thunks removes nontermination / infinite evalation loops but can still introduce slowdowns and space leaks as expressions are evaluated multiple times.
+* Thunk data type: To fully mimic call-by-need semantics, a new type ``Thunk a = Var (Evaluated a | Unevaluated (() -> a))`` can be introduced with operations force/delay. Then one does ``(\x -> force x + force x) (delay e)``. There is a lot of syntactic overhead, but it is a faithful emulation.
 
-To write a strict program in a lazy language, ignoring orthogonal aspects such as the handling of side effects, the program can simply be used unmodified. It will have the same semantics in normal conditions and possibly terminate without error in conditions where the strict version would loop infinitely. Slowdown and space leaks are possible issues, though not non-termination. Efficiency can be recovered by adding back strictness.
+Generally, ignoring orthogonal aspects such as the handling of side effects, there is no issue with using non-strict argument passing with a program written with strict semantics in mind; the program can simply be used unmodified. It will have the same semantics in normal conditions and possibly terminate without error in conditions where the strict version would loop infinitely. Slowdown and space leaks are possible issues, though not non-termination. Efficiency can be recovered by compiler optimizations that add back strictness.
 
-Conclusion: Laziness wins in terms of simulation usability (use programs as-is). Performance-wise, practically, both directions of simulation can introduce slowdown and space leaks, although with invasive syntax strict can simulate lazy without overhead.
+Conclusion: Non-strictness wins in terms of simulation usability (use programs as-is). Performance-wise, practically, both directions of simulation can introduce slowdown and space leaks. With invasive syntax and careful design, strict can simulate non-strict without overhead.
 
 Data structures
 ---------------
@@ -167,7 +141,7 @@ Purity
 
 Laziness offers a form of "hair shirt", an excuse to keep the language pure. Strict languages are often undisciplined in their use of effects and have unclear semantics given by "whatever the compiler does".
 
-:cite:`jonesWearingHairShirt2003` concluded that laziness, in particular the purity that non-strictness requires, was jolly useful. I/O did cause prolonged embarrassment with a confusing variety of solutions (continuations, streams) but Haskell has settled on monads.
+:cite:`jonesWearingHairShirt2003` concluded that laziness, in particular the purity that non-strictness requires, was jolly useful. I/O did cause prolonged embarrassment with a confusing variety of solutions (continuations, streams, monads) but Haskell has settled on monads.
 
 Types
 -----
@@ -186,6 +160,21 @@ One practical case where laziness shows up is UNIX pipes. For finite streams the
 However, for long outputs, interleaved or "lazy" execution saves memory and improves performance dramatically. For example with ``cat large_file | less``, ``less`` can browse a bit without loading the file into memory. It is really just a generalization that infinite streams like ``yes fred | less`` work. Of course interleaving is not magic, and not all programs support interleaving. For example, ``cat large_file | sort | less`` is slow and ``yes fred | sort | less`` is an infinite loop, because ``sort`` reads all its input before producing any output.
 
 But laziness means you can implement interleaving once in the language (as the evaluation strategy) as opposed to piecemeal for each program.
+
+Referential transparency
+------------------------
+
+Common subexpression elimination "pulls out" a repeated expression by giving it a fresh name and generally improves performance by sharing the result (although it could be a tie with the compiler inlining the expression again if it is really cheap). For instance ``e + e`` is the same as ``(\x -> x + x) e``, but in the second ``e`` is only evaluated once.
+
+In a strict language this transformation can only be performed if the expression is guaranteed to be evaluated. E.g. ``if c then undefined else f`` to ``let e = undefined in if c then e else f``, the second version always evalautes ``e`` and throws ``undefined`` whereas the original could succeed with ``f``. This is a form of speculative execution hazard.
+
+In a lazy language, this can be performed unconditionally because the expression will not be evaluated if it is not used. Similarly adding or removing unused expressions does not change the semantics, ``e`` versus ``let x= y in e``. Nontermination has the semantics of a value.
+
+A win for laziness.
+
+
+Non-strict arguments are passed as computations, so they can include non-terminating computations, whereas in a strict language arguments are evaluated values. But when we actually use a value it gets evaluated, so these computations resolve themselves. There is no way in a lazy language (barring runtime reflection or exception handling) to observe that an argument is non-termination as opposed to a real value, i.e. to make a function ``f _|_ = 0, f () = 1``. So stating that non-termination or ``undefined`` is a value in lazy languages is wrong. Similarly ``Succ undefined`` is not a value - it is WHNF but not normal form. These are programs (unevaluated expressions) that only come up when we talk about totality. Some people have confused the notions of "value" and "argument" in lazy languages. The term "laziness" has a lot of baggage, perhaps it is better to market the language as "normal order".
+
 
 Lazy vs optimal
 ===============
@@ -244,3 +233,21 @@ Time complexity
 * For elementary linear lambda terms the number of sharing graph reduction steps is at most quadratic compared to the number of leftmost-outermost reduction steps. :cite:`guerriniOptimalImplementationInefficient2017` Actually my implementation avoids bookkeeping and fan-fan duplication and hence is linear instead of quadratic (TODO: prove this). It would be nice to have a bound of optimal graph reduction steps vs. call-by-value (strict) steps but I couldn't find one. I think it is just the same quadratic bound, because lazy is 1-1 with strict.
 * A simply-typed term, when beta-eta expanded to a specific "optimal root" form, reduces to normal form in a number of family reduction steps linearly proportional to the "size" of the term ("size" is defined in a way polynomially more than its number of characters). Since the simply typed terms can compute functions in ℰ4\\ℰ3 of the Grzegorczyk hierarchy with linear size (Statman), one concludes there is a sequence of terms which reduces in a linear number of family reductions but takes ℰ4 time to compute on a Turing machine, for any implementation of family reduction. In particular there are terms taking optimal graph reduction steps proportional to the iterated exponential of 2 to the size of the term, i.e. :math:`2^{2^{2^n}}` for any number of 2's. :cite:`coppolaComplexityOptimalReduction2002`
 
+Sharing strategies with non-strictness don't extend to ``while``, because the condition and body must be evaluated multiple times. So more generally for iteration constructs we need `call by name <https://docs.scala-lang.org/tour/by-name-parameters.html>`__, macros, fexprs, or monads.
+
+::
+
+  while condition body =
+    c <- condition
+    if c then
+      body
+      while condition body
+    else return ()
+
+  i = 2
+  while (i > 0) {
+    println(i)
+    i -= 1
+  }
+
+Hence this is only a partial win for laziness.

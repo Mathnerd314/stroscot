@@ -25,11 +25,15 @@ Concurrent operations
 
 At the lowest level are:
 
-* explicit read/write operations on mutable shared memory
-* instruction set memory barriers
-* OS calls such as creating a thread
+* read/write operations on mutable shared memory
+* memory barrier/fence instructions
+* OS syscalls that involve concurrency
 
 There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, actors, transactional memory. Higher-level interfaces enable much simpler code, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot.
+
+TODO: create complete list of higher-level abstractions and figure out how to nicely expose them in the language as libraries
+
+* actors, channels, mvars
 
 Memory models and races
 =======================

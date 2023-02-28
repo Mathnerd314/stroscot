@@ -93,11 +93,13 @@ CWI Amsterdam
 
 
 
+Astrée
+B. Blanchet, P. Cousot, R. Cousot, J. Feret, L. Mauborgne, A. Miné, D. Monniaux, and
+X. Rival. A Static Analyzer for Large Safety-Critical Software. In Proc. of PLDI’03, San
+Diego, California, USA, June 2003. ACM Press.
 
-
-
-
-
+P. Baudin, A. Pacalet, J. Raguideau, D. Schoen, and N. Williams. CAVEAT: a Tool for
+Software Validation. In DSN. IEEE Computer Society, 2002.
 
 Configurable Program Analysis
 =============================

@@ -23,22 +23,6 @@ With no rules, the refactoring tool functions as a reformatter. Python's Black s
 
 Inspired by gofix / `gofmt <https://go.dev/blog/gofmt>`__ .
 
-Language server
-===============
-
-For integration with VSCode and other IDEs. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, we provide:
-
-* syntax highlighting
-* tooltips
-* autocomplete suggestions
-* navigation outline
-* debugger integration
-* navigate to definition
-* compiler errors/warnings/fixes
-* IDE-assisted renaming or refactoring
-
-According to the `StackOverflow 2022 survey <https://survey.stackoverflow.co/2022/#section-most-popular-technologies-integrated-development-environment>`__, VSCode was the most popular editor and 2x as popular as either of the next two, Visual Studio and IntelliJ, so probably is the only one that needs to be supported.
-
 Interactive shell
 =================
 
@@ -62,15 +46,33 @@ Full command list:
 * debugger commands
 * profiler commands
 
+IDE
+===
+
+A GUI interface is higher-bandwidth than the REPL. Typically an IDE allows editing text files but more recently there is the notebook interface which integrates the REPL format with multiline code and allows outputting images, graphs, and interactive components (which would require separate windows when running a text file and command line).
+
+Gilad Bracha says existing workspaces are missing many important features. He recommends writing a new workspace environment from scratch - he thinks 5 full-time people for 2-3 years could do it. But of course he's a bit biased since he led a team to do such a thing that got their funding pulled 1 year before completion. I think his experience and the deaths of other projects such as e.g. Light Table suggests that writing a new workspace environment is risky. You need a good cross-platform GUI library to even think about it - there is the Dart library, but maybe our port of that will suck. We could take a shortcut by using HTML and a browser engine, but IMO the massive web rendering stack introduces just a bit too much latency. Also, it seems impossible to implement the "tablike spaces" idea I had for an IDE with proportional fonts - I don't think table layout in HTML is performant enough to do one character per cell. (TODO: actually benchmark this with a hardcoded prototype) It's kind of a chicken-egg problem - you need an IDE to write code, but writing a new IDE requires writing code.
+
+According to the `StackOverflow 2022 survey <https://survey.stackoverflow.co/2022/#section-most-popular-technologies-integrated-development-environment>`__, VSCode was the most popular editor and 2x as popular as either of the next two, Visual Studio and IntelliJ. I think VSCode is a sufficient environment for hosting a new language, while the existing tools for writing IDEs are insufficient, so implementing the language comes first. So, at least until the language is stable, I only aim to support VSCode / LSP and nothing else.
+
+Language server
+---------------
+
+VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server will provide:
+
+* syntax highlighting
+* tooltips
+* autocomplete suggestions
+* navigation outline
+* debugger integration
+* navigate to definition
+* compiler errors/warnings/fixes
+* IDE-assisted renaming or refactoring
+
 Notebooks
-=========
+---------
 
-Notebooks/workspaces are a UI interface, higher-bandwidth than the REPL or even text files. You can input multiline code (like text files), and output images, graphs, and interactive components (which would require separate windows when running a text file from the command line).
+Ideally, IMO, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model allows putting interactive sliders in and quickly updating graphs. Also, like Smalltalk the workspaces should have memory and persist across close-open. Everything in the notebook state should be serialized, down to the cursor position. Ideally this should be a text-based format, JSON or maybe even a subset of Stroscot. Also it should be possible to export a notebook to a text file, once you've decided it's in a good state and don't need the interactivity anymore.
 
-Ideally, IMO, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model also allows putting interactive sliders in and quickly updating graphs. Also, like Smalltalk the workspaces should have memory and persist across close-open. Everything in the notebook state should be serialized, down to the cursor position. Ideally this should be a text-based format, JSON or maybe even a subset of Stroscot. Also it should be possible to export a notebook to a text file, once you've decided it's in a good state and don't need the interactivity anymore.
+The modern workspace environment that's most popular is the Jupyter notebook interface. But jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code" REPL, no information on what cell it's from. So we would have to hack jupyter to get this to work. OTOH the LSP protocol does support incremental update and it looks like you can use this incremental update protocol with notebooks. So another win for supporting VSCode exclusively.
 
-The modern workspace environment that's most popular is the Jupyter notebook interface. But jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code" REPL, no information on what cell it's from. So we would have to hack jupyter to get this to work. OTOH the LSP protocol does support incremental update and it looks like you can use this incremental update protocol with notebooks.
-
-Gilad Bracha says Jupyter is missing many important features. He recommends writing a new workspace environment from scratch - he thinks 5 full-time people for 2-3 years could do it. But of course he's a bit biased since he led a team to do such a thing that got their funding pulled 1 year before completion. I think his experience and the deaths of other projects such as e.g. Light Table suggests that writing a new workspace environment is risky. You need a good cross-platform GUI library to even think about it. Gilad's new project and VSCode cheat by using HTML, but IMO the massive web rendering stack introduces just a bit too much latency. Also, it seems impossible to implement the "tablike spaces" idea I had for an IDE with proportional fonts - I don't think table layout in HTML is performant enough to do one character per cell. (TODO: actually benchmark this with a hardcoded prototype) It's kind of a chicken-egg problem - I think VSCode is a sufficient environment for hosting a new language, while the existing tools for writing IDEs are insufficient, so the language comes first.
-
-So for now it seems like aiming to support notebooks via VSCode / LSP is the best choice.

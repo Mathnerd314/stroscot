@@ -60,12 +60,14 @@ Choices
 Documentation first
 -------------------
 
-It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, "if it isn't documented, it doesn't exist". Looking at HN submissions of programming languages, the best docs win - it's only "famous" languages that can submit a Github repo full of files but without a README and still get discussion. To do well we need at least a README. But I'm going with a wiki style so I can write down every last detail. And there are code snippets for the places where writing code is clearer than explaining in English.
+It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, "if it isn't documented, it doesn't exist". Looking at HN submissions of programming languages, the best docs win - it's only "famous" languages that can submit a Github repo full of files but without a README and still get discussion. To do well, we definitely need at least a README. But I'm going with a wiki style, so I can write down every last relevant detail that affected how the language was put together or how it was designed. And there are code snippets for the places where writing code is clearer than explaining in English.
 
 Sphinx
 ------
 
-GH Pages/Jekyll can't do forward/back links. Checking out various options, Sphinx is used by Clang, GHC, Futhark, etc., although not Rust or Java. And it has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, ... so far it's proving its worth. It's run via a Travis CI script and the generated docs are stored in the gh-pages branch.
+GH Pages/Jekyll can't do forward/back links. Checking out various options, Sphinx is used by Clang, GHC, and Futhark. It has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, ... so far it's proving its worth. It's run via a Github actions script and the generated docs are stored in the gh-pages branch.
+
+Alternatives include Rust's self-written mdBook. But their `documentation <https://rust-lang.github.io/mdBook/format/markdown.html>`__ is itself ill-formatted, with the first line of each Markdown example indented for some random reason, which does not inspire confidence. There is also Java's javadoc, but it's not used much outside Java.
 
 Organization
 ------------
@@ -88,10 +90,12 @@ The categorization procedure:
 * 2A: commentary
 * 2B: reference
 
+Currently Stroscot is still in the design stage so the majority of content is commentary.
+
 Quotes before commas
 --------------------
 
-The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this. And it's the `official style on Wikipedia <https://en.wikipedia.org/wiki/MOS:LQUOTE>`__.
+The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure (hence is called "logical quotation"). Proper nesting is important in programming and it seems strange to ignore this. And it's the `official style on Wikipedia <https://en.wikipedia.org/wiki/MOS:LQUOTE>`__.
 
 Forbidden words
 ---------------
@@ -115,13 +119,13 @@ A fair amount of terminology in programming seem to be meaningless or ambiguous.
   * static library - precompiled file archive
   * static linking - compile time binding, resolving memory addresses at compile time
 
-* pure - prefer the proposition that all expressions have a unique value. So instead of "impure expression" refer to an expression that has no value or multiple values.
+* pure - prefer the proposition that all expressions have a unique value. So instead of "impure expression" refer to an expression that has no value (unevaluatable expression) or multiple values (ambiguous expression). Actually with the TRS formalism I use every expression is evaluatable so we only worry about ambiguous expressions.
 * strongly typed - `8 definitions <https://perl.plover.com/yak/12views/samples/slide045.html>`__, all different. It's the semantic equivalent of "amazing", i.e. "My language is strongly typed" == "My language is amazing".
 * undecidable - people use this word to imply that it's unimplementable, when there are working solvers like the ones in `termCOMP <https://termination-portal.org/wiki/Termination_Competition>`__ that solve many useful cases. Godel's theorem only means that pathological examples exist for each specific implementation, which is true even with Hindley-Milner (linear for real-world programs, worst-case exponential). Prefer "complexity at least :math:`\Sigma^0_1`", where :math:`\Sigma^0_1` is in the `arithmetic hierarchy <https://en.wikipedia.org/wiki/Arithmetical_hierarchy>`__, or a more precise class if known. Note that decidable problems / computable sets are in :math:`\Delta_{1}^{0} \subsetneq \Sigma^0_1`.
 * primitive - as per `Wikipedia <https://en.wikipedia.org/wiki/Primitive_data_type>`__, primitive is ambiguous and can mean "the base cases of an inductive definition", in which case use "base", or "whatever is provided by a particular processor or compiler", in which case use "built-in". Note that built-in does not mean base, e.g. integers can be defined in terms of booleans hence are not base cases.
 * :math:`\subset` - per `Wikipedia <https://en.wikipedia.org/wiki/Subset#%E2%8A%82_and_%E2%8A%83_symbols>`__ this is ambiguous, use :math:`\subsetneq` and :math:`\subseteq`
-* abomination - a fun word, but basically meaningless
-* etc or ... - it's just too imprecise. usually if it's a list, it can just omitted. If there is a clear omission it can be replaced with an angle bracket construction like ``<more numbers>``, or the ambiguity erased with set-builder notation.
+* abomination - a fun word, but basically meaningless in a programming context where one person's "abomination" is another person's "cool hack"
+* "etc" and "..." - they're just too imprecise. Usually if it's a list, these can just be omitted. If there is an intentional omission it can be replaced with an angle bracket construction like ``<more numbers>``, or the ambiguity erased with set-builder notation.
 
 Avoiding this terminology is easy to forget so is enforced by periodic grep's of the code.
 
@@ -146,11 +150,17 @@ Communication methods
 ---------------------
 
 Stroscot's documentation first approach should help a lot with open development. As far as information, the main avenue for Stroscot is the Git repo. This has the documentation and the code all-in-one. Secondary sources are:
+
 * real-time chat, for quick questions and discussion. Discord suffices for now (0 people anyway). Alternatives are Gitter, Element, and Matrix which are somewhat more open-source friendly.
 * issues, for anything more important. Github issues seems fine, even Swift is using it. If open-source is a concern then `migrating to Gitlab <https://docs.gitlab.com/ee/user/project/import/github.html>`__ is possible.
-* in the future, a forum for long-form discussions, where the problem needs more consideration than just the random sample in chat but it's not really an issue with the project. Github discussions is a possibility but Discourse is the standard. There are `free instances <https://free.discourse.group/>`__ for open-source projects, but needs 10+ contributors. Anything relevant to language/standard library development should have an issue filed.
+* in the future, a forum for long-form discussions, where the problem needs more consideration than just the random sample in chat but it's not really an issue with the project. Github discussions is a possibility but Discourse is the standard. There are `free instances <https://free.discourse.group/>`__ for open-source projects, but the project first needs 10+ contributors. A Discourse would not replace issue tracking; anything relevant to language/standard library development should have an issue filed.
 
-As far as the "ping bot" that closes issues if they are not active, it seems like a good idea since if there is no reporter to discuss with then making progress is hard. IMO the bot should request a little discussion summary if there have been more than a few comments. Something like:
+Issue workflow
+--------------
+
+As far as the "ping bot" that closes issues if they are not active, on first impression it seems like a good idea since if there is nobody around to discuss an issue with, then making progress on that issue is hard. So a basic "do you still care about this" if nobody has looked at it. Arguably though, a bug reporting process where a report is only looked at by someone with commit access months or years after the initial report is quite broken.
+
+ With more than a few comments/participants, the bot should request a little discussion summary. Something like:
 
 * Goal: Summary of what conditions need to be satisfied to close the issue
 * Deliverable: What can be delivered in a few weeks to further the progress of this issue?
@@ -158,4 +168,4 @@ As far as the "ping bot" that closes issues if they are not active, it seems lik
 * Risks: What concerns have been raised about this goal?
 * Blockers: What resources or leadership decisions are needed, besides someone implementing it?
 
-The summary doesn't need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then "The previous summary is accurate" is fine as the summary. There should be an exponential backoff on pings if the issue is still active but has not changed.
+The summary doesn't need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then "The previous summary is accurate" is fine as the summary. There should be an exponential backoff on pings if the issue is still active but nothing has not changed since the last ping.

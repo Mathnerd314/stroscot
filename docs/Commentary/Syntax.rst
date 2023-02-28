@@ -1,20 +1,47 @@
 Syntax
 ######
 
-Design
-======
+In Stroscot, since syntax is pluggable, the standard syntax is really within the purview of the standard library. But a default syntax is necessary for writing the compiler, so we have to figure a syntax out first in order to bootstrap. The stuff here is mostly a dumping ground of ideas while the rest of the language is designed. No syntax choices are final. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final, unless the novice survey comes up with better choices.
 
-The stuff here is mostly a dumping ground of ideas while the rest of the language is designed. The actual syntax will be designed by going through the syntax of other languages (primarily the ones listed in the influences section, but also all the ones listed on RosettaCode and `Rigaux's list of syntax across languages <http://rigaux.org/language-study/syntax-across-languages/>`__) and picking out the nicest examples. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final.
+Design procedure
+================
 
-Quorum and its associated set of syntax studies provide useful datapoints on keywords and constructs. But Stroscot has a unique design so we can't use a lot of the research, and the research is limited to begin with.
+At the end of the day syntax is about picking a choice and sticking to it. There are many ways to do this. My original plan was to go through the syntax of other languages listed on RosettaCode and `Rigaux's list of syntax across languages <http://rigaux.org/language-study/syntax-across-languages/>`__) and pick out the nicest/most common examples. But this is not really a scientific procedure. For example, take comments. Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
+
+* For EOL impl, C++ style ``//``
+* For block impl, C style ``/* */``
+* For EOL doc, D style ``///``.
+* For block doc, Javadoc style ``/** */``
+* For code comments (nesting block), Pascal style ``(* *)``
+
+But are these the best choices? There are lots of other options, an EOL impl comment can be ``;`` or ``#`` or  ``->``. Similarly there are many choices for other syntactic elements. Quorum and its associated set of studies by Stefik provide an alternative approach - design a survey and ask novices what they think is most intuitive. As he says in the papers, choices ranked highly by experienced programmers but not chosen by novices are likely mistakes in PL design, learned helplessness since unintuitive PL syntax is hard to change.
+
+Stefik used a mixture of CS university students (freshman year novices and junior/senior year programmers). But since we're designing for novices we don't actually care about or need to measure experienced programmers. So using a convenience sample by posting a Google Form / SurveyMonkey / LimeSurvey to r/learnprogramming isn't that hard - polls need approval but this seems like it might be allowed. (TODO: is there a better place on the internet to find programming novices?). General outline:
+
+* Title: "Never programmed? Help design a new programming language! (Survey)"
+* Demographics: age, gender, native English speaker. These are mentioned as questions in Stefik's survey :cite:`stefikEmpiricalInvestigationProgramming2013`, but aren't mentioned as having any statistically significant correlations, so can probably be left out or be highly stratified to make people less worried about giving out personal information. :cite:`dossantosImpactsCodingPractices2018` did find statistically significant differences for females to prefer multiple statements on one line and more intermedate variable assignments, but there were only 7 females so this is probably noise. OTOH, it would be useful to have demographics to compare to large surveys like the `Stack Overflow Developer Survey <https://insights.stackoverflow.com/survey/2021>`__.
+* programming experience. Stefik found that programmers will list experience with individual languages even when reporting no experience total, so it seems best to skip an overall experience question and ask individually with a language matrix. Since not all languages will be listed we'll have an "All other programming languages" catch-all at the end. Stefik presumably asked an empty-box "how many years of experience do you have with X" question. But a matrix requires choices. Taking his mean experience reported as the data points, for experienced programmers, dividing into 5 buckets we have 0-0.03,0.03-0.09,0.9-0.22,0.28-0.48,0.67-1.76. For inexperienced programmers, we have 0-0 as a large bucket and then the remaining range is split into 0-0.01,0.01-0.03,0.05-0.09,0.12-0.23. Combining experienced and inexperienced, the 0-0 bucket stays and we have 4 more buckets 0.01-0.03 (±0.11-0.16), 0.03-0.09 (±0.18-0.31), 0.11-.28 (±0.41-1.06),0.39-1.76 (±.0.7-1.87) Translating into familiar units, these buckets are no experience, <11 days, 11-33 days, 40-102 days (1.32-3.36 months), 4.68+ months. Given the wide uncertainties we can round to no experience, < 2 weeks, 2 weeks to 1 month, >1 month and <4 months, or 4+ months. It's not as accurate as the empty-box but hitting a circle on mobile is much easier. In terms of the survey of :cite:`siegmundMeasuringModelingProgramming2014`, it is a quantified version of the self-estimation that rates experience as 1-5. We can sum the (approximate) years of experience to obtain overall years of experience, which should lead to Siegmund's "professional programming experience" factor, which IMO is the correct factor to use to measure programming experience. But we would have to do another validation study with university students to verify that this metric correlates with the ones in Siegmund's study. In fact though I am mainly going to use the metric as a binary variable, novice vs. not, so it's not too important.
+
+  As far as languages, Study 1 had HTML, C++, Java, Matlab, JavaScript, Basic, COBOL reported with experience for non-programmers and Study 2 was similar with the addition of PHP. Considering programmers among both studies, we would add C#, Python, Ruby, and COBOL as <1 month languages, and Perl and FORTRAN as <2 week languages. Meanwhile the SO language list top 15 is JavaScript, HTML/CSS, Python, SQL, Java, Node.js, TypeScript, C#, Bash, C++, PHP, C, Powershell, Go, Kotlin, with a clear break in popularity from C at 21% to Powershell at 10%. The question asked for "extensive development work in the past year" though so is not really a question about which languages are most likely to have beginner exposure. Contrariwise TIOBE does not consider HTML a programming language because it is not Turing complete, but does list SQL. We do not want to list too many languages, because marking lots of languages as "no experience" is tedious, but a good selection is key to defining the question and ensuring the catch-all is answered accurately. One design point would be to preselect "no experience" for all but the catch-all, solving the tedium issue, but the survey tool would have to support this.
+
+* Have you heard of the Stroscot or Quorum programming languages before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results.
+
+The meat of the survey is questions of the form "how do you think <english description of PL task> should look?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. Stefik did individual rankings of each choice on a 0-100% scale by 10%'s, but I think "rank top 3 choices" is sufficient and less tedious.
+
+Survey content
+--------------
+
+According to :cite:`tewFCS1LanguageIndependent2011` there are two important classes of validity. First is content: establishing the topics to be surveyed, and ensuring they have reasonable coverage of the subject area. IMO Stefik failed on this point - he just picked some basic Java-style keywords and constructs. Hence his research was quite limited - he didn't systematically go through every design choice possible in a programming language. :cite:`tewDevelopingValidatedAssessment2010` went through "widely adopted" introductory textbooks to select a set of CS1 topics, but ended up with more than 400 topics - they pruned them to 29 by limiting to concepts missing from at most one textbook. And with the focus on "wide adoption" they ended up including OO but not FP. The fact that Tew tested their exam only on Java, Matlab, and Python programmers is telling. Since Stroscot is a functional logic programming language, it will likely have some different fundamental concepts, and "wide adoption" is not necessarily the right inclusion criteria. I actually think ChatGPT can help a lot here - it knows the basic concepts used in programming and can devise wording that avoids prompting with the answer. The PL tasks should be a mixture of basic tasks common to all languages (operations, control, data structures) and Stroscot-specific tasks that showcase its unique features.
+
+A secondary form of validity is construct validity. This ensures that the survey is actually measuring what it is designed to measure, rather than something else. Without some procedures in place, it is easy to write bad questions. They can be unclear, resulting in participants answering the wrong question. They can be biased with "leading questions", resulting in canned answers rather than useful data. Unfortunately, some amount of priming is necessary, because novices do not know what the basic syntactic constructs of a language are. If you give novices a blank page and ask them to design a programming language, you will most likely get a simple language with glaring deficiencies. But similarly if you ask a novice "What syntax should be used for the if-else statement?" there is not much leeway in the question - most likely they will use the if and else keywords. So the wording of a question can be quite important.
+
+For construct validity, Stefik showed the questionnaire to several experts and resolved all issues. He also did pilot studies with both experts and novices, and confirmed that they gave decent answers. He also submitted the study for peer review. Tew used item-response statistics and also validated their questions by conducting think-aloud interviews during pilot versions of the test, showing that correct mental models corresponded to correct answers and likewise for incorrect. For similarly validating the constructs of my survey, CCC is a forum of expert programmers, and I can post the survey to /r/ProgrammingLanguages as a trial run. The write-your-own-syntax freeform question is similar to the think-aloud study. So the only missing quality assurance factor is peer review. It seems for journals in education/UX research, around 1/3 of on-topic papers submitted get accepted. ACM publishing is free, so it could be done. I don't really attach much importance to peer review though.
 
 Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization so choices could be compared and tested. Basically we store code as base64 or a Lisp-like AST dump, and then the formatter produces/consumes this like any other code style. Then people get an initial randomized style, but can customize it to their liking, and once we reach 100 users we have a syntax battle.
 
 Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR parser) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
 
-Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird function call syntax may lose too many users)
-
-TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
+Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird function call syntax may lose too many users) Almost everything is an expression. But there's also block statements and layout.
 
 Natural language like Inform 7, while interesting, is quite wordy. It's also hard to scan through.
 
@@ -22,33 +49,37 @@ Fortress has "mathematical syntax", with an ASCII form and typeset form. They us
 
 A language encourages certain expressions of thought. If the syntax is awkward then the feature will be used less and a bias will be introduced. But the styles of programming people come up with after a language is released are often completely different to what was intended by the language (e.g. Java and its design patterns). It's not clear that anything can be done about this, besides capturing as many existing patterns as cleanly as possible.
 
-Textual
--------
+Text-based
+==========
 
-There are some people who, when confronted with the complexity of syntax, think "It's better to use a binary format and store everything in a database." Now they have two problems. Math is textual, English is textual, the only programming stuff that isn't textual are flowcharts and tables. Flowcharts might be OK (e.g. Labview) but graph layout is hard - graphviz barely works, and most graph layout algorithms such as IDA Pro's are quite lacking. Labview struggles even to layout wires (edges). Tables lead into spreadsheet programming which is generally not expressive as a language - and the formulas and cell values are textual. If you show me a way to write 123.6 that doesn't involve text maybe visual programming is worth considering.
+There are some people who, when confronted with the complexity of syntax, think "It's better to use a binary format and store everything in a database." Now they have two problems. Math is textual, English is textual, the only programming stuff that isn't textual are flowcharts and tables. Flowcharts might be OK (e.g. Labview) but graph layout is hard - graphviz barely works, and most graph layout algorithms such as IDA Pro's are quite lacking. Labview struggleseven to layout wires (edges). Tables lead into spreadsheet programming which is generally not expressive as a language - and the formulas and cell values are textual. If you show me a way to write 123.6 that doesn't involve text maybe visual programming is worth considering.
 
 There's also structural editing, `lamdu <http://www.lamdu.org/>`__ and so on, but they are designing an IDE alongside a programming language. I'm not too interested in IDEs and given that half the IDEs are for languages that also have a textual syntax, syntax doesn't seem to be a big factor in writing such an IDE.
 
-Legibility research
--------------------
+Legibility/readability
+----------------------
 
-The main factor improving readability is consistency; reading is disrupted when unconventional layouts are used.
+There have been many legibility/readability studies, but they have to be evaluated carefully. Some are out of date, some were poorly designed, and some are just not relevant to programming. So we have to describe our assumptions and working setup.
 
-Spacing helps identify boundaries:
-* For words, intra-letter spacing should be significantly smaller than inter-word spacing.
-* For sentences, there should be extra space after the period, although the period's whitespace itself is distinctive.
-* Justified text is harder to read than ragged-right due to the inconsistent spacing arising from bad line-breaking.
-* The default inter-line spacing (line height, leading) is fine for most people. Some people with disabilities need more. Longer lines can use a little bit more line height.
-* To identify paragraphs, inter-paragraph spacing should be visibly larger than inter-line spacing, or paragraph indentation should be used.
+The first question is the medium. Most code will be read on a computer screen. Computer monitors have improved greatly over the years. Comparing the monochrome 1024x780 114ppi 11" $10k+ Tektronix 4010 in 1972 to the 24-bit color 1600x1024 110ppi 17.3" $2.5k SGI 1600SW in 1998 to the 3840x2160 140ppi 32" $850 Dell U3223QE recommended by `RTings <https://www.rtings.com/monitor/reviews/best/by-usage/programming-and-coding>`__ as of 2023, we see cost has significantly decreased and also there has been a significant amount of readability improvements in ppi, contrast, brightness, and persistence / refresh rate. Per `WP <https://en.wikipedia.org/wiki/Pixel_density#Printing_on_paper>`__, PPI is about half DPI, so the 300 DPI "good quality typographic print" standard corresponds to 150ppi. With subpixel rendering enhancing horizontal resolution, the recent 140ppi monitors are finally starting to have decent text quality, and that ppi is probably becoming standard for professionals. But there are even higher PPI displays, e.g. a 23.8" 185ppi LG 24UD58 or Macbook "retina" laptop display, and there are reports that these high ppi have perceivably better text quality.
 
-Left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line.
 
-Maximum line length is an open question. Diff programs seem like the limiting factor, but on my monitor I can fit 2 108-character texts at the default font size side-by-side along with a space in the middle and the taskbar. Rounding this down to 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt / 24px I can fit 97 characters, while a little less (17.25pt / 23px) fits 102 characters. The standard is 80 characters but monitors are wider now than they were in teletype days, so again 100 seems plausible. This can really only be tested by finding long lines of code and asking what line-breaking placement is most readable; code is not read like a block of prose so studies on column widths on the web are not applicable.
+But let's go through the findings.
 
-Code legibility
----------------
+* Many sources mention in passing that consistency improves readability. In particular, reading is disrupted when unconventional layouts, colors, or fonts are used, or when different values of such attributes are mixed in unconventional ways. :cite:`beierTypefaceLegibilityDefining2009` This seems generally applicable. The IDE dictates fonts / spacing / coloring so we should ensure good IDEs are used for Stroscot.
+* The general rule for spacing is that it should be significantly larger than its next-smallest spacing unit to clearly identify the boundary it marks.
 
-IMO layout improves code legibility. There haven't been any formal studies that I can find, but Python syntax is often said to be "clean". Also layout makes arguments over where to put braces moot. Hence Stroscot has layout.
+  * Intra-letter spacing should be significantly smaller than inter-word spacing to allow identifying words.
+  * The inconsistent inter-word spacing of justified text is harder to read than ragged-right. With good line breaking this is not as much of an issue but the effect is still there.
+  * For sentences, there should be a little extra space after the period to emphasize the sentence boundary. Just a little, not a double space, because period-normal space is almost visually distinctive enough by itself and people have gotten used to that spacing.
+  * The default inter-line spacing (line height, leading) in browsers is fine for most people. Some people with disabilities need more line height. Wider columns require a bit more line height.
+  * To identify paragraphs, inter-paragraph spacing should be visibly larger than inter-line spacing, or paragraph indentation should be used.
+
+* For English, and presumably other LTR languages, left-aligned text is easier to read than centered or right-aligned text because the reader knows where to look to find the next line.
+* According to an old study: "Longer lines will be read faster, due to less time scrolling. Though print studies find faster reading at medium line lengths, reading text on a computer screen is really exhausting, and slower than print, so there is no benefit to short lines except at large font sizes. Reading from a computer screen is different from printed media." But there are newer monitors, so this has to be tested again. There are also physical constraints. Diff programs seem like a limiting case - on my monitor I can fit 2 108-character texts at the default font size side-by-side along with a space in the middle and the taskbar. Rounding this down to 100 leaves room for line numbers and similar decorations. Plus, most diffs these days are unified, and line-wrapping is always an option for smaller screens. OTOH it's a tiny font, 18-26pt is the most readable for websites so maybe that size is needed for programming. At 18pt / 24px I can fit 97 characters, while a little less (17.25pt / 23px) fits 102 characters. The standard is 80 characters but monitors are wider now than they were in teletype days, so again 100 seems plausible.
+* Line-breaking (Knuth-Plass, hanging indents on soft linebreaks, etc.): This can really only be tested by finding long lines of code and asking what line-breaking placement is most readable;
+* A widow is when a paragraph line-breaks and leaves a word on its own line at the end. An orphan is when a paragraph line-breaks across a page and leave less than a full line on the next page. Widow and orphan lines are commonly cited as decreasing legibility, but I didn't find any formal studies. I think people get used to bad line breaking. Also most code is viewed on a computer rather than printed out. So what should really be considered is code that doesn't fit on one screen.
+
 
 Reading code top-to-bottom, left-to-right makes sense. So definitions should be on the left, blocks indented in, and lines themselves should read left to right. So Ruby's statement modifiers ``X if Y`` are a bad idea because the ``if Y`` is easy to miss when scanning control flow.  But operators like ``a = b xor c`` are fine because the assignment ``a =`` is clear and if the value of the expression matters you're reading the whole line anyway and can parse it in your head.
 
@@ -89,7 +120,7 @@ Another study :cite:`buseMetricSoftwareReadability2008` identified factors for r
 * fewer '='  numbers spaces '==' '<' '>' 'if' 'for' 'while'
 * higher number of '+' '*' '%' '/' '-'
 
-They constructed several models using these factors, mainly a Bayesian classifier, all of which predicted average readability scores better than the human raters. But the model is not public.
+They constructed several models using these factors, mainly a Bayesian classifier, all of which predicted average readability scores better than the original human raters. But the model is not public.
 
 Proportional fonts
 ------------------
@@ -111,6 +142,36 @@ TODO: test it out by modifying https://github.com/isral/elastic_tabstops_mono.vs
 
 The advantage of tablike spaces over elastic tabstops is that the underlying text file looks fine when viewed in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
 
+DSLs
+----
+
+Stroscot aims to be a "pluggable" language, where you can write syntax, type checking, etc. for a DSL and have it embed seamlessly into the main language. This may be possible due to the fexpr semantics, which allows pattern-matching the AST of any expression, like ``javascript (1 + "abc" { 234 })``, or may need more work to also do character-level embedding or seamless integration of parsers / escape sequences.
+
+Example DSLs:
+
+* SQL
+
+::
+
+  run_sql_statement { SELECT ... }
+
+* Assembly and C++.
+
+::
+
+  result = asm { sumsq (toregister x), (toregister y) }
+  my_func = load("foo.cpp").lookup("my_func")
+
+* TeX / mathematical expressions:
+
+::
+
+   tex { result = ax^4+cx^2 }
+   math { beta = phi lambda }
+
+
+It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging computations, like passes that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.
+
 Learning
 ========
 
@@ -121,6 +182,19 @@ Others recommend skipping the "dead tree" format altogether and watching videos 
 
 Learning a new language can be faster if you already know a language, but you can also bring over preconceptions. For example in :cite:`joostenTeachingFunctionalProgramming1993`, imperative gotchas became misconceptions in functional programming: variables can be defined after they are used, operators like ``tail``, ``take``, ``drop``, ``remove``, ``filter`` do not mutate their arguments, and there is no need to clone results to prevent them from being mutated and corrupted. It's not clear what can be done - people hate UI changes, and will complain when their cherished workarounds no longer work, even if they are now unnecessary. `Dijkstra <https://www.cs.utexas.edu/users/EWD/ewd04xx/EWD498.PDF>`__ similarly stated that COBOL "cripples the mind" and BASIC "mentally mutilates programmers beyond hope of regeneration", presumably because they give the programmer the wrong impression of what programming is. Still though, Dijkstra is too pessimistic - a simple "Stroscot for Y programmers" guide series should be sufficient to retrain programmers away from their bad habits.
 
+
+
+Immersion is by far the best way to learn anything. And as research shows, it turns out that humans retain:
+
+    5% of what they learn when they’ve learned from a lecture.
+    10% of what they learn when they’ve learned from reading.
+    20% of what they learn from audio-visual.
+    30% of what they learn when they see a demonstration
+    50% of what they learn when engaged in a group discussion.
+    75% of what they learn when they practice what they learned.
+    90% of what they learn when they use it immediately.
+
+Think back to how you learned to play basketball, ride a bicycle, or swim. Instead of watching tutorial videos or reading a textbook on how to do something, the way to learn faster is to get into the trenches and gain experience through making mistakes.
 
 
 Even if the learning material is there, what will convince people to invest the time to give it a try?
@@ -150,21 +224,23 @@ Taking union, we have that a filename is always a byte sequence. Taking intersec
 Unicode
 =======
 
-At a minimum comments in localized scripts should be supported. But `lots of languages <https://rosettacode.org/wiki/Unicode_variable_names>`__ support Unicode variable names too.
+Per Rust, non-English beginner tutorials are more friendly if they can use localized variable names for familiarity. Identifiers seem to be the limit though. Per `quotes from Y studios <https://ystudios.com/insights-passion/codelanguage>`__,  localized keywords are very tricky to implement, and often don't work well with the rest of the syntax. Localized grammars and word order are even more tricky and also really confusing if you don't know they're in use. But there are experiments like ChinesePython that have seen limited interest. It is a lot of work to fully localize a language:
+
+* parser - keywords/reserved words, grammar, word order
+* error messages, warnings, diagnostics
+* standard library method names and strings
+* documentation
+
+For Stroscot, at a minimum, comments in localized scripts should be supported. But `lots of languages <https://rosettacode.org/wiki/Unicode_variable_names>`__ support Unicode variable names too, so also seems good. Anything past that will be DSL territory and not part of the language proper.
+
+TODO: see if there are any more Unicode guidelines relevant to writing a programming language parser
 
 Usability
 ---------
 
 Unicode character input still has no standard solution. Copy-pasting from websites or a small cheat file is simple but it is too tedious to use frequently. Other methods include a language-specific keyboard, OS input methods like Character Map, or editor input methods like ``\name<tab>`` in Jupyter, `extensions <https://marketplace.visualstudio.com/items?itemName=brunnerh.insert-unicode>`__ for VSCode, or ``Ctrl+x 8 Enter`` in Emacs. Generally it seems there is no shortage of solutions and people will put in the effort to find a good IME as required. It is really an editor problem, not a PL problem.
 
-Unicode itself is quite complex and people can get confused by invisible spaces, bidirectional text, and lookalike characters. Compiler warnings can reduce these problems.
-
-Non-English beginner tutorials are more friendly if they can use localized variable names for familiarity. Identifiers seem to be the limit though. Per `quotes from Y studios <https://ystudios.com/insights-passion/codelanguage>`__,  localized keywords are very tricky to implement, and often don't work well with the rest of the syntax, and localized grammars and word order are tricky too and also really confusing. But there are experiments like ChinesePython that have seen limited interest. It is a lot of work to localize the full language:
-
-* error messages, warnings, diagnostics
-* standard library method names and strings
-* documentation
-* parser - keywords/reserved words, grammar, word order
+Unicode itself is quite complex and people can get confused by invisible characters, different width spaces, bidirectional text, and lookalike characters. Compiler warnings can reduce the chance of confusion.
 
 Language fragmentation
 ----------------------
@@ -773,7 +849,15 @@ You could also make something an atom, then you can write ``do something`` in co
 Indentation sensitivity
 =======================
 
-Indentation-sensitivity like Python and Haskell seems great. It requires less typing, fewer lines of code (no line for closing brace), and when copy-pasting code you only have to fix up the indentation by moving the block left/right (supported by all modern code editors) instead of messing with braces.
+Indentation-sensitivity (IS) like Python and Haskell seems great.
+
+* IS requires less typing. All modern languages are presented with indentation, so IS is just omitting the curly braces or begin-end markers.
+* IS avoids the issue of braces mismatching indentation.
+* IS avoids confusion or arguments about where to put the braces - `WP <https://en.wikipedia.org/wiki/Indentation_style>`__ lists 8 different styles.
+* IS is fewer lines of vertical space, because there are no braces on their own lines. This makes it cheaper to print code listings out on paper.
+* IS improves code legibility. There haven't been any formal studies that I can find, but Python syntax is often said to be "clean".
+* When copy-pasting code, you only have to fix up the indentation by moving the block left/right (supported by all modern code editors), instead of messing with braces.
+
 
 
 More discussion: https://www.reddit.com/r/ProgrammingLanguages/comments/uo0nq7/end_keywords_vs_pythonstyle_blocks_for_beginners/
@@ -1140,25 +1224,23 @@ But then statements like
 
 would have an unused return value. Maybe this value could be marked as optional somehow.
 
-Unless
-======
+Conditionals
+============
 
-Ruby's ``unless-else`` is unintuitive. Only support ``if-else`` and ``unless`` without the else. Also ``if not`` is a possible replacement for ``unless``.
+There is a "unified" syntax by `Simon <https://github.com/soc/soc.me/tree/main/_languages>`__, also a very similar paper on the "ultimate" syntax :cite:`parreauxUltimateConditionalSyntax`. Interesting idea, but still has to be tested real-world somehow.
+
+Per the internet, Ruby's ``unless-else`` is unintuitive. Only support ``if-else`` and ``unless`` without the else. Also ``if not`` is a possible replacement for ``unless``.
 
 Integers
 ========
 
 Flix says binary and octal literals are rarely used in practice, and uses this as a reason to drop support for them. Despite this most languages include support. Clearly there is a conflict here, so let's dive deeper.
 
-Per `Wikipedia <https://en.wikipedia.org/wiki/Octal>`__, octal is indeed rare these days because bytes do not divide evenly into octets whereas they do divide into 2 hex digits. But it can still be useful in certain cases like the ModRM byte which is divided into 2/3/3 just like how a byte divides unevenly into octets, or chmod's Unix file permission specifications which use 3-bit modes. Of course such usages are more likely to confuse than elucidate and using symbolic notation like ``modrm direct eax`` or ``u=rwx,g=rw,o=r`` is clearer. Nonetheless octal still crops up in legacy code as an omnipresent C feature, so should be included for compatibility.
+Per `Wikipedia <https://en.wikipedia.org/wiki/Octal>`__, octal is indeed rare these days because bytes do not divide evenly into octets whereas they do divide into 2 hex digits. But it can still be useful in certain cases like the ModRM byte which is divided into 2/3/3 just like how a byte divides unevenly into octets, or chmod's Unix file permission specifications which use 3-bit modes. Of course such usages are more likely to confuse than elucidate and using symbolic notation like ``modrm direct eax`` or ``u=rwx,g=rw,o=r`` is clearer. Nonetheless octal still crops up in legacy code as an omnipresent C feature, so should be included for compatibility. The main thing to avoid is the prefix 0 for octal, as leading zeros are useful for other purposes as well. ``0o`` has been introduced and widely adopted, with no obvious complaints.
 
-For binary literals, Java 7 added binary literals in 2011, C++ in 2014, and C# 7 in 2017, suggesting significant demand. The `Java proposal <https://mail.openjdk.org/pipermail/coin-dev/2009-March/000929.html>`__ lists bitmasks, bit arrays, and matching protocol specifications as killer usages. Hexadecimal is just artifical for these usages and obscures the intent of the code. Key to the usage of binary literals is a digit separator, so you can break up a long sequence like ``0b1010_1011_1100_1101_1110_1111``.
+For binary literals, Java 7 added binary literals in 2011, C++ in 2014, and C# 7 in 2017, suggesting significant demand. The `Java proposal <https://mail.openjdk.org/pipermail/coin-dev/2009-March/000929.html>`__ lists bitmasks, bit arrays, and matching protocol specifications as killer usages. Hexadecimal is just artifical for these usages and obscures the intent of the code. Key to the usage of binary literals is a digit separator, so you can break up a long sequence like ``0b1010_1011_1100_1101_1110_1111``. In theory ``0b1`` could be confused with ``0xB1``, but teaching programmers about the standardized ``0-letter`` pattern should mostly solve this.
 
-The alternative to not including literal support is to use a function parsing a string, so one would write for example ``binary "001100"``. Since Stroscot does compile-time evaluation this would work with no runtime overhead and give compile-time exceptions. But it is a little verbose. It is true that humans have 10 fingers but this isn't much reason to restrict literals to decimal, and once you have hex, binary and octal are just more cases to add.
-
-The main thing to avoid is the prefix 0 for octal, as leading zeros are useful for other purposes as well. ``0o`` has been introduced and widely adopted, with no obvious complaints. Similarly ``0b1`` could be confused with ``0xB1``, but teaching programmers about the standardized ``0-letter`` pattern should mostly solve this.
-
-Julia has juxtaposed multiplication? `Jump <https://jump.dev/JuMP.jl/dev/developers/style/#Juxtaposed-multiplication>`__ recommends limiting to cases where RHS is a symbol.
+The alternative to not including literal support is to use a function parsing a string, so one would write for example ``binary "001100"``. Since Stroscot does compile-time evaluation this would work with no runtime overhead and give compile-time exceptions. But it is a little more verbose than the ``0-letter`` literals. It is true that humans have 10 fingers but this isn't much reason to restrict literals to decimal, and once you have hex, binary and octal are just more cases to add.
 
 Tuples and records
 ==================
@@ -1174,6 +1256,8 @@ And if the types are different there's no ambiguity: ``(FirstName, LastName``, `
 
 Precedence
 ==========
+
+Julia has juxtaposed multiplication. `Jump <https://jump.dev/JuMP.jl/dev/developers/style/#Juxtaposed-multiplication>`__ recommends limiting to cases where RHS is a symbol, like ``2 pi``.
 
 `This post <https://ericlippert.com/2020/02/27/hundred-year-mistakes/>`__ describes a mistake in C-style precedence: it should be ``&&, ==, &`` but is instead ``&&, & ==``, causing a footgun. "Swift, Go, Ruby and Python get it right."
 
@@ -1377,46 +1461,863 @@ Even so, just letting people pick a style would not work. Wallace found that peo
 
 This doesn't solve the issue of picking a default style for the standard library though. Non-programmers prefer the underscore style, and it's more readable, so that's probably what common variables should use. Since that puts us in the Python camp and Python is the most popular language we should probably just follow Python's identifier conventions uniformly.
 
-Choices
+
+Layout
+======
+
+The most obvious instance of layout is the module declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't syntactically match with explicit braces, but are semantically identical.
+
+::
+
+  assertEqual
+    {
+      a
+        b
+        c
+      d
+    }
+    { a {b; c}; d}
+
+Behavior of a new line depends on its indentation level, relative to the indentation of the previous line. Indentation level is taken to be the sequence of whitespace characters related by "is prefix of", so "space, tab, space" is different from (incomparable to) "tab, space, space" but is less than "space, tab, space, em space" and more than "space, tab".
+
+* If it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
+* If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
+* If there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`off-side rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
+* Incomparable levels are an error.
+
+Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.
+
+::
+
+  assertEqual
+    a
+      + b
+      + c
+    a {+ b; + c}
+    a + (b + c)
+
+It should be possible to handle these with a fixup phase.
+
+Also, closed operators (e.g. parentheses) inhibit layout; this amounts to skipping whitespace layout when inside an explicit delimiter pair. But of course constructs inside the delimiter pair can start another layout. Finally for constructs that usually use layout we still want to parse 1-line things without braces:
+
+::
+
+  assertEqual
+    let a = b in c
+    let { a = b } in c
+
+Operators
+---------
+
+New operators can be declared with `mix <http://www.cse.chalmers.se/~nad/publications/danielsson-norell-mixfix.pdf>`__ `fix <http://www.bramvandersanden.com/publication/pdf/sanden2014thesis.pdf>`__ semantics, e.g.
+
+::
+
+  syntax _&&_ associate left above _and_ _or_ _not_ below _||_ equals _&_
+  syntax [[_]]
+  syntax if_then_else_
+  syntax _postfix
+  syntax prefix_
+
+Operator precedence will be a poset, rather than levels. Infix symbols can be left or right associative.
+
+Stroscot supports your typical PEMDAS:
+
+::
+
+  assertEqual
+    1 + 2 * 3^2
+    19
+  assertEqual
+    3+1/(7+1/(15+1/1))
+    355/113
+    3.14159292035...
+
+Most operators are textual:
+
+::
+
+  assert
+    true and false == false
+    true or false == true
+    true xor true == false
+    5 div 2 == 2
+    5 mod 2 == 1
+
+Minus is both a unary prefix operator and a binary infix operator with special support to disambiguate the two. ``(-)`` denotes the binary minus operator and ``neg`` the unary minus operation.
+
+Parentheses
+-----------
+
+Parentheses can be used to group expressions and override parsing as usual.
+
+For brevity, trailing parentheses can be omitted:
+
+::
+
+  assertEqual
+    3+1/(7+1/(15+1/1
+    355/113
+
+Although it parses, you can set Stroscot to warn or error on unmatched parentheses, or run the code formatter which will add them.
+
+Chained Comparison
+------------------
+
+::
+
+  assert
+    1 <= 2 < 3
+    9 > 2 < 3
+
+Variables
+=========
+
+Identifiers cannot be directly reassigned; you can shadow, which generates a warning, but once an identifier is declared in a scope, that's what that identifier refers to for the duration of the scope. OTOH references behave like mutable variables.
+
+::
+
+  a = mut 1
+  a := 2
+  raise a by 1
+
+Mutable assignment (``:=``) is completely distinct from name binding (``=``). They have distinct notation and mutable assignment cannot create new bindings.
+
+Functions
+=========
+
+Sequential matching:
+
+::
+
+  f 1 y = 1
+  f x 2 = 2
+  f x y = 3
+
+Parallel matching:
+::
+
+  f 1 = 1
+  ;
+  f 2 = 2
+  ;
+  f y | y != 1 && y != 2 = 3
+
+The extra ``;`` is an escape to avoid sequential matching of a sequence; if you alternate clauses of different functions or define clauses in different files they will also be combined with parallel matching.
+
+Function application (juxtaposition) binds stronger than all operators and associates to the left, ``x y z --> (x y) z``.
+
+Patterns
+--------
+
+Patterns all compile to guard conditions on ``$args``. They also check that the arity of ``$args`` is the number of patterns.
+
+::
+
+  _ --> True -- wildcard
+  ^a --> $args[i] == a -- matches the atom a
+  ^f a b c --> $args[0] == f && $args.length >= 4 # matches the symbol tree with atom f
+  (f@_) a --> $args.length >= 2 # matches any symbol tree besides a single atom
+  [(1, "x"), {c: 'a'}] -> $args[i] == [(1, "x"), {c: 'a'}] -- literal match
+  [1, ..., 2] --> $args[i][0] == 1 && $args[i][-1] == 2 -- matches any list starting with 1 and ending with 2
+  {a: 1, ...} --> $args[a] == 1 # matches a and the rest of the record
+   pat1 AND pat2 --> match $args pat1 and match $args pat2 # matches both patterns simultaneously
+   pat1 OR pat2 --> match $args pat1 or match $args pat2 # matches either pattern
+  ~pat --> True # desugars to f u_ ... = let pat = u_ in ..., where u_ is a unique name
+  (a : b) --> a elemOf b # type tag
+  a | f a --> f a # guard, arbitrary function
+  (f -> a) --> match (f $args[i]) a # view pattern
+
+``_`` occuring by itself denotes an anonymous variable which matches any value without actually binding a name.
+
+Destructuring and function bindings
+------------------------------------
+
+Generally identifiers ``f`` in head positions of a LHS ``f a b c`` are taken as literal function symbols. Identifiers in head position in a sub-term are taken to be constructors, and destructure the function argument. Identifiers in non-head positions are taken to be variables. This is Pure's "head = function rule".
+
+::
+
+  x = 2 # x is function of no arguments
+  x a = a # x is function of one argument, binds variable "a"
+  x (foo a b) # x is function of one argument, destructures term with head foo and binds a/b
+
+Certain symbols such as tuple heads as head of the LHS are assumed not to be function definitions. Instead matching on them destructures the right hand side. For example you can define functions using destructuring:
+
+::
+
+  (x < y, x > y) = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
+
+This translates to:
+
+::
+
+  x > y = case (z x y) of { (x < y, x > y) -> (x > y) }
+  -- equivalent to
+  x > y = case (z x y) of { (a,b) -> a }
+
+  x < y = case (z x y) of { (x < y, x > y) -> (x < y) }
+
+  z x y = (<0) &&& (>0) $ s' (digitsToBits digits) where (CR s') = x-y
+  -- z a fresh symbol
+
+To force a function definition you can use an as pattern, ``_@(,)``
+
+To force interpretation as a variable you can use an anonymous as pattern, ``(f@_) a b c``. Then ``f`` is a variable and will match any symbol, rather just ``f``. Example converting a function application to a list::
+
+  foo ((x@_) y) = (foo x) ++ [y]
+  foo x = [x]
+  > foo (a b c d);
+  [a,b,c,d]
+
+To force interpretation as a literal you can use ``^``. The symbol will be interpreted as a literal even in variable position::
+
+  foo ^foo = "self-application"
+
+  foo bar # does not reduce
+
+You can also declare ``foo`` to be a symbol::
+
+  symbol foo
+
+However this is a module definition and means the symbol cannot be used as a variable in the module anymore.
+
+
+Symbols
+-------
+
+ To say that it is actually a symbol a special keyword ``symbol`` is used:
+
+::
+
+  symbol foo
+
+  foo x = 1
+
+  bar 2 = 2
+  # equivalent to _ 2 = 2 because bar is interpreted as a variable
+
+Furthermore you can define a function symbol with an arity. This resolves applying the function symbol to arguments for which no clauses are defined to the exception ``undefined``, which often has better semantics than an unevaluated normal form.
+
+::
+
+  function symbol foo arity 2
+
+  foo 1 2 = "fine"
+
+  foo 1 2 # "fine"
+  foo 3 4 # undefined
+  foo 1 # not affected - normal form
+
+This just creates a low priority definition ``foo _ _ = undefined``.
+
+Non-linear patterns
+-------------------
+
+Non-left-linear patterns such as ``foo a a`` are allowed, this is interpreted as ``foo a b | a == b`` - rename variables and check for equality using ``==``. See :ref:`trs-equality-linearity` for a discussion.
+
+Pattern synonyms
+----------------
+
+::
+
+  toPolar (Point x y) = (sqrt (x^2 + y^2), atan2 x y)
+  pattern Polar r t = (toPolar -> (r,t))
+
+Pattern definitions are unidirectional in that they define matchers for syntax used only in patterns, not in expressions. To make a bidirectional pattern simply define the builder:
+
+::
+
+  Polar r t = Point (r * cos t) (r * sin t)
+
+Variable bindings
+-----------------
+
+::
+
+  a --> if a then $arga[0] == a else True -- binds a if a is not defined as a symbol
+  _a --> True -- hole, binds a even if a is an existing symbol
+
+
+This defines the variables as a zero-arity function symbol. So for example you can write
+
+::
+
+  a | True = 1
+  a | False = 2
+
+which means the same thing as
+
+::
+
+  a | True = 1
+    | False = 2
+
+i.e. ``a = 1``.
+
+Inline definitions
+------------------
+
+Definitions can be made inline; they are lifted to the closest scope that allows definitions.
+
+::
+
+   range = sqrt((dx=x1-x0)*dx + (dy=y1-y0)*dy)
+
+  -- translates to
+   dx=x1-x0
+   dy=y1-y0
+   range = sqrt(dx*dx + dy*dy)
+
+Keyword arguments
+-----------------
+
+::
+
+   foo w x y z = z - x / y * w
+
+  v = foo (y:2) (x:4) (w:1) (z:0)
+  # 0-4/2*1
+  v == foo {x:4,y:2,w:1,z:0}
+  # true
+
+You can specify a subset of the arguments to generate a partially applied function:
+
+::
+
+  a = foo (y:2) (w:1)
+  b = a (x:4) (z:0)
+  b == v
+  # true
+
+Using the variable name in braces by itself uses the value of that variable in scope:
+
+::
+
+  y = 2
+  x = 4
+  w = 1
+  z = 0
+  v = foo {w,x,y,z}
+
+Positional arguments
+--------------------
+
+::
+
+  v == foo 1 4 2 0
+  # true
+
+You can mix positional and keyword arguments freely; positions are
+assigned to whatever is not a keyword argument.
+
+::
+
+  v == foo {z:0} {w:1} 4 2
+  # true
+
+Positional arguments support currying, for example:
+
+::
+
+  c x y = x-y
+  b = c 3
+
+  b 4
+  # 1
+
+Positional arguments may be filled by the special syntax ``_`` to write a partial application:
+
+::
+
+  sub x y = x - y
+  sub1 = sub _ 1
+
+  # equivalent definition
+  sub1 x = sub x 1
+
+  sub1 3
+  # 2
+
+All the underscores of a call are regrouped to form the parameters of a unique function in the same order as the corresponding underscores.
+
+Implicit arguments
+------------------
+
+These behave similarly to arguments in languages with dynamical scoping. Positional arguments can be passed implicitly, but only if the function is used without applying any positional arguments. If the LHS contains positional arguments only that number of positional arguments are consumed and they are not passed implicitly.
+
+::
+
+  foo w x y z = z - x / y * w
+  bar = foo + 2
+  baz a = bar {x:4,y:2} - a
+
+  bar 1 2 3 4
+  # (4 - 2/ 3 * 1) + 2
+
+  ((0-4/2*1)+2)-5 == baz 5 {z:0,w:1}
+  # true
+   baz 1 2 3 4 5
+  # Error: too many arguments to baz, expected [a]
+
+Similarly keyword arguments inhibit passing down that keyword
+implicitly:
+
+::
+
+  a k = 1
+  b k = k + a
+
+  b {k:2}
+  # Error: no definition for k given to a
+
+A proper definition for b would either omit k or pass it explicitly to a:
+
+::
+
+  a k = 1
+  b = k + a
+  b' k = k + a k
+
+  b {k:2} == b' {k:2}
+  # true
+
+For functions with no positional arguments, positions are assigned
+implicitly left-to-right:
+
+::
+
+  a = x / y + y
+  a 4 1
+  # 5
+
+Atoms that are in lexical scope are not assigned positions, hence (/)
+and (+) are not implicit positional arguments for a in the example
+above. But they are implicit keyword arguments:
+
+::
+
+  a = x / y + y
+  assert
+    a {(+):(-)} 4 1
+    == 4/1-1
+    == 3
+
+The namespace scoping mechanism protects against accidental use in large
+projects.
+
+Infix operators can accept implicit arguments just like prefix functions:
+
+::
+
+  infix (**)
+  x ** y {z} = x+y/z
+
+Default arguments
+-----------------
+
+::
+
+  a {k:1} = k + 1
+  a # 2
+
+Modula-3 added keyword arguments and default arguments to Modula-2. But I think they also added a misfeature: positional arguments with default values. In particular this interacts very poorly with currying. If ``foo`` is a function with two positional arguments, the second of them having a default value, then ``foo a b`` is ambiguous as to whether the second argument is overriden.
+
+We can resolve this by requiring parentheses: ``(foo a) b`` passes ``b`` to the result of ``f a {_2=default}``, while ``foo a b`` is overriding the second argument. But it's somewhat fragile, a more robust method is to require specifying/overriding default arguments to use keyword syntax.
+
+Implicit arguments use keyword syntax as well, so they override default arguments:
+
+::
+
+  a {k:1} = k
+  b = a
+  c = b {k:2}
+  c # 2
+
+Output arguments
+----------------
+
+::
+
+  b = out {a:3}; 2
+  b + a
+  # 5
+
+Output arguments can chain into implicit arguments, so you get something like the state monad:
+
+::
+
+  inc {x} = out {x:x+1}
+
+  x = 1
+  inc
+  x # 2
+
+It might be worth having a special keyword ``inout`` for this.
+
+::
+
+  inc {inout x} =
+    x = x+1
+
+Variadic arguments
+------------------
+
+Positional variadic arguments:
+
+::
+
+  c = sum $arguments
+  c 1 2 3
+  # 6
+  c {$arguments=[1,2]}
+  # 3
+
+Only syntactically adjacent arguments are passed, e.g.
+
+::
+
+  (c 1 2) 3
+  # error: 3 3 is not reducible
+
+  a = c 1
+  b = a 2
+  # error: 1 2 is not reducible
+
+There are also variadic keyword arguments:
+
+::
+
+  s = print $kwargs
+  s {a:1,b:2}
+  # {a:1,b:2}
+
+Concatenative arguments
+-----------------------
+
+Results not assigned to a variable are pushed to a stack:
+
+::
+
+  1
+  2
+  3
+
+  %stack
+  # 1 2 3
+
+``%`` is the most recent result, with ``%2`` ``%3`` etc. referring to
+less recent results. These stack arguments are used for positional arguments when not
+supplied.
+
+::
+
+  {a = 1}
+  extend % {b=2}
+  extend % {c=3}
+  shuffle
+  # {b=2,a=1,c=3}
+
+Inheritance
+-----------
+
+The general idea of inheritance is, for ``Foo`` a child of ``Bar`` to rewrite calls ``exec (Foo ...) a b`` to calls ``exec (Bar ...) a b``, and this can be automated with a macro:
+
+::
+
+  inherit foopat barpat barmethodlist = {
+    for (m : barmethodlist) {
+      m foopat = m barpat
+    }
+  }
+
+Operators
+---------
+
+Operators are syntactic sugar for functions. Enclosing an operator
+in parentheses turns it into an ordinary function symbol, thus ``x+y`` is
+exactly the same as ``(+) x y``.
+
+Lambdas
 =======
 
-At the end of the day syntax is about picking a choice and sticking to it. There are many ways to do this. For example, take comments. Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
+::
 
-* For EOL impl, C++ style ``//``
-* For block impl, C style ``/* */``
-* For EOL doc, D style ``///``.
-* For block doc, Javadoc style ``/** */``
-* For code comments (nesting block), Pascal style ``(* *)``
+  \a b -> stuff
+  \a b. stuff
+  lambda {
+    a 1 = stuff
+    a 2 = other
+  }
 
-But is this the best choice? There are lots of other options, an EOL impl comment can be ``;`` or ``#`` or  ``->``. Similarly there are many choices for other syntactic elements:  "not equal" can be ``/=``, ``!=``, or ``~=``. Power can be ``**`` or ``^``. Xor can be ``^`` or ``xor``. In Stroscot, since syntax is pluggable, these are really standard library questions, but a default syntax is necessary for writing the compiler, so we have to figure it out first in order to bootstrap.
+A lambda raises an exception if no pattern matches (defined function), but otherwise is
+a nameless local function. With the ``lambda{}`` syntax multiple clauses can be defined - they are matched sequentially. Multiple-argument lambdas are curried.
 
-The Quorum approach is to design a survey and ask novices what they think is most intuitive. Choices ranked highly by self-reported experienced programmers but not chosen by novices are likely mistakes in PL design. Stefik used CS university students (freshman year novices vs junior/senior year programmers). Since we're designing for novices we don't actually care about or need to measure experienced programmers. So using a convenience sample by posting a Google Form / SurveyMonkey / LimeSurvey to r/learnprogramming isn't that hard - polls need approval but this seems like it might be allowed. (TODO: there is probably a better place on the internet to find programming novices). The questions are basically:
+Because they're nameless lambdas aren't sufficient to define recursive function - use (named) local functions, or the function ``fix : (a -> a) -> a``.
 
-* Title: "Never programmed? Help design a new programming language! (Survey)"
-* Demographics: age, gender, native English speaker. These are mentioned as questions in Stefik's survey :cite:`stefikEmpiricalInvestigationProgramming2013`, but aren't mentioned as having any statistically significant correlations, so can probably be left out to make people less worried about giving out personal information. :cite:`dossantosImpactsCodingPractices2018` did find statistically significant differences for females to prefer multiple statements on one line and more intermedate variable assignments, but there were only 7 females so this is probably noise. OTOH, it would be useful to have demographics to compare to large surveys like the `Stack Overflow Developer Survey <https://insights.stackoverflow.com/survey/2021>`__.
-* years of programming experience. Stefik found that programmers will list experience with individual languages even when reporting no experience total, so it is probably best to ask individually with a language matrix and have an "All others" at the end. Design buckets based on mean / standrd deviation of languages.
+Destructuring works in the arguments of lambdas as with named functions.
 
-* Have you heard of the Stroscot programming language before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results.
-* "how do you think <english description of PL task> should look?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. The concept descriptions are the meat of the survey and Stefik pilot-tested these several times and had them reviewed by expert programmers. Probably ChatGPT can help a lot here to devise standardized wording that avoids prompting with the answer.
+Matching
+--------
 
-The PL tasks themselves should come from an initial survey of expert programmers that is designed to identify key operations and data structures such as lists, function applications, etc.
+``match`` is an expression:
+
+::
+
+  f = match (2+2) (5+5) | x y = 2
+                        | 1 y = 2
+
+It desugars to a lambda applied to the arguments.
+
+``impossible`` is a special RHS used to help the verification analysis:
+
+::
+
+  f = match (2+2)
+        | 5 = impossible
+
+Reduce similarly reduces an expression to normal form using some rules:
+
+::
+
+  reduce x where
+    x = y
+    y = z
+  # z
+
+Operator sections
+-----------------
+
+Operator sections allow writing partial applications of infix operators.
+A left section ``(x+)`` is equivalent to ``(+) x``. A right section ``(+y)`` is
+equivalent to ``\x -> x + y``.
+
+In contrast, ``(-x)`` denotes an application of unary minus; the
+section ``(+-x)`` can be used to indicate a function which subtracts ``x``
+from its argument.
+
+Blocks
+======
+
+::
+
+  x = input number
+   display x
+
+   foo =
+     x = 0
+     x += 1
+     provide x
+
+   obtain http_server
+   main =
+     parse_args
+     build_folder
+     http_server.serve(folder)
+
+The translation rules are based on the continuation monad:
+
+::
+
+  {e} = e
+  {e;stmts} = \c -> e ({stmts} c) = e . {stmts}
+  {p <- e; stmts} = \c -> e (\x -> (\p -> {stmts}) x c) = e >>= {stmts}
+
+Bang notation
+-------------
+
+::
+
+  { f !(g !(print y) !x) }
+
+  // desugars to
+  {
+    t1 <- print y
+    t2 <- x
+    t3 <- g t1 t2
+    f t3
+  }
+
+The notation ``!expr`` within a block means that the expression ``expr`` should be bound in the block to a temporary before computing the surrounding expression. The expression is bound in the nearest enclosing block.
+Expressions are lifted leftmost innermost.
+
+Local definitions
+-----------------
+
+You can define variables and function locally to a block, clause, or clause group with let and where. These are in a new scope and only apply to the block where they are defined. This avoids cluttering up the program. All local definitions are substituted away before the block is evaluated in the ambient context.
+
+::
+
+  foo a y | true = {
+    f x = g x + h y -- block definition
+  }
+    where
+      g a = 2 * a -- clause definition
+  foo b y | false = impossible
+    where
+      h y = a * 2 -- last clause, hence a clause group definition, but uses "a" which is only defined for first clause
+
+A local definition shadows an ambient one, so for example you can write:
+
+::
+
+   f = f 4 where
+     f 0 = 0
+     f x = f (x-1)
+
+``f 4`` and ``f (x-1)`` both refer to the local definition. But you will get a shadowing warning as it is bad style.
+
+``let`` allows recursive definitions, bare definitions are not recursive:
+
+::
+
+  x = x + 1 # defines a new x shadowing the old x
+  let x = (x : Int) * 2 # defines a fixed point with unique solution x=0
+
+  fact x = if x==0 then 0 else x * fact (x-1) # fails due to fact being an unbound symbol
+  let fact x = ... # proper definition
 
 
-educational research
+Monad comprehensions
+--------------------
 
-, such as Tew and Guzdial’s excellent FCS1 instrument [Tew and Guzdial 2011].
-The FCS1 has a very different purpose than our surveys, and Tew and Guzdial’s procedures for statistical validation differ from those we used in pilot studies [Stefik and Gellenbeck 2011], but the level of care in design holds similarities.
+::
+
+  [x,y | x=1..n; y=1..m; x<y]
+
+A convenient means to construct lists and to write blocks compactly. There is a template expression, generator clauses which bind the result of continuation to a pattern, and filter clauses which allow skipping results.
+
+::
+
+  Expressions: e
+  Declarations: d
+  Lists of qualifiers: Q,R,S
+  Qv is the tuple of variables bound by Q (and used subsequently)
+  selQvi is a selector mapping Qv to the ith component of Qv
+
+  -- Basic forms
+  D[ e | ] = return e
+  D[ e1,e2,e3 | ] = return [e1,e2,e3]
+  D[ e | p <- e, Q ]  =
+    p <- e
+    D[ e | Q ]
+  D[ e | e, Q ] =
+    guard e
+    D[ e | Q ]
+  D[ e | let d, Q ] =
+    let d
+    D[ e | Q ]
+
+  -- Parallel comprehensions (iterate for multiple parallel branches)
+  D[ e | (Q | R), S ] =
+    (Qv,Rv) <- mzip D[ Qv | Q ] D[ Rv | R ]
+    D[ e | S ]
+
+  -- Transform comprehensions
+  D[ e | Q then f, R ] =
+    Qv <- f D[ Qv | Q ]
+    D[ e | R ]
+
+  D[ e | Q then f by b, R ] =
+    Qv <- f (\Qv -> b) D[ Qv | Q ]
+    D[ e | R ]
+
+  D[ e | Q then group using f, R ] =\
+    ys <- f D[ Qv | Q ]
+    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
+    D[ e | R ]
+
+  D[ e | Q then group by b using f, R ] =
+    ys <- f (\Qv -> b) D[ Qv | Q ]
+    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
+    D[ e | R ]
 
 
 
-Immersion is by far the best way to learn anything. And as research shows, it turns out that humans retain:
+Control structures
+==================
 
-    5% of what they learn when they’ve learned from a lecture.
-    10% of what they learn when they’ve learned from reading.
-    20% of what they learn from audio-visual.
-    30% of what they learn when they see a demonstration
-    50% of what they learn when engaged in a group discussion.
-    75% of what they learn when they practice what they learned.
-    90% of what they learn when they use it immediately.
+These are things that can show up in blocks and have blocks as arguments.
 
-Think back to how you learned to play basketball, ride a bicycle, or swim. Instead of watching tutorial videos or reading a textbook on how to do something, the way to learn faster is to get into the trenches and gain experience through making mistakes.
+::
+
+  a = if true then 1 else 2 -- just a function if_then_else_ : Bool -> a -> a -> a
+  {
+    x = mut undefined
+    if true { x := 1 } else { x := 2 } -- if on blocks
+    print x
+  }
+  repeat while x > 0 { x -= 1 }
+  repeat until x == 0 { x -= 1 }
+  repeat 10 times { x -= 1 }
+  repeat { x -= 1 } while x > 0
+  repeat
+    x = x * 2
+    if (x % 2 == 0)
+      break
+
+::
+
+  check {
+     risky_procedure
+  } error {
+     fix(error) or error("wtf")
+  } regardless {
+     save_logs
+  }
+
+More here: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
+
+Also the do-while block from `Rune <https://github.com/google/rune/blob/main/doc/rune4python.md#looping>`__:
+
+::
+
+  do
+    c = getNextChar()
+  while c != ‘\0’
+    processChar(c)
+
+The do-block always executes, and the while-block only executes if the condition is true, after which we jump to the start of the do-block. If the condition is false, the loop terminates. This avoids the common C/C++ assignment-in-condition hack:
+
+::
+
+  int c;
+  while ((c = getNextChar()) != '\0') {
+    processChar(c);
+  }
+
+
+Programs
+========
+
+A program is a block, and every declaration is a macro or control structure.
+
+So top-level statements and function calls are allowed. For example you can implement a conditional definition:
+
+::
+
+   if condition
+      a = 1
+   else
+      a = 2
+
+
+Comments
+========
+
+::
+
+  // comment
+  /* multiline
+      comment */
+  (* nesting (* comment *) *)
+   if(false) { code_comment - lexed but not parsed except for start/end }
+  #! shebang at beginning of file
+
+Type declarations
+=================
+
+::
+
+  a = 2 : s8
+  a = s8 2
+

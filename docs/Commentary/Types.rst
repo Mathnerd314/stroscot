@@ -32,15 +32,11 @@ What is a type system?
 
 Wikipedia defines a type system as "a set of rules that assigns a property called a type to the various constructs of a computer program". This phrasing assumes each construct has exactly one "principal" type. But more complex type systems don't have this property. For example with a Haskell GADT ``data R where R : { unR : Int } -> R Int``, ``unR`` may have the type ``forall a. R a -> a`` or ``forall a. R a -> Int``, and these have no unifying type. Haskell just picks a type ``unR : R Int -> Int`` in this case. Really the mapping from expressions to types is many-to-many.
 
-Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ the main point of a type system is to allow "stating and enforcing the invariant that the value at a particular program point must be a certain type" (e.g. an integer), in the form of a type declarations. Particularly this is to optimize inter-modular calls, so that the ABI is efficient.
-
- Stroscot's set membership assertions express these type declaration invariants and give the execution efficiency and safety of a "statically typed, compiled language".
+Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ the main point of a type system is to allow "stating and enforcing the invariant that the value at a particular program point must be a certain type" (e.g. an integer), in the form of a type declarations. Particularly this is to optimize inter-modular calls, so that the ABI is efficient. Stroscot's set membership assertions express these type declaration invariants and give the execution efficiency and safety of a "statically typed, compiled language".
 
 Cliff Click's even broader definition is "something that allows catching errors quickly at compile time", where example errors are calling a non-function or applying a primitive operation to the wrong type. Stroscot's static verification is more powerful than unit testing or type systems, and can catch hard bugs quickly and prove the absence of classes of bugs, allowing rapid development of quality software. The main interface is expresssing invariants as assertions, but type annotations can also be expressed as invariants.
 
-
 As far as the amount of type declarations, the `Zero one infinity rule <https://en.wikipedia.org/wiki/Zero_one_infinity_rule>`__ applies. A program should run without any type declarations, with one declaration for the root of the program, or with any amount of type declarations scattered through the program. The no type declarations is an "untyped" setting and ensures there is a complete operational semantics distinct from the type system. The one type declaration enables checking the program for bad behavior, and ruling out common errors such as typos. The infinite declarations allows using the power of static verification to its fullest, and may require many iterations of tweaked declarations to get right.
-
 
 Assertions are IMO more natural in many cases than types since they have an operational semantics, e.g. ``divide a b = assert (b != 0); ...`` rather than ``divide : Int -> Int\{0} -> Int``. Although, higher-order types can be somewhat more succinct than writing out logical set membership assertions by hand, ``f : (Int -> Int) -> Int`` vs ``{ s = arbElem; a = arbElem; assume(a isElemOf Int); assume(s a isElemOf Int); assert(f s isElemOf Int) }``.
 
@@ -119,12 +115,9 @@ Overall unityping seems good, hence Stroscot is unityped.
 Static vs dynamic
 =================
 
-
 "Soft typing" is similar to the verification approach, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell's "deferred type errors" flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.
 
-    Principle: Good type systems must balance permissiveness with strictness.
-
-Type systems must allow valid programs and catch errors.
+Type systems must allow valid programs and catch errors. But even practical type systems like ML or Haskell have corner cases - the "head of list" function errors on the empty list, but this is not reflected in the type ``[a] -> a``. With overloaded type signatures we can accurately capture the behavior, ``{x : [a] | nonempty x } -> a`` and ``[a] -> a|Error`` (and even ``{ x : [a] | empty x } -> Error``.
 
     Principle: Even sound static type systems compromise on some "type-like" errors and check them dynamically.
 
@@ -168,6 +161,13 @@ how do you represent, check, remove, and apply the tag on the value each time it
         You know the argument is one of polar or rectangular, although which one is not known until runtime. You have ruled out all other values. With a unityped language you cannot express this restriction.
 
         Sufficiently fancy types can give enough information to write ‘obvious’ pieces of code automatically, and with proof assistants this can be a dialogue. An elementary example of this is Lennart Augustsson’s djinn, which will take types like ``fmap : (a -> b) -> Maybe a -> Maybe b``  or ``callCC : ((a -> Cont r b) -> Cont r a) -> Cont r a`` and write code that has the type. These can be non-trivial to write if you’re just thinking about how it should behave, but the type completely determines the implementation.
+
+
+Dynamic languages don't have to be slow. With detailed profiling information, from a JIT compiler or PGO style build, LuaJIT can optimize the inner loop of mandelbrot to the same assembly as a C compiler. But a standard static build workflow won't cut it, and the most popular dynamic languages (JavaScript, Perl, PHP, Python, Ruby) are slow - performance was never a goal of their design, and it's only now everyone realizes that dynamic languages might be useful for compute-intensive tasks. Smalltalk and Self had pretty good optimization research.
+
+Common pain points that require careful design:
+* dynamic dispatch and type uncertainty
+* runtime checks (types, bounds, exceptions)
 
 Roles
 =====

@@ -23,6 +23,24 @@ Goals
 
 The minimal primitives is a question. Chopping up instructions into lots of mathematical operations means that there is a lot of overhead in code generation recognizing patterns of operations as instructions. On the other hand it allows writing a fewer number of more generic and powerful optimizations, instead of many processor-specific instruction patterns. So this choice favors ahead-of-time compilation at the expense of interpretation and JITing.
 
+ASL's primary aim is enabling formal verification of ARM processors. see my upcoming paper “Trustworthy Specifications of ARM v8-A and v8-M System Level Architecture”
+
+
+    ASL is an imperative rather than a functional language. Functional languages are often simpler for use during verification but functional languages and the coding tricks used to describe state changes are not familiar to many programmers so imperative languages are an obvious choice.
+
+    ASL supports unbounded integers, infinite precision reals, fixed-size bitvectors, booleans, enumerations, records (aka structs) and arrays. Virtually all processor state is defined using the bitvectors but most instructions start by unpacking the bitvector into an integer, perform calculations on the unbounded types and then rounds or truncates the final result at the end to pack it back into the bitvectors.
+
+    Using the more mathematical types “integer” and “real” means that as you read the specification you don’t need to be distracted by corner cases due to overflow or wraparound: all rounding, truncation, wraparound, etc. is explicit in the conversion back to bitvectors.
+
+    ASL does not have a concise syntax for dereferencing pointers. In a processor, there are many different flavours of memory accesses: aligned or unaligned, cached or uncached, secure or non-secure, etc. and it is critical that every memory access is explicit about what type of memory access is being used. A side effect of this is that there in no type representing a pointer to some type: there are only bitvectors.
+
+    ASL is strongly typed but uses type inference to give the early error-detection of strong typing without the clutter of having to annotate every variable declaration. The combination of fixed-size bitvectors and strong typing requires a slightly unusual type system where the length of the bitvector can depend on values calculated earlier in the code. A simple example is the function “Replicate(x,n)” which creates n copies of a vector x so if x has type “bits(8)” then “Replicate(x, 4)” has type “bits(32)”. When implementing the type inference system, this requires that bitvector lengths are represented as polynomials.
+
+    ASL has support for throwing and catching exceptions. As you would expect, exceptions allow us to focus on the normal (non-exceptional) case when specifying instructions that might raise exceptions. The one downside is that it is more difficult to think about the tricky cases that happen if an exception does occur.
+
+    Finally, ASL is used to write executable specifications. This is not necessary when using specifications for verification but for most of the other uses, it is critical. ASL does have some non-determinism though so executing specifications aims to follow one correct interpretation of the specification while for verification we use all correct interpretations of the spec.
+
+
 IR Style
 ========
 

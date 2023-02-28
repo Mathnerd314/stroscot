@@ -109,18 +109,18 @@ Principles:
 * The library should be divided up into modules. The modules should be dated/versioned independently to allow specifying fine-grained dependencies. The modules should also have hashes in the name, to avoid name collisions. Neither dates nor hashes should appear in actual source code, and they should be centralized in a lock file, to avoid the "magic number" antipattern. If a package depends on packages with colliding names the lockfile should specify how to rename the packages. The modules should also be downloadable independently, so really the "standard library" is a software repository with high standards for inclusion.
 * It should be easy to add code to the standard library. Taking more than a year to add a new API is just too slow; 6 months seems about right.
 
-  * If there are multiple popular third-party libraries that do similar things but are incompatible, sharing code becomes problematic because code is tied to one of these implementations, and the community starts to split and newcomers get turned off by decision paralysis. Example: `scalaz vs cats <https://github.com/fosskers/scalaz-and-cats>`__ was an issue with Scala for a long time, before `it became clear <https://www.reddit.com/r/scala/comments/afor0h/scalaz_8_timeline/>`__ that Scalaz 8 would never be released and scalaz was effectively dead. There are several strategies for dealing with incompatibilities:
+  * If there is a single popular third-party library that has become the "go-to" library for some task, the process is straightforward to make this part of the standard library: it should just be incorporated after it has been proven to be sufficiently stable. The standard library provides discoverability and maintenance benefits over isolated libraries. For example incorporation solves the `left-pad <https://qz.com/646467/how-one-programmer-broke-the-internet-by-deleting-a-tiny-piece-of-code/>`__ issue where key libraries are maintained by solo developers with no oversight. Since it's all FLOSS, licensing should not be an issue, and presumably most developers will be happy to share maintainershup and join the team, or relinquish maintainance entirely.
+
+  * If there are multiple popular third-party libraries that do similar things but are incompatible, there are several strategies to deal with this:
 
     * Create a wrapper interface that smooths over the differences and provides a portable interface
-    * Analyze the pros and cons and vote for one library to make standard
-    * Synthesize a new library that combines all the pros and none of the cons
+    * Analyze the pros and cons and vote for one library to make it the standard
+    * Synthesize a new library that combines all the pros and none of the cons of the existing libraries
 
-    It doesn't really matter if the wrong decision is made because a robust evolution process means it can always be changed later, and in the short term 50% is better than 0% even if there is a 60% option.
+    It doesn't really matter if the wrong decision is made because a robust evolution process means it can always be changed later, and in the short term 50% is better than 0% even if there is a 60% option. What is problematic is letting the split continue to fester without a clear path forward. Over time, sharing code becomes problematic because pieces of code become tied to one or another of these implementations, and the community starts to split and newcomers get turned off by decision paralysis. Example: `scalaz vs cats <https://github.com/fosskers/scalaz-and-cats>`__ was an issue with Scala for a long time, before `it became clear <https://www.reddit.com/r/scala/comments/afor0h/scalaz_8_timeline/>`__ that Scalaz 8 would never be released and scalaz was effectively dead, thus making cats the go-to choice.
 
-  * If there is a single popular third-party library that has become the "go-to" library for some task, the process is even easier: it should just be incorporated after it has been proven to be sufficiently stable. The standard library provides discoverability and maintenance benefits over isolated libraries. For example incorporation solves the `left-pad <https://qz.com/646467/how-one-programmer-broke-the-internet-by-deleting-a-tiny-piece-of-code/>`__ issue where key libraries are maintained by solo developers with no oversight. Since it's all FLOSS, licensing should not be an issue, and presumably most developers will be happy to share maintainershup and join the team, or relinquish maintainance entirely.
-
-* It should also be easy to remove code from the standard library. Some APIs inevitably become obsolete as others are added and become more popular. Similarly it should be easy to fix names, implementation details, and API design, as conventions change. This is accomplished as an add-remove pair. But people need time to migrate, so there should be a 2-year deprecation process. There should be some amount of forward stability so that if code compiles with an old SL, it will continue to do so with a new SL. This means deprecated API isn't actually removed, it instead goes to a "compatibility graveyard" and stays around for old projects while being invisible to new ones.
-* Generally speaking, third party libraries should be either be in active development or designed as specialized replacements for something in the standard library. The active development is obvious: it's much easier to rapidly iterate when you don't have to maintain compatibility. The specialized is less obvious: most likely the third-party is better than the standard in some way, but there are trade-offs. There is a possibility that standardizing a solution will crowd out other solutions, but discussing trade-offs and alternatives in the standard library documentation is probably sufficient.
+* It should also be easy to remove code from the standard library. Some APIs inevitably become obsolete as others are added and become more popular. Similarly it should be easy to fix names, implementation details, and API design, as conventions change. This is accomplished as an add-remove pair. But people need time to migrate, so there should be a 2-year deprecation process. There should be some amount of forward stability so that if code compiles with an old standard library, it will continue to do so with a new standard library. This means deprecated API isn't actually removed, it instead goes to a "compatibility graveyard" and stays around for old projects while being invisible to new ones.
+* Generally speaking, third party libraries should be either be in active development or designed as specialized replacements for something in the standard library. The active development is obvious: it's much easier to rapidly iterate when you don't have to maintain compatibility. The specialized is less obvious: most likely the third-party is better than the standard in some way, but there are trade-offs. There is a possibility that standardizing a solution in the standard library will crowd out other solutions, but discussing trade-offs and alternative libraries in the standard library documentation is probably sufficient.
 
 Blessed prelude
 ===============
@@ -312,6 +312,14 @@ They also have generator comprehensions and big operator syntax, but the descrip
              | otherwise = return $ Nil
 
 The problem with this design is you can accidentally store the ``next`` operation and re-use it. With ``next : Iterator -> Op (Done | Yield a)`` the similar pattern ``let y = next iter in { y; y}`` just results in calling ``next`` twice and does not corrupt the iterator state.
+
+Control structures
+==================
+
+ https://www.ccs.neu.edu/home/shivers/papers/loop.pdf / https://www.youtube.com/watch?v=PCzNwWmQdb0
+
+
+ see also Reference/Syntax, a lot of potential control structures
 
 Goto/Break/continue
 ===================
@@ -537,11 +545,24 @@ This all works because the set of lists/nonempty lists under concatenation is is
 Serialization
 =============
 
-Java has this by default, so we should too.
+Serialization is the ability to convert an object graph into a stream of bytes, and more broadly the reverse as well (deserialization). In Java the OO model was defined first and serialization was added later as a "magic function". The design has various problems, as described in `Project Amber <https://openjdk.org/projects/amber/design-notes/towards-better-serialization>`__:
 
-The hard parts are that Stroscot has more types of values: cyclic terms, lambdas. Ideally these would be deconstructible with term rewriting. References are a sticking point, the store needs special handling, probably just a reference <-> refid map.
+* serialization can access private classes and fields, an implicit public set of accessors
+* deserialization bypasses defined constructors and directly creates objects via the runtime, an implicit public constructor
+* serialization/deserialization uses magic private methods and fields to guide the process, such as readObject, writeObject, readObjectNoData, readResolve, writeReplace, serialVersionUID, and serialPersistentFields
+* The Serializable marker interface doesn’t actually mean that instances are serializable. Objects may throw during serialization, as e.g. Java has no way to express the constraint that a TreeMap is serializable only if the Comparator passed to the constructor is serializable. Also there are objects such as lambdas, which are easily serializable but error due to lacking Serializable, requiring special type casts.
+* Serialization uses a fixed encoding format that cannot be modified to JSON/XML/a more efficient/flexible format, or one with version markers. There are no checks that serialization/deserialization is a round trip.
 
-As far as wire encodings, a custom binary format and JSON seem sufficient, the others can be 3rd-party libraries.
+In Stroscot the privacy is a non-issue because everything is exposed through the internal module. Magic methods are no issue either because they are just normal multimethods. The hard parts are that Stroscot has more types of values: cyclic terms, lambdas. Ideally these would be deconstructible with term rewriting. References are also a sticking point, the store needs special handling, probably just a reference <-> refid map. We would like a friendly, generic way to write a function that can serialize all types of values, so that implementing new serialization formats in 3rd-party libraries is possible.
+
+Amber also says the format should be versioned, because unless you plan for versioning from the beginning, it can be very difficult to version the serialized form with the tools available without sacrificing compatibility. But JSON has no version numbers, and XML only barely. So this can be folded into general library-level compatibility and versioning.
+
+Cycles and non-serializable data
+--------------------------------
+
+Cyclic data occurs in many places, e.g. a doubly linked list ``rec { a = {next: b, prev: None}; b = {next: None, prev: a} }``. We also have non-serializable data such as finalizers that does not live across program restarts. These cannot be serialized to JSON etc. as-is, because the format doesn't support it. The solution is a replacer, which transforms cyclic and non-serializable data to a form suitable for serialization. The replacer produces a bijection from bad values to good values, so that we can serialize the good values in place of the bad values and do the opposite transformation on deserialization. Then we serialize this bijection separately (out-of-band).
+
+It is much easier to do replacement out of band because in-band replacement leads to DOS attacks such as "billion laughs". Basically the attacker defines a system such as ``a = "lol"; b = a+a; c=b+b; d=c+c;``, etc., constructing a string of a billion laughs, or similarly a large object that takes up too much memory. A simple solution is to cap memory usage, but this means some objects fail to serialize. Instead in-band entities must be treated lazily and not expanded unless necessary. Out-of-band avoids the issue by not allowing references in data.
 
 Function pipelines
 ==================
