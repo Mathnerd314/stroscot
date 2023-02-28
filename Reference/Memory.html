@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memory &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -94,7 +96,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
       <li class="breadcrumb-item active">Memory</li>
       <li class="wy-breadcrumbs-aside">
@@ -112,17 +114,17 @@
 <section id="value-representation">
 <h2>Value representation<a class="headerlink" href="#value-representation" title="Permalink to this heading"></a></h2>
 <p>We don’t consider memory a scarce resource, hence pure values can be created and destroyed as needed by the RTS. But the RTS allows controlling the in-memory representation with user-written code.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Bit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="kt">MaskedBit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Bit</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Masked</span><span class="w"></span>
-<span class="kt">Word</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Bit</span><span class="w"></span>
-<span class="kt">Addr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Word</span><span class="w"></span>
-<span class="kt">MaskedWord</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">MaskedBit</span><span class="w"></span>
-<span class="kt">Store</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="kt">MaskedWord</span><span class="w"></span>
-<span class="kt">Write</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Alloc</span><span class="w"> </span><span class="p">(</span><span class="kt">Size</span><span class="p">,</span><span class="kt">Align</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Write</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Store</span><span class="w"></span>
-<span class="kt">Read</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="kt">Word</span><span class="w"></span>
-<span class="kt">Unpack</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Maybe</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Read</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="kt">Object</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Write</span><span class="p">,</span><span class="w"> </span><span class="kt">Unpack</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"></span>
-<span class="nf">pack</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Object</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Bit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span>
+<span class="kt">MaskedBit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Bit</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Masked</span>
+<span class="kt">Word</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Bit</span>
+<span class="kt">Addr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Word</span>
+<span class="kt">MaskedWord</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="o">..</span><span class="n">n</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">MaskedBit</span>
+<span class="kt">Store</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="kt">MaskedWord</span>
+<span class="kt">Write</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Alloc</span><span class="w"> </span><span class="p">(</span><span class="kt">Size</span><span class="p">,</span><span class="kt">Align</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Write</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">Store</span>
+<span class="kt">Read</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="kt">Word</span>
+<span class="kt">Unpack</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Maybe</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Read</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span>
+<span class="kt">Object</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Write</span><span class="p">,</span><span class="w"> </span><span class="kt">Unpack</span><span class="w"> </span><span class="n">a</span><span class="p">)</span>
+<span class="nf">pack</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Object</span>
 </pre></div>
 </div>
 <p>The memory representation of a value is defined by an overloaded <code class="docutils literal notranslate"><span class="pre">pack</span></code> function. The result of pack is an <em>object</em>, a tuple containing how to write the value to memory and a matched unpack function to read the value back. Usually <code class="docutils literal notranslate"><span class="pre">unpack</span></code> will be a function pointer and Stroscot can use constant propagation to optimize it out of the object. In the worst case <code class="docutils literal notranslate"><span class="pre">unpack</span></code> captures the full value and Stroscot will use its default representation for the closure.</p>
@@ -155,63 +157,63 @@
 <span id="id2"></span><h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this heading"></a></h2>
 <p>Finalizers are a relaxed approach to prompt resource management. They allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, but do not require explicit marking of the free operation. A finalizer is a magic value created with the one-argument function <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">:</span> <span class="pre">(free</span> <span class="pre">:</span> <span class="pre">Command)</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Finalizer</span></code>. It supports equality, hashing, and command <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Finalizer</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Command</span></code>.</p>
 <p>The semantics is that <code class="docutils literal notranslate"><span class="pre">free</span></code> will be called as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> will not be called. Calling <code class="docutils literal notranslate"><span class="pre">use</span></code> delays finalization until after the <code class="docutils literal notranslate"><span class="pre">use</span></code>, and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> cancels the finalizer and returns the free operation. The general transformation:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span><span class="w"></span>
-<span class="w">  </span><span class="n">transform</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="n">free</span><span class="p">,</span><span class="n">f</span><span class="p">}</span><span class="w"></span>
-<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">free</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span>
+<span class="w">  </span><span class="n">transform</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="n">free</span><span class="p">,</span><span class="n">f</span><span class="p">}</span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">free</span>
 
-<span class="nf">transform</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Task</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Task</span><span class="w"></span>
-<span class="nf">transform</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">free</span><span class="w"> </span><span class="p">{</span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="p">})</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Delaying finalizer due to conditional usage&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
+<span class="nf">transform</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Task</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Task</span>
+<span class="nf">transform</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="n">c</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">free</span><span class="w"> </span><span class="p">{</span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="p">})</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Delaying finalizer due to conditional usage&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span>
 </pre></div>
 </div>
 <p>The info can be an error if prompt memory management is desired. The situation happens when freeing depends on input data:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
-<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="n">af</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="n">af</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span>
+<span class="w">  </span><span class="n">exit</span>
 </pre></div>
 </div>
 <p>Because <code class="docutils literal notranslate"><span class="pre">a</span></code> is used in the else branch, it cannot be freed before the condition. It is freed as soon as it is known it will not be used, hence this program is equivalent to:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">  </span><span class="n">af</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="n">af</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">af</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">af</span>
+<span class="w">  </span><span class="n">exit</span>
 </pre></div>
 </div>
 <p>If multiple finalizers simultaneously become able to call <code class="docutils literal notranslate"><span class="pre">free</span></code>, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="p">)</span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">)</span>
 
-<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
-<span class="w">  </span><span class="n">exit</span><span class="w"></span>
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">b</span>
+<span class="w">  </span><span class="n">exit</span>
 
-<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">false</span><span class="kt">:</span><span class="w"> </span><span class="n">cab</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">true</span><span class="kt">:</span><span class="w"> </span><span class="n">bac</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">false</span><span class="kt">:</span><span class="w"> </span><span class="n">cab</span>
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">true</span><span class="kt">:</span><span class="w"> </span><span class="n">bac</span>
 </pre></div>
 </div>
 <section id="freed-on-exit">
@@ -231,11 +233,11 @@
 <h3>Types<a class="headerlink" href="#types" title="Permalink to this heading"></a></h3>
 <section id="immutable">
 <h4>Immutable<a class="headerlink" href="#immutable" title="Permalink to this heading"></a></h4>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">imm</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">imm</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
 
-<span class="o">#</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">list</span><span class="w"></span>
-<span class="nf">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">list</span>
+<span class="nf">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">1</span>
 </pre></div>
 </div>
 <p>The contents of an immutable reference are fixed once created, i.e. an immutable reference cannot be written. It can be freely shared across threads.</p>
@@ -243,13 +245,13 @@
 </section>
 <section id="variable">
 <h4>Variable<a class="headerlink" href="#variable" title="Permalink to this heading"></a></h4>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="w"></span>
-<span class="nf">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="nf">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="nf">read</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
 
-<span class="o">#</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">list</span><span class="w"></span>
-<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="o">#</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">list</span>
+<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>A variable is a thread-local reference that can store arbitrary packable values. Thread local means that reading/writing from a different thread than the owning thread returns an error. You can get/set the owner with <code class="docutils literal notranslate"><span class="pre">getOwner/setOwner</span></code>. Initially the thread that allocates the variable owns it.</p>
@@ -257,20 +259,20 @@
 </section>
 <section id="shared-memory">
 <h4>Shared memory<a class="headerlink" href="#shared-memory" title="Permalink to this heading"></a></h4>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>A reference to shared memory is a fixed-size array of contiguous bits. The size is restricted to a multiple of bytes or words depending on the ISA. The operations are defined by the CPU; you can use fences, atomics, whatever is in the ISA.</p>
 <p>Reading always copies (into a register, usually).</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">thread</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">thread</span>
 </pre></div>
 </div>
 <p>Each word is its own reference; this uses the word sized load-store operations of the ISA.</p>
 </section>
 <section id="thread-local-storage">
 <h4>Thread-local storage<a class="headerlink" href="#thread-local-storage" title="Permalink to this heading"></a></h4>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">tls</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">tls</span><span class="w"> </span><span class="mi">0</span>
 </pre></div>
 </div>
 <p>See <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage">https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage</a></p>
@@ -283,12 +285,12 @@
 <section id="wrapper">
 <h4>Wrapper<a class="headerlink" href="#wrapper" title="Permalink to this heading"></a></h4>
 <p>A wrapper reference is a custom implementation of the read/modify operations. There’s no special support needed in the language for this beyond overloading <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">(Wrapper</span> <span class="pre">{read,modify})</span> <span class="pre">=</span> <span class="pre">read</span></code> and <code class="docutils literal notranslate"><span class="pre">(Wrapper</span> <span class="pre">{read,modify})</span> <span class="pre">:=</span> <span class="pre">newV</span> <span class="pre">=</span> <span class="pre">modify</span> <span class="pre">newV</span></code>.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inner</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
-<span class="nf">cell_0</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">newWrapper</span><span class="w"></span>
-<span class="w">  </span><span class="n">read</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="n">modify</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">    </span><span class="n">inner</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">cell_0</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">inner</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="nf">cell_0</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">newWrapper</span>
+<span class="w">  </span><span class="n">read</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="w">  </span><span class="n">modify</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">    </span><span class="n">inner</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">inner</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newV</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">read</span><span class="w"> </span><span class="n">cell_0</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>For example, there is a wrapper API around shared memory to allow load/store of non-word values; it packs and writes or reads and unpacks, erroring if the value doesn’t fit in the array. Hence a 1-word shared memory reference can be used like a variable containing a word.</p>

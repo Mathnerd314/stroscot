@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Modules &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -113,7 +114,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Modules</li>
       <li class="wy-breadcrumbs-aside">
@@ -132,7 +133,7 @@
 <section id="module">
 <h2>Module<a class="headerlink" href="#module" title="Permalink to this heading"></a></h2>
 <p>A module is a set of definitions - a set rather than a list because the order is not relevant. Some definitions are declared “visible” and are exposed/exported in the signature. We write: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> at the top of the module, with <code class="docutils literal notranslate"><span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> a list of exported names.</p>
-<p>Definitions not in the signature are considered “internal”. Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these definitions through the <code class="docutils literal notranslate"><span class="pre">_internal</span></code> pseudo-module, like <code class="docutils literal notranslate"><span class="pre">a._internal.b</span></code>. Thus definitions are always accessible somehow. This avoids Java’s issue of reflection allowing access to “private” data. If you really want to lock an API down then use a secret password or crypto.</p>
+<p>Definitions not in the signature are considered “internal”. Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these definitions through the <code class="docutils literal notranslate"><span class="pre">_internal</span></code> pseudo-module, like <code class="docutils literal notranslate"><span class="pre">a._internal.b</span></code>. Thus definitions are always accessible somehow. This avoids Java’s issue of reflection allowing access to “private” data. If you really want to lock an API down then you can clear out <code class="docutils literal notranslate"><span class="pre">_internal</span></code> by defining an immediately invoked function expression that first computes the module as a value and then returns a separate module that only re-exports the public definitions. But it is probably better to make the methods themselves use a secret password, token, crypto, etc. to prevent unauthorized access.</p>
 <p>Modules can be nested within other modules, to an arbitrary depth. Modules can also re-export other modules by importing the modules or by individual copy definitions using the dot syntax, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code>.</p>
 </section>
 <section id="functors">
@@ -154,14 +155,14 @@ There is only one effective scope at any point in the code (for instance, variab
 <section id="type-piracy">
 <h2>Type piracy<a class="headerlink" href="#type-piracy" title="Permalink to this heading"></a></h2>
 <p>Julia has “type piracy” where method definitions are visible even if you don’t import that module. For example</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">A</span><span class="w"></span>
-<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span><span class="w"></span>
-<span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="w"></span>
-<span class="nf">end</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">A</span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span>
+<span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="nf">end</span>
 
-<span class="kr">module</span><span class="w"> </span><span class="nn">B</span><span class="w"></span>
-<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span><span class="w"></span>
-<span class="nf">test</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="kr">module</span><span class="w"> </span><span class="nn">B</span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span>
+<span class="nf">test</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Apparently in Julia B will use A’s definition. This is not wanted, because it means there is a global rule definition space. In Stroscot only rules that are in the transitive closure of explicitly imported dependencies should apply.</p>

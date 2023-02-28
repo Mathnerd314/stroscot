@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Time API &mdash; Stroscot  documentation</title>
@@ -14,16 +14,14 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Types" href="Types.html" />
+    <link rel="next" title="Tools" href="Tools.html" />
     <link rel="prev" title="Term rewriting" href="TermRewriting.html" /> 
 </head>
 
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -102,6 +102,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#os-interface">OS interface</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -123,7 +124,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Time API</li>
       <li class="wy-breadcrumbs-aside">
@@ -141,9 +142,9 @@
 <h2>Instant<a class="headerlink" href="#instant" title="Permalink to this heading"></a></h2>
 <p>An instant marks a proper time (real number) as measured by some observer.  Although relativity means not all events can be given a time as they happened with space-like separation from the observer, the speed of light is quite fast so most events on a human-level timescale do have timelike separation.</p>
 <p>A timescale T is a one-to-one function of the proper time, i.e. each instant corresponds to a value on the timescale.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="kt">Instant</span>
 
-<span class="nf">timescale</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
+<span class="nf">timescale</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="kt">Instant</span>
 </pre></div>
 </div>
 <p>In Python’s terminology a timescale value is “aware”, but Python also considers bare times like <code class="docutils literal notranslate"><span class="pre">10:34</span> <span class="pre">AM</span></code> with a UTC offset to be aware, which is pretty weird because you can’t convert it to a proper time without the day.</p>
@@ -175,17 +176,17 @@
 <section id="epochs">
 <h2>Epochs<a class="headerlink" href="#epochs" title="Permalink to this heading"></a></h2>
 <p>The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, too many to list here. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">FixedEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
-<span class="kt">CalendarEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">FixedEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Instant</span>
+<span class="kt">CalendarEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Instant</span>
 </pre></div>
 </div>
 </section>
 <section id="epoch-relative-time">
 <h2>Epoch-relative time<a class="headerlink" href="#epoch-relative-time" title="Permalink to this heading"></a></h2>
 <p>The form of specifying time most convenient for calculations is as a quantity of time elapsed relative to some particular epoch, where the quantity is a number and some time unit. The time standard must also be specified to fix the length of the time unit. So it looks as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">EpochTime</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Epoch</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeStandard</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">EpochTime</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Epoch</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeStandard</span><span class="w"> </span><span class="p">}</span>
 
-<span class="kt">EpochTime</span><span class="w"> </span><span class="mi">14247</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="kt">UnixEpoch</span><span class="w"> </span><span class="kt">UTC</span><span class="w"> </span><span class="c1">-- 14247 days after Unix epoch</span><span class="w"></span>
+<span class="kt">EpochTime</span><span class="w"> </span><span class="mi">14247</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="kt">UnixEpoch</span><span class="w"> </span><span class="kt">UTC</span><span class="w"> </span><span class="c1">-- 14247 days after Unix epoch</span>
 </pre></div>
 </div>
 <p>The unit is a singular ChronoField, because a real number times one field is sufficient to express any instant. For multiple fields use a time record or tuple of time duration and epoch.</p>
@@ -194,19 +195,19 @@
 <section id="time-record">
 <h2>Time record<a class="headerlink" href="#time-record" title="Permalink to this heading"></a></h2>
 <p>A time record specifies an instant using a collection of fields from the proleptic Gregorian calendar (ISO 8601), implicitly using the Rata Die epoch. The time standard must also be specified.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">AdjustField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">InLeapSecond</span><span class="p">,</span><span class="w"> </span><span class="kt">TAIOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">InDST</span><span class="p">,</span><span class="w"> </span><span class="kt">UTCHourOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">Fold</span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">AdjustField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">InLeapSecond</span><span class="p">,</span><span class="w"> </span><span class="kt">TAIOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">InDST</span><span class="p">,</span><span class="w"> </span><span class="kt">UTCHourOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">Fold</span><span class="p">}</span>
 
-<span class="kt">ChronoField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">Nanosecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Microsecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Second</span><span class="p">,</span><span class="w"> </span><span class="kt">Minute</span><span class="p">,</span><span class="w"> </span><span class="kt">Hour</span><span class="p">,</span><span class="w"> </span><span class="kt">Half_Day</span><span class="p">,</span><span class="w"> </span><span class="kt">Day</span><span class="p">,</span><span class="w"> </span><span class="kt">WeekDay</span><span class="p">,</span><span class="w"> </span><span class="kt">Week</span><span class="p">,</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="kt">Quarter</span><span class="p">,</span><span class="w"> </span><span class="kt">Year</span><span class="p">,</span><span class="w"> </span><span class="kt">JulianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">BesselianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">Decade</span><span class="p">,</span><span class="w"> </span><span class="kt">Century</span><span class="p">,</span><span class="w"> </span><span class="kt">Millennium</span><span class="p">,</span><span class="w"> </span><span class="kt">Era</span><span class="p">}</span><span class="w"> </span><span class="n">union</span><span class="w"> </span><span class="kt">AdjustField</span><span class="w"></span>
+<span class="kt">ChronoField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">Nanosecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Microsecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="kt">Second</span><span class="p">,</span><span class="w"> </span><span class="kt">Minute</span><span class="p">,</span><span class="w"> </span><span class="kt">Hour</span><span class="p">,</span><span class="w"> </span><span class="kt">Half_Day</span><span class="p">,</span><span class="w"> </span><span class="kt">Day</span><span class="p">,</span><span class="w"> </span><span class="kt">WeekDay</span><span class="p">,</span><span class="w"> </span><span class="kt">Week</span><span class="p">,</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="kt">Quarter</span><span class="p">,</span><span class="w"> </span><span class="kt">Year</span><span class="p">,</span><span class="w"> </span><span class="kt">JulianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">BesselianAstroYear</span><span class="p">,</span><span class="w"> </span><span class="kt">Decade</span><span class="p">,</span><span class="w"> </span><span class="kt">Century</span><span class="p">,</span><span class="w"> </span><span class="kt">Millennium</span><span class="p">,</span><span class="w"> </span><span class="kt">Era</span><span class="p">}</span><span class="w"> </span><span class="n">union</span><span class="w"> </span><span class="kt">AdjustField</span>
 
 
-<span class="c1">-- convertible to integers</span><span class="w"></span>
-<span class="kt">DayOfWeek</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Monday</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="kt">Sunday</span><span class="w"></span>
-<span class="kt">Month</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">January</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="kt">December</span><span class="w"></span>
-<span class="kt">Era</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">BC</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">AD</span><span class="w"></span>
+<span class="c1">-- convertible to integers</span>
+<span class="kt">DayOfWeek</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Monday</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="kt">Sunday</span>
+<span class="kt">Month</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">January</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="kt">December</span>
+<span class="kt">Era</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">BC</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">AD</span>
 
-<span class="kt">TimeRecord</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="kt">Real</span><span class="o">|</span><span class="kt">DayOfWeek</span><span class="o">|</span><span class="kt">Month</span><span class="o">|</span><span class="kt">Era</span><span class="p">),</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="kt">TimeRecord</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="kt">Real</span><span class="o">|</span><span class="kt">DayOfWeek</span><span class="o">|</span><span class="kt">Month</span><span class="o">|</span><span class="kt">Era</span><span class="p">),</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span>
 
-<span class="kt">NormalizedTimeRecord</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="kt">TimeRecord</span><span class="w"></span>
+<span class="kt">NormalizedTimeRecord</span><span class="w"> </span><span class="n">subset</span><span class="w"> </span><span class="kt">TimeRecord</span>
 </pre></div>
 </div>
 <p>An un-normalized time record may have any real value for any of the fields, except for era for which only two values are defined (similar to a sign bit). Normalization calculates an instant as the sum associated left from least precise to most precise, e.g. <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">year</span> <span class="pre">=</span> <span class="pre">2006.6,</span> <span class="pre">month</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">day</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">}</span></code> gives <code class="docutils literal notranslate"><span class="pre">((RataDie</span> <span class="pre">+</span> <span class="pre">2006.6*year)+0*month)+3*day</span></code>.</p>
@@ -222,15 +223,15 @@
 <li><p>era : Era, year : range real 1 infinity</p></li>
 </ul>
 <p>Since the range and type varies there is an API to compute it:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">NormalizedRange</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">maxSmallest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">minLargest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="w"></span>
-<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">minLargest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">NormalizedRange</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">maxSmallest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">minLargest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">minLargest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">minSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxSmallest</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">maxLargest</span><span class="w"> </span><span class="p">}</span>
 
-<span class="c1">-- only looks at which fields are present</span><span class="w"></span>
-<span class="nf">range</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">NormalizedRange</span><span class="w"></span>
-<span class="kr">type</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Type</span><span class="w"></span>
+<span class="c1">-- only looks at which fields are present</span>
+<span class="nf">range</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">NormalizedRange</span>
+<span class="kr">type</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Type</span>
 
-<span class="c1">-- looks at values of fields</span><span class="w"></span>
-<span class="nf">preciseRange</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeRecord</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="n">min</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">)</span><span class="w"></span>
+<span class="c1">-- looks at values of fields</span>
+<span class="nf">preciseRange</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeRecord</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="n">min</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For the range, all values are within <code class="docutils literal notranslate"><span class="pre">[minSmallest,</span> <span class="pre">maxLargest)</span></code>, but setting a field to a value outside of <code class="docutils literal notranslate"><span class="pre">[minLargest,</span> <span class="pre">maxSmallest)</span></code> may produce an un-normalized value. To avoid this the precise range can be used, but it is dependent on the values of the less-precise fields (e.g. number of days in a month varies based on the month and year).</p>
@@ -249,7 +250,7 @@
 <section id="duration">
 <h2>Duration<a class="headerlink" href="#duration" title="Permalink to this heading"></a></h2>
 <p>A duration identifies a time difference as a collection of time fields. All the fields are real:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Duration</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Real</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Duration</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Real</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>The length of the fields varies by time standard, so that must also be specified. Although the primary use of a duration is to be added or subtracted from an instant, and some instant formats have standards associated with them which might allow avoiding the standard field in the duration, other instant types such as well-known fixed instants have no standard, so the instant’s standard cannot be used in general.</p>
@@ -263,7 +264,7 @@
 <section id="partial-date">
 <h2>Partial date<a class="headerlink" href="#partial-date" title="Permalink to this heading"></a></h2>
 <p>A partial date is just a collection of time fields, and a list of all of them for the complete date. There is an “update” operation which takes an instant and a partial date that has the semantics of replacing or overriding the fields of the instant with those of the partial date’s, when the instant is expressed as a time record in the given standard.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">PartialDate</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">complete</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="kt">Int</span><span class="o">|</span><span class="kt">Real</span><span class="o">|</span><span class="kt">DayOfWeek</span><span class="o">|</span><span class="kt">Month</span><span class="o">|</span><span class="kt">Era</span><span class="p">),</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">PartialDate</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">complete</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="kt">Int</span><span class="o">|</span><span class="kt">Real</span><span class="o">|</span><span class="kt">DayOfWeek</span><span class="o">|</span><span class="kt">Month</span><span class="o">|</span><span class="kt">Era</span><span class="p">),</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>For example a POSIX timestamp is a partial date with its InLeapSecond field unspecified.</p>
@@ -271,7 +272,7 @@
 <section id="intervals">
 <h2>Intervals<a class="headerlink" href="#intervals" title="Permalink to this heading"></a></h2>
 <p>Time intervals represent a closed interval <code class="docutils literal notranslate"><span class="pre">[s,e]</span></code> of instants.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">TimeInterval</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">}</span><span class="w"> </span><span class="c1">-- inclusive</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">TimeInterval</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">}</span><span class="w"> </span><span class="c1">-- inclusive</span>
 </pre></div>
 </div>
 <p>Probably the standard interval type is sufficient.</p>
@@ -279,43 +280,43 @@
 <section id="recurrence">
 <h2>Recurrence<a class="headerlink" href="#recurrence" title="Permalink to this heading"></a></h2>
 <p>This represents a recurrence rule as documented in the iCalendar RFC. (c.f. <a class="reference external" href="https://dateutil.readthedocs.io/en/stable/rrule.html">https://dateutil.readthedocs.io/en/stable/rrule.html</a>)</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">rrule</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dtstart</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">datetime</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">freq</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">{</span><span class="kt">YEARLY</span><span class="p">,</span><span class="w"> </span><span class="kt">MONTHLY</span><span class="p">,</span><span class="w"> </span><span class="kt">WEEKLY</span><span class="p">,</span><span class="w"> </span><span class="kt">DAILY</span><span class="p">,</span><span class="w"> </span><span class="kt">HOURLY</span><span class="p">,</span><span class="w"> </span><span class="kt">MINUTELY</span><span class="p">,</span><span class="w"> </span><span class="kt">SECONDLY</span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="o">.</span><span class="w"> </span><span class="n">interval</span><span class="kt">:</span><span class="w"> </span><span class="n">int</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">datetime</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">wkst</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DayOfWeek</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="p">{</span><span class="n">bysetpos</span><span class="p">,</span><span class="w"> </span><span class="n">bymonth</span><span class="p">,</span><span class="w"> </span><span class="n">bymonthday</span><span class="p">,</span><span class="w"> </span><span class="n">byyearday</span><span class="p">,</span><span class="w"> </span><span class="n">byweekno</span><span class="p">,</span><span class="w"> </span><span class="n">byweekday</span><span class="p">,</span><span class="w"> </span><span class="n">byhour</span><span class="p">,</span><span class="w"> </span><span class="n">byminute</span><span class="p">,</span><span class="w"> </span><span class="n">bysecond</span><span class="p">,</span><span class="w"> </span><span class="n">byeaster</span><span class="p">}</span><span class="w"> </span><span class="p">[</span><span class="n">int</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">rrule</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dtstart</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">datetime</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">freq</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">{</span><span class="kt">YEARLY</span><span class="p">,</span><span class="w"> </span><span class="kt">MONTHLY</span><span class="p">,</span><span class="w"> </span><span class="kt">WEEKLY</span><span class="p">,</span><span class="w"> </span><span class="kt">DAILY</span><span class="p">,</span><span class="w"> </span><span class="kt">HOURLY</span><span class="p">,</span><span class="w"> </span><span class="kt">MINUTELY</span><span class="p">,</span><span class="w"> </span><span class="kt">SECONDLY</span><span class="p">}</span>
+<span class="w">  </span><span class="o">.</span><span class="w"> </span><span class="n">interval</span><span class="kt">:</span><span class="w"> </span><span class="n">int</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">datetime</span><span class="p">)</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">wkst</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DayOfWeek</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="p">{</span><span class="n">bysetpos</span><span class="p">,</span><span class="w"> </span><span class="n">bymonth</span><span class="p">,</span><span class="w"> </span><span class="n">bymonthday</span><span class="p">,</span><span class="w"> </span><span class="n">byyearday</span><span class="p">,</span><span class="w"> </span><span class="n">byweekno</span><span class="p">,</span><span class="w"> </span><span class="n">byweekday</span><span class="p">,</span><span class="w"> </span><span class="n">byhour</span><span class="p">,</span><span class="w"> </span><span class="n">byminute</span><span class="p">,</span><span class="w"> </span><span class="n">bysecond</span><span class="p">,</span><span class="w"> </span><span class="n">byeaster</span><span class="p">}</span><span class="w"> </span><span class="p">[</span><span class="n">int</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="format-information">
 <h2>Format information<a class="headerlink" href="#format-information" title="Permalink to this heading"></a></h2>
 <p>This is used for pretty-printing and parsing instants.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">DateTimeFormat</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">printerParser</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">CompositePrinterParser</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">locale</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Locale</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">decimalStyle</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DecimalStyle</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">resolverStyle</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ResolverStyle</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">resolverFields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="kt">FormatStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">Full</span><span class="p">,</span><span class="w"> </span><span class="kt">Long</span><span class="p">,</span><span class="w"> </span><span class="kt">Medium</span><span class="p">,</span><span class="w"> </span><span class="kt">Short</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="kt">ResolverStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Strict</span><span class="p">,</span><span class="w"> </span><span class="kt">Smart</span><span class="p">,</span><span class="w"> </span><span class="kt">Lenient</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- strict: reject invalid values</span><span class="w"></span>
-<span class="c1">-- smart: day-of-month 32 is clipped to day 30 or 31</span><span class="w"></span>
-<span class="c1">-- lenient: month 15 is treated as being 3 months after month 12.</span><span class="w"></span>
-<span class="kt">SignStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Normal</span><span class="p">,</span><span class="w"> </span><span class="kt">Always</span><span class="p">,</span><span class="w"> </span><span class="kt">Never</span><span class="p">,</span><span class="w"> </span><span class="kt">Not_Negative</span><span class="p">,</span><span class="w"> </span><span class="kt">Exceeds_Pad</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- Normal: -1, 2</span><span class="w"></span>
-<span class="c1">-- Always: -1, +2</span><span class="w"></span>
-<span class="c1">-- Never: 1, 2</span><span class="w"></span>
-<span class="c1">-- Not_Negative: exception, 2</span><span class="w"></span>
-<span class="c1">-- Exceeds_Pad: Normal but output the sign if the value exceeds the pad width.</span><span class="w"></span>
-<span class="c1">-- In lenient parsing, any sign will be accepted unless the width is fixed,</span><span class="w"></span>
-<span class="c1">-- with the absence of a sign treated as a positive number.</span><span class="w"></span>
-<span class="kt">TextStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Full</span><span class="p">,</span><span class="w"> </span><span class="kt">Full_Standalone</span><span class="p">,</span><span class="w"> </span><span class="kt">Short</span><span class="p">,</span><span class="w"> </span><span class="kt">Short_Standalone</span><span class="p">,</span><span class="w"> </span><span class="kt">Narrow</span><span class="p">,</span><span class="w"> </span><span class="kt">Narrow_Standalone</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- standalone does not apply to English, but in other languages you have &quot;MarchX&quot; and &quot;MarchY 2, 2003&quot;</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">DateTimeFormat</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">printerParser</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">CompositePrinterParser</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">locale</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Locale</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">decimalStyle</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DecimalStyle</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">resolverStyle</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ResolverStyle</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">resolverFields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="kt">FormatStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">Full</span><span class="p">,</span><span class="w"> </span><span class="kt">Long</span><span class="p">,</span><span class="w"> </span><span class="kt">Medium</span><span class="p">,</span><span class="w"> </span><span class="kt">Short</span><span class="w"> </span><span class="p">}</span>
+<span class="kt">ResolverStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Strict</span><span class="p">,</span><span class="w"> </span><span class="kt">Smart</span><span class="p">,</span><span class="w"> </span><span class="kt">Lenient</span><span class="p">}</span>
+<span class="c1">-- strict: reject invalid values</span>
+<span class="c1">-- smart: day-of-month 32 is clipped to day 30 or 31</span>
+<span class="c1">-- lenient: month 15 is treated as being 3 months after month 12.</span>
+<span class="kt">SignStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Normal</span><span class="p">,</span><span class="w"> </span><span class="kt">Always</span><span class="p">,</span><span class="w"> </span><span class="kt">Never</span><span class="p">,</span><span class="w"> </span><span class="kt">Not_Negative</span><span class="p">,</span><span class="w"> </span><span class="kt">Exceeds_Pad</span><span class="p">}</span>
+<span class="c1">-- Normal: -1, 2</span>
+<span class="c1">-- Always: -1, +2</span>
+<span class="c1">-- Never: 1, 2</span>
+<span class="c1">-- Not_Negative: exception, 2</span>
+<span class="c1">-- Exceeds_Pad: Normal but output the sign if the value exceeds the pad width.</span>
+<span class="c1">-- In lenient parsing, any sign will be accepted unless the width is fixed,</span>
+<span class="c1">-- with the absence of a sign treated as a positive number.</span>
+<span class="kt">TextStyle</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">enum</span><span class="w"> </span><span class="p">{</span><span class="kt">Full</span><span class="p">,</span><span class="w"> </span><span class="kt">Full_Standalone</span><span class="p">,</span><span class="w"> </span><span class="kt">Short</span><span class="p">,</span><span class="w"> </span><span class="kt">Short_Standalone</span><span class="p">,</span><span class="w"> </span><span class="kt">Narrow</span><span class="p">,</span><span class="w"> </span><span class="kt">Narrow_Standalone</span><span class="p">}</span>
+<span class="c1">-- standalone does not apply to English, but in other languages you have &quot;MarchX&quot; and &quot;MarchY 2, 2003&quot;</span>
 </pre></div>
 </div>
 </section>
@@ -323,32 +324,32 @@
 <h2>Time zones<a class="headerlink" href="#time-zones" title="Permalink to this heading"></a></h2>
 <p>Civil time standards refer to a time zone database for the UTC offset using a time zone ID string.</p>
 <p>A time zone is a list of transitions:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneOffsetTransition</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">instant</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetBefore</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Offset</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetAfter</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Offset</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneOffsetTransition</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">instant</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetBefore</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Offset</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetAfter</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Offset</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>At the instant given the offset changes from before to after.</p>
 <p>Most transitions follow a regular pattern, so are given by a rule:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneOffsetTransitionRule</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="n">dayOfMonth</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">i8</span><span class="p">,</span><span class="w"> </span><span class="n">dow</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DayOfWeek</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">LocalTime</span><span class="p">,</span><span class="w"> </span><span class="n">timeEndOfDay</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">boolean</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">timeDefinition</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeDefinition</span><span class="p">,</span><span class="w"> </span><span class="n">standardOffset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetBefore</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetAfter</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneOffsetTransitionRule</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Month</span><span class="p">,</span><span class="w"> </span><span class="n">dayOfMonth</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">i8</span><span class="p">,</span><span class="w"> </span><span class="n">dow</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">DayOfWeek</span><span class="p">,</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">LocalTime</span><span class="p">,</span><span class="w"> </span><span class="n">timeEndOfDay</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">boolean</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">timeDefinition</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeDefinition</span><span class="p">,</span><span class="w"> </span><span class="n">standardOffset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetBefore</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">offsetAfter</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ZoneOffset</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>So overall Java uses this thing for a time zone:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneRules</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">standardTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">Instant</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">standardOffsets</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffset</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">standardOffsets</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">standardTransitions</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">savingsLocalTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">LocalDateTime</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">savingsLocalTransitions</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">wallOffsets</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">wallOffsets</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffset</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">savingsInstantTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">i64</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">savingsInstantTransitions</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">wallOffsets</span><span class="w"></span>
-<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">lastRules</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffsetTransitionRule</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneRules</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">standardTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">Instant</span><span class="p">]</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">standardOffsets</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffset</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">standardOffsets</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">standardTransitions</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">savingsLocalTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">LocalDateTime</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">savingsLocalTransitions</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">wallOffsets</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">wallOffsets</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffset</span><span class="p">]</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">savingsInstantTransitions</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">i64</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">savingsInstantTransitions</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">wallOffsets</span>
+<span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="n">lastRules</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="kt">ZoneOffsetTransitionRule</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>TODO: Checkout Python zoneinfo, whatever Rust does, etc. for a better API</p>
@@ -372,7 +373,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="TermRewriting.html" class="btn btn-neutral float-left" title="Term rewriting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Types.html" class="btn btn-neutral float-right" title="Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Tools.html" class="btn btn-neutral float-right" title="Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

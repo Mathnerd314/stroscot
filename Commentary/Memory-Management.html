@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memory management &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -118,7 +119,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Memory management</li>
       <li class="wy-breadcrumbs-aside">
@@ -155,9 +156,7 @@
 <p>Unfreed memory, use-after-free, and double free can all be statically checked, so are basically a solved problem. Hence Stroscot frees automatically, in particular immediately after the last access.</p>
 <p>Wikipedia says a memory leak occurs when memory which is no longer needed is not released. Stroscot’s analysis is more precise than traditional GC, so assuming Stroscot’s definition of “needed” is accurate, Stroscot’s analysis eliminates memory leaks. But it’s up to dead code elimination to decide that since the result is discarded the data access can be ignored and hence the memory is not “needed”, so there are still corner cases.</p>
 <p>There’s also “space leaks” where memory could be freed by evaluating a computation earlier. In general this has no solution besides profiling and refactoring the program or buying more RAM.</p>
-<p>The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored.
-A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to be an array variable plus metadata. They don’t require any special support AFAICT.</p>
-<p>Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
+<p>The malloc/free model is not correct; what we need to keep track of is what will be accessed and where it will be stored. Memory management is not about finding a place to store things. If it was, global storage capacity is measured in zettabytes, so we could just store everything in the cloud. Or hard drives would be sufficient for almost all purposes. The issue is storing and retrieving things in the most efficient way possible, with little overhead - in particular preserving cache locality. Examples:
 * A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
 * Grouping hot variables into a page, so the page is always loaded and ready
 * Grouping things that will be freed together (pools/arenas)</p>
@@ -242,15 +241,15 @@ Y is resolved and it turns out to be equal to X. At the time that the store to Y
 <p>Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS’s <a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">value type</a>, and the choices often impact performance significantly. Finally there is the use of pointers. It complicates the memory management a bit to handle non-contiguous memory layouts, but the algorithms all deal with pointer trees anyway so I don’t think it’s intractable.</p>
 <p>The pack/unpack idea is similar to the <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store library</a> and the encode/decode functions used by Narcissus <span id="id4">[<a class="reference internal" href="../zzreferences.html#id35" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>.</p>
 <p>Narcissus is too complex IMO:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
-<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
-<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The state parameter can be gotten rid of by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">(S,St),</span> <span class="pre">T</span> <span class="pre">=</span> <span class="pre">(T,St)</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"></span>
-<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">T</span><span class="w"></span>
-<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">S</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">T</span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">S</span>
 </pre></div>
 </div>
 <p>And we can make encode/decode total by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">{s</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">t.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>, <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">{t</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">s.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>.</p>
@@ -356,21 +355,21 @@ sweeps unsweeped chunk of memory.</p>
 <ol class="arabic simple">
 <li><p>Write barrier: catch writes of new objects to already marked objects.</p></li>
 </ol>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">writeBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">,</span><span class="n">field</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isMarked</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">isNotMarked</span><span class="p">(</span><span class="n">field</span><span class="p">))</span><span class="w"></span>
-<span class="w">        </span><span class="n">gcMark</span><span class="p">(</span><span class="n">field</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">mark</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">field</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">writeBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">,</span><span class="n">field</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isMarked</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">isNotMarked</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+<span class="w">        </span><span class="n">gcMark</span><span class="p">(</span><span class="n">field</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">mark</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">field</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Read barriers: Read barriers are used when collector is moving. They help to get correct reference to the object when collection is running:</p></li>
 </ol>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">readBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="o">//</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">gc</span><span class="w"> </span><span class="n">moved</span><span class="w"> </span><span class="n">object</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">it</span><span class="w"></span>
-<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">moved</span><span class="p">(</span><span class="n">object</span><span class="p">))</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">newLocationOf</span><span class="p">(</span><span class="n">object</span><span class="p">);</span><span class="w"></span>
-<span class="w">      </span><span class="n">return</span><span class="w"> </span><span class="n">object</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">function</span><span class="w"> </span><span class="n">readBarrier</span><span class="p">(</span><span class="n">object</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="o">//</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">gc</span><span class="w"> </span><span class="n">moved</span><span class="w"> </span><span class="n">object</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">it</span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">moved</span><span class="p">(</span><span class="n">object</span><span class="p">))</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="n">newLocationOf</span><span class="p">(</span><span class="n">object</span><span class="p">);</span>
+<span class="w">      </span><span class="n">return</span><span class="w"> </span><span class="n">object</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Concurrent/incremental GC:
@@ -412,40 +411,40 @@ for a_iter_source.iter().collect() there is an optional .size_hint function on t
 * <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">x</span></code> returns true and is never called thereafter
 * <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">x</span></code> is called</p>
 <p>If the control flow does not allow this no-leak property to hold, Stroscot will error.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewDestructor</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span><span class="w"></span>
-<span class="w">  </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"></span>
-<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">False</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">True</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="ne">error</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewDestructor</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span>
+<span class="w">  </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">will_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">False</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="kt">True</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="ne">error</span>
 </pre></div>
 </div>
 <p>TODO: can it be shared. need some way to coordinate control flow analysis across threads</p>
 <p>Destructors are very similar to finalizers. In fact we can use destructors to implement <em>prompt</em> finalizers, that guarantee <code class="docutils literal notranslate"><span class="pre">free</span></code> is called immediately after some <code class="docutils literal notranslate"><span class="pre">use</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newPromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"></span>
-<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
-<span class="w">    </span><span class="n">free</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">newPromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+<span class="w">  </span><span class="n">return</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">PromptFinalizer</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lastUse</span><span class="w"> </span><span class="n">d</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">l</span>
+<span class="w">    </span><span class="n">free</span>
 </pre></div>
 </div>
 <p>However, a prompt finalizer would give an error on programs such as the following:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Freed.&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="nf">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="kt">Bool</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
-<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;Freed.&quot;</span><span class="p">)</span>
+<span class="nf">use</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="kt">Bool</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">b</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;A&quot;</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;B&quot;</span>
 </pre></div>
 </div>
 <p>With a prompt finalizer this program will error. With a normal finalizer, Stroscot will insert calls to <code class="docutils literal notranslate"><span class="pre">free</span></code> after the <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">f</span></code> in the true branch and before the <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;B&quot;</span></code> statement in the else branch.</p>
@@ -494,6 +493,43 @@ destructive assignment is when a memory address is passed in and modified by the
 </ul>
 <p>But if the compiler is able to eliminate all allocations and hence eliminate the possibility of OOM, then these will most likely be consistently eliminated on every compile. So asserting that a function or block can’t OOM is possible. .NET had Constrained Execution Regions which implemented this, with various hacks such JITing the region at load time rather than when the region was first executed. So there’s precedent.</p>
 <p>GCC (and later LLVM) added MemorySSA</p>
+<p>A scratch buffer, as exemplified by GNU C’s <a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Obstacks.html">obstack</a> seems to be an array variable plus metadata. They don’t require any special support AFAICT. But a stack regime is too restrictive.</p>
+<p>The TelaMalloc paper seems like a good memory regime. Basically you have allocations (Start Clock Cycle, End Clock Cycle, Size in bytes) and the compiler has to be able to statically determine how to pack them into a memory space. TelaMalloc uses a limited space of size 𝑀, which is a good model for embedded. With a small limit like 8k, you can track the state of each byte and it’s not too much overhead. With a larger limit like the 2GB on video cards you will have to use a tree-like structure to track allocations. On desktop, the allocation limit is generally total physical RAM plus swap minus other running processes. 32-bit also has a limit of 2-3 GB due to virtual addressing.</p>
+<p>Allocation randomization such as that found in DieHard or OpenBSD does an isolated allocation for each object at a random address. This allows probabilistically detecting bad pointer arithmetic and buffer overflows because they will access a guard page or fence-post before or after the isolated allocation. It also improves security because malicious code will have to determine the addresses of important objects in order to proceed with an exploit; with careful pointer structure the addresses will not be directly accessible and a brute-force search will have to be used. A “trap page” can detect this brute-force search and abort the program.</p>
+<p>Control Flow Guard (CFG) builds a bit map table at compile time of all the legitimate target locations the code can jump too. During the execution of the application, whenever there is a call to jump to a new target location, CFG verifies that the new location was in the bit map table of valid jump locations. If the requested jump location is not listed in the “Valid Jump Locations”, Windows terminates the process thereby preventing the malware from executing.</p>
+<p>Data Execution Prevention (DEP) marks various pages as non-executable, specifically the default heap, stack, and memory pools.</p>
+<p>Structured Exception Handling Overwrite Protection (SEHOP): terminate process if SEH chain does not end with correct symbolic record. Also, the linker will produce a table of each image’s safe exception handlers, and the OS will check each SEH entry against these tables.</p>
+<p>Address Space Layout Randomization (ASLR) mainly refers to randomizing the locations of executable and library images in memory, but can also randomize allocations.</p>
+<p>DieHard segregates metadata from allocations by putting them in different address ranges. Most allocators store metadata adjacent to the allocation, which improves memory locality but makes it easy to corrupt allocation information.</p>
+<p>Many allocators attempt to increase spatial locality by placing objects that are allocated at the same time near each other in memory [11, 14, 25, 40]. DieHard’s random allocation algorithm instead makes it likely that such objects will be distant. This spreading out of objects has little impact on L1 locality because typical heap objects are near or larger than the L1 cache line size (32 bytes on the x86). However, randomized allocation leads to a large number of TLB misses in one application (see Section 7.2.1), and leads to higher resident set sizes because it can induce poor page-level lo- cality. To maintain performance, the in-use portions of the DieHard heap should fit into physical RAM</p>
+<p>DieHard’s complete randomization is key to provably avoiding a range of errors with high probability. It reduces the worst-case odds that a buffer overflow has any impact to 50%. The actual likelihood is even lower when the heap is not full. DieHard also avoids dangling pointer errors with very high probability (e.g., 99.999%), making it nearly impervious to such mistakes. You can read the PLDI paper for more details and formulae.</p>
+<blockquote>
+<div><p>On 64-bit the address space is so large that there is no need to worry about packing page allocations, you just allocate some number of pages at a random address and deal with packing things into that.</p>
+<p>But it is possible to allocate pages at fixed addresses, so conceptually the randomization is just an efficient strategy for when allocations are sparse. The randomization does allow detecting allocation errors via unmapped page access, but Valgrind detects that too.</p>
+</div></blockquote>
+<p>Program memory usage can be segmented into several types:</p>
+<ul class="simple">
+<li><p>frequently accessed data, where reducing the size increases cache performance but they cannot be freed</p></li>
+<li><p>infrequently accessed data, where they can be paged to disk but space optimizations don’t have much use. It may be better to free the pages and recreate them when needed.</p></li>
+<li><p>dead data, which will be determined to not be needed by a traversal and eventually freed</p></li>
+<li><p>leaks, data which has been allocated but will never be used</p></li>
+</ul>
+<p>Memory usage affects various measurements: paging, cache misses, OOM aborts, and the physical and virtual memory consumption reported in Task Manager.</p>
+<p>Basically you track at each program point what is allocated. Then for each allocation you try to find an unused space of sufficient size - this is where the solver comes in because there are constraints. For phi nodes you just combine allocations, so the state is whatever is allocated in either. And for recursion you require the starting and ending allocations to be identical, or warn about unbounded memory usage.
+The UI is essentially the compiler says “ok, I know how to compile your program”, or else it errors with an allocation that the compiler can’t figure out how to fit.
+there is also the end time… somehow you have to propagate the information of how long a block lives back to the allocation point, so that the allocator can make a good decision. I guess it’s your standard backwards dataflow pass. The hard part is figuring out a good representation of “cycle time” that can handle loops and stuff</p>
+<p>well you’ve very helpful so far with the references. let me summarize my position to wrap this up:
+* Most programmers do not know or care about atomics at all. If they do use atomics, they will most likely use whatever guarantees sequential consistency. Per the volatile-by-default papers, with Hotspot’s standard barrier coalescing and read caching optimizations, this has a geometric mean overhead of around 50%, with a maximum observed overhead of 167%. For many purposes this magnitude is not significant enough to matter; it’s about the hit you get moving from C++ to Java. And the relaxed annotations significantly reduced the max overhead from 81% to 34%. The fences needed for SC are well-understood and don’t have many optimizations.
+* If someone needs performance, most likely they are already at the level where they have picked a platform to optimize for and are looking at the assembly. So the most natural memory model is the hardware’s. These models are fully specified, well-tested to match actual hardware, and have even (in most cases) been signed off by the hardware manufacturers. Using the hardware memory model does mean the programmer has to learn about the different fences and decide which one to use, but I don’t think this task can be avoided if it’s really important to optimize a concurrent program. Implementing compiler optimizations based on a hardware MM seems doable.
+* Lastly there are the “portable” C++ and Java memory models (and maybe others like LLVM). These allow execution behavior / optimizations not possible on certain platforms, and maybe even “thin air” behavior of execution not possible on any supported platform. In the thin air case it seems it’s a bug, but apparently in the x86 vs ARM case it’s intended behavior. To avoid confusion, my strategy is to have a literal assembly translation for each atomic operation, so that the behavior is maybe not the fastest but is predictable and consistent.</p>
+<p>memory access optimizations: (unconditionally safe only for unshared RAM, but may be allowed depending on memory model and access patterns)
+- alias analysis
+- reorder loads and stores
+- narrowing a store into a bitfield
+- rematerializing a load
+- Dead Store Elimination (per <span id="id9">[]</span> need to have “secret variables” that can be cleared using “scrubbing stores” that don’t get DSE’d)
+- turning loads and stores into a memcpy call
+- introducing loads and stores along a codepath where they would not otherwise exist</p>
 </section>
 </section>
 

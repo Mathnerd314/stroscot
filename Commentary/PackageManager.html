@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Package manager &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
@@ -33,12 +31,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,13 +60,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -124,7 +125,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Package manager</li>
       <li class="wy-breadcrumbs-aside">
@@ -267,20 +268,20 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 <section id="marking">
 <h3>Marking<a class="headerlink" href="#marking" title="Permalink to this heading"></a></h3>
 <p>For marking, we can model the test process as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
-<span class="nf">for</span><span class="w"> </span><span class="n">commit</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">commits</span><span class="kt">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">choice</span><span class="p">([</span><span class="n">broken</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kt">FIXING</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">BREAKING</span><span class="p">,</span><span class="w"> </span><span class="kt">NONE</span><span class="p">],</span><span class="w"> </span><span class="n">broken</span><span class="p">,</span><span class="w"> </span><span class="n">commit</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">BREAKING:</span><span class="w"></span>
-<span class="w">    </span><span class="n">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">FIXING:</span><span class="w"></span>
-<span class="w">    </span><span class="n">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">false</span>
+<span class="nf">for</span><span class="w"> </span><span class="n">commit</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">commits</span><span class="kt">:</span>
+<span class="w">  </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">choice</span><span class="p">([</span><span class="n">broken</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="kt">FIXING</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">BREAKING</span><span class="p">,</span><span class="w"> </span><span class="kt">NONE</span><span class="p">],</span><span class="w"> </span><span class="n">broken</span><span class="p">,</span><span class="w"> </span><span class="n">commit</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">BREAKING:</span>
+<span class="w">    </span><span class="n">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">commit_type</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">FIXING:</span>
+<span class="w">    </span><span class="n">broken</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">false</span>
 
-<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">runs</span><span class="kt">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">flaky</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span><span class="w"> </span><span class="kt">NO</span><span class="p">],</span><span class="w"> </span><span class="n">broken</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">flaky</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">YES:</span><span class="w"></span>
-<span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="kr">else</span><span class="kt">:</span><span class="w"></span>
-<span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">runs</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">flaky</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">choice</span><span class="p">([</span><span class="kt">YES</span><span class="p">,</span><span class="w"> </span><span class="kt">NO</span><span class="p">],</span><span class="w"> </span><span class="n">broken</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">flaky</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">YES:</span>
+<span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="o">!</span><span class="n">broken</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">else</span><span class="kt">:</span>
+<span class="w">      </span><span class="n">report</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The choice function can be an arbitrarily complicated function of <code class="docutils literal notranslate"><span class="pre">commit</span></code>, but since the outcome is a random binary we can distill it down to two probabilities for each commit <span class="math notranslate nohighlight">\(k\)</span>: fixing <span class="math notranslate nohighlight">\(P(f_k)\)</span> and breaking <span class="math notranslate nohighlight">\(P(b_k)\)</span>. We’ll want complex models to predict these, like the logistic models from <span id="id1">[<a class="reference internal" href="../zzreferences.html#id108" title="Armin Najafi, Peter C. Rigby, and Weiyi Shang. Bisecting commits and modeling commit risk during testing. In Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering - ESEC/FSE 2019, 279–289. Tallinn, Estonia, 2019. ACM Press. URL: https://users.encs.concordia.ca/~shang/pubs/Armin_FSE_2019.pdf (visited on 2020-07-06), doi:10.1145/3338906.3338944.">NRS19</a>]</span> that use the list of files changed / modified components, presence of keywords in commit message, etc., or naive Bayes models that use similar factors but converge faster. Regardless, our model boils down to a hidden Markov process with two states, broken and working. Since the state space is so small we probably want to work with the second-order process, so we can easily identify breaking and fixing commits. The initial state is known to be working.</p>
@@ -289,14 +290,6 @@ For a basic path like <code class="docutils literal notranslate"><span class="pr
 \[ \begin{align}\begin{aligned}P(o_k = f^i s^j \mid r_k) = (1-P(p_k))^i P(p_k)^j\\P(o_k = f^i s^j \mid \neg r_k) = P(n_k)^i (1-P(n_k))^j\end{aligned}\end{align} \]</div>
 <p>We will want to use the logit function <span id="id2">[<a class="reference internal" href="../zzreferences.html#id158" title="Wikipedia. Logit. Wikipedia, June 2020. URL: https://en.wikipedia.org/w/index.php?title=Logit&amp;oldid=964387041 (visited on 2020-07-07).">Wikipedia20b</a>]</span> instead of computing products of small floating point numbers. We can also use a per-run model of flakiness, e.g. based on analyzing the test logs; then each success/failure probability is calculated individually. Whatever the case, we can then use the forward-backward algorithm <span id="id3">[<a class="reference internal" href="../zzreferences.html#id157" title="Wikipedia. Forward–backward algorithm. Wikipedia, July 2020. URL: https://en.wikipedia.org/w/index.php?title=Forward%E2%80%93backward_algorithm&amp;oldid=966683884 (visited on 2020-07-08).">Wikipedia20a</a>]</span> to smooth all the observations and compute the individual probabilities that each commit is broken / breaking / fixing. This can then be propagated back to compute the probability that each run is flaky. When all is said and done we end up with a table:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Change #</p></th>
 <th class="head"><p>P(Broken)</p></th>

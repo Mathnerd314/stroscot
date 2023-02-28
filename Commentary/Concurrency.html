@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Concurrency &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -66,13 +68,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -93,6 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -114,7 +115,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Concurrency</li>
       <li class="wy-breadcrumbs-aside">
@@ -158,29 +159,35 @@
 <section id="memory-models-and-races">
 <h2>Memory models and races<a class="headerlink" href="#memory-models-and-races" title="Permalink to this heading"></a></h2>
 <p>The smallest examples of races runtimewise just have memory access. For example this program SB: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id127" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="nf">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="nf">t1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">A</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="nf">t2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">B</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="nf">join</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span><span class="w"></span>
-<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">u</span><span class="p">))</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
+<span class="nf">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
+<span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
+<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
+<span class="nf">t1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">A</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">t2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fork</span><span class="w"> </span><span class="p">{</span><span class="kt">B</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">join</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">)</span>
+<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">read</span><span class="w"> </span><span class="n">u</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Here the threads are provided by the C stdlib’s pthreads, and the operations are hardware load/store instructions.
 This program has a race condition, i.e. the order of writing and reading from A, B, x and u is not fixed.</p>
-<p>At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot.</p>
-<p>Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code>, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding memory models, x86-TSO <span id="id3">[<a class="reference internal" href="../zzreferences.html#id127" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span> for x86 and multicopy atomicicity (MCA) <span id="id4">[<a class="reference internal" href="../zzreferences.html#id120" title="Christopher Pulte, Shaked Flur, Will Deacon, Jon French, Susmit Sarkar, and Peter Sewell. Simplifying ARM concurrency: multicopy-atomic axiomatic and operational models for ARMv8. Proceedings of the ACM on Programming Languages, 2(POPL):19:1–19:29, December 2017. URL: https://doi.org/10.1145/3158107 (visited on 2021-07-19), doi:10.1145/3158107.">PFD+17</a>]</span> for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs (‘litmus tests’) and appear to be generally accepted by the processor vendors as standard.</p>
+<p>At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot by having non-atomic shared variables.</p>
+<p>Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code>, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding “relaxed memory models”, such as x86-TSO <span id="id3">[<a class="reference internal" href="../zzreferences.html#id127" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span> for x86 and multicopy atomicicity (MCA) <span id="id4">[<a class="reference internal" href="../zzreferences.html#id120" title="Christopher Pulte, Shaked Flur, Will Deacon, Jon French, Susmit Sarkar, and Peter Sewell. Simplifying ARM concurrency: multicopy-atomic axiomatic and operational models for ARMv8. Proceedings of the ACM on Programming Languages, 2(POPL):19:1–19:29, December 2017. URL: https://doi.org/10.1145/3158107 (visited on 2021-07-19), doi:10.1145/3158107.">PFD+17</a>]</span> for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs (‘litmus tests’) and appear to be accepted by the processor vendors as standard.</p>
 <p>Another example is independent reads of independent writes (IRIW):</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">}</span><span class="w"></span>
-<span class="p">{</span><span class="kt">X</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
-<span class="p">{</span><span class="kt">Y</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span><span class="w"></span>
-<span class="p">{</span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">}</span>
+<span class="p">{</span><span class="kt">X</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="kt">Y</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Here the initial state is <code class="docutils literal notranslate"><span class="pre">(X,Y)=(0,0)</span></code>, and the final state can be <code class="docutils literal notranslate"><span class="pre">(a,b,c,d)=(1,0,1,0)</span></code> under POWER. But both ARMv8 and x86 forbid this outcome.</p>
-<p>Now there have been attempts to make cross-platform memory models, e.g. there is a C++11 memory model, a Java memory model, a Linux kernel memory memory model, etc. But each of these models has been a poor match on hardware - either it prevents outcomes possible in hardware, or allows outcomes that hardware would not (e.g. reading values out of thin air), or requires too many fences and is slow. So Stroscot uses the hardware models. For cross-platform programming, instead of a cross-platform model, Stroscot encourages checking platform compatibility of the program, i.e. that the two memory models make the program produce equivalent results.</p>
+<p>Now there have been attempts to make cross-platform memory models, e.g. there is a C++11 memory model, a Java memory model, a Linux kernel memory memory model, etc. But each of these models is a poor match for hardware - the non-relaxed modes prevent outcomes possible in hardware, and require too many fences and are slow, and the relaxed mode is just the hardware but without fences. Early specifications of these models even allowed outcomes that hardware would not (e.g. reading values out of thin air). So Stroscot avoids all this abstraction overhead by using the target hardware’s memory model. This does mean some more work to implement a new platform, but I think it’s worth it. Weaker fences are more performant, and you’ll have the wrong cost model if you aren’t optimizing using the processor’s memory model. For example x86’s TSO model means that concurrent memory writes don’t need a fence at all.</p>
+<p>Now for cross-platform programming, there are tricky cases. For example LDRD on ARM is atomic <a class="reference external" href="https://gcc.gnu.org/pipermail/gcc-patches/2017-April/471979.html">only if</a> LPAE (large physical address extension) is supported by the processor, and even then LDRD is atomic only if it is naturally aligned. For this the cross-platform memory models are useful. But we don’t need to implement the whole model, we just have to use the fairly well-defined assembly instruction translations, for example <a class="reference external" href="https://www.cl.cam.ac.uk/~pes20/cpp/cpp0xmappings.html">C/C++</a> and <a class="reference external" href="https://gee.cs.oswego.edu/dl/jmm/cookbook.html">Java</a>. Then we can use the processor memory model to optimize.</p>
+<p>So overall, determining whether a synchronization pattern is correct requires checking many cases and conditions - exactly what static verification using a memory model can help with.</p>
+<blockquote>
+<div><p>the easy strateg is to just do a strong fence every time you perform a concurrent operation, such as dmb on ARM. This ensures sequential consistency which is essentially everyone’s intuitive memory model.</p>
+<p>instead of a cross-platform model, Stroscot encourages checking platform compatibility of the program, i.e. that the two memory models make the program produce equivalent results.</p>
+</div></blockquote>
 </section>
 <section id="other-types-of-races">
 <h2>Other types of races<a class="headerlink" href="#other-types-of-races" title="Permalink to this heading"></a></h2>
@@ -209,12 +216,12 @@ This program has a race condition, i.e. the order of writing and reading from A,
 <p>For example, <a class="reference external" href="https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm#Parallel_and_distributed_algorithms">multiplying</a> two 2x2 matrices:</p>
 <img alt="../_images/matrix-multiply.svg" src="../_images/matrix-multiply.svg" /><p>The multiplications all happen in parallel and the additions in parallel.</p>
 <p>There’s no explicit syntax for parallelism - pure computations have inherent parallelism. Writing it out looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multiply</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="n">n&#39;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">n&#39;</span><span class="p">,</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
-<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">m</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">i</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
-<span class="w">    </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">o</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">j</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
-<span class="w">      </span><span class="n">sum</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="n">n</span><span class="p">]</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multiply</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">a</span>
+<span class="w">  </span><span class="p">(</span><span class="n">n&#39;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">n&#39;</span><span class="p">,</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="n">b</span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">m</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">i</span><span class="w"> </span><span class="ow">-&gt;</span>
+<span class="w">    </span><span class="n">for</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="n">o</span><span class="p">]</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">j</span><span class="w"> </span><span class="ow">-&gt;</span>
+<span class="w">      </span><span class="n">sum</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">!!</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="n">n</span><span class="p">]</span><span class="w"> </span><span class="p">]</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">for</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code> can evaluate arguments in parallel. More complicated is allowing functions, for example <code class="docutils literal notranslate"><span class="pre">foldMap</span> <span class="pre">f</span> <span class="pre">g</span> <span class="pre">(x:xs)</span> <span class="pre">=</span> <span class="pre">g</span> <span class="pre">(f</span> <span class="pre">x)</span> <span class="pre">(foldMap</span> <span class="pre">f</span> <span class="pre">g</span> <span class="pre">xs)</span></code> generates a DAG of f’s and g’s if the list spine is known. Even with general recursion it should still be possible to identify data dependencies and assign DAG cells to temporary values in some fashion. Conditionals are a little hard to schedule because you have to make sure both sides can be speculated or discard the untaken branch promptly.</p>

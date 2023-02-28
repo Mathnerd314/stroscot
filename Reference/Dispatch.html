@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dispatch &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
@@ -33,12 +31,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -87,7 +89,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Language Reference</a></li>
       <li class="breadcrumb-item active">Dispatch</li>
       <li class="wy-breadcrumbs-aside">
@@ -147,41 +149,41 @@
 <section id="priorities">
 <h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this heading"></a></h2>
 <p>The way sequential matching expands is that there is a chain of priorities.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">clause</span><span class="w"> </span><span class="n">c1</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">clause</span><span class="w"> </span><span class="n">c1</span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
 
-<span class="nf">clause</span><span class="w"> </span><span class="n">c2</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">clause</span><span class="w"> </span><span class="n">c2</span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
 
-<span class="nf">clause</span><span class="w"> </span><span class="n">c3</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<span class="nf">clause</span><span class="w"> </span><span class="n">c3</span>
+<span class="nf">f</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span>
 
-<span class="nf">prioConstrain</span><span class="w"> </span><span class="n">prioHigh</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">prioLow</span><span class="w"></span>
+<span class="nf">prioConstrain</span><span class="w"> </span><span class="n">prioHigh</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c2</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">c3</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">prioLow</span>
 </pre></div>
 </div>
 <p>Each clause has its own priority, which is the tuple (declared priority, specificity) ordered by lexicographical order. If a declared priority is not specified then it is an unnamed fresh priority with the relation <code class="docutils literal notranslate"><span class="pre">prioLow</span> <span class="pre">&lt;</span> <span class="pre">fresh</span> <span class="pre">&lt;</span> <span class="pre">prioHigh</span></code>. Specificity is a poset relation defined by an SMT solver: <code class="docutils literal notranslate"><span class="pre">a</span></code> is more specific than (higher priority) <code class="docutils literal notranslate"><span class="pre">b</span></code> if <code class="docutils literal notranslate"><span class="pre">UNSAT(a</span> <span class="pre">&amp;</span> <span class="pre">not</span> <span class="pre">b)</span></code> and <code class="docutils literal notranslate"><span class="pre">SAT</span> <span class="pre">(not</span> <span class="pre">a</span> <span class="pre">&amp;</span> <span class="pre">b)</span></code>.</p>
 <p>Clauses with lower priority are shadowed by clauses with higher priorities. Clauses with incomparable priorities are run in parallel. Clauses with equal priorities give a warning and are run in parallel.</p>
 <p>There is a macro to give all clauses in a region the same priority, which makes the specificity implementation more useful.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
-<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;garden gate&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="c1">-- the second clause is more specific than the first, hence overrides it</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">prioAll</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;garden gate&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span>
+<span class="p">}</span>
+<span class="c1">-- the second clause is more specific than the first, hence overrides it</span>
 
-<span class="nf">prioAll</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
-<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+<span class="nf">prioAll</span><span class="w"> </span><span class="n">p2</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span>
+<span class="w">   </span><span class="n">isPerson</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span>
 
-<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
-<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span>
+<span class="w">   </span><span class="n">isMan</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span>
 
-<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span><span class="w"></span>
-<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="kr">_</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">no</span>
+<span class="w">   </span><span class="n">isDoor</span><span class="w"> </span><span class="s">&quot;Steve&quot;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">yes</span>
 
-<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isPerson</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Humanoid&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Masculine&quot;</span><span class="w"></span>
-<span class="w">   </span><span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="c1">-- again each clause overrides the second</span><span class="w"></span>
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isPerson</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Humanoid&quot;</span>
+<span class="w">   </span><span class="n">describe</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">isMan</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Masculine&quot;</span>
+<span class="w">   </span><span class="c1">-- describe m | isDoor m = &quot;Door&quot; -- conflict with isMan for &quot;Steve&quot;</span>
+<span class="p">}</span><span class="w"> </span><span class="c1">-- again each clause overrides the second</span>
 </pre></div>
 </div>
 <p>You can get the priority of a clause with <code class="docutils literal notranslate"><span class="pre">prioOf</span> <span class="pre">{</span> <span class="pre">clause</span> <span class="pre">|</span> <span class="pre">condition</span> <span class="pre">}</span></code>, so as to constrain a clause that has an anonymous priority. The AST must match exactly.</p>

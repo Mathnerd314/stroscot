@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Posets &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -93,6 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -114,7 +115,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Posets</li>
       <li class="wy-breadcrumbs-aside">
@@ -136,11 +137,11 @@
 <li><p>symmetry: <code class="docutils literal notranslate"><span class="pre">comp</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">comp</span> <span class="pre">y</span> <span class="pre">x</span> <span class="pre">/.</span> <span class="pre">{</span> <span class="pre">LessThan</span> <span class="pre">-&gt;</span> <span class="pre">GreaterThan,</span> <span class="pre">GreaterThan</span> <span class="pre">-&gt;</span> <span class="pre">LessThan</span> <span class="pre">}</span></code></p></li>
 <li><p>transitivity:</p></li>
 </ul>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">forall</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="kt">Equal</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="kt">Equal</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="kt">LessThan</span><span class="p">,</span><span class="kt">LessThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">LessThan</span><span class="w"></span>
-<span class="w">  </span><span class="p">(</span><span class="kt">GreaterThan</span><span class="p">,</span><span class="kt">GreaterThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">GreaterThan</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">forall</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="kr">case</span><span class="w"> </span><span class="p">(</span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span>
+<span class="w">  </span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="kt">Equal</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span>
+<span class="w">  </span><span class="p">(</span><span class="kt">Equal</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">t</span>
+<span class="w">  </span><span class="p">(</span><span class="kt">LessThan</span><span class="p">,</span><span class="kt">LessThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">LessThan</span>
+<span class="w">  </span><span class="p">(</span><span class="kt">GreaterThan</span><span class="p">,</span><span class="kt">GreaterThan</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">GreaterThan</span>
 </pre></div>
 </div>
 <p>Considering <code class="docutils literal notranslate"><span class="pre">\x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">comp</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">/.</span> <span class="pre">{</span> <span class="pre">GreaterThan</span> <span class="pre">-&gt;</span> <span class="pre">Incomparable,</span> <span class="pre">LessThan</span> <span class="pre">-&gt;</span> <span class="pre">Incomparable</span> <span class="pre">}</span></code>, we obtain a <a class="reference external" href="https://en.wikipedia.org/wiki/Partial_equivalence_relation">partial equivalence relation</a>, hence the name.</p>
@@ -154,48 +155,48 @@
 <section id="constraints">
 <h3>Constraints<a class="headerlink" href="#constraints" title="Permalink to this heading"></a></h3>
 <p>The simplest constraint is specifying the results of comparison. For flexibility one can specify any set of the 4 outcomes (2^4 possibilities, minus the trivial none/all, so 14).  The syntax is to combine characters in the order <code class="docutils literal notranslate"><span class="pre">&lt;&gt;=~</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
-<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
-<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
-<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">y</span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="n">y</span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">y</span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="https://grouper.ieee.org/groups/msc/ANSI_IEEE-Std-754-2019/background/predicates.txt">IEEE 754</a> omits <code class="docutils literal notranslate"><span class="pre">=~</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> as “insufficiently useful to be mandatory”, but they seem worth including for completeness.</p>
 <p>Specifying inclusion in the poset is common, this is just reflexivity:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- equivalent to</span><span class="w"></span>
-<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span>
+<span class="c1">-- equivalent to</span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">z</span>
 </pre></div>
 </div>
 <p>Specifying each of the elements individually is tedious, so you can also define relations elementwise on two sets:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">{</span><span class="n">z</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>We can specify some common properties this way:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- C total order/chain</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">&lt;&gt;=</span><span class="w"> </span><span class="kt">C</span><span class="w"></span>
-<span class="c1">-- C antichain</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">~=</span><span class="w"> </span><span class="kt">C</span><span class="w"></span>
-<span class="c1">-- g upper bound of A</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- m lower bound of A</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- g max of A</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span><span class="w"></span>
-<span class="c1">-- m min of A</span><span class="w"></span>
-<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- C total order/chain</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">&lt;&gt;=</span><span class="w"> </span><span class="kt">C</span>
+<span class="c1">-- C antichain</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">C</span><span class="w"> </span><span class="o">~=</span><span class="w"> </span><span class="kt">C</span>
+<span class="c1">-- g upper bound of A</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span>
+<span class="c1">-- m lower bound of A</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span>
+<span class="c1">-- g max of A</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">g</span><span class="p">}</span>
+<span class="c1">-- m min of A</span>
+<span class="nf">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&gt;=~</span><span class="w"> </span><span class="p">{</span><span class="n">m</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>There’s also Zarf’s <a class="reference external" href="https://eblong.com/zarf/essays/rule-based-if/ruleday-log.html">Precedes thing</a>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
-<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">B</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
-<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">(</span><span class="kt">A</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">disjoint</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
-<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="ne">error</span><span class="w"> </span><span class="s">&quot;no idea what to do here&quot;</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">precedes</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">B</span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">B</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">A</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">B</span><span class="w"> </span><span class="n">subsetOf</span><span class="w"> </span><span class="kt">A</span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="p">(</span><span class="kt">A</span><span class="w"> </span><span class="nf">\</span><span class="w"> </span><span class="kt">B</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="n">disjoint</span><span class="w"> </span><span class="kt">B</span>
+<span class="w">    </span><span class="n">setR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="kt">B</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="ne">error</span><span class="w"> </span><span class="s">&quot;no idea what to do here&quot;</span>
 </pre></div>
 </div>
 <p>It’s so vague and “do what I mean” that I’m not sure it’s a real constraint.</p>
@@ -206,8 +207,8 @@
 <p>We want to talk about meet and join, but those do not exist in every poset. But with the Dedekind-MacNeille completion every poset embeds into a complete lattice, in a way that preserves order / incomparability and any meets and joins that exist in the poset. Specifically, we consider subsets A such that <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">x,</span> <span class="pre">a</span> <span class="pre">in</span> <span class="pre">A.</span> <span class="pre">y</span> <span class="pre">&lt;=</span> <span class="pre">x,</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">a</span> <span class="pre">}</span></code>, and map elements s in the poset to <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">y</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">x.</span> <span class="pre">y</span> <span class="pre">&lt;=</span> <span class="pre">x,</span> <span class="pre">x</span> <span class="pre">&gt;=</span> <span class="pre">s</span> <span class="pre">}</span></code>,</p>
 <p>So when we write <code class="docutils literal notranslate"><span class="pre">meet</span> <span class="pre">{a,b}</span></code> we are referring to a unique element in the completion that may or may not be in the poset, that is the upper bound of the lower bounds of <code class="docutils literal notranslate"><span class="pre">{a,b}</span></code>.</p>
 <p>To put the meet/join in the poset use something like</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">P</span><span class="w"></span>
-<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">meet</span><span class="w"> </span><span class="kt">A</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">P</span>
+<span class="nf">elemR</span><span class="w"> </span><span class="kt">P</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">meet</span><span class="w"> </span><span class="kt">A</span>
 </pre></div>
 </div>
 <p>There are also strict bounds, mainly defined for total orders / chains:

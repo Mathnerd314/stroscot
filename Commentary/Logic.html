@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Logic &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
@@ -33,12 +31,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,13 +60,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Logic</a><ul>
@@ -126,6 +126,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -147,7 +148,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Logic</li>
       <li class="wy-breadcrumbs-aside">
@@ -365,7 +366,7 @@
 \end{array}\]</div>
 <p>These probably aren’t needed, the use-def and infinite structures and types encode recursion better and we can use GHC’s graph reduction model (below).</p>
 <p>Alternately let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular <span id="id36">[<a class="reference internal" href="../zzreferences.html#id90" title="Oleg Kiselyov. Many faces of the fixed-point combinator. August 2013. URL: http://okmij.org/ftp/Computation/fixed-point-combinators.html (visited on 2020-07-31).">Kis13</a>]</span> outline a polyvariadic combinator:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fix_poly</span><span class="w"> </span><span class="n">fl</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fix</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">self</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="p">(</span><span class="o">$</span><span class="w"> </span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="n">fl</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">fix_poly</span><span class="w"> </span><span class="n">fl</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fix</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">self</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="p">(</span><span class="o">$</span><span class="w"> </span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="n">fl</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To implement <code class="docutils literal notranslate"><span class="pre">fix</span></code> we can use the variant of the Y combinator <span class="math notranslate nohighlight">\(\lambda f.(\lambda x.x x) (\lambda x.f (x x))\)</span>. To type it we need the cyclic/recursive type <span class="math notranslate nohighlight">\(Wr = \Pi[(^w, Wr, r)]\)</span> (in the sense of an infinite, regular tree).</p>

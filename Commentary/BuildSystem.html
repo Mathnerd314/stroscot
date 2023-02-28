@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Build system &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -114,13 +116,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -141,6 +141,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -162,7 +163,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Build system</li>
       <li class="wy-breadcrumbs-aside">
@@ -248,7 +249,7 @@
   {
     border-bottom-color: #b1b4b5;
   }
-</style><table class="colwidths-auto shal-trace-example docutils align-default">
+</style><table class="shal-trace-example docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>tid</p></th>
 <th class="head"><p>op</p></th>
@@ -371,7 +372,7 @@
 }</p></object></div>
 <p>Circular nodes represent tasks while rectangular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto’s two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.</p>
 <p>Then during an incremental run we start with a list of changed keys and their values; this is allowed to contain unmodified keys, so generating this list may be as simple as calculating the state of all keys and saying they all might be modified, or it may be a more precise list from a filesystem watcher or similar API. The keys can also include volatile information such as FTP server listings or stdin.</p>
-<table class="colwidths-auto docutils align-default">
+<table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>key</p></th>
 <th class="head"><p>value</p></th>
@@ -946,34 +947,34 @@ savings reflect improved resource utilization.</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--debug=presub</span><span class="w"></span>
-<span class="w">    </span><span class="kt">Building</span><span class="w"> </span><span class="n">myprog</span><span class="o">.</span><span class="n">o</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">action</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="kt">:</span><span class="w"></span>
-<span class="w">      </span><span class="o">$</span><span class="kt">SHCC</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">CPPFLAGS</span><span class="w"> </span><span class="o">$</span><span class="n">_CPPINCFLAGS</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">$</span><span class="kt">TARGET</span><span class="w"> </span><span class="o">$</span><span class="kt">SOURCES</span><span class="w"></span>
-<span class="w">    </span><span class="o">...</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--debug=presub</span>
+<span class="w">    </span><span class="kt">Building</span><span class="w"> </span><span class="n">myprog</span><span class="o">.</span><span class="n">o</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">action</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="kt">:</span>
+<span class="w">      </span><span class="o">$</span><span class="kt">SHCC</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">CPPFLAGS</span><span class="w"> </span><span class="o">$</span><span class="n">_CPPINCFLAGS</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">$</span><span class="kt">TARGET</span><span class="w"> </span><span class="o">$</span><span class="kt">SOURCES</span>
+<span class="w">    </span><span class="o">...</span>
 
-<span class="nf">stacktrace</span><span class="w"></span>
+<span class="nf">stacktrace</span>
 
-<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">internal</span><span class="w"> </span><span class="kt">Python</span><span class="w"> </span><span class="n">stack</span><span class="w"> </span><span class="n">trace</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">encountering</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">otherwise</span><span class="w"> </span><span class="n">unexplained</span><span class="w"> </span><span class="ne">error</span><span class="o">.</span><span class="w"></span>
+<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">internal</span><span class="w"> </span><span class="kt">Python</span><span class="w"> </span><span class="n">stack</span><span class="w"> </span><span class="n">trace</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">encountering</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">otherwise</span><span class="w"> </span><span class="n">unexplained</span><span class="w"> </span><span class="ne">error</span><span class="o">.</span>
 
-<span class="nf">time</span><span class="w"></span>
+<span class="nf">time</span>
 
-<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">profiling</span><span class="w"> </span><span class="n">information</span><span class="kt">:</span><span class="w"></span>
+<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">profiling</span><span class="w"> </span><span class="n">information</span><span class="kt">:</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">individual</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">command</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">individual</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">command</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">ran</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">beginning</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">end</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">ran</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">beginning</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">end</span><span class="p">)</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">itself</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="p">(</span><span class="n">that</span><span class="w"> </span><span class="n">is</span><span class="p">,</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">counting</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">itself</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="p">(</span><span class="n">that</span><span class="w"> </span><span class="n">is</span><span class="p">,</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">counting</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="p">)</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">those</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">those</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span>
 
-<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">passed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">function</span><span class="w"></span>
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">passed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">function</span>
 
-<span class="w">    </span><span class="p">(</span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">typically</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">slightly</span><span class="w"> </span><span class="n">longer</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">due</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">takes</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">between</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">command</span><span class="o">.</span><span class="w"> </span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="n">allows</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="n">parallelization</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">significantly</span><span class="w"> </span><span class="n">smaller</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">since</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">intervening</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">parallel</span><span class="o">.</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">typically</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">slightly</span><span class="w"> </span><span class="n">longer</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">due</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">takes</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">between</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">command</span><span class="o">.</span><span class="w"> </span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="n">allows</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="n">parallelization</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">significantly</span><span class="w"> </span><span class="n">smaller</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">since</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">intervening</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">parallel</span><span class="o">.</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>‘–debug[=options]’</p>
@@ -1053,9 +1054,9 @@ scons –tree=all,prune,status target</p>
 ‘–print-directory’
 ‘–no-print-directory’</p>
 <p>showing each directory as make starts processing it and as make finishes processing it. For example, if ‘make -w’ is run in the directory /u/gnu/make, make will print lines of the form:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Entering</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span><span class="w"></span>
-<span class="o">...</span><span class="w"></span>
-<span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Leaving</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Entering</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
+<span class="o">...</span>
+<span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Leaving</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
 </pre></div>
 </div>
 <p>In make this option improves the output of several levels of recursive make invocations. In Cot it is only useful for tracking down commands which change the current directory; the current directory should not be changed except with <code class="docutils literal notranslate"><span class="pre">-C</span></code>.</p>
@@ -1215,11 +1216,11 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">aut
 </dd>
 </dl>
 </div></blockquote>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--interactive</span><span class="w"></span>
-<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="kt">Reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
-<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="n">done</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="o">.</span><span class="w"></span>
-<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">prog</span><span class="w"></span>
-<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">exit</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--interactive</span>
+<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="kt">Reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="o">...</span>
+<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="n">done</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="o">.</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">prog</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">exit</span>
 </pre></div>
 </div>
 <dl class="simple">

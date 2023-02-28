@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Intrinsics &mdash; Stroscot  documentation</title>
@@ -14,17 +14,15 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Library" href="Library.html" />
-    <link rel="prev" title="Control flow" href="IR.html" /> 
+    <link rel="prev" title="Intermediate representation" href="IR.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Intrinsics</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hardware-operations">Hardware operations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#portable-operations">Portable operations</a></li>
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -115,7 +116,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Intrinsics</li>
       <li class="wy-breadcrumbs-aside">
@@ -131,54 +132,54 @@
 <h1>Intrinsics<a class="headerlink" href="#intrinsics" title="Permalink to this heading"></a></h1>
 <section id="hardware-operations">
 <h2>Hardware operations<a class="headerlink" href="#hardware-operations" title="Permalink to this heading"></a></h2>
-<p>Hardware instructions are a specific series of assembly instructions on a specific platform. This fixes the behavior in all cases quite strongly - we can always set up the machine to a given state and see what it does. Generally speaking the machine can be simulated deterministically as a function from machine state to machine state - otherwise programs would not execute reliably. We can examine emulator projects such as QEMU to get a good idea of what each instruction does. Due to out-of-order execution the execution time of each instruction is nondeterministic; this is not modeled.</p>
+<p>Hardware instructions are a specific series of assembly instructions on a specific platform. This fixes the behavior in all cases quite strongly - we can always set up the machine to a given state and see what it does. Generally speaking the machine can be simulated deterministically as a function from machine state to machine state - otherwise programs would not execute reliably. We can examine emulator projects such as QEMU or a formal ISA semantics to get a good idea of what each instruction does. Due to out-of-order execution the execution time of each instruction is nondeterministic; this is not modeled.</p>
 <p>To abstract the ISA we consider each hardware instruction as a deterministic function from inputs to outputs - these functions are called “operations”. Operations don’t reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX). The precise definition of inputs and outputs requires some care. E.g. for floating-point the FPU state must be considered an input, and RDRAND must have the hardware RNG state as input. Some registers are left in a state that the Intel SDM calls “reserved for future definition” and “undefined” - these must be excluded from outputs, or the precise chip-specific behavior determined and the chip ID considered part of the platform ID. But with suitable munging, operations are well-defined.</p>
 <p>Operations are exposed in Stroscot as intrinsic functions. This allows using Stroscot’s typical syntax. For example the operations corresponding to x86-64 DIV, ADD, and ADC with 64-bit operands look like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">divide</span><span class="w"> </span><span class="p">(</span><span class="n">src</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">high</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">low</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">divisor</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src</span><span class="w"></span>
-<span class="w">  </span><span class="n">dividend</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">high</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">low</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">src1</span><span class="w"></span>
-<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="o">^</span><span class="mi">64</span><span class="w"></span>
-<span class="w">      </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span><span class="w"></span>
-<span class="w">    </span><span class="kr">else</span><span class="w"></span>
-<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">quotient</span><span class="p">,</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">divide</span><span class="w"> </span><span class="p">(</span><span class="n">src</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">high</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">low</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">divisor</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src</span>
+<span class="w">  </span><span class="n">dividend</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">high</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">low</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">src1</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="o">^</span><span class="mi">64</span>
+<span class="w">      </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span>
+<span class="w">    </span><span class="kr">else</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">quotient</span><span class="p">,</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="p">}</span>
 
-<span class="nf">add</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"></span>
-<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">add</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span>
+<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span>
 
-<span class="nf">adc</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">cf</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cf</span><span class="w"></span>
-<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span><span class="w"></span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="nf">adc</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">cf</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cf</span>
+<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Accessing memory is handled by a separate operation - but in the ISA x86 has combined read-add instructions:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">read</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">B64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B32</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B16</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B8</span><span class="p">}</span><span class="w"></span>
-<span class="nf">read</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="n">noncanonical</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- https://stackoverflow.com/questions/25852367/x86-64-canonical-address</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">referencesSSsegment</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">SS</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">GP</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="kr">else</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">unaligned</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="n">alignment_checking</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">AC</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not_in_physical_memory</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
-<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">PF</span><span class="p">(</span><span class="n">fault</span><span class="o">-</span><span class="n">code</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"></span>
-<span class="w">    </span><span class="n">memory</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">read</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">B64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B32</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B16</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B8</span><span class="p">}</span>
+<span class="nf">read</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">noncanonical</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- https://stackoverflow.com/questions/25852367/x86-64-canonical-address</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">referencesSSsegment</span><span class="w"> </span><span class="n">a</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">SS</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">GP</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">unaligned</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="n">alignment_checking</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">AC</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not_in_physical_memory</span><span class="w"> </span><span class="n">a</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">PF</span><span class="p">(</span><span class="n">fault</span><span class="o">-</span><span class="n">code</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">memory</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Ideally we will expose every assembly instruction as a hardware instruction, for our supported platforms.</p>
 </section>
 <section id="portable-operations">
 <h2>Portable operations<a class="headerlink" href="#portable-operations" title="Permalink to this heading"></a></h2>
-<p>On non-native platforms, the given assembly instructions for a hardware operation will likely not exist. Generally it is better to implement use a portable API written at a higher level, such as the limb-multiply routine in libGMP.</p>
+<p>On non-native platforms, the given assembly instructions for a hardware operation will likely not exist. Generally it is better, rather than directly translating instruction-by-instruction, to create a portable API at a higher level, such as the limb-multiply routine in libGMP.</p>
 <p>So the API structure is that we have “native” modules providing native hardware instructions, which give compile-time errors on attempts to use it on non-native platforms, and a portable library that provides a cross-platform interface using switch statements like <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">platform</span> <span class="pre">of</span> <span class="pre">A</span> <span class="pre">-&gt;</span> <span class="pre">implA;</span> <span class="pre">B</span> <span class="pre">-&gt;</span> <span class="pre">implB;</span> <span class="pre">...</span></code>. Some hardware operations are ubiquitous, so it makes sense to expose them directly as portable operations. Addition wraps on all 64-bit hardware in the same way so only needs one portable operation. Other instructions like division have differing behavior, so we can provide 0-returning (ARM native) and <code class="docutils literal notranslate"><span class="pre">DivideByZero</span></code> exception-throwing (Intel native) division as portable operations. There is also the intersection of these functions with signature <code class="docutils literal notranslate"><span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int\{0}</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code>, which is useful when we want zero-overhead on multiple platforms and can prove that the divisor is non-zero. But ideally the compiler will be able to optimize the conditionals out of the 0-returning/exception-throwing versions, giving the native version without requiring a separate function.</p>
 </section>
 <section id="runtime-and-os-calls">
@@ -239,7 +240,7 @@ this goes through clang to identify its FFI signature</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="IR.html" class="btn btn-neutral float-left" title="Control flow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="IR.html" class="btn btn-neutral float-left" title="Intermediate representation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

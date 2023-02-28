@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resource management &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -121,7 +122,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Resource management</li>
       <li class="wy-breadcrumbs-aside">
@@ -140,12 +141,12 @@
 <section id="manual-approach">
 <h2>Manual approach<a class="headerlink" href="#manual-approach" title="Permalink to this heading"></a></h2>
 <p>The manual approach is to release sequentially after acquiring, for example:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="w"></span>
-<span class="nf">f2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file2.txt&quot;</span><span class="w"></span>
-<span class="nf">do_something</span><span class="w"> </span><span class="n">f1</span><span class="w"> </span><span class="n">f2</span><span class="w"></span>
-<span class="nf">close</span><span class="w"> </span><span class="n">f1</span><span class="w"></span>
-<span class="nf">do_something_2</span><span class="w"> </span><span class="n">f2</span><span class="w"></span>
-<span class="nf">close</span><span class="w"> </span><span class="n">f2</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">f2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file2.txt&quot;</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f1</span><span class="w"> </span><span class="n">f2</span>
+<span class="nf">close</span><span class="w"> </span><span class="n">f1</span>
+<span class="nf">do_something_2</span><span class="w"> </span><span class="n">f2</span>
+<span class="nf">close</span><span class="w"> </span><span class="n">f2</span>
 </pre></div>
 </div>
 <p>There are several issues:</p>
@@ -160,19 +161,19 @@
 <section id="try-finally">
 <h2>try-finally<a class="headerlink" href="#try-finally" title="Permalink to this heading"></a></h2>
 <p>The try-finally modifies the basic approach by marking the do_something and release blocks explicitly. There are two patterns in Java 6, <a class="reference external" href="http://www.javapractices.com/topic/TopicAction.do?Id=25">standard pattern</a> and open-in-try (<a class="reference external" href="https://stackoverflow.com/questions/2699209/java-io-ugly-try-finally-block">here</a>):</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="w"></span>
-<span class="nf">try</span><span class="kt">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="nf">finally</span><span class="kt">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">try</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">finally</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
 
-<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">var</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="w"></span>
-<span class="nf">try</span><span class="kt">:</span><span class="w"></span>
-<span class="w">    </span><span class="n">f</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
-<span class="nf">finally</span><span class="kt">:</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">var</span><span class="w"> </span><span class="kt">InvalidHandle</span>
+<span class="nf">try</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">f</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">finally</span><span class="kt">:</span>
+<span class="w">  </span><span class="kr">if</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span>
+<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>The unwinding protection solves the early exit leak. The failed acquire again doesn’t really matter. This pattern does not solve adjacency, encapsulation, or interleaving, meaning that it is still awkward and verbose. For adjacency, throws act as go-downs and you have to scan down almost the whole function to the finally block to see what cleanups are waiting and if an allocation has a matching clean-up. Also there is an indentation pyramid with nested try-finally.</p>
@@ -180,8 +181,8 @@
 <section id="try-with-resources">
 <h2>try-with-resources<a class="headerlink" href="#try-with-resources" title="Permalink to this heading"></a></h2>
 <p>The try-with-resources solves adjacency by making <code class="docutils literal notranslate"><span class="pre">close</span></code> a Java built-in interface, but it still can’t do encapsulation or interleaving:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">try</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">try</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>In particular <a class="reference external" href="https://stackoverflow.com/questions/12552863/correct-idiom-for-managing-multiple-chained-resources-in-try-with-resources-bloc">chained resources</a> are awkward.</p>
@@ -191,22 +192,22 @@
 <h2>Bracket<a class="headerlink" href="#bracket" title="Permalink to this heading"></a></h2>
 <p>Haskell has a <code class="docutils literal notranslate"><span class="pre">bracket</span> <span class="pre">acquire</span> <span class="pre">release</span> <span class="pre">action</span></code> combinator which functions similarly to try-with-resources. It similarly doesn’t support interleaving or encapsulation.</p>
 <p>The <a class="reference external" href="https://vimeo.com/97329153">D guy</a> claims you need an even larger combinator than bracket, which goes as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">  </span><span class="n">when</span><span class="w"> </span><span class="o">!</span><span class="n">next</span><span class="w"></span>
-<span class="w">    </span><span class="n">rollback</span><span class="w"></span>
-<span class="w">  </span><span class="n">release</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">when</span><span class="w"> </span><span class="o">!</span><span class="n">next</span>
+<span class="w">    </span><span class="n">rollback</span>
+<span class="w">  </span><span class="n">release</span>
 </pre></div>
 </div>
 <p>With masking this looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">generalBracket</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">mask</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">unmasked</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span><span class="w"></span>
-<span class="w">    </span><span class="n">resource</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">acquire</span><span class="w"></span>
-<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">unmasked</span><span class="w"> </span><span class="p">(</span><span class="n">next</span><span class="w"> </span><span class="n">resource</span><span class="p">)</span><span class="w"> </span><span class="p">`</span><span class="n">catch</span><span class="p">`</span><span class="w"> </span><span class="nf">\</span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span><span class="w"></span>
-<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">resource</span><span class="w"></span>
-<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span><span class="w"></span>
-<span class="w">      </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
-<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span><span class="w"></span>
-<span class="w">    </span><span class="n">return</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">generalBracket</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">mask</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">unmasked</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">    </span><span class="n">resource</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">acquire</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">unmasked</span><span class="w"> </span><span class="p">(</span><span class="n">next</span><span class="w"> </span><span class="n">resource</span><span class="p">)</span><span class="w"> </span><span class="p">`</span><span class="n">catch</span><span class="p">`</span><span class="w"> </span><span class="nf">\</span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">      </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">    </span><span class="n">return</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>acquire has to be masked because there could be an async exception between the action and running next.</p>
@@ -214,9 +215,9 @@
 <section id="scope-guard">
 <h2>Scope guard<a class="headerlink" href="#scope-guard" title="Permalink to this heading"></a></h2>
 <p>This approach involves a “deferred release”, which is called when the scope is exited. For example:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="w"></span>
-<span class="nf">defer</span><span class="w"> </span><span class="p">(</span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"></span>
-<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">defer</span><span class="w"> </span><span class="p">(</span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="p">)</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>It is available in C++ as the ScopeGuard class, in Go and Zig as the defer statement, and in D via the <a class="reference external" href="http://ddili.org/ders/d.en/scope.html">scope</a> keyword, where there are <code class="docutils literal notranslate"><span class="pre">scope(exit)</span></code>, <code class="docutils literal notranslate"><span class="pre">scope(success)</span></code>, and <code class="docutils literal notranslate"><span class="pre">scope(failure)</span></code> (referring to exiting the scope unconditionally as with <code class="docutils literal notranslate"><span class="pre">defer</span></code>, without exception, or by exception respectively).</p>
@@ -228,15 +229,15 @@
 <section id="goto-cleanup">
 <h2>Goto cleanup<a class="headerlink" href="#goto-cleanup" title="Permalink to this heading"></a></h2>
 <p>C has this pattern:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file&quot;</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="n">return</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="p">))</span><span class="w"></span>
-<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span><span class="w"></span>
-<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something_2</span><span class="w"> </span><span class="n">f</span><span class="p">))</span><span class="w"></span>
-<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span><span class="w"></span>
-<span class="nf">cleanup</span><span class="kt">:</span><span class="w"></span>
-<span class="w">  </span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file&quot;</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span>
+<span class="w">  </span><span class="n">return</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="p">))</span>
+<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something_2</span><span class="w"> </span><span class="n">f</span><span class="p">))</span>
+<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span>
+<span class="nf">cleanup</span><span class="kt">:</span>
+<span class="w">  </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>This suffers from early return but addresses adjacency in that the cleanup label is present and can handle interleaving with conditionals. It is not encapsulated though and it is easy to mess up handling a failed acquire.</p>
@@ -244,8 +245,8 @@
 <section id="garbage-collection">
 <h2>Garbage collection<a class="headerlink" href="#garbage-collection" title="Permalink to this heading"></a></h2>
 <p>GC almost solves the problem by making closing automatic. It looks like:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="w"></span>
-<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>It solves all the issues of early exit, adjacency (implicit in the open), and encapsulation (the GC is based on global program flow). Unfortunately GC does not guarantee it will promptly call the finalizer, so in practice the semantics are not usable.</p>
@@ -259,19 +260,19 @@
 <h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this heading"></a></h2>
 <p>Stroscot’s finalizers are inspired by RAII and GC but free resources “promptly” as opposed to the “eventually” of GC or the stack or reference counting discipline of RAII. Similarly to <code class="docutils literal notranslate"><span class="pre">defer</span></code> the cleanup is placed near the acquire but similarly to <code class="docutils literal notranslate"><span class="pre">finally</span></code> there can be a marker for the end of the scope. The pattern is <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">f;</span> <span class="pre">...</span> <span class="pre">;</span> <span class="pre">use</span> <span class="pre">f;</span> <span class="pre">...;</span> <span class="pre">use</span> <span class="pre">f</span></code>. The finalizer will run after the last <code class="docutils literal notranslate"><span class="pre">use</span></code> if code flows normally and soon after raising an exception otherwise. Finalizers allow nesting, in the natural way <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">a;</span> <span class="pre">newFinalizer</span> <span class="pre">b;</span> <span class="pre">...;</span> <span class="pre">use</span> <span class="pre">b;</span> <span class="pre">use</span> <span class="pre">a</span></code>, and interleaving, by reordering to <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">a;</span> <span class="pre">use</span> <span class="pre">b</span></code>. But the execution order on an exception is latest-defined-first-run. Finalizers also support encapsulation such as returning the allocated resource. It is also possible to embed the finalizer in a resource handle and use RAII style programming - each operation calls <code class="docutils literal notranslate"><span class="pre">use</span></code> and extends the finalizer’s life.</p>
 <p>Finalizers directly implement D’s <code class="docutils literal notranslate"><span class="pre">scope(exit)</span></code>, and with an extra flag variable they can implement <code class="docutils literal notranslate"><span class="pre">scope(success)</span></code> and <code class="docutils literal notranslate"><span class="pre">scope(failure)</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">scope_failure</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{})</span><span class="w"></span>
-<span class="w">  </span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">scope_failure</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{})</span>
+<span class="w">  </span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span>
 
-<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">   </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
-<span class="w">   </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">   </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span>
+<span class="w">   </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
 
 
-<span class="nf">s</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">scope_failure</span><span class="w"> </span><span class="n">rollback</span><span class="w"></span>
-<span class="nf">code</span><span class="w"></span>
-<span class="nf">use</span><span class="w"> </span><span class="n">s</span><span class="w"></span>
+<span class="nf">s</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">scope_failure</span><span class="w"> </span><span class="n">rollback</span>
+<span class="nf">code</span>
+<span class="nf">use</span><span class="w"> </span><span class="n">s</span>
 </pre></div>
 </div>
 <p><a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4152.pdf">Herb Sutter</a> claims that the extra <code class="docutils literal notranslate"><span class="pre">use</span></code> is “tedious and fragile” and forces the programmer to think about the placement of failure determination. One can define a proper <code class="docutils literal notranslate"><span class="pre">scope_failure</span> <span class="pre">rollback</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> block structure, and even redefine return/continue/break to not run the rollback. But personally I think the finalizers are more powerful because they allow interleaving scopes. The combinators only allow nesting which isn’t as expressive. In Haskell land Snoyman created <a class="reference external" href="https://hackage.haskell.org/package/resourcet">ResourceT</a> even though there was <code class="docutils literal notranslate"><span class="pre">bracket</span></code>, exactly because of this.</p>
@@ -279,14 +280,14 @@
 <section id="exceptions-in-finalizers">
 <h2>Exceptions in finalizers<a class="headerlink" href="#exceptions-in-finalizers" title="Permalink to this heading"></a></h2>
 <p>What to do when throwing an exception from a finalizer? Say we have</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">throw</span><span class="w"> </span><span class="kt">Bar</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="n">throw</span><span class="w"> </span><span class="kt">Foo</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">throw</span><span class="w"> </span><span class="kt">Bar</span><span class="p">)</span>
+<span class="w">  </span><span class="n">throw</span><span class="w"> </span><span class="kt">Foo</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
 
-<span class="nf">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">catch</span><span class="w"> </span><span class="nf">\</span><span class="kr">case</span><span class="w"></span>
-<span class="w">        </span><span class="kt">Foo</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;foo&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="kt">Bar</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;bar&quot;</span><span class="w"></span>
+<span class="nf">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">catch</span><span class="w"> </span><span class="nf">\</span><span class="kr">case</span>
+<span class="w">        </span><span class="kt">Foo</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;foo&quot;</span>
+<span class="w">        </span><span class="kt">Bar</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;bar&quot;</span>
 </pre></div>
 </div>
 <p>Per Stroscot’s semantics, the finalizer runs as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> will not be called - i.e. immediately after constructing the finalizer, before the <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Foo</span></code> (because <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">f</span></code> is unreachable). So <code class="docutils literal notranslate"><span class="pre">x</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Bar;</span> <span class="pre">throw</span> <span class="pre">Foo</span></code>. Then per normal exception semantics <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Bar</span></code> wins since it is first and <code class="docutils literal notranslate"><span class="pre">y</span></code> outputs <code class="docutils literal notranslate"><span class="pre">bar</span></code>.</p>
@@ -316,43 +317,43 @@
 <blockquote>
 <div><p>This code in Rust or C++ is not exception safe: (based on <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/1995/N0623.asc">this code</a> and <a class="reference external" href="https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md#background-what-is-exception-safety-in-rust">this code</a>)</p>
 </div></blockquote>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">push_ten_more</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="o">|</span><span class="n">uninitialized</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="nf">push_ten_more</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="o">@</span><span class="p">(</span><span class="n">readRef</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">arr</span><span class="p">))</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">new_arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">alloc</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">indexes</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">copy</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">new_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="n">delete</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"></span>
-<span class="w">  </span><span class="n">this</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">new_arr</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">push_ten_more</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="o">|</span><span class="n">uninitialized</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">push_ten_more</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="o">@</span><span class="p">(</span><span class="n">readRef</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">arr</span><span class="p">))</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">new_arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">alloc</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">indexes</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span>
+<span class="w">    </span><span class="n">copy</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">new_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">    </span><span class="n">delete</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">  </span><span class="n">this</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">new_arr</span>
 
-<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="p">(</span><span class="n">ptr</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">t</span><span class="o">.</span><span class="n">clone</span><span class="nb">()</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">(</span><span class="n">ptr</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">t</span><span class="o">.</span><span class="n">clone</span><span class="nb">()</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The update to the Vector happens when the next 10 elements are uninitialized, and <code class="docutils literal notranslate"><span class="pre">Vec</span></code> has an internal invariant that its elements are safe to deallocate. So if <cite>t.clone</cite> throws then the initialization will not be called. Vec’s destructor that assumes the invariant will then free uninitialized memory.</p>
 <p>In this code the Rust/C++ semantics require calling a destructor <code class="docutils literal notranslate"><span class="pre">delete</span></code> on each element of a <code class="docutils literal notranslate"><span class="pre">vec</span></code>, and copying values with <code class="docutils literal notranslate"><span class="pre">copy_to_</span></code> and <code class="docutils literal notranslate"><span class="pre">clone</span></code> operations that can fail -  Similarly we wouldn’t necessarily call any finalizers (<code class="docutils literal notranslate"><span class="pre">delete</span></code>) - the finalizer is called after the last use, and likely there are other copies and this is not the last use. Even if the Stroscot code was written to call an operation <code class="docutils literal notranslate"><span class="pre">clone</span></code> that could throw exceptions, the rest of the elements will be deallocated if needed, but otherwise not. In all cases memory is safe due to the finalizer semantics.</p>
 <p>Another issue is the uninitialized array. This means the array may be filled with <code class="docutils literal notranslate"><span class="pre">uninitialized</span></code> values (exceptions). The result type reflects this possibility. With careful rewriting, the code can provide the strong guarantee that the resulting vector only contains values of type T. This can be done by extending the array one element at a time or by saving the exception(s) thrown in a separate list and rethrowing at the end as an exception group.</p>
 <p>A simple example is <code class="docutils literal notranslate"><span class="pre">TwoList</span></code>, which maintains two mutable linked lists with the invariant that they are the same. What does adding an element look like?</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">List</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">head</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">l</span><span class="w"></span>
-<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Cons</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">head</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">List</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">head</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">l</span>
+<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Cons</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">head</span>
 
-<span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span><span class="w"></span>
-<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span><span class="w"></span>
+<span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span>
 </pre></div>
 </div>
 <p>But this is not exception safe for the invariant, because an async exception between the two adds may add a to l1 but not l2.</p>
 <p>If add is no-throw we can fix this just by adding uninterruptibleMask. But add allocates so can throw out of memory. But remove is no-throw so we can use remove:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">mask_</span><span class="w"> </span><span class="o">$</span><span class="w"></span>
-<span class="w">    </span><span class="kr">case</span><span class="w"> </span><span class="n">try</span><span class="w"> </span><span class="p">(</span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
-<span class="w">      </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
-<span class="w">      </span><span class="kt">Ok</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"></span>
-<span class="w">        </span><span class="kr">case</span><span class="w"> </span><span class="n">try</span><span class="w"> </span><span class="p">(</span><span class="n">allowInterrupt</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span><span class="w"></span>
-<span class="w">          </span><span class="kt">Ok</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">return</span><span class="w"></span>
-<span class="w">          </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">uninterruptibleMask</span><span class="w"> </span><span class="p">(</span><span class="n">remove</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">mask_</span><span class="w"> </span><span class="o">$</span>
+<span class="w">    </span><span class="kr">case</span><span class="w"> </span><span class="n">try</span><span class="w"> </span><span class="p">(</span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span>
+<span class="w">      </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span>
+<span class="w">      </span><span class="kt">Ok</span><span class="w"> </span><span class="ow">-&gt;</span>
+<span class="w">        </span><span class="kr">case</span><span class="w"> </span><span class="n">try</span><span class="w"> </span><span class="p">(</span><span class="n">allowInterrupt</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="kr">of</span>
+<span class="w">          </span><span class="kt">Ok</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">return</span>
+<span class="w">          </span><span class="kt">Err</span><span class="w"> </span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">uninterruptibleMask</span><span class="w"> </span><span class="p">(</span><span class="n">remove</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span>
 </pre></div>
 </div>
 <p>Here add should have strong safety, i.e. it restores the state if an exception is thrown during the add.</p>
@@ -360,19 +361,19 @@
 <h3>Poisoning<a class="headerlink" href="#poisoning" title="Permalink to this heading"></a></h3>
 <p>Rust has “poisoning” for taking locks, which is a safeguard against trying to use data that was corrupted due to an exception, e.g. a concurrent heap that doesn’t have the heap property anymore. Poisoned data will tear down all connected threads.</p>
 <p>Essentially it uses the scope_failure cleanup to poison the lock on failure:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">getGuard</span><span class="w"> </span><span class="n">mutex</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">acquireLock</span><span class="w"> </span><span class="n">mutex</span><span class="w"></span>
-<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
-<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">      </span><span class="n">poisonLock</span><span class="w"> </span><span class="n">mutex</span><span class="w"></span>
-<span class="w">    </span><span class="n">releaseLock</span><span class="w"> </span><span class="n">mutex</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">getGuard</span><span class="w"> </span><span class="n">mutex</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">acquireLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">      </span><span class="n">poisonLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">    </span><span class="n">releaseLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span>
 
-<span class="nf">finishGuard</span><span class="w"> </span><span class="p">(</span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span><span class="w"></span>
-<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span><span class="w"></span>
+<span class="nf">finishGuard</span><span class="w"> </span><span class="p">(</span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
 </pre></div>
 </div>
 <p>Once the lock is poisoned then locking the mutex will throw an exception.</p>

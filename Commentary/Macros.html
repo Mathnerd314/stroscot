@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Macros &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -110,7 +111,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Macros</li>
       <li class="wy-breadcrumbs-aside">
@@ -124,9 +125,10 @@
              
   <section id="macros">
 <h1>Macros<a class="headerlink" href="#macros" title="Permalink to this heading"></a></h1>
+<p>Macros are a facility that allows defining syntactic extensions to a programming language. Macros implement the essence of Lisp: code can be used as data, and data can be used as code. Although in Lisp the transformation of code into data (specifically, an AST tree) is obvious as the S-expression syntax is just nested lists, in Stroscot we choose to have more complex syntax and accompanying mental overhead. It should be noted that even McCarthy the inventor of Lisp intended to use an M-expression (mathematical expression) syntax and S-expressions were only a matter of convenience.</p>
 <section id="comparison">
 <h2>Comparison<a class="headerlink" href="#comparison" title="Permalink to this heading"></a></h2>
-<p>Macros, micros, and fexprs are facilities to allows allow defining syntactic extensions to a programming language. Comparing them:</p>
+<p>Macros, micros, and fexprs are all possibilities. Comparing them:</p>
 <ol class="arabic simple" start="0">
 <li><p>A (C) macro is a function translating text into text. Textual macros suffer from the scoping/name capture problem. Applying a macro <code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">x=x+x</span></code> to a side-effectful expression like <code class="docutils literal notranslate"><span class="pre">double(i++)</span></code> executes the side effect twice. They allow unbalanced/incorrect expansions like <code class="docutils literal notranslate"><span class="pre">startLoop</span> <span class="pre">=</span> <span class="pre">while(true)</span> <span class="pre">{</span></code> and <code class="docutils literal notranslate"><span class="pre">double(+)</span> <span class="pre">=</span> <span class="pre">+++</span></code>. One often can’t easily determine the expanded expression due to multiple layers of macros. Furthermore looking for control flow paths is hard.</p></li>
 <li><p>A (Scheme) macro is a function translating an AST node into an AST node. Macro substitution of an AST reduces away all macros and produces an AST. Scheme macros have a complex hygiene system to make naive macros handle scoping correctly and avoid name capture.</p></li>

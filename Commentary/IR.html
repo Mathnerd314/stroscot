@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control flow &mdash; Stroscot  documentation</title>
+  <title>Intermediate representation &mdash; Stroscot  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,14 +59,19 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ir-style">IR Style</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#llvm-ir-sucks">LLVM IR sucks</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Intermediate representation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#goals">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ir-style">IR Style</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#llvm-ir-sucks">LLVM IR sucks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#control-flow">Control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#blocks">Blocks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Blocks</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
@@ -87,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -108,9 +116,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
-      <li class="breadcrumb-item active">Control flow</li>
+      <li class="breadcrumb-item active">Intermediate representation</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/IR.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -120,15 +128,55 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="control-flow">
-<h1>Control flow<a class="headerlink" href="#control-flow" title="Permalink to this heading"></a></h1>
+  <section id="intermediate-representation">
+<h1>Intermediate representation<a class="headerlink" href="#intermediate-representation" title="Permalink to this heading"></a></h1>
+<p>An IR is necessary to interpret and compile efficiently. But what to use?
+EaRing used GNU Lightning for its IR, which let it support multiple CPUs (x86-32, x86-64, PPC, SPARC) from the same source, but per LLVM the IR should actually be designed to be target-specific. So Stroscot handles instruction set differences the same way it handles OS differences, by providing portable abstractions in the standard library while still allowing low-level access to the platform.</p>
+<p>TODO: read GNU lightning IR for design and features of assembly opcodes</p>
+<p>Thread safe (hopefully) and library capable. Can even access .so libraries with C calling conventions.</p>
+<section id="goals">
+<h2>Goals<a class="headerlink" href="#goals" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Literal machine: All assembly instructions embed directly in the IR</p></li>
+<li><p>Wide-spectrum, PyPy compilation model: the source language is valid IR. all constructs are gradually translated to a restricted subset that the code generator understands.</p></li>
+<li><p>Debuggable: capture source locations and other information necessary for good error messages</p></li>
+<li><p>Target-specific: no point in trying to retarget IR for a different platform, the relevant code has probably been ifdef’d out already. So feel free to assume specific processor features, like 80-bit floats, calling conventions, alignment requirements, etc.</p></li>
+<li><p>Portable: if there is an intrinsic with the same behavior across several platforms, then it should use the same name, so that optimization rules only have to be written once</p></li>
+<li><p>Minimal primitives: there should be enough information in the IR to force the code generator to generate all assembly instruction behaviors, but no more</p></li>
+<li><p>Like Thorin: SSA plus CPS (explicit non-local control flow)</p></li>
+<li><p>Localized optimizations: read small portion, write small portion.</p></li>
+<li><p>Mostly pure: fixes evaluation order only for stateful operations</p></li>
+</ul>
+<p>The minimal primitives is a question. Chopping up instructions into lots of mathematical operations means that there is a lot of overhead in code generation recognizing patterns of operations as instructions. On the other hand it allows writing a fewer number of more generic and powerful optimizations, instead of many processor-specific instruction patterns. So this choice favors ahead-of-time compilation at the expense of interpretation and JITing.</p>
+</section>
+<section id="ir-style">
+<h2>IR Style<a class="headerlink" href="#ir-style" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man">https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man</a></p>
+<section id="llvm-ir-sucks">
+<h3>LLVM IR sucks<a class="headerlink" href="#llvm-ir-sucks" title="Permalink to this heading"></a></h3>
+<p>LLVM IR contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Undefined Behavior, with C “nasal demons” semantics and optimization passes that assume behavior</p></li>
+<li><p>Intentional vagueness and edge cases that no one is interested in fixing.</p></li>
+<li><p>Inconsistent IEEE-754 arithmetic</p></li>
+</ul>
+</div></blockquote>
+<p>Interpreting LLVM is slow. High level abstractions are chopped up into lots of small low-level instructions. The interpreter has to execute a relatively large number of instructions to do virtual method calls. Languages built for interpretation use fewer more expensive instructions, and have lower per-instruction overhead.</p>
+<p>JITing LLVM is faster than static C compilers, but it’s not fast compared to purpose-built JIT compilers. The verbose instruction set requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it’s more involved than a simple template generator.</p>
+<p>LLVM IR also isn’t capable of representing the necessary semantic information for high level languages such as Objective-C without embedding the information into it using hacky mechanisms. Objective-C works around this by reverse-engineering Objective C information out of the lowered code, which isn’t guaranteed to be safe by LLVM IR rules alone and only works because the Objective C frontend generated the IR.</p>
+</section>
+</section>
+<section id="control-flow">
+<h2>Control flow<a class="headerlink" href="#control-flow" title="Permalink to this heading"></a></h2>
 <p>The ADD instruction is not so simple</p>
 <p>Control flow graph</p>
 </section>
 <section id="blocks">
-<h1>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h1>
+<h2>Blocks<a class="headerlink" href="#blocks" title="Permalink to this heading"></a></h2>
 <p>A basic block (BB) is a sequence of instructions that is entered only from the top, and that contains no terminator instructions except for a single one at the end. The last instruction in a BB must be a terminator instruction, so execution cannot fall through the end of the BB but instead jumps to a new BB.</p>
 <p>Terminator instructions are unconditional branches.</p>
+<p>Per cranelift:</p>
 <dl class="simple">
 <dt>EBB parameter</dt><dd><p>A formal parameter for an EBB is an SSA value that dominates everything
 in the EBB. For each parameter declared by an EBB, a corresponding
@@ -145,7 +193,7 @@ the arguments passed in the branch.</p>
 <p>Although phi nodes were an interesting idea all the <a class="reference external" href="https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes">cool kids</a> are now using block arguments. Blocks arguments fit better into various analysis passes.</p>
 </section>
 <section id="id1">
-<h1>Blocks<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<h2>Blocks<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
 <p>From a user perspective there are two types of jumpable addresses:</p>
 <p>memory - effective address computation
 SIB addressing form, where the index register is not used in address calculation, Scale is ignored. Only the base and displacement are used in effective address calculation.
@@ -160,34 +208,6 @@ VSIB memory addressing</p>
 * Tied input early clobber: register that is read and written and does not share a register with any other input
 * alignstack, sideeffect</p>
 <p>There are also constraints from the ABI calling convention: <a class="reference external" href="https://gitlab.com/x86-psABIs/x86-64-ABI">https://gitlab.com/x86-psABIs/x86-64-ABI</a></p>
-</section>
-<section id="ir-style">
-<h1>IR Style<a class="headerlink" href="#ir-style" title="Permalink to this heading"></a></h1>
-<p>Goals:</p>
-<ul class="simple">
-<li><p>represent non-local control flow (faults)</p></li>
-<li><p>optimizations are localized (read small portion, write small portion)</p></li>
-<li><p>all known optimizations can be implemented</p></li>
-<li><p>fixes evaluation order only for stateful operations</p></li>
-</ul>
-<p><a class="reference external" href="https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man">https://cs.stackexchange.com/questions/74794/why-is-static-single-assignment-preferred-over-continuation-passing-style-in-man</a></p>
-<section id="llvm-ir-sucks">
-<h2>LLVM IR sucks<a class="headerlink" href="#llvm-ir-sucks" title="Permalink to this heading"></a></h2>
-<p>LLVM IR contains:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Explicitly Target-specific features, like x86_fp80</p></li>
-<li><p>Target-specific ABI code, to interoperate with native C ABIs</p></li>
-<li><p>Implicitly Target-specific features, like Linkages.</p></li>
-<li><p>Target-specific limitations: alignment on alloca, supported integer types</p></li>
-<li><p>Undefined Behavior, with C “nasal demons” semantics and optimization passes that assume behavior</p></li>
-<li><p>Intentional vagueness and edge cases that no one is interested in fixing.</p></li>
-<li><p>Inconsistent IEEE-754 arithmetic</p></li>
-</ul>
-</div></blockquote>
-<p>Interpreting LLVM is slow. High level abstractions are chopped up into lots of small low-level instructions. The interpreter has to execute a relatively large number of instructions to do virtual method calls. Languages built for interpretation use fewer more expensive instructions, and have lower per-instruction overhead.</p>
-<p>JITing LLVM is faster than static C compilers, but it’s not fast compared to purpose-built JIT compilers. The verbose instruction set requires recognizing patterns in groups of instructions, and then emitting code for the patterns. This works, but it’s more involved than a simple template generator.</p>
-<p>LLVM IR also isn’t capable of representing the necessary semantic information for high level languages such as Objective-C without embedding the information into it using hacky mechanisms. Objective-C works around this by reverse-engineering Objective C information out of the lowered code, which isn’t guaranteed to be safe by LLVM IR rules alone and only works because the Objective C frontend generated the IR.</p>
 </section>
 </section>
 

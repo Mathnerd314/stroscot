@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checklist &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
@@ -33,12 +31,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -67,7 +69,12 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#criticisms">Criticisms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#other-programming-languages">Other programming languages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-programming-languages">Other programming languages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#top-50">Top 50</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#next-50-in-alphabetical-order">Next 50 in alphabetical order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#languages-not-in-tiobe">Languages not in TIOBE</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
@@ -76,13 +83,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -103,6 +108,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -124,7 +130,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Checklist</li>
       <li class="wy-breadcrumbs-aside">
@@ -287,21 +293,20 @@
   optimization -&gt; relation
   optimization -&gt; function
 }</p></object></div>
-<p>Graphviz has chosen “function” as the root paradigm. This agrees well with experience. Quoting <a class="reference external" href="https://www.google.com/books/edition/Calculus/7JKVu_9InRUC?hl=en&amp;gbpv=1&amp;bsq=central%20objects">Spivak</a>, “the most important concept in all of mathematics is that of a function - in almost every branch of modern mathematics functions turn out to be the central objects of investigation.” Looking closer, function is part of an SCC <code class="docutils literal notranslate"><span class="pre">function,</span> <span class="pre">relation,</span> <span class="pre">set,</span> <span class="pre">boolean,</span> <span class="pre">constraint,</span> <span class="pre">optimization</span></code>. The mathematical notion of function is broad; a functional relation cannot be expressed naturally using lambdas, but lambdas naturally express functions. So we need constraint logic programming as well to get full expressiveness of our functions. Hence the ultimate paradigm is functional logic programming.</p>
+<p>Graphviz has chosen “function” as the root paradigm. This agrees well with experience. Quoting <a class="reference external" href="https://www.google.com/books/edition/Calculus/7JKVu_9InRUC?hl=en&amp;gbpv=1&amp;bsq=central%20objects">Spivak</a>, “the most important concept in all of mathematics is that of a function - in almost every branch of modern mathematics functions turn out to be the central objects of investigation.” Looking closer, function is part of an SCC <code class="docutils literal notranslate"><span class="pre">function,</span> <span class="pre">relation,</span> <span class="pre">set,</span> <span class="pre">boolean,</span> <span class="pre">constraint,</span> <span class="pre">optimization</span></code>. Although lambdas naturally express functions, the mathematical notion of function is broader than just lambdas, and can be specified as a logical relation using a predicate. So we need constraint logic programming as well to get the full notion of “function”. Hence the ultimate paradigm is functional logic programming.</p>
 </section>
 </section>
 <section id="principles">
 <h2>Principles<a class="headerlink" href="#principles" title="Permalink to this heading"></a></h2>
-<p>Paradigms are vague and only express common patterns; they cannot be used to design a programming language. So instead we have principles.</p>
+<p>Paradigms are vague and only express common patterns or features; they cannot be used to determine the specific design of those features. So instead we have principles.</p>
 <ul class="simple">
 <li><p>Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)</p></li>
 <li><p>Make the irreducible basic elements as simple and as few as possible without having to surrender the adequate representation of a single datum of experience. (Albert Einstein)</p></li>
 <li><p>Write a prototype implementation. Conduct an A* search through the possible solutions, stopping early if the potential solution is clearly worse than the prototype. Periodically take the best solution out of all discovered so far and implement it as the new prototype. (<a class="reference external" href="https://en.wikipedia.org/wiki/Branch_and_bound">Branch and bound</a>)</p></li>
 <li><p>Never finished, never complete, but tracking the progress of technology (Lennart Poettering)</p></li>
-<li><p>Code can be used as data, data can be used as code (Lisp)</p></li>
 <li><p>Productivity is being able to do things that you were never able to do before. (attributed to Franz Kafka, maybe Jim Manzi)</p></li>
 <li><p>As size and complexity increase, architectural design dominates materials. Create durable, non-leaky, beautiful interfaces. (<a class="reference external" href="http://www.vpri.org/pdf/tr2011004_steps11.pdf">VPRI</a>, <a class="reference external" href="https://blog.regehr.org/archives/666">John Regehr</a>)</p></li>
-<li><p>If it isn’t documented, it doesn’t exist (Coding Horror) Corollary: There is no undefined behavior, only undocumented behavior.</p></li>
+<li><p>If it isn’t documented, it doesn’t exist (Coding Horror). Corollary: There is no undefined behavior, only undocumented behavior.</p></li>
 <li><p>Take a list of items. Imagine a specific walk through a familiar place. List distinctive features of the route. Combine each feature with an item to form new outrageous/memorable images. (Memory palace)</p></li>
 <li><p>People prefer a middle level of complexity: too simple and we are bored, too complex and we are confused. Moreover, the ideal level of complexity is a moving target, because the more expert we become at any subject, the more complexity we prefer. (Donald Norman)</p></li>
 <li><p>Better depends on your goodness metric (<a class="reference external" href="http://web.archive.org/web/20210325222034/https://www.artima.com/weblogs/viewpost.jsp?thread=24807">Jim Waldo</a>)</p></li>
@@ -309,27 +314,71 @@
 <li><p>Do all things without grumbling or complaining (Philippians 2:14)</p></li>
 <li><p>Secure by default: The default level of access should have the least privilege and the most number of checks. (OpenBSD)</p></li>
 <li><p>Organize functions by functionality into expressive components. (<a class="reference external" href="https://reasoncodeexample.com/2016/03/06/a-place-for-everything-and-everything-in-its-place-thoughts-on-organizing-source-code-by-type/">Uli Weltersbach</a>)</p></li>
-<li><p>When two elements of an interface conflict, or are ambiguous, the behavior should be that which will least surprise the user; in particular a programmer should try to think of the behavior that will least surprise someone who uses the program, rather than that behavior that is natural from knowing the inner workings of the program. (<a class="reference external" href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>)</p></li>
+<li><p>When an interface has multiple possibilities, and other principles conflict or are ambiguous, the behavior should be that which will least surprise most new users. In particular the behavior is not necessarily the behavior that would be the most easily implemented. (<a class="reference external" href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>)</p></li>
 </ul>
 <p>What are these principles useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons.</p>
 <section id="non-principles">
 <h3>Non-principles<a class="headerlink" href="#non-principles" title="Permalink to this heading"></a></h3>
+<section id="minimalism">
+<h4>Minimalism<a class="headerlink" href="#minimalism" title="Permalink to this heading"></a></h4>
+<p>Generally minimalism is bad. If you build on an existing language but include no new features, then there’s no incentive to use your language. If your language uses a minimal set of operations like Brainfuck, figuring out how to express programs in it will be difficult, and the resulting encoding most likely will be incomprehensible. Providing a broad set of features will mean that the language is suitable for whatever project someone is thinking about. What is worthwhile is Albert Einstein’s principle to form what is essentially a basis in the vector space of programs, a collection of “orthogonal features” (although there is no obvious interpretation of the norm-1 constraint of an). This does not mean giving up features, but rather “dissolving” redundant features that can be naturally expressed using other features by putting them in the standard library rather than the core language.</p>
+</section>
+<section id="familiarity">
+<h4>Familiarity<a class="headerlink" href="#familiarity" title="Permalink to this heading"></a></h4>
+<p>There is a quote from Grace Hopper, “The most dangerous phrase [one] can say is ‘We’ve always done it that way’.” According to <cite>some guy &lt;https://medium.com/geekculture/3-busted-myths-about-the-35-hour-week-that-you-should-present-to-your-boss-efa5403bb263&gt;</cite> the golden rule at his university was that anyone who said that phrase was a lousy engineer. Hopper <cite>continues &lt;https://books.google.com/books?id=3u9H-xL4sZAC&amp;lpg=PA9&amp;vq=%22most%20dangerous%22&amp;pg=PA9#v=snippet&amp;q=%22most%20dangerous%22&amp;f=false&gt;`__</cite>: “If we base our plans on the present, we fall behind and the cost of carrying out something may be more costly than not implementing it. But there is a line. If you step over it, you don’t get the budget. However, you must come as close to it as you can. And you must keep pushing the line out further. We must not only accept new concepts, we must manage their development and growth.”</p>
+<p>Per <a class="reference external" href="https://soc.me/languages/familiarity">Simon</a>, C’s operator precedence, C++’s use of <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> for generics, and C#’s design of properties are all examples of suboptimal, legacy decisions. They were designed based on limited information but in hindsight it has become clear that better choices exist. Nonetheless they continue to be adopted by new languages on the basis of “familiarity” - people are so used to the suboptimal behavior that they will complain if it changes.</p>
+<p>For Stroscot, is it worth repeating these mistakes for the benefit of “familiarity”? Familiarity will not help when</p>
+<p>Let us consider the various adopted principles:</p>
+<ul class="simple">
+<li><p>stealing ideas - we should understand why these choices were made, and consider if those reasons are still valid. For C’s operator precedence, there is essentially no basis - it is just historical baggage.</p></li>
+<li><p>irreducible elements - do we need these operators at all? Probably so, because they are in these other languages and people have used these languages for a while. But it is just syntax, so extensible syntax is sufficient - it does not have to be part of the language core.</p></li>
+<li><p>branch and bound - this says we should aim for the optimal choice, but first we have to define optimal</p></li>
+<li><p>Poettering - he broke your audio. I think he’d decide to break your programming habits too</p></li>
+<li><p>Productivity - these sorts of syntax decisions are minor annoyances, so don’t really impact the ability to accomplish things</p></li>
+<li><p>Beautiful interfaces - a consistent interface is more beautiful than a broken one</p></li>
+<li><p>Documentation - whatever the choice, the process for arriving at it should be clearly written down</p></li>
+<li><p>Memory palace - a consistent interface is also easier to remember</p></li>
+<li><p>Medium complexity: programming is hard enough by itself, the language doesn’t need to be more complex</p></li>
+<li><p>Goodness metric: these principles are sort of subjective, but I don’t know what else to use</p></li>
+<li><p>Edit-test cycle: Experienced Stroscot programmers will get tripped up because it’s a bad choice. Novice programmers will be slow regardless. Expert programmers from other languages may have to invest more time in learning the language.</p></li>
+<li><p>Philippians: With the good decision, expert programmers from other languages may complain due to change aversion. But nobody who uses Stroscot for a significant amount of time will complain. With the bad decision, complaints will come in forever.</p></li>
+<li><p>Secure by default: It is possible to avoid operator precedence by requiring parentheses all the time. This is safer as nobody will be confused.</p></li>
+<li><p>Organize:</p></li>
+<li><p>Least astonishment: we should aim for “the behavior that will least surprise someone who uses the program”. , rather than that behavior that is natural from knowing the inner workings of the program. (<a class="reference external" href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">POLA</a>)</p></li>
+</ul>
+<blockquote>
+<div><p>Ideally, changes will get so fed up that they will post “ragequit” posts to social media. So long as discussion can point to a solid basis for the changes, these will most likely serve to draw positive attention to the language. Anybody who uses the language for a while will get used to it. And actually the people who are willing to learn a new language are likely looking for something new and are willing to adapt, so they won’t ragequit. Succinct migration guides for users from various popular languages will get these users up to speed.</p>
+</div></blockquote>
+<p>There is another sense of familiarity though in the sense of creating a “brand” for the language. Some languages take this in the sense of not allowing any room for major changes in the design once the language reaches a beta. Minor migrations would be possible, but for example switching from curried to uncurried functions would be forbidden because they would annoy too many people. This requires doing essentially all of the designing up-front. I’m kind of split on this. On the one hand, there is the “durable” part of the “create interfaces” principle -</p>
+<blockquote>
+<div><p>Another important concept is being intuitive/memorable, as can be tested via cloze completion and “what does this piece of code do”. Ideally someone should be able to read the manual and write some throwaway Stroscot code, abandon Stroscot for 6 months, and then come back and correctly type out some new Stroscot code without having to look at the manual again. If Stroscot the language is a moving target this goal is difficult to accomplish. That being said though, like Poettering said nothing is ever finished and it is better to track the progress of technology.</p>
+</div></blockquote>
+</section>
 <section id="readability">
 <h4>Readability<a class="headerlink" href="#readability" title="Permalink to this heading"></a></h4>
-<p>The edit-test cycle time is an included design principle, and part of the cycle time is the time needed to understand the program. In fact per <a class="reference external" href="https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx">here</a>, the split is 70% Understanding Code, 25% Modifying Existing Code, 5% Writing New Code. So in its literal definition “ease of understanding code”, readability is an important factor to optimize for.</p>
-<p>But in practical studies, the typical “comments, naming, and formatting” advice associated with readability is not an important factor in cycle time. For example in a Scala vs Java parallel programming test <span id="id1">[<a class="reference internal" href="../zzreferences.html#id113" title="Victor Pankratius, Felix Schmidt, and Gilda Garreton. Combining functional and imperative programming for multicore software: An empirical study evaluating Scala and Java. In 2012 34th International Conference on Software Engineering (ICSE), 123–133. Zurich, June 2012. IEEE. URL: http://ieeexplore.ieee.org/document/6227200/ (visited on 2022-11-10), doi:10.1109/ICSE.2012.6227200.">PSG12</a>]</span>, the Scala programs ended up taking a lot longer to write - 72 hours vs 43 hours, with no working Scala programs submitted until the third week, versus a Java program working the first week. The main reason given in the paper was Scala’s complex type system, although programmers listed other complaints such as poor documentation, poor IDE/debugging support, complex memory model, and complex parallel programming abstractions.</p>
-<p>Documentation and IDE support are important factors in understanding code, but they are not usually mentioned as part of readability. For example, nobody would say Brainfuck is a readable language, even though liberally commented Brainfuck program (e.g. <a class="reference external" href="https://en.wikipedia.org/wiki/Brainfuck#Examples">Wikipedia examples</a>) can be quite readable - one reads the comments, rather than the code. Similarly extensive commentary or an accompanying academic paper can make otherwise unreadable code suddenly “click” and make sense. Readability is a function of the reader and the writer, and the programming language has only a marginal impact.</p>
-<p>Besides robust commenting syntax, readability doesn’t really place any hard constraints on a programming language. So readability isn’t a design principle.</p>
+<p>Using the literal definition, “ease of understanding code”, readability is included as part of the edit-test cycle time principle: per <a class="reference external" href="https://web.archive.org/web/20060213015737/http://blogs.msdn.com/peterhal/archive/2006/01/04/509302.aspx">here</a>, the cycle time can be broken down into 70% Understanding Code, 25% Modifying Existing Code, 5% Writing New Code. It is worth noting that this breakdown is probably domain-specific though - per APL, if a language is quick to program in, it may be faster to write small programs from scratch than to read and understand another person’s program. So the 70/25/5 may turn into something more like 50/20/30 in a scripting context.</p>
+<p>Cycle time has the benefit of being a lot more empirical. Most articles that discuss readability go on to describe “readable code”, defined by various properties:</p>
+<ul class="simple">
+<li><p>Meaningful variable and function names (“self-commenting”)</p></li>
+<li><p>Consistent identifier style, indentation, and spacing</p></li>
+<li><p>Comments that explain the purpose of each function</p></li>
+<li><p>Comments that explain non-obvious parts</p></li>
+<li><p>Intermediate variables to avoid complex expressions</p></li>
+<li><p>Intermediate functions to avoid deep nesting of control structures and ensure each function has a single purpose</p></li>
+<li><p>Parentheses that make the order of operations clear</p></li>
+</ul>
+<p>These definitions are somewhat subjective and unreliable: what makes a name meaningful? Should the identifier style be camel case or snake case? With a loose reading, most libraries and style guides qualify as readable, in that there is always somebody who will argue that the existing choice is the best. The cycle time principle provides a framework for evaluating these choices objectively, although it is still dependent on a subject pool and hence the scientific literature. In fact studies have validated many of these guidelines as empirically reducing time to understand, and in cases such as underscores vs camel case found a definitive benefit for underscores.</p>
+<p>Cycle time also accounts for the aphorism “Perfect is the enemy of good”. One could spend hours optimizing for readability by fixing spelling mistakes and other nits and not get anything useful done. In the time it takes to write a long descriptive comment or poll coworkers for a meaningful variable name, one could have skipped writing comments, used 1-letter names, run and debugged the code, and moved on to a new task. Perfect readability is not the goal - the code just has to be understandable enough that any further readability improvements would take more cycle time than they will save in the future. And with hyperbolic discounting, reducing future maintenance effort is generally not as important as shipping working code now. This calculation does flip though when considering the programming language syntax and standard library, where small readability improvements can save time for millions of programmers (assuming the language becomes popular, so there is again a discounting factor).</p>
 </section>
 <section id="terseness">
 <h4>Terseness<a class="headerlink" href="#terseness" title="Permalink to this heading"></a></h4>
-<p>APL is terse mainly due to its use of symbols, and <span id="id2">[]</span> mentions that some consider terseness an advantage. But is it really? Again the prtinciple for Stroscot is the edit-test cycle time, in particular the 70% of time needed to understand a program. An APL program may be short but if the APL program requires looking up symbols in a vocabulary while a normal word-based program is more verbose but self-contained, then the word-based program wins on cycle time.</p>
-<p>Iverson argues the human mind has a limit on how many symbols it can cope with at one time. A terser notation allows larger problems to be comprehended and worked with. But this ignores the role of chunking: a novice chess player works with individual pieces, while an expert player works with configurations of the entire board. Similarly a programming expert will work on the level of program fragments, for example CRUD or the design patterns of Java, and the amount of verbiage involved in writing such patterns is immaterial to mental manipulation but rather only becomes relevant in the time necessary to read unfamiliar codebases and comprehend their patterns and the time needed to write out such verbose patterns when moving to implementation. Rather than terseness, this consideration argues to make programming patterns distinctive and easy to remember (the “memory palace” principle). APL’s overloading of monadic and dyadic function symbols seems to conflate distinct functions.</p>
-<p>There is some advantage to terseness in that code can be published inline in books or blog posts without detracting from the flow of the text. Documentation works better when the commentary and the code are visible on the same medium. But readability of the code is more important - a barcode is terse but provides no help without a complicated scanning procedure. UX design provides many techniques for creating navigable code listings, e.g. a 1000-line listings to be discussed in a short note with a hyperlink. accordion folds can be used for 100-line listings, and 10-line listings can be in a two-column format or with a collapsed accordion fold. So this advantage of terseness seems minimal compared to the benefits of general UX.</p>
-<p>APL programmers tend to give up reading an APL program quickly and start programming it themselves. This is due to the fact that one can program so quickly in APL.
-Turtles all the way down
-~~~~~~~~~~~~~~~~~~~~~~~~</p>
-<p>“Turtles all the way down” only makes sense in the context of a directional layout, such as inheritance or composition. Stroscot has <a class="reference internal" href="Objects.html#no-inheritance"><span class="std std-ref">no inheritance</span></a>, so it must be composition. But an infinite object tree would require infinite space - there has to be a trick to allow compressing it, e.g. that the objects at some point refer back to themselves. This pointer trick is the useful part, rather than the idea that all objects look like turtles, and is covered by the productivity principle.</p>
+<p>APL is terse mainly due to its use of symbols, and <span id="id1">[]</span> mentions that some consider terseness an advantage. But is it really? Again the principle for Stroscot is the edit-test cycle time, in particular the 70% of time needed to understand a program. An APL program may be short but if the APL program requires looking up symbols in a vocabulary while a normal word-based program is more verbose but self-contained, then the word-based program wins on cycle time.</p>
+<p>Iverson argues the human mind has a limit on how many symbols it can cope with at one time. A terser notation allows larger problems to be comprehended and worked with. But this ignores the role of chunking: a novice chess player works with individual pieces, while an expert player works with configurations of the entire board. Similarly a programming expert will work on the level of program fragments, for example CRUD or the design patterns of Java, and the amount of verbiage involved in writing such patterns is immaterial to mental manipulation but rather only becomes relevant in the time necessary to read unfamiliar codebases and comprehend their patterns and the time needed to write out such verbose patterns when moving to implementation. Rather than terseness, this consideration argues to make programming patterns easy to recognize (distinctive) and easy to remember (the “memory palace” principle). APL’s overloading of monadic and dyadic function symbols seems to conflate distinct functions and go against this consideration.</p>
+<p>There is some advantage to terseness in that shorter code listings can be published more easily in books or blog posts, as inline snippets that do not detract from the flow of the text. Documentation works better when the commentary and the code are visible on the same medium. But readability of the code is more important - a barcode is terse but provides no help without a complicated scanning procedure. Web UX design provides many techniques for creating navigable code listings, e.g. a 1000-line listings to be discussed in a short note with a hyperlink. Accordion folds can be used for 100-line listings, and 10-line listings can be in a two-column format or with a collapsed accordion fold. So this advantage of terseness seems minimal when considering that code is mostly published on the web these days.</p>
+</section>
+<section id="turtles-all-the-way-down">
+<h4>Turtles all the way down<a class="headerlink" href="#turtles-all-the-way-down" title="Permalink to this heading"></a></h4>
+<p>This is an Ecstasy principle. But it’s misleading - going infinitely downward would require infinite space. Actually it is a finite list plus a trick to make it infinite, namely that the objects at some point refer back to themselves. This pointing trick is the useful part, hence why Stroscot supports infinite structures. But this sort of “can you do this trick?” question is covered by the productivity principle.</p>
 </section>
 <section id="remember-the-vasa">
 <h4>Remember the Vasa<a class="headerlink" href="#remember-the-vasa" title="Permalink to this heading"></a></h4>
@@ -345,7 +394,7 @@ Turtles all the way down
 <h2>Goals<a class="headerlink" href="#goals" title="Permalink to this heading"></a></h2>
 <section id="the-ultimate">
 <h3>The ultimate<a class="headerlink" href="#the-ultimate" title="Permalink to this heading"></a></h3>
-<p>Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the <a class="reference external" href="https://www.youtube.com/watch?v=HDXYfulsRBA">ultimate showdown of ultimate destiny</a> w.r.t. programming languages. This has been called “silly” by Dennis Ritchie (author of C) and “the dream of immature programmers” by Bjarne Stroustrup (author of C++), <span id="id3">[<a class="reference internal" href="../zzreferences.html#id145" title="Herb Sutter. The C Family of Languages. Java Report, July 2000. URL: http://www.gotw.ca/publications/c_family_interview.htm (visited on 2021-10-28).">Sut00</a>]</span> but I think it can be made to work. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.</p>
+<p>Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the <a class="reference external" href="https://www.youtube.com/watch?v=HDXYfulsRBA">ultimate showdown of ultimate destiny</a> w.r.t. programming languages. This has been called “silly” by Dennis Ritchie (author of C) and “the dream of immature programmers” by Bjarne Stroustrup (author of C++), <span id="id2">[<a class="reference internal" href="../zzreferences.html#id145" title="Herb Sutter. The C Family of Languages. Java Report, July 2000. URL: http://www.gotw.ca/publications/c_family_interview.htm (visited on 2021-10-28).">Sut00</a>]</span> but I think it can be made to work. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.</p>
 <p>Stroustrup claims there are “genuine design choices and tradeoffs” to consider, which I agree with to a point. Many queries in a compiler are too expensive to compute exactly and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and don’t affect the overall design of the language. While there may not be a best solver, there is a best set of syntax and features.</p>
 </section>
 <section id="global-maximum">
@@ -401,34 +450,47 @@ Turtles all the way down
 <section id="other-programming-languages">
 <h2>Other programming languages<a class="headerlink" href="#other-programming-languages" title="Permalink to this heading"></a></h2>
 <p>There are many existing programming languages to learn from. All of them have had effort put into their design so their features should be considered. But the disadvantages to a feature are not obvious and generally can only be found by examining complexities in large software projects in the language. The trick is to isolate the use case and cut the Gordian knot in a surgical manner.</p>
-<p id="inspiring-projects">Inspiring projects:</p>
+<p>Since we aim to be a popular language we list the languages in <a class="reference external" href="https://www.tiobe.com/tiobe-index/">TIOBE index</a> order (as of December 2022), so that trends in features vs popularity can be discerned.</p>
+<section id="top-50">
+<h3>Top 50<a class="headerlink" href="#top-50" title="Permalink to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Python</p></li>
+</ol>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/cheery/lever/">Lever</a></p></li>
-<li><p><a class="reference external" href="https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md">Jai</a></p></li>
-<li><p><a class="reference external" href="https://pinafore.info/">Pinafore</a></p></li>
-<li><p><a class="reference external" href="http://github.com/codedot/lambda">Macro Lambda Calculus</a></p></li>
-<li><p><a class="reference external" href="https://github.com/manuel/wat-js">Wat</a></p></li>
-<li><p><a class="reference external" href="https://github.com/vito/atomo">Atomo</a> / <a class="reference external" href="https://github.com/vito/atomy">Atomy</a></p></li>
-</ul>
-<p>Languages in TIOBE index order:</p>
-<p>Python</p>
-<ul class="simple">
-<li><p>Most popular on TIOBE index, said to be “easy to learn for beginners”, “simple and elegant syntax” “similar to English”.</p></li>
+<li><p>Most popular on TIOBE index, said to be “easy to learn for beginners”, “easy to write”, “simple and elegant syntax” “similar to English”.</p></li>
 <li><p>brevity, readability, developer-friendliness make it 5-10x more productive than Java</p></li>
 <li><p>“Batteries included” standard libraries, such as lists and dictionaries, numpy (BLAS wrapper) and scipy</p></li>
 <li><p>Twisted web framework, TensorFlow machine learning framework</p></li>
 <li><p>Mixed reference counting / tracing GC memory management</p></li>
 <li><p>Significant indentation - still a point of contention, e.g. whether it makes copy pasting code harder</p></li>
-<li><p>C++ interpreter CPython, slow performance. PyPy exists but has’t been widely adopted due to incompatibility.</p></li>
+<li><p>C++ interpreter CPython, slow performance. PyPy exists but has’t been widely adopted due to incompatibilities.</p></li>
+<li><p>unintuitive “double underscore”/”dunder” method names like <code class="docutils literal notranslate"><span class="pre">__getitem__</span></code> and <code class="docutils literal notranslate"><span class="pre">__str__</span></code>, C++’s <code class="docutils literal notranslate"><span class="pre">operator[]</span></code> and Java’s <code class="docutils literal notranslate"><span class="pre">toString</span></code> are clearer</p></li>
+<li><p>paradigm: impure functional</p></li>
 </ul>
-<p>C</p>
+<ol class="arabic simple" start="2">
+<li><p>C</p></li>
+</ol>
 <ul class="simple">
-<li><p>old and widespread language. Language of most OS’s, hence runs just about everywhere (portable).</p></li>
+<li><p>most portable/widespread language. runs on just about every piece of silicon (although some require specialized compilers)</p></li>
+<li><p>language of most OS’s, hence used for FFI stuff</p></li>
 <li><p>statically compiled, compilers are very efficient.</p></li>
-<li><p>unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these. Also there is the Boehm GC, used by many people who don’t want to deal with memory management.</p></li>
+<li><p>unsafe pointers, common to see memory corruption and security vulnerabilities. valgrind, smart fuzzing, and static analysis have allowed catching these with great difficulty. Also there is the Boehm GC, used by many people who don’t want to deal with memory management.</p></li>
 <li><p>header files slow down compilation as they have to be read many times during compilation</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>Java</p>
+<ol class="arabic simple" start="3">
+<li><p>C++</p></li>
+</ol>
+<ul class="simple">
+<li><p>many features, which interact in messy/complex ways making C++ take a long time to learn</p></li>
+<li><p>fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)</p></li>
+<li><p>templates, efficient at runtime but slow at compile time</p></li>
+<li><p>memory unsafe like C, although smart pointers and RAII make this a little better.</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="4">
+<li><p>Java</p></li>
+</ol>
 <ul class="simple">
 <li><p>Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top</p></li>
 <li><p>Compromises between performance and expressiveness such as covariant arrays</p></li>
@@ -439,131 +501,447 @@ Turtles all the way down
 <li><p>Every object has a 4-byte header and identity using <code class="docutils literal notranslate"><span class="pre">==</span></code>. No value types besides primitives.</p></li>
 <li><p>Requirement that the class name must match the directory name.  When moving functionality around this implies a lot of changes inside source files. Led to IDEs with extensive support for refactoring.</p></li>
 <li><p>Static methods. Scoped to a class, but not related to objects. Can be very confusing.</p></li>
+<li><p>fulfils “compile once, run anywhere” promise at the expense of a huge runtime</p></li>
 <li><p>JIT is probably best in the world for throughput. Startup is slow but throughput matches C performance in many cases.</p></li>
-<li><p>Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, around 15% overhead on wall clock time . <span id="id4">[<a class="reference internal" href="../zzreferences.html#id24" title="Zixian Cai, Stephen M Blackburn, Michael D Bond, and Martin Maas. Distilling the Real Cost of Production Garbage Collectors. IEEE International Symposium on Performance Analysis of Systems and Software, pages 12, 2022. URL: https://users.cecs.anu.edu.au/~steveb/pubs/papers/lbo-ispass-2022.pdf.">CBBM22</a>]</span></p></li>
+<li><p>Garbage collector takes big chunks of CPU time at irregular intervals. Low-pause GCs trade this for continuous overhead. Still not solved, around 15% overhead on wall clock time. <span id="id3">[<a class="reference internal" href="../zzreferences.html#id24" title="Zixian Cai, Stephen M Blackburn, Michael D Bond, and Martin Maas. Distilling the Real Cost of Production Garbage Collectors. IEEE International Symposium on Performance Analysis of Systems and Software, pages 12, 2022. URL: https://users.cecs.anu.edu.au/~steveb/pubs/papers/lbo-ispass-2022.pdf.">CBBM22</a>]</span></p></li>
+<li><p>paradigm: OO</p></li>
 </ul>
-<p>C++</p>
-<ul class="simple">
-<li><p>many features, which interact in messy/complex ways making C++ take a long time to learn</p></li>
-<li><p>fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)</p></li>
-<li><p>templates, efficient at runtime but slow at compile time</p></li>
-<li><p>memory unsafe like C, although smart pointers make this a little better.</p></li>
-</ul>
-<p>C#</p>
+<ol class="arabic simple" start="5">
+<li><p>C#</p></li>
+</ol>
 <ul class="simple">
 <li><p>best designed C-style syntax - e.g. introduced async/await</p></li>
 <li><p>wide usage - desktop software (Windows), games (MonoGame, Unity), web development (ASP.NET Core), mobile (Xamarin)</p></li>
+<li><p>paradigm: OO</p></li>
 </ul>
-<p>Visual Basic</p>
+<ol class="arabic simple" start="6">
+<li><p>Visual Basic</p></li>
+</ol>
 <ul class="simple">
 <li><p>“mentally mutilates” programmers (according to Dijkstra)</p></li>
-<li><p>runs on .NET, so very similar to C# in semantics</p></li>
+<li><p>runs on .NET, so very similar to C# in semantics. There is also “Classic Visual Basic” but the differences are small.</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>JavaScript</p>
+<ol class="arabic simple" start="7">
+<li><p>JavaScript</p></li>
+</ol>
 <ul class="simple">
-<li><p>second-best JIT, optimized for startup time - fast bytecode interpreters</p></li>
+<li><p>second-best JIT after Java, optimized for startup time - fast bytecode interpreters</p></li>
 <li><p>many strange features such as implicit type conversion, <code class="docutils literal notranslate"><span class="pre">with</span></code> statement, and <code class="docutils literal notranslate"><span class="pre">eval</span></code></p></li>
+<li><p>paradigm: impure functional</p></li>
 </ul>
-<p>Swift</p>
+<ol class="arabic simple" start="8">
+<li><p>SQL</p></li>
+</ol>
 <ul class="simple">
-<li><p>Automatic reference counting, interesting but not something I want to copy</p></li>
-<li><p>syntax for exception handling, if let/guard let</p></li>
-<li><p><a class="reference external" href="https://www.cocoawithlove.com/blog/2016/07/12/type-checker-issues.html">exponentially slow</a> type inference for numeric expressions, with bad heuristics</p></li>
+<li><p>DSL used for databases, common enough that finding a good way to embed it is necessary</p></li>
+<li><p>query compilers do a lot of interesting data structure traversal optimizations</p></li>
+<li><p>PL/SQL is Oracle’s extension which allows procedures, functions, and triggers; other databases have similar things</p></li>
+<li><p>paradigm: declarative</p></li>
 </ul>
-<p>Delphi / Object Pascal</p>
+<ol class="arabic simple" start="9">
+<li><p>Assembly language</p></li>
+</ol>
 <ul class="simple">
-<li><p>still kicking</p></li>
-<li><p>proprietary, so not worth looking at too closely</p></li>
+<li><p>Generally the last stage before a binary in any compilation pipeline</p></li>
+<li><p>full access to ISA and thus machine resources</p></li>
+<li><p>Intel and AT&amp;T syntaxes for x86. <a class="reference external" href="https://blog.reverberate.org/2009/07/giving-up-on-at-style-assembler-syntax.html">Several</a> <a class="reference external" href="https://outerproduct.net/2021-02-13_att-asm.html">posts</a> say to use Intel.</p></li>
+<li><p>repetitive and tedious, too many side effects, not at all intuitive, full of many inconsistencies</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>PHP</p>
+<ol class="arabic simple" start="10">
+<li><p>PHP</p></li>
+</ol>
 <ul class="simple">
 <li><p>Initial design was hacked together quickly, inconsistent API design. Could be fixed but backwards compatibility was held to be more important.</p></li>
-<li><p>Several features with huge security or performance impact: eval, weak typing</p></li>
+<li><p>Like JS, several features with huge security or performance impact: eval, weak typing</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>Objective C</p>
+<ol class="arabic simple" start="11">
+<li><p>R</p></li>
+</ol>
 <ul class="simple">
-<li><p>deprecated by Apple in favor of Swift, but a good comparison against C++</p></li>
+<li><p>numerous libraries for statistics and data analysis</p></li>
+<li><p>lazy evaluation</p></li>
+<li><p>paradigm: functional</p></li>
 </ul>
-<p>Go</p>
+<ol class="arabic simple" start="12">
+<li><p>Go</p></li>
+</ol>
 <ul class="simple">
 <li><p>opinionated design, touts meaningless features such as “strong typing”</p></li>
 <li><p>goroutines, killer feature - but stackless continuations are better</p></li>
 <li><p>finally added generics after a long time</p></li>
 <li><p>supposedly a Python replacement, but TensorFlow is mainly in Python and the Go binding <a class="reference external" href="https://github.com/tensorflow/build/tree/master/golang_install_guide">isn’t officially supported</a></p></li>
+<li><p>paradigm: actor model</p></li>
 </ul>
-<p>R</p>
+<ol class="arabic simple" start="14">
+<li><p>MATLAB</p></li>
+</ol>
 <ul class="simple">
-<li><p>numerous libraries for statistics and data analysis</p></li>
-<li><p>lazy evaluation</p></li>
+<li><p>extensive numerical libraries</p></li>
+<li><p>array syntax confuses people, <code class="docutils literal notranslate"><span class="pre">[1</span> <span class="pre">[2</span> <span class="pre">3]]</span></code> is a flat array because <code class="docutils literal notranslate"><span class="pre">[A</span> <span class="pre">B]</span></code> means concatenate A&amp;B. there is <a class="reference external" href="https://www.mathworks.com/help/matlab/math/multidimensional-arrays.html">no literal syntax</a> for 3D or higher dimension arrays.</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>Perl</p>
+<ol class="arabic simple" start="15">
+<li><p>Swift</p></li>
+</ol>
+<ul class="simple">
+<li><p>Automatic reference counting, interesting but not something I want to copy</p></li>
+<li><p>syntax for exception handling, if let/guard let</p></li>
+<li><p><a class="reference external" href="https://www.cocoawithlove.com/blog/2016/07/12/type-checker-issues.html">exponentially slow</a> type inference for numeric expressions, with bad heuristics</p></li>
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="16">
+<li><p>Delphi / Object Pascal</p></li>
+</ol>
+<ul class="simple">
+<li><p>still kicking</p></li>
+<li><p>proprietary, so not worth looking at too closely</p></li>
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="17">
+<li><p>Ruby</p></li>
+</ol>
+<ul class="simple">
+<li><p>weird syntax, e.g. expression by itself is return value - causes mistakes. Per Matsumoto <a class="reference external" href="https://www.artima.com/articles/the-philosophy-of-ruby">interview</a>, Ruby was designed for <em>his</em> least surprise, and maybe for least surprise after memorizing the language, not for novice programmers or programmers familiar with other languages, so has many idiosyncrasies.</p></li>
+<li><p>complex library, e.g. both find_all and select methods that do the exact same thing</p></li>
+<li><p>Rails is <a class="reference external" href="https://www.jetbrains.com/lp/devecosystem-2021/ruby/#Ruby_what-web-development-tools-and-or-frameworks-do-you-regularly-use-if-any">(still)</a> the most popular framework. Requires reading the Rails guide to learn things like models having singular class names with capitals and no underscores but db tables with plurals, lower case and underscores. Or how in controllers you just reference params without anything suggesting if params is a variable, method, how its populated, where its scoped, etc. As compared to Django where novices can figure out the basics easily without needing a guide.</p></li>
+<li><p>slow, <a class="reference external" href="https://github.com/ruby/ruby/blob/master/doc/yjit/yjit.md">YJIT</a> added in 3.1</p></li>
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="18">
+<li><p>Perl</p></li>
+</ol>
 <ul class="simple">
 <li><p>A mess with the Raku split</p></li>
 <li><p>Various libraries on CPAN are good</p></li>
 <li><p>Contexts and sigils, terrible syntax for beginners</p></li>
+<li><p>paradigm: impure functional</p></li>
 </ul>
-<p>Lua</p>
+<ol class="arabic simple" start="19">
+<li><p>Objective C</p></li>
+</ol>
 <ul class="simple">
-<li><p>Use of “tables” for everything is interesting</p></li>
-<li><p>LuaJIT was fast but the main developer left due to lack of income. Stroscot needs to avoid the same fate.</p></li>
+<li><p>deprecated by Apple in favor of Swift, but a good comparison against C++</p></li>
+<li><p>paradigm: OO</p></li>
 </ul>
-<p>Ruby</p>
-<ul class="simple">
-<li><p>weird syntax, e.g. expression by itself is return value - causes mistakes.</p></li>
-<li><p>Rails is <a class="reference external" href="https://www.jetbrains.com/lp/devecosystem-2021/ruby/#Ruby_what-web-development-tools-and-or-frameworks-do-you-regularly-use-if-any">(still)</a> the most popular framework</p></li>
-<li><p>slow, <a class="reference external" href="https://github.com/ruby/ruby/blob/master/doc/yjit/yjit.md">YJIT</a> added in 3.1</p></li>
-</ul>
-<p>Prolog</p>
-<ul class="simple">
-<li><p>old language, the family is discussed in the Logic Programming article</p></li>
-</ul>
-<p>Rust</p>
+<ol class="arabic simple" start="20">
+<li><p>Rust</p></li>
+</ol>
 <ul class="simple">
 <li><p>good standard library design and documentation, probably worth copying</p></li>
 <li><p>voted “most loved” by StackOverflow</p></li>
 <li><p>borrow checker, can’t even write linked lists without <a class="reference external" href="https://rcoh.me/posts/rust-linked-list-basically-impossible/">endless pain</a>. They <a class="reference external" href="https://rust-unofficial.github.io/too-many-lists/third-layout.html">end up</a>  using reference counting as a substitute for GC to ensure memory safety</p></li>
 <li><p>concurrency safe, but async suffers from “borrow checker”-itis and uses atomic reference counting</p></li>
+<li><p>paradigm: imperative</p></li>
 </ul>
-<p>Julia</p>
+<ol class="arabic simple" start="21">
+<li><p>Scratch</p></li>
+</ol>
 <ul class="simple">
-<li><p>good support for concurrency/parallelism</p></li>
-<li><p>C+Fortran+Python FFIs and syntax</p></li>
-<li><p>JIT design assumes trampolines, performance barrier</p></li>
+<li><p>Block-black visual programming language for children</p></li>
+<li><p>Essentially procedural, it has conditionals, loops, and functions</p></li>
+<li><p>paradigm: block-based</p></li>
 </ul>
-<p>Kotlin</p>
+<ol class="arabic simple" start="22">
+<li><p>SAS</p></li>
+</ol>
+<ul class="simple">
+<li><p>Another statistics language, less popular than R and proprietary</p></li>
+<li><p>paradigm: data-driven</p></li>
+</ul>
+<ol class="arabic simple" start="23">
+<li><p>Kotlin</p></li>
+</ol>
 <ul class="simple">
 <li><p>JVM languages with improved features compared to Java</p></li>
 <li><p>val keyword instead of final, null safety, extension methods, first-class type parameters</p></li>
 <li><p>coroutines</p></li>
+<li><p>paradigm: OO</p></li>
 </ul>
-<p>D</p>
+<ol class="arabic simple" start="24">
+<li><p>Julia</p></li>
+</ol>
 <ul class="simple">
-<li><p>C/C++ style but different. Never really took off AFAICT.</p></li>
-<li><p>many features that have been incorporated into C++, others that haven’t like scope guards</p></li>
+<li><p>good support for concurrency/parallelism</p></li>
+<li><p>C+Fortran+Python FFIs and syntax</p></li>
+<li><p>JIT design goes through LLVM and requires trampolines between functions, performance barrier</p></li>
+<li><p>paradigm: multiple dispatch</p></li>
 </ul>
-<p>Scala</p>
+<ol class="arabic simple" start="25">
+<li><p>Lua</p></li>
+</ol>
+<ul class="simple">
+<li><p>Use of “tables” for everything is interesting</p></li>
+<li><p>LuaJIT was fast but the main developer left due to lack of income. Stroscot needs to avoid the same fate.</p></li>
+<li><p>paradigm: impure functional</p></li>
+</ul>
+<ol class="arabic simple" start="26">
+<li><p>Fortran</p></li>
+</ol>
+<ul class="simple">
+<li><p>call-by-reference calling convention, avoids copying arrays but hard to program with</p></li>
+<li><p>still used for some numerical code</p></li>
+<li><p>handles floating point exceptions via signals</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="27">
+<li><p>COBOL</p></li>
+</ol>
+<ul class="simple">
+<li><p>staying far away from this</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="28">
+<li><p>Lisp</p></li>
+</ol>
+<ul class="simple">
+<li><p>Easily parsable syntax, originator of macros</p></li>
+<li><p>Racket is probably the most popular Lisp now</p></li>
+<li><p>paradigm: functional</p></li>
+</ul>
+<ol class="arabic simple" start="29">
+<li><p>(Visual) FoxPro</p></li>
+</ol>
+<ul class="simple">
+<li><p>commercial language, don’t know much about it</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="30">
+<li><p>Ada</p></li>
+</ol>
+<ul class="simple">
+<li><p>Still in use in aviation and DoD applications</p></li>
+<li><p>Considered somewhat legacy, but has many useful features</p></li>
+<li><p>SPARK language is a dialect which extends contract support</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="31">
+<li><p>Dart</p></li>
+</ol>
+<ul class="simple">
+<li><p>targets JS, WASM (in progress), and native ARM/x86 with AOT and JIT, a pretty reasonable set of targets</p></li>
+<li><p>tied to Flutter UI framework, which is mostly for creating mobile apps but also supports desktop and web</p></li>
+<li><p>main advantage is sharing code between client and server</p></li>
+<li><p>sentiment seems to be that Kotlin is about the same language-wise and the JVM is better for enterprise work</p></li>
+<li><p>they have a package manager, but it doesn’t support automatic vendoring so there are many version solving conflicts</p></li>
+<li><p>concurrency model is actor-style plus async-await event loop, similar to node</p></li>
+<li><p>unclear future, Google has been funding it but they kill projects frequently. It is an Ecma <a class="reference external" href="https://dart.dev/guides/language/spec">standard</a> though.</p></li>
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="32">
+<li><p>Scala</p></li>
+</ol>
 <ul class="simple">
 <li><p>Type inference, allows avoiding repetition of Java such as <code class="docutils literal notranslate"><span class="pre">SomeModule.MyClass</span> <span class="pre">v</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">SomeModule.MyClass();</span></code></p></li>
 <li><p>complex type system: implicit conversions, subtyping</p></li>
+<li><p>paradigm: impure functional</p></li>
 </ul>
-<p>TypeScript</p>
+<ol class="arabic simple" start="33">
+<li><p>Prolog</p></li>
+</ol>
 <ul class="simple">
-<li><p><a class="reference external" href="https://stackoverflow.com/questions/29918324/is-typescript-really-a-superset-of-javascript">near superset</a> of JavaScript with an unsound type system</p></li>
-<li><p>doesn’t really add anything besides the types, so only useful for ideas on gradual typing</p></li>
+<li><p>old language, the family is discussed in the Logic Programming article</p></li>
+<li><p>paradigm: logic</p></li>
 </ul>
-<p>Haskell</p>
+<ol class="arabic simple" start="34">
+<li><p>D</p></li>
+</ol>
+<ul class="simple">
+<li><p>C/C++ style but different. Never really took off AFAICT.</p></li>
+<li><p>many features that have been incorporated into C++, others that haven’t like scope guards</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="35">
+<li><p>PL/SQL is a dialect of of SQL</p></li>
+<li><p>Bash</p></li>
+</ol>
+<ul class="simple">
+<li><p>Common on Unix systems, but I think Python is more useful when you’re doing anything complex</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="37">
+<li><p>Powershell</p></li>
+</ol>
+<ul class="simple">
+<li><p>Equivalent of Bash on Windows - I don’t think there’s much inspiring</p></li>
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="38">
+<li><p>Haskell</p></li>
+</ol>
 <ul class="simple">
 <li><p>“finest imperative programming language”</p></li>
 <li><p>small community, few core/maintenance developers (mainly SPJ) compared to size of codebase</p></li>
 <li><p>good in benchmarks and scripting but GC is still not usable in production</p></li>
 <li><p>poor library design, e.g. verbose naming conventions</p></li>
+<li><p>paradigm: pure functional</p></li>
 </ul>
+<ol class="arabic simple" start="39">
+<li><p>Logo</p></li>
+</ol>
+<ul class="simple">
+<li><p>There is no official Logo implementation, but UCBLogo is popular.</p></li>
+<li><p>Simple procedural commands, functions, and Lisp-like linked lists</p></li>
+<li><p>Turtle graphics</p></li>
+<li><p>Personally I like the game <a class="reference external" href="https://en.wikipedia.org/wiki/RoboWar">RoboWar</a> better, which is based on Forth</p></li>
+<li><p>paradigm: block-based</p></li>
+</ul>
+<ol class="arabic simple" start="40">
+<li><p>Transact-SQL is a dialect of SQL</p></li>
+<li><p>TypeScript</p></li>
+</ol>
+<ul class="simple">
+<li><p><a class="reference external" href="https://stackoverflow.com/questions/29918324/is-typescript-really-a-superset-of-javascript">near superset</a> of JavaScript with an unsound type system</p></li>
+<li><p>doesn’t really add anything besides the types, so only useful for ideas on gradual typing. Also the type inference is not too good.</p></li>
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="42">
+<li><p>ABAP (Advanced Business Application Programming)</p></li>
+</ol>
+<ul class="simple">
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="43">
+<li><p>F#</p></li>
+</ol>
+<ul class="simple">
+<li><p>Mixture of C# and Haskell, not really as interesting as either</p></li>
+<li><p>paradigm: impure functional</p></li>
+</ul>
+<ol class="arabic simple" start="44">
+<li><p>OCaml</p></li>
+</ol>
+<ul class="simple">
+<li><p>paradigm: impure functional</p></li>
+</ul>
+<ol class="arabic simple" start="45">
+<li><p>CFML (ColdFusion Markup Language)</p></li>
+</ol>
+<ul class="simple">
+<li><p>paradigm: imperative</p></li>
+</ul>
+<ol class="arabic simple" start="46">
+<li><p>Scheme - discussed under Lisp</p></li>
+<li><p>Erlang</p></li>
+</ol>
+<ul class="simple">
+<li><p>has a well-tested distributed, fault-tolerant, reliable, soft real-time, concurrent database</p></li>
+<li><p>designed to be crash-only, restart tolerant</p></li>
+<li><p>not used much outside Ericsson</p></li>
+<li><p>paradigm: actor model</p></li>
+</ul>
+<ol class="arabic simple" start="48">
+<li><p>LabVIEW</p></li>
+</ol>
+<ul class="simple">
+<li><p>Pretty nice GUI approach to programming</p></li>
+<li><p>Lots of wires, and if you get a complicated enough program the auto wire layout command gives up</p></li>
+<li><p>paradigm: dataflow</p></li>
+</ul>
+<ol class="arabic simple" start="49">
+<li><p>Groovy</p></li>
+</ol>
+<ul class="simple">
+<li><p>paradigm: OO</p></li>
+</ul>
+<ol class="arabic simple" start="50">
+<li><p>ML</p></li>
+</ol>
+<ul class="simple">
+<li><p>paradigm: impure functional</p></li>
+</ul>
+</section>
+<section id="next-50-in-alphabetical-order">
+<h3>Next 50 in alphabetical order<a class="headerlink" href="#next-50-in-alphabetical-order" title="Permalink to this heading"></a></h3>
+<p>ABC</p>
+<p>ActionScript</p>
+<ul class="simple">
+<li><p>basically JS but with a different standard library</p></li>
+</ul>
+<p>Alice</p>
+<p>Apex</p>
+<p>APL</p>
+<p>AutoLISP</p>
+<p>Awk</p>
+<p>B4X</p>
+<p>C shell</p>
+<p>CL (OS/400)</p>
+<p>CLIPS</p>
 <p>Clojure</p>
 <ul class="simple">
 <li><p>one of few languages to use software transactional memory, custom implementation “MVCC”</p></li>
 <li><p><a class="reference external" href="https://github.com/matthiasn/talk-transcripts/tree/master/Hickey_Rich">interesting talks</a> on functional programming and language design</p></li>
 <li><p>runs well on JVM</p></li>
 </ul>
+<p>Common Lisp - discussed under Lisp</p>
+<p>Crystal</p>
+<ul class="simple">
+<li><p>Ruby-like syntax - attracts Ruby programmers, but too complex for anyone else</p></li>
+<li><p>statically compiled with LLVM - the usual story of fast binaries but slow compile times</p></li>
+<li><p>HM-style type inference, the usual caveats</p></li>
+</ul>
+<p>Elixir</p>
+<ul class="simple">
+<li><p>based on Erlang, new and supposedly great syntax</p></li>
+</ul>
+<p>Emacs Lisp - discussed under Lisp</p>
+<p>Forth</p>
+<ul class="simple">
+<li><p>Minimal design, almost as portable as C</p></li>
+<li><p>stack-based paradigm leads to annoying shuffling (dup, swap, etc.) to get anything done</p></li>
+<li><p>extended by Factor, Joy, and other “concatenative languages”</p></li>
+</ul>
+<p>Hack</p>
+<p>Icon</p>
+<p>Io</p>
+<p>J#</p>
+<p>JScript</p>
+<p>Korn shell</p>
+<p>Ladder Logic</p>
+<p>LPC</p>
+<p>Modula-2</p>
+<p>MQL5</p>
+<p>MUMPS</p>
+<p>NATURAL</p>
+<p>Occam</p>
+<p>OpenCL</p>
+<p>OpenEdge ABL</p>
+<p>PL/I</p>
+<ul class="simple">
+<li><p>Ye olde IBM language</p></li>
+<li><p>Weird exception handling style - “ON &lt;EXCEPTION&gt; GOTO &lt;LABEL&gt;”, very similar to hardware implementation</p></li>
+</ul>
+<p>Q</p>
+<p>Racket - discussed under Lisp</p>
+<p>Raku</p>
+<ul class="simple">
+<li><p>Perl 6, yay</p></li>
+</ul>
+<p>Ring</p>
+<p>RPG</p>
+<p>S</p>
+<p>Smalltalk</p>
+<p>Solidity</p>
+<p>SPARK - discussed under Ada</p>
+<p>Stata</p>
+<p>Tcl</p>
+<p>VBScript</p>
+<p>Verilog</p>
+<ul class="simple">
+<li><p>Two languages: a general purpose specification language, and a poorly-defined hardware synthesis language. Basically you have to run the synthesizer and see if it complains or generates a circuit.</p></li>
+</ul>
+<p>VHDL</p>
+<ul class="simple">
+<li><p>also a hardware synthesis language</p></li>
+</ul>
+<p>WebAssembly</p>
+<p>X++</p>
+<p>Xojo</p>
+</section>
+<section id="languages-not-in-tiobe">
+<h3>Languages not in TIOBE<a class="headerlink" href="#languages-not-in-tiobe" title="Permalink to this heading"></a></h3>
 <p>Elm</p>
 <ul class="simple">
 <li><p>small ecosystem</p></li>
@@ -571,20 +949,19 @@ Turtles all the way down
 <li><p>no substantial commits in main repo since 2019</p></li>
 <li><p>BDFL doing “exploratory work” closed-repo, most recently described in a 2021 <a class="reference external" href="https://discourse.elm-lang.org/t/status-update-3-nov-2021/7870">status update</a></p></li>
 </ul>
-<p>Erlang</p>
-<ul class="simple">
-<li><p>has a well-tested distributed, fault-tolerant, reliable, soft real-time, concurrent database</p></li>
-<li><p>designed to be crash-only, restart tolerant</p></li>
-<li><p>not used much outside Ericsson</p></li>
-</ul>
-<p>Elixir</p>
-<ul class="simple">
-<li><p>based on Erlang, new and supposedly great syntax</p></li>
-</ul>
 <p>Flix</p>
 <ul class="simple">
 <li><p>Long list of principles, most of which I disagree with. The corresponding Stroscot opinions are expressed on their respective pages.</p></li>
 </ul>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/cheery/lever/">Lever</a></p></li>
+<li><p><a class="reference external" href="https://github.com/BSVino/JaiPrimer/blob/4a2d14f3e1c8e82a4ba68b81d3fd7d8d438e955c/JaiPrimer.md">Jai</a></p></li>
+<li><p><a class="reference external" href="https://pinafore.info/">Pinafore</a></p></li>
+<li><p><a class="reference external" href="http://github.com/codedot/lambda">Macro Lambda Calculus</a></p></li>
+<li><p><a class="reference external" href="https://github.com/manuel/wat-js">Wat</a></p></li>
+<li><p><a class="reference external" href="https://github.com/vito/atomo">Atomo</a> / <a class="reference external" href="https://github.com/vito/atomy">Atomy</a></p></li>
+</ul>
+</section>
 </section>
 </section>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dispatch &mdash; Stroscot  documentation</title>
@@ -14,16 +14,14 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Evaluation strategy" href="Evaluation-Strategy.html" />
+    <link rel="next" title="Errors" href="Errors.html" />
     <link rel="prev" title="Core syntax" href="CoreSyntax.html" /> 
 </head>
 
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -79,13 +81,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -106,6 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -127,7 +128,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Dispatch</li>
       <li class="wy-breadcrumbs-aside">
@@ -157,12 +158,12 @@
 <p>CLOS has method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>. The basic idea of method combination can be seen here:</p>
 <img alt="../_images/Method-combination.png" src="../_images/Method-combination.png" />
 <p>But it turns out these can simply be implemented with priorities <code class="docutils literal notranslate"><span class="pre">around_clause</span> <span class="pre">&gt;</span> <span class="pre">before_clause</span> <span class="pre">&gt;</span> <span class="pre">after_clause</span> <span class="pre">&gt;</span> <span class="pre">prioHigh</span></code> and next-method. <code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="nf">after</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="p">;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">before</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">after</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="p">;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Guards are handled by calling next-method on failure:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">around</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">around</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w">  </span><span class="ow">=</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span>
 </pre></div>
 </div>
 </section>
@@ -261,15 +262,15 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <p>Per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id84">KKSV95</a>]</span>, an uncurried function symbol has an arity n and a function application <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">tn)</span></code> is formed from <code class="docutils literal notranslate"><span class="pre">f</span></code> and n terms t1,…,tn. In a curried system there are no arities and function applications are formed starting from a nullary constant <code class="docutils literal notranslate"><span class="pre">f</span></code> and applying the binary “application” operator, like <code class="docutils literal notranslate"><span class="pre">App(...App(App(f,t1),...),tn)</span></code> but more concisely written as left-associative juxtaposition <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tn</span></code>. We ignore the partially-applied system mentioned by Kennaway here and just assume the use of term matching.</p>
 <p>Partial application creates a function that takes one or more omitted parameters and plugs them into f to produce a final result. Currying allows easy partial function application for lastmost positional parameters and keyword parameters, which in turn allows using higher-order functions more easily, e.g. passing a partially-applied function as the argument to map. For example <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">(add</span> <span class="pre">2)</span> <span class="pre">[1,2]</span> <span class="pre">=</span> <span class="pre">[3,4]</span></code>. Without currying this would have to use a lambda to perform the partial application like <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">(\x.</span> <span class="pre">add</span> <span class="pre">2</span> <span class="pre">x)</span></code>. So in Stroscot positional parameters and keyword parameters are curried. This allows passing any function “directly”, without “wrapping” it in an anonymous function.</p>
 <p>The parentheses for a curried function don’t matter, e.g. all of the following are equivalent:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">((</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">((</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">f</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>Currying is independent of function call syntax, e.g. with C-style syntax we would write:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
-<span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
-<span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nf">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>for the various currying possibilities.</p>
@@ -277,16 +278,16 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <section id="variadic-arguments">
 <h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Permalink to this heading"></a></h3>
 <p>A variadic function has no fixed arity. So can currying and variadic functions coexist? Well consider a variadic function <code class="docutils literal notranslate"><span class="pre">sum</span></code>:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
-<span class="nf">sum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span>
+<span class="nf">sum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="o">#</span><span class="w"> </span><span class="mi">1</span>
 
-<span class="nf">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="nf">g</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">6</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="n">true</span><span class="w"></span>
-<span class="nf">g</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-<span class="o">#</span><span class="w"> </span><span class="mi">15</span><span class="w"></span>
+<span class="nf">g</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span>
+<span class="nf">g</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">6</span>
+<span class="o">#</span><span class="w"> </span><span class="n">true</span>
+<span class="nf">g</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="mi">5</span>
+<span class="o">#</span><span class="w"> </span><span class="mi">15</span>
 </pre></div>
 </div>
 <p>So even though <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">==</span> <span class="pre">6</span></code>, <code class="docutils literal notranslate"><span class="pre">g</span></code> is different from <code class="docutils literal notranslate"><span class="pre">6</span></code> - <code class="docutils literal notranslate"><span class="pre">g</span></code> is both a function and non-function at the same time. Similarly <code class="docutils literal notranslate"><span class="pre">sum</span></code> is both <code class="docutils literal notranslate"><span class="pre">0</span></code> and a function. This causes confusion. In particular the issue is there are multiple interpretations of a function call: it could be a partial application waiting for more arguments, or it could be a complete application with the intention to use defaults for default parameters and terminate the varargs list. To avoid this confusion we need to know when the function call is complete. It seems to be a common misconception (e.g. in the Flix principles) that this means currying and variadic functions cannot be in the same language. But there are several approaches:</p>
@@ -295,8 +296,8 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <li><p>a special terminator value, function, or type. For example in <a class="reference external" href="http://reasonmlhub.com/exploring-reasonml/ch_functions.html">ReasonML</a> every function needs at least one positional parameter. There are no nullary functions; a definition or function call without any positional parameters is transformed to take or pass an empty tuple argument (). ReasonML accumulates parameters until it first encounters a positional parameter, then defaults all default parameters and (if it supported varargs) ends varargs, creating a partially-applied function taking only positional parameters. So <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">{x=0,y=0}</span> <span class="pre">()</span> <span class="pre">=&gt;</span> <span class="pre">x</span> <span class="pre">+</span> <span class="pre">y</span></code> can be called as <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">{x=3}</span> <span class="pre">{y=3}</span> <span class="pre">()</span> <span class="pre">=</span> <span class="pre">6</span></code> or <code class="docutils literal notranslate"><span class="pre">add</span> <span class="pre">{x=3}</span> <span class="pre">()</span> <span class="pre">=</span> <span class="pre">3</span></code>, including splitting the intermediate values like <code class="docutils literal notranslate"><span class="pre">plus3</span> <span class="pre">=</span> <span class="pre">add</span> <span class="pre">{x=3};</span> <span class="pre">result</span> <span class="pre">=</span> <span class="pre">plus3</span> <span class="pre">()</span></code>. Another example is <a class="reference external" href="https://hackage.haskell.org/package/base-4.9.0.0/docs/Text-Printf.html">Haskell printf</a> which can do <code class="docutils literal notranslate"><span class="pre">finalize</span> <span class="pre">(printf</span> <span class="pre">&quot;%d&quot;</span> <span class="pre">23)</span></code> (In Haskell the finalize is implicit as a type constraint). Essentially we construct types <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">end</span> <span class="pre">|</span> <span class="pre">(param</span> <span class="pre">-&gt;</span> <span class="pre">T);</span> <span class="pre">finalize</span> <span class="pre">:</span> <span class="pre">end</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>. It is also possible to use a specific <code class="docutils literal notranslate"><span class="pre">end</span></code> value, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">end</span> <span class="pre">=</span> <span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">1</span> <span class="pre">2</span> <span class="pre">3</span> <span class="pre">end</span> <span class="pre">=</span> <span class="pre">6</span></code>.</p></li>
 <li><p>using a explicit length parameter. <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/286231/is-it-possible-to-have-currying-and-variadic-function-at-the-same-time">SO</a> proposes passing the length as the first parameter, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">4</span> <span class="pre">1</span> <span class="pre">2</span> <span class="pre">3</span> <span class="pre">4</span> <span class="pre">=</span> <span class="pre">10</span></code>, but this is error-prone and inferior to just passing a list <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">[1,2,3,4]</span></code>.</p></li>
 <li><p>using the syntactic boundary: Arguably both of the previous are hacks. They do allow currying, but at the expense of exposing the dispatch machinery. Generally currying is not needed and the function is fully applied at its use site. Per <span id="id4">[<a class="reference internal" href="../zzreferences.html#id99" title="Simon Marlow and Simon Peyton Jones. Making a fast curry: push/enter vs. eval/apply for higher-order languages. Journal of Functional Programming, 16(4-5):415–449, July 2006. URL: https://www.cambridge.org/core/product/identifier/S0956796806005995/type/journal_article (visited on 2020-06-15), doi:10.1017/S0956796806005995.">MJ06</a>]</span> Figure 6, around 80% of calls are fully applied with known arguments. Finalizing varargs at the site of the function call is a simple and clear strategy:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="p">(</span><span class="n">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">(</span><span class="n">sum</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>This is the same behavior as languages without currying (<code class="docutils literal notranslate"><span class="pre">sum(1,2,3)</span></code> vs <code class="docutils literal notranslate"><span class="pre">sum(1,2)(3)</span></code>) and is only really complicated if you think too much about consistency. If we want more arguments we can use a lambda, or a builder DSL like <code class="docutils literal notranslate"><span class="pre">finalize</span> <span class="pre">(f</span> <span class="pre">`add`</span> <span class="pre">a</span> <span class="pre">`add`</span> <span class="pre">b)</span></code>.</p>
@@ -306,10 +307,10 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <section id="optional-arguments">
 <h3>Optional arguments<a class="headerlink" href="#optional-arguments" title="Permalink to this heading"></a></h3>
 <p>A similar issue is optional arguments - when do we decide to put in the default value? Again Stroscot’s answer is it must be syntactically supplied.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">opt</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">opt</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span>
 
-<span class="nf">opt</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"></span>
-<span class="p">(</span><span class="n">opt</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
+<span class="nf">opt</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">(</span><span class="n">opt</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="mi">2</span>
 </pre></div>
 </div>
 <p>Again a lambda or builder works for anything tricky.</p>
@@ -318,10 +319,10 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <section id="keyword-arguments">
 <h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this heading"></a></h3>
 <p>Keyword arguments allow passing arguments without regards to the order in the function definition, making the code more robust to forgetting argument order. Of course keyword-only arguments do not work with currying either. But if they are mixed keyword-positional arguments then specifying most of them using keywords and leaving the rest as curried positional parameters can work:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">kw</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">kw</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span>
 
-<span class="nf">zipWith</span><span class="w"> </span><span class="p">(</span><span class="n">kw</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">1</span><span class="p">})</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="w"></span>
-<span class="o">--&gt;</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<span class="nf">zipWith</span><span class="w"> </span><span class="p">(</span><span class="n">kw</span><span class="w"> </span><span class="p">{</span><span class="n">b</span><span class="ow">=</span><span class="mi">1</span><span class="p">})</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="o">--&gt;</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>This kind of partial specification is possible to emulate with records and partial application logic, but since currying is built in, this dispatch logic also seems best to build into the language.</p>
@@ -331,30 +332,29 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
 <p>The full dispatch mechanism is as follows:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span><span class="w"> </span><span class="n">clauses</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">do</span><span class="w"></span>
-<span class="w">  </span><span class="n">warnIfAnyPrioEqual</span><span class="w"> </span><span class="n">clauses</span><span class="w"></span>
-<span class="w">  </span><span class="n">starting_clauses</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">find_no_predecessors</span><span class="w"> </span><span class="n">clauses</span><span class="w"></span>
-<span class="w">  </span><span class="n">callParallel</span><span class="w"> </span><span class="n">starting_clauses</span><span class="w"></span>
-<span class="w">   </span><span class="kr">where</span><span class="w"></span>
-<span class="w">    </span><span class="n">callParallel</span><span class="w"> </span><span class="n">clauses</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lubAll</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">clauses</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">call</span><span class="w"> </span><span class="n">clause</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">clause</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">callParallel</span><span class="w"> </span><span class="p">(</span><span class="n">find_covering</span><span class="w"> </span><span class="n">methods</span><span class="w"> </span><span class="n">clause</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="n">lubAll</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fold</span><span class="w"> </span><span class="n">lub</span><span class="w"> </span><span class="kt">DispatchError</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span><span class="w"> </span><span class="n">clauses</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">  </span><span class="n">warnIfAnyPrioEqual</span><span class="w"> </span><span class="n">clauses</span>
+<span class="w">  </span><span class="n">starting_clauses</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">find_no_predecessors</span><span class="w"> </span><span class="n">clauses</span>
+<span class="w">  </span><span class="n">callParallel</span><span class="w"> </span><span class="n">starting_clauses</span>
+<span class="w">   </span><span class="kr">where</span>
+<span class="w">    </span><span class="n">callParallel</span><span class="w"> </span><span class="n">clauses</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">lubAll</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">clauses</span><span class="p">)</span>
+<span class="w">    </span><span class="n">call</span><span class="w"> </span><span class="n">clause</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">clause</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">next</span><span class="o">-</span><span class="n">method</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">callParallel</span><span class="w"> </span><span class="p">(</span><span class="n">find_covering</span><span class="w"> </span><span class="n">methods</span><span class="w"> </span><span class="n">clause</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="n">lubAll</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">fold</span><span class="w"> </span><span class="n">lub</span><span class="w"> </span><span class="kt">DispatchError</span>
 </pre></div>
 </div>
-<p>This depends on the <code class="docutils literal notranslate"><span class="pre">lub</span></code> primitive defined in <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">Conal’s post</a>. Since strict evaluation of <code class="docutils literal notranslate"><span class="pre">(1,undefined)</span></code> gives <code class="docutils literal notranslate"><span class="pre">undefined</span></code>, <code class="docutils literal notranslate"><span class="pre">lub</span></code> instead works on expressions. Expressions with little information content are in the set Bottom or ⊥, such as predicate failure, failed assertions, exceptions, and nontermination. Values are normal forms excluding bottoms, <code class="docutils literal notranslate"><span class="pre">NF</span> <span class="pre">\</span> <span class="pre">Bottom</span></code>. Aggregate expressions can be partially evaluated and hence neither bottoms nor values, such as the aforementioned <code class="docutils literal notranslate"><span class="pre">(1,undefined)</span></code>.</p>
-<p>One of the clever ideas of the theory of semantic domains (“domain theory”) is to place a partial ordering on values (domain members), based on information content. Values can not only be equal and unequal, they can also have more or less information content than each other.</p>
-<p>Structured types are not flat. For instance, the meaning of (i.e., the domain corresponding to) the Haskell type (Bool,Integer) contains five different kinds of values, as shown in the figure. Each arrow leads from a less-defined (less informative) value to a more-defined value.</p>
-<p>Define an operation <code class="docutils literal notranslate"><span class="pre">lub</span> <span class="pre">::</span> <span class="pre">HasLub</span> <span class="pre">a</span> <span class="pre">=&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>.</p>
-<p>If the arguments are consistent, i.e. have a common upper bound, then that is the result.
-Otherwise the context is used, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(a</span> <span class="pre">`lub`</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">`lub`</span> <span class="pre">f</span> <span class="pre">b</span></code></p>
-<p>The dispatch semantics is that all methods are run in parallel using the .  Furthermore <code class="docutils literal notranslate"><span class="pre">lub</span></code> is an oracle, analyzing the whole program - we want return type overloading, return values that are not accepted by the surrounding context are discarded.</p>
-<p>This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
+<p>This depends on the <code class="docutils literal notranslate"><span class="pre">lub</span></code> primitive defined in <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">Conal’s post</a>. <code class="docutils literal notranslate"><span class="pre">lub</span></code> evaluates both sides to HNF, in a timeboxed fashion. If both sides are exceptions then an exception is returned. If one side gives an exception but the other doesn’t, then the other side is returned. If both sides evaluate to HNF and the heads are equal, the result is the head followed by the lub of the sub-arguments. Otherwise the context is used, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(a</span> <span class="pre">`lub`</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">`lub`</span> <span class="pre">f</span> <span class="pre">b</span></code>. <code class="docutils literal notranslate"><span class="pre">lub</span></code> is an oracle, analyzing the whole program - we want return type overloading, and that return values not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
+<p>The dispatch semantics is that all methods are run in parallel using lub.</p>
 <p>The way Stroscot optimizes dispatch is:
 * eliminate all the statically impossible cases (cases that fail)
 * use profiling data to identify the hot paths
 * build a hot-biased dispatch tree
 * use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)</p>
-<p>The standard vtable implementation of Java/C++ is out. TODO: check out pattern dispatch paper</p>
+<p>The standard vtable implementation of Java/C++ arises naturally as a table dispatch on a method name. It looks like ‘load klass pointer from object; load method from klass-vtable (fixed offset from klass pointer); load execution address from method (allows you to swap execution strategies, like interp-vs-C1-vs-C2, or multiple copies of C2 jit’d depending on context); jump’. But usually we can do better by building a custom table and fast-pathing the hot cases.</p>
+<p>Cliff says what we do for overloaded calls doesn’t matter so long as in practice, &gt;90% of calls are statically resolved to one clause.</p>
+<p>THe inline-cache hack observes that, while in theory many different things might get called here, in practice there’s one highly dominant choice.  Same for big switches: you huffman-encode by execution frequency.</p>
+<blockquote>
+<div><p>TODO: check out pattern dispatch paper</p>
+</div></blockquote>
 <p>Karnaugh map with profiling data</p>
 </section>
 </section>
@@ -364,7 +364,7 @@ Otherwise the context is used, <code class="docutils literal notranslate"><span 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="CoreSyntax.html" class="btn btn-neutral float-left" title="Core syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Evaluation-Strategy.html" class="btn btn-neutral float-right" title="Evaluation strategy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Errors.html" class="btn btn-neutral float-right" title="Errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Evaluation strategy &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
@@ -25,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Exceptions" href="Exceptions.html" />
-    <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
+    <link rel="prev" title="Errors" href="Errors.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -33,12 +31,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Evaluation strategy</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#strict-vs-lazy">Strict vs lazy</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#referential-transparency">Referential transparency</a></li>
@@ -90,10 +93,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -114,6 +114,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -135,7 +136,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Evaluation strategy</li>
       <li class="wy-breadcrumbs-aside">
@@ -163,18 +164,18 @@
 <h3>Control constructs<a class="headerlink" href="#control-constructs" title="Permalink to this heading"></a></h3>
 <p>Laziness allows defining if-then-else and short-circuit functions without special handling. E.g. <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">c</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">if</span> <span class="pre">c</span> <span class="pre">then</span> <span class="pre">t</span> <span class="pre">else</span> <span class="pre">False</span></code>. With strictness <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">false</span> <span class="pre">undefined</span></code> evaluates its arguments first and throws even though its substitution does not. Another example is <code class="docutils literal notranslate"><span class="pre">fromMaybe</span> <span class="pre">(error</span> <span class="pre">&quot;BOOO&quot;)</span> <span class="pre">x</span></code>.</p>
 <p>This advantage doesn’t extend to <code class="docutils literal notranslate"><span class="pre">while</span></code>, because the condition and body must be evaluated multiple times. So in general we need <a class="reference external" href="https://docs.scala-lang.org/tour/by-name-parameters.html">call by name</a>, macros, fexprs, monads, etc. to define control constructs.</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">while</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">condition</span><span class="w"></span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span><span class="w"></span>
-<span class="w">    </span><span class="n">body</span><span class="w"></span>
-<span class="w">    </span><span class="n">while</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="n">body</span><span class="w"></span>
-<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="nb">()</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">while</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="n">body</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">condition</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="n">body</span>
+<span class="w">    </span><span class="n">while</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="n">body</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="n">return</span><span class="w"> </span><span class="nb">()</span>
 
-<span class="nf">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
-<span class="nf">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"></span>
-<span class="w">  </span><span class="n">i</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="nf">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="nf">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="w">  </span><span class="n">i</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Hence this is only a partial win for laziness.</p>
@@ -225,24 +226,24 @@ It also allows defining infinite data structures, e.g. <code class="docutils lit
 <h3>Time complexity<a class="headerlink" href="#time-complexity" title="Permalink to this heading"></a></h3>
 <p>Regarding (sequential) time complexity, lazy reduction uses at most as many reduction steps as the corresponding strict reduction. Lazy corresponds to strict extended with an oracle that skips evaluation of unneeded terms. <span id="id4">[<a class="reference internal" href="../zzreferences.html#id63" title="Jennifer Hackett and Graham Hutton. Call-by-need is clairvoyant call-by-value. Proceedings of the ACM on Programming Languages, 3(ICFP):1–23, July 2019. URL: https://www.cs.nott.ac.uk/~pszgmh/clairvoyant.pdf (visited on 2022-01-20), doi:10.1145/3341718.">HH19</a>]</span></p>
 <p>Also the cost of each reduction step is about the same. Consider for example this program:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bar</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bar</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span>
 
-<span class="nf">foo</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"></span>
-<span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">let</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="w"></span>
+<span class="nf">foo</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span>
+<span class="nf">foo</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">let</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span>
 </pre></div>
 </div>
 <p>In Java the overhead of the bar function call is two argument pushes, the call itself, and the return.
 GHC (without optimization) compiles this code as something like the following pseudocode:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="kt">THUNK</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                   </span><span class="o">//</span><span class="w"> </span><span class="n">thunk</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">heap</span><span class="w"></span>
-<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">u</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="kt">THUNK</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                   </span><span class="o">//</span><span class="w"> </span><span class="n">thunk</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">heap</span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">u</span>
 
-<span class="nf">sat_u</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w">                                 </span><span class="o">//</span><span class="w"> </span><span class="n">saturated</span><span class="w"> </span><span class="n">closure</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="s">&quot;bar y z&quot;</span><span class="w"></span>
-<span class="w">    </span><span class="n">push</span><span class="w"> </span><span class="kt">UPDATE</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                     </span><span class="o">//</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">stack</span><span class="w"></span>
-<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span><span class="w"></span>
+<span class="nf">sat_u</span><span class="w"> </span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w">                                 </span><span class="o">//</span><span class="w"> </span><span class="n">saturated</span><span class="w"> </span><span class="n">closure</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="s">&quot;bar y z&quot;</span>
+<span class="w">    </span><span class="n">push</span><span class="w"> </span><span class="kt">UPDATE</span><span class="p">(</span><span class="n">sat_u</span><span class="p">)</span><span class="w">                     </span><span class="o">//</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">stack</span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="n">bar</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="n">z</span>
 
-<span class="nf">bar</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"></span>
+<span class="nf">bar</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">    </span><span class="n">jump</span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span>
 </pre></div>
 </div>
 <p>The overhead of the lazy bar function call is the creation of a thunk on the bump heap (as fast as stack) that includes two arguments and a pointer to sat_u (plus room for the return value, though there’s no “cost” for this), and a “call” (not visible in the above code) when the (+) function forces the value u by jumping to sat_u. The update frame more or less replaces the return. (In this case, it can be optimized away.) Hence the function call is shifted in time but the overhead in terms of pseudo-instruction count is not significantly increased.</p>
@@ -292,19 +293,19 @@ I can make a similar compiler for STG (lazy functional language) with a similar 
 <section id="exponential-speedup">
 <h3>Exponential speedup<a class="headerlink" href="#exponential-speedup" title="Permalink to this heading"></a></h3>
 <p>Although thunks prevent some forms of duplication, lazy reduction still duplicates work. An example is</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span><span class="w"> </span><span class="nn">System.IO.Unsafe</span><span class="w"></span>
-<span class="nf">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">w</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">unsafePerformIO</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;i&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">`</span><span class="n">seq</span><span class="p">`</span><span class="w"> </span><span class="n">w</span><span class="w"></span>
-<span class="nf">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span><span class="w"></span>
-<span class="nf">t</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span><span class="w"></span>
-<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"></span>
-<span class="nf">main</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span><span class="w"> </span><span class="nn">System.IO.Unsafe</span>
+<span class="nf">i</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">w</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">unsafePerformIO</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;i&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">`</span><span class="n">seq</span><span class="p">`</span><span class="w"> </span><span class="n">w</span>
+<span class="nf">z</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span>
+<span class="nf">t</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span>
+<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="n">t</span><span class="p">)</span>
+<span class="nf">main</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">::</span><span class="w"> </span><span class="kt">Integer</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Without GHC’s optimizations, <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;i&quot;</span></code> is evaluated twice. With <code class="docutils literal notranslate"><span class="pre">-O</span></code> GHC does a “hoisting” transformation that makes <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(unsafePerformIO</span> <span class="pre">(print</span> <span class="pre">&quot;i&quot;))</span> <span class="pre">`seq`</span> <span class="pre">\w</span> <span class="pre">-&gt;</span> <span class="pre">w</span></code>. But it doesn’t optimize another example:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
-<span class="nf">foo</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"></span>
-<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"></span>
-<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">s</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">foo</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="nf">foo</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="kr">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="w">  </span><span class="n">a</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">s</span>
 </pre></div>
 </div>
 <p>Without optimizations, this is exponential with lazy, vs linear with optimal. The reason is that with optimal reduction, sub-expressions of function bodies are shared between calls. In particular, the only time an expression is re-evaluated is when it depends on the arguments. Again with <code class="docutils literal notranslate"><span class="pre">-O</span></code> this improves: GHC inlines <code class="docutils literal notranslate"><span class="pre">a</span></code> and does CSE, giving <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">n</span> <span class="pre">=</span> <span class="pre">let</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">foo</span> <span class="pre">(n-1)</span> <span class="pre">in</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">a</span></code>.</p>
@@ -339,7 +340,7 @@ I can make a similar compiler for STG (lazy functional language) with a similar 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Errors.html" class="btn btn-neutral float-left" title="Errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Exceptions.html" class="btn btn-neutral float-right" title="Exceptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Commentary &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,13 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -84,6 +84,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -105,7 +106,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Commentary</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/index.rst" class="fa fa-github"> Edit on GitHub</a>
@@ -164,13 +165,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html#instruction-scheduling">Instruction Scheduling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html#layout">Layout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html#c-target">C target</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html#more-on-optimization">More on optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Compiler.html">Compiler design</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#pipeline">Pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#error-levels">Error levels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#error-messages">Error messages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#fuel">Fuel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#structure">Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#optimization">Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#cross-compilation">Cross compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#bootstrapping">Bootstrapping</a></li>
@@ -178,17 +177,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#compile-time-code-execution">Compile-time code execution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#compiler-ways">Compiler ways</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#compiler-memory-management">Compiler memory management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#documentation-generator">Documentation generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#refactorer-reformatter">Refactorer / reformatter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#language-server">Language server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#interactive-shell">Interactive shell</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#notebooks">Notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#dynamic-execution">Dynamic execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Compiler.html#logic">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#debugger">Debugger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#profiler">Profiler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#ir-dump">IR dump</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html#evolution">Evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#incremental-compilation">Incremental compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#hot-reloading">Hot reloading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html#literal-vm">Literal VM</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CompilerOutput.html">Compiler output</a><ul>
@@ -229,6 +225,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html#implementation">Implementation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Errors.html">Errors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#error-levels">Error levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#error-messages">Error messages</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html#strict-vs-lazy">Strict vs lazy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html#lazy-vs-optimal">Lazy vs optimal</a></li>
@@ -259,11 +260,12 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html#avoiding-slow-operations">Avoiding slow operations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l1"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="IR.html#ir-style">IR Style</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#llvm-ir-sucks">LLVM IR sucks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IR.html">Intermediate representation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#goals">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#control-flow">Control flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Intrinsics.html">Intrinsics</a><ul>
@@ -367,15 +369,17 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Objects.html">Objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#encapsulation">Encapsulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#inheritance">Inheritance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#virtual-methods">Virtual methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#inheritance-is-not-subtyping">Inheritance is not subtyping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#fragile-base-classes">Fragile base classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#dissolving-interfaces-into-multimethods">Dissolving interfaces into multimethods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html#multiple-inheritance">Multiple inheritance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#minimal-oo">Minimal OO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#serialization">Serialization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#all-or-nothing-field-access">All-or-nothing field access</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#no-inheritance">No inheritance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Objects.html#no-constructors">No constructors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Objects.html#no-traits-or-methods">No traits or methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Objects.html#no-autoboxing">No autoboxing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Objects.html#no-object-identity">No object identity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Objects.html#no-implicit-synchronization-lock">No implicit synchronization lock</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#emulating-typical-oo">Emulating typical OO</a></li>
 </ul>
 </li>
@@ -445,7 +449,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#design">Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html#familiarity">Familiarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#learning">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#filenames">Filenames</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#unicode">Unicode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#parsing">Parsing</a></li>
@@ -457,20 +461,22 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#specificity">Specificity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#comments">Comments</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#whitespace">Whitespace</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html#indendation-sensitivity">Indendation sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#indentation-sensitivity">Indentation sensitivity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#braces-and-brackets">Braces and brackets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#function-syntax">Function syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#n-k-patterns">n+k patterns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#pattern-matching-conditionals">Pattern matching / conditionals</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html#chained-assignment">Chained assignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html#embedded-assignment">Embedded assignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#id15">Assignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#unless">Unless</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#integers">Integers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#tuples-and-records">Tuples and records</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#precedence">Precedence</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#logic-programming">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#functional-programming">Functional programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#go-syntax-notes">Go syntax notes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html#dsls">DSLs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#identifier-conventions">Identifier conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html#choices">Choices</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="TermRewriting.html">Term rewriting</a><ul>
@@ -500,6 +506,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Time.html#time-zones">Time zones</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html#libraries">Libraries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html#os-interface">OS interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Tools.html">Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html#documentation-generator">Documentation generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html#refactorer">Refactorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html#language-server">Language server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html#interactive-shell">Interactive shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html#notebooks">Notebooks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a><ul>

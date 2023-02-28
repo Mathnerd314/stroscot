@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Code generation &mdash; Stroscot  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -32,12 +30,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,6 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#instruction-scheduling">Instruction Scheduling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#layout">Layout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#c-target">C target</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-on-optimization">More on optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
@@ -64,13 +67,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html">Control flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#blocks">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#id1">Blocks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#ir-style">IR Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
@@ -91,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
@@ -112,7 +114,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
       <li class="breadcrumb-item active">Code generation</li>
       <li class="wy-breadcrumbs-aside">
@@ -132,57 +134,66 @@
 <li><p>Register allocation</p></li>
 <li><p>Instruction scheduling</p></li>
 </ol>
-<p>Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three criteria encompass many other optimizations, so solving them properly is worthwhile.</p>
+<p>Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three tasks encompass many optimizations, such as:</p>
 <ul class="simple">
 <li><p>Peephole optimization</p></li>
 <li><p>Code motion</p></li>
 <li><p>Block ordering</p></li>
-<li><p>Spilling, rematerialization</p></li>
+<li><p>Spilling</p></li>
+<li><p>Rematerialization</p></li>
+<li><p>Common subexpression elimination</p></li>
 </ul>
+<p>Stroscot uses assembly instruction intrinsics in the language and IR. It doesn’t provide “inline assembly”, meaning literal blocks of texual assembly code - the closest is writing the hexadecimal machine code and pretending it’s a single instruction. So it makes sense to provide a performance guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code. Unison can do a search over the complete space of instruction sequences, hence can actually find the optimal solution and satisfy this guarantee.</p>
 <section id="register-allocation">
 <h2>Register allocation<a class="headerlink" href="#register-allocation" title="Permalink to this heading"></a></h2>
 <p>Definitions:</p>
 <dl class="simple">
-<dt>temporary</dt><dd><p>A location storing a bitstring, mapped to a logical register or memory location.</p>
-</dd>
-<dt>virtual register</dt><dd><p>A temporary that has write access. Not used because the codegen uses SSA.</p>
-</dd>
-<dt>(logical) register</dt><dd><p>A register as used in an instruction</p>
-</dd>
-<dt>physical register</dt><dd><p>A CPU register in the hardware register file. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.</p>
-</dd>
 <dt>program point</dt><dd><p>start of an instruction</p>
+</dd>
+<dt>temporary</dt><dd><p>A location storing a bitstring value. At the start of each instruction that uses the temporary as input, this value must be materialized in a physical location (logical register or memory location) supported by the instruction.</p>
+</dd>
+<dt>virtual register</dt><dd><p>A temporary that has write access. Eliminated by the codegen’s SSA pass.</p>
+</dd>
+<dt>(logical) register</dt><dd><p>A register as encoded in an instruction.</p>
+</dd>
+<dt>physical register</dt><dd><p>A storage location in the microarchitecture’s physical register file. Per <a class="reference external" href="https://www.anandtech.com/show/3922/intels-sandy-bridge-architecture-exposed/3T">Anandtech</a> Sandy Bridge has 160 physical integer registers. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.</p>
 </dd>
 <dt>live</dt><dd><p>An output t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i.</p>
 </dd>
 <dt>interference point</dt><dd><p>A program point where each of a set of output temporaries could be used later.</p>
 </dd>
-<dt>spilling</dt><dd><p>Spilling is assigning a temporary into memory. It requires the generation of spill code, store/load instructions to move the value to and from memory.</p>
+<dt>spilling</dt><dd><p>Spilling is materializing a temporary in memory. It requires the generation of spill code, instructions that store/load the value in memory.</p>
 </dd>
-<dt>register class</dt><dd><p>Most CPUs group registers into classes, such that a given instruction can only use a certain class of registers. For example, there may be floating point registers, scalar integer registers, and vector registers.</p>
+<dt>register class</dt><dd><p>The set of logical registers that can be used for a specific operand for a specific instruction. Usually an architecture has only a few register classes. For example, on x86 instructions operate on floating point registers, (scalar) integer registers, or vector registers.</p>
 </dd>
-<dt>register alias</dt><dd><p>Some registers may be aliases to parts of registers in another class. A good example are the x86 registers al and ah, which alias to the low/high part of ax, which in turn aliases to the low part of eax, itself the alias of the low part of rax.</p>
+<dt>subregister</dt><dd><p>Mainly in x86, some logical “registers” are really parts of a larger register. For example, on x86-64, rax has subregisters eax, ax, al, ah. These allow some instruction encoding tricks for sub-64-bit bitstrings, but have to be specially handled to detect conflicts.</p>
 </dd>
 </dl>
-<p>At each program point there is a map from variables to registers or memory. Registers and memory have relatively similar APIs: read and write. Processor registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach spill-everywhere is to store every temporary to memory, wrapping each instruction with spill instructions that store/load each input/output from memory. But it’s slow. So the problem is to apply various conflicting optimizations to spill-everywhere to get the fastest program:</p>
+<p>At each program point there is a multimap from temporaries to registers or memory, and a 1-1 map from registers and memory locations to bitstrings. Registers and memory have relatively similar APIs: read and write. Registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach “spill-everywhere” is to wrapping each instruction with spill instructions that load each input from memory and then store each output to memory, and then use standard memory allocation techniques. But it’s slow. So the problem is to apply various conflicting optimizations to get the fastest program:</p>
 <ul class="simple">
-<li><p>Register assignment: Preserve a temporary in a register</p></li>
+<li><p>Register assignment: Store a temporary in a register and use that register instead of reading from memory</p></li>
 <li><p>Live range splitting: Map a temporary to different registers in different parts of its live range</p></li>
 <li><p>Multi-allocation: Map a temporary to a register as well as memory</p></li>
 <li><p>Load-store optimization: Reuse values loaded in previous parts of the spill code</p></li>
 <li><p>Rematerialization: Recompute values at their use points rather than loading them from memory</p></li>
-<li><p>Coalescing: eliminates move instructions by ensuring the source and destination are the same.</p></li>
-<li><p>Packing: assign temporaries of small bit-widths to different parts of larger-width registers</p></li>
+<li><p>Coalescing: Eliminate move instructions by ensuring the source and destination are the same.</p></li>
+<li><p>Packing: assign temporaries of small bit-widths to subregisters of larger-width registers</p></li>
 </ul>
 <p>There are various heuristics, e.g. assigning the most used variables to registers first. Because of register renaming / memory buffering, the actual register / address assignment doesn’t matter, only the spill pattern. (TODO: check this with some benchmarks)</p>
 </section>
 <section id="instruction-selection">
 <h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Permalink to this heading"></a></h2>
-<p>The IR is split into a series of instruction patterns, a forest of trees. Usually a tree rewrite system is used - bottom up rewrite generator (BURG). See pyburg.</p>
-<p>One way is to write a lot of patterns and try all these patterns in turn. If a pattern matches a specific sequence of instructions, the pattern can be applied, and the instructions are substituted by the pattern substitute. Another way, is to define per instruction the effects of the instruction, and for each pair of instructions that are evaluated, combine the effects of these instructions. If there exist an instruction which has the same effect as the combined effect of the two original instructions, the substitution can be made. This is the combiner approach as described by [Davidson1980].</p>
-<p>The advantage of having the combiner, is that only per instructions the effects of the instruction must be defined. After this, all instructions with effects can be potentially combined. This reduces the amount of work to define peephole optimization patterns from N * N to N. Namely, not all instruction combinations must be described, but only the effects per instruction.</p>
+<p>Instruction selection transforms a sequence of IR instructions into the cheapest/shortest sequence of processor-specific instructions.</p>
+<p>Blindell’s universal instruction selection thesis is the main reference here. STOKE can find probabilistically optimal straightline assembly sequences using a specialized search algorithm, which is also a form of instruction selection so should be integrated.</p>
+<p>for literal assembly, we can either emit it as-is or try to optimize it. If we can actually optimize it to a faster but equivalent sequence, great, but we don’t want to transform a compound operation into several simpler instructions, fuse the simpler instructions with nearby instructions from other operations, fail to identify the compound operation due to the fusion, and lose performance.</p>
+<p>The IR is split into a series of instruction patterns, a forest of trees. Usually a tree rewrite system is used - bottom up rewrite generator (BURG). See pyburg. One way is to write a lot of patterns and try all these patterns in turn. If a pattern matches a specific sequence of instructions, the pattern can be applied, and the instructions are substituted by the pattern substitute.</p>
+<p>The combiner approach per <span id="id1">[]</span> integrates peephole optimizations. The effects of instructions are specified in a machine-independent register transfer language ISP. The definition of ISP is somewhat vague but basically you have read and assign register/memory, literals, conditionals, and math.
+A compiler can directly emit ISP or you can start with assembly instructions and convert one-at-a-time into ISP using the effect descriptions. Then there are standard optimization like dead store elimination.</p>
+<blockquote>
+<div><p>Another way, is to define per instruction the effects of the instruction, and a combiner that specifies how to combine two instructions given their effects, if there exist an instruction which has the same effect as the combined effect of the two original instructions. This is the combiner approach as described by [Davidson1980]. The advantage of specifying effects is that the amount of work to define peephole optimization patterns is N * N + M rather than M * M, where N is the number of effect patterns and M=81 is the number of instructions.</p>
+</div></blockquote>
 <ul class="simple">
-<li><p>Instruction selection - replacing sequences of instructions with cheaper/shorter sequences of instructions.</p></li>
+<li></li>
 <li><p>Peephole optimizations / strength reduction - like <code class="docutils literal notranslate"><span class="pre">x*2</span></code> by <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">x+x</span></code>, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.</p></li>
 <li><p>Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation</p></li>
 <li><p>Partial evaluation</p></li>
@@ -207,20 +218,20 @@ must satisfy instruction dependencies and constraints imposed by limited process
 </dd>
 </dl>
 <p>CPU model:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Fetch</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">decode</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">fuse</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">ops</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">queues</span><span class="w"></span>
-<span class="kt">Retrieve</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">uop</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">queues</span><span class="o">.</span><span class="w"></span>
-<span class="nf">record</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">names</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">inputs</span><span class="w"></span>
-<span class="nf">assign</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">registers</span><span class="w"></span>
-<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">free</span><span class="o">.</span><span class="w"></span>
-<span class="nf">assign</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">become</span><span class="w"> </span><span class="n">available</span><span class="o">.</span><span class="w"></span>
-<span class="nf">execute</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="o">.</span><span class="w"></span>
-<span class="w">  </span><span class="n">store</span><span class="o">/</span><span class="n">load</span><span class="w"> </span><span class="n">interact</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="n">buffer</span><span class="w"></span>
-<span class="w">    </span><span class="n">memory</span><span class="w"> </span><span class="n">prefetching</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="kt">Processor</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="n">lookahead</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">fetches</span><span class="w"> </span><span class="n">early</span><span class="o">.</span><span class="w"> </span><span class="kt">Stall</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">available</span><span class="o">/</span><span class="w"></span>
-<span class="w">  </span><span class="n">zeroing</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">no</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">initialized</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">zero</span><span class="w"></span>
-<span class="w">  </span><span class="s">&quot;retired&quot;</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">finished</span><span class="w"> </span><span class="n">executing</span><span class="w"></span>
-<span class="nf">buffer</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">earlier</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">completed</span><span class="w"></span>
-<span class="nf">un</span><span class="o">-</span><span class="n">stall</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">stations</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">inputs</span><span class="w"> </span><span class="n">available</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">cycles</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">cross</span><span class="o">-</span><span class="n">station</span><span class="w"> </span><span class="kt">RAW</span><span class="w"> </span><span class="n">dependencies</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Fetch</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">decode</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">fuse</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">ops</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">queues</span>
+<span class="kt">Retrieve</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">uop</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">queues</span><span class="o">.</span>
+<span class="nf">record</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">names</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">inputs</span>
+<span class="nf">assign</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">registers</span>
+<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">free</span><span class="o">.</span>
+<span class="nf">assign</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span>
+<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">become</span><span class="w"> </span><span class="n">available</span><span class="o">.</span>
+<span class="nf">execute</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="o">.</span>
+<span class="w">  </span><span class="n">store</span><span class="o">/</span><span class="n">load</span><span class="w"> </span><span class="n">interact</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="n">buffer</span>
+<span class="w">    </span><span class="n">memory</span><span class="w"> </span><span class="n">prefetching</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="kt">Processor</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="n">lookahead</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">fetches</span><span class="w"> </span><span class="n">early</span><span class="o">.</span><span class="w"> </span><span class="kt">Stall</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">available</span><span class="o">/</span>
+<span class="w">  </span><span class="n">zeroing</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">no</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">initialized</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">zero</span>
+<span class="w">  </span><span class="s">&quot;retired&quot;</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">finished</span><span class="w"> </span><span class="n">executing</span>
+<span class="nf">buffer</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">earlier</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">completed</span>
+<span class="nf">un</span><span class="o">-</span><span class="n">stall</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">stations</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">inputs</span><span class="w"> </span><span class="n">available</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">cycles</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">cross</span><span class="o">-</span><span class="n">station</span><span class="w"> </span><span class="kt">RAW</span><span class="w"> </span><span class="n">dependencies</span>
 </pre></div>
 </div>
 <p>The instruction scheduler schedules the instructions intelligently to avoid stalling, i.e. an instruction requesting data before it is available. Ideally each instruction arrives at the front of the pipeline at the exact cycle when the necessary data and execution station become available.</p>
@@ -240,8 +251,8 @@ must satisfy instruction dependencies and constraints imposed by limited process
 <section id="layout">
 <h2>Layout<a class="headerlink" href="#layout" title="Permalink to this heading"></a></h2>
 <p>For example getting rid of the jump here:</p>
-<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">jmp</span><span class="w"> </span><span class="no">my_label</span><span class="w"></span>
-<span class="nl">my_label:</span><span class="w"></span>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">jmp</span><span class="w"> </span><span class="no">my_label</span>
+<span class="nl">my_label:</span>
 </pre></div>
 </div>
 <p>even if the jump can’t be avoided, memory layout can affect program performance. see profile guided memory layout thesis</p>
@@ -264,37 +275,37 @@ must satisfy instruction dependencies and constraints imposed by limited process
 <li><p>Tuning and tricks.</p></li>
 </ul>
 <p>The control-flow graph of an interpreter with C switch-based dispatch looks like this:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">repeat</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">load</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="w">  </span><span class="n">dispatch</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="w">  </span><span class="n">switch</span><span class="p">(</span><span class="n">instruction_type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="kr">case</span><span class="w"> </span><span class="kt">X:</span><span class="w"></span>
-<span class="w">      </span><span class="n">decode</span><span class="w"> </span><span class="n">operations</span><span class="w"></span>
-<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="n">good</span><span class="w"></span>
-<span class="w">        </span><span class="n">fast</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">execution</span><span class="w"></span>
-<span class="w">      </span><span class="kr">else</span><span class="w"></span>
-<span class="w">        </span><span class="n">slow</span><span class="w"> </span><span class="n">execution</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">repeat</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">load</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">  </span><span class="n">dispatch</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">  </span><span class="n">switch</span><span class="p">(</span><span class="n">instruction_type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">case</span><span class="w"> </span><span class="kt">X:</span>
+<span class="w">      </span><span class="n">decode</span><span class="w"> </span><span class="n">operations</span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="n">good</span>
+<span class="w">        </span><span class="n">fast</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">execution</span>
+<span class="w">      </span><span class="kr">else</span>
+<span class="w">        </span><span class="n">slow</span><span class="w"> </span><span class="n">execution</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>There are dozens of instructions and hundreds of slow paths. The compiler doesn’t know which paths are fast. Even if it did, it’s still a single giant loop body. The standard register allocation heuristics fail at this scale, so the compiler has trouble keeping important variables in registers. There’s just no way to give it a goal function like “I want the same register assignment before each goto”. Diamond-shaped control-flow is known to be the worst-case scenario for most optimizations and for register allocation. Nested diamond-shaped control-flow is even worse. Tail-merging and CSE will happily join all these common tails of each instruction and generate a single dispatch point. Ick. You can try to disable some optimizations for this piece of code, but this will negatively impact all paths. Almost nothing can be hoisted or eliminated, because there will be a slow path where an aliasing store kills all opportunities.. The slow paths kill the opportunities for the fast paths and the complex instructions kill the opportunities for the simpler instructions.</p>
 <p>We can use direct or indirect threading with computed goto. clang/LLVM optimizes the looped switch to indirect threading at <code class="docutils literal notranslate"><span class="pre">-O</span></code>. (<a class="reference external" href="https://internals.rust-lang.org/t/computed-gotos-tco-threaded-interpreters-experiments-and-findings/4668/6">ref</a>)</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">static</span><span class="w"> </span><span class="n">void</span><span class="o">*</span><span class="w"> </span><span class="n">dispatch_table</span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP2</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">};</span><span class="w"></span>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">static</span><span class="w"> </span><span class="n">void</span><span class="o">*</span><span class="w"> </span><span class="n">dispatch_table</span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP2</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">};</span>
 
-<span class="o">//</span><span class="w"> </span><span class="n">indirect</span><span class="w"></span>
-<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">goto</span><span class="w"> </span><span class="o">*</span><span class="n">dispatch_table</span><span class="p">[</span><span class="n">memory</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="p">]</span><span class="w"></span>
-<span class="o">//</span><span class="w"> </span><span class="n">direct</span><span class="w"></span>
-<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">jump</span><span class="w"> </span><span class="o">*</span><span class="n">ip</span><span class="o">++</span><span class="w"></span>
+<span class="o">//</span><span class="w"> </span><span class="n">indirect</span>
+<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">goto</span><span class="w"> </span><span class="o">*</span><span class="n">dispatch_table</span><span class="p">[</span><span class="n">memory</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="p">]</span>
+<span class="o">//</span><span class="w"> </span><span class="n">direct</span>
+<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">jump</span><span class="w"> </span><span class="o">*</span><span class="n">ip</span><span class="o">++</span>
 
-<span class="kt">DISPATCH</span><span class="nb">()</span><span class="p">;</span><span class="w"></span>
+<span class="kt">DISPATCH</span><span class="nb">()</span><span class="p">;</span>
 
-<span class="kt">OP:</span><span class="w"></span>
-<span class="w">    </span><span class="n">decode</span><span class="w"> </span><span class="n">operands</span><span class="w"></span>
-<span class="w">    </span><span class="n">execute</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="w">    </span><span class="n">ip</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">reg</span><span class="p">[</span><span class="kt">R_PC</span><span class="p">]</span><span class="o">++</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="w">    </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">dispatch</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span><span class="w"></span>
-<span class="o">...</span><span class="w"></span>
+<span class="kt">OP:</span>
+<span class="w">    </span><span class="n">decode</span><span class="w"> </span><span class="n">operands</span>
+<span class="w">    </span><span class="n">execute</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">    </span><span class="n">ip</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">reg</span><span class="p">[</span><span class="kt">R_PC</span><span class="p">]</span><span class="o">++</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">    </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">dispatch</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span>
+<span class="o">...</span>
 </pre></div>
 </div>
 <p>This effectively replicates the load and the dispatch, which helps
@@ -310,6 +321,28 @@ the CPU branch predictors.</p>
 <li><p>Remove stalls. Interleave operations based on the data dependencies.</p></li>
 </ul>
 <p>The C compiler does have these optimizations but figuring out the right C code to generate so that the program will optimize properly is hard.</p>
+</section>
+<section id="more-on-optimization">
+<h2>More on optimization<a class="headerlink" href="#more-on-optimization" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166">https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166</a></p>
+<p>high-performance programming</p>
+<p>coroutine switching and resource competition (I/uop cache, D cache, BTB) makes it slow - use buffering
+SIMD/AVX2 branch-free code
+avoid branch mispredictions. Branch mispredicts are highly data dependent so it’s all about your use case. There’s a lot of variance. The more you micro-optimize for one case, the bigger the variance gets for others. Part of optimizing is building an understanding of the empirical statistics of your data so you can make the right optimization trade-offs. Reducing L1D pressure while increasing branch mispredicts can be a net win (L1 load latency 4-6 cycles).</p>
+<p>“hot state” should be in registers at all times. Store non-hot state in memory. Register allocators can really only be trusted to do two things: move spill code out of loops and reduce the impact of calling conventions. Register allocation in handwritten bytecode interpreters often relies on reasoning of the form “this opcode is going to be slower anyways, so it’s okay to put the spill code there”, which is not captured by most register allocators. The compiler is not perfect. In some cases better usage of profile info by the register allocator would suffice. In other cases, a better cost model for spill code would be required, e.g. Proebsting &amp; Fischer’s work on “probabilistic” register allocation: <a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/143103.143142">https://dl.acm.org/doi/abs/10.1145/143103.143142</a> Once you are trying to optimize things to this level you really want control. Systems languages should really have more ways of constraining the compiler (best-effort constraints as well constraints that generate compile-time errors if they can’t be satisfied). From a constraint solving perspective it should be exactly as easy/hard as constraining the hot state to be in the ABI argument registers and ABI register targeting for function calls is already a core competency of any usable register allocator.</p>
+<p>This affects coding style for dispatch loops:</p>
+<ul class="simple">
+<li><p>a loop with a big switch statement. In theory, the loop-switch gives the compiler the ability to look at the whole block graph and make optimal decisions about register allocation, hoisting, etc. In practice, the compiler will make terrible decisions (e.g. register pressure on one rare branch will screw all the other branches) and there’s no tools available to control the compiler’s register allocation.</p></li>
+<li><p>unchecked table load - you can compress an 8 byte pointer to a 2 byte offset. You just have to use a separate linker section so you can guarantee they’re physically clustered. Only the “head blocks” that are targeted by a jump table need to be in the section. So most space-efficient option.</p></li>
+<li><p>tailcalls - can let you control the convention at the IR level, but still no control at language level</p></li>
+<li><p>inline assembly. you can specify the register convention with input/output constraints. But not really maintainable.</p></li>
+<li><p>computed goto - sort of like tailcalls + asm - decoupling of having separate functions, maintainable and reliable</p></li>
+</ul>
+<p>The intrinsic branch mispredict penalty (IBMP) is the minimum time it takes from when a mispredicted control dependency retires to when the first uops from the correct PC can retire. It is always &lt;= to the minimum pipeline depth starting at the uop cache and finishing at retirement; the pipeline depth may be larger because there are additional “clean-up” cycles that have to be serialized with the pipeline redirect and restart. For x86 the penalty is around 20 cycles, although some say it can be as low as 15. I always use 20 cycles as a round number regardless of uarch.</p>
+<p>If a dependency chain is only consumed as a control dependency, its latency essentially doesn’t matter (within limits) if the branch never mispredicts. But as soon as the consuming branch mispredicts, you end up paying for that latency in full. In two versions of the same code where you add 10 extra cycles of latency to a mispredicted control dependency for one version but not the other, the effective mispredict penalty increases by 10 cycles because you discover the mispredict 10 cycles later than in the other version. So I define the effective mispredict penalty, effective_penalty = IBMP + control_latency. But it doesn’t always work like that because control latency is affected by other things. However, you often find that, if I reduce the latency of this control dependency by 10 cycles, it should reduce the effective mispredict penalty by 10 cycles.</p>
+<p>ops already in flight, from before the mispredicted branch, will have IBMP cycles of free time relative to the same path if the branch had been correctly predicted. Or to put it differently, when you restart at a PC after a mispredict, reading a register for the result of a pre-branch mid-latency op like an L2 load is effectively zero latency. So before you take a hard-to-predict branch, you really want to issue as many of these medium latency ops as you can, even speculatively hoisting those ops from different successors into the common predecessor, so long as you have free pipeline slots to spare. branch-free computations are inherently latency sensitive, so need the data preloaded. This preloading idea is effective both in the ideal dependency graph sense (which assumes infinite pipeline width and lookahead) and also that after restarting from a branch mispredict the scheduling window starts out very narrow and so as a programmer if you manually kick off critical ops early like you were on an in-order machine, it’s going to reduce latency.</p>
+<p>A high fan-out jump table is the most efficient when a branch is really unpredictable e.g. 8 choices with 1/8 probability. For more skewed conditions use a series of conditional tests.</p>
+<p>uica analysis</p>
 </section>
 </section>
 
