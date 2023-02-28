@@ -147,32 +147,19 @@
 <section id="register-allocation">
 <h2>Register allocation<a class="headerlink" href="#register-allocation" title="Permalink to this heading"></a></h2>
 <p>Definitions:</p>
-<dl class="simple">
-<dt>program point</dt><dd><p>start of an instruction</p>
-</dd>
-<dt>temporary</dt><dd><p>A location storing a bitstring value. At the start of each instruction that uses the temporary as input, this value must be materialized in a physical location (logical register or memory location) supported by the instruction.</p>
-</dd>
-<dt>virtual register</dt><dd><p>A temporary that has write access. Eliminated by the codegen’s SSA pass.</p>
-</dd>
-<dt>(logical) register</dt><dd><p>A register as encoded in an instruction.</p>
-</dd>
-<dt>physical register</dt><dd><p>A storage location in the microarchitecture’s physical register file. Per <a class="reference external" href="https://www.anandtech.com/show/3922/intels-sandy-bridge-architecture-exposed/3T">Anandtech</a> Sandy Bridge has 160 physical integer registers. Logical registers are dynamically mapped to these, making many register assignment decisions immaterial.</p>
-</dd>
-<dt>live</dt><dd><p>An output t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i.</p>
-</dd>
-<dt>interference point</dt><dd><p>A program point where each of a set of output temporaries could be used later.</p>
-</dd>
-<dt>spilling</dt><dd><p>Spilling is materializing a temporary in memory. It requires the generation of spill code, instructions that store/load the value in memory.</p>
-</dd>
-<dt>register class</dt><dd><p>The set of logical registers that can be used for a specific operand for a specific instruction. Usually an architecture has only a few register classes. For example, on x86 instructions operate on floating point registers, (scalar) integer registers, or vector registers.</p>
-</dd>
-<dt>subregister</dt><dd><p>Mainly in x86, some logical “registers” are really parts of a larger register. For example, on x86-64, rax has subregisters eax, ax, al, ah. These allow some instruction encoding tricks for sub-64-bit bitstrings, but have to be specially handled to detect conflicts.</p>
-</dd>
-</dl>
-<p>At each program point there is a multimap from temporaries to registers or memory, and a 1-1 map from registers and memory locations to bitstrings. Registers and memory have relatively similar APIs: read and write. Registers have shorter access times, but they are limited in number, forcing some temporaries to be stored in memory. The straightforward approach “spill-everywhere” is to wrapping each instruction with spill instructions that load each input from memory and then store each output to memory, and then use standard memory allocation techniques. But it’s slow. So the problem is to apply various conflicting optimizations to get the fastest program:</p>
+<ul class="simple">
+<li><p>A temporary is an identifier for a bitstring value - it is not modified. A “virtual register” would be a temporary that has write access but these are eliminated by the codegen’s SSA pass.</p></li>
+<li><p>A location is a logical register or virtual memory address.</p></li>
+<li><p>An instruction takes some temporaries as inputs and produces other output temporaries, then jumps to an address. A program point is the logical start of the execution of an instruction (as opposed to the logical end). To encode an instruction each temporary must be assigned to a fixed location supported by the instruction (proper register class or encodable memory location) at the program point.</p></li>
+<li><p>A (logical) register is a register identifier as encoded in an instruction. The number of logical/ISA registers is relatively small, e.g. 31 on ARM and 16 on AMD64. Logical registers are dynamically renamed/mapped to physical registers, storage locations in the microarchitecture’s physical register file, making many logical register assignment decisions immaterial. For example, per <a class="reference external" href="https://www.anandtech.com/show/3922/intels-sandy-bridge-architecture-exposed/3T">Anandtech</a>, Sandy Bridge has 160 physical integer registers.</p></li>
+<li><p>A “subregister”, mainly in x86, is a logical register that is really part of a larger logical register. For example, on x86-64, rax has subregisters eax, ax, al, ah. These allow some instruction encoding tricks for sub-64-bit bitstrings, but have to be specially handled to detect conflicts.</p></li>
+<li><p>A register class is the set of logical registers that can be used for a specific operand for a specific instruction. ARM only has a small number of register classes used consistently across all of its instructions, e.g. floating point registers, (scalar) integer registers, or vector registers, and any register in the class can be used with any instruction. But on x86 there are exceptions, e.g. the div instruction hardcodes edx:eax, so div uses its own special register class for those operands.</p></li>
+<li><p>Register allocation creates a multimap at each program point from temporaries to registers or memory. Similarly at each program point there is a 1-1 map from registers and memory to bitstrings. Memory is not really 1-1 because of the memory model but private memory for register allocation is deterministic so we can ignore it.</p></li>
+</ul>
+<p>Registers and memory have relatively similar APIs, read and write, so they can be exposed as temporaries or virtual registers before codegen. But on the hardware, registers have shorter access times, and are required for many instructions, but they are limited in number, forcing temporaries to be stored in a mixture of registers and memory. The straightforward approach “spill-everywhere” is to wrapping each instruction with spill instructions that load each input from memory and then store each output to memory, and then use standard memory allocation techniques. But it’s slow. So the problem is to apply various conflicting optimizations to get the fastest program:</p>
 <ul class="simple">
 <li><p>Register assignment: Store a temporary in a register and use that register instead of reading from memory</p></li>
-<li><p>Live range splitting: Map a temporary to different registers in different parts of its live range</p></li>
+<li><p>Spilling is “materializing” a temporary in memory by generating spill code, instructions that store/load the value in memory. In practice C2 talks about “live range splitting” instead of spilling - if a temporary is used in several places, C2 makes an effort to reuse the same register, which in post-regalloc will coalesce and emit no instructions, but otherwise the reg-reg or mem-reg movement instructions are emitted post-regalloc. A temporary t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i. LRS maps a temporary to different registers in different parts of its live range. An interference point is a program point where each of a set of output temporaries is live (could be used later).</p></li>
 <li><p>Multi-allocation: Map a temporary to a register as well as memory</p></li>
 <li><p>Load-store optimization: Reuse values loaded in previous parts of the spill code</p></li>
 <li><p>Rematerialization: Recompute values at their use points rather than loading them from memory</p></li>
@@ -180,6 +167,17 @@
 <li><p>Packing: assign temporaries of small bit-widths to subregisters of larger-width registers</p></li>
 </ul>
 <p>There are various heuristics, e.g. assigning the most used variables to registers first. Because of register renaming / memory buffering, the actual register / address assignment doesn’t matter, only the spill pattern. (TODO: check this with some benchmarks)</p>
+<p>C2 register allocator per Cliff:</p>
+<ul class="simple">
+<li><p>all the X86 registers &amp; constraints are directly represented; no special code for e.g. div/mod</p></li>
+<li><p>stack gets colored just like a register (which makes temps “free” when thinking about them). “stack” registers have an infinite number, so always color in one pass.</p></li>
+<li><p>SSA form thru the entire reg allocation process. No requirement for special cycle-breaking for any registers, including XMM, other than you got a “free” break when the SSA form got linearized.</p></li>
+<li><p>During the copy-coalesce phases C2 can skip some lds if a the value in already known to be in the correct place. Can “rematerialize” constants, and can have a value in a cpu register and in a “stack” register. There’s no “home” location like in some other allocators (home locations never played well with the JMM)</p></li>
+<li><p>If coloring fails on the cpu regs, the live range(s) are split with copies that can sink/source stack and cpu regs &amp; you color again.</p></li>
+</ul>
+<p>algorithm: you start with a single large live range, of many def’s and use’s, of many branches &amp; arms &amp; cycles in the cfg. This is over coalesced to make max live ranges. This typically over-constrains colors (returning reg from fcn Call is in RAX, but needed in argument RCX for next call) and fails to color, so you split it at places with hard register constraints. Still has huge live ranges and fails to color, but in fewer places. Track the losers and split the losers around high-pressure/high-frequency blocks. Still fails to color, but again fewer losers. Construct a “hard win” split, an inefficient coloring that uses many smaller ranges, connected by copies into stack. Very rarely must repeat hard win splitting a few times. Then you try to coalesce things, under the hard-win max split by picking colors from copy-connected live ranges to match - “smart coloring” based on neighbors and split history. In the absence of better options, you pick colors based on the original hard-win split, figuring that those live ranges are “more likely” to re-coalesce together. At no time after splitting a v to the stack, do you later spill v again to the stack, you already got that one done. There is another post-pass smart coloring attempt using local history and not live ranges.</p>
+<p>End result is typically very good on all the hot paths, never very bad on cold paths and never gets into a death-spiral of spilling.  I’ve done at least 4 for-production-use allocators in my life, including C2.
+Oh yeah, and its by far the fastest register graph-coloring allocator I’ve ever seen.  Key point for a JIT, as reg-alloc can be expensive.  Its often about 40% of C2’s compile budget.</p>
 </section>
 <section id="instruction-selection">
 <h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Permalink to this heading"></a></h2>

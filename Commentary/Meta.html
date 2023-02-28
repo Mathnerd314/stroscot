@@ -83,6 +83,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#forbidden-words">Forbidden words</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#open-source">Open source</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#communication-methods">Communication methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#issue-workflow">Issue workflow</a></li>
 </ul>
 </li>
 </ul>
@@ -161,7 +162,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="tractable" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>Notably omitted here is Brooks’s assertion that programming is a “tractable medium”. It is not tractable. Programming is hard. <span id="id2">[<a class="reference internal" href="../zzreferences.html#id14" title="Brett A. Becker. What does saying that 'programming is hard' really say, and about whom? Communications of the ACM, 64(8):27–29, August 2021. URL: https://cacm.acm.org/magazines/2021/8/254304-what-does-saying-that-programming-is-hard-really-say-and-about-whom/fulltext (visited on 2021-08-28), doi:10.1145/3469115.">Bec21</a>]</span> questions this, but IMO fails quite badly - although incomplete, all the evidence available shows that programming is hard. The only positive contribution of the article is a reminder to focus on computer education and usability.</p>
+<p>Notably omitted here is Brooks’s assertion that programming is a “tractable medium”. It is not tractable. Programming is hard. <span id="id2">[<a class="reference internal" href="../zzreferences.html#id16" title="Brett A. Becker. What does saying that 'programming is hard' really say, and about whom? Communications of the ACM, 64(8):27–29, August 2021. URL: https://cacm.acm.org/magazines/2021/8/254304-what-does-saying-that-programming-is-hard-really-say-and-about-whom/fulltext (visited on 2021-08-28), doi:10.1145/3469115.">Bec21</a>]</span> questions this, but IMO fails quite badly - although incomplete, all the evidence available shows that programming is hard. The only positive contribution of the article is a reminder to focus on computer education and usability.</p>
 </aside>
 </aside>
 </section>
@@ -173,7 +174,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 </dd>
 <dt>cot</dt><dd><p>Similar to how the “trek” in “Star Trek” expresses a journey to find new worlds, the cot here expresses that Stroscot provides comfortable support while still being flexible, lightweight, portable, and compact.</p>
 </dd>
-<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id77" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
+<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id83" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
 </dd>
 <dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 / ARM and then later add a mode to generate LLVM IR.</p>
 </dd>
@@ -188,11 +189,12 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <h2>Choices<a class="headerlink" href="#choices" title="Permalink to this heading"></a></h2>
 <section id="documentation-first">
 <h3>Documentation first<a class="headerlink" href="#documentation-first" title="Permalink to this heading"></a></h3>
-<p>It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, “if it isn’t documented, it doesn’t exist”. Looking at HN submissions of programming languages, the best docs win - it’s only “famous” languages that can submit a Github repo full of files but without a README and still get discussion. To do well we need at least a README. But I’m going with a wiki style so I can write down every last detail. And there are code snippets for the places where writing code is clearer than explaining in English.</p>
+<p>It is tempting to just start coding - a prototype might attract contributors and let the project gain momentum. But as the principle goes, “if it isn’t documented, it doesn’t exist”. Looking at HN submissions of programming languages, the best docs win - it’s only “famous” languages that can submit a Github repo full of files but without a README and still get discussion. To do well, we definitely need at least a README. But I’m going with a wiki style, so I can write down every last relevant detail that affected how the language was put together or how it was designed. And there are code snippets for the places where writing code is clearer than explaining in English.</p>
 </section>
 <section id="sphinx">
 <h3>Sphinx<a class="headerlink" href="#sphinx" title="Permalink to this heading"></a></h3>
-<p>GH Pages/Jekyll can’t do forward/back links. Checking out various options, Sphinx is used by Clang, GHC, Futhark, etc., although not Rust or Java. And it has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, … so far it’s proving its worth. It’s run via a Travis CI script and the generated docs are stored in the gh-pages branch.</p>
+<p>GH Pages/Jekyll can’t do forward/back links. Checking out various options, Sphinx is used by Clang, GHC, and Futhark. It has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, … so far it’s proving its worth. It’s run via a Github actions script and the generated docs are stored in the gh-pages branch.</p>
+<p>Alternatives include Rust’s self-written mdBook. But their <a class="reference external" href="https://rust-lang.github.io/mdBook/format/markdown.html">documentation</a> is itself ill-formatted, with the first line of each Markdown example indented for some random reason, which does not inspire confidence. There is also Java’s javadoc, but it’s not used much outside Java.</p>
 </section>
 <section id="organization">
 <h3>Organization<a class="headerlink" href="#organization" title="Permalink to this heading"></a></h3>
@@ -213,10 +215,11 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <li><p>2A: commentary</p></li>
 <li><p>2B: reference</p></li>
 </ul>
+<p>Currently Stroscot is still in the design stage so the majority of content is commentary.</p>
 </section>
 <section id="quotes-before-commas">
 <h3>Quotes before commas<a class="headerlink" href="#quotes-before-commas" title="Permalink to this heading"></a></h3>
-<p>The <a class="reference external" href="https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/">MLA style guide</a> doesn’t explicitly forbid it, mentioning that it’s similar to British style, and it matches the logical structure. Proper nesting is important in programming and it seems strange to ignore this. And it’s the <a class="reference external" href="https://en.wikipedia.org/wiki/MOS:LQUOTE">official style on Wikipedia</a>.</p>
+<p>The <a class="reference external" href="https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/">MLA style guide</a> doesn’t explicitly forbid it, mentioning that it’s similar to British style, and it matches the logical structure (hence is called “logical quotation”). Proper nesting is important in programming and it seems strange to ignore this. And it’s the <a class="reference external" href="https://en.wikipedia.org/wiki/MOS:LQUOTE">official style on Wikipedia</a>.</p>
 </section>
 <section id="forbidden-words">
 <h3>Forbidden words<a class="headerlink" href="#forbidden-words" title="Permalink to this heading"></a></h3>
@@ -241,13 +244,13 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <li><p>static linking - compile time binding, resolving memory addresses at compile time</p></li>
 </ul>
 </li>
-<li><p>pure - prefer the proposition that all expressions have a unique value. So instead of “impure expression” refer to an expression that has no value or multiple values.</p></li>
+<li><p>pure - prefer the proposition that all expressions have a unique value. So instead of “impure expression” refer to an expression that has no value (unevaluatable expression) or multiple values (ambiguous expression). Actually with the TRS formalism I use every expression is evaluatable so we only worry about ambiguous expressions.</p></li>
 <li><p>strongly typed - <a class="reference external" href="https://perl.plover.com/yak/12views/samples/slide045.html">8 definitions</a>, all different. It’s the semantic equivalent of “amazing”, i.e. “My language is strongly typed” == “My language is amazing”.</p></li>
 <li><p>undecidable - people use this word to imply that it’s unimplementable, when there are working solvers like the ones in <a class="reference external" href="https://termination-portal.org/wiki/Termination_Competition">termCOMP</a> that solve many useful cases. Godel’s theorem only means that pathological examples exist for each specific implementation, which is true even with Hindley-Milner (linear for real-world programs, worst-case exponential). Prefer “complexity at least <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span>”, where <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span> is in the <a class="reference external" href="https://en.wikipedia.org/wiki/Arithmetical_hierarchy">arithmetic hierarchy</a>, or a more precise class if known. Note that decidable problems / computable sets are in <span class="math notranslate nohighlight">\(\Delta_{1}^{0} \subsetneq \Sigma^0_1\)</span>.</p></li>
 <li><p>primitive - as per <a class="reference external" href="https://en.wikipedia.org/wiki/Primitive_data_type">Wikipedia</a>, primitive is ambiguous and can mean “the base cases of an inductive definition”, in which case use “base”, or “whatever is provided by a particular processor or compiler”, in which case use “built-in”. Note that built-in does not mean base, e.g. integers can be defined in terms of booleans hence are not base cases.</p></li>
 <li><p><span class="math notranslate nohighlight">\(\subset\)</span> - per <a class="reference external" href="https://en.wikipedia.org/wiki/Subset#%E2%8A%82_and_%E2%8A%83_symbols">Wikipedia</a> this is ambiguous, use <span class="math notranslate nohighlight">\(\subsetneq\)</span> and <span class="math notranslate nohighlight">\(\subseteq\)</span></p></li>
-<li><p>abomination - a fun word, but basically meaningless</p></li>
-<li><p>etc or … - it’s just too imprecise. usually if it’s a list, it can just omitted. If there is a clear omission it can be replaced with an angle bracket construction like <code class="docutils literal notranslate"><span class="pre">&lt;more</span> <span class="pre">numbers&gt;</span></code>, or the ambiguity erased with set-builder notation.</p></li>
+<li><p>abomination - a fun word, but basically meaningless in a programming context where one person’s “abomination” is another person’s “cool hack”</p></li>
+<li><p>“etc” and “…” - they’re just too imprecise. Usually if it’s a list, these can just be omitted. If there is an intentional omission it can be replaced with an angle bracket construction like <code class="docutils literal notranslate"><span class="pre">&lt;more</span> <span class="pre">numbers&gt;</span></code>, or the ambiguity erased with set-builder notation.</p></li>
 </ul>
 <p>Avoiding this terminology is easy to forget so is enforced by periodic grep’s of the code.</p>
 </section>
@@ -268,11 +271,19 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 </section>
 <section id="communication-methods">
 <h3>Communication methods<a class="headerlink" href="#communication-methods" title="Permalink to this heading"></a></h3>
-<p>Stroscot’s documentation first approach should help a lot with open development. As far as information, the main avenue for Stroscot is the Git repo. This has the documentation and the code all-in-one. Secondary sources are:
-* real-time chat, for quick questions and discussion. Discord suffices for now (0 people anyway). Alternatives are Gitter, Element, and Matrix which are somewhat more open-source friendly.
-* issues, for anything more important. Github issues seems fine, even Swift is using it. If open-source is a concern then <a class="reference external" href="https://docs.gitlab.com/ee/user/project/import/github.html">migrating to Gitlab</a> is possible.
-* in the future, a forum for long-form discussions, where the problem needs more consideration than just the random sample in chat but it’s not really an issue with the project. Github discussions is a possibility but Discourse is the standard. There are <a class="reference external" href="https://free.discourse.group/">free instances</a> for open-source projects, but needs 10+ contributors. Anything relevant to language/standard library development should have an issue filed.</p>
-<p>As far as the “ping bot” that closes issues if they are not active, it seems like a good idea since if there is no reporter to discuss with then making progress is hard. IMO the bot should request a little discussion summary if there have been more than a few comments. Something like:</p>
+<p>Stroscot’s documentation first approach should help a lot with open development. As far as information, the main avenue for Stroscot is the Git repo. This has the documentation and the code all-in-one. Secondary sources are:</p>
+<ul class="simple">
+<li><p>real-time chat, for quick questions and discussion. Discord suffices for now (0 people anyway). Alternatives are Gitter, Element, and Matrix which are somewhat more open-source friendly.</p></li>
+<li><p>issues, for anything more important. Github issues seems fine, even Swift is using it. If open-source is a concern then <a class="reference external" href="https://docs.gitlab.com/ee/user/project/import/github.html">migrating to Gitlab</a> is possible.</p></li>
+<li><p>in the future, a forum for long-form discussions, where the problem needs more consideration than just the random sample in chat but it’s not really an issue with the project. Github discussions is a possibility but Discourse is the standard. There are <a class="reference external" href="https://free.discourse.group/">free instances</a> for open-source projects, but the project first needs 10+ contributors. A Discourse would not replace issue tracking; anything relevant to language/standard library development should have an issue filed.</p></li>
+</ul>
+</section>
+<section id="issue-workflow">
+<h3>Issue workflow<a class="headerlink" href="#issue-workflow" title="Permalink to this heading"></a></h3>
+<p>As far as the “ping bot” that closes issues if they are not active, on first impression it seems like a good idea since if there is nobody around to discuss an issue with, then making progress on that issue is hard. So a basic “do you still care about this” if nobody has looked at it. Arguably though, a bug reporting process where a report is only looked at by someone with commit access months or years after the initial report is quite broken.</p>
+<blockquote>
+<div><p>With more than a few comments/participants, the bot should request a little discussion summary. Something like:</p>
+</div></blockquote>
 <ul class="simple">
 <li><p>Goal: Summary of what conditions need to be satisfied to close the issue</p></li>
 <li><p>Deliverable: What can be delivered in a few weeks to further the progress of this issue?</p></li>
@@ -280,7 +291,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <li><p>Risks: What concerns have been raised about this goal?</p></li>
 <li><p>Blockers: What resources or leadership decisions are needed, besides someone implementing it?</p></li>
 </ul>
-<p>The summary doesn’t need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then “The previous summary is accurate” is fine as the summary. There should be an exponential backoff on pings if the issue is still active but has not changed.</p>
+<p>The summary doesn’t need to be long, it can just link to the relevant comments. If the summary is inaccurate then someone who cares will correct it. And of course if the ping bot activates multiple times but nobody has worked on the issue then “The previous summary is accurate” is fine as the summary. There should be an exponential backoff on pings if the issue is still active but nothing has not changed since the last ping.</p>
 </section>
 </section>
 </section>

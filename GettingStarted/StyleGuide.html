@@ -57,6 +57,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#type-guidelines">Type Guidelines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scoping">Scoping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#structuring">Structuring</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sources">Sources</a></li>
 </ul>
 </li>
@@ -104,7 +105,7 @@
 <li><p>Module names should be lower_with_under (snake case), like Python.</p></li>
 <li><p>Function, constant, and variable names should be snake_case (all lowercase), like Julia, or camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.</p></li>
 <li><p>If an argument is unused use the wildcard pattern <code class="docutils literal notranslate"><span class="pre">_</span></code> or (less preferred) a name starting with <code class="docutils literal notranslate"><span class="pre">_</span></code></p></li>
-<li><p>Whole words are preferred. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don’t use abbreviations because they tend to be inconsistent and too terse; use a text editor with autocomplete.</p></li>
+<li><p>Use whole words unless you have a good reason. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don’t use abbreviations, because they tend to be inconsistent and too terse; use a text editor with autocomplete.</p></li>
 <li><p>Multi-word names are allowed, but consider whether the binding might be decomposable into separate values.</p></li>
 <li><p>Bang convention: Append <code class="docutils literal notranslate"><span class="pre">!</span></code> to names of functions that modify their arguments. Not too sure about this, the <code class="docutils literal notranslate"><span class="pre">Ref</span></code> type that marks a value as allowing modification may be enough indication.</p></li>
 </ul>
@@ -237,6 +238,13 @@
 <li><p>Place code in a namespace, except if it is the main module of a throwaway script</p></li>
 <li><p>The main application or library module should be in in the root or <code class="docutils literal notranslate"><span class="pre">src/</span></code> directory.</p></li>
 <li><p>The imports should be in three groups, separated by a blank line: standard library, third-party libraries, project modules. Within each group the modules should be listed alphabetically.</p></li>
+</ul>
+</section>
+<section id="structuring">
+<h2>Structuring<a class="headerlink" href="#structuring" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Only create an intermediate variable if it has a meaningful name. But if an expression has a meaningful name, then put it in a variable.</p></li>
+<li><p>Refactor a case list with 15 or more cases to use a table or loop. <a class="reference external" href="https://github.com/MinBZK/woo-besluit-broncode-digid-app/blob/master/Source/DigiD.iOS/Services/NFCService.cs#L182">10 percentage cases</a> is pushing it but probably OK, but 100 Fizzbuzz cases written out is definitely a maintenance burden.</p></li>
 </ul>
 </section>
 <section id="sources">
