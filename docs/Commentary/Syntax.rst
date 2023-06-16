@@ -1,12 +1,19 @@
 Syntax
 ######
 
-In Stroscot, since syntax is pluggable, the standard syntax is really within the purview of the standard library. But a default syntax is necessary for writing the compiler, so we have to figure a syntax out first in order to bootstrap. The stuff here is mostly a dumping ground of ideas while the rest of the language is designed. No syntax choices are final. But in the end, syntax is decided by usage, so a lot of the syntax here will probably become final, unless the novice survey comes up with better choices.
+Customization
+=============
+
+Lots of old crappy languages are still in use, terrible design choices or not. Most people can get used to almost any syntax, and some will even come to like it, even if that syntax performs terribly vs other options in controlled studies. So in that sense, most PL syntax decisions do not really have a "bad" option - whatever syntax we end up on will be the syntax used, each individual choice will probably not impact language adoption that much, and even if there are a lot of complaints about the syntax, there probably will not be a consensus so it will stay unchanged for many years. Since the syntax doesn't really matter, it makes sense to make it pluggable and customizable - switch out the standard library, switch out the syntax. This allows supporting many small use cases, like non-English coding, demonstrations of new/changed syntax, etc. Most likely they will only be simple formatting customizations like indentation size, tabs vs spaces, line length, and layout vs braces, but once there is a syntax definition file it makes sense to allow putting more things in it. One specific issue is allowing per-checkout customization, so someone can write a git smudge/clean filter that runs the formatter on checkout/commit.
+
+On the other hand, some choice of syntax is necessary for writing the compiler, standard libraries, and documentation examples. Let's call this the "default syntax", since it makes sense to use the same syntax for all of these. Although the impact of individual choices may be minor, overall the default syntax is quite important - it defines the "feel" of the language and is probably the biggest factor of whether people try out the language or close the homepage. Also, just guessing from https://blog.mozilla.org/metrics/2009/08/11/how-many-firefox-users-customize-their-browser/, about 1/3 of people will bother to use some amount of customization, while 2/3 will use the default settings. The 1/3 that customize obviously have their reasons for wanting the customization. But with a million users, 2/3 of a million is quite a lot. Syntax is decided by usage, so the default syntax will most likely become the most popular. But it could also be that as the language becomes popular, an alternative syntax emerges and takes over, ending up in an evolution of the default syntax. So none of the choices of the default syntax are final, but neither should they be arbitrary. It's similar to the discussion of the IDE where I settled on VSCode - of course I'm not going to force a choice of IDE, but neither am I going to spend much effort on supporting other IDEs, besides some basic hooks, at least until the language gets popular.
+
+Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization as part of the customization, so choices could be compared and tested. Basically this uses the per-checkout customization and stores code in the repository as a non-readable base64 or Lisp-like AST dump. Then people get an initial randomized style, but can customize it to their liking, and once we reach 100 users we collect styles/opinions and decide on a final choice as default.
 
 Design procedure
 ================
 
-At the end of the day syntax is about picking a choice and sticking to it. There are many ways to do this. My original plan was to go through the syntax of other languages listed on RosettaCode and `Rigaux's list of syntax across languages <http://rigaux.org/language-study/syntax-across-languages/>`__) and pick out the nicest/most common examples. But this is not really a scientific procedure. For example, take comments. Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
+My original syntax design plan was to go through the syntax of other languages listed on RosettaCode and `Rigaux's list of syntax across languages <http://rigaux.org/language-study/syntax-across-languages/>`__) and pick out the nicest/most common examples. But I didn't really like the results. For example, take comments. Counting up examples on Rosetta Code's `comment page <https://rosettacode.org/wiki/Comments>`__ showed the most common choices:
 
 * For EOL impl, C++ style ``//``
 * For block impl, C style ``/* */``
@@ -14,45 +21,61 @@ At the end of the day syntax is about picking a choice and sticking to it. There
 * For block doc, Javadoc style ``/** */``
 * For code comments (nesting block), Pascal style ``(* *)``
 
-But are these the best choices? There are lots of other options, an EOL impl comment can be ``;`` or ``#`` or  ``->``. Similarly there are many choices for other syntactic elements. Quorum and its associated set of studies by Stefik provide an alternative approach - design a survey and ask novices what they think is most intuitive. As he says in the papers, choices ranked highly by experienced programmers but not chosen by novices are likely mistakes in PL design, learned helplessness since unintuitive PL syntax is hard to change.
+Going through RosettaCode was good for identifying the different styles of comments, but when I was going through concrete choices I saw lots of other options, some nearly as common: an EOL impl comment can be ``;`` or ``#`` or  ``->``. Similarly there are many choices for other syntactic elements.
+
+In general, directly copying syntax from other languages is a mistake for several reasons:
+
+* Different semantics - Programmers will come in with preconceived notions based on common syntax, and find the differences strange and confusing.
+* Easily learned - Syntax is easy to explain: just write down the grammar, and a few examples since BNF isn't self-explanatory. It probably takes more time to write a complaint about new syntax than it does to just memorize it.
+* Blind leading the blind - a lot of existing syntax choices in popular languages are bad. They're unintuitive, hard to use, and programmers just plain hate them, but live with them anyway.
+
+Quorum and its associated set of studies by Stefik provide an alternative approach - design a survey and ask novices what they think is most intuitive. As Stefik says in the papers, choices ranked highly by experienced programmers but not chosen by novices are likely mistakes in PL design, learned helplessness since unintuitive PL syntax is hard to change.
 
 Stefik used a mixture of CS university students (freshman year novices and junior/senior year programmers). But since we're designing for novices we don't actually care about or need to measure experienced programmers. So using a convenience sample by posting a Google Form / SurveyMonkey / LimeSurvey to r/learnprogramming isn't that hard - polls need approval but this seems like it might be allowed. (TODO: is there a better place on the internet to find programming novices?). General outline:
 
 * Title: "Never programmed? Help design a new programming language! (Survey)"
-* Demographics: age, gender, native English speaker. These are mentioned as questions in Stefik's survey :cite:`stefikEmpiricalInvestigationProgramming2013`, but aren't mentioned as having any statistically significant correlations, so can probably be left out or be highly stratified to make people less worried about giving out personal information. :cite:`dossantosImpactsCodingPractices2018` did find statistically significant differences for females to prefer multiple statements on one line and more intermedate variable assignments, but there were only 7 females so this is probably noise. OTOH, it would be useful to have demographics to compare to large surveys like the `Stack Overflow Developer Survey <https://insights.stackoverflow.com/survey/2021>`__.
+* Demographics: age, gender, native English speaker. These are mentioned as questions in Stefik's survey :cite:`stefikEmpiricalInvestigationProgramming2013`, but aren't mentioned as having any statistically significant correlations, so can probably be left out or be highly stratified to make people less worried about giving out personal information. :cite:`dossantosImpactsCodingPractices2018` did find statistically significant differences for females to prefer multiple statements on one line and more intermediate variable assignments, but there were only 7 females so this is probably noise. OTOH, it would be useful to have demographics to compare to large surveys like the `Stack Overflow Developer Survey <https://insights.stackoverflow.com/survey/2021>`__.
 * programming experience. Stefik found that programmers will list experience with individual languages even when reporting no experience total, so it seems best to skip an overall experience question and ask individually with a language matrix. Since not all languages will be listed we'll have an "All other programming languages" catch-all at the end. Stefik presumably asked an empty-box "how many years of experience do you have with X" question. But a matrix requires choices. Taking his mean experience reported as the data points, for experienced programmers, dividing into 5 buckets we have 0-0.03,0.03-0.09,0.9-0.22,0.28-0.48,0.67-1.76. For inexperienced programmers, we have 0-0 as a large bucket and then the remaining range is split into 0-0.01,0.01-0.03,0.05-0.09,0.12-0.23. Combining experienced and inexperienced, the 0-0 bucket stays and we have 4 more buckets 0.01-0.03 (±0.11-0.16), 0.03-0.09 (±0.18-0.31), 0.11-.28 (±0.41-1.06),0.39-1.76 (±.0.7-1.87) Translating into familiar units, these buckets are no experience, <11 days, 11-33 days, 40-102 days (1.32-3.36 months), 4.68+ months. Given the wide uncertainties we can round to no experience, < 2 weeks, 2 weeks to 1 month, >1 month and <4 months, or 4+ months. It's not as accurate as the empty-box but hitting a circle on mobile is much easier. In terms of the survey of :cite:`siegmundMeasuringModelingProgramming2014`, it is a quantified version of the self-estimation that rates experience as 1-5. We can sum the (approximate) years of experience to obtain overall years of experience, which should lead to Siegmund's "professional programming experience" factor, which IMO is the correct factor to use to measure programming experience. But we would have to do another validation study with university students to verify that this metric correlates with the ones in Siegmund's study. In fact though I am mainly going to use the metric as a binary variable, novice vs. not, so it's not too important.
 
   As far as languages, Study 1 had HTML, C++, Java, Matlab, JavaScript, Basic, COBOL reported with experience for non-programmers and Study 2 was similar with the addition of PHP. Considering programmers among both studies, we would add C#, Python, Ruby, and COBOL as <1 month languages, and Perl and FORTRAN as <2 week languages. Meanwhile the SO language list top 15 is JavaScript, HTML/CSS, Python, SQL, Java, Node.js, TypeScript, C#, Bash, C++, PHP, C, Powershell, Go, Kotlin, with a clear break in popularity from C at 21% to Powershell at 10%. The question asked for "extensive development work in the past year" though so is not really a question about which languages are most likely to have beginner exposure. Contrariwise TIOBE does not consider HTML a programming language because it is not Turing complete, but does list SQL. We do not want to list too many languages, because marking lots of languages as "no experience" is tedious, but a good selection is key to defining the question and ensuring the catch-all is answered accurately. One design point would be to preselect "no experience" for all but the catch-all, solving the tedium issue, but the survey tool would have to support this.
 
-* Have you heard of the Stroscot or Quorum programming languages before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results.
+* Have you heard of the Stroscot or Quorum programming languages before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results. (2 questions actually)
 
-The meat of the survey is questions of the form "how do you think <english description of PL task> should look?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. Stefik did individual rankings of each choice on a 0-100% scale by 10%'s, but I think "rank top 3 choices" is sufficient and less tedious.
+The meat of the survey is questions of the form "<English description of PL concept>; how do you think the syntax of <concept> should look like for <example>?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. We can of course use RosettaCode as the source of choices, top X choices either randomized or ranked. Stefik did individual rankings of each choice on a 0-100% scale by 10%'s, but I think "select first,second,third choice" is sufficient and less tedious.
 
-Survey content
---------------
+Survey validity
+---------------
 
-According to :cite:`tewFCS1LanguageIndependent2011` there are two important classes of validity. First is content: establishing the topics to be surveyed, and ensuring they have reasonable coverage of the subject area. IMO Stefik failed on this point - he just picked some basic Java-style keywords and constructs. Hence his research was quite limited - he didn't systematically go through every design choice possible in a programming language. :cite:`tewDevelopingValidatedAssessment2010` went through "widely adopted" introductory textbooks to select a set of CS1 topics, but ended up with more than 400 topics - they pruned them to 29 by limiting to concepts missing from at most one textbook. And with the focus on "wide adoption" they ended up including OO but not FP. The fact that Tew tested their exam only on Java, Matlab, and Python programmers is telling. Since Stroscot is a functional logic programming language, it will likely have some different fundamental concepts, and "wide adoption" is not necessarily the right inclusion criteria. I actually think ChatGPT can help a lot here - it knows the basic concepts used in programming and can devise wording that avoids prompting with the answer. The PL tasks should be a mixture of basic tasks common to all languages (operations, control, data structures) and Stroscot-specific tasks that showcase its unique features.
+According to :cite:`tewFCS1LanguageIndependent2011` there are two important classes of validity. First is content: establishing the topics to be surveyed, and ensuring they have reasonable coverage of the subject area. IMO Stefik failed on this point - he just picked some basic Java-style keywords and constructs. Hence his research was quite limited - he didn't systematically go through every design choice possible in a programming language. :cite:`tewDevelopingValidatedAssessment2010` went through "widely adopted" introductory textbooks to select a set of CS1 topics, but ended up with more than 400 topics - they pruned them to 29 by limiting to concepts missing from at most one textbook. And with the focus on "wide adoption" they ended up including OO but not FP. The fact that Tew tested their exam only on Java, Matlab, and Python programmers is telling. Since Stroscot is a functional logic programming language, it will likely have some different fundamental concepts, and "wide adoption" is not necessarily the right inclusion criteria. ChatGPT might help here - it knows the basic concept clusters used in programming. The PL tasks should be a mixture of basic tasks common to all languages (operations, control, data structures) and Stroscot-specific tasks that showcase its unique features. But it is quite important to pick representative tasks first, identify their semantics, break them down into constructs and "how do I do this task", and only then apply the principle of "form follows function" to magic up a syntax. But there is also some requirement to differentiate the tasks and avoid overlap - putting two questions with no significant differences on the survey will likely end up with identical responses, or even worse, variant syntaxes for writing the same thing.
 
-A secondary form of validity is construct validity. This ensures that the survey is actually measuring what it is designed to measure, rather than something else. Without some procedures in place, it is easy to write bad questions. They can be unclear, resulting in participants answering the wrong question. They can be biased with "leading questions", resulting in canned answers rather than useful data. Unfortunately, some amount of priming is necessary, because novices do not know what the basic syntactic constructs of a language are. If you give novices a blank page and ask them to design a programming language, you will most likely get a simple language with glaring deficiencies. But similarly if you ask a novice "What syntax should be used for the if-else statement?" there is not much leeway in the question - most likely they will use the if and else keywords. So the wording of a question can be quite important.
+15:08-15:59 Avoid adding special cases in your syntax just to save a few bytes. It doesn't really matter how long your code is. For example, Lua has a syntax for writing down a literal key-value table, and between each key-value pair, you put either a comma or a semicolon. It's very simple and straightforward. One guy worked out that in many cases you could avoid having to put this comma or semicolon in. It wouldn't always work, but sometimes you could do it, and it could save 200-300 bytes in his program. But it didn't work all the time, and if you omitted the separator in the wrong place you might get something behaving completely differently. So in the end special cases just make code more difficult to write and understand.
 
-For construct validity, Stefik showed the questionnaire to several experts and resolved all issues. He also did pilot studies with both experts and novices, and confirmed that they gave decent answers. He also submitted the study for peer review. Tew used item-response statistics and also validated their questions by conducting think-aloud interviews during pilot versions of the test, showing that correct mental models corresponded to correct answers and likewise for incorrect. For similarly validating the constructs of my survey, CCC is a forum of expert programmers, and I can post the survey to /r/ProgrammingLanguages as a trial run. The write-your-own-syntax freeform question is similar to the think-aloud study. So the only missing quality assurance factor is peer review. It seems for journals in education/UX research, around 1/3 of on-topic papers submitted get accepted. ACM publishing is free, so it could be done. I don't really attach much importance to peer review though.
 
-Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization so choices could be compared and tested. Basically we store code as base64 or a Lisp-like AST dump, and then the formatter produces/consumes this like any other code style. Then people get an initial randomized style, but can customize it to their liking, and once we reach 100 users we have a syntax battle.
+A secondary form of validity is construct validity. This ensures that the survey is actually measuring what it is designed to measure, rather than something else. Without some procedures in place, it is easy to write bad questions. They can be unclear, resulting in participants answering the wrong question. They can be biased with "leading questions", resulting in canned answers rather than useful data. Unfortunately, some amount of priming is necessary, because novices do not know what the basic syntactic constructs of a language are. If you give novices a blank page and ask them to design a programming language, you will most likely get a simple language with glaring deficiencies. But similarly if you ask a novice "What syntax should be used for the if-else statement?" there is not much leeway in the question - most likely they will use the if and else keywords. So the wording of a question can be quite important. ChatGPT can probably help here a lot by devising neutral wording that avoids prompting with too much of the answer.
+
+For further verifying construct validity, there are various sanity checks to do:
+
+* Stefik and Tew showed their questionnaires to several experts and resolved all issues. For similarly validating the constructs of my survey, CCC is a forum of expert programmers, who can probably spot issues given the right prompting.
+* Stefik did pilot studies with both experts and novices, and confirmed that they gave decent answers. Similarly, I can post the survey to /r/ProgrammingLanguages as a trial run.
+* Tew used item-response statistics. I don't think this is directly applicable as I am not designing a test, but looking at statistical measures of agreement on a per-item basis will probably be useful after the fact.
+* Tew validated their questions by conducting think-aloud interviews during pilot versions of the test, showing that correct mental models corresponded to correct answers and likewise for incorrect. The write-your-own-syntax freeform question is similar to the think-aloud study, and can validate the concept descriptions.
+* Stefik and Tew submitted their studies for peer review, Stefik to "Software Quality Journal" and "ACM Transactions on Computing Education" and Tew to "ACM technical symposium on Computer science education". It seems for journals in education/UX research, around 1/3 of on-topic papers submitted get accepted. ACM publishing is free, so TOCE could be an option. But it seems you need pretty close to a camera-ready manuscript for peer review, so this would be something to do after the study is pretty much done.
+
+Influences
+==========
 
 Some languages offer a "simple" syntax. But simplicity is hard to define, and boils down to either a simple implementation (LR parser) or else just the syntax familiar to them from other languages (which implementation-wise is often quite complex). People seem to be afraid of new syntax so there is the tendency to make it explicit and loud while reserving the terse syntax for established features. But Stroscot's goal is to unify all the features, so all of the notation is designed to be short, terse, flexible, and general.
 
 Haskell/Idris syntax is mostly awesome, use it. (TODO: check this. The weird function call syntax may lose too many users) Almost everything is an expression. But there's also block statements and layout.
 
-Natural language like Inform 7, while interesting, is quite wordy. It's also hard to scan through.
-
 Fortress has "mathematical syntax", with an ASCII form and typeset form. They used LaTeX but HTML / MathML output should be possible too. And juxtaposition was overloaded. Probably worth emulating.
 
-A language encourages certain expressions of thought. If the syntax is awkward then the feature will be used less and a bias will be introduced. But the styles of programming people come up with after a language is released are often completely different to what was intended by the language (e.g. Java and its design patterns). It's not clear that anything can be done about this, besides capturing as many existing patterns as cleanly as possible.
+A language encourages certain expressions of thought. If the syntax is awkward then the feature will be used less and a bias will be introduced. But the styles of programming people come up with after a language is released are often completely different to what was intended by the language (e.g. Java and its design patterns). It's not clear that anything can be done about this, besides capturing as many existing patterns as cleanly as possible and allowing macros.
 
 Text-based
 ==========
 
-There are some people who, when confronted with the complexity of syntax, think "It's better to use a binary format and store everything in a database." Now they have two problems. Math is textual, English is textual, the only programming stuff that isn't textual are flowcharts and tables. Flowcharts might be OK (e.g. Labview) but graph layout is hard - graphviz barely works, and most graph layout algorithms such as IDA Pro's are quite lacking. Labview struggleseven to layout wires (edges). Tables lead into spreadsheet programming which is generally not expressive as a language - and the formulas and cell values are textual. If you show me a way to write 123.6 that doesn't involve text maybe visual programming is worth considering.
+There are some people who, when confronted with the complexity of syntax, think "It's better to use a binary format and store everything in a database." Now they have two problems. Math is textual, English is textual, the only programming stuff that isn't textual are flowcharts and tables. Flowcharts might be OK (e.g. Labview) but graph layout is hard - graphviz barely works, and most graph layout algorithms such as IDA Pro's are quite lacking. Labview struggles even to layout wires (edges). Tables lead into spreadsheet programming which is generally not expressive as a language - and the formulas and cell values are textual. If you show me a way to write 123.6 that doesn't involve text (sliders aren't precise enough to do 4 digits unless they fill the screen!), maybe I'll start to consider visual programming.
 
 There's also structural editing, `lamdu <http://www.lamdu.org/>`__ and so on, but they are designing an IDE alongside a programming language. I'm not too interested in IDEs and given that half the IDEs are for languages that also have a textual syntax, syntax doesn't seem to be a big factor in writing such an IDE.
 
@@ -61,8 +84,7 @@ Legibility/readability
 
 There have been many legibility/readability studies, but they have to be evaluated carefully. Some are out of date, some were poorly designed, and some are just not relevant to programming. So we have to describe our assumptions and working setup.
 
-The first question is the medium. Most code will be read on a computer screen. Computer monitors have improved greatly over the years. Comparing the monochrome 1024x780 114ppi 11" $10k+ Tektronix 4010 in 1972 to the 24-bit color 1600x1024 110ppi 17.3" $2.5k SGI 1600SW in 1998 to the 3840x2160 140ppi 32" $850 Dell U3223QE recommended by `RTings <https://www.rtings.com/monitor/reviews/best/by-usage/programming-and-coding>`__ as of 2023, we see cost has significantly decreased and also there has been a significant amount of readability improvements in ppi, contrast, brightness, and persistence / refresh rate. Per `WP <https://en.wikipedia.org/wiki/Pixel_density#Printing_on_paper>`__, PPI is about half DPI, so the 300 DPI "good quality typographic print" standard corresponds to 150ppi. With subpixel rendering enhancing horizontal resolution, the recent 140ppi monitors are finally starting to have decent text quality, and that ppi is probably becoming standard for professionals. But there are even higher PPI displays, e.g. a 23.8" 185ppi LG 24UD58 or Macbook "retina" laptop display, and there are reports that these high ppi have perceivably better text quality.
-
+The first question is the medium. Most code will be read on a computer screen. Computer monitors have improved greatly over the years. Comparing the monochrome 1024x780 114ppi 11" $10k+ Tektronix 4010 in 1972 to the 24-bit color 1600x1024 110ppi 17.3" $2.5k SGI 1600SW in 1998 to the 3840x2160 140ppi 32" $850 Dell U3223QE recommended by `RTings <https://www.rtings.com/monitor/reviews/best/by-usage/programming-and-coding>`__ as of 2023, we see cost has significantly decreased and also there has been a significant amount of readability improvements in PPI, contrast, brightness, and persistence / refresh rate. Per `WP <https://en.wikipedia.org/wiki/Pixel_density#Printing_on_paper>`__, PPI is about half DPI, so the 300 DPI "good quality typographic print" standard corresponds to 150ppi. With subpixel rendering enhancing horizontal resolution, the recent 140ppi monitors are finally starting to have decent text quality. But there are even higher PPI displays, e.g. a 23.8" 185ppi LG 24UD58 or 16.2" 254ppi Macbook Pro "retina" laptop display, and there are reports that these high PPI displays have perceivably better text quality. OTOH, looking at what people commonly use at home, it's 1920x1080 monitors per `Steam survey <https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam>`__. Assuming the common 24" screen size that's only 92ppi. Multi-monitor is 2 1080p displays next to each other. So we can see there is a wide range of possibilities for PPI. `This guy <https://nickjanetakis.com/blog/how-to-pick-a-good-monitor-for-software-development>`__ says a programming monitor should cost $250-$350 or so, so that's what I'll aim for, a selection of popular $250-$350 monitors, but really we can't make any assumptions. As far as presentation, it is also a menagerie of choice - colors, fonts, font size, visible whitespace.
 
 But let's go through the findings.
 
@@ -172,35 +194,10 @@ Example DSLs:
 
 It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging computations, like passes that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.
 
-Learning
-========
+Familiarity
+===========
 
-Learning a language takes time and effort. Self-taught novices might want to start with a book. How long should it be? A `121 page Python book (60 pages double spaced) <https://www.amazon.com/Python-Programming-Beginners-Comprehensive-Hands/dp/B0BFV21L24/>`__ is derided as terse and useless, requiring to google every new keyword. `K&R C <https://www.amazon.com/C-Programming-Language-2nd-Edition/dp/0131103628/>`__ has 272 pages, but is "not beginner friendly". The `C# Programming Yellow Book <http://www.csharpcourse.com/>`__  is 217 8.5x11 pages or about 322 of the standard 7x9 pages. `Python for Kids <https://www.amazon.com/Python-Kids-Playful-Introduction-Programming/dp/1593274076/>`__ clocks in at 344 pages but is still missing critical functions such as the input command. On the other hand some chapters such as turtle graphics, tkinter, and classes/objects can be skipped (74 pages). My first programming book `Beginning Programming with Java For Dummies <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computers/dp/0764526464/>`__ had 408 pages. The `5th edition <https://www.amazon.com/Beginning-Programming-Java-Dummies-Computer/dp/1119235537/>`__ is the most popular and has 560 pages. But it still only covers the basics. `Head First Java <https://www.amazon.com/Head-First-Java-2nd-Edition/dp/0596009208/>`__ is recommended by the r/learnprogramming subreddit and has 688 pages.
-
-Others recommend skipping the "dead tree" format altogether and watching videos on YouTube or doing educational courses on edX, Udacity, and Coursera. On YouTube `MIT
-6.0001 <https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/video_galleries/lecture-videos/>` is around 12x45=540 minutes. `CS50P <https://www.youtube.com/playlist?list=PLhQjrBD2T3817j24-GogXmWqO5Q5vYy0V>`__ is 14x1.2=1005 minutes. The amateur `CS Dojo <https://www.youtube.com/playlist?list=PLBZBJbE_rGRWeh5mIBhD-hhDwSEDxogDg>` is 16x~13=217 minutes. `Digilent Inc.'s course <https://www.youtube.com/playlist?list=PL0845FEB57E5894C2>`__ is 87x6.5=561 minutes. Coursera's `Learn to program <https://www.coursera.org/learn/learn-to-program>`__ course is 291 minutes or less than 5 hours of video content but there are 43 readings and Coursera says it will take 25 hours to complete.
-
-Learning a new language can be faster if you already know a language, but you can also bring over preconceptions. For example in :cite:`joostenTeachingFunctionalProgramming1993`, imperative gotchas became misconceptions in functional programming: variables can be defined after they are used, operators like ``tail``, ``take``, ``drop``, ``remove``, ``filter`` do not mutate their arguments, and there is no need to clone results to prevent them from being mutated and corrupted. It's not clear what can be done - people hate UI changes, and will complain when their cherished workarounds no longer work, even if they are now unnecessary. `Dijkstra <https://www.cs.utexas.edu/users/EWD/ewd04xx/EWD498.PDF>`__ similarly stated that COBOL "cripples the mind" and BASIC "mentally mutilates programmers beyond hope of regeneration", presumably because they give the programmer the wrong impression of what programming is. Still though, Dijkstra is too pessimistic - a simple "Stroscot for Y programmers" guide series should be sufficient to retrain programmers away from their bad habits.
-
-
-
-Immersion is by far the best way to learn anything. And as research shows, it turns out that humans retain:
-
-    5% of what they learn when they’ve learned from a lecture.
-    10% of what they learn when they’ve learned from reading.
-    20% of what they learn from audio-visual.
-    30% of what they learn when they see a demonstration
-    50% of what they learn when engaged in a group discussion.
-    75% of what they learn when they practice what they learned.
-    90% of what they learn when they use it immediately.
-
-Think back to how you learned to play basketball, ride a bicycle, or swim. Instead of watching tutorial videos or reading a textbook on how to do something, the way to learn faster is to get into the trenches and gain experience through making mistakes.
-
-
-Even if the learning material is there, what will convince people to invest the time to give it a try?
-
- Language designers should give careful thought to how strange their langauge is, and choose the right amount to accomplish what they’re trying to accomplish.
-
+Language designers should give careful thought to how strange their langauge is, and choose the right amount to accomplish what they’re trying to accomplish.
 
 Therefore, it’s best to treat familiarity as a tie-breaker: to be used sparingly, only when the pros and cons of different design options have been fully explored, and it has been determined that no design has an edge above the other.
 
@@ -238,27 +235,35 @@ TODO: see if there are any more Unicode guidelines relevant to writing a program
 Usability
 ---------
 
-Unicode character input still has no standard solution. Copy-pasting from websites or a small cheat file is simple but it is too tedious to use frequently. Other methods include a language-specific keyboard, OS input methods like Character Map, or editor input methods like ``\name<tab>`` in Jupyter, `extensions <https://marketplace.visualstudio.com/items?itemName=brunnerh.insert-unicode>`__ for VSCode, or ``Ctrl+x 8 Enter`` in Emacs. Generally it seems there is no shortage of solutions and people will put in the effort to find a good IME as required. It is really an editor problem, not a PL problem.
+Unicode character input still has no standard solution. Copy-pasting from websites or a cheat file is simple but it is too tedious to use frequently. Other methods include a language-specific keyboard, OS input methods like Character Map, or editor input methods like ``\name<tab>`` in Jupyter, `extensions <https://marketplace.visualstudio.com/items?itemName=brunnerh.insert-unicode>`__ for VSCode, or ``Ctrl+x 8 Enter`` in Emacs. Generally it seems there is no shortage of solutions and motivated people will put in the effort to find a good IME as required. It is really an editor problem, not a PL problem.
 
 Unicode itself is quite complex and people can get confused by invisible characters, different width spaces, bidirectional text, and lookalike characters. Compiler warnings can reduce the chance of confusion.
 
 Language fragmentation
 ----------------------
 
-People aren't omniglots, so using multiple languages will cause library fragmentation. Past introductory tutorials that write throwaway code it makes sense to use a common language. Which one though?
+People aren't omniglots, so using multiple languages will cause library fragmentation. Past introductory tutorials that write throwaway code, it makes sense to use a common language. Which one though?
 
-Per `Wikipedia <https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers>`__ English has 1.452 billion total speakers and Standard Chinese 1.118 billion, with Hindi and others less than half English. Even if we count "second language" liberally, English is as high as 2 billion while Standard Chinese is only 1.5 billion, so the gap increases slightly. And calculating growth rates from `2021 <https://en.wikipedia.org/w/index.php?title=List_of_languages_by_total_number_of_speakers&direction=prev&oldid=1073408213>`__ and earlier, English increased by 7.7%-9.8%/year while Chinese has remained mostly steady at -0.1% to 3.3%/year. Per `this WP page <https://en.wikipedia.org/wiki/Languages_used_on_the_Internet>`__ English websites are 61.1% English, 1.7% Chinese, while internet users are 25.9% English, 19.4% Chinese. The number of Chinese websites is probably skewed low because most Chinese content is on social sites rather than independent sites, and the firewall makes it hard to index. Still though, across all of these statistics, there is a clear pattern of English being first.
+Per `Wikipedia <https://en.wikipedia.org/wiki/List_of_languages_by_total_number_of_speakers>`__ English has the most speakers, 1.452 billion, while the next, Standard Chinese, has 1.118 billion, and the next (Hindi) less than half English. If we count "second language" liberally, English is as high as 2 billion while Standard Chinese is only 1.5 billion, so the gap only increases slightly. And calculating growth rates from `2021 <https://en.wikipedia.org/w/index.php?title=List_of_languages_by_total_number_of_speakers&direction=prev&oldid=1073408213>`__ and earlier, English increased by 7.7%-9.8%/year while Chinese has remained mostly steady at -0.1% to 3.3%/year. Per `this WP page <https://en.wikipedia.org/wiki/Languages_used_on_the_Internet>`__ English websites are 61.1% English, 1.7% Chinese, while internet users are 25.9% English, 19.4% Chinese. The number of Chinese websites is probably skewed low because most Chinese content is on social sites rather than independent sites, and the firewall makes it hard to index. Still though, across all of these statistics, there is a clear pattern of English being first.
 
-Choosing Standard Chinese also has political problems since the speakers are mainly native speakers in China that have been artificially created via the CCP systematically targeting ethnic minorities and forcing them to learn Standard Chinese in place of their original dialect. In contrast English is mainly a second language and its speakers are spread across many countries.
+Choosing Standard Chinese also has political problems since the speakers are mainly "native" speakers in China that have been indictrinated via the CCP systematically targeting ethnic minorities and forcing them to learn Standard Chinese in place of their original dialect. In contrast English is mainly a second language - its speakers are spread across many countries, and for the most part learn it as a course in school supplemented with additional voluntary self-education.
 
 Also Chinese is `just plain hard <http://pinyin.info/readings/texts/moser.html>`__ to learn and remember. Per that article it takes 7-8 years to learn 3000 Chinese characters but half that time to learn a comparable number of French or Spanish words. Then there is the `character amnesia <https://en.wikipedia.org/wiki/Character_amnesia>`__ problem where people can read the character just fine but forget how to write it by hand, only remembering the pinyin Latin-based transcription.
 
 So English it is.
 
-Unicode overuse
----------------
+Symbol overuse
+--------------
 
-Stroscot's user-defined syntax is flexible enough to create APL-style operators if desired. But just compare this example of computing the prime numbers less than ``R`` in APL vs. a Haskell style:
+There are several reasons to allow the use of Unicode mathematical symbols in Stroscot, as opposed to requiring lexical (word-based) identifiers:
+
+* First is that many mathematical symbols are widely recognized. Programming languages have taken arithmetic syntax directly from mathematics, with good effect, so it makes sense to allow other widely recognized symbols, such as the summation sign, set union, dot product, constant pi, theta/phi for angles, floor, ceiling, and infinity.
+
+* Second is that a symbol may be notably used in a specific domain. For example, it makes sense to allow matching the symbols and notation of a popular paper or textbook when transcribing an algorithm. There are many custom operators such as discrete difference and convolution.
+
+* Third is that it can make code more concise and hence more readable. A lexical operator is generally several characters, so its repeated use in an expression may create a long line, requiring line breaks. A new symbol is more concise hence faster to read than the lexical version, if one knows the meaning of the symbol. Examples include a circle symbol for specifying circles, or a music note symbol for defining chords. Of course one does have to learn the meaning, so it introduces a learning barrier.
+
+Stroscot's user-defined syntax is flexible enough to create symbolic operators if desired. But compare this example of computing the prime numbers less than ``R`` in APL vs. a Haskell lexical+prefix style:
 
 ::
 
@@ -270,21 +275,25 @@ Stroscot's user-defined syntax is flexible enough to create APL-style operators 
   T = drop 1 (count R)
   scan (not (isElementOf T (tie 0 (*) T T))) T
 
-IMO the letter-based prefix operators are easier to read - particularly, the word choices give clues as to what is happening. Although the number of APL hieroglyphs is not comparable to Chinese's thousands of ideograms, it seems likely that APL suffers from learnability issues similar to Chinese and is harder to learn than letter-based identifiers because it does not have a phonetic basis.
+The learning barrier is definitely real - IMO the Haskell style is much easier to read. The English words give many more clues as to what is happening. Although the number of APL hieroglyphs is not comparable to Chinese's thousands of ideograms, it seems likely that APL suffers from learnability issues similar to Chinese and is harder to learn than a language with lexical identifiers because it does not have a phonetic basis. Thus it does not make sense to uniformly adopt symbols for all operators as was done in APL. There is definitely a balance between concision and clarity. Hence, although Stroscot allows Unicode symbols, it does not encourage or require their use. I like to think that programmers have good taste and will avoid symbol overuse.
 
-Similarly Agda uses mathematical Unicode symbols extensively for both identifiers and syntax. This kind of mathematical jargon seems fine so long as there's clear documentation or it's limited to .
+To implement the "symbols not encouraged or required" rule, the constraint on Stroscot's standard library is that every symbol should have a corresponding lexical operator, and the library code should always use the lexical version, to avoid "monkey see monkey do". Maybe some symbols can be encouraged and the rules ignored for those symbols, but that would require a standardized Unicode input method. The documentation should have a symbol dictionary showing the lexical and symbolic versions of all operators in the standard library, for easy searching and copy-paste. The dictionary should also document what the symbol means and its usage and pronunciation. As far as availability, unambiguous widely-used symbols can be available in the prelude. Custom operators can be exposed in an appropriate module - either the main module for some functionality if it is expected that end-users will use the symbol, or an internal or DSL module if the symbol is not expected to be used.
 
 Encoding
 --------
 
-There are various encodings of Unicode, like UTF-8, UTF-16, and GBK/GB 18030. But UTF-8 has 97.8% market share, and general-purpose compression algorithms provide better compression than specialized encodings. So for now it's not worth supporting anything besides UTF-8. If it becomes necessary to support another encoding then it can be cheaply written as a prepass that run ICU and transforms the encoding to UTF-8. Maybe as an alternative it is possible to use an encoding abstraction that supports many encodings and doesn't assume UTF-8 properties like stream synchronization; it depends on if there is a performance hit for such an abstraction.
+The Unicode Consortium has put in a great deal of effort to create a universal character set that is compatible with legacy systems. It would be foolhardy to ignore their work and attempt to create a competing incompatible standard. Considering Unicode formats, UTF-8 has 97.8% market share on the web (per Wikipedia), and has been adopted by many programming languages. Its variable-width encoding represents ASCII transparently, making English identifiers and markup characters easy to manipulate. It is thus the natural choice for input encoding.
+
+There are other formats, like UTF-16, GB 18030, and SCSU/BOCU. UTF-16 is pretty much a legacy format since it cannot fully represent a Unicode character in one code unit and requires double the space of UTF-8. UTF-32 is even more inefficient and is simply not suitable for storage on disk. GB 18030 represents CJK somewhat efficiently but is not used much outside China and even within China has only ~5% market share (per `W3Techs <https://w3techs.com/technologies/segmentation/sl-cnter-/character_encoding>`__), although there are some popular sites using it. Regarding SCSU/BOCU, per `experiment <https://web.archive.org/web/20041206080839/http://www.cs.fit.edu/~ryan/compress/>`__, it seems gzip/bzip provide better compression. The difference between compressibility of encodings is on the order of 1% for bzip but for some gzip examples, converting to SCSU as a preprocessing step saved 25% over UTF-8. Per `FAQ <http://www.unicode.org/faq/compression.html>`__, SCSU/BOCU are mainly for avoiding the overhead of Unicode vs. legacy encodings. So overall, it doesn't seem to be worth supporting anything besides UTF-8 as the input encoding.
+
+How dangerous is this assumption? Well, many systems support non-UTF-8 encodings by first running ICU and transforming the encoding to UTF-8, such as PostgresSQL. This would not be hard to add, if for some unforeseeable reason we suddenly had the need to support non-UTF-8 encoding. Although, there is a performance hit for transforming on the fly. We could alternatively design an abstract string library that allows manipulating data of various encodings in a uniform manner, most likely as a sequence of Unicode codepoints. But again there is likely some overhead, as the decoding and the parsing have to be written as coroutines. Likely, to get the same performance as UTF-8, we would have to fork the parser and spend some time tweaking. With suitable abstractions probably most of the code could be shared with the UTF-8 parser. So, at the end of the day, it is just some performance, some hacking, and the overall design does not really depend on assuming the encoding - it just makes the initial implementation a bit easier.
 
 NFC
 ---
 
 NFC solves the issue of having the same font grapheme but different codepoint encoding, like A + combining acute accent vs the precomposed character "latin capital letter a with acute". NFC is used by 98% of the web and a fair amount of software automatically normalizes input to NFC (e.g. web browsers). Also per `Unicode Normalization FAQ <http://www.unicode.org/faq/normalization.html>`__ "NFC is the best form for general text." It also seems that the unstated opinion of the Unicode Consortium is that text that cannot be NFC'd does not count as "Unicode". When there was an issue with NFC breaking `Biblical Hebrew <https://www.unicode.org/mail-arch/unicode-ml/y2003-m06/0423.html>`__ the solution was to change the input (inserting joiners) rather than modifying NFC.
 
-So it seems correct to soft-require input to be NFC normalized. This might annoy someone somewhere, but they can work around it by putting in joiners, like Biblical Hebrew had to do. We cannot hard-require because `per someone <https://github.com/rust-lang/rfcs/pull/2457#issuecomment-395488644>`__ there exist some Vietnamese keyboards that produce combining characters not in NFC.
+So it seems correct to soft-require input to be NFC normalized. This might annoy someone somewhere, but they can work around it by putting in joiners, like Biblical Hebrew had to do. We cannot hard-require because `per someone <https://github.com/rust-lang/rfcs/pull/2457#issuecomment-395488644>`__ there exist some Vietnamese keyboards that produce combining characters not in NFC normal form.
 
 NFC also means that unnormalized strings or raw binary data can't be included in files directly. But keeping those in separate files or encoding the bad bytes as hexadecimal seems fine.
 
@@ -362,7 +371,7 @@ Meanwhile with NFC the variable names would have to be consistent and built-in n
 
 Python's version where the variables do not have to be visually identical is really confusing. The NFKC input is too restrictive. IMO the NFC wins on both readability and flexibility.
 
-In the Unicode TRs NFKC usually is used in conjunction with case folding. In particular Unicode 3.13 R5 defines the mapping toNFKC_Casefold which case folds, normalizes, and removes default ignorable code points, and this operation is recommended for matching identifiers case-insensitively. Similarly `TR36 <https://www.unicode.org/reports/tr36/#Recommendations_General>`__ recommends processing identifiers by applying NFKC_Casefold. So NFKC doesn't make a lot of sense since Stroscot is case-sensitive. Many have `suggested <https://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJhttps://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJ>`__ that Python made the wrong choice when it picked NFKC because Python is case-sensitive.
+In the Unicode TRs, NFKC usually is used in conjunction with case folding. In particular, the Unicode standard 3.13 R5 defines the mapping toNFKC_Casefold which case folds, normalizes, and removes default ignorable code points, and this operation is recommended for matching identifiers case-insensitively. Similarly `TR36 <https://www.unicode.org/reports/tr36/#Recommendations_General>`__ recommends processing identifiers by applying NFKC_Casefold. So NFKC doesn't make a lot of sense since Stroscot is case-sensitive. Many have `suggested <https://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJhttps://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJ>`__ that Python made the wrong choice when it picked NFKC because Python is case-sensitive.
 
 Let's look at what NFKC actually does. Compared to NFC, it applies transformations with non-empty `Decomposition_type <https://www.unicode.org/reports/tr44/#Character_Decomposition_Mappings>`__, which are as follows:
 
@@ -384,11 +393,42 @@ Let's look at what NFKC actually does. Compared to NFC, it applies transformatio
   * changes kanxi to unified CJK (but not CJK compatibility ideographs)
   * changes en/em spaces to normal spaces
 
-TR31 specifically recommends excluding font transformations (1194 characters, 32% of NFKC) to allow mathematical notation. The superscript/subscript transforms also `confuse people <https://stackoverflow.com/questions/48404881/unicode-subscripts-and-superscripts-in-identifiers-why-does-python-consider-xu>`__ and seem to be unwanted. For Go, bcmills says superscripts and subscripts are 'cutesy' which seems to be an acknowledgement of the fact that they should not be erased. Similarly circle, fraction, square, and small look so different that they will confuse people as to why they are considered equivalent.
+TR31 specifically recommends excluding font transformations (1194 characters, 32% of NFKC) to allow mathematical notation. The superscript/subscript transforms also `confuse people <https://stackoverflow.com/questions/48404881/unicode-subscripts-and-superscripts-in-identifiers-why-does-python-consider-xu>`__ and seem to be unwanted. For Go, bcmills says superscripts and subscripts are 'cutesy', which seems to be an acknowledgement of the fact that they should not be erased. Similarly circle, fraction, square, and small (collectively 12% of NFKC) look so different that they will confuse people as to why they are considered equivalent.
 
-The symbol and ligature transformations in compat do seem useful. Python `apparently <https://mail.python.org/pipermail/python-3000/2007-May/007995.html>`__ went with NFKC because they were worried about confusing ligatures, specifically ﬁnd vs find (the first using the U+FB01 LATIN SMALL LIGATURE FI character). In VSCode the fi ligature shows up compressed into one fixed-width space so is visibly different from the non-ligature version, but in proportional fonts this is indeed a problem. The Go issue mentions micro and mu, which per Wikipedia look identical in most fonts, although some fonts do distinguish them. noBreak is also useful. wide/narrow/vertical/Arabic do look clearly different in my fonts, but the characters are intended only to support legacy character encodings so transforming them away is probably best. (`CHARMOD <https://www.w3.org/TR/charmod-norm/#canonical_compatibility>`__)
+The symbol and ligature transformations in compat (20% of NFKC) do seem useful. Python `apparently <https://mail.python.org/pipermail/python-3000/2007-May/007995.html>`__ went with NFKC because they were worried about confusing ligatures, specifically ﬁnd vs find (the first using the U+FB01 LATIN SMALL LIGATURE FI character). In VSCode the fi ligature shows up compressed into one fixed-width space so is visibly different from the non-ligature version, but in proportional fonts this is indeed a problem. The Go issue mentions confusing micro and mu, which per Wikipedia look identical in most fonts, although some fonts do distinguish them. noBreak is also useful. However, since the main goal is to avoid confusion, the confusable detection algorithm seems more appropriate.
 
-Overall, only 20% of the transformations NFKC does are clearly useful (compat), the standard recommends excluding 32% of transformations (fonts), and a further 12% (circle, fraction, square, small) also are clearly unwanted. It's clear that the stock NKFC transform isn't appropriate. Even if we used the reasonable subset of NFKC transforms, we're barely using half, so at best we could say we are using "NFC with most decompositions from NFKC". The base is still NFC and it's just monkeying up the encoding.
+wide/narrow/vertical/Arabic do look clearly different in my fonts, but the characters are intended only to support legacy character encodings. They could be transformed or not, but if we did implement a partial NFKC transform then transforming them away would probably be best. (`CHARMOD <https://www.w3.org/TR/charmod-norm/#canonical_compatibility>`__)
+
+Overall, given that the standard specifically recommends excluding font transformations, it should be clear that the stock NKFC transform isn't appropriate. Using a reasonable subset of NFKC (compat,noBreak,wide,narrow,vertical,Arabic), we're still barely using half, so at best we could say we are using "NFC with most decompositions from NFKC". The base is still NFC and it's just monkeying up the encoding. And the main benefit of such a partial NFKC transform is avoiding ligature confusion, but we also get that if we implement confusable detection. And there don't seem to be any other benefits to NFKC.
+
+Confusables
+-----------
+
+There is an alternative to NFKC, namely the TR39 `confusable detection <https://www.unicode.org/reports/tr39/#Confusable_Detection>`__ transformation. `Rust <https://github.com/rust-lang/rfcs/blob/master/text/2457-non-ascii-idents.md>`__ uses this. The dataset `contains <https://www.unicode.org/Public/security/latest/confusables.txt>`__ conversions of:
+
+* micro to mu, and other standardization of symbols (including kanxi and CJK compatibility ideographs to unified CJK)
+* 1 to l (one to ell), 0 to O (zero to oh), and other similar looking characters
+* ligatures like ffi to their expansion
+* parenthesized expressions like ⑵ to (2)
+* ℍ to H and other standardization of font styles
+* noBreak to normal, various spaces to normal
+* fullwidth to normal, vertical to similar characters like ︵ to ⏜
+* some amount of initial, isolated, medial, and final Arabic NFKC normalizations
+* no narrow, square, superscript, subscript, circle, or fraction NFKC mappings
+
+Due to the standardization of similar looking characters the confusable transform is actually larger than NFKC, 6311 vs 3675. But the transform makes a lot more sense for detecting similar-looking identifiers. The only unwanted transformations are the font styles which can be excluded from confusable detection just like they can be excluded from NKFC.
+
+Also per `dscorbett <https://github.com/rust-lang/rfcs/pull/2457#discussion_r192605996>`__ the confusable transform should also be extended to remove `default ignorable code points <https://unicode.org/reports/tr44/#Default_Ignorable_Code_Point>`__ (`consisting <https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt>`__ of combining grapheme joiner, zero width space, hangul filler, and 146 other invisible characters, plus 256 variation selectors and 3769 reserved). Per the `Variation Sequence FAQ <http://unicode.org/faq/vs.html>`__ variation sequences are morally equivalent to code points, in that they distinguish different glyphs, but they were unable to be assigned a new codepoint because an existing codepoint was considered to be "clearly the same character". This includes visually distinctive alterations such as rotating Egyptian Hieroglyphs 90 degrees or black-and-white vs color emoji, as well as less noticeable ones like adding serifs. From testing with my fonts (𓂑 vs 𓂑︀, ⊓ vs ⊓︀, 齋 vs 齋󠄁, ≩ vs ≩︀, ⛺︎ vs ⛺️) and various `open <https://github.com/w3c/csswg-drafts/issues/1710>`__ `bugs <https://gitlab.gnome.org/GNOME/pango/-/issues/206>`__ it seems variations besides emoji are not supported well and mostly fall back to the base character, so removing the selectors is appropriate for confusable detection. This could be revisited if more fonts start including variations or the `CSS font substitution logic <https://drafts.csswg.org/css-fonts-3/#cluster-matching>`__ that attempts to preserve variations is implemented. `As of 2017 <https://github.com/harfbuzz/harfbuzz/issues/515#issuecomment-317932409>`__ font substitution for variations doesn't work on Chrome, Firefox, or Word.
+
+So overall the approach is "confusable detection with font variants distinguished and default ignorable code points ignored". Since the focus for developing the confusable database was on covering characters with Identifier_Status=Allowed for standard OS fonts, it may be incomplete. But it's the best production-quality database available, and Unicode claims to accept updates, and if not it's not too hard to fork.
+
+There are also research projects. `ShamFinder <https://arxiv.org/pdf/1909.07539.pdf>`__ provides a database SimChar similar to the confusables database. Its generation is based solely on Unifont so it misses many homoglyphs from other fonts. The pixel metric adds extra pairs such as accents, e vs é, which IMO are not going to confuse anyone. The database is publicly available at `GitHub <https://github.com/FlowCrypt/idn-homographs-database>`__, but not the code used to generate it. `PhishGAN <https://arxiv.org/abs/2006.13742>`__ generates vectors from images and finds likely homoglyph identifiers, but was trained on a small identifier list, is Arial and Times only, trains over the whole identifier, and is not publicly available. But an ML approach which breaks up identifiers into fixations and compares these using a human visual perceptual model could theoretically be more accurate than a confusables database; getting it performant enough would require some specially crafted perceptual hash functions. This approach catches multicharacter homoglyphs like "vv" vs "w" (of course in a monospace font these are clearly distinguished by width). But, overall, neither of these approaches is ready for prime time with further work.
+
+The transform generates a "skeleton" that can be compared with other skeletons to see if two identifiers are confusable. Per Rust the implementation should use the NFC form for compilation but hash the skeleton and generate an optional warning if the usage of an identifier is confusable with another identifier in scope. We could add an additional step that compares the actual identifiers and computes a confusion probability, but the skeleton alone is generally good enough. The warning can be turned off on a per-file or per-project basis if the user doesn't care or on a per-grapheme basis if the user is using a font that clearly distinguishes the confused characters. But most users will appreciate the warning and fix their code to use clearer identifier names.
+
+Also for unresolvable identifiers we should compute an edit distance score between skeletons to find likely typos.
+
+Confusable detection generally prevents homoglyph attacks using identifiers, although homoglyph attacks are difficult to exploit to begin with as the duplicate definitions are visible. It is still possible to use zero-width characters or homoglyphs in strings or comments. Comments have no effect. With strings a comparison can fail, but the weird characters may be desired. One possibility is a warning with recommendation to replace with an escape sequence.
 
 TR31
 ----
@@ -436,35 +476,6 @@ Go's rule is that identifier characters must be letters or digits as defined by 
 
 Generally it seeems that case distinctions only work for English, and are somewhat hard to get right. So we don't put it in the syntax and leave case as a style guideline.
 
-Confusables
------------
-
-So requiring NFKC is not a good idea - do we have to roll our own transform? Fortunately, the answer is not really - there is an alternative to NFKC, namely the TR39 `confusable detection <https://www.unicode.org/reports/tr39/#Confusable_Detection>`__ transformation. `Rust <https://github.com/rust-lang/rfcs/blob/master/text/2457-non-ascii-idents.md>`__ uses this. The dataset `contains <https://www.unicode.org/Public/security/latest/confusables.txt>`__ conversions of:
-
-* micro to mu, and other standardization of symbols (including kanxi and CJK compatibility ideographs to unified CJK)
-* 1 to l (one to ell), 0 to O (zero to oh), and other similar looking characters
-* ligatures like ffi to their expansion
-* parenthesized expressions like ⑵ to (2)
-* ℍ to H and other standardization of font styles
-* noBreak to normal, various spaces to normal
-* fullwidth to normal, vertical to similar characters like ︵ to ⏜
-* some amount of initial, isolated, medial, and final Arabic NFKC normalizations
-* no narrow, square, superscript, subscript, circle, or fraction NFKC mappings
-
-Due to the standardization of similar looking characters the confusable transform is actually larger than NFKC, 6311 vs 3675. But the transform makes a lot more sense for detecting similar-looking identifiers. The only unwanted transformations are the font styles which can be excluded from confusable detection just like they can be excluded from NKFC.
-
-Also per `dscorbett <https://github.com/rust-lang/rfcs/pull/2457#discussion_r192605996>`__ the confusable transform should also be extended to remove `default ignorable code points <https://unicode.org/reports/tr44/#Default_Ignorable_Code_Point>`__ (`consisting <https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt>`__ of combining grapheme joiner, zero width space, hangul filler, and 146 other invisible characters, plus 256 variation selectors and 3769 reserved). Per the `Variation Sequence FAQ <http://unicode.org/faq/vs.html>`__ variation sequences are morally equivalent to code points, in that they distinguish different glyphs, but they were unable to be assigned a new codepoint because an existing codepoint was considered to be "clearly the same character". This includes visually distinctive alterations such as rotating Egyptian Hieroglyphs 90 degrees or black-and-white vs color emoji, as well as less noticeable ones like adding serifs. From testing with my fonts (𓂑 vs 𓂑︀, ⊓ vs ⊓︀, 齋 vs 齋󠄁, ≩ vs ≩︀, ⛺︎ vs ⛺️) and various `open <https://github.com/w3c/csswg-drafts/issues/1710>`__ `bugs <https://gitlab.gnome.org/GNOME/pango/-/issues/206>`__ it seems variations besides emoji are not supported well and mostly fall back to the base character, so removing the selectors is appropriate for confusable detection. This could be revisited if more fonts start including variations or the `CSS font substitution logic <https://drafts.csswg.org/css-fonts-3/#cluster-matching>`__ that attempts to preserve variations is implemented. `As of 2017 <https://github.com/harfbuzz/harfbuzz/issues/515#issuecomment-317932409>`__ font substitution for variations doesn't work on Chrome, Firefox, or Word.
-
-So overall the approach is "confusable detection with font variants distinguished and default ignorable code points ignored". Since the focus for developing the confusable database was on covering characters with Identifier_Status=Allowed for standard OS fonts, it may be incomplete. But it's the best production-quality database available, and Unicode claims to accept updates, and if not it's not too hard to fork.
-
-There are also research projects. `ShamFinder <https://arxiv.org/pdf/1909.07539.pdf>`__ provides a database SimChar similar to the confusables database. Its generation is based solely on Unifont so it misses many homoglyphs from other fonts. The pixel metric adds extra pairs such as accents, e vs é, which IMO are not going to confuse anyone. The database is publicly available at `GitHub <https://github.com/FlowCrypt/idn-homographs-database>`__, but not the code used to generate it. `PhishGAN <https://arxiv.org/abs/2006.13742>`__ generates vectors from images and finds likely homoglyph identifiers, but was trained on a small identifier list, is Arial and Times only, trains over the whole identifier, and is not publicly available. But an ML approach which breaks up identifiers into fixations and compares these using a human visual perceptual model could theoretically be more accurate than a confusables database; getting it performant enough would require some specially crafted perceptual hash functions. This approach catches multicharacter homoglyphs like "vv" vs "w" (of course in a monospace font these are clearly distinguished by width). But, overall, neither of these approaches is ready for prime time with further work.
-
-The transform generates a "skeleton" that can be compared with other skeletons to see if two identifiers are confusable. Per Rust the implementation should use the NFC form for compilation but hash the skeleton and generate an optional warning if the usage of an identifier is confusable with another identifier in scope. We could add an additional step that compares the actual identifiers and computes a confusion probability, but the skeleton alone is generally good enough. The warning can be turned off on a per-file or per-project basis if the user doesn't care or on a per-grapheme basis if the user is using a font that clearly distinguishes the confused characters. But most users will appreciate the warning and fix their code to use clearer identifier names.
-
-Also for unresolvable identifiers we should compute an edit distance score between skeletons to find likely typos.
-
-Confusable detection generally prevents homoglyph attacks using identifiers, although homoglyph attacks are difficult to exploit to begin with as the duplicate definitions are visible. It is still possible to use zero-width characters or homoglyphs in strings or comments. Comments have no effect. With strings a comparison can fail, but the weird characters may be desired. One possibility is a warning with recommendation to replace with an escape sequence.
-
 Script restrictions
 -------------------
 
@@ -479,45 +490,30 @@ Bidi attack
 
 Language syntax does not generally allow bidi overrides, but they can show up in comments and strings, and the bidi overrides can obsfuscate which part is the comment or string. For example ``"x"; return`` could look like ``"return x;"`` (early return), ``/* if { */`` could look like ``/* */ if {`` (commenting out), and ``"user // check"`` could look like ``"user" // check`` (stretched string). The overrides are visible in most syntax highlighting and when selecting/navigating through the text, but these cues are easy to miss.
 
-The solution presented in the paper is to ban unterminated bidi override characters within string literals and comments. This prevents reordering across string and comment boundaries.
+The solution presented in the paper is to ban unterminated bidi override characters within string literals and comments. This prevents reordering across string and comment boundaries, but poses no restrictions on well-terminated uses of bidi reordering. There are more restrictive solutions like completely banning bidi overrides, but the paper's solution is sufficient to prevent the attack, so seems better.
 
-Parsing
-=======
+Natural language
+================
 
-I've got a basic Earley algorithm working in JS, but it's not used anywhere. But eventually I could extend it with BSRs and layout and other fun things. There's also `Yakker <https://github.com/attresearch/yakker>`__, which is the most developed parser I've seen feature-wise. It's only missing incremental parsing.
+Natural language is a source of many of the basic keywords for language constructs - their natural language menaing helps recall the PL meaning. It also is the source of spacing conventions, such as blanks and indentation, although the hanging indent style used in programming is somewhat unusual for prose.
 
-  A new parsing engine, Yakker, capable of handling the requirements of modern applications including full scannerless context-free grammars with regular expressions as right-hand sides for defining nonterminals. Yakker also includes facilities for binding variables to intermediate parse results and using such bindings within arbitrary constraints to control parsing. Yakker supports both semantic actions and speculative parsing techniques such as backtracking and context-free lookahead and several parsing back ends (including Earley, GLR and backtracking).  In addition, nonterminals may be parameterized by arbitrary values, which gives the system good modularity and abstraction properties in the presence of data-dependent parsing. Finally, legacy parsing libraries, such as sophisticated libraries for dates and times, may be directly incorporated into parser specifications.
+It is possible to be too inspired by natural language, however. Inform 7, while interesting as a PL, is quite wordy, and the paragraph style is hard to scan through. Natural language also contains a lot of ambiguity, which is reflected in a NL-based programming language as reasonable-looking sentences being ambiguous or failing to parse. Machine learning is probably good enough to get a decent NL parser these days, but the parser will still not be perfect.
 
-I've looked at various algorithms but I think the only way to handle it completely correctly and generically is to have a disambiguating pass on the set of parse tree generated by a nondeterministic automaton. The alternatives involve restricting parsers to be deterministic, for example PEGs. But PEGs have big issues with error detection and reporting, not to mention correct parsing. There's just no information on what possible parses are available or what token is expected. Whereas with Earley you can do "Ruby slippers": scan the sets for what they want next, output "warning: expected ';' at end of statement", and then add that to the parse forest and continue parsing with almost no overhead.
+Desugaring
+==========
 
-Treesitter implements incremental LR parsing with error recovery, but since it doesn't support ambiguity I don't think it's sufficient for a compiler.
-
-Revisiting this, the goal is to use partial evaluation to generate the parser, by speeding up a naive brute-force algorithm applied to the grammar. There is already a paper on LR parsing by partial evaluation :cite:`sperberGenerationLRParsers2000` and also on specializing Earley, so with sufficiently powerful compiler optimization handling general grammars should be possible.
-
-In particular the parser should be written as a nondeterministic finite state transducer that builds up trees (outputs a list in the style of start-children-end or S-expressions or something).
-
-Formally:
-
-* Q is a finite set, the set of states;
-* I is a subset of Q, the set of initial states;
-* F is a subset of Q, the set of final states; and
-* Σ is a finite set, called the input alphabet;
-* Γ is a finite set, called the output alphabet;
-* The transition function is of type :math:`Q \times (\Sigma \cup \{\epsilon \})\to P(Q \times (\Gamma \cup \{\epsilon \}))`, where ε is the empty string and P(Q) denotes the power set of Q.
-
-TODO: match this up with Parsec, attoparsec, trifecta, etc. the syntax should be similar except with nondeterministic choice ``|``.
+One feature of Atomo I liked and thought was cool was that all the syntax was defined with the syntax extension mechanism - even the "core" syntax `was just <https://github.com/Mathnerd314/atomo/blob/master/prelude/core.atomo>`__ defined as rules desugaring to the basic message-sending syntax. I don't really like message-sending as the basic construct, but it should be easy enough to use a Lisp syntax instead. So for example we'd desugar ``a = b`` to ``Assign a b``. Similarly Stroscot should define desugarings for all the other syntactic constructs too. Then we can use this basic Lisp syntax to bootstrap the language, as well as for macro debugging and other tasks. That way the parser is almost completely self-contained as a transformation from sugary code to a basic AST - there are only a few complex interactions like line numbers, inline syntax extension, and macros/DSLs.
 
 Blocks
 ======
 
-Blocks are inspired by Haskell's do notation. For an example of how natural this is you can look at :ref:`how I/O works <tasks>`. Since codensity/continuations are the mother of all monads, we don't lose anything by fixing the monadic operations in the do-notation to be the continuation monad operations.
+Blocks are inspired by Haskell's do notation. They are intimately tied with :ref:`how I/O works <tasks>`.
 
-There is also "not returning anything" versus returning a value ``()``. In Haskell these are generally consdiered the same. But using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
+There is also "not returning anything" versus returning a value ``()``. In Haskell these are generally considered the same. But using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
 
 The return keyword should be invalid in short-form (pure) method definitions, like ``f x = x``, but should be required for blocks, i.e. ``f x = { return x }``. There is some question over whether to allow calling a function without return, i.e. ``f x = { return (g x) }`` versus ``f x = { g x }`` where ``g`` is itself a block.
 
-
-
+Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``, equivalent to ``when expr (throw AssertionFailed)``. Java's complex form ``assert expr : exception`` that throws a specific ``exception`` on failure seems pointless - it's only a little less verbose than ``when expr (throw exception)``. There's special integration of the blocks and exceptions so exceptions propagate even in pure expressions.
 
 ApplicativeDo
 -------------
@@ -846,27 +842,59 @@ OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
 
-Indentation sensitivity
-=======================
+Indentation
+===========
 
-Indentation-sensitivity (IS) like Python and Haskell seems great.
+The tabs vs. spaces debate is still going. So let's make some people unhappy by baking the decision into the default syntax.
 
-* IS requires less typing. All modern languages are presented with indentation, so IS is just omitting the curly braces or begin-end markers.
-* IS avoids the issue of braces mismatching indentation.
-* IS avoids confusion or arguments about where to put the braces - `WP <https://en.wikipedia.org/wiki/Indentation_style>`__ lists 8 different styles.
-* IS is fewer lines of vertical space, because there are no braces on their own lines. This makes it cheaper to print code listings out on paper.
-* IS improves code legibility. There haven't been any formal studies that I can find, but Python syntax is often said to be "clean".
-* When copy-pasting code, you only have to fix up the indentation by moving the block left/right (supported by all modern code editors), instead of messing with braces.
+* `Pike <https://groups.google.com/g/golang-nuts/c/iHGLTFalb54/m/zqMoq9JRBAAJ>`__ says tabs allow choosing 2,4,8 spaces. But this flexibility means linebreaking suffers. For example, assume 100 character lines. Then someone with a 2-space tab and an 8 tab indent can fit 84 characters of code, but someone with an 8-space tab will see that 84 characters of code as a 148 character line, 150% of a line and needing a linebreak. It's better that everyone sees pretty much the same thing. Linus Torvalds `says <https://www.yarchive.net/comp/linux/coding_style.html>`__ tabs are 8 spaces and not adjustable. Also `he says <https://www.kernel.org/doc/html/latest/process/coding-style.html>`__ the line-limit argument is invalid because 3 levels of indentation suffices, but deep indentation often comes up with nested literal data. Another point against Pike is that browsers offer no means to change the width of tabs, so this customization is incomplete - using spaces will at least ensure the display is consistent with the editor.
+* Style guides for large companies/projects all agree on "no tabs" (e.g. `this <https://github.com/jrevels/YASGuide#linealignmentspacing-guidelines >`__)
+* `GitHub stats <https://hoffa.medium.com/400-000-github-repositories-1-billion-files-14-terabytes-of-code-spaces-or-tabs-7cfe0b5dd7fd#.o7n8zeezx>`__ show spaces winning in the majority of languages
+* The `2017 SO survey <https://stackoverflow.blog/2017/06/15/developers-use-spaces-make-money-use-tabs/>`__ showed spaces make 8.6% more salary
+* "Tabs + spaces" still has the issues with resizing tabs, and more because the hardcoded spaces may be larger than the tabs. For example resizing an 8-space tab plus 4 spaces to a 2-space tab plus spaces will break. And it is even less common.
+
+So I think the right solution is (by default) to completely forbid tabs, and only allow spaces.
+
+As far as the indent size, :cite:`miaraProgramIndentationComprehensibility1983` studied 0,2,4,6 space indents in Pascal code and found 2 spaces was best, followed by 4 spaces. :cite:`bauerIndentationSimplyMatter2019` did a replication using much simpler stimuli with 0,2,4,8 and eye tracking, but concluded that the difference was too small and they needed 304 participants instead of 22 to find statistically significant results. Per Figure 1, it seems the maximum response time goes up with indentation, but the average is within noise. Looking at Figure 2, it seems the upper quartile fixation duration increases (increasing effort) with increasing indentation, fixation rate is lowest (least effort) at 4, and saccadic length is lowest (least effort) at 4. Likely the mild advantages for 2/4 were tuning effects from previous exposure - they really should have had a 15 minute reading period for each condition and used a crossover design with a lot of questions in each block. I can imagine an online study that just shows some code under varying conditions and asks "how many times does this identifier appear" and measures time to correct response, although doing it with eye tracking would be better.
+
+So 2-4 is all the scientific literature narrows it down to; arguably we should include 1/5 for consideration as they were not explicitly studied, but it's clear from opinion that they are too big or small. A `poll <https://opensource.com/article/18/9/spaces-poll>`__ shows the popularity order is 4,2,3,5. Pros/cons of each per ChatGPT and other sources:
+
+* 2 - Pros: more compact, common in many languages (`list <http://www.opimedia.be/DS/languages/tabs-vs-spaces/>`__, also Cliff's preference), start of line is within peripheral vision. Cons: doesn't mark blocks sufficiently
+* 3 - Pros: marks blocks well, still relatively compact, still easy to find start of line. Standard in Ada. `Endorsed <https://twitter.com/clattner_llvm/status/715572957720870912>`__ by Chris Lattner as "looks the best". Lines up with "if ". Cons: uncommon, per `this <https://www.audero.it/blog/2015/10/21/the-revolution-of-3-spaces-code-indentation/>`__ some editors don't support it (only do 2/4/8), not a power of 2 so no easy conversion from 8-space tabs.
+* 4 - Pros: most common (Java/Python standard), marks blocks well. Cons: excessive, hard to find start of line
+* Mixture - Pros: some blocks are more visually distinguishable by themselves, so they can use less indentation, while others can be emphasized. Cons: Yet more knobs to tweak, complex rules are hard to remember, only works well in editors with 4-2 so is really 2 with some double indents.
+
+Lattner's opinion seems representative; on that Twitter thread and in the Google search results for "3 space indent", several agreed 3 looks the best, and nobody argued against 3's aesthetics. Since 3 is the most uncommon, it should attract the most opinions out of the options, and Stroscot can switch to 2 or 4 if these opinions are backed up with good reasoning or there is sufficient pressure to switch. VSCode is fine with 3, so the editor problem is not a problem in the expected configuration. So we'll try 3.
+
+Layout
+======
+
+Indentation-sensitivity (IS) like Python and Haskell seems great. Drawing from `Reddit <https://www.reddit.com/r/ProgrammingLanguages/comments/uo0nq7/end_keywords_vs_pythonstyle_blocks_for_beginners/>`__, the advantages:
+
+* IS requires less typing. All modern languages are presented with indentation, so IS is just omitting the hard-to-type curly braces or begin-end markers.
+* IS avoids the issue of braces mismatching indentation. In "An Empirical Investigation into Programming Language Syntax", misplaced end tokens were the most common error. It also avoids confusion or arguments about where to put the braces - `WP <https://en.wikipedia.org/wiki/Indentation_style>`__ lists 8 different styles.
+* IS is fewer lines of vertical space, because there are no braces on their own lines. This makes it cheaper to print code listings out on paper. Contrastinngly. brace styles with end braces not on their own line are uncommon.
+* IS improves code legibility. There haven't been any formal studies that I can find, but Python syntax is often said to be "clean", whereas the punctuation looks "intimidating and alien". IS code looks very similar regardless of indent size, while braces are all over the place. Even Rob Pike says indentation sensitivity is nice.
+* Copy-paste: Generally, to use the code you have to reformat it. Although brace reformatting can be done automatically, for small snippets it is less setup to manually fix it up, and manually reformatting mangled IS code is generally a bit easier than manually reformatting braced code. You only have to fix up the indentation by moving the block left/right (supported by all modern code editors), instead of navigating all over and moving the braces to your preferred location.
+
+There are some disadvantages:
+
+* Wordpress comment forms chomp indentation and special characters on unmarked text. Hence braces have a slight advantage over IS in terms of convenience because they can just be posted without any markup and are still valid code after chomping. This problem can be avoided by replacing special characters with entities and leading spaces with ``&nbsp;``, or on newer versions using the ``<pre>`` tag. More generally, most sites support some form of markup for code blocks which preserves indentation. Resolution: works for me.
+* Tabs vs spaces - Programmers copy code with spaces from their browser to their editor which uses tabs, or vice-versa, and get issues with invisible mismatching. Although this is a hard error in IS style, it is also an issue in brace style, where once the code is committed and someone with a different tab size tries to open it they will get badly indented code. So I like the hard error - mixed whitespace is just wrong; someone should be forced to use a consistent indentation style (as described above, tabs + spaces is not an option).
+* Embedding - Per Rob Pike, "a Python snippet embedded in another language through a SWIG invocation is subtly and invisibly broken by a change in the indentation of the surrounding code." This is solved by the tool processing the embedding being indentation-sensitive, or by using a separate file instead of embedding code in code.
+* Screenreading for the blind - `Rune <https://github.com/google/rune/blob/main/doc/rune4python.md>`__ and `several <https://www.youtube.com/watch?v=94swlF55tVc>`__ `others <https://stackoverflow.com/a/453758>`__ say that brace languages like C# are usable with the default screenreader settings. In contrast, indentation-sensitive languages require setting up a new profile that enables reporting the indentation of the current line as speech or a tone. Although this is supported by "almost all" modern screenreaders (`HN <https://news.ycombinator.com/item?id=11419478>`__), and seems fairly easy to use, I guess there are still curmudgeons. Some people turn on indentation even for brace languages, because knowing the indentation level can be helpful in navigating code. But obviously everyone has their preference and supporting several options can improve accessibility.
+* One-liners are no longer possible, because the newlines are required for layout
+
+Given these minor disadvantages, it seems best to follow Haskell and define a secondary brace syntax that doesn't rely on indentation, always enabled in the parser. Perhaps they could be discouraged with a warning, but I could see using the braces for one-liners.
 
 
-
-More discussion: https://www.reddit.com/r/ProgrammingLanguages/comments/uo0nq7/end_keywords_vs_pythonstyle_blocks_for_beginners/
+More discussion (basically summarized by the above):
 https://unspecified.wordpress.com/2011/10/18/why-pythons-whitespace-rule-is-right/
 https://wiki.python.org/moin/Why%20separate%20sections%20by%20indentation%20instead%20of%20by%20brackets%20or%20%27end%27
 
-Mixing tabs and spaces can lead to errors, but erroring on this is fine.
 
-Haskell's layout rules seem overly restrictive, for example this is not allowed:
+
+Haskell's layout rules are overly restrictive, for example this is not allowed:
 
 ::
 
@@ -882,9 +910,7 @@ Although the parentheses make this unambiguous, Haskell requires indenting a lot
                     (Sequent (fst bl_tseq, newcut_bseq) (bl_tlnotn++brl_bl) (bl_tmain, bl_tr ++ brl_br))
                     (Sequent bl_bseq (bl_blnotn++br_bl) (bl_bmain, bl_br ++ br_br)))
 
-Per `anecdote of Kmett <https://stackoverflow.com/a/2149878>`__ this requirement makes Haskell's layout rules too complex for blind people because it requires lining up columns.
-
-Similarly https://www.youtube.com/watch?v=SUIUZ09mnwM says to avoid a layout like this:
+Per `anecdote of Kmett <https://stackoverflow.com/a/2149878>`__ this requirement makes Haskell's layout rules too complex for blind people because it requires lining up columns. Similarly https://www.youtube.com/watch?v=SUIUZ09mnwM says a layout like this is bad style:
 
 ::
 
@@ -905,12 +931,16 @@ because renaming ``unstable`` will require reindenting the rest of the expressio
     anotherExpression
 
 
-Rob Pike says indentation sensitivity "is nice for small programs" but causes issues with embedding. For example, "a Python snippet embedded in another language, for instance through a SWIG invocation, is subtly and invisibly broken by a change in the indentation of the surrounding code." This seems like an issue caused by the embedding style - if the snippet was in a separate file then the tools might deal with it better. Haskell defines a translation from indentation style to brace syntax, and just requiring brace syntax in these embeddings might be sufficient.
+
+
+
+
+
 
 Blind community
 ---------------
 
-Blind programmers have diverse opinions. I don't know a significant number of them so this is all anecdotes. Per `this HN comment <https://news.ycombinator.com/item?id=11419478>`__ the majority seem to use screen readers and "almost all" screen readers have a setting to report the indentation of the current line, and this is relatively easy to use. For example per `this video <https://www.youtube.com/watch?v=qvg-uo_I7JM>`__ NVDA can be set up to automatically switch between different profiles for different tasks based on the focused window / process, and can announce indentation level using both beep tones and a TTS description of the number of spaces or tabs when navigating. Per `this <https://github.com/microsoft/vscode/issues/147386>`__ JAWS provides similar functionality. Roughly the experiences can be compared like this:
+Roughly the experiences can be compared like this:
 
 ::
 
@@ -944,7 +974,6 @@ Blind programmers have diverse opinions. I don't know a significant number of th
   indent 2 print quote bye quote
   dedent 2 close brace
 
-Some people turn on indentation even for brace languages, because knowing the indentation level can be helpful in navigating code. However, `Rune <https://github.com/google/rune/blob/main/doc/rune4python.md>`__ and `several <https://www.youtube.com/watch?v=94swlF55tVc>`__ `others <https://stackoverflow.com/a/453758>`__ say that brace languages like C# are usable without indentation on, and then they don't have to set up profiles. IMO the indentation version seems a little easier to navigate, and this is backed up by Python still being a popular coding language for blind people (e.g. NVDA is written in Python). But obviously everyone has their preference and supporting several options can improve accessibility. There is a pindent script in the Python distribution that adds/removes block open/close markers, so you can run it as a git smudge/clean filter. It seems Stroscot similarly should provide an explicit but optional brace syntax and a smudge/clean filter to convert to/from this syntax.
 
 Another option for blind people is the Braille display, but it is expensive and only shows at most 80 characters. Per `this user <https://stackoverflow.com/a/148880>`__ it can help with both indentation and complex punctuation, particularly lines with many nested parentheses. But the screen reader is usually faster. Comparing wpm, Braille is around 150 wpm starting out going up to 250 wpm, a physical limit of how fast fingers can run over the dots. 150 wpm is also about what TTS does by default but TTS can be sped up to around 500 wpm as the user becomes more accustomed to the synthesizer, :cite:`stentIntelligibilityFastSynthesized2011` and even at 900 wpm experienced users can still transcribe gibberish text with 50% accuracy. So TTS has markedly more bandwidth.
 
@@ -1261,6 +1290,7 @@ Julia has juxtaposed multiplication. `Jump <https://jump.dev/JuMP.jl/dev/develop
 
 `This post <https://ericlippert.com/2020/02/27/hundred-year-mistakes/>`__ describes a mistake in C-style precedence: it should be ``&&, ==, &`` but is instead ``&&, & ==``, causing a footgun. "Swift, Go, Ruby and Python get it right."
 
+Per Tremblay, Experiments in language design (Gannon, 1975) have indicated that APL's "natural" right-to-left rule is in fact harder to understand than simple priority rules. Gannon, J. D.: "Language Design to Enhance Programming Reliability," Report CSRG-47,Computer Systems Research Group, University of Toronto, Toronto, Canada, January 1975.
 
 Cycle
 -----
@@ -1465,7 +1495,7 @@ This doesn't solve the issue of picking a default style for the standard library
 Layout
 ======
 
-The most obvious instance of layout is the module declaration list, but other constructs introduce clauses as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The braces are virtual braces; they don't syntactically match with explicit braces, but are semantically identical.
+The most obvious instance of layout is the module declaration list, but blocks, lists, and records can start layout as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The inserted braces are "virtual": they don't grammatically match with braces explicitly written in the file, but are otherwise semantically identical.
 
 ::
 
@@ -1478,12 +1508,11 @@ The most obvious instance of layout is the module declaration list, but other co
     }
     { a {b; c}; d}
 
-Behavior of a new line depends on its indentation level, relative to the indentation of the previous line. Indentation level is taken to be the sequence of whitespace characters related by "is prefix of", so "space, tab, space" is different from (incomparable to) "tab, space, space" but is less than "space, tab, space, em space" and more than "space, tab".
+Behavior of a new line depends on its indentation level, relative to the indentation of the previous line. Indentation level is taken to be the sequence of whitespace characters related by "is prefix of", so "space, tab, space" is less than "space, tab, space, em space", more than "space, tab", and incomparable to "tab, space, space". Incomparable levels are an error.
 
 * If it is indented more, it's a sequence given as an argument to the previous line, so a virtual open brace is inserted
 * If it is at the same level, another item in the sequence, so a (virtual) semicolon is inserted
 * If there is a line at lower indentation (or EOF), the sequence is ended as it's a new declaration (`off-side rule <https://en.wikipedia.org/wiki/Off-side_rule>`__). A virtual close brace is inserted at the start of the line.
-* Incomparable levels are an error.
 
 Layout handling is complicated by the presence of grammar rules without layout that allow free choice of indentation, e.g.
 
@@ -2036,6 +2065,8 @@ Operators
 Operators are syntactic sugar for functions. Enclosing an operator
 in parentheses turns it into an ordinary function symbol, thus ``x+y`` is
 exactly the same as ``(+) x y``.
+
+String concatenation is ``++``.
 
 Lambdas
 =======

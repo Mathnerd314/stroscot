@@ -39,9 +39,9 @@ Code of Conduct
 
 ZOMG there's none!
 
-Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I haven't got around to picking one yet.
+Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I haven't got around to picking one yet. No point in doing it until there is an actual community to conduct. The model codes I've seen need at least 10 people to fill in the different roles.
 
 License
 =======
 
-Currently the license is WTFPL, because I haven't gotten around to picking a real license. It might switch back to Apache 2, IDK. License for contributing is CC0.
+Currently the main license is WTFPL, because I haven't gotten around to picking a real license and WTFPL annoys people and is avoided by large companies such as Google. Apache 2.0, MIT, and BSD are all good candidates for a real license. The license was Apache 2 briefly, switching back to that is probably the most likely outcome. License for contributing is CC0 until a real license gets picked, to allow relicensing.

@@ -1,6 +1,8 @@
 Exceptions
 ##########
 
+Exceptions allow us to focus on the normal (non-exceptional) case when performing operations that might fail. The downside is that it is more tricky to reason about how the failure cases are handled, because the handling code may be many levels of function calls removed from the operation.
+
 Exception menagerie
 ===================
 
@@ -956,4 +958,30 @@ I guess there is ABI stability to consider.  says the interface will be added to
 
 
     writing no-throw code that uses an exception-throwing function is tedious - you have to handle all the exceptions and update the code whenever the exception list changes. But with precise checking it is pretty straightforward. In C++ integrating exception-throwing code into no-throw code doesn't work though.
+
+
+
+Assertions
+==========
+
+An assertion expresses an expectation or requirement for the program state. Assertions function similarly to breakpoints in a debugger - they check a condition and trigger an exceptional situation. But because they appear inline in the source code, they communicate assumptions and constraints to other developers. They are more precise than a comment because they are executable. Depending on where they appear in the program flow and the condition, assertions can express simple defensive sanity checks, loop invariants, pre-conditions, post-conditions, or the presence or absence of side effects. Assertions ensure more reliable code.
+
+At their core, assertions are still just a use of the exception-handling mechanism - ``assert cond`` is equivalent to ``when cond (throw AssertionFailure)``. Stroscot also allows generating values non-deterministically and constraining them using ``assume``, so that an assertion may check a property of a function over all inputs. This is more commonly referred to as a contract or signature, but there's no clear distinction between contracts, signatures, and assertions - the type assertion ``a : Int -> Int`` relies on non-determinism but can appear in the module (acting as a signature and showing up in the documentation) or in the body (checking a property of a value).
+
+In typical languages, assertions have a verbose syntax that clutters the code. Stroscot introduces several specialized compact syntaxes, such as type assertions. This should allow using them more easily and make them suitable for more contexts.
+
+Also, in C++, there are some pitfalls of assertions. To avoid unexpected behavior, Stroscot places several restrictions on assertion expressions. An assertion condition must evaluate to true or false. It must not require any continuation side-effects to evaluate. Ambient state can be read and written, but the state after evaluating the assertion expression is discarded and evaluation continues with the state from before evaluating the assertion expression.
+
+assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
+assume expr - prunes traces where expression is false. backtracking implementation at runtime.
+
+Regarding assertions that are only checked in debug builds, it is certainly possible with a statement of the form ``when DEBUG { assert X }``, and of course it is possible to define a function for this .
+
+
+ in practice unconditionally enabled assertions are more useful/common, particularly if the compiler is good at checking assertions and optimizing them away. Imagine you're designing a car and put in air bags. You test the car and the air bags in all sorts of configurations and they work great and are much safer. But just as you're getting ready to go into production to send the car out to consumers, you take out all the airbags. That's what debug-only assertions are like. It's for this reason that GCC and clang do not deactivate asserts when compiling with optimizations.
+
+
+
+
+
 

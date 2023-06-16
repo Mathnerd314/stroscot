@@ -13,7 +13,7 @@ Macros, micros, and fexprs are all possibilities. Comparing them:
 2. A micro :cite:`krishnamurthiLinguisticReuse2001` is a function translating from a source AST node and an environment to an expression in the intermediate language. Micro dispatch of an AST reduces away all micros and produces an intermediate representation.
 3. An f-expression (fexpr) :cite:`shuttFexprsBasisLisp2010` is a function translating an AST node and an environment to a value. Fexpr evaluation of an AST reduces away all fexprs and produces a value.
 
-Fexprs are the most powerful: IR expressions and AST nodes are values, hence micros and macros can be implemented in terms of fexprs, but conversely fexprs can't be emulated. E.g. we can implement Scheme macros as f-expressions by computing the AST and evaluating, ``defmacro f = \vau $args $env -> eval $env (f $args)``. But there is no macro corresponding to an eval function ``evalF = \vau $args env -> \f -> eval f $env`` that evaluates a value in an environment at runtime.
+Fexprs are the most powerful: IR expressions and AST nodes are values, hence micros and macros can be implemented in terms of fexprs, but conversely fexprs can't be emulated. E.g. we can implement Scheme macros as f-expressions by computing the AST and evaluating, ``defmacro f = \vau $args $env -> eval $env (f $args)``, modulo some hygiene stuff. But there is no macro corresponding to an eval function ``evalF = \vau $args env -> \f -> eval f $env`` that evaluates a value in an environment at runtime.
 
 Another advantage of fexprs is that there are no phases - the full language is always available and immediately executed. For example predicate dispatch of fexprs is possible - you just have to look up the argument values in the environment like with predicate dispatch on applicatives. In contrast macros can only overload on number of arguments because the precise values are not available in the preprocessing phase, and similarly micros have a linking phase for the IR. Hence implementing the compiler using the Futamura projection of specializing an interpreter to a program is only sensible for fexprs.
 
@@ -47,3 +47,8 @@ Fexprs in contrast get an explicit environment. They can do staged lookup, ``eva
 ``eval`` is hard to compile, because it makes the full power of an interpreter available. But we can often simplify ``eval (a + b)`` to ``eval a + eval b``, reducing the amount of code that is evaluated each loop. If all of the variable lookups are static, we can furthermore optimize the environment to remove all unneeded variables. Hence we can recover macro-level performance on macros. Dynamic lookups need the full environment unfortunately. But dynamic lookups are essentially a REPL or debugging tool, so does not need to be too efficient, and we can warn that they are not optimized.
 
 Fexprs make the equational theory of ASTs trivial, (:cite:`shuttFexprsBasisLisp2010`, chapter 15) in that ASTs can be completely deconstructed, so no two ASTS are behaviorally equivalent. But this is good, because it means the programmer's intent can be fully examined. If ``(\x. x) y`` was equivalent to ``y`` then many DSL's would not be possible. The behavior of programs containing fexprs is decidedly nontrivial and quite varied.
+
+Parsing
+=======
+
+Macros consume the syntax tree, so

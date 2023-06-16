@@ -9,7 +9,7 @@ Rust locks all its memory APIs behind the "unsafe" keyword, as if using the unde
 Location vs allocation
 ======================
 
-Memory management is usually presented as two operations, allocation and deallocation/freeing. But really there is a whole page-level memory API, managed by the OS, 
+Memory management is usually presented as two operations, allocation and deallocation/freeing. But really there is a whole page-level memory API, managed by the OS,
 
 
 the costs of these operations is hard to measure. All allocation and freeing do is update metadata, so depending on the metadata model an operation may be unexpectedly cheap or expensive. Usually there is a buffering effect, so for example a scratch buffer page with many objects can be allocated/freed in around the same amount of time as a single object. Similarly it is slightly faster to call ``close_range`` to close several open FD's than to iterate over them individually in user space. Also, to improve this metadata buffering effect, allocations can be pushed forward, and frees can be delayed, as long as there is sufficient memory or resource capacity available.
@@ -575,3 +575,5 @@ https://github.com/doctorn/micro-mitten
 ASAP is not ready for production use, it needs more research.
 But it fills a hole in the memory management design space.
 
+
+There is no concise built-in syntax for dereferencing pointers, because there are many different flavours of memory accesses: aligned or unaligned, cached or uncached, secure or non-secure, etc. and it is critical that every memory access is explicit about its flavor. A side effect of putting more information in the access operation is that pointers are untyped, simply a wrapper around bitvectors.

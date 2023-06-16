@@ -1,6 +1,15 @@
 Reduction
 #########
 
+In graph reduction, a graph node identifies a closed expression, and can be referenced by many other nodes. This sharing allows reduction in a more efficient manner, only computing the expression's reduction once rather than repeatedly for each occurrence. But this sharing is relative to the initial term - if there are duplicated expressions in the initial program, or identical expressions arise from distinct reduction paths, graph reduction will not merge them.  But this labelling is only preserved under weak reduction, reduction not inside lambdas.
+
+An extension of graph reduction is optimal reduction.  In optimal reduction, terms with the same family / Levy-label are identified as one node, and strong reduction is valid, i.e. reducing any redex. Levy-labelling is again relative to the initial expression (each sub-term annotated with a unique label) and the reduction history from that expression to the current. There is then the implementation task of representing the shared redexes efficiently so that they may be reduced together.
+
+
+
+Although BOHM and Lambdascope have created interaction net machines where a Levy family beta-reduction is an atomic operation, it does not seem that these interaction net machines are actually that efficient. In :cite:`guerriniOptimalImplementationInefficient2017` they find a quadratic slowdown of the fan-fan swap interactions, relative to normal order reduction on lambdas. Furthermore in :cite:`aspertiParallelBetaReduction2001` they find that a Levy family beta-reduction step can take time that is not elementary recursive. It seems like an easier path to optimal reduction is to track the families directly and perform family reductions individually using an efficient non-sharing algorithm such as :cite:`shiversBottomupVreductionUplinks2004` or a limited-sharing algorithm such as graph reduction. Such an approach gives up the exponential speedups of sharing contexts, but has a much more understandable cost model. It is still "optimal" in the sense that outermost family reduction performs the minimal number of family reductions, and the overall reduction follows this strategy, hence the only inefficiency is the need to evaluate some unnecessary individual reductions as part of the family. Potentially, there is the possibility to use the homogeneity of the redexes within a family to speed up within-family reduction, but most likely not.
+
+
 Linear logic
 ============
 
@@ -18,7 +27,6 @@ So how do we specify the difference between the two, in linear logic?
 Boxes do have some performance cost, so how can they be avoided? There are cases where boxes are not necessary:
 
 1. When the term is linear or affine and does not need to duplicate anything.
-2. When the duplication is duplication of a graph without any cuts, such as a boolean, integer, list of integers, etc. Even when there are cuts, the value can be forced and then copied directly, using a fold. (per :cite:`filinskiLinearContinuations1992`) Q: Does this change the evaluation semantics to be stricter?
 3. Inlining, when the duplication is carried out, resulting in two terms.
 4. More complex cases enforced by a typing system, such as Elementary Affine Logic.
 
@@ -34,13 +42,3 @@ To determine which scope becomes the outer scope, delimiters are also marked as 
 For multiplexers the situation is a little more complicated. A multiplexer also has two scopes, an inner "label"/identity-like scope and an outer "ambient" scope. When a multiplexer crosses a delimiter, from outside to inside, its "ambient" scope is changed to the delimiter's inside scope. Meanwhile the delimiter's scope is split into a new set of scopes, and this is indexed by the label scope. In the Stroscot code these are referred to as "variant" scopes. In particular, multiplexers with the same label scope must split other scopes into the same set of variant scopes at each interaction. This is not too hard to keep track of, just give each scope a map ``other scope -> variant scope set`` that's lazily created.
 
 For efficient graph reduction we want to reduce a term completely, if we are able to. The top-level instruction evaluation loop can be written strictly, using a code pointer for conditional nodes.
-
-stack machines: waste of time. the stack manipulation takes up more resources than register allocation.
-
-* Dead code elimination
-* Recursion
-  * induction variable analysis to replace multiplication by a loop index with addition
-  * loop reversal - changing condition to zero comparison
-  * loop unswitching - moving conditional outside loop
-  * hoisting invariants, partial/total redundancy elimination
-  * parallelization - multi-threaded or vectorized code

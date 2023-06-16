@@ -1,25 +1,12 @@
-Library
-#######
+Compiler library
+################
 
-Importing
-=========
-
-Stroscot should support the standard libraries of popular languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination, and this allows an intermediate step of C semantics with Stroscot syntax. For example a function of type ``C.int -> C.size_t`` is different from plain ``int -> int``, and if you really need the semantics of C++'s unstable sort then it has to be included.
-
-It's only worth supporting the biggies, in particular:
-
-* C, the standardized library. Quite lean so it's the one to start with.
-* C++, the standardized library
-* Java, OpenJDK libraries (GPL but with linking exception, should be OK to use for most projects. And Oracle v Google found that reimplementing the API via Apache-2 licensed Apache Harmony was fair use)
-
-Others, such as the Python standard library, Glib, and Boost, are probably not worth the effort of copying directly, rather programs using these libraries can be linked via FFI or rewritten into Stroscot.
+For the language to be useful it must have an implementation, and ideally a self-hosting implementation. In this framework the compiler, and hence the language, are really just another set of library modules. I will unimaginatively call this library the "compiler library". Per the standard library evolutionary design process, the compiler library will likely serve as the prototype for the standard library, so some investment is worthwhile.
 
 Synthesizing
 ============
 
-Just copying wholesale isn't enough, we also have to create a new standard library for new programs to use. The stretch goal is to offer a common set of abstractions used by all programs that covers all use cases. Of course it won't be anywhere close initially - the near-term goal is to ensure that what the standard library is always improving, and to build it out steadily. But eventually, even if a user needs a weird data structure like a Y-fast trie, they should be able to find it in the standard library. Duplicating implementations is a waste of man‑hours that can be spent developing something new.
-
-Quality is hard, but we can get most of the way there by synthesizing various standard libraries and implementing what they agree on (commonalities) and what is unique to one library (innovations). Sources:
+Designing a good, quality API is hard, but lots of people have tried. There are various existing libraries that seem worth inspecting:
 
 * `Rust <https://github.com/rust-lang/rust/tree/master/library>`__ (MIT + Apache 2.0, `small <https://blog.nindalf.com/posts/rust-stdlib/>`__)
 * `Go <https://github.com/golang/go/tree/master/src>`__ (BSD-style)
@@ -41,10 +28,11 @@ Quality is hard, but we can get most of the way there by synthesizing various st
 
 * Python `1 <https://github.com/python/cpython/tree/master/Modules>`__ `2 <https://github.com/python/cpython/tree/master/Lib>`__ (PSFv2)
 * `Zig <https://github.com/ziglang/zig/tree/master/lib/std>`__ (MIT)
-*
 * Slate `1 <https://github.com/briantrice/slate-language/tree/master/src/core>`__ `2 <https://github.com/briantrice/slate-language/tree/master/src/lib>`__ `3 <https://github.com/briantrice/slate-language/tree/master/src/i18n>`__ (MIT)
 
-Also, the proposals of the various languages are really useful, as they encapsulate changes and include motivation as to why the change was made. An aspect of the library might simply be a historical "accident" from the initial design, but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library "smells", areas that could use improvement.
+We don't just copy wholesale, rather we look for what libraries agree on (commonalities), what is unique to one library (innovations), and what libraries overlap but disagree on (competition). Commonalities and innovations are fairly straightforward, they can just be adopted. But if there are multiple competing solution to a problem, then we have to look at experience reports as to which solution is best, and create a new solution with the best parts of each.
+
+The proposals of the various languages can be useful, as they include motivation as to why the library was designed that way. An aspect of the library might simply be a historical "accident" from the initial design, but a proposal is always a deliberate design choice. Even the rejected proposals are useful as they indicate language/library "smells", areas that could use improvement.
 
 * `GHC <https://github.com/ghc-proposals/ghc-proposals/pulls>`__
 * `Python <https://github.com/python/peps>`__. The repo includes almost all proposals, but there are a few stray PRs:
@@ -55,7 +43,7 @@ Also, the proposals of the various languages are really useful, as they encapsul
   * https://github.com/python/peps/pull/671/files
   * https://github.com/python/peps/pull/686/files
   * https://github.com/python/peps/pull/690/files
-  * https://github.com/python/peps/pull/2620/files (and other PEPs after Jun 1 2022)
+  * https://github.com/python/peps/pull/2620/files (and other PRs after Jun 1 2022)
 
 * `Rust <https://github.com/rust-lang/rfcs/pulls>`__ (`accepted <https://rust-lang.github.io/rfcs/>`__)
 * `Go <https://github.com/golang/go/labels/Proposal>`__
@@ -63,10 +51,23 @@ Also, the proposals of the various languages are really useful, as they encapsul
 
 TODO: go through these, unfortunately there’s a lot
 
-Definition
-==========
+Importing
+=========
 
-The C library is also considered somewhat small, so this defines a minimum:
+Stroscot should support the standard libraries of popular languages, so e.g. if you want the C functions with C semantics you would ``import Library.C``. Compatibility is a natural step to world domination, and this allows an intermediate step of C semantics with Stroscot syntax. For example a function of type ``C.int -> C.size_t`` is different from plain ``int -> int``, and if you really need the semantics of C++'s unstable sort then it has to be included.
+
+It's only worth supporting the biggies, in particular:
+
+* C, the standardized library. Quite lean, and it's the basis of most OS's, so it's definitely the one to start with, and maybe the only one needed
+* C++, the standardized library
+* Java, OpenJDK libraries (GPL but with linking exception, should be OK to use for most projects. And Oracle v Google found that reimplementing the API via Apache-2 licensed Apache Harmony was fair use)
+
+Others, such as the Python standard library, Glib, and Boost, are probably not worth the effort of copying directly, rather programs using these libraries can be linked via FFI or rewritten into Stroscot.
+
+Scope
+=====
+
+The C library is considered somewhat small, so this defines a minimum:
 
 * file system input/output
 * data types and conversions
@@ -101,38 +102,77 @@ Then there are the APIs that have caused endless bikeshedding:
 * random number generation
 * serialization (data persistence)
 
-Evolution
-=========
+Booleans
+========
 
-Principles:
+four distinct 2-valued types, for true/false, yes/no, on/off, and 0/1
 
-* The library should be divided up into modules. The modules should be dated/versioned independently to allow specifying fine-grained dependencies. The modules should also have hashes in the name, to avoid name collisions. Neither dates nor hashes should appear in actual source code, and they should be centralized in a lock file, to avoid the "magic number" antipattern. If a package depends on packages with colliding names the lockfile should specify how to rename the packages. The modules should also be downloadable independently, so really the "standard library" is a software repository with high standards for inclusion.
-* It should be easy to add code to the standard library. Taking more than a year to add a new API is just too slow; 6 months seems about right.
-
-  * If there is a single popular third-party library that has become the "go-to" library for some task, the process is straightforward to make this part of the standard library: it should just be incorporated after it has been proven to be sufficiently stable. The standard library provides discoverability and maintenance benefits over isolated libraries. For example incorporation solves the `left-pad <https://qz.com/646467/how-one-programmer-broke-the-internet-by-deleting-a-tiny-piece-of-code/>`__ issue where key libraries are maintained by solo developers with no oversight. Since it's all FLOSS, licensing should not be an issue, and presumably most developers will be happy to share maintainershup and join the team, or relinquish maintainance entirely.
-
-  * If there are multiple popular third-party libraries that do similar things but are incompatible, there are several strategies to deal with this:
-
-    * Create a wrapper interface that smooths over the differences and provides a portable interface
-    * Analyze the pros and cons and vote for one library to make it the standard
-    * Synthesize a new library that combines all the pros and none of the cons of the existing libraries
-
-    It doesn't really matter if the wrong decision is made because a robust evolution process means it can always be changed later, and in the short term 50% is better than 0% even if there is a 60% option. What is problematic is letting the split continue to fester without a clear path forward. Over time, sharing code becomes problematic because pieces of code become tied to one or another of these implementations, and the community starts to split and newcomers get turned off by decision paralysis. Example: `scalaz vs cats <https://github.com/fosskers/scalaz-and-cats>`__ was an issue with Scala for a long time, before `it became clear <https://www.reddit.com/r/scala/comments/afor0h/scalaz_8_timeline/>`__ that Scalaz 8 would never be released and scalaz was effectively dead, thus making cats the go-to choice.
-
-* It should also be easy to remove code from the standard library. Some APIs inevitably become obsolete as others are added and become more popular. Similarly it should be easy to fix names, implementation details, and API design, as conventions change. This is accomplished as an add-remove pair. But people need time to migrate, so there should be a 2-year deprecation process. There should be some amount of forward stability so that if code compiles with an old standard library, it will continue to do so with a new standard library. This means deprecated API isn't actually removed, it instead goes to a "compatibility graveyard" and stays around for old projects while being invisible to new ones.
-* Generally speaking, third party libraries should be either be in active development or designed as specialized replacements for something in the standard library. The active development is obvious: it's much easier to rapidly iterate when you don't have to maintain compatibility. The specialized is less obvious: most likely the third-party is better than the standard in some way, but there are trade-offs. There is a possibility that standardizing a solution in the standard library will crowd out other solutions, but discussing trade-offs and alternative libraries in the standard library documentation is probably sufficient.
-
-Blessed prelude
-===============
-
-The standard library is blessed in that its prelude module is imported by default into every module. Other than this there is no special support from the compiler for the standard library. Furthermore there is a compiler option to override the prelude import to import no prelude or a different prelude module.
-
-Since the prelude is imported by default it should be small, so that no name conflicts arise. The definition of small varies but we'll just take the intersection among popular languages. A truly minimal prelude would just have the import statement, which would also have some advantages.
+Per :cite:`pradelGoodBadUgly2015` the only acceptable coercions are coercing to bool in ``if-else``, ``!x``, ``x && y``, and ``x || y``.
 
 Numbers
 =======
 
-Arbitrary precision is attractive for beginners but hard to optimize. Machine-precision integers and floating-point numbers should be easily accessible. Still, overflow, roundoff, and catastrophic cancellation all appear with the standard sized types. A high-level language can avoid these by using bignums and computational reals.
+Mathematically, the definition of `number <https://en.wikipedia.org/wiki/Number#Main_classification>`__ mainly refers to natural numbers, integers, rationals, real numbers, and complex numbers (the "numeric tower"), but other mathematical structures like p-adics or the surreal numbers are also considered numbers.
+
+Representation
+--------------
+
+There are various ways to represent these numbers. Naturals are generally represented as a list of digits in some base (a decimal). Integers are naturals with a sign. Rationals may be written as a (possibly improper) fraction of integers, a terminating or infinitely repeating decimal, a "mixed number" an integer and a proper fraction, or a floating point of a decimal times an exponent 1/2^n. For the complete fields such as reals and p-adics there are even more representations:
+
+* Cauchy sequence of rationals
+* nondecreasing bounded sequence of rationals
+* an infinite decimal
+* predicate which determines if a rational is lower, equal to, or higher than the number
+* "sign expansion", an ordinal and a function from the domain of that ordinal to {-1,+1}
+
+Completion also brings with it the computability issue. For example, finding a rational approximation of Chaitin's Ω constant within a given precision has complexity at least :math:`\Sigma^0_1`, meaning that every Turing program attempting to compute Ω has a precision beyond which it will unconditionally fail to produce an answer. Practically, one mainly restricts attention to computable numbers, i.e. those numbers for which the predicate/sequence/function is representable as a terminating program, but although they are closed under the field operations, equality is still complexity at least :math:`\Sigma^0_1`. I'm not sure of a direct example, but for example it is an open question if :math:`e+\pi` is rational, algebraic, irrational or transcendental.
+
+Complex numbers have two main representations, rectangular (1+2i) and polar (sqrt(5) e^(i arctan(2))). Each of these has two coordinates, so we might represent them as ``data Complex = Rectangular Real Real | Polar Real Real``. Most complex numbers have a 1-1 conversion between the two forms. There are the issues that 0 has only one rectangular form but many polar forms, and the polar angle can differ by any multiple of 360 degrees, but restricting the polar number set to the "small" polar set where theta in [0,360 degrees) and r=0 -> theta=0 fixes this.
+
+So far we have only considered the variety of mathematical forms. The representation on a computer also involves a certain amount of differentiation based on practicalities. There are arbitrary-precision bignums and symbolic representations that can represent almost all values, subject to memory and computability limits, which are great for those who don't care much about performance. But for reasons of efficiency, and also for faithfulness to standards etc. which specify a representation, many programs will want to use fixed-size types that restrict values to a certain range, precision, and bit representation, such as int8, uint16, or the IEEE floating point formats.
+
+So, how do we deal with this multitude of forms? Generally, programs are not representation-independent, and each algorithm or operation in a program will have a preferred representation that it works with for input and output, preferred for reasons of accuracy, speed, or convenience. We cannot reliably perform automatic conversion between formats, as they differ in ranges and so on; there will be unrepresentable value in one direction or the other, loss of precision in the case of floating-point, and the conversion itself adds nontrivial overhead. Thus, we must consider each representation of a mathematical value to be a distinct programmatic value. There are thus several sets relevant to, for example, the integers:
+
+* Int8, Int16, UInt16, etc.: the sets of integers representable in various fixed representations
+* GmpIntegers: the set of all integers as represented in arbitrary precision in libGMP (disjoint from the above)
+
+  * GmpIntegers8, GmpIntegers16, GmpIntegersU16, etc.: the subsets of libGMP integers corresponding to the fixed representations
+
+* Integers: the disjoint union (sum type) of all integer representations
+* Any: the universal set containing the above and all other values
+
+Syntax
+------
+
+Number syntax is mainly `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__. There is the integer literal ``4211``, extended to the decimal ``12.11``. Different bases are provided, indicated with a prefix - decimal ``1000``, hexadecimal ``0x3e8``, octal ``0o1750``, binary ``0b1111101000``. Exponential notation ``1.23e+3`` may be either integer or rational. Positive exponents with decimal (e) / hexadecimal (p) / binary (b) are allowed. Also there is a sign. Numbers can also have a suffix interpreted as the format. This expand to a term that specifies the format by applying it, e.g.  ``123i8`` expands to ``int8 123``. Formats include IEE 754 float/double, signed and unsigned fixed bit-width integers, and fixed-point rationals. So the full syntax is sign, base, mantissa, exponent, format.
+
+Leadings 0's are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. ``0001`` cannot be stored in a ``i8`` (type must be able to contain ``9999``). Parsing leading ``0`` as octal is widely acknowledged as a mistake and should not be done. On the other hand trailing 0's are not significant - the decimal point should never be the last character in numeric literals (e.g. 1. is invalid, and must be written as 1 or 1.0).
+
+It seems worth allowing extension of bases / exponential formats to characters other than xob / epb.
+
+Then there are the standard arithmetic operations, no need to mess with them.
+
+Digit grouping
+--------------
+
+`Wikipedia <https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping>`__ lists the following commonly used digit grouping delimiters: comma ",", dot ".", thin space " ", space " ", underscore "_", apostrophe/single quote «'».Traditionally, English-speaking countries employ commas, and other European countries employ dots. This causes ambiguity as ``1.000`` could either be ``1`` or ``1000`` depending on country. To resolve this ambiguity, various standards organizations have advocated the thin space in groups of three since 1948, using a regular word space or no delimiter if not available. However, comma, dot, and space are already in use in programming languages as list separator, radix point, and token separator.
+
+Hence underscore and apostrophe have been used in PLs instead. Simon of `Core <https://github.com/core-lang/core/issues/52>`__ says apostrophe is more readable. Underscore is also used in identifiers, which can confuse as to whether a symbol is an identifier or a numeric literal. But the underscore is the natural ASCII replacement for a space. 13+ languages have settled on underscore, `following <https://softwareengineering.stackexchange.com/questions/403931/which-was-the-first-language-to-allow-underscore-in-numeric-literals>`__ Ada that was released circa 1983. Only C++14, Rebol, and Red use the "Swiss" apostrophe instead.
+
+C++14 chose quote to solve an ambiguity in whether the ``_db`` in ``0xdead_beef_db`` is a user-defined format or additional hexadecimal digits, by making it ``0xdead'beef_db``. This could have been solved by specifying that the last group parses as a format if defined and digits otherwise, or parses as digits and requires an extra underscore ``__db`` to specify a format.
+
+Rebol uses comma/period for decimal point so quote was a logical choice. There doesn't seem to be any reason underscore couldn't have been used. Red is just a successor of Rebol and copied many choices.
+
+Operations
+----------
+
+Considering the multitude of forms, and the fact that representations are often changed late in a project, it seems reasonable to expect that most code should be representation-agnostic. The library should support this by making the syntax "monotonous", in the sense of `Jef Raskin <https://en.wikipedia.org/wiki/The_Humane_Interface>`__, meaning that there should be only one common way to accomplish an operation. For example, addition should have one syntax, ``a+b``, but this syntax should work on numerous forms. This avoids a profusion of operators such as ``+.`` for addition of floating-point in OCaml which is just noisy and hard to remember.
+
+Internally, each exposed operation is implemented as overloading the symbol for various more specific "primitive" operations, ``(+) = lub [add_int8, add_int16, ...]``. The compiler will be able to use profiling data to observe the forms of the numbers involved and select the appropriate primitive operation, so it should always be possible to replace a direct use of the primitive ``add`` with the normal ``+`` operation without significantly affecting performance. But for expressiveness purposes, it does seem worth exposing the primitives. Conceptually, since the primitives don't overlap, each primitive ``add`` operation is the restriction of the overloaded ``(+)`` to the domain of the specific primitive, so even if we didn't expose the primitives we could define them ourselves as ``add_int8 = (+) : Int8 -> Int8 -> Int8`` and so on. It makes sense to avoid this convolutedness and simply expose the primitives directly - in one stroke, we avoid any potential optimization problems, and we also ensure that the domains of the primitives are only defined in one place (DRY). Of course, such primitives are quite low-level and most likely will only be needed during optimization, as a sanity check that the representation expected is the representation in use.
+
+For fixed-precision integers and floating point, the operations work in stages: first, the numbers are converted to arbitrary-precision, then the operation is performed in arbitrary precision, then the result is rounded. In the case of fixed-precision integers, there are choices such as truncating (clamping/saturating), wrapping, or erroring on overflow. In the case of floating point, there are numerous rounding modes and errors as well.
+
+Commonly, the rounding is considered part of the operation, and the rounding mode is just fixed to some ambient default, but this is not optimal with respect to performance. Herbie provides a different approach. Given a real-valued expression and assumptions on the inputs, Herbie produces a list of equivalent computations, and computes their speed and accuracy for various choices of machine types and rounding. The programmer can then choose among these implementations, selecting the fastest, the most accurate, or some trade-off of speed and precision. The question is then how to expose this functionality in the language. The obvious choice is to make the rounding operation explicit. In interpreted mode arbitrary-precision is used, at least to the precision of the rounding, and in compiled mode Herbie is used. Or something like that.
 
 Matrix multiplication
 =====================
@@ -148,6 +188,7 @@ Text types::
   ByteString = BS { payload : Addr#, finalizer : ref Finalizers, length : Int }
   Lazy = Empty | Chunk Text Lazy
 
+Interpolation and internationalization are two things that have to work together, copy JS i18n and Python interpolation like ``i'{x} {y}'.format(locale_dict)``.
 
 Poison values
 =============
@@ -156,6 +197,11 @@ This requires some support from the OS to implement. Pointer reads generate page
 
 UDIV by 0 on ARM simply produces 0. So on ARM producing the division by 0 error requires checking if the argument is zero beforehand and branching. The people that really can't afford this check will have to use the unchecked division instruction in the assembly module, or make sure that the check is compiled out. But on x86, DIV by 0 on produces a fault, which on Linux the kernel picks up and sends to the application as a SIGFPE. So on x86 we can decide between inserting a check and handling the SIGFPE. It'll require testing to see which is faster in typical programs - my guess is the handler, since division by zero is rare.
 
+Null
+====
+
+``null`` is just a symbol. The interesting part is the types. A type may either contain or not contain the null value. If the type does contain null, then the null value represents an absent or uninitialized element, and should be written with a question mark, like ``Pointer?``. If the type does not contain null, then the value is guaranteed to be non-null, and the type should not have a question mark. We can formalize this by making ``?`` a type operator, ``A? = assert (null notin A); A | {null}``.
+
 Relations
 =========
 
@@ -163,14 +209,15 @@ There are various types of relations: https://en.wikipedia.org/wiki/Binary_relat
 
 The question is, what data types do we need for relations?
 
-* Function: we need functions, obviously.
-* Functional: This is a function too, just add a "no clause defined" element.
-* One-to-one: a function with an assertion, ``assume(forall x y; if f x == f y { assert x == y}``
+* Function: a function, obviously.
+* Functional: This is a function too, just add a ``NoClauseDefined`` element to the result type.
+* One-to-one: a function with an assertion, ``assume(forall x y; if f x == f y { assert x == y})``
 * Many-to-one: A function, no constraints
 * Injective: This is the converse of a function, just use the function.
 * One-to-many: the converse of a function, again just use the function.
+* Many-to-many: the only relation that can't be represented by a one-argument function
 
-So the only relation that can't be represented by a one-argument function is a many-to-many relation. Here we really do have a set of tuples. There are choices of how to implement this set.
+So, a function represents most relations, and for a many-to-many relation, we need to represent a set of tuples. There are choices of how to implement this set.
 
 We could use a function of two arguments returning a boolean, if the domain/codomain are infinite. Or if both domain and codomain are finite, a set data structure containing tuples. Or a boolean matrix, if there are lots of tuples. Or a map of sets if one of the elements is sparse. Or a directed simple graph if we have a graph library.
 
@@ -294,6 +341,14 @@ STM syntax is a simple DSL, ``atomically { if x { retry }; y := z }``. Transacti
 
 Transactions have sequentially consistent semantics by default, but mixing transactions with low-level relaxed-semantics code might work, IDK. There could be ``atomically {order=relaxed} { ... }`` to use the CPU's memory model instead of totally ordered. The transaction syntax is more expressive than atomic instructions, so providing an atomic DSL for machine code instructions would be nice. I.e. transactions matching atomic machine code instructions should compile to the atomic machine code instructions and nothing else. If there are waiting threads with ``retry`` involved, then we do need extra junk like thread wakeups etc., but it would be nice to avoid this in simple cases.
 
+Wait-free
+---------
+
+:cite:`ramalheteEfficientAlgorithmsPersistent2021` claims to be wait-free. But Cliff says it's impossible to get wait-free. CAS is lock-free, about a dozen clocks on X86 (L2 miss time). But 's' You can NOT have a wait-free under any circumstance, except single-thread simulation of a multi-core device.  i.e., under current hardware a wait-free is always slower than a single core.
+Still playing catchup.  Parents made it home after a 36hr delay.  😛
+Sure, OS schedules threads.  As an example, some linux kernel kept 8 runnables on a core-local runnable queue for fast rotation and time-slicing.  On my 10 real-core, 20 hyper-thread machine, that would be 8x20 or 160 runnables on local queues.  I launch 1000 runnables.  One of them attempts a wait-free program shutdown by writing a single boolean "true" to a global that the other 999 threads read.  Kernel launches 120 threads on 20 cores and rotates between them.  All those 999 threads are computing e.g. Mandelbrots in a loop (might as well be bit-miners).  Kernel rotates amongst the 160, which get equal billing at 1/8 a hyper-core.  Kernel will rotate in a different thread when one of the currently running stops - which is never.  So kernel never gives a single clock cycle to the other ~820 threads.  So the stop bit thread never runs, and the program never halts.  Seen in practice during our Azul days, on non-Azul hardware.
+
+
 Iterators
 =========
 
@@ -400,11 +455,11 @@ There is a function ``convert : (T : Set) -> Any -> T|Exception`` in a module in
 
 * Reflexive: ``convert T a = a``, if ``a : T``
 * Symmetric: ``convert T (convert T2 a) = a``, if ``a : T`` (assuming ``convert T2 a`` succeeds)
-* Transitive: ``convert T3 (convert T2 a) = convert T3 a`` (assuming both conversions succeed)
+* Transitive: ``convert T3 (convert T2 a) = convert T3 a`` (assuming all conversions succeed)
 
 These rules avoid conversion "gotchas" where information is lost during conversion. For example all convertible numbers must be exactly representable in the target type because of transitivity and the existence of arbitrary-precision types (``convert Exact (convert Approx a) == convert Exact a``).
 
-Conversion is only a partial function, hence these properties may not hold due to some of the conversions resulting in errors. For example ``convert Float32 (2^24+1 : Int32)`` fails because only ``2^24`` and ``2^24+2`` are exactly representable as floats. Generally one direction of the conversion should be total, or there should be subtypes like ``Float32_Int subset Float 32`` and ``Int32_Float subset Int32`` for which conversion to both ``Float32`` and ``Int32`` is total.
+Conversion is only a partial function, hence these properties may not hold due to some of the conversions resulting in errors. For example ``convert Float32 (2^24+1 : Int32)`` fails because only ``2^24`` and ``2^24+2`` are exactly representable as floats. Generally one direction of the conversion should be total, or there should be subtypes like ``Float32_Int subset Float 32`` for which conversion to both ``Float32`` and ``Int32`` is total.
 
 Conversion for unions is often undefined, because if ``convert T2 (a : T) = b``, and ``a != b``, then by reflexivity we have ``convert (T|T2) a = a``.  and by assumption and reflexivity we have ``convert (T|T2) (convert T2 a) = convert (T|T2) b = b``, violating transitivity. Hence ``convert (T|T2)`` on at least one of ``a`` or ``b`` must be undefined.
 
@@ -449,9 +504,7 @@ Julia's promotion rules:
 
 Promotion is effectively implicit type conversion but scoped to certain functions. Standard ML, OCaml, Elm, F#, Haskell, and Rust don't have any implicit type conversions and work fine. Scala has full implicit conversions, a search invoked when types mismatch. The search is brute force, hence expensive to compile, and promotion seems sufficient. Also the semantics of promotion are simple (expanded function domain) vs implicit conversion which requires some kind of nondeterminism.
 
-Per :cite:`pradelGoodBadUgly2015` the acceptable JS coercions are:
-
-* coercing to bool in ``if-else``, ``!x``, ``x && y``, and ``x || y``  as follows:
+JavaScript is notorious for its pervasive and byzantine coercion rules. They are as follows:
 
   * 0, -0, null, false, NaN, undefined, and the empty string ("") coerce to false.
   * Objects, including empty objects {}, empty array [], all nonempty strings (including "false"), all numbers except zero and NaN coerce to true.
@@ -459,12 +512,11 @@ Per :cite:`pradelGoodBadUgly2015` the acceptable JS coercions are:
 * binary ``+`` can combine two numbers or a string and a defined value (not null or undefined).
 * unary ``+, -`` and binary ``-, *, /, %, <<, >>, >>>`` only work on numbers
 * relational operators ``<, >, <=, >=`` works on two numbers or two strings
-* bitwise operators ``~, &, |`` work only on numbers
-* equality is of type ``forall a. (a|undefined|null) -> (a|undefined|null) -> bool`` and does no coercions. Having ``5 == "5"`` by converting the number to a string is counterintuitive.
+* bitwise operators ``~, &, |`` work only on numbers. For example ``m & 8192 != 8192`` parses as ``m & (8192 != 8192) = m & false``, not as intended. Forbidding using a boolean in place of a number makes it an error.
+* equality is of type ``forall a. (a|undefined|null) -> (a|undefined|null) -> bool`` and does no coercions, as e.g. having ``5 == "5"`` by converting the number to a string is counterintuitive.
 
 The counter idiom ``x = (x | 0) + 1`` seems to be hardly used, probably not worth supporting.
 
-A confusing example is ``m & 8192 != 8192``, which parses as ``m & (8192 != 8192) = m & false``. So using a boolean in place of a number here should be an error.
 
 Equality and comparison
 =======================

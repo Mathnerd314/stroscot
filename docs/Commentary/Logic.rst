@@ -16,29 +16,38 @@ Logic
   \definecolor{mygray}{RGB}{156,156,156}
   \newcommand{\sk}[1]{{\color{mygray} #1}}
 
-The logic proper
+The Curry-Howard correspondence maps logic to programming. A logical system specifies well-formed proofs of propositions. These correspond to well-formed programs in a simple type system. By proving the logic sound and complete, we get an expressive programming language.
+
+Logic style
+===========
+
+The use of sequent calculus is inspired by :cite:`downenSequentCalculusCompiler2016`. Whereas a natural deduction logic results in reduction patterns similar to the lambda-calculus, sequent calculus divides the program into values and continuations. Reduction always takes place at a cut point with a value and a continuation. Continuations are exposed as first-class manipulable variables, similar to CPS, but as discussed in IR, CPS-based IRs have drawbacks that sequent calculus-style IRs do not.
+
+Between classical, intuitionistic, and linear logic, I went with linear logic. It's the most expressive, in that intuitionistic and classical logic can be encoded fairly naturally, but linear logic has more operators. Intuitionistic logic is traditional and has a direct machine implementation, but there is an operational semantics for linear logic :cite:`mackieGeometryInteractionMachine1995` and linear logic makes the expensive "copy term" operation more explicit. In intuitionistic logic, copying can happen anywhere in the reduction, which is harder to handle. The "boxes" of linear logic which demarcate copying boundaries are supposedly the basis of optimal reduction :cite:`guerriniTheoreticalPracticalIssues1996`.
+
+:cite:`downenSequentCalculusCompiler2016`  say "Sequent Core lies in between [intuitionistic and classical logic]: sometimes there can only be one conclusion, and sometimes there can be many." Specifically, terms and types are intuitionistic (single conclusion), but commands, continuations and bindings are written to allow multiple propositions. Ret/Ax, WR/Name, and Jump/Label all introduce right-weakening. Linear logic seems a lot cleaner than this mess, but also lies between intuitionistic and classical logic, in that (like intuitionistic) there is no excluded middle, but also (like classical) there is duality and no limitation on the number of conclusions.
+
+Linear logic can be formulated as two-sided, one-sided, or intuitionistic. I chose two-sided because again, it's the most expressive. Intuitionistic logic doesn't typically have negation, but it can be encoded as :math:`A \to \bot`, pretty bad for trying to simplify connectives. One-sided might seem attractive, as on first glance it makes formulas more uniform, but it actually doesn't really improve complexity because the one-sided logic has the same number of connectives, and the duals require special handling - e.g. an application of identity looks like :math:`\vdash \Sigma X^\bot, \Pi X` instead of :math:`\Pi X \vdash \Pi X`. So we end up with a representation of a connective as having a boolean for polarity, whereupon there is not much issue with adding a boolean for side as well to obtain the two-sided sequent. The two-sided sequent formulation preserves intent, e.g. the definition of refutations as sequents :math:`A \vdash` is not distinct from that of a proof in the one-sided calculus. Taking the two-sided logic as basic, the one sided logic can be formulated as a transformation that moves everything to the right side with negation and pushes down negations to atomic statements by applying duality. Such a transformation is of course useful, but forcing it to be applied from the start does not seem to serve much purpose.
+
+There are also other logics similar to Girard's linear logic, like deep inference. Most papers on deep inference seem to add the `mix rule <https://ncatlab.org/nlab/show/mix+rule>`__ which corresponds to assuming :math:`1 \leftrightarrow \bot`. This doesn't seem attractive compared to plain linear logic - it proves contradiction as a theorem, hence loses the embedding of classical logic. `This page <https://www.pls-lab.org/en/Mix_rule>`__ mentions that mix holds in various models of linear logic such as coherent spaces and the game-theoretic semantics, but models are usually a simplification and there are models such as the syntactic model where mix doesn't hold. :cite:`strassburgerDeepInferenceExpansion2019` presents a deep inference system for non-mix MLL but says extending it to full LL is future work.
+
+There is also the question of if, having removed weakening and contraction, the remaining structural rules, exchange and associativity, should be dropped. Linear logic gives the idea of the propositions being in named slots, as e.g. :math:`\vdash A^a, B^b`` is for almost all purposes the same as :math:`\vdash B^b, A^a``, and only in some narrow cases would we want to differentiate them. This associative array semantics corresponds well to the RAM model. In contrast, dropping exchange gives non-commutative or ordered logic, leading to a stack or list on each side. But :cite:`shiVirtualMachineShowdown2005` shows that a register model is much better for an implementation - the extra stack swapping instructions are more overhead than the additional register names. Stack-like access is just too restrictive. Similarly, dropping associativity gives a tree-like semantics, and trees are not iterable in constant time. The number of operators would explode because every tree structure / stack index would create a new operator. Hence linear logic is the clear winner. But, there seem to be reasonable ways of embedding linear logic in non-associative / non-commutative logic by adding associative / commutative modalities. :cite:`blaisdellNonassociativeNoncommutativeMultimodal2022` If there was a popular logic with such an embedding, then we could switch from linear logic to that. But per :cite:`millerOverviewLinearLogic2004` "no single [non-commutative] proposal seems to be canonical at this point."
+
+Type annotations
 ================
 
-The sequent calculus instead of natural deduction is inspired by :cite:`downenSequentCalculusCompiler2016`. But they use a weird nonstandard logic (Figures 4/5) to match GHC Core and its syntax. In a new language it seems better to use standard logical derivation rules, and worry about the syntax second. Stroscot's infinite tree representation with use-def is better than the MultiCut / Rec rules because it allows the graph reduction method used in GHC to work.
-
-For the deduction system I went with linear logic because optimal reduction :cite:`guerriniTheoreticalPracticalIssues1996` is based on using the boxes of linear logic as markers and classical / intuitionistic logic can be encoded in linear logic hence are special cases. Without linear logic every sequent would be its own box, which would be harder to handle.
-
-The logic is two-sided because that's more expressive than one-sided. Omitting the left side reduces code verbosity, because a sequent is one list instead of a pair of lists, but the one-sided logic has the same number of connectives, and it's IMO confusing to always have to remember the duals - e.g. an application of identity looks like :math:`\vdash \Sigma X^\bot, \Pi X` instead of :math:`\Pi X \vdash \Pi X`. Taking the two-sided logic as basic, the one sided logic can still be formulated as a transformation of the two-sided logic that moves everything to the right side with negation and pushes down negations to atomic statements by applying duality theorems (inserted with cuts).
-
-There are also other presentations like deep inference. In one paper on deep inference they ended up adding the `mix rule <https://ncatlab.org/nlab/show/mix+rule>`__ which corresponds to assuming :math:`1 \leftrightarrow \bot`. This doesn't seem attractive compared to plain linear logic - it proves contradiction as a theorem, hence loses the embedding of classical logic. `This page <https://www.pls-lab.org/en/Mix_rule>`__ mentions that mix holds in various models of linear logic such as coherent spaces and the game-theoretic semantics, but models are usually a simplification and there are models such as the syntactic model where mix doesn't hold. :cite:`strassburgerDeepInferenceExpansion2019` presents a deep inference system for non-mix MLL but says extending it to full LL is future work.
-
-There is also the question of if the last remaining structural rules, the exchange and associativity rules, should be dropped, to obtain non-commutative or ordered logic and non-associative logic. Noncommutativity leads to a stack or list, and non-associativity leads to a tree-like semantics which can be quite complicated. Contrast this with the idea of the propositions being in named slots, where associativity and commutativity seem natural - e.g. ``{a = 1, b = 2}`` is for almost all purposes the same as ``{b = 2, a = 1}``, and only in some narrow cases would we want to differentiate them. But, there seem to be reasonable ways of embedding linear logic in non-associative / non-commutative logic by adding associative / commutative modalities. :cite:`blaisdellNonassociativeNoncommutativeMultimodal2022` If there was a popular logic with such an embedding, then we could switch from linear logic to that. But per :cite:`millerOverviewLinearLogic2004` "no single [non-commutative] proposal seems to be canonical at this point."
+In :cite:`downenSequentCalculusCompiler2016`, TyApp is written in natural deduction style. Actually, it seeems type annotations just sort of float around, they should not be part of the sequents at all. In my presentation of logic, terms are the proof trees, and propositions the types. So when it is written that ∀ and ∃ consume terms with types, like ∀R :math:`(\Gamma, a : \kappa \to v : \tau) \vdash (\Gamma \to \Lambda a : \kappa. v : \forall a : \kappa . \tau)`, :math:`a : \kappa` is just an assertion, and I would instead just write :math:`(\Gamma \to \tau) \vdash (\Gamma \to \forall a : \kappa . \tau)`, where :math:`a` has no free occurrence in :math:`\Gamma` and is ambiently assumed to be of some type. Stroscot is a unityped language, so the types can just be ignored for now.
 
 Jumbo connectives
 =================
 
-Based on :cite:`levyJumboLcalculus2006`, Stroscot aims for the largest allowable set of operators. In particular we generalize into two jumbo operators, :math:`\Sigma` (sigma) and :math:`\Pi` (pi). The generalized :math:`\Pi` rule is similar to Levy's rule except it allows multiple conclusion propositions. The generalized :math:`\Sigma` rule is the dual of :math:`\Pi`.
+Based on :cite:`levyJumboLcalculus2006`, Stroscot aims for the largest allowable set of operators. In particular we generalize into two jumbo operators, :math:`\Sigma` (sigma) and :math:`\Pi` (pi). The generalized :math:`\Pi` rule is similar to Levy's rule except it allows multiple conclusion propositions. The generalized :math:`\Sigma` rule is the dual of :math:`\Pi`. We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`[(m_i,n_i)]` the jumbo-arity.
 
-We have indexed variables :math:`A_{ij}` and :math:`B_{ik}` where :math:`0 \leq i < N, 0 \leq j < m_i, 0 \leq k < n_i`. We call :math:`N` the length of the jumbo type and the list :math:`[(m_i,n_i)]` the jumbo-arity.
-
-The dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For an ADT, the RHS of the difference is empty, i.e. ``a A | b B1 B2 | C`` looks like :math:`\Sigma [(a, [A]-[]),(b, [B_1, B_2]-[]), (c,[]-[])]`. This follows :cite:`wadlerCallbyvalueDualCallbyname2003` and :cite:`crolardFormulaeastypesInterpretationSubtractive2004` but is flipped compared to Pi.
+In :cite:`downenSequentCalculusCompiler2016`, TLK/TRK correspond to the intuitionistic jumbo-style Sigma operator. But they have no corresponding Pi operator, but rather Case/Deflt, which have no effect on the sequent type, hence no logical meaning. They say they considered adding "general existential types" which seems to be a Pi operator in disguise, but mapping to GHC Core was too difficult and required a "heavy-handed encoding". Since  Stroscot is a new language, we can have a full set of jumbo operators to do all sorts of case-matching.
 
 When the RHS of :math:`\Sigma` is nonempty we get terms with holes, that can be pattern-matched by filling the holes, e.g. `difference lists <https://en.wikipedia.org/wiki/Difference_list>`__. (TODO: check that this actually gives efficient concatenation)
+
+The dual of implication is called "subtraction" or "difference" and is denoted :math:`-`. For an ADT, the RHS of the difference is empty, i.e. ``a A | b B1 B2 | C`` looks like :math:`\Sigma [(a, [A]-[]),(b, [B_1, B_2]-[]), (c,[]-[])]`. This follows :cite:`wadlerCallbyvalueDualCallbyname2003` and :cite:`crolardFormulaeastypesInterpretationSubtractive2004` but is flipped compared to Pi's implication.
 
 The jumbo connectives have the nice "unpacking" property that any combination of :math:`\Sigma` connectives is equivalent to a single :math:`\Sigma` connective, and likewise for :math:`\Pi`.
 
@@ -47,11 +56,21 @@ The index :math:`i` in Levy's presentation is a tag drawn from a finite subset o
 Common connectives
 ==================
 
-The idea behind :math:`\bot` as contradiction is as follows: if we have a sequent :math:`\Gamma \vdash A\otimes \neg A`, we can decompose this into sequents :math:`\Gamma_1 \vdash A` and :math:`\Gamma_2, A \vdash` where :math:`\Gamma = \Gamma_1, \Gamma_2`. Then we can cut to derive the sequent :math:`\Gamma \vdash`, and hence derive :math:`\Gamma \vdash \bot`.
+Girard chose his notation mainly for convenience, in particular he avoided the common symbols of logical connectives so that he didn't have to mark classical logical connectives vs. linear logic connectives. Since Stroscot only uses one logic style, we aren't limited by such considerations.
 
-The notation :math:`\land,\lor` is chosen because the structure-preserving translation from intuitionistic logic preserves the logical operators :cite:`dicosmoIntroductionLinearLogic2015`, hence some intuition arises from using it. The notation for times and par is trickier; times and par are both `tensor/monoidal products <https://en.wikipedia.org/wiki/Monoidal_category>`__ (identities :math:`1,\bot`), and do not appear in classical logic. The fact that tuples are typically positive data leads us to privilege :math:`\otimes` as the default product, agreeing with Girard.
+Per the structure-preserving "plethoric" translation in :cite:`dicosmoIntroductionLinearLogic2015`, section 2.1, PDF page 30, the linear logic operators that correspond to intuitionistic logic's conjunction/disjunction are the additive binary connectives, Girard's :math:`\with` and :math:`\oplus`. Girard's notation doesn't express their duality at all so it has to be replaced. Per Wikipedia, the customary symbols are :math:`\land / \lor`, programming uses :math:`\with / \vert`, and there is also the electronics notation :math:`\cdot / +`. ChatGPT says :math:`\land / \lor` is 80% of usage so that's what I went with.
 
-:math:`\par` is the dual of :math:`\otimes` in the sense that :math:`A \par B \equiv \neg (\neg A \otimes \neg B)`; unfortunately for deciding a notation, this seems to be its only useful property. :math:`\oplus, \odot ,\Box,\sharp, \bullet` and :math:`*` have meanings (direct sum/coproduct, Hadamard product/XNOR gate/symmetric product, modal operator, music, multiplication/logical and, convolution) dissimilar from the function of :math:`\par`. :math:`\mathbin{{\scriptstyle+}\mkern-0.522em\raise{-0.077em}{\diamond}},\mathbin{{\vee}\mkern-0.815em\raise{0.09em}{\bigcirc}}` don't have Unicode symbols so are hard to use. In the end none of the operators seems particularly evocative. :math:`\par` on the other hand redirects to linear logic on Wikipedia. So we follow Girard.
+For :math:`\otimes`, it is a `tensor/monoidal product <https://en.wikipedia.org/wiki/Monoidal_category>`__ so the symbol is natural. Technically :math:`\par` is a tensor product too, but the fact that tuples are typically positive data leads us to privilege one over the other. And it agrees with Girard, although I think he chose :math:`\otimes` to go with :math:`\oplus`.
+
+:math:`\par` is the dual of :math:`\otimes` in the sense that :math:`A \par B \equiv \neg (\neg A \otimes \neg B)`; unfortunately for deciding a notation, this seems to be its only useful property. Looking at the literature, :math:`\oplus, \odot ,\Box,\sharp, \bullet` and :math:`*` have meanings (direct sum/coproduct, Hadamard product/XNOR gate/symmetric product, modal operator, music, multiplication/logical and, convolution) dissimilar from the function of :math:`\par`. :math:`\mathbin{{\scriptstyle+}\mkern-0.522em\raise{-0.077em}{\diamond}},\mathbin{{\vee}\mkern-0.815em\raise{0.09em}{\bigcirc}}` don't have Unicode symbols so are hard to use. In the end none of the operators seems particularly evocative. :math:`\par` on the other hand redirects to linear logic on Wikipedia. So again we follow Girard.
+
+Then we have the units for each of these connectives. I'm most confident in my choice of :math:`\bot` as the unit for :math:`\par`. It is usually used for denoting the absurdity derived from a contradiction, and indeed we can prove :math:`A, \neg A \vdash \bot` and :math:`\neg A \equiv A \to \bot` starting from the identity rule. It also agrees with Girard.
+
+For the unit of the tensor product, it's the standard unit type in programming, so ``()`` is a possibility, but in the math-style semantics the unit type is traditionally represented as :math:`\mathbb{1}`, matching Girard. I went with an unstyled :math:`1` for ease of input. Another choice would be the tee symbol :math:`\top` to be the dual of :math:`\bot`, but this conflicts with Girard's usage of that symbol.
+
+The units of :math:`\lor / \land` are logical false / logical true. Looking at choices, :math:`\bot / \top` is out because :math:`\bot` is already taken. IMO it's pretty confusing that in Girard's notation :math:`\bot` is not the dual of :math:`\top`. :math:`0/1` is pretty common, but conflicts with using :math:`1` for the unit of :math:`\otimes`. :math:`T/F` is clear enough and doesn't conflict, so that's what I went with.
+
+The negations and shifts show up in polarized / focused linear logic. We use the convention that an up shift raises a negative to positive (increases the value, hence points up). This is the original definition of `Girard's <https://www.seas.upenn.edu/~sweirich/types/archive/1991/msg00123.html>`__, ``P = up N``. More recent papers such as :cite:`girardLocusSolumRules2001` and :cite:`zeilbergerLogicalBasisEvaluation2009` seem to have lost this convention and use definitions of up-shift and down-shift reversed from ours. :cite:`nigamAlgorithmicSpecificationsLinear2009` uses an alternate notation of delay operators :math:`\delta^\pm(\cdot)` instead of shifts.
 
 Programming types
 -----------------
@@ -66,7 +85,7 @@ With the programming types we see the justification for the jumbo types: they ca
 
 With the encoding, we lose the free-form tags and have to use strings like "RRRRRL". This leads to unbalanced proof trees and a general lack of expressiveness of the proof language.
 
-Lambdas are in :cite:`maraistCallbynameCallbyvalueCallbyneed1995`: Call by name lambdas are :math:`\Omega_N = \bang \Omega_N \to \Omega_N`, Call by value or optimal lambdas are :math:`\Omega_V = \bang (\Omega_V \to \Omega_V)`. But honestly I'm not sure about the definition, I found another paper that says these all expand to the same thing. So for now the definitions are here rather than in the reference.
+Lambdas have several conflicting definitions, so I have left them out. :cite:`maraistCallbynameCallbyvalueCallbyneed1995` says call by name lambdas are :math:`\Omega_N = \bang \Omega_N \to \Omega_N`, and call by value lambdas are :math:`\Omega_V = \bang (\Omega_V \to \Omega_V)`. :cite:`filinskiLinearContinuations1992` agrees on call by name lambdas, but says call by value lambdas are :math:`\Omega_V = \bang (\Omega_V \to \whim \Omega_V)`. A paper I forgot to cite says that these all expand to the same infinite type so are equivalent, making me wonder if linear logic actually represents reduction strategy at all.
 
 Exponentials
 ============
@@ -81,11 +100,26 @@ Instead of binary contraction we allow :math:`n`-ary contraction for :math:`n\ge
 Subexponentials
 ---------------
 
-In standard linear logic there are two S4 modalities !/bang/"of course" (positive) and the dual ?/whim/whimper/"why not" (negative). But if we introduce two modalities :math:`\bang_1, \bang_2` with separate rules we cannot prove :math:`\bang_1 A \equiv \bang_2 A`. So in keeping with the maximalist approach we present the logic with subexponentials. The subexponentials are like type annotations, in that we can erase all the subexponential labels to a single standard exponential, and we can infer subexponentials, computing the minimal subexponential structure necessary for the program to work. Subexponentials whose only operations are promotion/dereliction can be deleted from the program.
+Standard linear logic only contains bang and whim. But per :cite:`nigamAlgorithmicSpecificationsLinear2009` these are not "canonical" - if we introduce two modalities :math:`\bang_1, \bang_2` with distinct but identical rules, we cannot prove :math:`\bang_1 A \equiv \bang_2 A`. So in keeping with the maximalist approach we present here the logic with subexponentials. The subexponentials function as annotations on exponentials, in that we can erase all the subexponential labels to a single standard exponential, and we can infer subexponential labels, computing the minimal subexponential structure necessary for the program to work. Subexponentials whose only operations are promotion/dereliction can be deleted from the program. :cite:`danosStructureExponentialsUncovering1993`
 
-For notation, subexponentials look like :math:`\bang^x_m,\whim^x_m` where :math:`m` is in an index set :math:`M \supseteq \{\cdot\}` and :math:`x \in X, X = P(\{c, w, d\})`. :math:`m=\cdot` is written :math:`\bang^x,\whim^x`, and similarly :math:`x=\{\}` is written as :math:`\bang_m,\whim_m`, so that we recover the standard notation :math:`\bang,\whim` for :math:`m=\cdot,x=\{\}`. We can also write :math:`\bang_{(m,x)},\whim_{(m,x)}`, or more simply :math:`\bang_{m}` if the available operations are clear.
+For notation, there's a lot of choices. I propose the following:
 
-To use these we must define a relation :math:`\leq` on :math:`(M,X)` such that :math:`((M,X),\leq)` is a poset. :math:`\leq` must have that :math:`(m,x) \leq (n,y)` only if :math:`x\subseteq y`. Reflexivity ensures the identity theorem. Transitivity and the subset relation on :math:`X` ensure cut elimination. Antisymmetry ensures that if :math:`\bang^x_m A \equiv \bang^y_n A` then :math:`m=n` and :math:`x=y`, so that we do not have duplicate notation for a particular modality. We require :math:`(m,x) \leq (m,y)` for :math:`x \subseteq y`, but the relation between different modalities may not be so simple.
+* :math:`\bang^x_m,\whim^x_m`, :math:`\bang_{(m,x)},\whim_{(m,x)}`, or more simply :math:`\bang_S,\whim_S` (with :math:`S = (m,x) \in (M,X)`) is the full notation for a subexponential, where :math:`m` is in an index set :math:`M` and :math:`x \in X, X = P(\{c, w\})`.
+* The "well-known" subexponentials are :math:`\bang^x,\whim^x`, where the index :math:`m=\cdot \in M` is omitted. These allow easily omitting various operations.
+* The "full" subexponentials are :math:`\bang_m,\whim_m`, and have :math:`x=\{c,w,d\}` - this allows easily writing distinguished subexponentials.
+* Combining these conventions, :math:`\bang,\whim` are the well-known full exponentials :math:`m=\cdot,x=\{c,w,d\}`, as is standard.
+
+To use these we must define a relation :math:`\leq` on :math:`(M,X)` such that :math:`((M,X),\leq)` is a poset abd satisfies two more requirements:
+
+#. :math:`(m,x) \leq (n,y)` implies :math:`x\subseteq y`.
+#. if :math:`x \subseteq y`, then :math:`(m,x) \leq (m,y)` for all :math:`m`.
+
+Justifying these:
+
+* Reflexivity ensures the identity theorem.
+* Transitivity and the first requirement ensure cut elimination.
+* Antisymmetry ensures that if :math:`\bang^x_m A \equiv \bang^y_n A` then :math:`m=n` and :math:`x=y`, so that we do not have duplicate notation for a particular modality.
+* The second requirement is not strictly necessary, but makes the notation more coherent. If it is not satisfied we can simply split the index :math:`m` into two or more indexes :math:`m_i`.
 
 The rule for promotion requires that :math:`(z,o)\leq (x_i,m_i)` and :math:`(z,o)\leq (y_i,n_i)` for the elements of the context.
 
@@ -99,7 +133,7 @@ The rule for promotion requires that :math:`(z,o)\leq (x_i,m_i)` and :math:`(z,o
 
   \end{array}
 
-Dereliction requires :math:`d \in x`.
+Dereliction must be allowed, otherwise the identity rule does not hold.
 
 .. math::
   :nowrap:
@@ -134,7 +168,7 @@ We also allow quantification over subexponentials, as in :cite:`nigamAlgorithmic
 Modalities
 ----------
 
-Because of the equivalences :math:`\bang \bang A \equiv \bang A, \bang \whim \bang \whim A \equiv \bang \whim A`, there are only 7 modalities created from combining exponentials. They have the relationships as follows, where an arrow :math:`A \to B` means :math:`\vdash A \to B` is provable:  :cite:`coniglioEqualityLinearLogic2002`
+Because of the equivalences :math:`\bang \bang A \equiv \bang A, \whim\whim A \equiv \whim A, \bang \whim \bang \whim A \equiv \bang \whim A, \whim \bang \whim \bang A \equiv \whim \bang A`, there are only 7 modalities created from combining exponentials. They have the relationships as follows, where an arrow :math:`A \to B` means :math:`\vdash A \to B` is provable:  :cite:`coniglioEqualityLinearLogic2002`
 
 .. graphviz::
 
@@ -151,30 +185,83 @@ Because of the equivalences :math:`\bang \bang A \equiv \bang A, \bang \whim \ba
 
 More generally with subexponentials:
 
-* For :math:`(x,m)\geq(y,n)`, :math:`\bang^x_m \bang^y_n A \equiv \bang^x_m A \equiv \bang^y_n \bang^x_m A`, and similarly for :math:`\whim`.
+* For :math:`(x,m)\geq(y,n)`, :math:`\bang^x_m \bang^y_n A \equiv \bang^x_m A \equiv \bang^y_n \bang^x_m A`, and identically with :math:`\whim`.
 * For :math:`(x,n)\leq(z,p)` and :math:`(y,o)\leq(w,m)` we can prove :math:`\bang^w_m \whim^x_n \bang^y_o \whim^z_p A \equiv \bang^w_m \whim^z_p A`.
 
-With subexponentials the possible combinations become infinite, for example alternating patterns like :math:`\bang_1 \bang_2 \bang_1 \bang_2` cannot be simplified unless there is a relation in the poset between 1 and 2.
+With distinguished subexponentials the possible modalities become infinite, for example alternating patterns like :math:`\bang_1 \bang_2 \bang_1 \bang_2` cannot be simplified unless there is a relation in the poset between 1 and 2. But of course if we erase the index labels then :math:`\bang \bang \bang \bang A \equiv \bang A`. Due to this, I think keeping the "well-known" subexponentials in the IR is fine and informative, but distinguished subexponentials should be avoided except during a pass that reduces exponential strength and eliminates unnecessary exponentials.
+
+Classification of sequents
+==========================
+
+:cite:`downenSequentCalculusCompiler2016` splits the space of sequents into four sets: commands :math:`\Gamma \vdash \Delta`, terms :math:`\Gamma \vdash \tau`, continuations :math:`\Gamma, \tau \vdash \Delta`, and bindings :math:`\Gamma, \Delta' \vdash \Gamma', \Delta` (noting that :math:`\mid` is synonymous with ","). These clearly overlap, and the restrictions on what can be used where seem arbitrary.
+
+It seems easier to follow :cite:`lafontLinearLogicPages` and classify proofs by properties of their sequent:
+
+* :math:`\vdash A` is a proof of :math:`A`. :math:`A` is said to be a theorem or tautology. The theorem :math:`\vdash A \leftrightarrow B` shows equivalence :math:`A\equiv B`.
+* :math:`A \vdash` or :math:`A \vdash \bot` is a refutation of :math:`A`. :math:`A` is said to be an absurdity.
+* :math:`\Gamma \vdash` or :math:`\Gamma \vdash \bot` derives a contradiction from :math:`\Gamma`
+* :math:`x, \ldots, z \vdash A`, where :math:`x,\ldots,z` are free variables representing propositions (most likely appearing in :math:`A`), is a proof pattern of :math:`A`. Similarly :math:`x, \ldots, z, A \vdash` is a refutation pattern.
+* :math:`\Gamma \vdash A` is a term with result type :math:`A`
+
+:math:`\Sigma_R` constructs a proof from a collection of proofs and refutations, while :math:`\Pi_L` constructs a refutation from a collection of proofs and refutations.
 
 Polarized logic
 ===============
 
-Following :cite:`lafontLinearLogicPages` we say a proposition :math:`A` is positive if :math:`A \leftrightarrow \bang A` and negative if :math:`A \leftrightarrow \whim A`, and that is is polarized if it is either positive or negative. We can forget negative polarity by forming :math:`A\otimes 1`, and positive polarity by :math:`A \par \bot`, and ensure a proposition has no polarity by using both.
+Following :cite:`lafontLinearLogicPages` we say a proposition :math:`A` is positive if :math:`A \equiv \bang A`. Of course the direction :math:`\bang A \vdash A` is trivial by dereliction.
 
-:math:`\Sigma` forms positive propositions and :math:`\Pi` forms negative propositions, where in each case, the clauses :math:`\vec A - \vec B` or :math:`\vec A \multimap \vec B` are formed from positive subformulas :math:`A_j` and negative subformulas :math:`B_k`. Formulas :math:`\bang A` are always positive while formulas :math:`\whim A` are always negative.
+Going through the rules on :math:`A \vdash \bang A`:
 
-:math:`BB = \text{Bool} \to \text{Bool}` is positive and doesn't conform to the above rules.
+* :math:`F,1` are positive
+* :math:`\bang A` is positive for any :math:`A`
+* :math:`A \lor B,A \otimes B` are positive if :math:`A,B` are positive
+* :math:`T,\bot` are not positive
+* :math:`A \land B` is positive if :math:`A` is positive and :math:`\bang A \vdash B`, e.g. if :math:`B` is a theorem
+* :math:`A \par \bot` is positive if :math:`A` is positive. More generally, :math:`A \par B` is positive if :math:`A` is positive, :math:`B \vdash \bot` (i.e., :math:`B` is a refutation), and :math:`A\vdash A,B`.
 
-The polarized negations and shifts show up in polarized / focused linear logic. We use the convention that an up shift raises a negative to positive (increases the value, hence points up). This is the original definition of `Girard's <https://www.seas.upenn.edu/~sweirich/types/archive/1991/msg00123.html>`__, ``P = up N``. More recent papers such as :cite:`girardLocusSolumRules2001` and :cite:`zeilbergerLogicalBasisEvaluation2009` seem to have lost this convention and use definitions of up-shift and down-shift reversed from ours. :cite:`nigamAlgorithmicSpecificationsLinear2009` uses an alternate notation of delay operators :math:`\delta^\pm(\cdot)` instead of shifts.
+Dually we say :math:`A` is negative if :math:`A \equiv \whim A`. :math:`A` is positive iff :math:`\neg A` is negative, and vice-versa. In general, :math:`\Sigma [ \vec A_i - \vec B_i]` is positive and :math:`\Pi [ \vec A_i \multimap \vec B_i ]` is negative if :math:`A_i` are all positive and :math:`B_i` are all negative.
+
+We say that a proposition is polarized if it is either positive or negative. Unpolarized propositions such as :math:`T \otimes \bot` exist, although every tautology is positive and every absurdity is negative. By strong consistency, no proposition can be both negative and positive.
+
+Girard defined a syntactic rather than semantic notion of polarity, based on classifying connectives. By his definitions, :math:`A \par \bot` and :math:`A\otimes 1` remove polarity from a positive resp. negative proposition. But the semantic definition seems more useful.
+
+Lafont also defines regular types :math:`A \equiv \whim \bang A`, but considering that there are 6 non-trivial modalities including a dual modality :math:`\bang \whim` this seems too limited. There is not a clear justification for this definition; maybe some paper in the literature explains it, but a simple search "regular linear logic" didn't uncover it.
 
 Cartesian types
 ---------------
 
-Certain "cartesian" types, like booleans, integers, lists, and in general ADTs of cartesian types using :math:`\Sigma`, have a "natural" proof of positivity that preserves the value. This is an extension of :cite:`filinskiLinearContinuations1992`'s observation in section 3.1 - we destruct the value, then use bang, then construct the same value. But :math:`BB` from above can't be cartesian because we cannot evaluate a function twice.
+:cite:`filinskiLinearContinuations1992` observes in section 3.1 that, even in the absence of exponentials, we can actually copy and discard data of certain "cartesian" types in a linear fashion. This is quite similar to positivity. However, positivity is not necessary or sufficient to be cartesian - :math:`BB = \text{Bool} \to \text{Bool}` is positive, but the proof does not actually make a copy of the function, because it can only evaluate the function at one value. Also, as exponentials are non-canonical, per :cite:`lafontLinearLogicPages` a formula :math:`C = \alpha \otimes \bang(\alpha \ to \alpha \otimes \alpha) \otimes \bang(\alpha \to 1)` can be copied and discarded but does not satisfy :math:`C \vdash \bang \alpha` hence is not positive.
 
-There's similarly negative types with a "natural" proof using :math:`\Pi`, e.g. for :math:`D=\Pi[(\#l,[]\multimap []),(\#r,[]\multimap [])]`. We could call these co-cartesian types.
+Formally, cartesian types are defined as commutative co-monoids. In terms of sequent proofs, this means we have a
+proposition :math:`A`, with theorems :math:`w : A \vdash 1` and :math:`c : A \vdash A \otimes A`. There are then 3 laws that these theorems must satisfy, equivalences under cut elimination:
 
-The conclusion is to be generous with exponentials and use them whenever you have a cartesian / co-cartesian type, so that the proof structure identifies those operations.
+* unit:
+
+.. math::
+
+     \rule{c : A \vdash A \otimes A \quad (w \otimes \text{id}) : A \otimes A \vdash A \otimes 1}{A \vdash A \otimes 1}{\text{cut}} = \rule{\text{id} : A \vdash A \quad \vdash 1}{A \vdash A\otimes 1}{\otimes_R}
+
+* commutativity:
+
+.. math::
+
+     \rule{c : A \vdash A \otimes A \quad swap : A_1 \otimes A_2 \vdash A_2 \otimes A_1}{A \vdash A \otimes A}{\text{cut}} = \text{c} : A \vdash A \otimes A
+
+* associativity:
+
+.. math::
+
+     \rule{c : A \vdash A \otimes A \quad (id \otimes c) : A \otimes A \vdash A \otimes (A \otimes A) \quad A\otimes (B \otimes C) \vdash (A \otimes B) \otimes C}{A \vdash (A\otimes A) \otimes A}{\text{cut x2}} = \rule{c : A \vdash A \otimes A \quad (c \otimes id) : A \otimes A \vdash (A \otimes A) \otimes A}{A \vdash (A\otimes A) \otimes A}{\text{cut}}
+
+In addition, Filinski adds uniqueness: :math:`w : A \vdash 1` and :math:`c : A \vdash A \otimes A` must each have only one unique cut-free proof.
+
+We can similarly define co-cartesian types :math:`A` that can be copied and discarded on the right with theorems :math:`w : 1 \vdash A` and :math:`c : A \otimes A \vdash A` and are a commutative monoid.
+
+I'm not sure if there is a simple description of all cartesian types, but of course :math:`\bang/\whim` are cartesian/co-cartesian, and :math:`Sigma [ \vec A_i - \vec B_i]` and and :math:`\Pi [ \vec A_i \multimap \vec B_i ]` are cartesian/co-cartesian if :math:`A_i` are all cartesian and :math:`B_i` are all co-cartesian. So ADTs in general - booleans, integers, lists, trees - are all cartesian. Our earlier example :math:`C` is in general not cartesian because, although copy and discard can be proven, it uses the included functions and those won't necessarily satisfy the laws.
+
+Filinski says in 3.2 that all cartesian types are positive. Hence, for cartesian / co-cartesian types, because the proof of polarity is natural, we can be generous with exponentials and use them whenever we have such a type, without fear of changing the program semantics. This allows a more faithful representation of copy operations in the proof structure, avoiding implicit copying such as ``\x -> case x of True -> (True,True); False -> (False,False)``.
+
+But, if we start with a plethoric translation to begin with and only remove unnecessary exponentials, probably cartesian types don't matter, because all the copy operations are explicitly represented using exponentials to begin with.
 
 Tangent: Reversible computing
 -----------------------------
@@ -188,8 +275,6 @@ Structural rules
 
 As is usual for linear logic there are no structural rules for weakening or contraction (they are restricted to the exponentials above). And in Core we use a graph representation that internalizes the exchange rule, so there is not really an exchange rule either.
 
-Restricting the exchange rule would result in an ordered type system / noncommutative logic, similar to a stack machine. But :cite:`shiVirtualMachineShowdown2005` shows that a register model is much better for an implementation - the extra stack swapping instructions give no benefit. Similarly restricting associativity would turn sequent lists into a binary tree - but this also has no benefit, it would just be a lot of shuffling operations. The number of operators would explode because every tree structure / stack index would create a new operator. Overall messing with the exchange rule seems like a nothing burger - some theoretical papers, but no real meat.
-
 The cut rule is technically a theorem; we can prove that any proof using cut can be reformulated to be cut-free. But the expansion may result in exponentially more rule applications.
 
 Similarly the identity rule is a theorem for propositional logic: we can produce a proof tree for :math:`A \vdash A` for any finite proposition :math:`A` via expansion of all the cases. Using the identity rule speeds up reduction because it skips iterating through the structure, and it also allows manipulating (prefixes of) :ref:`infinite <infinite>` trees.
@@ -197,11 +282,12 @@ Similarly the identity rule is a theorem for propositional logic: we can produce
 Quantifiers
 ===========
 
-To move from propositional to first-order logic we must extend the identity rule to allow terms. Some presentations call the identity rule "ax", for identity axiom, but in general the identity rule is a theorem so this seems foolish. Instead we list the identity rule explicitly when needed.
+To move from propositional to first-order logic we must extend the identity rule to allow terms. Some presentations call the identity rule "ax", for identity axiom, but in general the identity rule is a theorem so this seems foolish. Instead we call it "id".
 
-`nLab <https://ncatlab.org/nlab/show/sequent+calculus>`__ defines a substitution rule/theorem. There is a theorem that substitution rules can be eliminated from the proof tree, proven by taking the proof tree for :math:`\Gamma \vdash \Delta` and replacing all its identities :math:`x \vdash x` with identities :math:`t \vdash t`. This requires :math:`t \vdash t` to hold, hence we include it. If the identity rule is not used with ``x`` in the proof tree, then the identity rule is not needed for the substitution, but such a situation is unlikely.
+We explicitly list the identity theorem where it is needed:
 
-Quantifiers also require the identity rule, because cut elimination applies substitution of ``x`` for ``t`` in the proof tree where ``x`` is a variable.
+* `nLab <https://ncatlab.org/nlab/show/sequent+calculus>`__ defines a substitution rule/theorem. There is a theorem that substitution rules can be eliminated from the proof tree, proven by taking the proof tree for :math:`\Gamma \vdash \Delta` and replacing all its identities :math:`x \vdash x` with identities :math:`t \vdash t`. This requires :math:`t \vdash t` to hold, hence we include it. If the identity rule is not used with ``x`` in the proof tree, then the identity rule is not needed for the substitution, but such a situation is unlikely.
+* Quantifiers also require the identity rule, because cut elimination applies substitution of ``x`` for ``t`` in the proof tree where ``x`` is a variable.
 
 Cut elimination for quantifiers is sound because the number of quantifiers in the sequent decreases.
 
@@ -220,14 +306,7 @@ The translation from intuitionistic logic to linear logic decorates every propos
 
 We can translate classical logic into intuitionistic logic by decorating every proposition and subproposition with :math:`\neg\neg` and moving the right to the left with another negation, i.e. :math:`\Gamma \vdash \Delta \Rightarrow \Gamma', \neg \Delta' \vdash`. Thus the translation of classical logic into linear logic decorates like :math:`\neg \bang (\neg \bang A) \equiv \whim \bang A`.
 
-These two decoration translations preserve proof structure, in the sense that every intuitionistic/classical proof tree can be converted to a linear logic proof tree, and the reverse as well if the linear logic proof tree's sequent is the result of the proposition translation.
-
-Patterns
-========
-
-We call sequents of the form :math:`\vdash A` proofs of :math:`A`. Similarly sequents :math:`A \vdash` are refutations of :math:`A`. :math:`\Sigma_R` constructs a proof from a collection of proofs and refutations, while :math:`\Pi_L` constructs a refutation from a collection of proofs and refutations. We can similarly consider proof patterns :math:`x, \ldots, z \vdash A` / refutation patterns :math:`x,\ldots,z, A \vdash` where :math:`x,\ldots,z` are free variables.
-
-If we have a proof of :math:`A` then :math:`A` is a theorem (also called a tautology). If we prove a sequent :math:`\Gamma \vdash` then :math:`\Gamma` is a contradiction. We define equivalence :math:`A\equiv B` as the theorem :math:`\vdash A \leftrightarrow B`.
+These two decoration translations preserve proof structure, in the sense that every intuitionistic/classical proof tree can be converted to a linear logic proof tree, and the reverse as well if the linear logic proof tree's sequent is the result of the proposition translation. There are other "uniform" translations, like in :cite:`danosStructureExponentialsUncovering1993`, but they aren't as simple.
 
 Definitions
 ===========
@@ -272,24 +351,10 @@ The axioms of reflexivity, substitution, etc. can take a variety of modalities a
 
 Proof of the substitution property: For :math:`\Pi` we use the right rule to split into cases for each tag, then we use contraction/weakening on :math:`\bang(A=B)` to match the number of A's/B's in the case, then the left rule to split into each A and B, giving each branch a copy of the hypothesis. :math:`\Sigma` is similar but with the left first. For exponentials, quantifiers, and set comprehension we simply do left/right in the correct order. Then at the end we use the hypothesis to change :math:`A[x/a]` on the left or right to :math:`B[x/b]`, or else weakening to remove the hypothesis followed by the identity.
 
-Infinite structures
-===================
+Recursion and infinite structures
+=================================
 
-These are used to support infinite types like the lambda calculus or lists, and similarly infinite expressions like ``x = 1 : x``. We construct "infinite" as a terminal coalgebra - our proof trees turn into fixed points of systems of formal equations :cite:`karazerisFinalCoalgebrasAccessible2011`.
-
-Infinite structures can be paradoxical, e.g. we can prove :math:`\vdash\bot` using cut on the proposition :math:`A=\neg A`. Cut elimination will often fail to complete, but there is a progress property in the sense that the cut can always be pushed down and eliminate an identity rule or two matching logical rules.
-
-Hashing
-=======
-
-To hash the graphs we can use the tree structure of the sequent derivations. Each upward slot in a node is hashed with a fixed value and each downward slot is hashed with a value corresponding to the path through the derivation tree followed by the label of the upward slot. It is written as a single DFS traversal with the leaves as base case that stores the hashed subtree and a map from edge name to partial path.
-
-Hashing infinite graphs is harder, we have to hash each SCC as a unit. See :cite:`mauborgneIncrementalUniqueRepresentation2000`.
-
-Recursion
-=========
-
-Sequent Core :cite:`downenSequentCalculusCompiler2016` also introduces two more rules "multicut" and "rec" that are illogical but computationally useful:
+There is the question of representing recursion, as standard derivations only allow finite (well-founded) proofs.Sequent Core :cite:`downenSequentCalculusCompiler2016` introduces Let/MultiCut and Rec, which "serve two purposes: to give a shared name to the result of some computation, and to express (mutual) recursion."
 
 .. math::
 
@@ -303,7 +368,7 @@ Sequent Core :cite:`downenSequentCalculusCompiler2016` also introduces two more 
         {\Gamma, \overrightarrow{\Theta_i} \vdash \overrightarrow{\Lambda_i}, \Delta }{\text{rec}}
     \end{array}
 
-These probably aren't needed, the use-def and infinite structures and types encode recursion better and we can use GHC's graph reduction model (below).
+But these rules are illogical and inadmissible. For example with Let/MultiCut, one can conclude from :math:`A,B \vdash B,C` and :math:`A,B \vdash B,C` (provable via Ax) that :math:`A \vdash C`. Similarly Rec concludes from :math:`A,B,C,D \vdash B, D, E, F` and :math:`A,B,C,E \vdash C, D, E, F` (again provable via Ax) that :math:`A,D,E \vdash B,C,F`.
 
 Alternately let can be encoded as a record and recursion via a fixed-point combinator or a cycle in the graph. In particular :cite:`kiselyovManyFacesFixedpoint2013` outline a polyvariadic combinator:
 
@@ -311,14 +376,23 @@ Alternately let can be encoded as a record and recursion via a fixed-point combi
 
   fix_poly fl = fix (\self -> map ($ self) fl)
 
-To implement ``fix`` we can use the variant of the Y combinator :math:`\lambda f.(\lambda x.x x) (\lambda x.f (x x))`. To type it we need the cyclic/recursive type :math:`Wr = \Pi[(^w, Wr, r)]` (in the sense of an infinite, regular tree).
-
-BOHM uses a fan/duplication node combined with a loop.
+To implement ``fix`` we can use the variant of the Y combinator :math:`\lambda f.(\lambda x.x x) (\lambda x.f (x x))`. To type it we need the cyclic/recursive type :math:`Wr = \Pi[(^w, Wr, r)]` (in the sense of an infinite, regular tree). BOHM uses a fan/duplication node combined with a loop.
 
 Graph reduction
 ---------------
 
-Following :cite:`jonesImplementationFunctionalProgramming1987` chapter 12 we give each definition node a static integer. Then the root is a distinguished definition. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-def indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
+A better method, following :cite:`jonesImplementationFunctionalProgramming1987` chapter 12, is to
+In Stroscot, we instead simply allow (regular) infinite proof trees. We construct "infinite" as a terminal coalgebra - our proof trees turn into fixed points of systems of formal equations :cite:`karazerisFinalCoalgebrasAccessible2011`, as opposed to actually being infinite. We represent the system of equations explicitly with the use-def rules, which also allow naming computations. Although the regular restriction means we can't represent some values directly such as the Fibonacci sequence, most of the types we care about are regular, like the lambda calculus or lists, and similarly some infinite values like ``x = 1 : x``.
+
+Infinite structures can be paradoxical, e.g. we can prove :math:`\vdash\bot` using cut on the proposition :math:`A=\neg A`. Cut elimination will often fail to complete, but there is a progress property in the sense that the cut can always be pushed down and eliminate an identity rule or two matching logical rules.
+
+ is better than  because it allows the graph reduction method used in GHC to work.
+
+
+These probably aren't needed, the use-def and infinite structures and types encode recursion better and we can use GHC's graph reduction model (below).
+
+
+ give each definition node a static integer. Then the root is a distinguished definition. Assuming the static data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-def indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).
 
 The optimal fixedpoint algorithm outlined in :cite:`shamirFixedpointsRecursiveDefinitions1976` (10.18, PDF pages 240-242) is a variation of Tarjan's strongly connected component algorithm. Cuts between two definitions ``f x`` are memoized in a list, and if the SCC algorithm finds a component ``f x -> let g = ... in g (f x)`` then this component is solved. If it has a unique solution then that's the answer, otherwise ``f x`` diverges and is replaced with a ``RecursionError`` or ``AmbiguousError``. We assume the solver allows uninterpreted "holes", so that the SCC can be solved before its sub-computations.
 
@@ -328,15 +402,17 @@ The solver is an SMT solver on the predicate ``SAT(y == g y)``, and for uniquene
 
 The posets the paper uses appear to be pointed directed-complete partial orders `(cppo's) <https://en.wikipedia.org/wiki/Complete_partial_order>`__.
 
+Hashing
+=======
+
+To hash the graphs we can use the tree structure of the sequent derivations. Each upward slot in a node is hashed with a fixed value and each downward slot is hashed with a value corresponding to the path through the derivation tree followed by the label of the upward slot. It is written as a single DFS traversal with the leaves as base case that stores the hashed subtree and a map from edge name to partial path.
+
+Hashing infinite graphs is harder, we have to hash each SCC as a unit. See :cite:`mauborgneIncrementalUniqueRepresentation2000`.
+
 Primitives
 ==========
 
-Primitives (integers) can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR. Alternately we can use compressed graphs.
-
-Compressed graphs
------------------
-
-64-bit integers are represented as a sigma type with 2^64 possibilities. So addition is represented as a case expression, where each case contains another case expression, and then each case constructs the integer corresponding to the addition. There is a lot of fan-out at each step, which would require 2^128 values to represent, clearly infeasible. So although this is the conceptual representation, the actual representation has no fan-out for the cases - instead the case nodes create symbolic variables ``a`` and ``b``, and the constructed value has the tag ``a+b``.
+Primitives (integers) can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR. Alternately we can use a specialized proof trees: 64-bit integers are represented as a sigma type with 2^64 possibilities. So addition is represented as a case expression, where each case contains another case expression, and then each case constructs the integer corresponding to the addition. There is a lot of fan-out at each step, which would require 2^128 values to represent, clearly infeasible. So although this is the conceptual representation, the actual representation has no fan-out for the cases - instead the case nodes create symbolic variables ``a`` and ``b``, and the constructed value has the tag ``a+b``.
 
 Confluent reduction
 ===================

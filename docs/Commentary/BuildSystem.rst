@@ -13,11 +13,12 @@ Also we need a way to do multi-language dependency management and ensure that th
 Scale
 =====
 
-As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-sih files) on an isolated system, in around the same time.
+As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-ish files) on an isolated system, in around the same time.
 
-Of course this is not a from-scratch build - this is an incremental build, measuring the average build time for a small change to one file.
+There are several types of build. If we trust our build system, we never need to do a from-scratch build. But it is good to trust no one and to do from-scratch builds occasionally. Those might take seconds, hours, days, or weeks depending on the scale - it doesn't really matter because they're rare. They just have to be possible.
 
-No-op builds should be "instantaneous" (<100 milliseconds per `SO <https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria>`__), this is easy enough to do with a file change watcher.
+No-op builds should be "instantaneous" (<100 milliseconds per `SO <https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria>`__), this is easy enough to do with a file change watcher. For incremental builds that do a small change to 1 file, let's say it rebuilds from 1 - 1000 files depending on where it is in the dependency graph. Presumably you've architected the system so "change one file, rebuild a million" is rare. Taking average numbers (500 files, 2100 lines/file), achieving 10 second rebuild times (max acceptable UI lag per `Nielsen <https://www.nngroup.com/articles/response-times-3-important-limits/>`__`) requires 105k/s. Practically I think go's 100k/s is probably adequate.
+
 
 Overview
 ========

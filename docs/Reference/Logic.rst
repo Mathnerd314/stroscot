@@ -59,7 +59,7 @@ All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be ex
     - Type
   * - :math:`F`
     - :math:`0`
-    - Zero (False)
+    - False (Zero)
     - :math:`\Sigma []`
   * - :math:`1`
     - :math:`1`
@@ -75,7 +75,7 @@ All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be ex
     - :math:`\Sigma [(\#s,[A,B] - [])]`
   * - :math:`A^{\otimes n}`
     -
-    - `Tensor power <https://en.wikipedia.org/wiki/Tensor_product#Tensor_powers_and_braiding>`__
+    - `Tensor power <https://en.wikipedia.org/wiki/Tensor_algebra#Construction>`__
     - :math:`\Sigma [(\#s,\overbrace{[A,\ldots,A]}^n - [])]`
   * - :math:`\smash{\stackrel{+}{\neg}} A`
     - :math:`A^{\bot}`
@@ -87,7 +87,7 @@ All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be ex
     - :math:`\Sigma [(\#s,[A] - [])]`
   * - :math:`T`
     - :math:`\top`
-    - Top (True)
+    - True (Top)
     - :math:`\Pi []`
   * - :math:`\bot`
     - :math:`\bot`
@@ -124,6 +124,45 @@ All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be ex
 
 The negations and shifts have identical derivation rules for each polarity, so we write :math:`\neg A` and :math:`\smash{\updownarrow}A` unless there is a need for the distinction.
 
+The specific derivation rules can be derived from the jumbo connective rules and the above definitions. For ease of reference, here are the derivation rules for the common connectives:
+
+.. math::
+    :nowrap:
+
+    \begin{array}{rr}
+     { \text{N/A} \  (F_R)} & \rule{}{\Gamma, F \vdash \Delta }{F_L} \\
+     \rule{}{\Gamma \vdash T, \Delta }{T_R} & { \text{N/A} \  (T_L)} \\
+
+     \rule{}{\vdash 1}{1_R} & \rule{\Gamma \vdash \Delta}{\Gamma, 1 \vdash \Delta }{1_L} \\
+     \rule{\Gamma \vdash \Delta}{\Gamma \vdash \bot, \Delta }{\bot_R} & \rule{}{\bot \vdash}{\bot_L} \\
+
+     \rule{\Gamma \vdash A_i, \Delta}{\Gamma \vdash A_1 \lor A_2, \Delta }{\lor_{iR}} &
+      \rule{\Gamma, A \vdash \Delta \quad \Gamma, B \vdash \Delta}{\Gamma, A \lor B \vdash \Delta}{\lor_L} \\
+     \rule{\Gamma \vdash A, \Delta \quad \Gamma \vdash B, \Delta}{\Gamma \vdash A \land B, \Delta}{\land_R} &
+      \rule{\Gamma, A_i \vdash \Delta}{\Gamma, A_1 \land A_2 \vdash \Delta }{\land_{iL}} \\
+
+     \rule{\Gamma \vdash A, \Delta \quad \Theta \vdash B, \Lambda}{\Gamma, \Theta \vdash A \otimes B, \Lambda, \Delta}{\otimes_R} &
+      \rule{\Gamma, A, B \vdash \Delta}{\Gamma, A \otimes B \vdash \Delta }{\otimes_L} \\
+     \rule{\Gamma \vdash A, B, \Delta}{\Gamma \vdash A \par B, \Delta }{\par_R} &
+      \rule{\Gamma, A \vdash \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, \Theta, A \par B \vdash \Lambda, \Delta}{\par_L} \\
+
+     \rule{\Gamma_1 \vdash A, \Delta_1 \quad \ldots \quad \Gamma_n \vdash A, \Delta_n}{\Gamma_1, \ldots, \Gamma_n \vdash A^{\otimes n}, \Delta_1, \ldots, \Delta_n}{{\otimes n}_R} &
+      \rule{\Gamma, \overbrace{A,\ldots,A}^n \vdash \Delta}{\Gamma, A^{\otimes n} \vdash \Delta }{{\otimes n}_L} \\
+     \rule{\Gamma \vdash \overbrace{A,\ldots,A}^n, \Delta}{\Gamma \vdash A^{\par n}, \Delta }{{\par n}_R} &
+     \rule{\Gamma_1, A \vdash \Delta_1 \quad \ldots \quad \Gamma_n, A \vdash \Delta_n}{\Gamma_1, \ldots, \Gamma_n, A^{\par n} \vdash \Delta_1, \ldots, \Delta_n}{{\par n}_L} \\
+
+     \rule{\Gamma, A \vdash \Delta}{\Gamma \vdash \neg A, \Delta }{\neg_R} &
+     \rule{\Gamma \vdash A, \Delta}{\Gamma, \neg A \vdash \Delta }{\neg_L} \\
+     \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \smash{\updownarrow}A, \Delta }{\smash{\updownarrow}_R} &
+     \rule{\Gamma, A \vdash \Delta}{\Gamma, \smash{\updownarrow}A \vdash \Delta }{\smash{\updownarrow}_L} \\
+
+     \rule{\Gamma, A \vdash B, \Delta}{\Gamma \vdash A \to B, \Delta }{\to_R} &
+     \rule{\Gamma \vdash A, \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, \Theta, A \to B \vdash \Lambda, \Delta }{\to_L} \\
+     \rule{\Gamma, A \vdash B, \Delta \quad \Gamma, B \vdash A, \Delta}{\Gamma \vdash A \leftrightarrow B, \Delta }{\leftrightarrow_R} &
+     \rule{\Gamma \vdash A, \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, A \leftrightarrow B \vdash \Delta }{\leftrightarrow_{\to L}} \\
+      & \rule{\Gamma \vdash B, \Delta \quad \Theta, A \vdash \Lambda}{\Gamma, A \leftrightarrow B \vdash \Delta }{\leftrightarrow_{\leftarrow L}}
+    \end{array}
+
 Programming types
 -----------------
 
@@ -148,6 +187,8 @@ We can also write some types common from programming:
    * - :math:`Arr_A`
      - Arbitrarily-sized tuple of A
      - :math:`\Sigma [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]`
+
+In general :math:`\Sigma` can represent any algebraic data type.
 
 Exponentials
 ============
@@ -196,6 +237,53 @@ Contraction
   \begin{array}{cc}
       \rule{\sk{\Gamma}, \overrightarrow{\bang A, \bang A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang c_n}
     & \rule{\sk{\Gamma} \vdash \overrightarrow{\whim A, \whim A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim c_n}
+  \end{array}
+
+Admissible rules
+----------------
+
+The following rules are derivable from the four rules above.
+
+Weak promotion, implied by promotion and dereliction:
+
+.. math::
+  :nowrap:
+
+  \begin{array}{cc}
+      \rule{\Gamma \vdash A, \Delta }{\bang \Gamma \vdash \bang A, \whim \Delta}{\bang_\text{weak}}
+      & \rule{\Gamma, A \vdash \Delta }{\bang \Gamma, \whim A \vdash \whim \Delta}{\whim_\text{weak}}
+  \end{array}
+
+Digging is simply the theorems :math:`\bang \bang A \equiv \bang a` and :math:`\whim \whim A \equiv \whim a`, but we present the sequent forms for completeness. It is implied by promotion and dereliction.
+
+.. math::
+  :nowrap:
+
+  \begin{array}{cc}
+      \rule{\Gamma, \bang \bang A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{dig}}
+      & \rule{\Gamma \vdash \whim \whim A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{dig}}
+  \end{array}
+
+Weak promotion and digging together imply promotion.
+
+Absorption is implied by contraction and dereliction:
+
+.. math::
+  :nowrap:
+
+  \begin{array}{cc}
+      \rule{\Gamma, A, \bang A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{absorb}}
+      & \rule{\Gamma \vdash A, \whim A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{absorb}}
+  \end{array}
+
+Multiplexing is implied by absorption and dereliction:
+
+.. math::
+  :nowrap:
+
+  \begin{array}{cc}
+      \rule{\Gamma, A, \ldots, A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{multiplex}}
+      & \rule{\Gamma \vdash A, \ldots, A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{multiplex}}
   \end{array}
 
 Structural rules
@@ -330,19 +418,11 @@ We define
 
   \left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]
 
-  \exists x\in A. P(x) = \exists x. \bang(x \in A) \otimes P(x)
+  \exists x\in A. P(x) = \exists x.(\bang(x \in A) \otimes P(x))
 
-  \forall x\in A. P(x) = \forall x. (\bang(x\in A) \multimap P(x)
+  \forall x\in A. P(x) = \forall x. (\bang(x\in A) \to P(x))
 
-Comprehension
--------------
-
-We can prove the axiom schema of comprehension for formulas :math:`\phi` with free variable :math:`x`:
-
-1. :math:`\vdash \phi \leftrightarrow \phi`
-2. :math:`\vdash x\in \{x\mid\phi\} \leftrightarrow \phi`
-3. :math:`\vdash \forall x. x\in \{x\mid\phi\} \leftrightarrow \phi`
-4. :math:`\vdash \exists y. \forall x. x\in y \leftrightarrow \phi`
+We can prove the axiom schema of comprehension :math:`\vdash \exists y. \forall x. x\in y \leftrightarrow \phi` for all formulas :math:`\phi` with free variable :math:`x`.
 
 Equality
 --------

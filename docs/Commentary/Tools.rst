@@ -58,7 +58,7 @@ According to the `StackOverflow 2022 survey <https://survey.stackoverflow.co/202
 Language server
 ---------------
 
-VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server will provide:
+VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server can provide:
 
 * syntax highlighting
 * tooltips
@@ -67,7 +67,7 @@ VSCode comes with an extensive protocol for language integration, LSP. Other IDE
 * debugger integration
 * navigate to definition
 * compiler errors/warnings/fixes
-* IDE-assisted renaming or refactoring
+* renaming or refactoring actions
 
 Notebooks
 ---------
@@ -76,3 +76,25 @@ Ideally, IMO, notebooks would be incremental. Running (shift-enter) would act as
 
 The modern workspace environment that's most popular is the Jupyter notebook interface. But jupyter's kernel `protocol <https://jupyter-client.readthedocs.io/en/latest/messaging.html>`__ is just a dumb "execute this string of code" REPL, no information on what cell it's from. So we would have to hack jupyter to get this to work. OTOH the LSP protocol does support incremental update and it looks like you can use this incremental update protocol with notebooks. So another win for supporting VSCode exclusively.
 
+Debugger
+========
+
+The debugger's view of the program's state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation.
+
+One debugging technique useful in combination with reversible debugging is to use a step counter that starts at 0 at the beginning of the program and increments every time a reduction step is performed. The exact step that triggers a behavior can be determined by binary search. Similarly when we are debugging a phase of the compiler, we can use "fuel" - this specifies how many transformations can be performed during the phase of interest before moving on to the next phase.
+
+Let's assume we have symbols, then there are lots of operations available from a debugger:
+
+* recording: record the whole program execution. Reversible debugging allows running a program backwards. Omniscient debugging allows queries over the entire execution of the program, as though all states were stored in a database and indexed. Recording can be implemented by instruction-level recording, but more efficient is to record only non-deterministic events, with occasional whole-program snapshots to allow seeking. Supporting concurrent execution requires recording inter-thread sequencing.
+* breakpoints: set/clear/list. essentially a breakpoint is a true/false predicate on a transition. Can inspect state and the previous state - common conditions include at program line/column, transition calls syscall, transition enters function, expression not yet evaluated, transition invokes signal handler, variable has value in state, transition modifies variable, transition in certain thread.
+* tracepoints: record message / data / statistics at a set of program transitions, like a breakpoint but without stopping
+* queries: print backtrace / call stack, print state (threads, variables), dump memory, disassemble memory, blocked thread dependencies, pretty-printing, GUI visualizations
+* stepping: single step, step out, continue thread / all threads until breakpoint, run ignoring breakpoints until stopped with interactive commnad
+* REPL / patching: evaluate pure expression in context of state, evaluate arbitrary code in current state (e.g. set variable to value), replace definition, hot-reload code changes, jump to address, return early from function. Pedantically, the patched state has no real history so the debugger should only be able to run forward from the state, but we can graft the patched state onto the old state to avoid losing context.
+* IPC: send signal, modify files
+
+Debugging by querying a database of all program state by Kyle Huey
+The State Of Debugging in 2022 by Robert O’Callahan
+Debugging Backwards in Time (2003) by Bil Lewis
+undo.io UDB
+rr, WinDBG, Pernosco.

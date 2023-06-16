@@ -230,6 +230,16 @@ See https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local
 
 Essentially it's a shared memory variable that stores ``Map ThreadId Word``, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.
 
+Secret
+------
+
+A secret a la `Rune <https://github.com/google/rune/blob/main/g3doc/index.md>`__ represents information stored in a "secure enclave". This could be implemented via an actual "trusted execution" environment provided by the hardware, but that requires some OS involvement, so instead secrets are just normal memory that is handled carefully to protect it from some attacks. In particular:
+
+* To prevent data leakage, the memory used for secrets is zeroed when freed.
+* To prevent timing side-channel leakage, all secret-using operations will occur in time not dependent on the value of the secret.
+* To avoid Spectre/Meltdown, conditional branching on a secret boolean or indexing via a secret integer are prohibited.
+* To prevent coding errors, all operations that have a secret as input return the output in a secret. The secret must be explicitly "revealed" (dereferenced) to be used as an ordinary value.
+
 Symbol
 ______
 

@@ -6,34 +6,33 @@ As Go says, the rise of multicore CPUs means that a language should provide firs
 Model
 =====
 
-The general idea with concurrency is there are multiple threads of execution. But practically there are more layers than just threads:
+The general idea with concurrency is there are multiple threads of execution. But practically there are several types of threads:
+
+* An OS thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (`1 <https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989>`__, :cite:`nishanovFibersMagnifyingGlass2018` section 2.3.1)
+* A UMS thread is a special type of Windows thread which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
+* A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (`contiguous stacks <https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub>`__). Per Microsoft, fibers in C do not provide many advantages over threads.
+
+Threads have their own thread-local state/storage, but they do not exist in a vacuum; most of their state is shared with other threads running in the same context. This context may have several levels:
 
 * A node is a physical or virtual machine in a cluster
 * A pod is a group of one or more containers, that share storage and network resources and runs on a single node
 * A container / namespace (Linux) / silo (Windows) contains one or more applications in an isolated form with all dependencies loaded from the container image
-* A cgroup (Linux) / job object (Windows) is a group of processes whose resource usage is managed as a unit. Cgroups / job objects are arranged in a hierarchy of containment - cgroups may have multiple hierarchies for distinct resources, but job objects have only one hierarchy. A process belongs to one most specific job object / cgroup in each hierarchy. Cgroups / job objects have rules for assigning newly spawned processes to themselves, and there is an atomic API call to terminate all processes in the cgroup / job object, contrary to `what this says <http://jdebp.info/FGA/linux-control-groups-are-not-jobs.html>`__  (it was added later).
+* A cgroup (Linux) / job object (Windows) is a group of processes whose resource usage is managed as a unit. Cgroups / job objects are arranged in a hierarchy of containment - cgroups may have multiple hierarchies for distinct resources, but job objects have only one hierarchy. A process belongs to one most specific job object / cgroup in each hierarchy. Cgroups / job objects have rules for assigning newly spawned processes to themselves, and there is an atomic API call to terminate all processes in the cgroup / job object, contrary to `what this says <http://jdebp.info/FGA/linux-control-groups-are-not-jobs.html>`__  (the API call was added later).
 * An application is the result of invoking a binary and consists of one or more running processes.
 * A process is an executing program and has a memory space and other resources allocated. One or more threads run in the context of the process.
-* An (OS) thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (`1 <https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989>`__, :cite:`nishanovFibersMagnifyingGlass2018` section 2.3.1)
-* A "UMS thread" is a special type of Windows thread which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.
-* A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (`contiguous stacks <https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub>`__). Per Microsoft, fibers in C do not provide many advantages over threads.
 
-A typical thread uses a combination of hardware and OS operations. In the cloud, a thread uses more network-centric operations.
+As far as storage, all immutable data exists in ambient space and is transparently copied by the memory management system as needed. Mutable data is stored in a specific location (TLS, process context, etc.) and is accessed via specialized, imperative concurrent operations.
 
 Concurrent operations
 =====================
 
-At the lowest level are:
+At the lowest level, a thread uses a combination of hardware and OS operations. The hardware operations are read/write on mutable shared memory, and various memory barrier/fence instructions. The OS syscalls are a mess but can be roughly tagged as files, networking, process, (shared) memory, permissions, system clock, futex, System V IPC, and signals. In the cloud, a thread uses mostly network-centric operations, message-passing between nodes, while on a node the operations are mostly shared memory operations due to current machine architectures.
 
-* read/write operations on mutable shared memory
-* memory barrier/fence instructions
-* OS syscalls that involve concurrency
-
-There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, actors, transactional memory. Higher-level interfaces enable much simpler code, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot.
+There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, transactional memory. These high-level interfaces are conceptually much simpler to reason about than mutable shared memory, in particular avoiding aliasing, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot. Sharing is caring.
 
 TODO: create complete list of higher-level abstractions and figure out how to nicely expose them in the language as libraries
 
-* actors, channels, mvars
+In Erlang we have the actor model. This had the following concurrent operations: spawn process (identified by ID), send message (any value) to process, receive next message (block indefinitely), receive next message (with timeout). These are implemented by a runtime, which ensures processes are lightweight, schedules and runs them, and manages memory like the message queues.
 
 Memory models and races
 =======================

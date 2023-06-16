@@ -95,79 +95,35 @@ So the difficult property to ensure is logical consistency. By Godel's first inc
 
 The simplest complete and consistent system is the unitype system. This consists of a universe type whose domain contains all values and its negation the empty type. To ensure consistency we must ensure that the empty type is uninhabited, so all programs must be of the universe type. This means nonterminating programs must have a value in the semantic domain. If we add termination checking we can put nonterminating programs in the empty type and restrict the universe to terminating programs, but this increases the complexity.
 
-Unityped
-========
+Unityping
+=========
 
-Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ all type systems are static. So this is really about dynamic vs not. Harper has coined the phrase "unityped" to describe what is commonly known as a dynamic language. In Stroscot this word is short for "universally typed", i.e. the language has a universal type that can contain all values. This definition is slightly different from Harper's, who uses "unitype" to mean that there is only one type in the language. We will call Harper's definition "single-typed". If a language is single-typed it must be unityped, since all values are in the single universal type, but not every uni-typed language is single-typed.
+Per `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ all type systems are static, and dynamic languages are simply "unityped" static languages. "[A dynamic language] agglomerates all of the values of the language into a single, gigantic (perhaps even extensible) [static] type".In Stroscot we follow this description literally, interpreting "unityped" to be short for "universally typed", i.e. the language has a universal type that contains all values. This definition is slightly different from Harper's post, where he interprets "unityped" to mean that there is only the single universal type in the language. We will call Harper's definition "single-typed". If a language is single-typed it must be unityped, since all values are in the single universal type, but not every uni-typed language is single-typed.
 
-Consider the notion of Curry-style types, called sorts in :cite:`pfenningChurchCurryCombining2008`. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is unityped if it has a trivial sort that checks no properties. Even if the language is unityped, it doesn't have to be single-typed, because there can still be more than one type (sort) - in fact there can be a whole language of properties/sorts.
+Consider the notion of Curry-style types, called sorts in :cite:`pfenningChurchCurryCombining2008`. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is unityped if it has a trivial sort that checks no properties. But even if the language is unityped, it doesn't have to be single-typed, because there can still be more than one type (sort) - in fact there can be a whole language of properties/sorts.
 
-A unityped language means if you write zero type signatures and ignore all type warnings the program still compiles and runs and produces a value. The compiler starts with the universal sort and refines this as much as it can, but even if it fails there is still an operational semantics.
+A unityped language means if you write zero type signatures and ignore all warnings the program still compiles and runs and produces a value (although it may be an error). Every non-unityped program has a corresponding unityped program where the values are extended to contain the type information as a tag (reification). Often the operational semantics does not depend on the type and we can simply erase the type. In the specific case of return type overloaded type classes, where type inference is key, the semantics can be made nondeterministic and type annotations can be incorporated explicitly as pruning possibilities.
 
-Non-unityped programs are a subset of unityped programs. Every non-unityped program has a corresponding unityped program where the values are extended to contain the type information as a tag (reification). Often the operational semantics does not depend on the type and we can simply erase the type. In the specific case of return type overloaded type classes, where type inference is key, the semantics can be made nondeterministic and type annotations can be incorporated explicitly as pruning possibilities.
+Practically, one cannot encode unityping scheme in existing static languages. For example, ML's type system is incomplete and hence some terms allowed in a dynamic system, such as the Y combinator, are untypeable. Haskell has unsafeCoerce, which solves the typeability problem, and a `Dynamic type <https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html>`__ which allows interacting with the existing type system. Specifically Clean's Dynamic type (but not GHC's) can store all types. But even though Dynamic can store all values 1-1 it is not a universal type because ``a : Int`` and ``toDyn a : Dynamic`` are distinct values. So unityping also requires subtyping.
 
-Non-unityped is at most as expressive - there are programs which unityped allows which most non-unityped systems reject. Haskell has a `Dynamic type <https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html>`__ which allows expressing such programs. It seems to only be a GHC limitation that it can only contain monomorphic values. Clean's dynamic can store polymorphic types and presumably one could add polymorphic ``Typeable`` instances to GHC as well. But even though Dynamic can store all values it is not a universal type because ``a : Int`` and ``toDyn a : Dynamic`` are distinct values. So unityping also requires subtyping.
+Unityping makes the language more expressive: variables can contain all values, and type tests can dynamically check against some type. It does add some overhead to represent members of diverse types, check the tags/types of specific values, and convert between representations, but there are well-known optimizations (Self, Smalltalk, LuaJIT), and it seems that adding unityping will not necessarily decrease the performance of non-unityped programs.
 
-It complicates the language unnecessarily to have two values which can't be stored to the same variable or type tests which can't scrutinize some values.
+Overall, unityping seems good, hence Stroscot is a unityped language.
 
-Overall unityping seems good, hence Stroscot is unityped.
+Regarding single-typing, Harper gives the example of the complex numbers. Doel extends this: one would like to write a function on the complex numbers, and rule out other forms of input. This can be represented as a runtime check, ``f x = assert (x : Complex); ...``, but clearly if the universal type is the only type it becomes very difficult to express it concisely. Many dynamic languages such as Python, Perl, Lua provide concise type test syntax in some way or another (``isinstance``, ``isa``, ``type``). So it seems a strawman property. In CCC 6/9/23 it was brought up that since the check is formally at run-time, it will generally require running the program over all inputs, rather than being detected at compile time. But this is where model checking comes in, as it can detect potential runtime errors at compile time.
 
-Static vs dynamic
-=================
+There is the benefit of type signatures that many ‘obvious’ pieces of code can be written automatically. For example Lennart Augustsson’s djinn takes a type like ``fmap : (a -> b) -> Maybe a -> Maybe b``  or ``callCC : ((a -> Cont r b) -> Cont r a) -> Cont r a`` and writes code that has that type. These can be non-trivial to write if you’re just thinking about how it should behave, but the type completely determines the implementation. This sort of functionality seems like it can be offered through a macro, completely separate from the type system of the language.
 
-"Soft typing" is similar to the verification approach, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell's "deferred type errors" flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.
+Model checking
+==============
 
-Type systems must allow valid programs and catch errors. But even practical type systems like ML or Haskell have corner cases - the "head of list" function errors on the empty list, but this is not reflected in the type ``[a] -> a``. With overloaded type signatures we can accurately capture the behavior, ``{x : [a] | nonempty x } -> a`` and ``[a] -> a|Error`` (and even ``{ x : [a] | empty x } -> Error``.
+Type systems, and model checkers, both aim to catch some types of errors while allowing valid programs. But most practical type systems like those of ML or Haskell have corner cases. For example the "head of list" function errors on the empty list, but this is not reflected in the type ``[a] -> a``. With dependent type signatures we can accurately capture the behavior for specific cases, ``{x : [a] | nonempty x } -> a`` and ``[a] -> a|Error`` (and even ``{ x : [a] | empty x } -> Error``, but these type signatures overlap and there is no best type signature. In practice, in order to be useful, type systems compromise and treat some "type-like" errors as dynamic errors not handled by the type system. Similarly there is a tension between knowing the size of an array (preventing out of bounds errors) and writing code that is independent of array size.
 
-    Principle: Even sound static type systems compromise on some "type-like" errors and check them dynamically.
+In contrast, with model checking, we are verifying predicates or sorts. There is no issue with writing multiple overlapping type signatures; simply check them all. We are analyzing the full dynamic behavior of the program, rather than a simplification, so there are no corner cases. Consider ``x = 4 : int; y = x : nat``. We’re assigning an int to a nat here, which could potentially fail. But model checking concludes that 4 is a nat, and therefore that the check will succeed and the program has no errors. In contrast, no type system can soundly allow assignment from a supertype to a subtype, at least without also recording the actual set of values similarly to model checking.
 
-Consider the hd function in ML. The type of this function is 'a list -> 'a. However, clearly, when applied to the nil list, which is a well-typed application, hd cannot return a useful value. One could imagine some type system in which lists are further subdivided into empty and non-empty static types. ML does not take this approach. Instead, it checks dynamically and raises an exception.
+In general, trying to prove any non-trivial property will find all the bugs in a program. But a type system is simpler than a model checker, hence will find false positives more often. Model checking allows unityping, while there are very few unityped type systems.
 
-In practice, in order to be useful, all statically typed languages compromise and define some "type-like" errors as dynamic errors. The other classic example is an array-out-of-bounds error: one can imagine a language in which all arrays have statically known size. In such a language there would be no such thing as a generic array of integers; instead, there would be an array of integers of length 1, an array of integers of length 2, etc. One would then be able to check statically that all array accesses were in bounds.
-
-The drawback of such a system is that it would not be possible to write functions over arrays of unknown size. This is not considered acceptable for most practical programming. Indeed, the original version of the Pascal language had array types that fixed the size --- it was not possible to write routines that were polymorphic over array size --- and this was one of the reasons that programmers rejected this language.
-
-In practice, most type-safe languages allow array size polymorphism, and check array bounds dynamically.
-
-
-Practically one cannot encode Harper's "unitype" scheme in existing static languages such as ML, because ML's type system is incomplete and hence some dynamic terms are untypable. Further datatypes in ML require pattern matching to extract the value, endless tedium. A dynamic language provides easy syntax.
-
-multiple forms of complex numbers
-  rectangular: 1+2 i
-  polar: sqrt(5) e^(i arctan(2))
-
-They are mostly interchangeable, a 1-1 conversion between polar and rectangular. But in practice not, e.g. 0 has only one rectangular form but many polar forms, and the polar angle can differ by any multiple of 360 degrees. Restricting the domain to theta in [0,360 degrees) and r=0 -> theta=0 fixes this.
-
-Some forms are more convenient for some computations. A given computation may require and return results in a specific form. We may overload computations work on both forms, testing which form is given and dispatching to the appropriate sub-computation. Data structures such as sets can contain any form and also other types of values. So there are several sets relevant to programming with complex numbers:
-* the set of all rectangular forms
-* the set of all polar forms
-* the disjoint union of the above (sum type)
-* the universal set containing the above and all other values
-
-even if a particular value is an integer, it is a value of universal set.
-how do you represent, check, remove, and apply the tag on the value each time it is used?
-
-    Consider:
-
-    x = 4 : int
-    y = x : nat
-
-    We’re assigning supertype to subtype here (nat <: int), which could potentially fail. But we can be sure from inspection that it will succeed.
-
-        when you prove properties of your program, you end up finding bugs, almost regardless of what properties you are trying to prove.
-
-        If complex numbers are classified as either rectangular or polar, then if you see:
-        f : Complex -> ...
-        You know the argument is one of polar or rectangular, although which one is not known until runtime. You have ruled out all other values. With a unityped language you cannot express this restriction.
-
-        Sufficiently fancy types can give enough information to write ‘obvious’ pieces of code automatically, and with proof assistants this can be a dialogue. An elementary example of this is Lennart Augustsson’s djinn, which will take types like ``fmap : (a -> b) -> Maybe a -> Maybe b``  or ``callCC : ((a -> Cont r b) -> Cont r a) -> Cont r a`` and write code that has the type. These can be non-trivial to write if you’re just thinking about how it should behave, but the type completely determines the implementation.
-
-
-Dynamic languages don't have to be slow. With detailed profiling information, from a JIT compiler or PGO style build, LuaJIT can optimize the inner loop of mandelbrot to the same assembly as a C compiler. But a standard static build workflow won't cut it, and the most popular dynamic languages (JavaScript, Perl, PHP, Python, Ruby) are slow - performance was never a goal of their design, and it's only now everyone realizes that dynamic languages might be useful for compute-intensive tasks. Smalltalk and Self had pretty good optimization research.
-
-Common pain points that require careful design:
-* dynamic dispatch and type uncertainty
-* runtime checks (types, bounds, exceptions)
+"Soft typing" is similar to model checking, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell's "deferred type errors" flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.
 
 Roles
 =====

@@ -1,22 +1,114 @@
 Code generation
 ###############
 
-The back-end is complicated. There are three main operations that need to be done.
+Code generation is NP-hard and affects performance a lot. There are three main operations that need to be done, encompassing many optimizations:
 
-#. Instruction selection
-#. Register allocation
-#. Instruction scheduling
+#. Instruction selection - Peephole optimization, Common subexpression elimination
+#. Register allocation - Spilling, Rematerialization
+#. Instruction scheduling - Code motion, Block ordering
 
-Per Unison/Blindell, all of these are interdependent and must be solved as a single, large constrained combinatorial optimization problem to find the optimal solution. These three tasks encompass many optimizations, such as:
+Constrained optimization
+========================
 
-* Peephole optimization
-* Code motion
-* Block ordering
-* Spilling
-* Rematerialization
-* Common subexpression elimination
+Per Unison, instruction selection, register allocation, and instruction scheduling are interdependent. Solving instruction scheduling first tends to increase the register pressure (number of live temporaries), which may degrade the result of register allocation. Conversely, solving register allocation first tends to increase the reuse of registers, which introduces additional dependencies between instructions and may degrade the result of instruction scheduling.
 
-Stroscot uses assembly instruction intrinsics in the language and IR. It doesn't provide "inline assembly", meaning literal blocks of texual assembly code - the closest is writing the hexadecimal machine code and pretending it's a single instruction. So it makes sense to provide a performance guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code. Unison can do a search over the complete space of instruction sequences, hence can actually find the optimal solution and satisfy this guarantee.
+Because of the interdependency, the "holy grail" of code generation (Roberto's words) is to model code generation as a single combinatorial optimization problem, because the optimal solution can only be found when the search space is large enough. Stroscot aims for this holy grail: when run without compile time constraint, Stroscot should find the globally best solution, given the objective function for the runtime.
+
+We could take the traditional approach and just design a heuristic algorithm that solves these problems in sequence. But code generation is complex enough that there is just no way to solve it optimally without properly defining the search space, constraints, and the objective function, and conducting an actual search. Following the traditional approach, we could invest a lot of effort into kludges, like a second instruction scheduling pass, and yet still not be able to generate optimal code. Furthermore, with the traditional approach, it is easy to have bugs in the heuristics and generate incorrect code, caught only much later in production, whereas properly defining constraints allows them to be automatically checked in a "lint" mode. Furthermore, with the constrained optimization paradigm, it is easy to exercise all codepaths by overriding the objective function, enabling good testing of all optimizations.
+
+Within the constrained optimization framework, there is still a lot of room for heuristics. Finding the optimal solution requires ruling out all other solutions, and with the branch-and-bound method it is important to have a near-optimal solution that is known to work. Furthermore, brute-force search is slow, and good search heuristics can allow finding the optimal solution faster. Good bounding heuristics can allow pruning the search much earlier.
+
+When there is a constraint on compile time, as there is in most real-world scenarios, the initial-solution heuristic ends up being most of the execution. Specifically, for cold code (the majority!), the focus is simply to produce correct code in the shortest amount of time, and even a 10x inefficiency doesn't particularly matter. For hot code, a better heuristic such as graph coloring can be used, and again this will probably take up most of the compile time spent on that function. It is only in extremely hot code that searching is worthwhile. Furthermore, searching has diminishing returns, so in most cases the search will not be to optimality, as the optimality gap can be bounded and the time spent searching for that last 2% efficiency is better spent on other optimizations.
+
+Although optimality may not be often used in industrial code, there's at least one design factor requiring it. Stroscot encourages the use of assembly instruction intrinsics, rather than literal blocks of "inline assembly". Since the assembly code gets munged, optimality is the only way to guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code, in various microbenchmarks.
+
+Optimizations
+=============
+calling convention/ABI
+  accumulate arguments on the stack vs popping them
+  omit frame pointer
+  tail recursive calls
+  scalar replacement of aggregates
+  removal of unused parameters
+  replacement of parameters passed by reference by parameters passed by value.
+  omitting unexported functions
+  automatic constructor/destructor implementation
+  null pointer dereference behavior
+  Emit function prologues only before parts of the function that need it, rather than at the top of the function.
+  alignment - functions, loops, jumps, labels
+instruction scheduling
+  reorder instructions
+  region size: basic blocks, superblocks
+  schedule instructions of the same type together
+instruction selection
+  combining instructions, e.g. fused multiply-add, decrement and branch
+  transformation of conditional jumps to branchless code (arithmetic and conditional moves)
+  remove redundant instructions
+register allocation
+  swing modulo scheduling
+  allow allocating "wide" types non-consecutively
+  Graph coloring algorithm: Chow's priority, Chaitin-Briggs
+  region size: loop, function
+  rematerialization
+  use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.
+  Use caller save registers if they are not used by any called function.
+  rename registers to avoid false dependencies
+optimizations
+  replace standard functions with faster alternatives when possible
+  inlining
+  deduplication of constants, functions, code sequences (tail merging / cross jumping)
+  common subexpression elimination (CSE)
+  dead code/store eliminate (DCE/DSE)
+  conditional dead code elimination (DCE) for calls to built-in functions that may set errno but are otherwise free of side effects
+  global constant and copy propagation
+  constant propagation - which values/bits of values passed to functions are constants, function cloning
+  value range propagation - like constant propagation but value ranges
+  sparse conditional constant propagation (CCP), including bit-level
+  elimination of always true/false conditions
+  move loads/stores outside loops
+  loop unrolling/peeling
+  loop exit test
+  cross-jumping transformation
+  constant folding
+  specializing call dispatch (possible targets, likely targets, test/branch)
+  Code hoisting - evaluate guaranteed-evaluated expressions as early as possible
+  copy propagation - eliminate unnecessary copy operations
+  Discover which variables escape
+  partial/full redundancy elimination (PRE/FRE)
+  modified/referenced memory analysis, points-to analysis, aliasing
+  strips sign operations if the sign of a value never matters
+  convert initialization in switch to initialization from a scalar array
+  termination checking
+  loop nest optimizer based on the Pluto optimization algorithms. It calculates a loop structure optimized for data-locality and parallelism.
+  graphite - loop distribution, loop interchange, unroll, jam, peel, split, unswitch, parallelize, copy variables, inline to use first iteration values, predictive commoning, prefetch
+  final value replacement - loop to calculation using initial value and number of loop iterations
+  explode structures to scalars in registers
+  vectorization - loop vectorization, basic block vectorization, cost free (for debugging), likely faster, or code size
+  reorder blocks, duplicate blocks, partition into hot/cold to improve paging and cache locality
+  specialization of division operations using knowledge of the denominator
+
+profiling:
+  generate approximate profile of new/modified code, guessing using heuristics
+  cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions
+  AutoFDO profile https://perf.wiki.kernel.org/
+
+live-patching: depending on optimizations, all callers maybe impacted, therefore need to be patched as well.
+
+
+floating-point variables
+  register or memory.
+  on machines such as 68881 and x86, the floating registers keep excess precision. For most programs, the excess precision does only good, but a few programs rely on the precise definition of IEEE floating point.
+  fast: allow higher precision / formula transformations if that would result in faster code. it is unpredictable when rounding to the IEEE types takes place and NaNs, signed zero, and infinities are assumed to not occur.
+  standard: follow the rules specified in ISO C99 or C++; both casts and assignments cause values to be rounded to their semantic types
+  strict: rounding occurs after each operation, no transformations
+  exception handling, mode handling
+
+Magic numbers:
+  search space sizes - Increasing values mean more aggressive optimization, making the compilation time increase, but with diminishing improvement in runtime execution time. Generally a formula producing a boolean "try optimization" answer or an integer "maximum number of possibilities to consider".
+  memory limit - If more memory than specified is required, the optimization is not done.
+  analysis skipping - ignore objects larger than some size
+  ratios - if inlining grows code by more than this, cancel inlining. tends to be overly conservative on small functions which can increase by 300%.
+
 
 Register allocation
 ===================
@@ -57,6 +149,8 @@ End result is typically very good on all the hot paths, never very bad on cold p
 Oh yeah, and its by far the fastest register graph-coloring allocator I've ever seen.  Key point for a JIT, as reg-alloc can be expensive.  Its often about 40% of C2's compile budget.
 
 
+LuaJit register allocator (reinvented): https://www.mattkeeter.com/blog/2022-10-04-ssra/ simple and fast
+
 Instruction selection
 =====================
 
@@ -91,6 +185,9 @@ A compiler can directly emit ISP or you can start with assembly instructions and
 
 Instruction Scheduling
 ======================
+
+pre-calculate offsets, branch penalties, speculative execution, cache misses, code size
+
 
 Instruction scheduling assigns issue cycles to program instructions. Valid instruction schedules
 must satisfy instruction dependencies and constraints imposed by limited processor resources.
@@ -135,6 +232,26 @@ timing of instructions - most are fixed. load operations depend on what's cached
 * Bias conditional jumps towards the common case
 
 branch prediction: branch target buffer (BTB), indirect branch target array, loop detector and renamed return stack buffer. mispredicted branch clears cache and restarts.
+
+Jumps
+=====
+
+An important point is how control transfers between blocks. Cliff is always talking about inline jump target caches. These reduce use of the branch target buffer (BTB), improving the performance of programs that use a lot of jumps and calls. The BTB is a finite resource.  If you have a few hundred jmp-regs you're calling lots, the BTB will cover you.  Somewhere above 1000's it starts to get overwhelmed and you start getting misses on the J-R. The inline cache reduces BTB pressure at the expense of some code generation complexity, increased code size, and possible slowdown if the cache misses often. In a typical Java program, however, the inline cache will literally never fail over the program lifetime once it is generated by the JIT.
+
+The idea is to encode likely target addresses of the jump or call in the assembly as a ld/cmp/br/call or ld/call/cmp/br instruction sequence. Assuming there is a hit, the processor will jump directly to a fixed address, no entry in the BTB will be made, and the call can avoid several indirect memory fetches. Furthermore since the sequence is entirely predictable, the processor will likely be able to speculatively execute or skip the jump. In a typical Java program, because the failure rate is so low, no stats are kept and on first-fail, it directly flips to the fallback ld/ld/ld/jump-reg.
+
+The ld/cmp/br sequence is highly optimized by X86 and can wide issue. So call it ~1clk for the whole set of 4 ops. A bare static call is ~1/2clk (can wide issue with other stuff). A BTB miss is ~30clks. So the cache
+
+Advantages:
+
+    Reduced memory access: By caching the target addresses of jumps and calls, the processor can reduce the number of memory accesses it needs to perform. This can result in less contention for the memory bus and can help improve overall system performance.
+
+Disadvantages:
+
+    Increased code size: The inline jump target caches can increase the size of the code, which can make the program larger and require more memory to store.
+    Cache misses: If the cache does not contain the target address of a jump or call, the processor must fetch the address from memory. This can result in increased memory access times and can negate the performance benefits of the cache.
+
+Overall, the advantages of jump target caches generally outweigh the disadvantages, especially in programs that have a lot of jumps and calls. However, as with any optimization technique, the effectiveness of jump target caches depends on the specific program and system configuration.
 
 Layout
 ======

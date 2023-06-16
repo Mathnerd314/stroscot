@@ -193,42 +193,15 @@ A reachability (safety) task consists of a program annotated with a set of error
 
 To prove unreachability we exhibit a covering domain with no concrete error states in any of the abstract states. To prove reachability we produce a concrete feasible path ending in an error state. The counterexample can then be fed into a debugger to determine what changes to make to the program.
 
-Assertions
+Exceptions
 ~~~~~~~~~~
 
-Assertions come in two flavors: true assertions, written inside the function for sanity-checking purposes, and contracts, which are external to the function and show up in the documentation. The difference is that contracts fail at the point of the contract definition, while true assertions only fail once the function is used. Technically a contract like ``a : Int -> Int`` is exercising a function over all possible integers.
-
-If an assertion expression doesn't evaluate to true or false then the expression is not correct and has an error. The assertion condition must be side-effect free.
-
-For example, an algebraic data type declares a set of cases. With an assertion that the function produces a value of some type given the ADT, the compiler checks that every ADT case is covered by the code and produces the right value type.
-
-A dead code (coverage checking) pass checks that all the code is exercised by the assertions or by the program proper.
-
-Assertions are not required. They are useful, but the operational semantics depends on them only as part of the general exception-handling mechanism.
-
-
-
-assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
-assume expr - prunes traces where expression is false. backtracking implementation at runtime.
-
-Regarding debug-only assertions that are only checked in debug builds, in practice the unconditional "release" assertions are more useful/common than debug. Policies like “checked in debug” versus “checked in release” don't belong in a programming language. If you really want a debug-only check, you can say ``if(DEBUG) { assert X }``.
-
-Imagine you're designing a car and put in air bags. You test the car and the air bags in all sorts of configurations and they work great and are much safer. But just as you're getting ready to go into production to send the car out to consumers, you take out all the airbags. That's what debug-only assertions are like.
-
-``assert`` is deeply special, since it has to work with descriptions of executable properties, so unfortunately not all programs/properties will be statically resolvable.
-
-Assertions are strongly recommended for reliability and defensive coding.
-
-Invariants are just assertions in loop bodies.
-
-Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``.
-
-Java's complex form ``assert expr : exception`` that throws ``exception`` on failure seems pointless.
+The main reachability analysis figures out which exceptions a piece of code may throw. Top-level unhandled exceptions are reported as warnings.
 
 Dead code
 ~~~~~~~~~
 
-Reachability can also find dead (unreachable) code, like unused declarations, unused variables, or unsatisfiable conditions. Code is only dead if it is unreachable on all compilation configurations, so the build configurations must be interfaced.
+Reachability can also find dead (unreachable) code, like unused declarations, unused variables, or unsatisfiable conditions. Code is only dead if it is unreachable on all compilation configurations, so the build configurations must be interfaced. Assertions can exercise code too.
 
 Many exceptions are unwanted, e.g. "no patterns matched in case". Reachability can verify these are dead code.
 

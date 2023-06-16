@@ -176,12 +176,12 @@ Conveniently the CRIU project has a `list <https://criu.org/Images>`__ of what's
   * IP addresses on network devices
   * Routing tables
 
-Usually these are modeled using primitive operations, e.g. file descriptors are allocated with the open syscall rather than declaratively as ``{ fd1 = inode 1234 } ``. But the more state we model as state, the more powerful our debugging tools get. A traditional debugger has no way to undo closing a file. However, a filestate-aware debugger can reopen the file. The less we view the program as an I/O machine the easier it is to use high-bandwidth interfaces such as io_uring to perform bulk state changes - describing what rather than how is the hallmark of a high-level language. Of course, in most cases the program will use state in a single-threaded manner and it will simply be compiled to the primitive operation API by the automatic destructive update optimization.
+Usually these are modeled using primitive operations, e.g. file descriptors are allocated with the open syscall rather than declaratively as ``{ fd1 = inode 1234 }``. But the more state we model as state, the more powerful our debugging tools get. A traditional debugger has no way to undo closing a file. However, a filestate-aware debugger can reopen the file. The less we view the program as an I/O machine the easier it is to use high-bandwidth interfaces such as io_uring to perform bulk state changes - describing what rather than how is the hallmark of a high-level language. Of course, in most cases the program will use state in a single-threaded manner and it will simply be compiled to the primitive operation API by the automatic destructive update optimization.
 
 I/O sequencing model showdown
 =============================
 
-State accounts for a lot, but as said before we still need "change the world" operations like ``readLn :: IO String`` and ``print :: String -> IO ()``. Rather than side effects, following Haskell we would like the do-notation blocks that integrate statements as expressions. So a model must provide the basic monad operators ``>>=`` and ``return``. Another useful operation is recursion, in particular ``mfix :: MonadFix m => (a -> m a) -> m a``.
+All programs behave as a mathematical function, i.e., returns the same output when given the same input(s). But a for a pure function, the input and output are simply values, whereas for impure programs it is more complex. State accounts for a lot, but we still need "change the world" operations like ``readLn :: IO String`` and ``print :: String -> IO ()``. Rather than side effects, following Haskell we would like the do-notation blocks that integrate statements as expressions. So a model must provide the basic monad operators ``>>=`` and ``return``. Another useful operation is recursion, in particular ``mfix :: MonadFix m => (a -> m a) -> m a``.
 
 Monad transformers are overrated so not needed:
 
@@ -190,7 +190,7 @@ Monad transformers are overrated so not needed:
 * ReaderT is handled by implicit parameters / the store
 * MaybeT/ErrorT/ExceptT/MonadFail are handled by exceptions.
 * Select is handled by nondeterminism and exceptions.
-* These are all the standard transformers provided in `transformers <https://hackage.haskell.org/package/transformers>`__m, besides ContT.
+* These are all the standard transformers provided in `transformers <https://hackage.haskell.org/package/transformers>`__, besides ContT.
 
 So let's consider all the implementations of the I/O monad.
 

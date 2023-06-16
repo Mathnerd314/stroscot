@@ -1,31 +1,113 @@
 Objects
 #######
 
-Many people like to use the phrase "object-oriented programming". Per ChatGPT the minimal set of features necessary to be support OOP is:
+Many people like to use the word "object", as in "object-oriented programming". Stroscot aims to support all the paradigms, so being able to claim that Stroscot is OOP would be a great feature. But our analysis is stymied before it begins: per the C2 wiki, `nobody agrees on what OO is <https://wiki.c2.com/?NobodyAgreesOnWhatOoIs>`__ and there are `many definitions for OO <https://wiki.c2.com/?DefinitionsForOo>`__. For that reason the word "object" is not used in the rest of the documentation.
 
-1. Encapsulation: The ability to group data and behavior within an object and hide the implementation details from the outside world.
-2. Inheritance: The ability to create a hierarchy of classes, where subclasses can inherit attributes and behaviors from their superclasses.
-3. Overloading or dynamic dispatch: The ability to define a method of the same name in various classes and have a single call ``a.method`` resolve to the appropriate method definition.
+Definition
+==========
 
-As far as I can tell this definition is not standard - OOP is a broad term that can refer to many concepts, principles, techniques, patterns, and philosophies used in software development. So for that reason the word "object" is not used in the rest of the documentation. But this definition or similar shows up in several places when you google it and I don't particularly disagree with it.
+Fortunately, it is 2023, so we can use ChatGPT to cut the Gordian knot. It has analyzed many discussions of OOP and distilled the common themes. ChatGPT does not actually give a consistent definition either, but we can distill the common parts of 10 ChatGPT definitions:
+
+* OOP uses objects to represent and manipulate data. An object contains properties and methods, which group related data and behavior.
+* The core principles of OOP are encapsulation, inheritance, and polymorphism.
+
+There are some other statements included in some definitions but not others. Since we want only what is agreed on, it is clear that these should be ignored, but I will also justify why they can be ignored:
+
+* Objects are instances of classes (8/10) - prototypes instead of classes is a common twist on OO, e.g. as done in Self, and :cite:`borningClassesPrototypesObjectoriented1986` argues that prototype-based inheritance is simpler than class-based.
+* It is widely used / popular in software development (6/10) - this doesn't really matter in an argument on whether Stroscot is OO.
+* Abstraction is a fourth core principle (4/10) - arguably this is included in the "use objects to represent and manipulate data" bullet point.
+
+Getting back to the definition, the second part is just the `PolymorphismEncapsulationInheritance <https://wiki.c2.com/?PolymorphismEncapsulationInheritance>`__ definition found on C2. We thus see that this is the "correct" definition. Notably, this definition is one of the few definitions on C2 not associated with a particular pundit, and it is listed second, pretty close to the top. It is similar to `Rees's <http://paulgraham.com/reesoo.html>`__  "conventional Simula 67-like pattern" of encapsulation, ad hoc polymorphism, inheritance = subtyping, and sum-of-product-of-function pattern, which he states "many people take as a definition of OO". C2 does list caveats:
+
+* It is C++ centric - ChatGPT vehemently disagrees with this, and says the principles also apply to Java, Python, and Ruby.
+* The words "encapsulation", "inheritance", "polymorphism" only express so much, and are ambiguous out of context. There is a large amount of convention and code constructs associated with expressing these principles. - Each ChatGPT definition devotes a sentence or two to each of these words expressing the intended meaning, so doing the same common theme distillation, there is much less ambiguity. And we can always follow up by asking ChatGPT what it means by these various words. In 4/10 definitions it thought encapsulation referred to the idea of bundling data and methods into a single entity. But it should be clear that this is the basic definition of "object", rather than a principle of OOP. In 8/10 definitions, it said more reasonably that (2 definitions had both bundling and hiding) This hiding ensures that the object's internal data can only be accessed through a public interface provided by the object, which can prevent unintended changes to an object's state, and makes it easier to maintain and modify code over time.
+
+Objects
+=======
+
+For the first part of OO, we must define objects, and explain how they can contain properties and methods. For the most part I agree with `ObjectsAreDictionaries <https://wiki.c2.com/?ObjectsAreDictionaries>`__, i.e. objects are a mapping from strings to values. But I want one fewer concept in the core language so I will instead define objects to be modules, in the ML sense: a module is a list of definitions, and these definitions collectively define a mapping from expressions to values. The expression evaluated in the context of an object/module will usually be an identifier, corresponding to a dictionary lookup, but this definition lets us define values for function calls and other bits of syntax as well, so we can write DSLs more easily.
+
+We want to create and manipulate objects. So we have some operations on modules:
+
+* literal syntax
+* evaluate an expression in the context of the module
+* inspect/replace/remove a definition
+* list all definitions
+* change module imports/exports
+
+Per some cursory reading, these include all the object creation and manipulation idioms of `Self <https://handbook.selflanguage.org/SelfHandbook2017.1.pdf>`__ and `Javascript <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects>`__.
+
+No autoboxing
+-------------
+
+Stroscot does not subscribe to Smalltalk's notion that "everything is an object". Rather, in Stroscot, "everything is a value", and booleans, integers, and objects (modules) are different types of values.  This is a little similar to Java's notion of "primitive types", but unlike Java, Stroscot does not make objects reference types - objects have value semantics, and are part of the universal type. Stroscot's notion of object is more similar to the notion of "pure object" in :cite:`cookUnderstandingDataAbstraction2009`, where an object is an immutable record of functions that themselves take and return immutable objects and primitive values. To express the Java notion of mutable object, you would use Stroscot's mutable variables, in particular a Java object could be represented as a variable containing an object whose methods/functions took mutable variable references pointing to more objects.
+
+Java and C# have implemented a feature called "autoboxing" where primitive types are automatically converted to "wrapped primitive" objects like Boolean or Integer. This allows using primitives in places where an object is required. But this is a leaky abstraction; autoboxing actually changes behavior. For example in Java ``new Integer(0) != new Integer(0)``, you have to do ``Integer.valueOf(0) == Integer.valueOf(0)`` or use ``.equals``. In JS ``false`` is falsy but ``new Boolean(false)`` is truthy. Properly speaking, primitives are distinct from objects, in that they do not support key object operations such as looking up identifiers. Ultimately, discarding the "wrapping primitive" notion and simply representing primitive values directly is the most logical. Supporting a universal type that can contain both primitives and objects does complicate code generation, but it's not that bad.
+
+No object identity
+------------------
+
+In Java, objects have an identity. For example, ``new Object() == new Object()`` returns false because two different object references are constructed and their addresses are different. But when you try to do ``new Object() <  new Object()`` it's disallowed because the address is an implementation detail. So just for consistency's sake ``==`` shouldn't work either - if the address is an implementation detail, then don't expose anything about it! But apparently the desire for a fast pointer equality hack won out over the desire to avoid exposing implementation details of the language. As :cite:`cookUnderstandingDataAbstraction2009` says, "primitive equality exposes representation and prevents simulation of one object by another."
+
+In Stroscot, objects are values, so they don't have identity. Syntactically identical objects will always compare equal. However, mutable variables have identity - their value is the address, and allocating a new mutable variable creates a new address hence a new identity.. So in the emulation of Java objects as mutable variables containing objects, we can compare ref-to-object for address equality, and also dereference the refs and compare the object values. Hence the Java notion naturally decomposes into the combination of two concepts. Immutable objects work much better with the functional programming paradigm. Furthermore JSON cannot easily represent the notion of object identity, whereas object values are easily written.
+
+No implicit synchronization lock
+--------------------------------
+
+Another (mis)feature of Java is the ability to write ``synchronize (random_object)`` and use any object as a lock. This adds some bytes of header to every object allocation. It has been acknowledged by `the Java tutorial <https://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html>`__ that the ability to use any object was overly broad and it is better to use specific lock objects. `This post <https://shipilev.net/blog/2016/close-encounters-of-jmm-kind/#_horror_circus_kinda_works_but_horrifying>`__ points out that you can synchronize on primitives (actually the corresponding autoboxed objects) and on strings. Although it works for small examples due to interning caches, it will fail if your program uses too many primitives/strings as locks. This sort of tomfoolery seems pretty stupid, and there is an easy fix: if you want a mutex you should have to create a value of the ``Mutex`` type.
+
+More ChatGPT definitions
+========================
+
+Polymorphism refers to the ability of objects to take on different forms, depending on the context in which they are used.
+Polymorphism allows different objects to be used interchangeably, even if they have different implementations or behaviors, which can make code more flexible and extensible.
+Polymorphism - allowing objects to take on different forms or behaviors depending on the context in which they are used.
+Polymorphism allows objects to take on multiple forms, depending on their context.
+polymorphism, which allows objects to be treated as instances of their parent classes, or as instances of their own specific class.
+Polymorphism allows objects of different classes to be treated as if they were of the same class, by providing a common interface that can be used to interact with them.
+Polymorphism allows objects of different classes to be used interchangeably, as long as they share a common interface.
+polymorphism, which refers to the ability of objects to take on different forms or behaviors depending on the context in which they are used.
+Polymorphism: the ability of an object to take on different forms, depending on the context in which it is used.
+polymorphism allows objects to take on multiple forms and behave in different ways depending on the context in which they are used.
+
+Abstraction - representing complex systems or processes through simpler, more generalized concepts.
+Abstraction is the practice of defining interfaces without specifying implementation details, allowing for flexibility in how the interface is implemented.
+Abstraction: the ability to represent complex real-world objects in simplified form, by focusing on the essential features and ignoring the non-essential details.
+abstraction involves defining simplified interfaces for objects that hide their implementation details.
+
 
 Encapsulation
 =============
 
-Per :cite:`snyderEncapsulationInheritanceObjectoriented1986`. a module is encapsulated if clients are restricted to access the module only via its defined external interface. The external interface of a module serves as a contract between the module and its clients. So long as this contract is maintained the module can be reimplemented without affecting any clients. Thus, software evolution and maintenance is easier. To maximize the advantages of encapsulation, the contract should avoid including implementation details. For example, it should be possible to rename instance variables without affecting clients.
+According to 8/10 ChatGPT definitions, encapsulation refers to hiding the internal workings of an object from the outside world. The object's data can only be accessed or modified through a well-defined interface. Typically this interface is defined by marking certain methods and fields as "public", meaning they can be accessed by the outside world, while others are marked "private", meaning they can only be accessed by the object itself.
+
+:cite:`snyderEncapsulationInheritanceObjectoriented1986` says this controlled interface serves as a contract between the object and its clients. So long as this contract is maintained, the object can be reimplemented without affecting any clients. To maximize the advantages of encapsulation, the contract should avoid including implementation details. For example, it should be possible to rename instance variables without affecting clients. Encapsulation provides a way to protect an object's integrity, ensuring a consistent and valid internal state. Encapsulation promotes modular software evolution and maintenance.
+
+:cite:`cookUnderstandingDataAbstraction2009` argues that encapsulation is really a property of
+ML modules, because only ML modules provide sophisticated sharing mechanisms that allow multiple implementations and uses of multiple abstractions to coexist. ML of course allow the basic hiding feature, by not exporting the representation of a type. Unlike Smalltalk, which disallows ``this.foo == b.foo`` even if ``b`` is an instance of the current class, ML modules allow inspecting the representation of more than one value at the same time. ML modules also allow defining multiple abstract data types in the same module, so that a complex internal representation may be defined and manipulated without recourse to C++'s "friend" qualifier. The only feature missing from ML modules is mixing values of two different implementations - this is solved in Stroscot by allowing functions to use duck typing, so that two values may be mixed if they both conform to the proper interface. Since Stroscot defines objects to be ML modules, all the benefits of encapsulation are provided.
+
+Cook goes on to state that "any programming model that allows inspection of the representation of more than one abstraction at a time is not object-oriented." So by his definition C++ and Java are not object-oriented - bleh. In fact this is just a limitation of ML - ML cannot inspect/pattern match on functions; they are opaque. In Stroscot, it is possible to match on the lambdas in Cook's Figure 8 and determine if an ISet was constructed via the Empty, Insert, or Union implementations. We might as well have written ``data ISet = Empty | Insert int ISet | Union ISet ISet`` as in the ADT implementation, except that the lambda presentation is an open data type that allows adding more cases. In Stroscot, we use multimethods to solve the expression problem, so it is just defining symbols and adding more dispatch cases to the relevant multimethods.
+
+::
+
+  interface ISet = {
+    isEmpty : bool,
+    contains : int → bool,
+    insert : int → ISet,
+    union : ISet → ISet
+  }
+
 
 Stroscot has modules, which provide encapsulation. We can create a type and not export its constructor symbols, so that the type becomes an abstract data type: only functions defined in the module can access the concrete representation of the type, and functions outside the module can only use the public interface. This indeed allows renaming fields of the data type without affecting external clients.
-
-Per ChatGPT, for modules themselves to be considered objects, we must be able to create and manipulate them at runtime. So: literal module syntax, get/replace/remove a definition, and evaluate an expression in the context of the module. Then we have all the object creation and manipulation features of Self. (TODO: double-check against Self langauge spec)
 
 No constructors
 ---------------
 
-A constructor has many limitations compared to a factory function: it must allocate new memory, it cannot return a subclass, and it has to be called with a noisy "new" syntax and a fixed name.
+A Java constructor has many limitations compared to a factory function: it must allocate new memory, it cannot return a subclass, and it has to be called with a noisy "new" syntax and a fixed name.
 
 For example, consider a boxed primitive boolean. It only needs two values: a factory function can construct one true and one false and then return those from then on. But using a constructor forces the program to produce millions of distinct trues and falses, creating significant overhead.
 
-Another difference is that a factory function computes the field values first and then can use an allocate-and-initialize primitive. The primitive can ensure that its allocation is private, hence appears atomic for concurrency. In contrast a constructor allocates memory initialized to a default value and then overwrites each field. This implicit memory writing means that concurrency and constructors interact poorly because you can access partially-constructed objects.
+Another difference is that a factory function computes the field values first and then can use an allocate-and-initialize primitive. The primitive can ensure that its allocation is private, hence appears atomic for concurrency. In contrast a constructor allocates memory initialized to a default value and then overwrites each field. This implicit memory writing means that concurrency and constructors interact poorly because you can access partially-constructed objects. `This page <https://counterexamples.org/under-construction.html>`__ describes several bugs in real-world systems.
 
 Deserialization bypasses defined constructors and directly creates objects via the runtime - it is an implicit public constructor. In fact this deserialization constructor is exactly the allocate-and-initialize primitive that a factory function needs.
 
@@ -33,22 +115,6 @@ One use of constructors is to enforce invariants (validity checking); for exampl
 
 A minor downside of doing away with constructors is that factory functions are not automatically marked in the documentation, so can be harder to find. Organizing the source code and documentation to group factory methods is not hard, the hard part is enforcing that such a convention is followed consistently. But it's not even clear that grouping factory functions together is the best organization.
 
-No autoboxing
--------------
-
-Smalltalk had this idea that everything should be an object, including boolean and integer values. Java and C# have implemented this using "wrapped primitive" objects like Boolean or Integer. Autoboxing then converts between the primitive, which has no methods, and the wrapped primitive, which does. But this is a leaky abstraction; autoboxing actually changes behavior. For example in Java ``new Integer(0) != new Integer(0)``, you have to do ``Integer.valueOf(0) == Integer.valueOf(0)`` or use ``.equals``. In JS ``false`` is falsy but ``new Boolean(false)`` is truthy. Also, wrapped primitives are distinct from normal OOP objects, in that when properly implemented they are immutable singletons constructed through a factory method, in other words "value types". Ultimately, discarding the "wrapping primitive" notion and simply representing primitive values directly is the most logical, although it does complicate code generation.
-
-No object identity
-------------------
-
-In Java, ``new Object() == new Object()`` returns false because the two object references refer to different object instances that are stored in different locations in memory, i.e. their identities are different. It's pretty stupid IMO because they are syntactically identical: the only reason they are different is that allocation has side effects. When you try to do ``new Object() <  new Object()`` it's disallowed because identity is an implementation detail. But apparently fast pointer equality checks win over avoiding exposing implementation details of the language.
-
-When we don't have object identity, it works much better with the functional programming paradigm. Furthermore JSON cannot even represent the notion of object identity.
-
-No implicit synchronization lock
---------------------------------
-
-If you want a mutex you should have to create a value of the ``Mutex`` type. This seems obvious and it has been acknowledged by e.g. `the Java tutorial <https://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html>`__ that Java's ability to write ``synchronize (random_object)`` was overly broad and it is better to use specific lock objects, but I will state it just in case.
 
 All-or-nothing field access
 ---------------------------
@@ -59,6 +125,17 @@ In Stroscot, if you can access the term's constructor symbol, you have full data
 
 Inheritance
 ===========
+
+Inheritance allows objects to inherit properties and methods from a parent class, making it possible to create specialized subclasses with additional functionality.
+Inheritance allows objects to inherit properties and behaviors from other objects, which can be useful for creating related objects with similar functionality.
+Inheritance - allowing classes to inherit properties and methods from other classes, forming a hierarchy of related objects.
+inheritance allows classes to inherit properties and methods from other classes.
+inheritance, which allows classes to inherit properties and methods from other classes
+Inheritance allows new objects to be based on existing objects, inheriting their attributes and behaviors.
+Inheritance is the ability of a class to inherit properties and behaviors from a parent class.
+Classes can inherit properties and behaviors from parent classes, allowing for code reuse and the creation of hierarchies of objects. Inheritance allows classes to inherit properties and behaviors from parent classes
+Inheritance: the ability of one class to inherit properties and methods from another class.
+Inheritance allows classes to derive attributes and behaviors from parent classes
 
 Inheritance originated from Simula where per :cite:`nygaardDevelopmentSIMULALanguages1978` they were trying to model a toll booth on a bridge, with a queue of cars which were either trucks or buses. The queue was modeled with a "circular list" structure, consisting of a "set head" and a variable number of "links", each with a predecessor and successor reference. The trucks and buses are modeled as collections of static properties according to a schema. Inheritance thus appeared as a "concatenation" or "prefixing" mechanism for "gluing" each of the various vehicles (trucks, buses) together with a "link" for an intrusive list to make one record instance. As `this post <https://catern.com/inheritance.html>`__ argues, inheritance was invented as a performance hack.
 

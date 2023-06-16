@@ -1,7 +1,7 @@
 Checklist
 #########
 
-This page goes through programming paradigms, principles of language design, and discusses a selection of other programming languages.
+This page goes through programming paradigms, principles of language design, and discusses some design points of quite a few other programming languages.
 
 Paradigms
 =========
@@ -41,7 +41,7 @@ Unfortunately people seem to use paradigms as labels of entire languages, rather
 * dynamic: eval is a function from strings to values (and optionally with an environment)
 * event driven: an ED program is some event handler functions, data binding event handlers to events, and a main loop function (provided by a library) that repeatedly checks for events and calls the matching event handler
 * generic functions are just functions over a large domain
-* imperative programing:
+* imperative programming:
 
   * commands can be represented as a tag (payload) plus a callback function returning another command
   * mutable variables are using read and modify functions on an implicitly passed/returned store.
@@ -150,7 +150,7 @@ Graphviz has chosen "function" as the central paradigm. This agrees well with ex
 Principles
 ==========
 
-Paradigms are vague and only express common patterns or features; they cannot be used to determine the specific design of those features. So instead we have principles. What are these principles actually useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons and these general principles are hard to apply.
+Paradigms are vague and only express common patterns or features; they cannot be used to determine the specific design of those features. So instead we have principles. What are these principles actually useful for? Mainly wasting time. Practical decisions are are made by judging pros and cons and these general principles are hard to apply. But, in theory, a pull request or design choice can be declared "wrong" according to a principle, and a list of such principles can avoid wasted work. Contributors can also discuss changing the principles if a desired change is not compatible.
 
 * Immature poets imitate; mature poets steal; bad poets deface what they take, and good poets make it into something better, or at least something different. The good poet welds his theft into a whole of feeling which is unique, utterly different than that from which it is torn. (T. S. Eliot)
 * Make the irreducible basic elements as simple and as few as possible without having to surrender the adequate representation of a single datum of experience. (Albert Einstein)
@@ -179,25 +179,43 @@ Non-principles
 Minimalism
 ~~~~~~~~~~
 
-Generally minimalism is bad. If you build on an existing language but include no new features, then there’s no incentive to use your language. If your language uses a minimal set of operations like Brainfuck, figuring out how to express programs in it will be difficult, and the resulting encoding most likely will be incomprehensible. Providing a broad set of features will mean that the language is suitable for whatever project someone is thinking about. What is worthwhile is Albert Einstein's principle to form what is essentially a basis in the vector space of programs, a collection of "orthogonal features" (although there is no obvious interpretation of the norm-1 constraint of an). This does not mean giving up features, but rather "dissolving" redundant features that can be naturally expressed using other features by putting them in the standard library rather than the core language.
+Generally speaking, minimalism is bad. If you build on an existing language but include no new features, then there’s no incentive to use your language. If your language only provides a minimal Turing-complete set of operations like Brainfuck, figuring out how to express programs in it will be difficult, and the resulting encoding most likely will be incomprehensible. Providing a broad set of features will mean that the language is suitable for whatever project someone is thinking about. And as Edsger Dijkstra put it, "complexity sells better". If you spend all this time hyping up a language, and then it turns out it's so simple it fits on a postcard, your audience will feel cheated and dismiss the result as trivial.
+
+I think what does make sense is having a small "core" language (like GHC's System F), and emphasizing the use of libraries to provide most functionality and features. The core language provides tools for defining abstractions, such as macros and syntactic extensions, and the compiler only has to focus on handling these core constructs well. With suitable abstraction facilities, this approach doesn't lose any expressiveness because we can implement any language construct we can think of. We have not "surrender[ed] the adequate representation of a single datum of experience", but merely reduced the reducible elements. The surface language is still complex, modern, and slick. Beginners can focus on learning the core language's abstract and general constructs, and then pick up useful idioms as they go along, or simply learn the libraries they like without understanding the implementation.
+
+So what defines the "core" language? Well, per Einstein, each element should be basic, simple, and irreducible, and there should be as few elements as possible. More formally, we can consider the "core" as an orthonormal basis in an inner product space, with vectors as programming elements. Then our "core" must satisfy the following conditions:
+
+* spanning: every element can be written (macro-expressed) as some combination of the core elements
+* linear independence: this representation in terms of the core elements is unique (up to some notion of equivalence)
+* orthogonality: The dot product of any two core elements should be 0. Said another way, for all scalars :math:`r,s` and core elements :math:`x,y`, :math:`\|r x\|\leq \|r x+sy\|`. In words, the combination of two core elements is at least as powerful as either element individually.
+* units: The norm of each core element should be 1. I interpret this as that each core element should be Turing-complete but not highly undecidable, and correspond to one syntactic construct. There shouldn't be overly-specific elements or overly-powerful elements. Overly-specific elements cause clutter, while overly powerful elements are too hard to understand.
+
+There is also "simplicity". In his talk "Simple Made Easy", Rich Hickey uses four words, etymologies from Wiktionary:
+
+* simple - literally "same fold", consisting of a single part or aspect. An objective criterion about avoiding too many features, basically minimalism.
+* complex - braided together or weaved together. Hickey also uses "complect", meaning to braid things together and make them more complex. Also an objective criterion, about avoiding feature overlap.
+* easy - literally "lying next to", "bordering on". A subjective criterion about a task being within the grasp of a particular person and toolset.
+* hard - literally "strong" or "powerful". A subjective criterion about whether changing the software requires a lot of effort.
+
+Hickey tries to say that simple is the opposite of complex and easy is the opposite of hard, but the etymologies don't really agree. Consider this `$1 Split Woven Pouch Single String Sling <https://www.youtube.com/watch?v=M_wNutoddYE>`__. It's simple, because it's only one string. It's complex, because he weaved the string with itself. It's easy to make, because you just have to buy the string and follow the tutorial. It's hard, because he made the knots really tight and the finished product is quite stiff. So clearly the qualities are not mutually exclusive.
+
+Considering the meanings, Hickey's talk mainly focuses on complexity, rather than simplicity. A project might have many parts (not simple), but as long as they are not complected it is fine. Per Hickey, there is a trade-off: allowing complexity makes initial development to go faster, but eventually the project will get bogged down, by having to refactor things you've already done and too many interactions among items. In contrast, Hickey advocates having "entanglement radar", and deliberately un-complecting things that could be independent. This might cause an initial slow "think about the design" period, but development speed will ramp up and not get bogged down.
 
 Familiarity
 ~~~~~~~~~~~
 
-There is a quote from Grace Hopper, "The most dangerous phrase [one] can say is 'We've always done it that way'." According to `some guy <https://medium.com/geekculture/3-busted-myths-about-the-35-hour-week-that-you-should-present-to-your-boss-efa5403bb263>` the golden rule at his university was that anyone who said that phrase was a lousy engineer. Hopper `continues <https://books.google.com/books?id=3u9H-xL4sZAC&lpg=PA9&vq=%22most%20dangerous%22&pg=PA9#v=snippet&q=%22most%20dangerous%22&f=false>`__`: "If we base our plans on the present, we fall behind and the cost of carrying out something may be more costly than not implementing it. But there is a line. If you step over it, you don't get the budget. However, you must come as close to it as you can. And you must keep pushing the line out further. We must not only accept new concepts, we must manage their development and growth."
+Per Grace Hopper, "the most dangerous phrase [one] can say is 'We've always done it that way'." According to `some guy <https://medium.com/geekculture/3-busted-myths-about-the-35-hour-week-that-you-should-present-to-your-boss-efa5403bb263>` the golden rule at his university was that anyone who said that phrase was a lousy engineer. Hopper `continues <https://books.google.com/books?id=3u9H-xL4sZAC&lpg=PA9&vq=%22most%20dangerous%22&pg=PA9#v=snippet&q=%22most%20dangerous%22&f=false>`__`: "If we base our plans on the present, we fall behind and the cost of carrying out something may be more costly than not implementing it. But there is a line. If you step over it, you don't get the budget. However, you must come as close to it as you can. And you must keep pushing the line out further. We must not only accept new concepts, we must manage their development and growth."
 
 Per `Simon <https://soc.me/languages/familiarity>`__, C’s operator precedence, C++’s use of ``<>`` for generics, and C#’s design of properties are all examples of suboptimal, legacy decisions. They were designed based on limited information but in hindsight it has become clear that better choices exist. Nonetheless they continue to be adopted by new languages on the basis of "familiarity" - people are so used to the suboptimal behavior that they will complain if it changes.
 
-For Stroscot, is it worth repeating these mistakes for the benefit of "familiarity"? Familiarity will not help when
-
-Let us consider the various adopted principles:
+For Stroscot, is it worth repeating these mistakes for the benefit of "familiarity"? Familiarity will not help beginners learn the language. Let us consider the various adopted principles:
 
 * stealing ideas - we should understand why these choices were made, and consider if those reasons are still valid. For C's operator precedence, there is essentially no basis - it is just historical baggage.
 * irreducible elements - do we need these operators at all? Probably so, because they are in these other languages and people have used these languages for a while. But it is just syntax, so extensible syntax is sufficient - it does not have to be part of the language core.
 * branch and bound - this says we should aim for the optimal choice, but first we have to define optimal
 * Poettering - he broke your audio. I think he'd decide to break your programming habits too
 * Productivity - these sorts of syntax decisions are minor annoyances, so don't really impact the ability to accomplish things
-* Beautiful interfaces - a consistent interface is more beautiful than a broken one
+* Beautiful interfaces - a consistent interface is more beautiful than an inconsistent one
 * Documentation - whatever the choice, the process for arriving at it should be clearly written down
 * Memory palace - a consistent interface is also easier to remember
 * Medium complexity: programming is hard enough by itself, the language doesn't need to be more complex
@@ -208,19 +226,18 @@ Let us consider the various adopted principles:
 * Organize:
 * Least astonishment: we should aim for "the behavior that will least surprise someone who uses the program". , rather than that behavior that is natural from knowing the inner workings of the program. (`POLA <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__)
 
- Ideally, changes will get so fed up that they will post "ragequit" posts to social media. So long as discussion can point to a solid basis for the changes, these will most likely serve to draw positive attention to the language. Anybody who uses the language for a while will get used to it. And actually the people who are willing to learn a new language are likely looking for something new and are willing to adapt, so they won't ragequit. Succinct migration guides for users from various popular languages will get these users up to speed.
+Ideally, changes will make experienced programmers so fed up that they will post "ragequit" posts to social media. So long as discussion can point to a solid basis for the changes, these will most likely serve to draw positive attention to the language. Anybody who uses the language for a while will get used to it. And actually the people who are willing to learn a new language are likely looking for something new and are willing to adapt, so they won't ragequit. Succinct migration guides for users from various popular languages will get these users up to speed.
 
 There is another sense of familiarity though in the sense of creating a "brand" for the language. Some languages take this in the sense of not allowing any room for major changes in the design once the language reaches a beta. Minor migrations would be possible, but for example switching from curried to uncurried functions would be forbidden because they would annoy too many people. This requires doing essentially all of the designing up-front. I'm kind of split on this. On the one hand, there is the "durable" part of the "create interfaces" principle -
 
-
- Another important concept is being intuitive/memorable, as can be tested via cloze completion and "what does this piece of code do". Ideally someone should be able to read the manual and write some throwaway Stroscot code, abandon Stroscot for 6 months, and then come back and correctly type out some new Stroscot code without having to look at the manual again. If Stroscot the language is a moving target this goal is difficult to accomplish. That being said though, like Poettering said nothing is ever finished and it is better to track the progress of technology.
-
-
+Another important concept is being intuitive/memorable, as can be tested via cloze completion and "what does this piece of code do". Ideally someone should be able to read the manual and write some throwaway Stroscot code, abandon Stroscot for 6 months, and then come back and correctly type out some new Stroscot code without having to look at the manual again. If Stroscot the language is a moving target this goal is difficult to accomplish. That being said though, like Poettering said nothing is ever finished and it is better to track the progress of technology.
 
 Readability
 ~~~~~~~~~~~
 
-Using the literal definition, "ease of understanding code", readability is included as part of the edit-test cycle time principle. Cycle time has the benefit of being a lot more empirical. Most articles that discuss readability go on to describe "readable code", defined by various properties:
+Using the literal definition, "ease of understanding code", readability is included as part of the edit-test cycle time principle. Cycle time has the benefit of being a lot more empirical - just provide some code and an editing task, time it, and average across a pool of subjects. In contrast, readability is more subjective - the author of some code will most likely consider his code perfectly readable, particularly immediately after writing said code, even if an average programmer would not. Of course, in a week or a few years, depending on the author's memory, any domain-specific knowledge will fade away and the author will struggle with his code just as much as any average programmer, but waiting ages just to measure readability is not feasible.
+
+Most articles that discuss readability go on to describe "readable code", defined by various properties:
 
 * Meaningful variable and function names ("self-commenting")
 * Consistent identifier style, indentation, and spacing
@@ -230,18 +247,22 @@ Using the literal definition, "ease of understanding code", readability is inclu
 * Intermediate functions to avoid deep nesting of control structures and ensure each function has a single purpose
 * Parentheses that make the order of operations clear
 
-These definitions are somewhat subjective and unreliable: what makes a name meaningful? Should the identifier style be camel case or snake case? With a loose reading, most libraries and style guides qualify as readable, in that there is always somebody who will argue that the existing choice is the best. The cycle time principle provides a framework for evaluating these choices objectively, although it is still dependent on a subject pool and hence the scientific literature. In fact studies have validated many of these guidelines as empirically reducing time to understand, and in cases such as underscores vs camel case found a definitive benefit for underscores.
+These definitions are somewhat subjective and unreliable. What makes a name meaningful? How deep and complex can an expression/function get before it needs to be broken up? Should the "consistent identifier style" be camel case or snake case? With a loose reading, most libraries and style guides qualify as readable, in that there is always somebody who will argue that the existing choice is the best. The cycle time principle provides a framework for evaluating these choices objectively, although it is still dependent on a subject pool and hence the scientific literature. In fact studies have validated many specific guidelines as empirically reducing time to understand, e.g in the underscores vs camel case debate finding a definitive benefit for underscores.
 
 Cycle time also accounts for the aphorism "Perfect is the enemy of good". One could spend hours optimizing for readability by fixing spelling mistakes and other nits and not get anything useful done. In the time it takes to write a long descriptive comment or poll coworkers for a meaningful variable name, one could have skipped writing comments, used 1-letter names, run and debugged the code, and moved on to a new task. Perfect readability is not the goal - the code just has to be understandable enough that any further readability improvements would take more cycle time than they will save in the future. And with hyperbolic discounting, reducing future maintenance effort is generally not as important as shipping working code now. This calculation does flip though when considering the programming language syntax and standard library, where small readability improvements can save time for millions of programmers (assuming the language becomes popular, so there is again a discounting factor).
+
+Not included in cycle time (or readability) is the time to initially write a program. Maintainance cost is much more important in the long run than the initial investment.
 
 Terseness
 ~~~~~~~~~
 
-APL is terse mainly due to its use of symbols, and :cite:`holmesAPLProgrammingLanguage1978` mentions that some consider terseness an advantage. But is it really? Again the principle for Stroscot is the edit-test cycle time, in particular the 70% of time needed to understand a program. An APL program may be short but if the APL program requires looking up symbols in a vocabulary while a normal word-based program is more verbose but self-contained, then the word-based program wins on cycle time.
+APL is terse mainly due to its use of symbols, and :cite:`holmesAPLProgrammingLanguage1978` mentions that some consider terseness an advantage. But is it really? Again the principle for Stroscot is the edit-test cycle time. An APL program may be short but if the APL program requires looking up symbols in a vocabulary while a normal word-based program is a little more verbose but self-contained, then the word-based program wins on cycle time.
 
-Iverson argues the human mind has a limit on how many symbols it can cope with at one time. A terser notation allows larger problems to be comprehended and worked with. But this ignores the role of chunking: a novice chess player works with individual pieces, while an expert player works with configurations of the entire board. Similarly a programming expert will work on the level of program fragments, for example CRUD or the design patterns of Java, and the amount of verbiage involved in writing such patterns is immaterial to mental manipulation but rather only becomes relevant in the time necessary to read unfamiliar codebases and comprehend their patterns and the time needed to write out such verbose patterns when moving to implementation. Rather than terseness, this consideration argues to make programming patterns easy to recognize (distinctive) and easy to remember (the "memory palace" principle). APL's overloading of monadic and dyadic function symbols seems to conflate distinct functions and go against this consideration.
+Iverson argues the human mind has a limit on how many symbols it can manipulate simultaneously. A terser notation allows larger problems to be comprehended and worked with. But this ignores the role of chunking: a novice chess player works with symbols representing individual pieces, while an expert player works with symbols representing configurations of the entire board. Similarly, a novice programmer might have to look up individual functions, but a programming expert will work on the level of program patterns, for example CRUD or the design patterns of Java, and the amount of verbiage involved in writing such patterns is immaterial to mental manipulation but rather only becomes relevant in two places:
+* the time necessary to scan through unfamiliar codebases and comprehend their patterns. This can be reduced by making programming patterns easy to recognize (distinctive). APL's overloading of monadic and dyadic function symbols seems to conflate distinct functions and go against this consideration.
+* the time needed to write out patterns when moving to implementation. Most programmers type at 30-50 wpm and use autocomplete, which means that even a long identifier requires at most 1-2 seconds. In contrast, for APL, symbols might found with the hunt and peck method, per `Wikipedia <https://en.wikipedia.org/wiki/Typing#Alphanumeric_entry>`__ 27 wpm / 135 cpm or 0.4 seconds per symbol. So APL is faster for raw input. But in practice, most of the time programming is spent thinking, and the time writing the program out is only a small fraction of coding. So what is important is how easy it is to remember the words/symbols and bring their representations to mind (the "memory palace" principle), for which APL's symbols are at a disadvantage due to being pretty much arbitrary.
 
-There is some advantage to terseness in that shorter code listings can be published more easily in books or blog posts, as inline snippets that do not detract from the flow of the text. Documentation works better when the commentary and the code are visible on the same medium. But readability of the code is more important - a barcode is terse but provides no help without a complicated scanning procedure. Web UX design provides many techniques for creating navigable code listings, e.g. a 1000-line listings to be discussed in a short note with a hyperlink. Accordion folds can be used for 100-line listings, and 10-line listings can be in a two-column format or with a collapsed accordion fold. So this advantage of terseness seems minimal when considering that code is mostly published on the web these days.
+There is some advantage to terseness in that shorter code listings can be published more easily in books or blog posts, as inline snippets that do not detract from the flow of the text. Documentation works better when the commentary and the code are visible on the same medium. But readability of the code is more important - a barcode is terse too but provides no help without scanning it. Web UX design provides many techniques for creating navigable code listings, e.g. a 1000-line listings to be discussed in a short note with a hyperlink. Accordion folds can be used for 100-line listings, and 10-line listings can be in a two-column format or with a collapsed accordion fold. So this advantage of terseness seems minimal when considering that code is mostly published on the web these days.
 
 Turtles all the way down
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,15 +279,69 @@ Hungarian notation
 
 Hungarian notation puts abbreviated type annotations in variable names, so humans can check that the types are correct. But the compiler already checks declared types, automatically and much more thoroughly. So in the end it is noise. Mathematicians do use single-letter variables with subscripts, but these do not encode types, they are just abbreviations - e.g. ``x`` stands for "first coordinate". Per `Stroustrup <https://www.stroustrup.com/bs_faq2.html#Hungarian>`__ it is "a maintenance hazard and a serious detriment to good code. Avoid it as the plague."
 
+Keep syntax and semantics separate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Although both syntax and semantics are essential to a programming language, they are not on an equal footing. A given semantics may have many valid syntaxes, but there is generally only one semantics for a given construct (otherwise, it would be a different construct). Most considerations involve both syntactic and semantic components. Consider some examples:
+
+* Allowing both ``1+2`` and ``1.0+2.0``: One "solution" is to use different operators, such as ``+`` and ``+.`` in OCaml. But actually allowing this requires a semantic solution, such as typeclasses, overloading, or union types.
+* Allowing ``a.b()`` for a method defined outside a class: Again, there is a "solution" of writing ``b(a)``. But actually allowing this requires a semantic solution of extension methods or implicit classes, which Flix mentions requires a lot of semantic baggage and can incur unexpected performance penalties.
+* Lambdas: There is a "solution" of passing a function pointer and closure struct. But actually allowing this in C++ required (just in the standard) 28 lines of BNF (~1/2 page) plus a note for syntax, and 6.5 pages plus 2 mentions for semantics.
+
+The addition example makes it clear that it's pretty hard to design any sort of syntax without taking into account the semantics. You may want to emulate the syntax of another language (or mathematics, in this case), but it may not be possible. So Stroscot takes the approach of "form follows function": first design the semantics, then design the syntax based on that. Thus there is a clear dependency relationship, rather than them being separate.
+
+Of course, the distinction is more fuzzy in practice. Papers define a syntax along with their semantics, and for clarity, we use that syntax when describing the semantics in the commentary. Similarly, the semantics of extension methods were proposed in order to allow a certain syntax. But formally speaking, most of the commentary is only considering semantics. As discussed in :ref:`Syntax`, the final syntax will be decided upon by a survey describing the abstract semantics of each language construct, with all preconceived ideas for syntax removed from the descriptions as much as possible.
+
+Another question is where to draw the line of syntactic sugar vs. language feature. Per `Wikipedia <https://en.wikipedia.org/wiki/Syntactic_sugar>`__, syntactic sugar is a shorthand for an operation canonically expressed in a more verbose form. I would say that syntactic sugar can be clearly identified by being able to write the translation as an unconditional function or macro, like the parser combinator ``some x = x <|> some x`` or the for loop:
+
+::
+
+  for ( init; condition; update) { body } = init; go
+    where
+      go | condition = body; update; go
+         | otherwise = return ()
+
+Anything more complex is a language or library feature (I don't distinguish the language and the standard library). So for example, lambdas are a language feature, not because they introduce new syntax for lambda expressions, but because the syntax for calling a lambda overlaps with the syntax for calling a function.
+
+Blazingly fast
+--------------
+
+The V language compiles millions of lines a second. And assembly can provide the fastest speeds. But only enthusiasts use these languages - V is too buggy to be usable, and assembly development is so tedious and specialized that few programmers are comfortable going down to that level. Really, what people value is cost-effectiveness. Specifically, which language can do the task with minimum total cost?
+
+Let's look at the cost breakdown for a big software company (Google). The `balance sheet <https://www.sec.gov/Archives/edgar/data/1652044/000165204423000016/goog-20221231.htm>`__ lists cost of revenues, R&D, sales and marketing, general and administrative, property and equipment, and a bunch of financing considerations like loans, bonds, and stocks that don't really matter for our purposes. Really, the only costs affected by a programming language are R&D and IT assets. We can assume that R&D costs are mainly employee compensation, and measure by total man-hours of developer and QA time. Per `2016 10K <https://abc.xyz/investor/static/pdf/20161231_alphabet_10K.pdf>`__ 27,169 employees (37.7% of total) worked in R&D, for about $513,379 per year. Trying to update that, the 2022 10K lists 190,234 employees and $39.5 billion R&D, so estimate about 71,718 R&D employees and $550,766 per man-year. Regarding equipment costs, the main figure is "other costs of revenue", $48.955 billion, which is mainly data center operation and depreciation. Similarly Meta's numbers are $35.338 billion R&D, $25.249 billion cost of revenue. Their employee count is weird though.
+
+it is definitely possible for a 2x speedup from a new compiler optimization to reduce these costs by half, although
+
+ so can be ignored, as can G&A because it's not impacted by choice of programming language.
+
+some programs have a hard minimum speed requirement - if it doesn't finish it's unusable.
+some programs have a soft requirement - perceived quality decreases as speed decreases
+some programs have a speed / accuracy tradeoff, where the answer can be sloppy but close
+compile speed makes developers more likely to use your language
+moaning about "Slow speeds" in the context of taking a few minutes is somewhat comical considering history where program runs took hours or days. Embedded development still deals with that timeframe, like this `3 hour linux bootup <https://www.youtube.com/watch?v=nm0POwEtiqE>`__.
+
+
+
+
+ How much does it cost to do a specific task, in total? We can list various costs: developer time, quality assurance, and hardware. Better runtime performance allows less hardware, while a productive and intuitive language reduces development time and QA effort. The goals are, as Cliff `puts it <https://youtu.be/W9uazRKW6as?t=1460>`__, "fast and easy". But the situation is asymmetric.
+
+One asymmetry is simply the cost breakdown. Development and QA time is generally the main cost for most tasks, while hardware performance is not. When hardware performance is a significant factor, profiling gives a very detailed explanation of why the program is slow, usually allowing "low-hanging fruit" such as
+
+. Often, profiling reveals that only a few regions of "hot" code are relevant, and the other "cold" regions can be ignored, although in other cases the inefficiencies may not be as obvious. It's tempting to prematurely optimize by writing code in a style you expect will be faster, but per `C2 <http://wiki.c2.com/?ProfileBeforeOptimizing>`__ "this almost never works". It is just not that easy for humans (even experts) to predict the hot spots of optimized code, and it is more time-efficient to measure directly.
+
+Another asymmetry is what people expect from their compiler. Compilers have gotten quite good at working optimization magic. Automatic optimizations can transform code beyond recognition and even improve asymptotic complexity. But all of this is predicated on preserving the intent of the programmer as expressed by the semantics of the written program. In contrast, bug fixing is not fully automatable. Although bots such as Repairnator can detect bugs, identify the root cause, and formulate a pull request, nobody trusts such a system so the patches still have to be reviewed by a human.
+
+So in all cases, it is most important to get a clear, correct program first, as quickly as possible. Then it can be profiled. Maybe the compiler will deliver good performance right out of the gate, or maybe the generated code will be unusably slow, but at least with the profile the bottlenecks are clear. The rapid prototyping phase requires powerful constructs and high-level abstractions. Then, for optimizing, there are lots of ways to improve performance: use a different data structure, cache results, take advantage of order, traverse only what you need to, or switch to a lower-level abstraction.
+
 Goals
 =====
 
 The ultimate
 ------------
 
-Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup (author of C++), :cite:`sutterFamilyLanguages2000` but I think it can be made to work. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history. In this analogy Stroscot would be an early nuke prototype.
+Stroscot aims to be the ultimate programming language, rather than something just alright. The goal is to win the `ultimate showdown of ultimate destiny <https://www.youtube.com/watch?v=HDXYfulsRBA>`__ w.r.t. programming languages. This has been called "silly" by Dennis Ritchie (author of C) and "the dream of immature programmers" by Bjarne Stroustrup (author of C++), :cite:`sutterFamilyLanguages2000` but I think it can be made to work. A lot of language features have become standardized, which wasn't the case in 2000, and for the other "unique" features there has been enough research to establish a clear hierarchy of power. To bring in an analogy with weapons, the question of which firearm is strongest is quite subjective and a matter of debate, among other reasons due to loading and capacity questions. But the Tsar Bomba is without question the strongest weapon in history, and makes such debates irrelevant - all you need is a single giant bomb, and making more of them would be a waste of resources. And when the standard interface for deploying such a weapon is pushing a button, the choice of what the button should look like is essentially a bikeshedding debate - it's just a button and any choice of style and color will do (although of course red is traditional). In this analogy Stroscot would be an early nuke prototype - I'm not claiming it's the biggest baddest language, but at least it will point the way towards designing such languages in the future.
 
-Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with to a point. Many queries in a compiler are too expensive to compute exactly and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and don't affect the overall design of the language. While there may not be a best solver, there is a best set of syntax and features.
+Stroustrup claims there are "genuine design choices and tradeoffs" to consider, which I agree with up to a point. Many queries in a compiler are too expensive to compute exactly and the method used to approximate the answer can be refined or optimized. There are competing approaches to answering these questions and methods of combining solvers to obtain more precise answers. The time/precision tradeoff here is real. But these are implementation tradeoffs, and don't affect the overall design of the language. While there may not be a best solver, there is a best set of syntax and features, at least until you get to details so minor that they are matters of personal taste.
 
 Global maximum
 --------------
@@ -321,7 +396,7 @@ Stroscot aims to replace all the programming languages in use today. Mainly this
 
 Once the C/C++ implementation is stable enough for production use, focus will shift to developing automated conversion tools for other languages like Python and Java, so that the surface syntax can be changed to Stroscot's. And yes, this is the `E-E-E strategy <https://en.wikipedia.org/wiki/Embrace,_extend,_and_extinguish>`__, but Stroscot is open source so it's all OK.
 
-Standardization doesn't seem necessary, a popular language builds its own standard and Python, the world's most popular language as of `July 2022 <https://www.tiobe.com/tiobe-index/>`__, has `never been <https://stackoverflow.com/questions/1535702/python-not-a-standardized-language>`__ formally standardized. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new best language every 3-5 years.
+Standardization doesn't seem necessary. A popular language builds its own standard. Python, the world's most popular language as of `July 2022 <https://www.tiobe.com/tiobe-index/>`__, has `never been <https://stackoverflow.com/questions/1535702/python-not-a-standardized-language>`__ formally standardized. But there needs to be an open-source cross-platform implementation, with a committee process for changes to build consensus and ensure stability. Another alternative is to freeze Stroscot after release and design a new language every 3 years, but that requires creating new names and websites so it's easier to evolve gradually.
 
 Criticisms
 ==========
@@ -371,9 +446,8 @@ PyPL index (top 28)
 
 2. Java
 
-* Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top
-* Compromises between performance and expressiveness such as covariant arrays
-* The OO mantra has led to design patterns, which are a reference point for features support with explicit syntax. The class-based syntax for the patterns is not worth emulating.
+* Baroque type system, many types of class-like thing (interfaces, enumerations, anonymous adapters), with generics on top. Many compromises/holes such as covariant arrays
+* Verbose. But there is a book on design patterns, which can be used to identify areas needing explicit syntax. The class-based syntax for the patterns is not worth emulating.
 * try-finally and checked exceptions have wasted the time of many programmers.
 * Keyword soup for declarations, such as "public static void main".
 * Lack of operator overloading such as ``+`` for ``BigInteger``
@@ -412,6 +486,7 @@ PyPL index (top 28)
 * fast, efficient standard libraries similar to hand-tuned code (but missing many features, see also Boost)
 * templates, efficient at runtime but slow at compile time
 * memory unsafe like C, although smart pointers and RAII make this a little better.
+* Hard to debug, there is GDB, valgrind but really rr is the only way to track some errors down
 * paradigm: imperative
 
 6. PHP
@@ -456,8 +531,9 @@ PyPL index (top 28)
 
 * good standard library design and documentation, probably worth copying
 * voted "most loved" by StackOverflow
-* ownership model/borrow checker has been found difficult to use by several studies :cite:``. Also it is incomplete - can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. In practice Rust programmers `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting or GC to ensure memory safety
+* ownership model/borrow checker has been found difficult to use by several studies (`1 <https://arxiv.org/pdf/1901.01001.pdf>`__, `2 <https://arxiv.org/pdf/2011.06171.pdf>`__, `https://dl.acm.org/doi/pdf/10.1145/3510003.3510107`__). Also it is incomplete - can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. In practice Rust programmers `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting or GC to ensure memory safety in complex cases
 * concurrency safe, but async suffers from "borrow checker"-itis and uses atomic reference counting
+* has claimed to be "blazing fast" since `2014 <https://github.com/rust-lang/prev.rust-lang.org/commit/863e4176f92483853338f6237dafdf1a127a91ce>`__. But we see in `the one test of this claim on Google <https://youtu.be/ou8kQ4rIGqQ?t=1948>`__ that C is faster.
 * paradigm: imperative
 
 13. Kotlin
@@ -509,7 +585,8 @@ PyPL index (top 28)
 19. Scala
 
 * Type inference, allows avoiding repetition of Java such as ``SomeModule.MyClass v = new SomeModule.MyClass();``
-* complex type system: implicit conversions, subtyping
+* complex type system: implicit conversions, subtyping.
+* complex syntax: scares off newbies, steep learning curve, not recommended. Scala 3 has 3 ways to end blocks (end, braces, indentation) and everyone is confused as to which one they should use.
 * paradigm: impure functional
 
 20. Lua
@@ -524,7 +601,7 @@ PyPL index (top 28)
 * proprietary PL developed by SAP in 1983, only available as part of NetWeaver ERP suite.
 * "German COBOL", popular in Eastern Europe / Germany.
 * odd niche language, but with even bigger footprint than COBOL, gradually being phased out with Java/JS/etc.
-* weird combination of BASIC and SQL. built-in SQL syntax.
+* weird combination of BASIC and SQL. Built-in SQL syntax.
 * all code is stored in databases, thousands of tables
 * OOP extensions that make everything terrible to maintain
 * good debugger
@@ -571,8 +648,8 @@ PyPL index (top 28)
 * still kicking, but proprietary
 * paradigm: OO
 
-TIOBE Top 22
-------------
+TIOBE Next 22
+-------------
 
 8. SQL
 
@@ -615,7 +692,8 @@ TIOBE Top 22
 25. Lisp
 
 * Easily parsable syntax, originator of macros
-* Racket is probably the most popular Lisp now
+* Error messages involving macros are probably more confusing than the macros themselves
+* Racket is probably the most popular Lisp now. Uses Chez Scheme's work on the nanopass framework.
 * paradigm: functional
 
 33. Prolog
@@ -671,6 +749,7 @@ TIOBE Top 22
 * has a well-tested distributed, fault-tolerant, reliable, soft real-time, concurrent database
 * designed to be crash-only, restart tolerant
 * not used much outside Ericsson
+* Per roastedby.ai, written by drunk masochistic Swedes. Just watch `Erlang: the movie <https://www.youtube.com/watch?v=xrIjfIjssLE>`__ and tell me they aren't drunk.
 * paradigm: actor model
 
 48. LabVIEW
@@ -715,6 +794,8 @@ Clojure
 * one of few languages to use software transactional memory, custom implementation "MVCC"
 * `interesting talks <https://github.com/matthiasn/talk-transcripts/tree/master/Hickey_Rich>`__ on functional programming and language design
 * runs well on JVM
+* slow
+* never seen it used for anything performance-critical or that substantially affects a business
 
 Common Lisp - discussed under Lisp
 

@@ -1,0 +1,140 @@
+1. A \vdash A by identity theorem
+2. A, \neg A \vdash from 1 by \neg_L
+3. A, \neg A \vdash \bot from 2 by \bot_R
+4. \neg A \vdash A \to \bot from 3 by \to_R
+5. \vdash A, \neg A from 1 by \neg_R
+6. \bot \vdash from \bot_L
+7. A \to \bot \vdash \neg A from 5 and 6 by \to_L
+8. \neg A \equiv A \to \bot from 4 and 7 by \leftrightarrow_R
+
+F \vdash !F by F_L
+T \vdash !T - no reduction T_L
+
+\vdash 1 by 1_R
+\vdash !1 by promotion
+1 \vdash !1 by 1_L
+
+\bot \vdash !\bot - no reduction
+
+1. A \vdash !A by assumption of positivity
+2. A \vdash !(A \lor B) by cut with weak promotion on \lor_1R
+3. B \vdash !B by assumption of positivity
+4. B \vdash !(A \lor B) by cut with weak promotion on \lor_2R
+5. A \lor B \vdash !(A \lor B) by \lor_L on 2,4
+
+1. !A \vdash B by assumption (e.g., B theorem + weakening)
+2. A \vdash A by identity
+3. !A \vdash A  by dereliction on 2
+4. !A \vdash A \land B by \land_R on 1 and 3
+5. !A \vdash !(A \land B) by promotion on 4
+6. A \vdash !A by assumption of positivity
+7. A \vdash !(A \land B) by cut on 5 and 6
+8. A \land B \vdash !(A \land B) by \land_1L on 7
+
+1. !A \vdash A by positivity
+2. !B \vdash B by positivity
+3. !A, !B \vdash (A \otimes B) by \otimes_R on 1,2
+4. !A, !B \vdash !(A \otimes B) by promotion
+5. A \vdash !A by positivity
+6. A, !B \vdash !(A \otimes B) by cut on 5,4
+7. B \vdash !B by positivity
+8. A, B \vdash !(A \otimes B) by cut on 7,6
+9. A \otimes B \vdash !(A \otimes B) by \otimes_L
+
+1. B \vdash by assumption
+2. A \vdash A,B by assumption
+3. A \vdash A \par B by \par_R
+4. !A \vdash !(A \par B) by weak promotion
+5. A \vdash !(A \par B) by cut on 4 and positivity of A
+6. A \par B \vdash !(A \par B) by \par_L on 1 and 5
+
+A \vdash A
+A \vdash \whim A
+\vdash \neg A, \whim A
+\vdash \bang \neg A, \whim A
+\vdash \bang \neg A, A
+\neg A \vdash \bang \neg A
+
+1. \vdash Bool by Sigma_FR
+2. Bool \vdash Bool by Sigma_L on 1
+3. \vdash Bool \to Bool by \to_R on 2
+4. \vdash !(Bool \to Bool) by promotion on 3
+5. Bool \vdash !(Bool \to Bool) by Sigma_L on 4,4
+6. Bool \to Bool \vdash !(Bool \to Bool) by \to_L on 1 and 5
+
+T, \bot \vdash !(T \otimes \bot) - no left derivation
+T \otimes \bot \vdash !(T \otimes \bot)
+
+\vdash T by T_R
+?(T \otimes \bot) \vdash T by T_R
+\vdash \bot - unprovable by strong consistency
+T, \bot \vdash - no left derivation
+T \otimes \bot \vdash by \otimes_L
+?(T \otimes \bot) \vdash by promotion
+?(T \otimes \bot) \vdash \bot by \bot_R
+?(T \otimes \bot) \vdash T \otimes \bot
+
+
+A = !A = ?A
+neg A = !(neg A) = ?(neg A)
+
+A \vdash A
+\vdash A
+\vdash neg A
+A \vdash
+\vdash
+\vdash bot
+
+!A \vdash
+A \vdash !A
+A \vdash
+
+\vdash 1
+A \vdash 1
+\vdash A \to 1
+
+A \vdash 1
+1 \to 1
+(1 to 1), A \vdash 1
+(1 to 1) \vdash (A \to 1)
+\vdash (1 to 1) \to (A \to 1)
+
+Comprehension
+1. :math:`\vdash \phi \leftrightarrow \phi`
+2. :math:`\vdash x\in \{x\mid\phi\} \leftrightarrow \phi`
+3. :math:`\vdash \forall x. x\in \{x\mid\phi\} \leftrightarrow \phi`
+4. :math:`\vdash \exists y. \forall x. x\in y \leftrightarrow \phi`
+
+
+
+* For :math:`m \leq n`,
+
+1. \bang_n A \vdash \bang_n A by identity
+2. \bang_m \bang_n A \vdash \bang_n A by dereliction
+3. \bang_n A \vdash \bang_m \bang_n A by promotion since m \leq n
+4. \bang_m \bang_n A \equiv \bang_n A by 2 and 3
+
+1. A \vdash A by identity
+2. \bang_m A \vdash A by dereliction on 1
+3. \bang_n \bang_m A \vdash A by dereliction on 2
+4. \bang_n \bang_m A \vdash \bang_n A by promotion on 3
+5. \bang_n A \vdash A by dereliction on 1
+6. \bang_n A \vdash \bang_m A by promotion on 5 since m <= n
+7. \bang_n A \vdash \bang_n \bang_m A by promotion on 6
+8. \bang_n \bang_m A \equiv \bang_n A from 4 and 7
+
+1. \whim_n A \vdash \whim_n A by identity
+2. \whim_m \whim_n A \vdash \whim_n A by promotion on 1 since m \leq n
+3. \whim_n A \vdash \whim_m \whim_n A by dereliction on 1
+4. \whim_m \whim_n A \equiv \whim_n A from 2 and 3
+
+Similarly \whim_n \whim_m A \equiv \whim_n A
+
+* For :math:`a\leq b` and :math:`c\leq d` we can prove
+
+
+\bang_d \whim_a \bang_c \whim_n A \vdash \bang_d \whim_b A
+
+\bang_d \whim_b A \vdash \whim_a \bang_c \whim_n A
+\bang_d \whim_b A \vdash \bang_d \whim_a \bang_c \whim_n A by promotion
+\bang_d \whim_a \bang_c \whim_n A \equiv \bang_d \whim_b A

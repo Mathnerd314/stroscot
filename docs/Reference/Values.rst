@@ -5,7 +5,7 @@ In Stroscot values are defined to be expressions that are in normal form (strong
 
 Values are immutable (as `Rich Hickey says <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg>`__) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.
 
-For convenience, "value" really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - they reduce to a value of the compiler's preferred data structure implementation. Programs may define the syntax here to other values.
+For convenience, "value" really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - usually they reduce to a value of the compiler's preferred data structure implementation. Programs may define the syntax here to other values.
 
 Symbols
 =======
@@ -72,89 +72,6 @@ Infinite terms
 
 Sometimes it is useful to deal with terms that are solutions to a system of equations, like ``let x=cons 1 x in x``. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. ``let fib x y = cons x (fib y (x+y)) in fib 0 1`` requires infinitely many reductions to reduce to an infinite normal form.
 
-Numbers
-=======
-
-In the mathematical world the definition of `number <https://en.wikipedia.org/wiki/Number#Main_classification>`__ variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the "numeric tower") But in the computer world most of these are composite structures and the primitive notion of "number" is a literal that looks like a number.
-
-Integers
---------
-
-::
-
-  4711
-  4711L
-  1.2e+3
-
-  base = 0[a-z]
-  digit = [0-9a-fA-F_]
-  pos_exponent = [a-zA-Z] +? [0-9_]+
-  format = [a-zA-Z] identifier
-
-  integer = base? digit+ pos_exponent? format{0}
-
-Really integers are just a special class of symbols. Different bases for integers are provided - decimal ``1000``, hexadecimal ``0x3e8``, octal ``0o1750``, binary ``0b1111101000``. Further bases may be added. Positive exponents with decimal (e) / hexadecimal (p) / binary (b) / user-defined are allowed.
-
-Leadings 0's are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. ``0001`` cannot be stored in a ``i8`` (type must be able to contain ``9999``). The old mistake of parsing leading ``0`` as octal is completely ignored. On the other hand trailing 0's are not significant - the decimal point should never be the last character in numeric literals (e.g. 1. is invalid, and must be written as 1 or 1.0).
-
-`Wikipedia <https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping>`__ lists the following commonly used digit grouping delimiters:
-
-* comma ","
-* dot "."
-* thin space " "
-* space " "
-* underscore "_"
-* apostrophe «'».
-
-Traditionally, English-speaking countries employ commas, and other European countries employ dots. This causes ambiguity as ``1.000`` could either be ``1`` or ``1000`` depending on country. To resolve this ambiguity, various standards organizations have advocated the thin space in groups of three since 1948, using a regular word space or no delimiter if not available. However these are already in use in programming languages as list separator, radix point, and token separator.
-
-Hence underscore and apostrophe have been used in PLs instead. Simon of `Core <https://github.com/core-lang/core/issues/52>`__ says quote is more readable. Underscore is also used in identifiers, which can confuse as to whether a symbol is an identifier or a numeric literal. But the underscore is the natural ASCII replacement for a space. 13+ languages have settled on underscore, `following <https://softwareengineering.stackexchange.com/questions/403931/which-was-the-first-language-to-allow-underscore-in-numeric-literals>`__ Ada that was released circa 1983. Only C++14, Rebol, and Red use the "Swiss" apostrophe/single quote instead.
-
-C++14 chose quote to solve an ambiguity in whether the ``_db`` in ``0xdead_beef_db`` is a user-defined format or additional hexadecimal digits, by making it ``0xdead'beef_db``. This could have been solved in the parser by specifying that the last group parses as a format if defined and digits otherwise, or parses as digits and requires ``__db`` to specify a format. But overall I think Stroscot doesn't need user-defined format suffixes; the prefix style ``i16 0xdead_beef`` is just fine.
-
-Rebol uses comma/period for decimal point so quote was a logical choice. There doesn't seem to be any reason underscore couldn't have been used. Red is just a successor of Rebol and copied many choices.
-
-Rationals
----------
-
-::
-
-  exponent = [a-zA-Z] [+-]? [0-9_]+
-  float = base? digit+(\.digit+)? exponent? format?
-
-  rational = float | float '/' float
-
-Number syntax is `Swift's <https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal>`__, but liberalized. We allow exponential notation in the numerator/denominator because writing out ``1e99 / 1e-99`` would be tedious.
-
-The normal form of a rational is ``AeB / C`` where ``A`` and ``C`` are relatively prime integers, ``B`` is an integer, and ``C`` is an integer that is not zero and not divisible by 10.
-
-So the value a rational is a term with a nested term, ``(/) ((e) <int> <int>) <int>``.
-
-Reals
------
-
-The real numbers and numeric spaces containing it are uncomputably large. In practice only a subset of  (computable) values is accessible. Generally we take the integers and rationals and consider the closure under operations:
-* constants (e, pi)
-* arithmetic ops (addition, subtraction multiplication, division)
-* other ops (sqrt, pow, sin, cos, abs, find root of polynomial in interval, definite integral, etc.)
-
-These operations can be written out as terms, e.g. ``sin (7/2)``, so to support the real numbers only appropriate symbols and defined operations are needed.
-
-p-adics and surreals
---------------------
-
-p-adics and surreal numbers are also represented using terms composed of integers, rationals, constants, and other terms, representing operations.
-
-Number formats
---------------
-
-Numbers can have a suffix interpreted as the format. This expand to a term that specifies the format by applying it, e.g.  ``123i8`` expands to ``int8 123``. Formats include IEE 754 float/double, signed and unsigned fixed bit-width integers, and fixed-point rationals.
-
-Complex
--------
-
-These are just a term ``complex a b`` representing ``a + b*i`` where ``a,b`` are real numbers. Maybe it is also worth having ``complex_polar r t = r*exp (i*t)``.
-
 Lists
 ======
 
@@ -194,6 +111,8 @@ Mutable arrays are a reference pointing to an immutable array. Operations are op
 
 There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like ``readOffset Int 0 ptr``. You can read a different type than you wrote, and it doesn't have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.
 
+:cite:`Tremblay` says that "allowing the size of arrays to be decided at run time [...] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas." But Storscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time.
+
 Tensors
 -------
 
@@ -232,15 +151,6 @@ There is also a ``matrix`` DSL which turns semicolons into rows.
 
   matrix [1,2;3,4]
   # [[1,2],[3,4]]
-
-Binary data
-===========
-
-Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values.
-
-Another way to write data is as a string ``bits "abcd\x0F"`` which makes use of UTF-8 characters and
-
-The normal form is just a term applied to a list of bits, ``bits [1,0,1]``. Because of the term tagging it, the list can be stored compactly.
 
 Strings
 =======
@@ -292,12 +202,19 @@ There is also a binary/hex literal syntax to abbreviate ``\xAA\xBB\xCC`` as ``0x
 
   data = base digit+
 
-String concatenation is ``++``.
-
 Characters
 ----------
 
 There is no explicit syntax for characters, instead a character is a Unicode string containing exactly one grapheme cluster. Unicode provides an algorithm for identifying grapheme clusters in UAX #29. The main notable feature of the algorithm is that a grapheme cluster / character is not just a single Unicode code point and may be arbitrarily long due to the use of combining characters/accents and ZWJs. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points, as does Zalgo text. Hence a character is in general an arbitrary length sequence of codepoints and it is simplest and most correct to define a character as a type of string.
+
+Bitvectors
+==========
+
+Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides bitvector values to represent binary data.
+
+The normal form of a bitvector is just the symbol ``bits`` applied to a list of bits, ``bits [1,0,1]``. The symbol marks that the list should be stored compactly.
+
+A more compact way to write a bitvector is via a string ``bits "abcd\x0F"``. This syntax uses UTF-8 characters and hexadecimal escapes, but is limited to expressing bitvectors whose length is a multiple of 8.
 
 Date/time
 =========
