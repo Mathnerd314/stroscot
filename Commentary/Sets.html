@@ -14,14 +14,15 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Stateful programming" href="State.html" />
+    <link rel="next" title="Standard library" href="Standard-Library.html" />
     <link rel="prev" title="Resource management" href="Resource-Management.html" /> 
 </head>
 
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
@@ -65,7 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -74,7 +76,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -104,6 +113,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -259,7 +269,7 @@
 <span class="p">}</span>
 </pre></div>
 </div>
-<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id44" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
+<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id45" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
 </section>
 <section id="records">
 <h3>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h3>
@@ -395,7 +405,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Resource-Management.html" class="btn btn-neutral float-left" title="Resource management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="State.html" class="btn btn-neutral float-right" title="Stateful programming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Standard-Library.html" class="btn btn-neutral float-right" title="Standard library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

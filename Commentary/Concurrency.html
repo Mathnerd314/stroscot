@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Concurrency</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
@@ -74,7 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -83,12 +85,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -132,37 +142,33 @@
 <p>As Go says, the rise of multicore CPUs means that a language should provide first-class support for concurrency and parallelism. But concurrency and multi-threaded programming have over time developed a reputation for difficulty. So let’s get it right.</p>
 <section id="model">
 <h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
-<p>The general idea with concurrency is there are multiple threads of execution. But practically there are more layers than just threads:</p>
+<p>The general idea with concurrency is there are multiple threads of execution. But practically there are several types of threads:</p>
+<ul class="simple">
+<li><p>An OS thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (<a class="reference external" href="https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989">1</a>, <span id="id1">[<a class="reference internal" href="../zzreferences.html#id116" title="Gor Nishanov. Fibers under the magnifying glass. November 2018. URL: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1364r0.pdf (visited on 2021-11-04).">Nis18</a>]</span> section 2.3.1)</p></li>
+<li><p>A UMS thread is a special type of Windows thread which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.</p></li>
+<li><p>A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (<a class="reference external" href="https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub">contiguous stacks</a>). Per Microsoft, fibers in C do not provide many advantages over threads.</p></li>
+</ul>
+<p>Threads have their own thread-local state/storage, but they do not exist in a vacuum; most of their state is shared with other threads running in the same context. This context may have several levels:</p>
 <ul class="simple">
 <li><p>A node is a physical or virtual machine in a cluster</p></li>
 <li><p>A pod is a group of one or more containers, that share storage and network resources and runs on a single node</p></li>
 <li><p>A container / namespace (Linux) / silo (Windows) contains one or more applications in an isolated form with all dependencies loaded from the container image</p></li>
-<li><p>A cgroup (Linux) / job object (Windows) is a group of processes whose resource usage is managed as a unit. Cgroups / job objects are arranged in a hierarchy of containment - cgroups may have multiple hierarchies for distinct resources, but job objects have only one hierarchy. A process belongs to one most specific job object / cgroup in each hierarchy. Cgroups / job objects have rules for assigning newly spawned processes to themselves, and there is an atomic API call to terminate all processes in the cgroup / job object, contrary to <a class="reference external" href="http://jdebp.info/FGA/linux-control-groups-are-not-jobs.html">what this says</a>  (it was added later).</p></li>
+<li><p>A cgroup (Linux) / job object (Windows) is a group of processes whose resource usage is managed as a unit. Cgroups / job objects are arranged in a hierarchy of containment - cgroups may have multiple hierarchies for distinct resources, but job objects have only one hierarchy. A process belongs to one most specific job object / cgroup in each hierarchy. Cgroups / job objects have rules for assigning newly spawned processes to themselves, and there is an atomic API call to terminate all processes in the cgroup / job object, contrary to <a class="reference external" href="http://jdebp.info/FGA/linux-control-groups-are-not-jobs.html">what this says</a>  (the API call was added later).</p></li>
 <li><p>An application is the result of invoking a binary and consists of one or more running processes.</p></li>
 <li><p>A process is an executing program and has a memory space and other resources allocated. One or more threads run in the context of the process.</p></li>
-<li><p>An (OS) thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (<a class="reference external" href="https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989">1</a>, <span id="id1">[<a class="reference internal" href="../zzreferences.html#id116" title="Gor Nishanov. Fibers under the magnifying glass. November 2018. URL: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1364r0.pdf (visited on 2021-11-04).">Nis18</a>]</span> section 2.3.1)</p></li>
-<li><p>A “UMS thread” is a special type of Windows thread which has more application control. An application can switch between UMS threads in user mode without involving the system scheduler and regain control of the processor if a UMS thread blocks in the kernel. Each UMS thread has its own thread context. The ability to switch between threads in user mode makes UMS more efficient than thread pools for short-duration work items that require few system calls.</p></li>
-<li><p>A fiber (green thread, virtual thread, goroutine) consists of a stack, saved registers, and fiber local storage. A fiber runs in the context of a thread and shares the thread context with other fibers. Fiber switching is fewer instructions than a thread context switch. When fibers are integrated into the runtime they can be more memory efficient than OS threads - Go uses only one page for the stack and reallocates the stack if it needs a larger one (<a class="reference external" href="https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub">contiguous stacks</a>). Per Microsoft, fibers in C do not provide many advantages over threads.</p></li>
 </ul>
-<p>A typical thread uses a combination of hardware and OS operations. In the cloud, a thread uses more network-centric operations.</p>
+<p>As far as storage, all immutable data exists in ambient space and is transparently copied by the memory management system as needed. Mutable data is stored in a specific location (TLS, process context, etc.) and is accessed via specialized, imperative concurrent operations.</p>
 </section>
 <section id="concurrent-operations">
 <h2>Concurrent operations<a class="headerlink" href="#concurrent-operations" title="Permalink to this heading"></a></h2>
-<p>At the lowest level are:</p>
-<ul class="simple">
-<li><p>read/write operations on mutable shared memory</p></li>
-<li><p>memory barrier/fence instructions</p></li>
-<li><p>OS syscalls that involve concurrency</p></li>
-</ul>
-<p>There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, actors, transactional memory. Higher-level interfaces enable much simpler code, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot.</p>
+<p>At the lowest level, a thread uses a combination of hardware and OS operations. The hardware operations are read/write on mutable shared memory, and various memory barrier/fence instructions. The OS syscalls are a mess but can be roughly tagged as files, networking, process, (shared) memory, permissions, system clock, futex, System V IPC, and signals. In the cloud, a thread uses mostly network-centric operations, message-passing between nodes, while on a node the operations are mostly shared memory operations due to current machine architectures.</p>
+<p>There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, transactional memory. These high-level interfaces are conceptually much simpler to reason about than mutable shared memory, in particular avoiding aliasing, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot. Sharing is caring.</p>
 <p>TODO: create complete list of higher-level abstractions and figure out how to nicely expose them in the language as libraries</p>
-<ul class="simple">
-<li><p>actors, channels, mvars</p></li>
-</ul>
+<p>In Erlang we have the actor model. This had the following concurrent operations: spawn process (identified by ID), send message (any value) to process, receive next message (block indefinitely), receive next message (with timeout). These are implemented by a runtime, which ensures processes are lightweight, schedules and runs them, and manages memory like the message queues.</p>
 </section>
 <section id="memory-models-and-races">
 <h2>Memory models and races<a class="headerlink" href="#memory-models-and-races" title="Permalink to this heading"></a></h2>
-<p>The smallest examples of races runtimewise just have memory access. For example this program SB: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id134" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
+<p>The smallest examples of races runtimewise just have memory access. For example this program SB: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id135" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
 <span class="nf">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
 <span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
@@ -176,7 +182,7 @@
 <p>Here the threads are provided by the C stdlib’s pthreads, and the operations are hardware load/store instructions.
 This program has a race condition, i.e. the order of writing and reading from A, B, x and u is not fixed.</p>
 <p>At this point one might be tempted to mimic C++ or Java and say a race is undefined behavior. But in fact C++ provides an escape hatch: atomics. Every type has a corresponding atomic type, so the program can just be made valid by making every variable and operation atomic. So this is a perfectly reasonable program. C++ is just adding more ways to shoot yourself in the foot by having non-atomic shared variables.</p>
-<p>Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code>, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding “relaxed memory models”, such as x86-TSO <span id="id3">[<a class="reference internal" href="../zzreferences.html#id134" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span> for x86 and multicopy atomicicity (MCA) <span id="id4">[<a class="reference internal" href="../zzreferences.html#id127" title="Christopher Pulte, Shaked Flur, Will Deacon, Jon French, Susmit Sarkar, and Peter Sewell. Simplifying ARM concurrency: multicopy-atomic axiomatic and operational models for ARMv8. Proceedings of the ACM on Programming Languages, 2(POPL):19:1–19:29, December 2017. URL: https://doi.org/10.1145/3158107 (visited on 2021-07-19), doi:10.1145/3158107.">PFD+17</a>]</span> for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs (‘litmus tests’) and appear to be accepted by the processor vendors as standard.</p>
+<p>Suppose we actually run the program on a processor a lot of times - we will see that the printed outcome may be <code class="docutils literal notranslate"><span class="pre">(1,1)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,0)</span></code>, <code class="docutils literal notranslate"><span class="pre">(0,1)</span></code>, or <code class="docutils literal notranslate"><span class="pre">(0,0)</span></code>, but values other than 0 or 1 are not observed. To predict this behavior there are corresponding “relaxed memory models”, such as x86-TSO <span id="id3">[<a class="reference internal" href="../zzreferences.html#id135" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span> for x86 and multicopy atomicicity (MCA) <span id="id4">[<a class="reference internal" href="../zzreferences.html#id128" title="Christopher Pulte, Shaked Flur, Will Deacon, Jon French, Susmit Sarkar, and Peter Sewell. Simplifying ARM concurrency: multicopy-atomic axiomatic and operational models for ARMv8. Proceedings of the ACM on Programming Languages, 2(POPL):19:1–19:29, December 2017. URL: https://doi.org/10.1145/3158107 (visited on 2021-07-19), doi:10.1145/3158107.">PFD+17</a>]</span> for ARMv8. These models have been tested to match physical processors for a wide variety of concurrent programs (‘litmus tests’) and appear to be accepted by the processor vendors as standard.</p>
 <p>Another example is independent reads of independent writes (IRIW):</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">X</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Y</span><span class="p">}</span>
 <span class="p">{</span><span class="kt">X</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>

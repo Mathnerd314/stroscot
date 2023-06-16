@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -61,6 +62,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#dereliction">Dereliction</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#weakening">Weakening</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#contraction">Contraction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#admissible-rules">Admissible rules</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#structural-rules">Structural rules</a><ul>
@@ -78,7 +80,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#infinite-proof-structures">Infinite proof structures</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#set-theory">Set theory</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#comprehension">Comprehension</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#equality">Equality</a></li>
 </ul>
 </li>
@@ -177,7 +178,7 @@
 <tbody>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(F\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(0\)</span></p></td>
-<td><p>Zero (False)</p></td>
+<td><p>False (Zero)</p></td>
 <td><p><span class="math notranslate nohighlight">\(\Sigma []\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
@@ -197,7 +198,7 @@
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A^{\otimes n}\)</span></p></td>
 <td></td>
-<td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Tensor_product#Tensor_powers_and_braiding">Tensor power</a></p></td>
+<td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Tensor_algebra#Construction">Tensor power</a></p></td>
 <td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,\overbrace{[A,\ldots,A]}^n - [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\smash{\stackrel{+}{\neg}} A\)</span></p></td>
@@ -212,7 +213,7 @@
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(T\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\top\)</span></p></td>
-<td><p>Top (True)</p></td>
+<td><p>True (Top)</p></td>
 <td><p><span class="math notranslate nohighlight">\(\Pi []\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\bot\)</span></p></td>
@@ -258,7 +259,41 @@
 </tbody>
 </table>
 <p>The negations and shifts have identical derivation rules for each polarity, so we write <span class="math notranslate nohighlight">\(\neg A\)</span> and <span class="math notranslate nohighlight">\(\smash{\updownarrow}A\)</span> unless there is a need for the distinction.</p>
-</section>
+<p>The specific derivation rules can be derived from the jumbo connective rules and the above definitions. For ease of reference, here are the derivation rules for the common connectives:</p>
+<div class="math notranslate nohighlight">
+\begin{array}{rr}
+ { \text{N/A} \  (F_R)} &amp; \rule{}{\Gamma, F \vdash \Delta }{F_L} \\
+ \rule{}{\Gamma \vdash T, \Delta }{T_R} &amp; { \text{N/A} \  (T_L)} \\
+
+ \rule{}{\vdash 1}{1_R} &amp; \rule{\Gamma \vdash \Delta}{\Gamma, 1 \vdash \Delta }{1_L} \\
+ \rule{\Gamma \vdash \Delta}{\Gamma \vdash \bot, \Delta }{\bot_R} &amp; \rule{}{\bot \vdash}{\bot_L} \\
+
+ \rule{\Gamma \vdash A_i, \Delta}{\Gamma \vdash A_1 \lor A_2, \Delta }{\lor_{iR}} &amp;
+  \rule{\Gamma, A \vdash \Delta \quad \Gamma, B \vdash \Delta}{\Gamma, A \lor B \vdash \Delta}{\lor_L} \\
+ \rule{\Gamma \vdash A, \Delta \quad \Gamma \vdash B, \Delta}{\Gamma \vdash A \land B, \Delta}{\land_R} &amp;
+  \rule{\Gamma, A_i \vdash \Delta}{\Gamma, A_1 \land A_2 \vdash \Delta }{\land_{iL}} \\
+
+ \rule{\Gamma \vdash A, \Delta \quad \Theta \vdash B, \Lambda}{\Gamma, \Theta \vdash A \otimes B, \Lambda, \Delta}{\otimes_R} &amp;
+  \rule{\Gamma, A, B \vdash \Delta}{\Gamma, A \otimes B \vdash \Delta }{\otimes_L} \\
+ \rule{\Gamma \vdash A, B, \Delta}{\Gamma \vdash A \par B, \Delta }{\par_R} &amp;
+  \rule{\Gamma, A \vdash \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, \Theta, A \par B \vdash \Lambda, \Delta}{\par_L} \\
+
+ \rule{\Gamma_1 \vdash A, \Delta_1 \quad \ldots \quad \Gamma_n \vdash A, \Delta_n}{\Gamma_1, \ldots, \Gamma_n \vdash A^{\otimes n}, \Delta_1, \ldots, \Delta_n}{{\otimes n}_R} &amp;
+  \rule{\Gamma, \overbrace{A,\ldots,A}^n \vdash \Delta}{\Gamma, A^{\otimes n} \vdash \Delta }{{\otimes n}_L} \\
+ \rule{\Gamma \vdash \overbrace{A,\ldots,A}^n, \Delta}{\Gamma \vdash A^{\par n}, \Delta }{{\par n}_R} &amp;
+ \rule{\Gamma_1, A \vdash \Delta_1 \quad \ldots \quad \Gamma_n, A \vdash \Delta_n}{\Gamma_1, \ldots, \Gamma_n, A^{\par n} \vdash \Delta_1, \ldots, \Delta_n}{{\par n}_L} \\
+
+ \rule{\Gamma, A \vdash \Delta}{\Gamma \vdash \neg A, \Delta }{\neg_R} &amp;
+ \rule{\Gamma \vdash A, \Delta}{\Gamma, \neg A \vdash \Delta }{\neg_L} \\
+ \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \smash{\updownarrow}A, \Delta }{\smash{\updownarrow}_R} &amp;
+ \rule{\Gamma, A \vdash \Delta}{\Gamma, \smash{\updownarrow}A \vdash \Delta }{\smash{\updownarrow}_L} \\
+
+ \rule{\Gamma, A \vdash B, \Delta}{\Gamma \vdash A \to B, \Delta }{\to_R} &amp;
+ \rule{\Gamma \vdash A, \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, \Theta, A \to B \vdash \Lambda, \Delta }{\to_L} \\
+ \rule{\Gamma, A \vdash B, \Delta \quad \Gamma, B \vdash A, \Delta}{\Gamma \vdash A \leftrightarrow B, \Delta }{\leftrightarrow_R} &amp;
+ \rule{\Gamma \vdash A, \Delta \quad \Theta, B \vdash \Lambda}{\Gamma, A \leftrightarrow B \vdash \Delta }{\leftrightarrow_{\to L}} \\
+  &amp; \rule{\Gamma \vdash B, \Delta \quad \Theta, A \vdash \Lambda}{\Gamma, A \leftrightarrow B \vdash \Delta }{\leftrightarrow_{\leftarrow L}}
+\end{array}</div></section>
 <section id="programming-types">
 <h3>Programming types<a class="headerlink" href="#programming-types" title="Permalink to this heading"></a></h3>
 <p>We can also write some types common from programming:</p>
@@ -288,6 +323,7 @@
 </tr>
 </tbody>
 </table>
+<p>In general <span class="math notranslate nohighlight">\(\Sigma\)</span> can represent any algebraic data type.</p>
 </section>
 </section>
 <section id="exponentials">
@@ -321,6 +357,31 @@
 \begin{array}{cc}
     \rule{\sk{\Gamma}, \overrightarrow{\bang A, \bang A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang c_n}
   &amp; \rule{\sk{\Gamma} \vdash \overrightarrow{\whim A, \whim A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim c_n}
+\end{array}</div></section>
+<section id="admissible-rules">
+<h3>Admissible rules<a class="headerlink" href="#admissible-rules" title="Permalink to this heading"></a></h3>
+<p>The following rules are derivable from the four rules above.</p>
+<p>Weak promotion, implied by promotion and dereliction:</p>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\Gamma \vdash A, \Delta }{\bang \Gamma \vdash \bang A, \whim \Delta}{\bang_\text{weak}}
+    &amp; \rule{\Gamma, A \vdash \Delta }{\bang \Gamma, \whim A \vdash \whim \Delta}{\whim_\text{weak}}
+\end{array}</div><p>Digging is simply the theorems <span class="math notranslate nohighlight">\(\bang \bang A \equiv \bang a\)</span> and <span class="math notranslate nohighlight">\(\whim \whim A \equiv \whim a\)</span>, but we present the sequent forms for completeness. It is implied by promotion and dereliction.</p>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\Gamma, \bang \bang A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{dig}}
+    &amp; \rule{\Gamma \vdash \whim \whim A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{dig}}
+\end{array}</div><p>Weak promotion and digging together imply promotion.</p>
+<p>Absorption is implied by contraction and dereliction:</p>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\Gamma, A, \bang A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{absorb}}
+    &amp; \rule{\Gamma \vdash A, \whim A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{absorb}}
+\end{array}</div><p>Multiplexing is implied by absorption and dereliction:</p>
+<div class="math notranslate nohighlight">
+\begin{array}{cc}
+    \rule{\Gamma, A, \ldots, A \vdash \Delta }{\Gamma, \bang A \vdash \Delta}{\bang_\text{multiplex}}
+    &amp; \rule{\Gamma \vdash A, \ldots, A, \Delta }{\Gamma \vdash \whim A, \Delta}{\whim_\text{multiplex}}
 \end{array}</div></section>
 </section>
 <section id="structural-rules">
@@ -403,17 +464,8 @@
 <p>We can also define set-builder notation <span class="math notranslate nohighlight">\(\{a_1,\ldots,a_n\} = \{x\mid x = a_1 \lor \ldots \lor x=a_n\}\)</span>.</p>
 <p>We define</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}a \ocin B = \bang(a \in B)\\\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\\\exists x\in A. P(x) = \exists x. \bang(x \in A) \otimes P(x)\\\forall x\in A. P(x) = \forall x. (\bang(x\in A) \multimap P(x)\end{aligned}\end{align} \]</div>
-<section id="comprehension">
-<h3>Comprehension<a class="headerlink" href="#comprehension" title="Permalink to this heading"></a></h3>
-<p>We can prove the axiom schema of comprehension for formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>:</p>
-<ol class="arabic simple">
-<li><p><span class="math notranslate nohighlight">\(\vdash \phi \leftrightarrow \phi\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash x\in \{x\mid\phi\} \leftrightarrow \phi\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash \forall x. x\in \{x\mid\phi\} \leftrightarrow \phi\)</span></p></li>
-<li><p><span class="math notranslate nohighlight">\(\vdash \exists y. \forall x. x\in y \leftrightarrow \phi\)</span></p></li>
-</ol>
-</section>
+\[ \begin{align}\begin{aligned}a \ocin B = \bang(a \in B)\\\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\\\exists x\in A. P(x) = \exists x.(\bang(x \in A) \otimes P(x))\\\forall x\in A. P(x) = \forall x. (\bang(x\in A) \to P(x))\end{aligned}\end{align} \]</div>
+<p>We can prove the axiom schema of comprehension <span class="math notranslate nohighlight">\(\vdash \exists y. \forall x. x\in y \leftrightarrow \phi\)</span> for all formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <section id="equality">
 <h3>Equality<a class="headerlink" href="#equality" title="Permalink to this heading"></a></h3>
 <p>Equality on sets is defined as follows:</p>

@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
@@ -124,12 +126,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#unmask-is-not-an-inverse">Unmask is not an inverse</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#assertions">Assertions</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -138,12 +141,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -184,6 +195,7 @@
              
   <section id="exceptions">
 <h1>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading"></a></h1>
+<p>Exceptions allow us to focus on the normal (non-exceptional) case when performing operations that might fail. The downside is that it is more tricky to reason about how the failure cases are handled, because the handling code may be many levels of function calls removed from the operation.</p>
 <section id="exception-menagerie">
 <h2>Exception menagerie<a class="headerlink" href="#exception-menagerie" title="Permalink to this heading"></a></h2>
 <p>The first question is what an exception is. Let us try to classify all the exceptions, everything that can use an exception-like semantic. The space of exceptions is unquestionably large so this list is probably incomplete.</p>
@@ -393,7 +405,7 @@
 <p>The answer I’ve come up with is that the visible marker encourages beginners to write robust code because it provides a starting point to write down all the cases and reason through their handling. It is easier to identify errors in code using manual propagation because the erroneous cases are often visibly missing or underhandled. However, specialized marker syntaxes such as Swift’s <code class="docutils literal notranslate"><span class="pre">try</span></code> or Rust’s <code class="docutils literal notranslate"><span class="pre">?</span></code> remove this advantage, making the marker just syntactic noise. It’s really only a difference for beginners, so the tutorial can garner the same advantage so long as it introduces explicit error handling first and emphasizes that automatic error propagation is a shortcut syntax and exception safety should always be considered.</p>
 <p>The most common syntax is unwinding, and manual unwinding code, even if a single character, is still repetitive, tedious, ugly, and annoying boilerplate, making programmers discouraged and code less readable and maintainable. In particular there is the case where you are in a call chain several levels deep and want to throw an exception that is handled higher up - with manual propagation you would have to add unwinding code to each intervening function. But since this boilerplate is visible and translates into basic language facilities it is easy for beginners to understand. The sequencing is explicit in the translation so there is no ambiguity.</p>
 <p>Automatic propagation is a language feature that makes it very easy to do unwinding. Vaguely, it decorates every expression with an early return of the form <code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">expr</span> <span class="pre">of</span> <span class="pre">(e</span> <span class="pre">:</span> <span class="pre">Exception)</span> <span class="pre">-&gt;</span> <span class="pre">return</span> <span class="pre">e;</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">x</span></code>. But this definition doesn’t specify which exception gets returned, e.g. from <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">a</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">b</span></code>. The more correct (operational) semantics is that as soon as an exception is evaluated (thrown) it is immediately propagated to the nearest applicable exception-catching context and the remaining part of the expression is discarded. This exposes the evaluation strategy of the language implementation. Java says left-to-right, but this prevents many optimizations. Stroscot’s answer is that the exception returned is a deterministic function of the expression and compiler version. However the compiler’s evaluation strategy is not exposed to the static verification system, so type signatures must be written as if either exception could be returned.</p>
-<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id122" title="Simon Peyton Jones, Alastair Reid, Fergus Henderson, Tony Hoare, and Simon Marlow. A semantics for imprecise exceptions. ACM SIGPLAN Notices, 34(5):25–36, May 1999. URL: https://doi.org/10.1145/301631.301637 (visited on 2022-07-25), doi:10.1145/301631.301637.">PJRH+99</a>]</span> says that because automatic propagation is “nondeterministic”, <code class="docutils literal notranslate"><span class="pre">catch</span></code> should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad. <code class="docutils literal notranslate"><span class="pre">getException</span></code> is just <code class="docutils literal notranslate"><span class="pre">return</span></code> and pattern matching (section 4.4, page 9). Their approach merely uses the I/O monad as a “sin bin” for nondeterminism. Stroscot’s choice to expose the nondeterminism allows more concise and flexible pure exception handling. But since the verification system models the set of exceptions and <code class="docutils literal notranslate"><span class="pre">catch</span></code> as randomly picking one, it robustly checks all evaluation strategies, including strange possibilities such as <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">throw</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">2</span> <span class="pre">in</span> <span class="pre">try</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">try</span> <span class="pre">x</span></code> evaluating to false. (CBN expansion duplicates x, then try/catch picks different branches)</p>
+<p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id123" title="Simon Peyton Jones, Alastair Reid, Fergus Henderson, Tony Hoare, and Simon Marlow. A semantics for imprecise exceptions. ACM SIGPLAN Notices, 34(5):25–36, May 1999. URL: https://doi.org/10.1145/301631.301637 (visited on 2022-07-25), doi:10.1145/301631.301637.">PJRH+99</a>]</span> says that because automatic propagation is “nondeterministic”, <code class="docutils literal notranslate"><span class="pre">catch</span></code> should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad. <code class="docutils literal notranslate"><span class="pre">getException</span></code> is just <code class="docutils literal notranslate"><span class="pre">return</span></code> and pattern matching (section 4.4, page 9). Their approach merely uses the I/O monad as a “sin bin” for nondeterminism. Stroscot’s choice to expose the nondeterminism allows more concise and flexible pure exception handling. But since the verification system models the set of exceptions and <code class="docutils literal notranslate"><span class="pre">catch</span></code> as randomly picking one, it robustly checks all evaluation strategies, including strange possibilities such as <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">throw</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">throw</span> <span class="pre">2</span> <span class="pre">in</span> <span class="pre">try</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">try</span> <span class="pre">x</span></code> evaluating to false. (CBN expansion duplicates x, then try/catch picks different branches)</p>
 <p>According to <a class="reference external" href="https://www.joelonsoftware.com/2003/10/13/13/">Joel</a> automatic propagation sucks because the early returns mean magic gotos are invisibly sprinkled throughout your code. It does take some training to learn to read code as if every line, expression, and subexpression could throw an exception and to use finalizers appropriately. But automatic propagation gives streamlined syntax. With automatic propagation it does not require any changes to a call chain to throw an exception and catch it several layers higher up. Generally, it is easy to quickly write code for the happy path using automatic propagation because you don’t mark any error paths.</p>
 <p>The correctness of code using automatic propagation is hard to judge. An exception code path may unwind too soon and not restore its state properly, but this may not be obvious. There are a few mutable state strategies that are easy to check:</p>
 <ul class="simple">
@@ -891,6 +903,19 @@ bar :: (MonadIO m, MonadMask m) =&gt; FilePath -&gt; (Handle -&gt; m a) -&gt; m 
 <p>writing no-throw code that uses an exception-throwing function is tedious - you have to handle all the exceptions and update the code whenever the exception list changes. But with precise checking it is pretty straightforward. In C++ integrating exception-throwing code into no-throw code doesn’t work though.</p>
 </div></blockquote>
 </section>
+</section>
+<section id="assertions">
+<h2>Assertions<a class="headerlink" href="#assertions" title="Permalink to this heading"></a></h2>
+<p>An assertion expresses an expectation or requirement for the program state. Assertions function similarly to breakpoints in a debugger - they check a condition and trigger an exceptional situation. But because they appear inline in the source code, they communicate assumptions and constraints to other developers. They are more precise than a comment because they are executable. Depending on where they appear in the program flow and the condition, assertions can express simple defensive sanity checks, loop invariants, pre-conditions, post-conditions, or the presence or absence of side effects. Assertions ensure more reliable code.</p>
+<p>At their core, assertions are still just a use of the exception-handling mechanism - <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">cond</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">cond</span> <span class="pre">(throw</span> <span class="pre">AssertionFailure)</span></code>. Stroscot also allows generating values non-deterministically and constraining them using <code class="docutils literal notranslate"><span class="pre">assume</span></code>, so that an assertion may check a property of a function over all inputs. This is more commonly referred to as a contract or signature, but there’s no clear distinction between contracts, signatures, and assertions - the type assertion <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code> relies on non-determinism but can appear in the module (acting as a signature and showing up in the documentation) or in the body (checking a property of a value).</p>
+<p>In typical languages, assertions have a verbose syntax that clutters the code. Stroscot introduces several specialized compact syntaxes, such as type assertions. This should allow using them more easily and make them suitable for more contexts.</p>
+<p>Also, in C++, there are some pitfalls of assertions. To avoid unexpected behavior, Stroscot places several restrictions on assertion expressions. An assertion condition must evaluate to true or false. It must not require any continuation side-effects to evaluate. Ambient state can be read and written, but the state after evaluating the assertion expression is discarded and evaluation continues with the state from before evaluating the assertion expression.</p>
+<p>assert - error if trace exists where expression is false, omitted if compiler can prove true, otherwise runtime check with error if expression evaluates to false,
+assume expr - prunes traces where expression is false. backtracking implementation at runtime.</p>
+<p>Regarding assertions that are only checked in debug builds, it is certainly possible with a statement of the form <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">DEBUG</span> <span class="pre">{</span> <span class="pre">assert</span> <span class="pre">X</span> <span class="pre">}</span></code>, and of course it is possible to define a function for this .</p>
+<blockquote>
+<div><p>in practice unconditionally enabled assertions are more useful/common, particularly if the compiler is good at checking assertions and optimizing them away. Imagine you’re designing a car and put in air bags. You test the car and the air bags in all sorts of configurations and they work great and are much safer. But just as you’re getting ready to go into production to send the car out to consumers, you take out all the airbags. That’s what debug-only assertions are like. It’s for this reason that GCC and clang do not deactivate asserts when compiling with optimizations.</p>
+</div></blockquote>
 </section>
 </section>
 

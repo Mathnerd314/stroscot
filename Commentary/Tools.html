@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
@@ -65,7 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -74,12 +76,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -93,6 +103,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#notebooks">Notebooks</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#debugger">Debugger</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
@@ -174,7 +185,7 @@
 <p>According to the <a class="reference external" href="https://survey.stackoverflow.co/2022/#section-most-popular-technologies-integrated-development-environment">StackOverflow 2022 survey</a>, VSCode was the most popular editor and 2x as popular as either of the next two, Visual Studio and IntelliJ. I think VSCode is a sufficient environment for hosting a new language, while the existing tools for writing IDEs are insufficient, so implementing the language comes first. So, at least until the language is stable, I only aim to support VSCode / LSP and nothing else.</p>
 <section id="language-server">
 <h3>Language server<a class="headerlink" href="#language-server" title="Permalink to this heading"></a></h3>
-<p>VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There’s a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specification">specification</a>. As an overview, an LSP server will provide:</p>
+<p>VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There’s a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specification">specification</a>. As an overview, an LSP server can provide:</p>
 <ul class="simple">
 <li><p>syntax highlighting</p></li>
 <li><p>tooltips</p></li>
@@ -183,7 +194,7 @@
 <li><p>debugger integration</p></li>
 <li><p>navigate to definition</p></li>
 <li><p>compiler errors/warnings/fixes</p></li>
-<li><p>IDE-assisted renaming or refactoring</p></li>
+<li><p>renaming or refactoring actions</p></li>
 </ul>
 </section>
 <section id="notebooks">
@@ -191,6 +202,26 @@
 <p>Ideally, IMO, notebooks would be incremental. Running (shift-enter) would act as if it reran the notebook from the start up to the selected cell. For speed the computation would be cached incrementally, so long-running computations would be skipped if possible. This model allows putting interactive sliders in and quickly updating graphs. Also, like Smalltalk the workspaces should have memory and persist across close-open. Everything in the notebook state should be serialized, down to the cursor position. Ideally this should be a text-based format, JSON or maybe even a subset of Stroscot. Also it should be possible to export a notebook to a text file, once you’ve decided it’s in a good state and don’t need the interactivity anymore.</p>
 <p>The modern workspace environment that’s most popular is the Jupyter notebook interface. But jupyter’s kernel <a class="reference external" href="https://jupyter-client.readthedocs.io/en/latest/messaging.html">protocol</a> is just a dumb “execute this string of code” REPL, no information on what cell it’s from. So we would have to hack jupyter to get this to work. OTOH the LSP protocol does support incremental update and it looks like you can use this incremental update protocol with notebooks. So another win for supporting VSCode exclusively.</p>
 </section>
+</section>
+<section id="debugger">
+<h2>Debugger<a class="headerlink" href="#debugger" title="Permalink to this heading"></a></h2>
+<p>The debugger’s view of the program’s state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation.</p>
+<p>One debugging technique useful in combination with reversible debugging is to use a step counter that starts at 0 at the beginning of the program and increments every time a reduction step is performed. The exact step that triggers a behavior can be determined by binary search. Similarly when we are debugging a phase of the compiler, we can use “fuel” - this specifies how many transformations can be performed during the phase of interest before moving on to the next phase.</p>
+<p>Let’s assume we have symbols, then there are lots of operations available from a debugger:</p>
+<ul class="simple">
+<li><p>recording: record the whole program execution. Reversible debugging allows running a program backwards. Omniscient debugging allows queries over the entire execution of the program, as though all states were stored in a database and indexed. Recording can be implemented by instruction-level recording, but more efficient is to record only non-deterministic events, with occasional whole-program snapshots to allow seeking. Supporting concurrent execution requires recording inter-thread sequencing.</p></li>
+<li><p>breakpoints: set/clear/list. essentially a breakpoint is a true/false predicate on a transition. Can inspect state and the previous state - common conditions include at program line/column, transition calls syscall, transition enters function, expression not yet evaluated, transition invokes signal handler, variable has value in state, transition modifies variable, transition in certain thread.</p></li>
+<li><p>tracepoints: record message / data / statistics at a set of program transitions, like a breakpoint but without stopping</p></li>
+<li><p>queries: print backtrace / call stack, print state (threads, variables), dump memory, disassemble memory, blocked thread dependencies, pretty-printing, GUI visualizations</p></li>
+<li><p>stepping: single step, step out, continue thread / all threads until breakpoint, run ignoring breakpoints until stopped with interactive commnad</p></li>
+<li><p>REPL / patching: evaluate pure expression in context of state, evaluate arbitrary code in current state (e.g. set variable to value), replace definition, hot-reload code changes, jump to address, return early from function. Pedantically, the patched state has no real history so the debugger should only be able to run forward from the state, but we can graft the patched state onto the old state to avoid losing context.</p></li>
+<li><p>IPC: send signal, modify files</p></li>
+</ul>
+<p>Debugging by querying a database of all program state by Kyle Huey
+The State Of Debugging in 2022 by Robert O’Callahan
+Debugging Backwards in Time (2003) by Bil Lewis
+undo.io UDB
+rr, WinDBG, Pernosco.</p>
 </section>
 </section>
 

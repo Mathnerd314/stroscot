@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
@@ -87,7 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -96,12 +98,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -222,7 +232,7 @@
 <section id="inference">
 <h3>Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h3>
 <p>The case where a parameter approach falls down is when we desire an inferred type rather than specifying the type directly on the function. For example <code class="docutils literal notranslate"><span class="pre">(fromInteger</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">fromInteger</span> <span class="pre">2)</span> <span class="pre">::</span> <span class="pre">Int</span></code>, Haskell pushes the constraint down and deduces <code class="docutils literal notranslate"><span class="pre">fromInteger</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">Int</span></code>. If we went with giving the type as a parameter we would have to write <code class="docutils literal notranslate"><span class="pre">fromInteger</span> <span class="pre">Int</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">fromInteger</span> <span class="pre">Int</span> <span class="pre">2</span></code>, duplicating the type. With a function expression of fixed type <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">id</span> <span class="pre">::</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">in</span> <span class="pre">show</span> <span class="pre">(f</span> <span class="pre">$</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;)</span></code> or case statement <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">(case</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;</span> <span class="pre">of</span> <span class="pre">(1</span> <span class="pre">::</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">&quot;x&quot;)</span></code> the type is far removed from the ambiguous <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
-<p>It is arguable whether inference is desirable. The programmer has to perform the same type inference in their head to follow the path the compiler is taken, which can make code tricky to understand. The meaning of an expression is context-dependent. But the original typeclasses paper <span id="id2">[<a class="reference internal" href="../zzreferences.html#id163" title="P. Wadler and S. Blott. How to make ad-hoc polymorphism less ad hoc. In Proceedings of the 16th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages - POPL '89, 60–76. Austin, Texas, United States, 1989. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=75277.75283 (visited on 2022-06-07), doi:10.1145/75277.75283.">WB89</a>]</span> mentions resolving overloaded constants based on the context as a feature. So this section discusses possible ways of implementing the context resolution.</p>
+<p>It is arguable whether inference is desirable. The programmer has to perform the same type inference in their head to follow the path the compiler is taken, which can make code tricky to understand. The meaning of an expression is context-dependent. But the original typeclasses paper <span id="id2">[<a class="reference internal" href="../zzreferences.html#id164" title="P. Wadler and S. Blott. How to make ad-hoc polymorphism less ad hoc. In Proceedings of the 16th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages - POPL '89, 60–76. Austin, Texas, United States, 1989. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=75277.75283 (visited on 2022-06-07), doi:10.1145/75277.75283.">WB89</a>]</span> mentions resolving overloaded constants based on the context as a feature. So this section discusses possible ways of implementing the context resolution.</p>
 <p>One approach is similar to <a class="reference external" href="https://artificial-mind.net/blog/2020/10/10/return-type-overloading">this C++ thing</a>. We create a “blob” type that represents an RTO value of unknown type as a function from type to value. Then we overload operations on the blob to return blobs, delaying resolution until the full type can be inferred. Furthermore the blob can store its type in a mutable reference and use <code class="docutils literal notranslate"><span class="pre">unsafePerformIO</span></code> to ensure that it resolves to the same type if it is used multiple times. Or it can be safe and evaluate at multiple types. This requires overloading every function to support the blob, so can be some boilerplate.</p>
 <p>A little simpler approach is to use a term, so e.g. <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;x&quot;</span></code> is a normal form. Then you overload functions to deal with these terms. This works well for nullary symbols like <code class="docutils literal notranslate"><span class="pre">maxBound</span></code> - you implement conversion <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">maxBound</span> <span class="pre">Float</span> <span class="pre">=</span> <span class="pre">float</span> <span class="pre">Infinity</span></code> and promotion will take care of the rest. The issue is that an expression like <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;1&quot;</span> <span class="pre">+</span> <span class="pre">read</span> <span class="pre">&quot;2&quot;</span></code> will not resolve the return type, and returning <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;3&quot;</span></code> is inefficient. I think the best solution is to return a blob. So this ends up being the blob solution but with readable literals for the first level of return value.</p>
 <p>Another approach is to add type inference, but as a macro transformation. All it has to do is infer the types using Hindley Milner or similar and insert explicit type parameters for the RTOed functions. But this is really the opposite of what Stroscot aims for. Stroscot avoided static typing to begin with because there are no principal types if you have union types. For example a value of type <code class="docutils literal notranslate"><span class="pre">A</span></code> may take on the type <code class="docutils literal notranslate"><span class="pre">(A|B)</span></code> or <code class="docutils literal notranslate"><span class="pre">(A|C)</span></code> depending on context. The inserted types would have to be principal, negating the advantage of dynamic typing. Furthermore you’d have to use more macros to specify type instances and types of functions.</p>

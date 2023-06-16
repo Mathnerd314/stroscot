@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -63,26 +64,17 @@
 <li class="toctree-l4"><a class="reference internal" href="#infinite-terms">Infinite terms</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#numbers">Numbers</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#integers">Integers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rationals">Rationals</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#reals">Reals</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#p-adics-and-surreals">p-adics and surreals</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#number-formats">Number formats</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#complex">Complex</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#lists">Lists</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tuple">Tuple</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#arrays">Arrays</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#tensors">Tensors</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#binary-data">Binary data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#characters">Characters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#bitvectors">Bitvectors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#date-time">Date/time</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#records">Records</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#maps">Maps</a></li>
@@ -144,7 +136,7 @@
 <h1>Values<a class="headerlink" href="#values" title="Permalink to this heading"></a></h1>
 <p>In Stroscot values are defined to be expressions that are in normal form (strongly reduced), i.e. they evaluate to themselves. WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value. Traditionally a function is only defined on values, but lazy evaluation allows functions to produce useful behavior for non-values as well.</p>
 <p>Values are immutable (as <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">Rich Hickey says</a>) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.</p>
-<p>For convenience, “value” really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - they reduce to a value of the compiler’s preferred data structure implementation. Programs may define the syntax here to other values.</p>
+<p>For convenience, “value” really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - usually they reduce to a value of the compiler’s preferred data structure implementation. Programs may define the syntax here to other values.</p>
 <section id="symbols">
 <h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h2>
 <p>Symbols or identifiers are unique values. Bare symbols can be either ordinary or extended, vaguely like <a class="reference external" href="https://docs.raku.org/language/syntax#Identifiers">Raku</a>. However symbols defined in modules are qualified to that module, hence more specific.</p>
@@ -193,72 +185,6 @@
 <p>Sometimes it is useful to deal with terms that are solutions to a system of equations, like <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x=cons</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">x</span></code>. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">fib</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">cons</span> <span class="pre">x</span> <span class="pre">(fib</span> <span class="pre">y</span> <span class="pre">(x+y))</span> <span class="pre">in</span> <span class="pre">fib</span> <span class="pre">0</span> <span class="pre">1</span></code> requires infinitely many reductions to reduce to an infinite normal form.</p>
 </section>
 </section>
-<section id="numbers">
-<h2>Numbers<a class="headerlink" href="#numbers" title="Permalink to this heading"></a></h2>
-<p>In the mathematical world the definition of <a class="reference external" href="https://en.wikipedia.org/wiki/Number#Main_classification">number</a> variously refers to integers, rationals, real numbers, complex numbers, and/or other mathematical structures like p-adics or the surreal numbers. (the “numeric tower”) But in the computer world most of these are composite structures and the primitive notion of “number” is a literal that looks like a number.</p>
-<section id="integers">
-<h3>Integers<a class="headerlink" href="#integers" title="Permalink to this heading"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="mi">4711</span>
-<span class="mi">4711</span><span class="kt">L</span>
-<span class="mf">1.2e+3</span>
-
-<span class="nf">base</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="p">]</span>
-<span class="nf">digit</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">a</span><span class="o">-</span><span class="n">fA</span><span class="o">-</span><span class="kt">F_</span><span class="p">]</span>
-<span class="nf">pos_exponent</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="o">+?</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span>
-<span class="nf">format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="n">identifier</span>
-
-<span class="nf">integer</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="w"> </span><span class="n">pos_exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="p">{</span><span class="mi">0</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>Really integers are just a special class of symbols. Different bases for integers are provided - decimal <code class="docutils literal notranslate"><span class="pre">1000</span></code>, hexadecimal <code class="docutils literal notranslate"><span class="pre">0x3e8</span></code>, octal <code class="docutils literal notranslate"><span class="pre">0o1750</span></code>, binary <code class="docutils literal notranslate"><span class="pre">0b1111101000</span></code>. Further bases may be added. Positive exponents with decimal (e) / hexadecimal (p) / binary (b) / user-defined are allowed.</p>
-<p>Leadings 0’s are significant - literals with leading zeros must be stored in a type that can hold the digits all replaced with their highest value, e.g. <code class="docutils literal notranslate"><span class="pre">0001</span></code> cannot be stored in a <code class="docutils literal notranslate"><span class="pre">i8</span></code> (type must be able to contain <code class="docutils literal notranslate"><span class="pre">9999</span></code>). The old mistake of parsing leading <code class="docutils literal notranslate"><span class="pre">0</span></code> as octal is completely ignored. On the other hand trailing 0’s are not significant - the decimal point should never be the last character in numeric literals (e.g. 1. is invalid, and must be written as 1 or 1.0).</p>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Decimal_separator#Digit_grouping">Wikipedia</a> lists the following commonly used digit grouping delimiters:</p>
-<ul class="simple">
-<li><p>comma “,”</p></li>
-<li><p>dot “.”</p></li>
-<li><p>thin space ” “</p></li>
-<li><p>space ” “</p></li>
-<li><p>underscore “_”</p></li>
-<li><p>apostrophe «’».</p></li>
-</ul>
-<p>Traditionally, English-speaking countries employ commas, and other European countries employ dots. This causes ambiguity as <code class="docutils literal notranslate"><span class="pre">1.000</span></code> could either be <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">1000</span></code> depending on country. To resolve this ambiguity, various standards organizations have advocated the thin space in groups of three since 1948, using a regular word space or no delimiter if not available. However these are already in use in programming languages as list separator, radix point, and token separator.</p>
-<p>Hence underscore and apostrophe have been used in PLs instead. Simon of <a class="reference external" href="https://github.com/core-lang/core/issues/52">Core</a> says quote is more readable. Underscore is also used in identifiers, which can confuse as to whether a symbol is an identifier or a numeric literal. But the underscore is the natural ASCII replacement for a space. 13+ languages have settled on underscore, <a class="reference external" href="https://softwareengineering.stackexchange.com/questions/403931/which-was-the-first-language-to-allow-underscore-in-numeric-literals">following</a> Ada that was released circa 1983. Only C++14, Rebol, and Red use the “Swiss” apostrophe/single quote instead.</p>
-<p>C++14 chose quote to solve an ambiguity in whether the <code class="docutils literal notranslate"><span class="pre">_db</span></code> in <code class="docutils literal notranslate"><span class="pre">0xdead_beef_db</span></code> is a user-defined format or additional hexadecimal digits, by making it <code class="docutils literal notranslate"><span class="pre">0xdead'beef_db</span></code>. This could have been solved in the parser by specifying that the last group parses as a format if defined and digits otherwise, or parses as digits and requires <code class="docutils literal notranslate"><span class="pre">__db</span></code> to specify a format. But overall I think Stroscot doesn’t need user-defined format suffixes; the prefix style <code class="docutils literal notranslate"><span class="pre">i16</span> <span class="pre">0xdead_beef</span></code> is just fine.</p>
-<p>Rebol uses comma/period for decimal point so quote was a logical choice. There doesn’t seem to be any reason underscore couldn’t have been used. Red is just a successor of Rebol and copied many choices.</p>
-</section>
-<section id="rationals">
-<h3>Rationals<a class="headerlink" href="#rationals" title="Permalink to this heading"></a></h3>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">exponent</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="kt">Z</span><span class="p">]</span><span class="w"> </span><span class="p">[</span><span class="o">+-</span><span class="p">]</span><span class="o">?</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">+</span>
-<span class="nf">float</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="o">?</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span><span class="p">(</span><span class="o">\.</span><span class="n">digit</span><span class="o">+</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">exponent</span><span class="o">?</span><span class="w"> </span><span class="n">format</span><span class="o">?</span>
-
-<span class="nf">rational</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">float</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">float</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="w"> </span><span class="n">float</span>
-</pre></div>
-</div>
-<p>Number syntax is <a class="reference external" href="https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#grammar_numeric-literal">Swift’s</a>, but liberalized. We allow exponential notation in the numerator/denominator because writing out <code class="docutils literal notranslate"><span class="pre">1e99</span> <span class="pre">/</span> <span class="pre">1e-99</span></code> would be tedious.</p>
-<p>The normal form of a rational is <code class="docutils literal notranslate"><span class="pre">AeB</span> <span class="pre">/</span> <span class="pre">C</span></code> where <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are relatively prime integers, <code class="docutils literal notranslate"><span class="pre">B</span></code> is an integer, and <code class="docutils literal notranslate"><span class="pre">C</span></code> is an integer that is not zero and not divisible by 10.</p>
-<p>So the value a rational is a term with a nested term, <code class="docutils literal notranslate"><span class="pre">(/)</span> <span class="pre">((e)</span> <span class="pre">&lt;int&gt;</span> <span class="pre">&lt;int&gt;)</span> <span class="pre">&lt;int&gt;</span></code>.</p>
-</section>
-<section id="reals">
-<h3>Reals<a class="headerlink" href="#reals" title="Permalink to this heading"></a></h3>
-<p>The real numbers and numeric spaces containing it are uncomputably large. In practice only a subset of  (computable) values is accessible. Generally we take the integers and rationals and consider the closure under operations:
-* constants (e, pi)
-* arithmetic ops (addition, subtraction multiplication, division)
-* other ops (sqrt, pow, sin, cos, abs, find root of polynomial in interval, definite integral, etc.)</p>
-<p>These operations can be written out as terms, e.g. <code class="docutils literal notranslate"><span class="pre">sin</span> <span class="pre">(7/2)</span></code>, so to support the real numbers only appropriate symbols and defined operations are needed.</p>
-</section>
-<section id="p-adics-and-surreals">
-<h3>p-adics and surreals<a class="headerlink" href="#p-adics-and-surreals" title="Permalink to this heading"></a></h3>
-<p>p-adics and surreal numbers are also represented using terms composed of integers, rationals, constants, and other terms, representing operations.</p>
-</section>
-<section id="number-formats">
-<h3>Number formats<a class="headerlink" href="#number-formats" title="Permalink to this heading"></a></h3>
-<p>Numbers can have a suffix interpreted as the format. This expand to a term that specifies the format by applying it, e.g.  <code class="docutils literal notranslate"><span class="pre">123i8</span></code> expands to <code class="docutils literal notranslate"><span class="pre">int8</span> <span class="pre">123</span></code>. Formats include IEE 754 float/double, signed and unsigned fixed bit-width integers, and fixed-point rationals.</p>
-</section>
-<section id="complex">
-<h3>Complex<a class="headerlink" href="#complex" title="Permalink to this heading"></a></h3>
-<p>These are just a term <code class="docutils literal notranslate"><span class="pre">complex</span> <span class="pre">a</span> <span class="pre">b</span></code> representing <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b*i</span></code> where <code class="docutils literal notranslate"><span class="pre">a,b</span></code> are real numbers. Maybe it is also worth having <code class="docutils literal notranslate"><span class="pre">complex_polar</span> <span class="pre">r</span> <span class="pre">t</span> <span class="pre">=</span> <span class="pre">r*exp</span> <span class="pre">(i*t)</span></code>.</p>
-</section>
-</section>
 <section id="lists">
 <h2>Lists<a class="headerlink" href="#lists" title="Permalink to this heading"></a></h2>
 <p>A list represents an ordered sequence of values that is empty or finite, but not infinite (only terms can be infinite).</p>
@@ -284,6 +210,7 @@
 <p>(Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code> defines a 1-based array where <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">i</span></code>. Maybe there is also an element type, <code class="docutils literal notranslate"><span class="pre">typed_array</span> <span class="pre">int32</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code></p>
 <p>Mutable arrays are a reference pointing to an immutable array. Operations are optimized by the memory system, so it does in-place operations where possible but can still resize the array. Conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> to get the first element, i.e. taking an immutable snapshot and then reading/modifying it. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
 <p>There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. You can read a different type than you wrote, and it doesn’t have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.</p>
+<p><span id="id1">[]</span> says that “allowing the size of arrays to be decided at run time […] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas.” But Storscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time.</p>
 </section>
 <section id="tensors">
 <h3>Tensors<a class="headerlink" href="#tensors" title="Permalink to this heading"></a></h3>
@@ -316,12 +243,6 @@
 </pre></div>
 </div>
 </section>
-</section>
-<section id="binary-data">
-<h2>Binary data<a class="headerlink" href="#binary-data" title="Permalink to this heading"></a></h2>
-<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides binary data values.</p>
-<p>Another way to write data is as a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code> which makes use of UTF-8 characters and</p>
-<p>The normal form is just a term applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. Because of the term tagging it, the list can be stored compactly.</p>
 </section>
 <section id="strings">
 <h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
@@ -366,11 +287,16 @@ Escape sequences are defined:</p>
 <span class="kr">data</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">digit</span><span class="o">+</span>
 </pre></div>
 </div>
-<p>String concatenation is <code class="docutils literal notranslate"><span class="pre">++</span></code>.</p>
 <section id="characters">
 <h3>Characters<a class="headerlink" href="#characters" title="Permalink to this heading"></a></h3>
 <p>There is no explicit syntax for characters, instead a character is a Unicode string containing exactly one grapheme cluster. Unicode provides an algorithm for identifying grapheme clusters in UAX #29. The main notable feature of the algorithm is that a grapheme cluster / character is not just a single Unicode code point and may be arbitrarily long due to the use of combining characters/accents and ZWJs. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points, as does Zalgo text. Hence a character is in general an arbitrary length sequence of codepoints and it is simplest and most correct to define a character as a type of string.</p>
 </section>
+</section>
+<section id="bitvectors">
+<h2>Bitvectors<a class="headerlink" href="#bitvectors" title="Permalink to this heading"></a></h2>
+<p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides bitvector values to represent binary data.</p>
+<p>The normal form of a bitvector is just the symbol <code class="docutils literal notranslate"><span class="pre">bits</span></code> applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. The symbol marks that the list should be stored compactly.</p>
+<p>A more compact way to write a bitvector is via a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code>. This syntax uses UTF-8 characters and hexadecimal escapes, but is limited to expressing bitvectors whose length is a multiple of 8.</p>
 </section>
 <section id="date-time">
 <h2>Date/time<a class="headerlink" href="#date-time" title="Permalink to this heading"></a></h2>

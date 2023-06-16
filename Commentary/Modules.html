@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
@@ -65,7 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -78,16 +80,25 @@
 <li class="toctree-l3"><a class="reference internal" href="#imports">Imports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#type-piracy">Type piracy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#speed">Speed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#libraries">Libraries</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -170,6 +181,25 @@ There is only one effective scope at any point in the code (for instance, variab
 <section id="speed">
 <h2>Speed<a class="headerlink" href="#speed" title="Permalink to this heading"></a></h2>
 <p>Stroscot has no forward declarations and no header files; everything is declared exactly once. This is in contrast to C++ header includes which are slow because each include must be scanned every time it is included, as much as 30x in bad cases. This explodes code from 2000 files totaling 4.2 MB to 8 GB of disk usage. See for example how Go caches compiled files hence avoiding C++’s issues.</p>
+</section>
+<section id="libraries">
+<h2>Libraries<a class="headerlink" href="#libraries" title="Permalink to this heading"></a></h2>
+<p>Modules are collected into mini-libraries, and mini-libraries into larger libraries, eventually agglomerating into large collections such as the standard library.</p>
+<p>The full form of a module identifier should have the following (<a class="reference external" href="https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview">MS</a>):</p>
+<ul class="simple">
+<li><p>Name: A memorable name chosen by the module developer. Names are not guaranteed to be unique in the general ecosystem, but are unique to a given publisher.</p></li>
+<li><p>Publisher: The real-world author, as identified by their signing certificate’s public key. Pretty much globally unique, the hard part is rather identifying when two certificates represent the same entity.</p></li>
+<li><p>Version: Version number of the package, ordered by some canonical version comparison algorithm. The module developer can choose arbitrary version numbers, or just leave it 0 if the date is sufficient, but usually they will follow guidelines like <a class="reference external" href="https://semver.org/">SemVer</a>, “Major.Minor.Build.Revision” or so.</p>
+<ul>
+<li><p>Version comparison algorithm: Split both strings into parts, <code class="docutils literal notranslate"><span class="pre">[A-Za-z0-9~]</span></code> and complement, and compare starting from left to right. Then if the first character of both parts is a tilde, it is trimmed. Otherwise, the ~ (tilde) character indicates that a given package or version should be considered older (even if it is numerically larger), so if <code class="docutils literal notranslate"><span class="pre">a</span></code> begins with a tilde, <code class="docutils literal notranslate"><span class="pre">b</span></code> is newer, and vice-versa. Numbers and words are popped off as units and compared in the following order: any string not found in this list &lt; dev &lt; alpha = a &lt; beta = b &lt; pre &lt; RC = rc &lt; # &lt; pl = p. If one side runs out of characters, the other side is newer, except that a present release specifier is treated as comparing with an absent number. Otherwise, if the last part compares equal, the versions are equal.</p></li>
+</ul>
+</li>
+<li><p>Date: The date of the module’s release, used for preferring updated versions of package. The dates must monotically increase, i.e. it is forbidden to release a mainline version of a module with a date earlier than a previously released module.</p></li>
+<li><p>Hash: Sometimes you want to fork a module rather than update it. As such there is a hash, to specify Git-like fine grained updates while avoiding collisions.</p></li>
+</ul>
+<p>The module identifier specifies the module source, not its built form, so processor architecture is not really relevant.</p>
+<p>Modules in source code should primarily use name, and only occasionally publisher or version. Neither dates nor hashes should appear in actual source code, to avoid the “magic number” antipattern. Instead, they should be centralized in a lock file,  If a module depends on modules with colliding names, the lockfile should specify renamings for the modules so that they can be used together.</p>
+<p>The modules should also be downloadable independently, so really the “standard library” is a software repository with high standards for inclusion.</p>
 </section>
 </section>
 

@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -56,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Core syntax</a><ul>
@@ -80,7 +82,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
@@ -89,12 +91,20 @@
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
@@ -147,7 +157,7 @@ But we need a syntax for all the proofs.</p>
 <section id="derivation-tree">
 <h3>Derivation tree<a class="headerlink" href="#derivation-tree" title="Permalink to this heading"></a></h3>
 <p>See the connectives <span class="math notranslate nohighlight">\(\text{B} = \text{Bool}\)</span> and <span class="math notranslate nohighlight">\(\multimap\)</span> defined <span class="xref std std-ref">above</span>. <span class="math notranslate nohighlight">\(\multimap\)</span> is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function instead of currying, expand out the identity, etc.).</p>
-<img alt="../_images/Stroscot_AND_Proof_Tree.svg" src="../_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id1">[<a class="reference internal" href="../zzreferences.html#id63" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. Proceedings of the AMS-IMS-SIAM Joint Summer Research Conference, June 14–20, 1987, Boulder, Colorado; Contemporary Mathematics Volume 92. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
+<img alt="../_images/Stroscot_AND_Proof_Tree.svg" src="../_images/Stroscot_AND_Proof_Tree.svg" /><p>The derivation tree representation suffers from what Girard calls “bureaucratic problems of transposing rules” (<span id="id1">[<a class="reference internal" href="../zzreferences.html#id64" title="Jean-Yves Girard. Towards a geometry of interaction. In J. W. Gray and A. Scedrov, editors, Categories in Computer Science and Logic, volume 92 of Contemporary Mathematics, 69–108. University of Colorado in Boulder, 1989. American Mathematical Society. Proceedings of the AMS-IMS-SIAM Joint Summer Research Conference, June 14–20, 1987, Boulder, Colorado; Contemporary Mathematics Volume 92. URL: https://jb55.com/linear/pdf/Towards%20a%20geometry%20of%20interaction.pdf.">Gir89</a>]</span>, page 30 / 98). Girard’s example is based on cut elimination; but it is also visible in the specification of the proof tree as rule reordering. For example the cuts on <span class="math notranslate nohighlight">\(\Sigma_{F R}\)</span> and “Use and” can be swapped without changing the meaning. The derivation tree is also ambiguous in that rule invocations with a sequent like <span class="math notranslate nohighlight">\(A, A \vdash B\)</span> are ambiguous as to which proposition <span class="math notranslate nohighlight">\(A\)</span> is used - this isn’t resolved by using the exchange rule as then exchange on <span class="math notranslate nohighlight">\(A, A, A \vdash B\)</span> is ambiguous as to which pair of formulas was swapped.</p>
 </section>
 <section id="nets">
 <h3>Nets<a class="headerlink" href="#nets" title="Permalink to this heading"></a></h3>

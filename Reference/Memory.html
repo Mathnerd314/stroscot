@@ -14,7 +14,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -71,6 +72,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#references">References</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pointer-conversion">Pointer conversion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#types">Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#secret">Secret</a></li>
 </ul>
 </li>
 </ul>
@@ -288,6 +290,16 @@
 <p>See <a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage">https://docs.microsoft.com/en-us/windows/win32/procthread/using-thread-local-storage</a></p>
 <p>Essentially it’s a shared memory variable that stores <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">ThreadId</span> <span class="pre">Word</span></code>, and each thread only sees/writes its own id. So in that sense it behaves similarly to a variable, but OTOH all threads can use it.</p>
 </section>
+</section>
+<section id="secret">
+<h3>Secret<a class="headerlink" href="#secret" title="Permalink to this heading"></a></h3>
+<p>A secret a la <a class="reference external" href="https://github.com/google/rune/blob/main/g3doc/index.md">Rune</a> represents information stored in a “secure enclave”. This could be implemented via an actual “trusted execution” environment provided by the hardware, but that requires some OS involvement, so instead secrets are just normal memory that is handled carefully to protect it from some attacks. In particular:</p>
+<ul class="simple">
+<li><p>To prevent data leakage, the memory used for secrets is zeroed when freed.</p></li>
+<li><p>To prevent timing side-channel leakage, all secret-using operations will occur in time not dependent on the value of the secret.</p></li>
+<li><p>To avoid Spectre/Meltdown, conditional branching on a secret boolean or indexing via a secret integer are prohibited.</p></li>
+<li><p>To prevent coding errors, all operations that have a secret as input return the output in a secret. The secret must be explicitly “revealed” (dereferenced) to be used as an ordinary value.</p></li>
+</ul>
 <section id="symbol">
 <h4>Symbol<a class="headerlink" href="#symbol" title="Permalink to this heading"></a></h4>
 <p>A symbol can be thought of as a type of reference. It supports neither reading nor writing, but has an identity.</p>

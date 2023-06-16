@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profiling &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exemplary programs" href="Programs.html" />
+    <link rel="prev" title="Posets" href="Posets.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metrics">Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Profiling</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Profiling.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="profiling">
+<h1>Profiling<a class="headerlink" href="#profiling" title="Permalink to this heading"></a></h1>
+<p>The goal of the profiler is to measure performance, and allow making optimization decisions based on that.</p>
+</section>
+<section id="resources">
+<h1>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h1>
+<p>We model a computer using a “functional block diagram”, i.e. blocks and buses. The level of detail varies depending on the application. Buses typically have sufficient capacity for all data so can be trivialized, but for CPU internals, they are a bottleneck, so are left in. Similarly PSU and cooling are not usually a problem, but I left them in.</p>
+<p>Blocks:</p>
+<ul>
+<li><p>processor
+* 8x die - 4x DDR, 8x I/O, L3 cache</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>8x core
+* caches - L1I, L1D, L2 I+D, L0/L1/L2 TLB and BTB, L1 Perceptron, L2 TAGE, operation, return stack, indirect target array, micro-tags, microcode ROM
+* decode, dispatch</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>I/O controller die - memory, PCIe, hub, secure processor</p></li>
+</ul>
+</li>
+<li><p>graphics card</p></li>
+<li><p>memory</p></li>
+<li><p>motherboard</p></li>
+<li><p>storage</p></li>
+<li><p>power supply - typically left out</p></li>
+<li><p>case/cooling - also typically left out</p>
+<p>branches (&amp; misses)
+branch-instructions
+cache-references (&amp; misses)
+L1-dcache/icache prefetches (&amp;misses)
+LLC-stores
+loads: LLC, dTLB, iTLB, node, L1-dcache/icache (&amp;misses)
+faults: alignment, emulation, major, minor, page
+bpf-output
+cgroup-switches
+context-switches OR cs
+cpu-migrations OR migrations
+dummy</p>
+<p>cpu-cycles
+stalled(idle)-cycle backend/frontend</p>
+<p>instructions
+cpu-clock
+task-clock
+duration_time
+user_time
+system_time</p>
+</li>
+</ul>
+<p>branch prediction -&gt; {L1l cache, op cache}
+L1l cache -&gt; decode
+decode -&gt; micro-op queue 4 instructions
+decode -&gt; op cache
+op cache -&gt; micro-op queue 8 fused instructions
+micro-op queue -&gt; {integer register rename, floating point register rename} 6 dispatch ops
+integer register rename -&gt; {ALU scheduler x 4, AGU scheduler} -&gt; {physical register file, reorder buffer}
+reorder buffer &lt;-&gt; register rename</p>
+<blockquote>
+<div><p>-&gt; {ALU x 4, AGU ld st x 2, AGU st}</p>
+</div></blockquote>
+<p>FP register rename -&gt; scheduler -&gt; physical register file -&gt; {FMA/FMUL x2, FADD x2}
+AGU ld st -&gt; load store queues -&gt; L1D cache &lt;-&gt; L2 cache</p>
+</section>
+<section id="metrics">
+<h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h1>
+<p>Key metric types:</p>
+<ul class="simple">
+<li><p>throughput: operations per second or similar. E.g. for disks, IOPS is reads and writes per second.</p></li>
+<li><p>response time: time for an operation to complete, from start to finish</p></li>
+<li><p>latency: time waiting for an operation to complete, generally the largest/only component of response time</p></li>
+<li><p>utilization: % time active (non-idle time). Doesn’t necessarily mean saturated. E.g. if a CPU core is always running, even if it’s a multicore system, the system is at 100% CPU utilization. (which is why fine grained resource utilization stats are much more useful)</p></li>
+<li><p>saturation: requested work / capacity. For example, a hard disk may be spinning and have lots of queued requests but still be able to service more, hence utilization 100% but saturation lower than 100%. At 100% saturation the disk cannot perform any more work; if more requests are sent (pressure is applied), the disk’s request queue will simply fill up (oversaturation, &gt;100%). Similarly memory usage, at the 100% saturation mark requests start going to swap or OOM. Measure capacity and hence saturation by graphing load vs latency and finding an inflection point, but a sharp point may not exist, so often simply reported as queue length without dividing by capacity.</p></li>
+<li><p>exceptions: log message or abnormal return code. Can be quantified as % of requests or count per second. The usual exception broadness applies, like “is a cache miss an exception?” (yes). The code can stop on exception, making it obvious, but more often it automatically recovers from exceptions and requires detailed logging to investigate.</p></li>
+</ul>
+<p>Saturation is the catch-all metric, you can use it for almost all resources and anything at or over 100% is definitely a bottleneck. Of course it is also the hardest to measure. And exceptions are also important, and don’t really have a saturation point, just typical ranges.</p>
+</section>
+<section id="statistics">
+<h1>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading"></a></h1>
+<p>Throughput / utilization / saturation are all instantaneous measurements. Practically they cannot be recorded every cycle, so instead reporting 1-, 5-, and 15-minute averages is typical. But this can disguise short spikes; use better statistics. Also, for CPU utilization, if it’s just one core in use, but it hops around, the utilization can be misleading. The balance of CPU utilization among all cores must be considered.</p>
+</section>
+<section id="methods">
+<h1>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p>counters: most simply, number of times an operation was performed. They start at 0 and increment.</p></li>
+<li><p>event log: a list of timestamps. Can just count the events, but also you can calculate average rate, spikes, and other statistics.</p></li>
+<li><p>sampling: perform detailed analysis only some of the time, so that performance is not affected as much</p></li>
+<li><p>sensitivity: for each resource, when adding a little bit more of that resource, the amount of performance increase divided by the amount added</p></li>
+<li><p>scalability: throughput as a function of load</p></li>
+<li><p>execution: start time and latency (duration / finish time)</p></li>
+<li></li>
+</ul>
+<p>Time can be measured as internal clock, CPU cycles (~0.3 ns),</p>
+<p>A flame graph shows a tree of calls annotated with execution times.</p>
+<p>Measure</p>
+<ul class="simple">
+<li><p>time and memory usage.</p></li>
+<li><p>throughput (calls/second)</p></li>
+<li><p>A/B testing of multiple implementations</p></li>
+</ul>
+<p>for functions, expressions, programs, etc. Profiling can be at different granularities (module, function, instruction). Generally, recording at the finest level is most desirable, and similarly automated optimizations mainly operate at the finest level, but it can be useful to produce summary statistics more understandable to humans.</p>
+<p>Use statistical sampling and hardware performance counters to avoid overhead. Checkout criterion, papers on LLVM hardware sampling.</p>
+<p>Intel VTune, perf, and various profilers available for different programming languages.</p>
+</section>
+<section id="action">
+<h1>Action<a class="headerlink" href="#action" title="Permalink to this heading"></a></h1>
+<p>Once specific “hot paths” for optimization have been identified, the general strategy is to identify inefficiencies, such as:</p>
+<ul class="simple">
+<li><p>unnecessary operations - remove them</p></li>
+<li><p>bad data access patterns - reorder operations or use a different algorithm/data structure</p></li>
+<li><p>repetitive or redundant computations - cache/memoize operations</p></li>
+<li><p>independent computations - take advantage of hardware parallelism, such as SIMD, multiple cores, or the GPU</p></li>
+</ul>
+<p>It is good to profile the program after each change to ensure it is actually an improvement. Static performance models are pretty accurate, so automated optimizations will generally be improvements, but the static models are only so accurate and there are always exceptions.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Posets.html" class="btn btn-neutral float-left" title="Posets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Programs.html" class="btn btn-neutral float-right" title="Exemplary programs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
