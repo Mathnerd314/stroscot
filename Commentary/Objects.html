@@ -82,6 +82,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#no-implicit-synchronization-lock">No implicit synchronization lock</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#more-chatgpt-definitions">More ChatGPT definitions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#encapsulation">Encapsulation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#no-constructors">No constructors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#all-or-nothing-field-access">All-or-nothing field access</a></li>
@@ -176,12 +177,8 @@
 <p>Getting back to the definition, the second part is just the <a class="reference external" href="https://wiki.c2.com/?PolymorphismEncapsulationInheritance">PolymorphismEncapsulationInheritance</a> definition found on C2. We thus see that this is the “correct” definition. Notably, this definition is one of the few definitions on C2 not associated with a particular pundit, and it is listed second, pretty close to the top. It is similar to <a class="reference external" href="http://paulgraham.com/reesoo.html">Rees’s</a>  “conventional Simula 67-like pattern” of encapsulation, ad hoc polymorphism, inheritance = subtyping, and sum-of-product-of-function pattern, which he states “many people take as a definition of OO”. C2 does list caveats:</p>
 <ul class="simple">
 <li><p>It is C++ centric - ChatGPT vehemently disagrees with this, and says the principles also apply to Java, Python, and Ruby.</p></li>
-<li><p>The words “encapsulation”, “inheritance”, “polymorphism” only express so much, and are ambiguous out of context. There is a large amount of convention and code constructs associated with expressing these principles. - Each ChatGPT definition devotes a sentence or two to each of these words expressing the intended meaning, so doing the same common theme distillation, there is much less ambiguity. And we can always follow up by asking ChatGPT what it means by these various words.</p></li>
+<li><p>The words “encapsulation”, “inheritance”, “polymorphism” only express so much, and are ambiguous out of context. There is a large amount of convention and code constructs associated with expressing these principles. - Each ChatGPT definition devotes a sentence or two to each of these words expressing the intended meaning, so doing the same common theme distillation, there is much less ambiguity. And we can always follow up by asking ChatGPT what it means by these various words. In 4/10 definitions it thought encapsulation referred to the idea of bundling data and methods into a single entity. But it should be clear that this is the basic definition of “object”, rather than a principle of OOP. In 8/10 definitions, it said more reasonably that (2 definitions had both bundling and hiding) This hiding ensures that the object’s internal data can only be accessed through a public interface provided by the object, which can prevent unintended changes to an object’s state, and makes it easier to maintain and modify code over time.</p></li>
 </ul>
-<p>Admittedly</p>
-<blockquote>
-<div><p>In 4/10 definitions it thought encapsulation referred to the idea of bundling data and methods into a single entity. But it should be clear that this is the basic definition of “object”, rather than a principle of OOP. In 8/10 definitions, it said more reasonably that (2 definitions had both bundling and hiding) This hiding ensures that the object’s internal data can only be accessed through a public interface provided by the object, which can prevent unintended changes to an object’s state, and makes it easier to maintain and modify code over time.</p>
-</div></blockquote>
 </section>
 <section id="id2">
 <h2>Objects<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h2>
@@ -208,6 +205,10 @@
 <section id="no-implicit-synchronization-lock">
 <h3>No implicit synchronization lock<a class="headerlink" href="#no-implicit-synchronization-lock" title="Permalink to this heading"></a></h3>
 <p>Another (mis)feature of Java is the ability to write <code class="docutils literal notranslate"><span class="pre">synchronize</span> <span class="pre">(random_object)</span></code> and use any object as a lock. This adds some bytes of header to every object allocation. It has been acknowledged by <a class="reference external" href="https://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html">the Java tutorial</a> that the ability to use any object was overly broad and it is better to use specific lock objects. <a class="reference external" href="https://shipilev.net/blog/2016/close-encounters-of-jmm-kind/#_horror_circus_kinda_works_but_horrifying">This post</a> points out that you can synchronize on primitives (actually the corresponding autoboxed objects) and on strings. Although it works for small examples due to interning caches, it will fail if your program uses too many primitives/strings as locks. This sort of tomfoolery seems pretty stupid, and there is an easy fix: if you want a mutex you should have to create a value of the <code class="docutils literal notranslate"><span class="pre">Mutex</span></code> type.</p>
+</section>
+</section>
+<section id="more-chatgpt-definitions">
+<h2>More ChatGPT definitions<a class="headerlink" href="#more-chatgpt-definitions" title="Permalink to this heading"></a></h2>
 <p>Polymorphism refers to the ability of objects to take on different forms, depending on the context in which they are used.
 Polymorphism allows different objects to be used interchangeably, even if they have different implementations or behaviors, which can make code more flexible and extensible.
 Polymorphism - allowing objects to take on different forms or behaviors depending on the context in which they are used.
@@ -218,17 +219,10 @@ Polymorphism allows objects of different classes to be used interchangeably, as 
 polymorphism, which refers to the ability of objects to take on different forms or behaviors depending on the context in which they are used.
 Polymorphism: the ability of an object to take on different forms, depending on the context in which it is used.
 polymorphism allows objects to take on multiple forms and behave in different ways depending on the context in which they are used.</p>
-<blockquote>
-<div><blockquote>
-<div><p>Abstraction - representing complex systems or processes through simpler, more generalized concepts.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Abstraction is the practice of defining interfaces without specifying implementation details, allowing for flexibility in how the interface is implemented.</dt><dd><p>Abstraction: the ability to represent complex real-world objects in simplified form, by focusing on the essential features and ignoring the non-essential details.</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>abstraction involves defining simplified interfaces for objects that hide their implementation details.</p>
-</section>
+<p>Abstraction - representing complex systems or processes through simpler, more generalized concepts.
+Abstraction is the practice of defining interfaces without specifying implementation details, allowing for flexibility in how the interface is implemented.
+Abstraction: the ability to represent complex real-world objects in simplified form, by focusing on the essential features and ignoring the non-essential details.
+abstraction involves defining simplified interfaces for objects that hide their implementation details.</p>
 </section>
 <section id="encapsulation">
 <h2>Encapsulation<a class="headerlink" href="#encapsulation" title="Permalink to this heading"></a></h2>
@@ -236,19 +230,15 @@ polymorphism allows objects to take on multiple forms and behave in different wa
 <p><span id="id5">[<a class="reference internal" href="../zzreferences.html#id147" title="Alan Snyder. Encapsulation and inheritance in object-oriented programming languages. ACM SIGPLAN Notices, 21(11):38–45, November 1986. URL: https://dl.acm.org/doi/10.1145/960112.28702 (visited on 2022-12-26), doi:10.1145/960112.28702.">Sny86</a>]</span> says this controlled interface serves as a contract between the object and its clients. So long as this contract is maintained, the object can be reimplemented without affecting any clients. To maximize the advantages of encapsulation, the contract should avoid including implementation details. For example, it should be possible to rename instance variables without affecting clients. Encapsulation provides a way to protect an object’s integrity, ensuring a consistent and valid internal state. Encapsulation promotes modular software evolution and maintenance.</p>
 <p><span id="id6">[]</span> argues that encapsulation is really a property of
 ML modules, because only ML modules provide sophisticated sharing mechanisms that allow multiple implementations and uses of multiple abstractions to coexist. ML of course allow the basic hiding feature, by not exporting the representation of a type. Unlike Smalltalk, which disallows <code class="docutils literal notranslate"><span class="pre">this.foo</span> <span class="pre">==</span> <span class="pre">b.foo</span></code> even if <code class="docutils literal notranslate"><span class="pre">b</span></code> is an instance of the current class, ML modules allow inspecting the representation of more than one value at the same time. ML modules also allow defining multiple abstract data types in the same module, so that a complex internal representation may be defined and manipulated without recourse to C++’s “friend” qualifier. The only feature missing from ML modules is mixing values of two different implementations - this is solved in Stroscot by allowing functions to use duck typing, so that two values may be mixed if they both conform to the proper interface. Since Stroscot defines objects to be ML modules, all the benefits of encapsulation are provided.</p>
-<p>Cook goes on to state that “any programming model that allows inspection of the representation of more than one abstraction at a time is not object-oriented.” So by his definition C++ and Java are not object-oriented - bleh. In fact this is just a limitation of ML - ML cannot inspect/pattern match on functions; they are opaque. In Stroscot, it is possible to match on the lambdas in Figure 8 and determine if an ISet was constructed via the Empty, Insert, or Union implementations. We might as well have written <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">ISet</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">|</span> <span class="pre">Insert</span> <span class="pre">int</span> <span class="pre">ISet</span> <span class="pre">|</span> <span class="pre">Union</span> <span class="pre">ISet</span> <span class="pre">ISet</span></code> as in the ADT implementation, except that the lambda presentation is an open data type that allows adding more cases. In Stroscot, we use multimethods to solve the expression problem, so it is just defining symbols and adding more dispatch cases to the relevant multimethods.</p>
-<p>interface ISet = {
-isEmpty : bool,
-contains : int → bool,
-insert</p>
-<blockquote>
-<div><p>: int → ISet,</p>
-</div></blockquote>
-<dl class="simple">
-<dt>union</dt><dd><p>: ISet → ISet</p>
-</dd>
-</dl>
-<p>}</p>
+<p>Cook goes on to state that “any programming model that allows inspection of the representation of more than one abstraction at a time is not object-oriented.” So by his definition C++ and Java are not object-oriented - bleh. In fact this is just a limitation of ML - ML cannot inspect/pattern match on functions; they are opaque. In Stroscot, it is possible to match on the lambdas in Cook’s Figure 8 and determine if an ISet was constructed via the Empty, Insert, or Union implementations. We might as well have written <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">ISet</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">|</span> <span class="pre">Insert</span> <span class="pre">int</span> <span class="pre">ISet</span> <span class="pre">|</span> <span class="pre">Union</span> <span class="pre">ISet</span> <span class="pre">ISet</span></code> as in the ADT implementation, except that the lambda presentation is an open data type that allows adding more cases. In Stroscot, we use multimethods to solve the expression problem, so it is just defining symbols and adding more dispatch cases to the relevant multimethods.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>interface ISet = {
+  isEmpty : bool,
+  contains : int → bool,
+  insert : int → ISet,
+  union : ISet → ISet
+}
+</pre></div>
+</div>
 <p>Stroscot has modules, which provide encapsulation. We can create a type and not export its constructor symbols, so that the type becomes an abstract data type: only functions defined in the module can access the concrete representation of the type, and functions outside the module can only use the public interface. This indeed allows renaming fields of the data type without affecting external clients.</p>
 <section id="no-constructors">
 <h3>No constructors<a class="headerlink" href="#no-constructors" title="Permalink to this heading"></a></h3>

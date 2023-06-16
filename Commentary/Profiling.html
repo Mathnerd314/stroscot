@@ -136,17 +136,19 @@
 <h1>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h1>
 <p>We model a computer using a “functional block diagram”, i.e. blocks and buses. The level of detail varies depending on the application. Buses typically have sufficient capacity for all data so can be trivialized, but for CPU internals, they are a bottleneck, so are left in. Similarly PSU and cooling are not usually a problem, but I left them in.</p>
 <p>Blocks:</p>
-<ul>
-<li><p>processor
-* 8x die - 4x DDR, 8x I/O, L3 cache</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>8x core
-* caches - L1I, L1D, L2 I+D, L0/L1/L2 TLB and BTB, L1 Perceptron, L2 TAGE, operation, return stack, indirect target array, micro-tags, microcode ROM
-* decode, dispatch</p></li>
-</ul>
-</div></blockquote>
 <ul class="simple">
+<li><p>processor</p>
+<ul>
+<li><p>8x die - 4x DDR, 8x I/O, L3 cache</p>
+<ul>
+<li><p>8x core</p>
+<ul>
+<li><p>caches - L1I, L1D, L2 I+D, L0/L1/L2 TLB and BTB, L1 Perceptron, L2 TAGE, operation, return stack, indirect target array, micro-tags, microcode ROM</p></li>
+<li><p>decode, dispatch</p></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><p>I/O controller die - memory, PCIe, hub, secure processor</p></li>
 </ul>
 </li>
@@ -155,42 +157,46 @@
 <li><p>motherboard</p></li>
 <li><p>storage</p></li>
 <li><p>power supply - typically left out</p></li>
-<li><p>case/cooling - also typically left out</p>
-<p>branches (&amp; misses)
-branch-instructions
-cache-references (&amp; misses)
-L1-dcache/icache prefetches (&amp;misses)
-LLC-stores
-loads: LLC, dTLB, iTLB, node, L1-dcache/icache (&amp;misses)
-faults: alignment, emulation, major, minor, page
-bpf-output
-cgroup-switches
-context-switches OR cs
-cpu-migrations OR migrations
-dummy</p>
-<p>cpu-cycles
-stalled(idle)-cycle backend/frontend</p>
-<p>instructions
-cpu-clock
-task-clock
-duration_time
-user_time
-system_time</p>
-</li>
+<li><p>case/cooling - also typically left out</p></li>
 </ul>
-<p>branch prediction -&gt; {L1l cache, op cache}
-L1l cache -&gt; decode
-decode -&gt; micro-op queue 4 instructions
-decode -&gt; op cache
-op cache -&gt; micro-op queue 8 fused instructions
-micro-op queue -&gt; {integer register rename, floating point register rename} 6 dispatch ops
-integer register rename -&gt; {ALU scheduler x 4, AGU scheduler} -&gt; {physical register file, reorder buffer}
-reorder buffer &lt;-&gt; register rename</p>
-<blockquote>
-<div><p>-&gt; {ALU x 4, AGU ld st x 2, AGU st}</p>
-</div></blockquote>
-<p>FP register rename -&gt; scheduler -&gt; physical register file -&gt; {FMA/FMUL x2, FADD x2}
-AGU ld st -&gt; load store queues -&gt; L1D cache &lt;-&gt; L2 cache</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">branches</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="w"> </span><span class="n">misses</span><span class="p">)</span>
+<span class="nf">branch</span><span class="o">-</span><span class="n">instructions</span>
+<span class="nf">cache</span><span class="o">-</span><span class="n">references</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="w"> </span><span class="n">misses</span><span class="p">)</span>
+<span class="kt">L1</span><span class="o">-</span><span class="n">dcache</span><span class="o">/</span><span class="n">icache</span><span class="w"> </span><span class="n">prefetches</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">misses</span><span class="p">)</span>
+<span class="kt">LLC</span><span class="o">-</span><span class="n">stores</span>
+<span class="nf">loads</span><span class="kt">:</span><span class="w"> </span><span class="kt">LLC</span><span class="p">,</span><span class="w"> </span><span class="n">dTLB</span><span class="p">,</span><span class="w"> </span><span class="n">iTLB</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="kt">L1</span><span class="o">-</span><span class="n">dcache</span><span class="o">/</span><span class="n">icache</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">misses</span><span class="p">)</span>
+<span class="nf">faults</span><span class="kt">:</span><span class="w"> </span><span class="n">alignment</span><span class="p">,</span><span class="w"> </span><span class="n">emulation</span><span class="p">,</span><span class="w"> </span><span class="n">major</span><span class="p">,</span><span class="w"> </span><span class="n">minor</span><span class="p">,</span><span class="w"> </span><span class="n">page</span>
+<span class="nf">bpf</span><span class="o">-</span><span class="n">output</span>
+<span class="nf">cgroup</span><span class="o">-</span><span class="n">switches</span>
+<span class="nf">context</span><span class="o">-</span><span class="n">switches</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">cs</span>
+<span class="nf">cpu</span><span class="o">-</span><span class="n">migrations</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">migrations</span>
+<span class="nf">dummy</span>
+
+<span class="nf">cpu</span><span class="o">-</span><span class="n">cycles</span>
+<span class="nf">stalled</span><span class="p">(</span><span class="n">idle</span><span class="p">)</span><span class="o">-</span><span class="n">cycle</span><span class="w"> </span><span class="n">backend</span><span class="o">/</span><span class="n">frontend</span>
+
+<span class="nf">instructions</span>
+<span class="nf">cpu</span><span class="o">-</span><span class="n">clock</span>
+<span class="nf">task</span><span class="o">-</span><span class="n">clock</span>
+<span class="nf">duration_time</span>
+<span class="nf">user_time</span>
+<span class="nf">system_time</span>
+
+
+<span class="nf">branch</span><span class="w"> </span><span class="n">prediction</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">L1l</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">cache</span><span class="p">}</span>
+<span class="kt">L1l</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">decode</span>
+<span class="nf">decode</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="n">instructions</span>
+<span class="nf">decode</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">cache</span>
+<span class="nf">op</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="n">fused</span><span class="w"> </span><span class="n">instructions</span>
+<span class="nf">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="n">integer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="p">,</span><span class="w"> </span><span class="n">floating</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="p">}</span><span class="w"> </span><span class="mi">6</span><span class="w"> </span><span class="n">dispatch</span><span class="w"> </span><span class="n">ops</span>
+<span class="nf">integer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">ALU</span><span class="w"> </span><span class="n">scheduler</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">scheduler</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="n">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="p">}</span>
+<span class="nf">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="o">&lt;-&gt;</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span>
+
+<span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">ALU</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">ld</span><span class="w"> </span><span class="n">st</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">st</span><span class="p">}</span>
+<span class="kt">FP</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">scheduler</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">FMA</span><span class="o">/</span><span class="kt">FMUL</span><span class="w"> </span><span class="n">x2</span><span class="p">,</span><span class="w"> </span><span class="kt">FADD</span><span class="w"> </span><span class="n">x2</span><span class="p">}</span>
+<span class="kt">AGU</span><span class="w"> </span><span class="n">ld</span><span class="w"> </span><span class="n">st</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="n">queues</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">L1D</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">&lt;-&gt;</span><span class="w"> </span><span class="kt">L2</span><span class="w"> </span><span class="n">cache</span>
+</pre></div>
+</div>
 </section>
 <section id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h1>
@@ -218,7 +224,6 @@ AGU ld st -&gt; load store queues -&gt; L1D cache &lt;-&gt; L2 cache</p>
 <li><p>sensitivity: for each resource, when adding a little bit more of that resource, the amount of performance increase divided by the amount added</p></li>
 <li><p>scalability: throughput as a function of load</p></li>
 <li><p>execution: start time and latency (duration / finish time)</p></li>
-<li></li>
 </ul>
 <p>Time can be measured as internal clock, CPU cycles (~0.3 ns),</p>
 <p>A flame graph shows a tree of calls annotated with execution times.</p>
