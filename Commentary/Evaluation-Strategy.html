@@ -114,6 +114,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -207,7 +208,7 @@
 </section>
 <section id="data-structures">
 <h3>Data structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h3>
-<p>Laziness allows writing certain amortized data structures, as per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id120" title="Chris Okasaki. Purely Functional Data Structures. Cambridge University Press, Cambridge, U.K. ; New York, 1998. ISBN 978-0-521-63124-2.">Oka98</a>]</span>.
+<p>Laziness allows writing certain amortized data structures, as per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id123" title="Chris Okasaki. Purely Functional Data Structures. Cambridge University Press, Cambridge, U.K. ; New York, 1998. ISBN 978-0-521-63124-2.">Oka98</a>]</span>.
 It also allows defining infinite data structures, e.g. <code class="docutils literal notranslate"><span class="pre">omega</span> <span class="pre">=</span> <span class="pre">Succ</span> <span class="pre">omega</span></code> or the Fibonacci stream, that have finite time and memory usage if only a part of the data is used. These are hard to replicate in strict code except via thunk simulation. When analyzing performance, the explicit simulation makes the data structures clearer and easier to analyze, but analyzing core IR of a lazy language should provide the same benefit.</p>
 <p>A strict, imperative stream (iterator) is one where reading from the stream is an operation <code class="docutils literal notranslate"><span class="pre">next</span> <span class="pre">:</span> <span class="pre">Stream</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">(Nil</span> <span class="pre">|</span> <span class="pre">Cons</span> <span class="pre">a</span> <span class="pre">Stream)</span></code>. It is not the same as a lazy stream - accessing elements does I/O, not just pure reduction of thunks. Iterators are ephemeral data structures (objects). An iterator can be turned into a pure data structure by reading it to exhaustion, or buffered using a thunk-like data structure to create a fake-lazy abstraction that still uses I/O but allows pure access to previous elements. Regardless, iterators can be implemented in a lazy langauge as well using an I/O monad, with little overhead.</p>
 </section>

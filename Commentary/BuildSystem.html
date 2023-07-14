@@ -141,6 +141,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -248,7 +249,7 @@
 </section>
 <section id="model">
 <h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
-<p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../zzreferences.html#id136" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
+<p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../zzreferences.html#id139" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
 <style>
   .shal-trace-example tr:nth-child(1) td,
   .shal-trace-example tr:nth-child(2) td,
@@ -592,7 +593,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 </ul>
 <section id="cached-build">
 <h3>Cached build<a class="headerlink" href="#cached-build" title="Permalink to this heading"></a></h3>
-<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../zzreferences.html#id112" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
+<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../zzreferences.html#id114" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">--cache-create <var>PATH</var></span></kbd></dt>
 <dd><p>Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.</p>
@@ -707,6 +708,7 @@ differ, the rule is not reproducible and a warning will be emitted.</p>
 <section id="non-reproducible-rules">
 <h3>Non-reproducible rules<a class="headerlink" href="#non-reproducible-rules" title="Permalink to this heading"></a></h3>
 <p>If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.</p>
+<p>Similarly, some files may not be redistributable (copyright license or similar), these are reproducible but the data cannot be stored in the cloud cache.</p>
 </section>
 </section>
 <section id="daemon-less-mode">

@@ -84,13 +84,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Standard library</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#checklist">Checklist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#library-checklist">Library checklist</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scope">Scope</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stability">Stability</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#processes">Processes</a></li>
@@ -141,8 +142,8 @@
 <p>What is a good standard library? Well, in Stroscot, the goal of the standard library is to simplify the question “For this task, how do I use a 3rd party library?”. Obviously, writing your own code is fun and all. But life is short, and reinventing the wheel is a waste of man‑hours that can be better spent elsewhere.
 Still, there is a lot of due diligence necessary to use a 3rd party library. The standard library is the “opinionated and supported path” to build programs. (<a class="reference external" href="https://engineering.atspotify.com/2020/08/how-we-use-golden-paths-to-solve-fragmentation-in-our-software-ecosystem/">Spotify</a>) The library team has already done the due diligence, identified the “golden path”, and any caveats will be noted in the documentation.</p>
 <p>Of course, sometimes the solution you want is not in the standard library, but that’s where continuously expanding the standard library can help. In an ideal world, the standard library would offer a common set of abstractions used by all programs that covers all use cases. Eventually, even if a user needs an unusual data structure like a Y-fast trie, they should be able to find it in the standard library.</p>
-<section id="checklist">
-<h2>Checklist<a class="headerlink" href="#checklist" title="Permalink to this heading"></a></h2>
+<section id="library-checklist">
+<h2>Library checklist<a class="headerlink" href="#library-checklist" title="Permalink to this heading"></a></h2>
 <p>The standard library is essentially a shortcut for using 3rd party libraries in general. So let’s look at that process for <a class="reference external" href="https://chromium.googlesource.com/chromium/src/+/main/docs/adding_to_third_party.md">Chromium</a>:</p>
 <ul class="simple">
 <li><p>Identify a necessary piece of functionality.</p></li>
@@ -172,7 +173,7 @@ Still, there is a lot of due diligence necessary to use a 3rd party library. The
 <li><p>Security review by the security team, license review by script or random person</p></li>
 <li><p>Refactor other libraries to use the chosen library, so that there is not duplicate code</p></li>
 </ul>
-<p>Pretty much all these steps are also necessary to include something in the standard library.</p>
+<p>Pretty much all these steps seem suitable as requirements to include something in the standard library.</p>
 </section>
 <section id="scope">
 <h2>Scope<a class="headerlink" href="#scope" title="Permalink to this heading"></a></h2>

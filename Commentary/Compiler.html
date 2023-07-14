@@ -59,6 +59,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Compiler design</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#definitions">Definitions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#design">Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model">Model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#optimization">Optimization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#optimization-variables">Optimization variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build-model">Build model</a></li>
@@ -101,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -196,6 +198,14 @@
 </section>
 <section id="design">
 <h2>Design<a class="headerlink" href="#design" title="Permalink to this heading"></a></h2>
+<p>I don’t really like how implicit building an executable is in most compiled languages.
+There’s no obvious entry point where you can say “this is me invoking the compiler”, so it forces a 2-level system of shell and program.</p>
+<p>I’d rather write something like:
+writeFile (compileToExecutable main)</p>
+<p>where it’s clear that compileToExecutable is doing the work.</p>
+</section>
+<section id="model">
+<h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
 <p>Stroscot’s main compiler uses a hybrid JIT model. Full list of execution engine features:</p>
 <p>Precompiled code loading: The model loads precompiled code from a database when available.
 Fast start interpretation: If precompiled code is not available, the model interprets the source code for a fast start.
@@ -304,7 +314,7 @@ The equivalent of “object files” in the JIT model are the profiling data and
 <li><p>Cross compilation: In general, we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. When the host and target systems are the same, it’s a native build; otherwise it’s a cross build.</p>
 <p>The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” there is really a configuration option, namely the supported target of the compiler that will run on the host. It is a gcc-ism to specify the supported target, as Clang is generally built to support all supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.</p>
 </li>
-<li><p>Bootstrapping: We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build stage 1 <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code>, new compiler on old ABI (targeting the host), and stage 2 <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code>, new compiler on new ABI (targeting the target). We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. With multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, we can use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id166" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. Comment: PhD dissertation. Accepted by George Mason University, Fairfax, Virginia, USA's Volgenau School of Information Technology and Engineering in 2009. 199 single-side printed pages. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span> to increase our confidence in the correctness of the stage 2 compiler.</p></li>
+<li><p>Bootstrapping: We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build stage 1 <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code>, new compiler on old ABI (targeting the host), and stage 2 <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code>, new compiler on new ABI (targeting the target). We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. With multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, we can use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id169" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. Comment: PhD dissertation. Accepted by George Mason University, Fairfax, Virginia, USA's Volgenau School of Information Technology and Engineering in 2009. 199 single-side printed pages. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span> to increase our confidence in the correctness of the stage 2 compiler.</p></li>
 </ul>
 <p>The toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
 the package set is also target-dependent. some packages that are pure data are target-independent</p>

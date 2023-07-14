@@ -85,6 +85,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
@@ -316,6 +317,7 @@ which consists of</p>
 <section id="exceptions">
 <h4>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading"></a></h4>
 <p>The main reachability analysis figures out which exceptions a piece of code may throw. Top-level unhandled exceptions are reported as warnings.</p>
+<p>Assertions have a simple form <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">expr</span></code> that throws <code class="docutils literal notranslate"><span class="pre">AssertionFailed</span></code>, equivalent to <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">expr</span> <span class="pre">(throw</span> <span class="pre">AssertionFailed)</span></code>. Java’s complex form <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">expr</span> <span class="pre">:</span> <span class="pre">exception</span></code> that throws a specific <code class="docutils literal notranslate"><span class="pre">exception</span></code> on failure seems pointless - it’s only a little less verbose than <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">expr</span> <span class="pre">(throw</span> <span class="pre">exception)</span></code>.</p>
 </section>
 <section id="dead-code">
 <h4>Dead code<a class="headerlink" href="#dead-code" title="Permalink to this heading"></a></h4>
