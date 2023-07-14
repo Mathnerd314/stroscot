@@ -193,8 +193,6 @@ A necessary condition for confluence is weak/local confluence, i.e. each critica
 
 We say → has random descent (RD), if for each R:a ↔∗b with b in normal form, all maximal reductions from a have length d(R) and end in b. Systems with random descent are confluent.
 
-
-
 Normalization
 -------------
 

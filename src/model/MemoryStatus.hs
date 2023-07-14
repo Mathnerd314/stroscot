@@ -1,8 +1,41 @@
-type LinuxOnly a = a
-type WindowsOnly a = a
-type WindowsOnlyV = ()
-type LinuxOnlyV = ()
+data FlattenedStatus
+  = Free (LinuxOnly EffectiveNUMAPolicy)
+  | Reserved AllocFlags WindowsOnlyV
+  | NotPresent AllocFlags LinuxOnlyV
+  | NormalStatus CommitFlags
+  | Uninitialized CommitFlags
+  | Zeroed CommitFlags
+  | SecurelyZeroed CommitFlags
+  | Offered (WindowsOnly VMOfferPriority) CommitFlags
+  | Locked CommitFlags
+  | WithinEnclave EnclaveInfo CommitFlags
+  | AWEAllocated WindowsOnlyV PFNBuffer CommitFlags
 
+data AllocFlags = AllocFlags
+  (LinuxOnly EffectiveNUMAPolicy)
+  NUMANode
+  Base Size MappingType
+  (WindowsOnly AllocatedMemoryProtection)
+  (LinuxOnly LinuxMemoryProtection)
+  (WindowsOnly (Maybe ControlFlowGuard))
+  (WindowsOnly PageBits)
+  HugePageFlags
+  (LinuxOnly MemoryProtectionKey)
+  WriteWatch
+  (LinuxOnly (ReadAdvise, VmFlags))
+
+data SwapStatus
+  = InRam PageFrameNumber MapCount PageFrameFlags
+  | Swapped SwapFileNumber SwapOffset
+
+data CommitFlags = CommitFlags
+  AllocFlags
+  (LinuxOnly SwapStatus)
+  (WindowsOnly (WindowsMemoryProtection, NUMANode_))
+  (Maybe HeapInfo)
+
+-- Unflattened
+{-
 data Address = Address
   (LinuxOnly EffectiveNUMAPolicy)
   Status
@@ -22,34 +55,6 @@ data Allocation = Allocation
   WriteWatch
   (LinuxOnly (ReadAdvise, VmFlags))
   PageStatus
-
-data NUMANode = Node Int | NUMA_NO_PREFERRED_NODE WindowsOnlyV
-type Base = Int
-type Size = Int
-
-data MappingType =
-  AnonymousPrivate (LinuxOnly PseudoPath) (WindowsOnly AllocType)
-  | AnonymousShared
-      (WindowsOnly (Name, AllocShared, SEC_NOCACHE, SEC_WRITECOMBINE))
-  | Mapping FileHandle (WindowsOnly
-    (Name, Maybe SecurityDescriptor,
-    FileMappingType))
-      CopyOnWrite
-  | PhysicalMemory WindowsOnlyV
-  | DirectMapped WindowsOnlyV
-
-type FileHandle = Int
-type CopyOnWrite = Bool
-
-data HugePageFlags
-  = MADV_NOHUGEPAGE
-  | MADV_HUGEPAGE
-  | LinuxOnly TransparentHugePage
-
-data WriteWatch
-  = CleanSinceReset
-  | SoftDirty
-  | WriteWatchDisabled WindowsOnlyV
 
 data PageStatus
   = Reserved WindowsOnlyV
@@ -72,6 +77,40 @@ data CommitStatus
   | Locked
   | WithinEnclave EnclaveInfo
   | AWEAllocated WindowsOnlyV PFNBuffer
+-}
+
+type LinuxOnly a = a
+type WindowsOnly a = a
+type WindowsOnlyV = ()
+type LinuxOnlyV = ()
+
+data NUMANode = Node Int | NUMA_NO_PREFERRED_NODE WindowsOnlyV
+type Base = Int
+type Size = Int
+
+data MappingType
+  = AnonymousPrivate (LinuxOnly PseudoPath) (WindowsOnly AllocType)
+  | AnonymousShared
+      (WindowsOnly (Name, AllocShared, SEC_NOCACHE, SEC_WRITECOMBINE))
+  | Mapping FileHandle (WindowsOnly
+    (Name, Maybe SecurityDescriptor,
+    FileMappingType))
+      CopyOnWrite
+  | PhysicalMemory WindowsOnlyV
+  | DirectMapped WindowsOnlyV
+
+type FileHandle = Int
+type CopyOnWrite = Bool
+
+data HugePageFlags
+  = MADV_NOHUGEPAGE
+  | MADV_HUGEPAGE
+  | LinuxOnly TransparentHugePage
+
+data WriteWatch
+  = CleanSinceReset
+  | SoftDirty
+  | WriteWatchDisabled WindowsOnlyV
 
 data EnclaveInfo = LinuxEnclaveSECS LinuxOnlyV |
   WindowsEnclaveInfo WindowsOnlyV

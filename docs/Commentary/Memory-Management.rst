@@ -1,6 +1,136 @@
 Memory management
 #################
 
+Per :cite:`kangFormalMemoryModel2015` there are pretty much two models of memory. The "concrete" model models memory as a an integer-indexed array of 2^32 or 2^64 words, or more generally the model exposed by the OS. The "symbolic" model models memory as an associative array from symbols (potentially infinite in number) to "cells", arrays of values (stored in some unspecified format). Semantically, these models give you pointers and references respectively. Kang describes how combinations of these can be made, for example the "quasi-concrete model" which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested, but the concrete and symbolic models are the fundamental ideas.
+
+Symbolic memory
+===============
+
+A reference is a symbolic index into a global associative array of objects, ``Map Reference Object``. The array allows allocating new references, deleting them, and reading/writing the reference. Reference symbols can be compared for equality, hashed to an integer, packed to a 64-bit word that's in pointer format, and unpacked to the identical reference. The value when converted reference is internal to the memory system but doesn't change.
+
+There are higher-level types like immutable references and reference wrappers, but those all translate away to normal references or pointer access and don't need involvement from the compiler.
+
+Pointer conversion
+------------------
+
+The in-memory location of the data of a reference is not fixed. If it's small enough it could just be in a register, or there could be multiple copies of the data. Also GC can move/copy the reference.
+
+Often operations require a pointer to a memory address, so you can pin the object to a pointer ("materialize" it in memory), ``(address, unpinner) = getPointer ref``. ``unpinner`` is a finalizer that unpins the object after you are finished with the pointer. The alignment of the pointer can be specified during the ``getPointer`` operation.. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.
+
+Internally, when compiling away the symbolic memory model, the compiler tries to find a good place to store the data - if it's lucky, it can backpropagate the pointer request and store it there from the beginning, so that no copies are needed. When the data cannot be associated with a fixed address like that, it is stored in a special memory allocation area that is configured to trap on stray program-level access.
+
+Representation
+--------------
+
+A lot of languages have a fixed or default memory representation for values, e.g. a C struct, a Haskell ADT, and a Python object are always laid out in pretty much the same way. The more systems-level languages allow controlling the layout with flags, for example Rust has `type layout <https://doc.rust-lang.org/reference/type-layout.html>`__ which allows specifying the size and alignment/padding of its fields, and also C compatibility. But these flags are't really that powerful. Here's some examples of what can't be done:
+
+* specify the in-memory order of fields differently from their logical order
+* turn array-of-structs into struct-of-arrays
+* flattening a datatype, like ``Either Bool Int`` into ``(Bool,Int)``, or representing a linked list as a contiguous series of records.
+* NaN-boxing and NuN-boxing (`ref <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__ `2 <https://searchfox.org/mozilla-central/source/js/public/Value.h#526>`__), representing the JS ``Any`` type as a single 64-bit word.
+* parsing network packets into structured data
+
+Maybe some of these could be addressed by flags, but from the last two, it is clear that we are really looking for a general-purpose memory serialization interface. I looked at `Data.Binary <https://hackage.haskell.org/package/binary-0.8.9.1/docs/src/Data.Binary.Get.Internal.html#Decoder>`__, `store <https://hackage.haskell.org/package/store-core-0.4.4.4/docs/Data-Store-Core.html>`__, and :cite:`delawareNarcissusCorrectbyconstructionDerivation2019` and came up with the most general API I could, ``Write = Alloc (Size,Align) (Addr -> Write) | Store, Store = Map Addr MaskedWord`` and ``Unpack a = Maybe Addr -> Read -> a, Read = Map Addr Word``. This allows masked writes and multiple or fixed allocation addresses, but does not allow failing to read the value back. Also the ``pack`` function allows passing arbitrary side-band data to the ``unpack`` function.
+
+Maybe though, it is still not general enough, we should just have lens-like functions like ``write : Memory -> a -> Memory`` and ``read :: Memory -> a``. There still need to be constraints though, like that you get back what you wrote and non-interference of writes.
+
+Pointers
+========
+
+Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of memory APIs and concluded that memory can be modeled as a global mutable array, ``Memory = Map (Word,BitIdx) Status``. The status allows storing metadata, it's `a complex ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ which has various states like unallocated, committed, etc. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.
+
+Memory functions check the status of memory before operating, hence identifying common errors like double free, access to undefined memory, null pointer dereferencing, etc. Similarly unused memory cannot be read/written, preventing use after free. But there is still the possibility of overflowing a buffer into an adjacent allocation, or more generally `type punning <https://en.wikipedia.org/wiki/Type_punning>`__ by reading some memory as a format it was not written with. These sorts of possibilities are intrinsic to the "big array of bits" model, and many low-level hacks rely on such functionality, so forbidding such possibilities entirely is not an option. But of course someone can easily add bounds-checking etc. on top of the basic model as a library.
+
+Most addresses will not be allocated (status Free), hence the array is sparse in some sense. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It's a little more complicated than simple sparsity because there are many different statuses and the operations overlap.
+
+In practice fixed-address allocation is never used and instead there are ``mmap NULL``, ``malloc``, and the C library API alloc/realloc/free which allocate memory with system-chosen / allocator-chosen location. The right model for this is adversarial, i.e. the allocator chooses the worst possible location. Then to ensure correct program behavior, it should not matter what addresses the system picks, i.e. all choices should be observationally equivalent. The limitations on the system's choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn't have to result in equivalent behavior so it can be ignored.)
+
+Optimizing access
+-----------------
+
+Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. They're both a bit tricky as they have to make assumptions about what pointers foreign code will use and analyze the possible values a dereference may take. But, should be possible.
+
+.. _finalizers:
+
+Finalizers
+==========
+
+Finalizers allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, by implicitly inserting the free operation in the locations.
+
+A finalizer is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and command ``use : Finalizer -> Command`` and ``useForever : Finalizer -> Op Command``. The semantics is that ``free`` will be called as soon as it is known that ``use`` and ``useForever`` will not be called. Calling ``use`` delays finalization until after the ``use``, and ``useForever`` cancels the finalizer and returns the free operation. The general transformation:
+
+::
+
+  reduce (NewFinalizer free c) =
+    f = freshSymbol
+    transform (c f) {free,f}
+  reduce (Use f c) = c
+  reduce (UseForever f c) = c free
+
+  transform : Task -> Task
+  transform c =
+    if will_call (UseForever f) c
+      reduce c
+    else if will_call (Use f) c
+      let c' = continuation c
+      reduce (c { continuation = transform c' })
+    else if !(could_call (Use f) c || could_call (UseForever f) c)
+      reduce (free {continuation = c})
+    else
+      assert(could_call (Use f) c || could_call (UseForever f) c)
+      info("Delaying finalizer due to conditional usage")
+      let c' = continuation c
+      reduce (c { continuation = transform c' })
+
+The `info("Delaying finalizer due to conditional usage")`` can be an error/warning if prompt memory management is desired. The situation happens when freeing depends on input data:
+
+::
+
+  af = print "a"
+  a = newFinalizer af
+  if randomBool then
+    exit
+  else
+    use a
+    exit
+
+Because ``a`` is used in the else branch, it cannot be freed before the condition. It is freed as soon as it is known it will not be used, hence this program is equivalent to:
+
+::
+
+  af = print "a"
+  if randomBool then
+    af
+    exit
+  else
+    af
+    exit
+
+
+If multiple finalizers simultaneously become able to call ``free``, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.
+
+::
+
+  a = newFinalizer (print "a")
+  b = newFinalizer (print "b")
+
+  if randomBool then
+    print "c"
+    exit
+  else
+    print "c"
+    use a
+    use b
+    exit
+
+  # when bool is false: cab
+  # when bool is true: bac
+
+Freed on exit
+-------------
+
+Many resources are automatically freed by the OS on exit: memory, file handles, etc. In this circumstance  ``useForever`` can mark the resource as not needing finalization. As an optimization you can call it on every allocated resource once you are on the termination path and know that no further resources will be allocated, or that there are sufficient spare resources that any further allocation can be satisfied without deallocation. But prompt deallocation is the better policy.
+
 Unsafe
 ======
 
@@ -9,21 +139,9 @@ Rust locks all its memory APIs behind the "unsafe" keyword, as if using the unde
 Location vs allocation
 ======================
 
-Memory management is usually presented as two operations, allocation and deallocation/freeing. But really there is a whole page-level memory API, managed by the OS,
+Memory management is usually presented as two operations, allocation and deallocation/freeing. But really the array-of-bits model is more accurate. The costs of allocation/deallocation are hard to predict, as all they do is update metadata. With a suitable OS/allocator design, they most likely will be pretty cheap. For example `in Doom 3 <https://www.forrestthewoods.com/blog/benchmarking-malloc-with-doom3/>`__ the median time for is 31 nanoseconds, ranging from 21 nanoseconds to 201 microseconds, and free is comparable. Generally, if they are a bottleneck, the operations can be combined into a single larger operation (allocate a larger buffer, call ``close_range`` to close several open FD's than to iterate over them individually) by pushing allocations forward and delaying frees, as long as there is sufficient memory or resource capacity available. In contrast, reads and writes are always real work. Filling a page with random data and reading it back will be at most a few GB/s, and most likely in the 300 MB/s range.
 
-
-the costs of these operations is hard to measure. All allocation and freeing do is update metadata, so depending on the metadata model an operation may be unexpectedly cheap or expensive. Usually there is a buffering effect, so for example a scratch buffer page with many objects can be allocated/freed in around the same amount of time as a single object. Similarly it is slightly faster to call ``close_range`` to close several open FD's than to iterate over them individually in user space. Also, to improve this metadata buffering effect, allocations can be pushed forward, and frees can be delayed, as long as there is sufficient memory or resource capacity available.
-
-An alternative model removes ``free`` as a user-visible operation. Instead, allocation scans a list of blocks, and "magically" knows if each block is never going to be used again, and hence can be freed and made available for allocation. In special cases, such as fixed memory usage and fixed address assignments, allocation can be hard coded and zero cost memory allocation overall can actually be achieved. In many practical applications, however, variable allocations will need to be tracked, and determining if an allocation will no longer be used can take a fair amount of computation.
-
-The alternative model allows optimizing the common case of re-using already-allocated memory for another purpose - the memory is simply returned. Similarly with the ``dup2`` syscall, file descriptor numbers can be reused. In contrast the malloc/free requires an explicit free call, and hence two traversals of the allocation list. In the case where resources may be scarce, such as file descriptors, the OS-level free call is delayed to the next allocation. Generally a program allocates frequently so this will not be too long - the only way this could cause problems is if another program needs to allocate a million FDs in the short span of time.
-
-
-Values take up memory, so memory management needs special handling so it is automatic and fast. But underneath it is just resource management, so all of it translates into allocations and deallocations.
-
-
-There are many places to store a value, but storing every in the cloud or hard drives is too slow for an executing program. The issue is cache locality. Examples:
-
+Obviously, speeding up allocation is still important, but it is more important to pay attention to cache effects from the choice of address. In the trivial case, the memory usage can be predicted in advance and allocations given fixed assignments, giving zero cost memory allocation. In more practical applications, variable allocations will need to be tracked, but it is still not an expensive problem, and there are well-known algorithms.
 
 Memory errors
 =============
@@ -577,3 +695,11 @@ But it fills a hole in the memory management design space.
 
 
 There is no concise built-in syntax for dereferencing pointers, because there are many different flavours of memory accesses: aligned or unaligned, cached or uncached, secure or non-secure, etc. and it is critical that every memory access is explicit about its flavor. A side effect of putting more information in the access operation is that pointers are untyped, simply a wrapper around bitvectors.
+
+
+Memory model
+~~~~~~~~~~~~
+
+The ‘load’ and ‘store’ instructions are specifically crafted to fully resolve to an element of a memref. These instructions take as arguments n+1 indices for an n-ranked tensor. This disallows the equivalent of pointer arithmetic or the ability to index into the same memref in other ways (something which C arrays allow for example). Furthermore, for the affine constructs, the compiler can follow use-def chains (e.g. through `affine.apply operations <../Dialects/Affine.md/#affineapply-affineapplyop>`__ or through the map attributes of `affine operations <../Dialects/Affine.md/#operations>`__) to precisely analyze references at compile-time using polyhedral techniques. This is possible because of the `restrictions on dimensions and symbols <../Dialects/Affine.md/#restrictions-on-dimensions-and-symbols>`__.
+
+A scalar of element-type (a primitive type or a vector type) that is stored in memory is modeled as a 0-d memref. This is also necessary for scalars that are live out of for loops and if conditionals in a function, for which we don’t yet have an SSA representation – `an extension <#affineif-and-affinefor-extensions-for-escaping-scalars>`__ to allow that is described later in this doc.

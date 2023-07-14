@@ -504,140 +504,6 @@ Desugaring
 
 One feature of Atomo I liked and thought was cool was that all the syntax was defined with the syntax extension mechanism - even the "core" syntax `was just <https://github.com/Mathnerd314/atomo/blob/master/prelude/core.atomo>`__ defined as rules desugaring to the basic message-sending syntax. I don't really like message-sending as the basic construct, but it should be easy enough to use a Lisp syntax instead. So for example we'd desugar ``a = b`` to ``Assign a b``. Similarly Stroscot should define desugarings for all the other syntactic constructs too. Then we can use this basic Lisp syntax to bootstrap the language, as well as for macro debugging and other tasks. That way the parser is almost completely self-contained as a transformation from sugary code to a basic AST - there are only a few complex interactions like line numbers, inline syntax extension, and macros/DSLs.
 
-Blocks
-======
-
-Blocks are inspired by Haskell's do notation. They are intimately tied with :ref:`how I/O works <tasks>`.
-
-There is also "not returning anything" versus returning a value ``()``. In Haskell these are generally considered the same. But using the continuation monad allows us to separate commands (not returning a value) and operations (returning a value). Haskell has the translation ``{e;stmts} = e >> stmts = \c -> e (\_ -> {stmts} c)``. But usually ``e`` returns ``()``, so ``(>>)`` is applied at the type ``f () -> f b -> f b`` and that ``\_`` is a ``\()``. With our translation, commands (which don't return a value) are functions ``r -> r``. Haskell's translation would require them to be ``Cont r () = (() -> r) -> r``, which is equivalent but has an extra ``()`` floating around. But in both translations operations (whose value is used) are of type ``Cont r a = (a -> r) -> r``. The non-uniform type for actions might make copying code from Haskell a little harder, but on the other hand we get function composition as a built-in syntax. That's right, the most basic operation in category theory is available as syntactic sugar in Stroscot. Take that, Haskell. And also we can easily use indexed monads, just change ``r) -> r`` to ``r) -> s``.
-
-The return keyword should be invalid in short-form (pure) method definitions, like ``f x = x``, but should be required for blocks, i.e. ``f x = { return x }``. There is some question over whether to allow calling a function without return, i.e. ``f x = { return (g x) }`` versus ``f x = { g x }`` where ``g`` is itself a block.
-
-Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``, equivalent to ``when expr (throw AssertionFailed)``. Java's complex form ``assert expr : exception`` that throws a specific ``exception`` on failure seems pointless - it's only a little less verbose than ``when expr (throw exception)``. There's special integration of the blocks and exceptions so exceptions propagate even in pure expressions.
-
-ApplicativeDo
--------------
-
-ApplicativeDo :cite:`marlowDesugaringHaskellDonotation2016` has two functions. The first is to make some do-notation sequences be Applicative rather than Monad. In fact though these are exactly the sequences handled by idiom brackets, of the form ``{a <- ax; b <- bx; return (f a b)} = return (f !a !b)``. Idiom brackets are shorter, so the value this provides is minimal.
-
-The second function is to use applicative operations instead of monadic operations because in "some" monads the applicative operation is more efficient. Their example is the Haxl DSL:
-
-::
-
-  numCommonFriends :: Id -> Id -> Haxl Int
-  numCommonFriends x y = do
-    fx <- friendsOf x
-    fy <- friendsOf y
-    return (length (intersect fx fy))
-
-Well, if you're writing a DSL then writing it as a macro is much more powerful than trying to shoehorn it into an applicative/monadic framework. They discuss in the paper that the translation to use applicative operations is ambiguous and the best one depends on details of the computation that are not accessible, because functions are opaque. It's exactly these kinds of details that *are* accessible in a DSL - you just write a pass that walks over the expression tree and estimates the costs. Similarly the `use/def analysis <https://en.wikipedia.org/wiki/Use-define_chain>`__ that they use for the rewriting is a standard compiler pass. The commutativity mentioned in the paper is another property one could know from the DSL and that changes the output significantly.
-
-For regular do notation with continuations, the applicative notation translates to exactly the same functions as the monadic notation.
-
-Verdict: DSL in disguise. Just write a DSL. Stroscot does not benefit at all by adding ApplicativeDo.
-
-RecursiveDo
------------
-
-RecursiveDo :cite:`erkokValueRecursionMonadic2002` is an older extension to do notation. The motivating example is a circuit DSL:
-
-::
-
-   toggle : Signal Bool
-   toggle = out
-      where
-         inp = inv out
-         out = delay False inp
-
-   counter : Signal Bool -> Signal Int
-   counter reset = out
-      where
-         next = delay 0 inc
-         inc = out + 1
-         out = mux reset zero next
-         zero = 0
-
-But wait, where's the do notation? In fact, this is really just a DSL. There are no monads and no sequencing to be found. All of these operations happen in parallel. The uses for these circuit descriptions all depend on the circuits being specified using a small set of operations specified in a typeclass.
-
-Investigating Hackage, mdo is uncommon. "Many Haskell programmers will never use it in their careers." (`1 <https://ro-che.info/articles/2015-09-02-monadfix>`__) Uses fall into categories:
-* DSLs, where variable assignments are interpreted as data
-* Gratuitous (no/one binding, or bindings do not refer to bindings from later)
-* Examples where it would be clearer to use mfix or the do-rec notation that is just ``(a,b,c) <- mfix (\(a,b,c) -> (_,_,_))``
-* I/O monad, mfix is used to write the code in a recursive style instead of modifying a variable, e.g. forking two threads that kill each other:
-
-::
-
-   mdo
-      a <- fork $ killThread b
-      b <- fork $ killThread a
-
-   -- vs
-   bId <- newEmptyMVar
-   a <- fork $ readMVar b >>= killThread
-   b <- fork $ killThread a
-   writeMVar bId b
-
-The code for IO's mfix uses unsafeDupableInterleaveIO. This has been the subject of at least one `bug <https://gitlab.haskell.org/ghc/ghc/-/issues/5421>`__ (`two <https://gitlab.haskell.org/ghc/ghc/-/issues/15349>`__ counting fixST), and is why there is both fixIO and `unsafeFixIO <https://hackage.haskell.org/package/base-4.15.0.0/docs/System-IO-Unsafe.html#v:unsafeFixIO>`__. Reasoning about fixIO seems to `require <https://wiki.haskell.org/Evaluation_order_and_state_tokens>`__ laziness semantics and maybe also an understanding of Haskell's State-based I/O model.
-
-Also, most monads fail to satisfy monadic right shrinking, which IMO makes the notation completely unintuitive:
-
-::
-
-   mdo
-      z <- f z
-      w <- g z
-      return (z,w)
-
-   -- is NOT equivalent to
-
-   z <- mdo
-            z <- f z
-            return z
-   w <- g z
-   return (z,w)
-
-The only price to pay for leaving mdo out is that value-recursive monadic computations have to be written with ``mfix`` or its tuple-heavy cousin ``rec{}``. We can still implement ``mfix`` for the monads that matter, like ``State``. According to all available knowledge, ``mfix`` can't be implemented for continuations, so nothing is lost from regular programs.
-
-Verdict: Not only a DSL in disguise, but also a footgun. mfix and the rec{} notation are better for those who care.
-
-Arrows
-------
-
-You might be getting the pattern here. Arrows were inspired by a parsing DSL. Any arrow which supports the ArrowApply class is a monad. Arrows not supporting ArrowApply must write operations for every language element supported (variable, function, conditional, grammar production choice, and so on). Continuations require ArrowApply to even implement the basic arrow interface. Verdict: trash, a leaky "abstraction" that just wastes everyone's time.
-
-Idiom brackets
---------------
-
-While do notation is defined for monads, idiom brackets are defined for applicative functors, ``[[ f a b ]] = pure f <*> a <*> b``. But DSL notation works too: ``apply { a + b }``.
-
-The issue with translating to ``<*>`` is that it assumes left-to-right evaluation. You can see this in the `translation <https://hackage.haskell.org/package/base-4.15.0.0/docs/Control-Applicative.html#t:Applicative>`__ for Monads: ``m1 <*> m2`` binds ``m1`` before ``m2``. In Stroscot the program is required to be equivalent under all evaluation orders. So to enforce this we need a function ``parallel : [m a] -> m [a]`` that checks there is no issue with evaluating in parallel. Then using parallel the translation of ``apply { f a b x }`` looks like ``{ (av,bv,cv) = parallel (a,b,c); return (f av bv cv) }``
-
-Idris defines `!-notation <http://docs.idris-lang.org/en/latest/tutorial/interfaces.html#notation>`__, "implicitly bound application". The scoping is `unintuitive <https://github.com/idris-lang/Idris-dev/issues/4395>`__, but the notation itself is powerful. Binding it to a syntactic block seems reasonable. And it can easily express idiom brackets, ``[[ f a b ]]`` becomes ``{ f !a !b }``. Idiom brackets save characters with more arguments, but bang notation looks natural if there are multiple bindings in the block.
-
-C-like reference access
------------------------
-
-For example we want to do:
-
-::
-
-  a = ref 1
-  b = ref 2
-  c = a + b
-  a := c
-
-Translated this looks like:
-
-::
-
-   ref 1 >>= \a ->
-   ref 2 >>= \b ->
-   parallel (read a, read b) >>= \(av,bv)  ->
-   let c = av + bv in
-   writeRef a c
-
-I think the solution is another DSL. Inserting ``read a`` is not too complicated, just follow the C/C++ rules about converting lvalues to rvalues.
-
 Assignment
 ==========
 
@@ -2126,68 +1992,26 @@ In contrast, ``(-x)`` denotes an application of unary minus; the
 section ``(+-x)`` can be used to indicate a function which subtracts ``x``
 from its argument.
 
-Blocks
-======
+Definitions
+===========
+
+You can define variables and functions pretty much anywhere: a module, a block, a clause, or a clause group. These are in a new lexical scope specific to the syntactic unit where they are defined. This avoids unexpected conflicts between different areas of the program. An inner definition is not visible from an outer context unless the inner context is explicitly imported.
 
 ::
 
-  x = input number
-   display x
+  clause-group-let
+    -- clause group definition, but uses "a" which is only defined for first clause
+    h y = a * 2
+  for
+    foo a y | true = {
+      f x = g x + h y -- block definition
+      return (f 3)
+    }
+      where
+        g a = 2 * a -- clause definition
+    foo b y | false = impossible
 
-   foo =
-     x = 0
-     x += 1
-     provide x
-
-   obtain http_server
-   main =
-     parse_args
-     build_folder
-     http_server.serve(folder)
-
-The translation rules are based on the continuation monad:
-
-::
-
-  {e} = e
-  {e;stmts} = \c -> e ({stmts} c) = e . {stmts}
-  {p <- e; stmts} = \c -> e (\x -> (\p -> {stmts}) x c) = e >>= {stmts}
-
-Bang notation
--------------
-
-::
-
-  { f !(g !(print y) !x) }
-
-  // desugars to
-  {
-    t1 <- print y
-    t2 <- x
-    t3 <- g t1 t2
-    f t3
-  }
-
-The notation ``!expr`` within a block means that the expression ``expr`` should be bound in the block to a temporary before computing the surrounding expression. The expression is bound in the nearest enclosing block.
-Expressions are lifted leftmost innermost.
-
-Local definitions
------------------
-
-You can define variables and function locally to a block, clause, or clause group with let and where. These are in a new scope and only apply to the block where they are defined. This avoids cluttering up the program. All local definitions are substituted away before the block is evaluated in the ambient context.
-
-::
-
-  foo a y | true = {
-    f x = g x + h y -- block definition
-  }
-    where
-      g a = 2 * a -- clause definition
-  foo b y | false = impossible
-    where
-      h y = a * 2 -- last clause, hence a clause group definition, but uses "a" which is only defined for first clause
-
-A local definition shadows an ambient one, so for example you can write:
+An inner definition shadows an outer one, so for example you can write:
 
 ::
 
@@ -2195,74 +2019,7 @@ A local definition shadows an ambient one, so for example you can write:
      f 0 = 0
      f x = f (x-1)
 
-``f 4`` and ``f (x-1)`` both refer to the local definition. But you will get a shadowing warning as it is bad style.
-
-``let`` allows recursive definitions, bare definitions are not recursive:
-
-::
-
-  x = x + 1 # defines a new x shadowing the old x
-  let x = (x : Int) * 2 # defines a fixed point with unique solution x=0
-
-  fact x = if x==0 then 0 else x * fact (x-1) # fails due to fact being an unbound symbol
-  let fact x = ... # proper definition
-
-
-Monad comprehensions
---------------------
-
-::
-
-  [x,y | x=1..n; y=1..m; x<y]
-
-A convenient means to construct lists and to write blocks compactly. There is a template expression, generator clauses which bind the result of continuation to a pattern, and filter clauses which allow skipping results.
-
-::
-
-  Expressions: e
-  Declarations: d
-  Lists of qualifiers: Q,R,S
-  Qv is the tuple of variables bound by Q (and used subsequently)
-  selQvi is a selector mapping Qv to the ith component of Qv
-
-  -- Basic forms
-  D[ e | ] = return e
-  D[ e1,e2,e3 | ] = return [e1,e2,e3]
-  D[ e | p <- e, Q ]  =
-    p <- e
-    D[ e | Q ]
-  D[ e | e, Q ] =
-    guard e
-    D[ e | Q ]
-  D[ e | let d, Q ] =
-    let d
-    D[ e | Q ]
-
-  -- Parallel comprehensions (iterate for multiple parallel branches)
-  D[ e | (Q | R), S ] =
-    (Qv,Rv) <- mzip D[ Qv | Q ] D[ Rv | R ]
-    D[ e | S ]
-
-  -- Transform comprehensions
-  D[ e | Q then f, R ] =
-    Qv <- f D[ Qv | Q ]
-    D[ e | R ]
-
-  D[ e | Q then f by b, R ] =
-    Qv <- f (\Qv -> b) D[ Qv | Q ]
-    D[ e | R ]
-
-  D[ e | Q then group using f, R ] =\
-    ys <- f D[ Qv | Q ]
-    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
-    D[ e | R ]
-
-  D[ e | Q then group by b using f, R ] =
-    ys <- f (\Qv -> b) D[ Qv | Q ]
-    let Qv = (fmap selQv1 ys, ..., fmap selQvn ys)
-    D[ e | R ]
-
-
+The first ``f`` is a separate symbol as the LHS is in an outer scope compared to the rest. ``f 4`` and ``f (x-1)`` both refer to the function definition, but you will get a shadowing warning as it is bad style.
 
 Control structures
 ==================

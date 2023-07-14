@@ -1,7 +1,13 @@
-I don't really like how implicit building an executable is in most compiled languages.
-There's no obvious entry point where you can say "this is me invoking the compiler", so it forces a 2-level system of shell and program.
+x = input number
+display x
 
-I'd rather write something like:
-writeFile (compileToExecutable main)
+foo =
+  x = 0
+  x += 1
+  provide x
 
-where it's clear that compileToExecutable is doing the work.
+obtain http_server
+main =
+  parse_args
+  build_folder
+  http_server.serve(folder)

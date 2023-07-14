@@ -129,3 +129,20 @@ Once specific "hot paths" for optimization have been identified, the general str
 * independent computations - take advantage of hardware parallelism, such as SIMD, multiple cores, or the GPU
 
 It is good to profile the program after each change to ensure it is actually an improvement. Static performance models are pretty accurate, so automated optimizations will generally be improvements, but the static models are only so accurate and there are always exceptions.
+
+
+profilers have overhead - e.g. Python profiler slows down by 2x, making measurements inaccurate.
+
+
+ grabs a huge amount of memory
+ OS drops most of its page cache
+ many page misses in rest of program
+
+Caches
+======
+
+For caches there are a few basic metrics: putting stuff in the cache, taking it out, and the miss rate. There are many caches: OS page cache, cpu cache, BTB, TLB, GPU texture cache, disk cache, JITted code cache. It is important to attribute miss costs properly, e.g. one piece of "cold" code might put a lot of stuff in and then cause misses in the important "hot" code.
+
+For example, using XXHash made an individual function faster, but in a larger program it was slower than using Python's native hash because Python's hash was already in L1 instruction cache. Similarly, calling a function 100 times, then pass the results to another function, etc. for a total of 8 functions and 800 calls, is better than interleaving the function calls and doing the 8 functions on one item, then on another item, and so on.
+
+Hyperthreading

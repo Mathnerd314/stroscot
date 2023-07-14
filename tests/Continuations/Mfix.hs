@@ -1,6 +1,14 @@
 {-# OPTIONS_GHC -Wno-overlapping-patterns -Wno-incomplete-patterns #-}
 {-# LANGUAGE TupleSections, RankNTypes #-}
 
+import Data.Maybe
+
+mfix f = case fmap f (f undefined) of
+  Nothing -> Nothing
+  Just _ -> return (fix (unJust . f))
+
+
+
 {-
 It might or might not be possible to implement mfix as a function (lambda / letrec mixture)
 that works for all continuation types.

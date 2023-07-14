@@ -6,8 +6,8 @@ Still, there is a lot of due diligence necessary to use a 3rd party library. The
 
 Of course, sometimes the solution you want is not in the standard library, but that's where continuously expanding the standard library can help. In an ideal world, the standard library would offer a common set of abstractions used by all programs that covers all use cases. Eventually, even if a user needs an unusual data structure like a Y-fast trie, they should be able to find it in the standard library.
 
-Checklist
-=========
+Library checklist
+=================
 
 The standard library is essentially a shortcut for using 3rd party libraries in general. So let's look at that process for `Chromium <https://chromium.googlesource.com/chromium/src/+/main/docs/adding_to_third_party.md>`__:
 
@@ -37,7 +37,7 @@ The standard library is essentially a shortcut for using 3rd party libraries in 
 * Security review by the security team, license review by script or random person
 * Refactor other libraries to use the chosen library, so that there is not duplicate code
 
-Pretty much all these steps are also necessary to include something in the standard library.
+Pretty much all these steps seem suitable as requirements to include something in the standard library.
 
 Scope
 =====

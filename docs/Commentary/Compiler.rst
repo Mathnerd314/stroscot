@@ -60,6 +60,19 @@ With a runner :math:`r` we can turn a GNG :math:`n` into a specializer :math:`\r
 Design
 ======
 
+
+I don't really like how implicit building an executable is in most compiled languages.
+There's no obvious entry point where you can say "this is me invoking the compiler", so it forces a 2-level system of shell and program.
+
+I'd rather write something like:
+writeFile (compileToExecutable main)
+
+where it's clear that compileToExecutable is doing the work.
+
+
+Model
+=====
+
 Stroscot's main compiler uses a hybrid JIT model. Full list of execution engine features:
 
 Precompiled code loading: The model loads precompiled code from a database when available.

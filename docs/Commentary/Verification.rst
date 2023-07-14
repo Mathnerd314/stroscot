@@ -198,6 +198,8 @@ Exceptions
 
 The main reachability analysis figures out which exceptions a piece of code may throw. Top-level unhandled exceptions are reported as warnings.
 
+Assertions have a simple form ``assert expr`` that throws ``AssertionFailed``, equivalent to ``when expr (throw AssertionFailed)``. Java's complex form ``assert expr : exception`` that throws a specific ``exception`` on failure seems pointless - it's only a little less verbose than ``when expr (throw exception)``.
+
 Dead code
 ~~~~~~~~~
 

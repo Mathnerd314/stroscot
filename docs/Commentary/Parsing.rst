@@ -1,7 +1,7 @@
 Parsing
 #######
 
-Source code by itself is rather difficult to work with. To do anything useful, one would prefer to work with the AST or IR. Extensible syntax complicates the issue because there is no fixed grammar for the language. So we need a parser that can take arbitrary rules. And of course once we have a good parser, there is no harm in exposing it in the language, similar to Raku's inline `grammars <https://docs.raku.org/language/grammars.html>`__.
+Source code by itself is rather difficult to work with. To do anything useful, one would prefer to work with the AST or IR. Extensible syntax complicates the issue because there is no fixed grammar for the language. So we need a parser that can take arbitrary rules. And of course once we have a good parser, there is no harm in exposing it in the language, similar to Raku's inline `grammars <https://docs.raku.org/language/grammars.html>`__. `Per Vognsen <https://mastodon.social/@zwarich@hachyderm.io/109559009711883166>`__ says lexers (and consequently parsers) can be useful for searching through code and indexing it. And also, parser combinator libraries in general are pretty popular, so I'm sure people will write parsers for HTML, JSON, XML, and other common data formats.
 
 Scannerless generalized parsing
 ===============================
@@ -130,6 +130,12 @@ Another potential representation is as the shift/reduce stream of an LR parser, 
 For an analysis of tree sharing into forests and the effect on parsing complexity, you may want to read "Observations on Context Free Parsing" by Beau Sheil In Statistical Methods in Linguistics, 1976:71-109. The point is that all general CF parsing algorithms walk this shared forest completely. And it has size O(n3)
 
 Some later paper uses something called "BSR", have to look it up again.
+
+It is also important to have some kind of demand-driven / streaming interface. Parsing a whole file at a time can lead to OOM. There is the coroutine pattern where the semantic analysis calls down to the parser when it needs more input, but this has too many context switches. It is possible to use buffers of e.g. 1024 characters but this requires handling incomplete input. Attoparsec handle it as returning a continuation, but we'd like more than a just an opaque function, like a partial parse tree. For compilers, Per Vognsen says using declarations as the chunk granularity is best - it's a natural boundary, since usually a decl is the largest syntactic unit in a file. Even if your language requires unbounded token lookahead, it would be really weird to require parsing past the end of a decl into the next decl. But even so a decl is typically not too large so you don't have to worry about OOM or buffer refills or anything like that. Although for very large decls (like a generated array) you probably still need a incomplete-input fallback, that's a very cold path and some awkward cache misses are fine.
+
+Another idea Per Vognsen brings up is that, for indexing, the full file-level AST is not needed. Only some relevant subsection needs to be parsed, and the rest just needs start/end of each declaration but no interior detail. He proposes "random access" to the AST, building a dictionary of name -> (src span, decl kind). But his performance hacks assume all legal top-level declarations must have a keyword in column 0, which isn't necessarily true
+
+
 
 Compilation
 ===========
@@ -286,3 +292,5 @@ PWD involves four recursive functions: nullable?, derive, parse-null, and parse.
 The nullable? and derive functions implement δ (L) and D c (L), respectively
 the parse-null function extracts the final AST;
 and parse implements the outer loop over input tokens.
+
+error isolation so you can just bail on a decl and know the other decls will be independently handled

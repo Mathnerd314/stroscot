@@ -540,6 +540,8 @@ Non-reproducible rules
 
 If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.
 
+Similarly, some files may not be redistributable (copyright license or similar), these are reproducible but the data cannot be stored in the cloud cache.
+
 Daemon-less mode
 ================
 
