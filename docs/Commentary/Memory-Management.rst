@@ -1,23 +1,108 @@
 Memory management
 #################
 
-Per :cite:`kangFormalMemoryModel2015` there are pretty much two models of memory. The "concrete" model models memory as a an integer-indexed array of 2^32 or 2^64 words, or more generally the model exposed by the OS. The "symbolic" model models memory as an associative array from symbols (potentially infinite in number) to "cells", arrays of values (stored in some unspecified format). Semantically, these models give you pointers and references respectively. Kang describes how combinations of these can be made, for example the "quasi-concrete model" which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested, but the concrete and symbolic models are the fundamental ideas.
+The language should have automatic memory management. Manual memory management is slow, tedious, and error prone. Automatic memory management is better in all respects, but the implementation has to be flexible enough to be usable for all the things manual memory management is.
 
-Symbolic memory
-===============
+Memory models
+=============
 
-A reference is a symbolic index into a global associative array of objects, ``Map Reference Object``. The array allows allocating new references, deleting them, and reading/writing the reference. Reference symbols can be compared for equality, hashed to an integer, packed to a 64-bit word that's in pointer format, and unpacked to the identical reference. The value when converted reference is internal to the memory system but doesn't change.
+Per :cite:`kangFormalMemoryModel2015` there are pretty much two models of memory, pointers and references. Pointers model memory as an integer-indexed array of 2^32 or 2^64 words, accessed by the OS/hardware APIs. References model memory as an associative array from symbolic "references" (potentially infinite in number) to "cells", values (stored in some unspecified format, but with lossless storage).
+
+Kang describes how combinations of these can be made, for example the "quasi-concrete model" which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. You can also imagine the other direction, a pointer that masquerades as a reference but errors when attempting to store a value larger than the allocation. But references and pointers are the fundamental ideas and serve to implement all other possibilities.
+
+:cite:`brightProgrammingLanguageIdeas2022` brings up the old x86 16-bit pointer model. There were data, code, stack, and extra segment registers. A near pointer simply adds an offset to the appropriate segment register. Far and huge pointers set the segment register first, allowing access to other segments. Far pointers were unnormalized, while huge points were normalized to a canonical segment+offset pair. Nowadays, in x86-64, pointers are just represented as a uniform 64-bit absolute address. The only residue of segment addressing is there are some "load relative" instructions that take offsets instead of absolute pointers.
+
+Bright suggests that the lesson is to only have one type of pointer. But I disagree. The lesson is really to ensure that a pointer is self-contained, in that it always points to the same location, and unique, in that no other pointer value refers to that location. In the 16-bit pointer model, only far and huge pointers were self-contained. And far and huge pointers had the issue of allowing multiple representations of the same address. The normalization solved this, but there were disagreements on how to normalize and it was often skipped for performance reasons. Comparatively, the 64-bit model has a unique pointer value for every address. Turning now to modern models, the concrete and symbolic models are both fine in this regard; integers and symbols are self-contained and unique.
+
+Bright also raises the specter that "You will wind up with two versions of every function, one with manually managed pointers and one with garbage collected pointers (references). The two versions will require different implementations. You'll be sorry." How worrisome is this?
+
+Well, first let's try to use a pointer as a reference. There are many issues to consider:
+
+* Allocation size: Generally it is assumed the pointer points to some fixed-size buffer of bytes. But this means we can't store arbitrary-sized values; they just don't fit. Usually this is solved by restricting the possible values to a finite set, then the storage is fixed.
+* Serialization: To mimic the ability of a reference to store heterogeneous types of data, strings, numbers, lists, functions, and so on, we need a universal serialization function, that e.g. stores a type tag. We can probably expose such a serialization function from the compiler, as the compiler needs such a function to implement references. Alternatively, for a restricted type, this is solved by writing a custom serialization function.
+* Ownership - Pointers can just be calculated out of thin air, so some other function could overwrite our buffer. The format could be corrupted, or the memory could be deallocated altogether. Usually this is solved by making a private copy of the buffer at some isolated address that no other part of the program uses, and only writing back changes at the end in one atomic operation.
+
+Is someone really going to work through these issues and write a second version of the function? When they could just make the pointer into a reference with ``newRef (deserialize (readBytes 10 ptr))`` and let the compiler do all the work? References should have decent performance so there will be no reason to try to shoehorn a pointer into a reference-like API. Pointers are really a low-level, byte-based abstraction whose only business is interfacing with C code. As evidence that they are needed I offer `C# <https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/unsafe-code#pointer-types>`__ which has included them since 1.0.
+
+As far as using a reference as a pointer, as long as we don't want to do pointer arithmetic, we can just store an array of bytes in the reference. Such a pattern is common in Java, e.g. the ArrayList class. But when we want to materialize some bytes at a given memory address, there is no way to do it with references. References just don't support interfacing with C code.
+
+I guess it is possible that someone will have two versions of a function, one that implements it in pure Stroscot via references and one that calls out a C library with pointers. But externally, I think both of them should interact with the rest of the code using references. Using pointers with the C code might avoid a few conversion calls, but references are a lot cleaner to use, e.g. avoiding the use of callbacks, and there is the guaranteed optimization that you can use a reference as a pointer with zero-cost. So I don't think this poses an issue. Even if the C wrapper did use pointers because it was easier than converting to/from references all the time, that's a judgement call on the part of the library author and I don't think there is a solution that would let everyone standardize on one universal type. The best a "pointerOrRef" type can support, even restricted to a small type like ``int8``, is get/set like a regular reference.
+
+Pointers
+========
+
+Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of memory APIs and concluded that memory is best modeled as the global mutable array ``Memory = Map (Word,BitIdx) Status``. The status allows storing metadata, it's `a complex ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ which has various states like unallocated, committed, etc. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.
+
+It is simple enough to maintain "extra" status bits, and instrument memory functions to check the status of memory before operating. This is essentially what Valgrind does. With this it is possible to identify many common errors, like double free, use after free, access to undefined memory, and null pointer dereferencing. But there is still the possibility of overflowing a buffer into an adjacent allocation, or more generally `type punning <https://en.wikipedia.org/wiki/Type_punning>`__ by reading some memory as a format it was not written with. These sorts of possibilities are intrinsic to the "big array of bits" model, and many low-level hacks rely on such functionality, so I would say to use references if you want to avoid such things. But of course someone can easily add bounds-checking etc. on top of the basic pointer model as a library.
+
+Most addresses will not be allocated (status Free), hence the array is sparse in some sense. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It's a little more complicated than simple sparsity because there are many different statuses and the operations overlap.
+
+Storage vs. memory
+-------------------
+
+In practice, the path from cloud to CPU is long, and accessible storage is not just RAM. Some latency numbers and the programming API:
+
+* Physical registers (0.3 ns): managed by the CPU
+* Logical registers (0.3 ns): assembly read/write
+* Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
+* Main Memory (0.1us-4us): assembly read/write
+* GPU memory (0.2us-0.5us): assembly read/write, driver ioctl's
+* NVRAM (200us-250us): assembly read/write, special calls
+* SSD (250-500us): kernel file APIs
+* LAN (0.5-500ms): kernel network stack, driver bypass
+* HDD (3 ms): kernel file APIs
+* WAN (150ms): kernel network stack, driver bypass
+
+Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application. Ideally the memory management system would be a "storage management system" that combines all of these into a single pointer-like abstraction and allows copying data between locations as appropriate. But it's a leaky abstraction, I'm not sure it can be pulled off except as a library.
+
+"You-choose" Allocation
+-----------------------
+
+In practice, fixed-address allocation / assignment is not commonly used. Instead, there are ``mmap NULL``, ``malloc``, and the C library API alloc/realloc, which allocate memory with system-chosen / allocator-chosen location. For verifying behavior, the right model for this is adversarial, i.e. the allocator chooses the worst possible location, subject to restrictions such as that the allocation must be suitably aligned and disjoint from all unrevoked allocations. More formally, the behavior of a correct program should not depend on what addresses the system picks, i.e. all choices should be observationally equivalent. (The system can also return an out of memory error, but this doesn't have to result in equivalent behavior.)
+
+Of course, the actual allocation strategy should not be the worst, rather it should try to achieve the best performance. For the most part, people do not seem to pay much attention to allocator design, because it is pretty cheap. For example `in Doom 3 <https://www.forrestthewoods.com/blog/benchmarking-malloc-with-doom3/>`__ the median time for is 31 nanoseconds, ranging from 21 nanoseconds to 201 microseconds, and free is comparable.
+
+But, speeding up allocation is actually fairly important. Combining operations into a single larger operation (allocate a larger buffer, call ``close_range`` to close several open FD's than to iterate over them individually) by pushing allocations forward and delaying frees, as long as there is sufficient memory or resource capacity available, can be a big win. In contrast, reads and writes are always real work, and besides SIMD there is not much way to optimize it.
+
+There are also a lot of locality and cache effects from the address allocation algorithm. In the trivial case, the memory usage can be predicted in advance and allocations given fixed assignments, giving zero cost memory allocation. In more practical applications, variable allocations will need to be tracked, but there are still tricks for grouping allocations based on access patterns, avoiding fragmentation. Most research has been on runtime allocation optimization, but many of these optimizations can be precomputed at compile time. For example:
+
+* A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
+* Grouping hot variables into a page, so the page is always loaded and ready
+* Grouping things that will be freed together (pools/arenas)
+
+Optimizing access
+-----------------
+
+Generally, optimizations are allowed to eliminate possibilities allowed by the memory model, but there could also be an option to strictly preserve the set of possibilities.
+
+Eliminating a pointer read amounts to tracking down the matching pointer write and propagating the value directly, which can be accomplished by tracing control flow. There is the issue of data races with concurrent writes, but the memory model dictates which values a read may resolve to, and the verifier already handles nondeterminism, so it is not much harder than normal value propagation. There is also modeling foreign code, specifically determining whether the foreign code can write a pointer (i.e, whether the pointer is shared or not).
+
+Eliminating a pointer write requires proving that the address is never read before deallocation or another pointer write. Again there are the issues of data races and foreign code.
+
+CHERI
+-----
+
+CHERI pointers are 129-bit, consisting of a 1-bit validity tag, bounds, permissions, object type, and actual pointer. Valid pointers may only be materialized in a register or memory by transforming an initial unbounded pointer obtained from the OS. This means that the simple model of pointers as integers is no longer valid. Instead, a pointer is the combination of an integer address and a capability. The `CHERI C/C++ API <https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf>`__ represents capabilities as ``void*``, addresses as ``vaddr_t``, and
+
+I tried to read further, but the model is complicated, essentially implementing a GC to avoid dangling pointers, so I am not sure it will ever become mainstream.
+
+References
+==========
+
+A reference is a symbolic index into a global associative array of objects, ``Map Reference Object``. The array allows allocating new references, deleting them, and reading/writing the reference. Reference symbols can be compared for equality, hashed to an integer, and packed/unpacked to/from an integer.
+
+The packing and hashing requires a little explanation. Packing the same reference always returns the same value during a program execution, and the packed value is distinct from the packed value of any other reference. But the exact value is internal to the memory system - it is an "adversarial" model similar to pointers where if the program's behavior depends on the choice of packed value it is incorrect. The hashing is similar to packing, it is again the same value for the same reference, it is just that there is no distinctiveness constraint (so the program must have the same behavior even if all references hash to 0), and also no way to unhash the value, so there is no need to worry about resolving unpack invocations.
 
 There are higher-level types like immutable references and reference wrappers, but those all translate away to normal references or pointer access and don't need involvement from the compiler.
 
 Pointer conversion
 ------------------
 
-The in-memory location of the data of a reference is not fixed. If it's small enough it could just be in a register, or there could be multiple copies of the data. Also GC can move/copy the reference.
+The location of the data of a reference is not fixed. If it's small enough it could just be in a register, or there could be multiple copies of the data in memory. Also GC can move/copy the reference. The data could be produced on-demand and be represented by a thunk. All that can really be said is that the compiler will respect the semantics of storing and retrieving data.
 
-Often operations require a pointer to a memory address, so you can pin the object to a pointer ("materialize" it in memory), ``(address, unpinner) = getPointer ref``. ``unpinner`` is a finalizer that unpins the object after you are finished with the pointer. The alignment of the pointer can be specified during the ``getPointer`` operation.. The default is no alignment, to allow packing data compactly, although of course the location may be aligned anyway.
+Foreign operations like OS calls require a pointer to a memory address, because references don't necessarily exist in memory. The canonical way of doing this is simply reading the reference value and storing it in a buffer represented by a pointer ("materializing" it in memory). Internally, when compiling away the reference, the compiler tries to find a good way to store the reference - if it's lucky, it can backpropagate the pointer request and store the data there from the beginning, so that the "read and store" operation is actually a no-op that makes zero copies.
 
-Internally, when compiling away the symbolic memory model, the compiler tries to find a good place to store the data - if it's lucky, it can backpropagate the pointer request and store it there from the beginning, so that no copies are needed. When the data cannot be associated with a fixed address like that, it is stored in a special memory allocation area that is configured to trap on stray program-level access.
+But, in the fallback case of storing a few words, where a memory allocation is appropriate, the reference translates directly to a pointer allocation. The memory is configured to trap on stray user-level access, so that only the compiler-generated code has access. Even in this case, though, the reference's internal value is not the pointer itself, rather there is a more complex strategy of using a "handle" identifier that allows moving the data around after it is allocated.
 
 Representation
 --------------
@@ -34,30 +119,17 @@ Maybe some of these could be addressed by flags, but from the last two, it is cl
 
 Maybe though, it is still not general enough, we should just have lens-like functions like ``write : Memory -> a -> Memory`` and ``read :: Memory -> a``. There still need to be constraints though, like that you get back what you wrote and non-interference of writes.
 
-Pointers
-========
-
-Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of memory APIs and concluded that memory can be modeled as a global mutable array, ``Memory = Map (Word,BitIdx) Status``. The status allows storing metadata, it's `a complex ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ which has various states like unallocated, committed, etc. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.
-
-Memory functions check the status of memory before operating, hence identifying common errors like double free, access to undefined memory, null pointer dereferencing, etc. Similarly unused memory cannot be read/written, preventing use after free. But there is still the possibility of overflowing a buffer into an adjacent allocation, or more generally `type punning <https://en.wikipedia.org/wiki/Type_punning>`__ by reading some memory as a format it was not written with. These sorts of possibilities are intrinsic to the "big array of bits" model, and many low-level hacks rely on such functionality, so forbidding such possibilities entirely is not an option. But of course someone can easily add bounds-checking etc. on top of the basic model as a library.
-
-Most addresses will not be allocated (status Free), hence the array is sparse in some sense. It is in fact possible to implement the typical `sparse array operations <https://developer.android.com/reference/android/util/SparseArray>`__. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from ``/proc/self/maps`` and `VirtualQueryEx <https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299>`__, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it's easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It's a little more complicated than simple sparsity because there are many different statuses and the operations overlap.
-
-In practice fixed-address allocation is never used and instead there are ``mmap NULL``, ``malloc``, and the C library API alloc/realloc/free which allocate memory with system-chosen / allocator-chosen location. The right model for this is adversarial, i.e. the allocator chooses the worst possible location. Then to ensure correct program behavior, it should not matter what addresses the system picks, i.e. all choices should be observationally equivalent. The limitations on the system's choice are that the allocation must be suitably aligned and disjoint from all unrevoked allocations. (The system can also return an out of memory error, but this doesn't have to result in equivalent behavior so it can be ignored.)
-
-Optimizing access
------------------
-
-Eliminating pointer reads amounts to tracking down the matching pointer write, which can be accomplished by tracing control flow. Eliminating pointer writes requires proving that the address is never read before deallocation, which requires a global analysis of pointer reads. They're both a bit tricky as they have to make assumptions about what pointers foreign code will use and analyze the possible values a dereference may take. But, should be possible.
-
 .. _finalizers:
 
 Finalizers
 ==========
 
-Finalizers allow the prompt freeing of allocated memory and resources like thread handles, file handles, and sockets, by implicitly inserting the free operation in the locations.
+So far we have just seen manual memory management. For both pointers and references, you allocate the memory, and then "when you are done with it", you have to free the pointer or delete the reference. Many other resources work the same way, like thread handles, file handles, and sockets. But of course, forgetting to free resources (leaking) is a common error. Finalizers are inspired by ASAP and allow the prompt freeing of allocated memory and resources, RAII-style. They assume there is exactly one best place to free the resource, "immediately after the last use of the operation". The compiler determines this location and automatically inserts the free operation there. Such an analysis is more precise than traditional GC, because GC looks at what references are "in scope" and cannot free an unused reference embedded in a structure whose other parts are in use. But semantics-wise, finalization is a static, completely solvable problem. It is just of a high complexity :math:`\Sigma^0_1`. So if we are willing to accept potentially long compile times, we can eliminate memory errors.
 
-A finalizer is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and command ``use : Finalizer -> Command`` and ``useForever : Finalizer -> Op Command``. The semantics is that ``free`` will be called as soon as it is known that ``use`` and ``useForever`` will not be called. Calling ``use`` delays finalization until after the ``use``, and ``useForever`` cancels the finalizer and returns the free operation. The general transformation:
+Formal definition
+-----------------
+
+More formally, a finalizer is a magic value created with the one-argument function ``newFinalizer : (free : Command) -> Op Finalizer``. It supports equality, hashing, and command ``use : Finalizer -> Command`` and ``useForever : Finalizer -> Op Command``. The semantics is that ``free`` will be called as soon as it is known that ``use`` and ``useForever`` will not be called. Calling ``use`` delays finalization until after the ``use``, and ``useForever`` cancels the finalizer and returns the free operation. The general transformation:
 
 ::
 
@@ -82,32 +154,67 @@ A finalizer is a magic value created with the one-argument function ``newFinaliz
       let c' = continuation c
       reduce (c { continuation = transform c' })
 
-The `info("Delaying finalizer due to conditional usage")`` can be an error/warning if prompt memory management is desired. The situation happens when freeing depends on input data:
+Non-prompt finalization
+-----------------------
+
+Finalizers do not really free memory "immediately after the last use", as the `info("Delaying finalizer due to conditional usage")`` message points out. This situation happens when the location to free depends on further input:
 
 ::
 
   af = print "a"
   a = newFinalizer af
-  if randomBool then
+  b = input Bool
+  if b then
+    print "b"
     exit
   else
+    print "c"
     use a
+    print "d"
     exit
 
-Because ``a`` is used in the else branch, it cannot be freed before the condition. It is freed as soon as it is known it will not be used, hence this program is equivalent to:
+Because ``a`` might be used in the else branch, it cannot be freed between the ``newFinalizer af`` and ``input Bool`` statements, even though this would be the earliest place to free for a "true" input. Instead, ``a`` is freed as soon as it is known it will (unconditionally) not be used, hence this program is equivalent to:
 
 ::
 
   af = print "a"
-  if randomBool then
+  b = input Bool
+  if b then
     af
+    print "b"
     exit
   else
+    print "c"
     af
+    print "d"
     exit
 
+Non-prompt finalization can be made into an error/warning if prompt memory management is desired. I was calling prompt finalizers "destructors" for a while, because they behave a lot more like C++-style RAII. The API was slightly different, instead of a ``free`` operation that gets called at random times, destructors had this operation ``lastUse : Destructor -> Op Bool``, that returns false for every call except the last. The pattern for using this API is to make each use check if it's the ``lastUse``, like ``use (PromptFinalizer free d) = { l = lastUse d; if l { free } }``. But eventually I proved that this destructor API is equivalent to just using finalizers with the error enabled: the ``use`` function I presented lets you wrap a destructor as a finalizer, and destructors can be implemented using finalizers by::
 
-If multiple finalizers simultaneously become able to call ``free``, the finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.
+  isFinalized = mut false
+  f = newFinalizer { isFinalized := true }
+  lastUse =
+    use f
+    read isFinalized
+
+This implementation of destructors works just fine in programs where the warning is not triggered. But with non-prompt finalization, delaying until known, the contract is not valid because ``lastUse`` could return false even though it is the last use (delaying the finalizer after the read).
+
+Subsuming manual memory management
+----------------------------------
+
+By construction, finalizers without the warning are as prompt as finalizers with the warning, on the programs where the warning does not trigger. In particular, finalizers subsume prompt finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can gradually change it:
+
+1. ``malloc`` is wrapped to return a tuple with ``newFinalizer``, ``free`` is replaced with ``use``
+2. every operation is modified to call ``use``
+3. the finalizer warning is turned off
+4. The ``use`` calls corresponding to ``free`` are removed
+
+Up until step 4, the finalizer program compiles identically to the original. It's step 4 that's a bit fragile - the lifetime of the finalizer could be shortened and, depending on the program structure, the point at which ``free`` should be called may be hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases. At worst, the programmer will have to provide additional help to the finalizer analysis in the form of inserting the ``use`` statements corresponding to ``free``. Either way, since all operations call ``use``, the program behavior is not changed, only its resource management.
+
+Finalization order
+------------------
+
+If multiple finalizers simultaneously become able to call ``free``, then finalizer instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first.
 
 ::
 
@@ -129,113 +236,45 @@ If multiple finalizers simultaneously become able to call ``free``, the finalize
 Freed on exit
 -------------
 
-Many resources are automatically freed by the OS on exit: memory, file handles, etc. In this circumstance  ``useForever`` can mark the resource as not needing finalization. As an optimization you can call it on every allocated resource once you are on the termination path and know that no further resources will be allocated, or that there are sufficient spare resources that any further allocation can be satisfied without deallocation. But prompt deallocation is the better policy.
+Many resources are automatically freed by the OS on exit: memory, file handles, etc. This automatic freeing is generally more efficient than releasing each resource one by one. So as an optimization, one would like to *not* free these resources earlier, but rather hold on to them until the program exits and the OS frees them itself. So what we need is an analysis that determines at what point in the program there are sufficient spare resources that any further allocation can be satisfied without deallocation. This measure "the remaining amount of additional memory the program might use" will not necessarily be compared against the remaining memory amount of free physical memory actually available, but more likely a configurable parameter like 2MB. Once this point is determined the compiler can insert ``useForever`` calls to mark all the in-use resources as not needing manual finalization.
 
-Unsafe
-======
+Sloppy frees
+------------
 
-Rust locks all its memory APIs behind the "unsafe" keyword, as if using the underlying computer hardware is inherently unsafe. It's only certain tasks that are unsafe. And with the proper API for low-level systems programming, those tasks can be statically checked. These sorts of memory APIs are necessary for writing your own operating system or memory allocator. "unsafe" is an anti-pattern - either a feature is useful or it isn't, and if it isn't useful then don't provide it. Nanny-state "yes I really want to do this" prompts are just a waste of everyone's time.
+GC is more composable and it can also be faster than manual memory management :cite:`appelGarbageCollectionCan1987`. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out a small amount of useful data and just marking a whole region of objects as free. In a similar vein, sometimes we do not actually want the finalizer to run as promptly as possible, but rather batch it with other allocations and free it all in one go. The opportunities for batching are hard to detect and even harder to implement by hand. Setting some "slop factor" of memory that can be delayed-freed is quite useful - the only downside is that if the program is pushing the limits of memory maybe it will crash at 1.9GB instead of 2GB.
 
-Location vs allocation
-======================
+Really, we are distinguishing "unused" or "dead" memory from memory that is released back to the OS or the rest of the program.
 
-Memory management is usually presented as two operations, allocation and deallocation/freeing. But really the array-of-bits model is more accurate. The costs of allocation/deallocation are hard to predict, as all they do is update metadata. With a suitable OS/allocator design, they most likely will be pretty cheap. For example `in Doom 3 <https://www.forrestthewoods.com/blog/benchmarking-malloc-with-doom3/>`__ the median time for is 31 nanoseconds, ranging from 21 nanoseconds to 201 microseconds, and free is comparable. Generally, if they are a bottleneck, the operations can be combined into a single larger operation (allocate a larger buffer, call ``close_range`` to close several open FD's than to iterate over them individually) by pushing allocations forward and delaying frees, as long as there is sufficient memory or resource capacity available. In contrast, reads and writes are always real work. Filling a page with random data and reading it back will be at most a few GB/s, and most likely in the 300 MB/s range.
+Evaluation order
+----------------
 
-Obviously, speeding up allocation is still important, but it is more important to pay attention to cache effects from the choice of address. In the trivial case, the memory usage can be predicted in advance and allocations given fixed assignments, giving zero cost memory allocation. In more practical applications, variable allocations will need to be tracked, but it is still not an expensive problem, and there are well-known algorithms.
+There are also "space leaks" where memory could be freed earlier by evaluating expressions in a specific order but some other order is chosen. Certainly there is some evaluation order that results in minimum RAM usage, but maybe a less compact order is more time-efficient. So there is some amount of time-space tradeoff for this category. Finalizers kind of skirt this issue by being completely imperative, but with unsafePerformIO this becomes relevant again.
 
-Memory errors
-=============
+On borrowing
+------------
 
-Per Wikipedia there are a few types of memory errors:
+Rust has gotten much attention with the borrow checker, documented in :cite:`weissOxideEssenceRust2019`. Similar to finalizers, Rust also has a concept of the "lifetime" of each reference. But, whereas in Stroscot the lifetime is simply the set of program states during which the reference is not dead, in Rust a lifetime is a *region* consisting of annotating each program point with the set of *loans* of the reference, where each loan is either unique or shared. At each point, a reference may have no loans, one unique loan, or many shared loans - no other possibilities are allowed. This restrictive set of allowed access patterns means that Rust does not allow simple cyclic pointer patterns such as doubly-linked lists.
 
-* Memory leak: now-unused memory is not freed
-* Use-after-free: attempt to use freed memory
-* Double free: attempt to free freed memory
+Similarly, Val's `mutable value semantics <https://www.jot.fm/issues/issue_2022_02/article2.pdf>`__ is even more restrictive than Rust, dropping references altogether and simply using the function parameter annotation ``inout``. But it once again cannot represent any sort of cyclic pointer structure. It is really just the trick for representing state as the type ``s -> (a,s)``, and doesn't handle memory management at all.
 
-Inspired by ASAP, we can solve all these errors by inserting frees automatically. In particular, as defined in the semantics of finalizers, we insert a free for a piece of memory promptly after the last access. This avoids all the above errors. Such an analysis is more precise than traditional GC, because GC looks at what references are "in scope" and cannot free an unused subpart of a structure. But semantics-wise, memory management is a static, completely solvable problem. It is just of a high complexity :math:`\Sigma^0_1`. So if we are willing to accept potentially long compile times, we can eliminate memory errors.
+In practice, Rust developers have a variety of escapes from the borrow checker.  code frequently switches to the ``Rc`` reference counted type, which besides cycles has the semantics of GC. There is even a `library <https://github.com/Others/shredder>`__ for a ``Gc`` type that does intrusive scanning.
 
-There are also "space leaks" where memory could be freed earlier by evaluating expressions in a specific order but some other order is chosen. Certainly there is some evaluation order that results in minimum RAM usage, but maybe a less compact order is more time-efficient. So there is some amount of time-space tradeoff for this category.
+Per :cite:`proustASAPStaticPossible2017`, finalizers and the "free after last use" criterion subsume both region-based memory management and reference counting. :cite:`corbynPracticalStaticMemory2020` implemented a buggy incomplete version and showed even that version is comparable to Rust.
 
+Timeliness
+----------
 
+If doing automatic static memory management is so easy, why hasn't it been tried before? Well, it has. For example, :cite:`guyerFreeMeStaticAnalysis2006` has a similar notion of automatically inserting frees, and they report good results. But that paper focused on reachability, rather than lack of use, and their analysis was local to function blocks, rather than global. So it didn't see much adoption.
 
+:cite:`proustASAPStaticPossible2017` presented the theory and the formulation of the problem fairly well, but he fell into the trap of thinking that since the complexity of determining "waste blocks" was :math:`\Sigma_0^1`, any analysis had to be approximate. There are techniques for solving such high-complexity problems precisely, as evidenced in the TERMCOMP termination analysis competition, but such techniques really only got started in 2007 or so. From his citations list, Proust didn't really get into this area of the literature.
 
-The path from cloud to CPU is long, so there is a lot of caching in between. Some latency numbers and the programming API:
+So the answer is, it seems novel to try to apply techniques from formal verification to memory management, and that's the only technique that seems powerful enough to implement finalizers in the way presented here, where the point of finalization is guaranteed. All previous approaches have focused on approximate analyses that aren't powerful enough to subsume manual memory management.
 
-* Physical registers (0.3 ns): managed by the CPU
-* Logical registers (0.3 ns): assembly read/write
-* Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU
-* Main Memory (0.1us-4us): assembly read/write
-* GPU memory (0.2us-0.5us): assembly read/write, driver ioctl's
-* SSD (16us-62us): kernel file APIs
-* LAN (0.5-500ms): kernel network stack, driver bypass
-* HDD (3 ms): kernel file APIs
-* WAN (150ms): kernel network stack, driver bypass
+Certainly there is some risk involved in implementing a novel analysis. But it doesn't seem like a `"cursed problem" <https://www.youtube.com/watch?v=8uE6-vIi1rQ>`__ where even trying to solve it is a waste of time - :cite:`corbynPracticalStaticMemory2020` got decent results with just 8 months or so of part-time work. I'd rather be spending a lot of effort on solving the right problem, even if it's hard, than getting sidetracked solving the wrong easy problem.
 
-Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application. The memory management system combines all of these into a single "storage" abstraction and moves data between locations as appropriate.
-
-
-
-
-* A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.
-* Grouping hot variables into a page, so the page is always loaded and ready
-* Grouping things that will be freed together (pools/arenas)
-
-Ownership a la Rust cannot even handle doubly-linked lists so is not worth considering. Code frequently switches to the ``Rc`` reference counted type, which besides cycles has the semantics of GC. There is even a `library <https://github.com/Others/shredder>`__ for a ``Gc`` type that does intrusive scanning. GC is more composable and it can also be faster than manual memory management :cite:`appelGarbageCollectionCan1987`. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out the useful data. But garbage collection scanning slows things down because it pulls in a lot of memory; generational GC reduces this somewhat, but the more interesting area of memory management research is static analysis. To that end some work :cite:`proustASAPStaticPossible2017` :cite:`corbynPracticalStaticMemory2020` on "as static as possible" (ASAP) memory management is quite relevant. Conceptually we are taking a tracing GC algorithm and replacing the tracing with a compile time analysis that outputs a comparatively small bit of runtime checks. It's whole program and undecidable, but Stroscot already has 3 or 4 of those planned.
-
-Why hasn't anyone done static memory management before? Well, the notion of termination analysis only got started in 2007 or so. 10 years later Proust applies the techniques to memory, it's slow but there is a conceptual leap in going from program verification to program synthesis. It could have happened faster but I can see why it didn't.
-
-* The newly-dead set for a state transition ``s -> t`` is all objects that are accessed before but not accessed later, ``A = {z | Access(s,z) = yes && Access(t,z) = no} = L(s) intersect D(t)``.
-
-We deallocate the newly-dead set after each operation. This doesn't necessarily reclaim the memory, but ensures freeing is timely if needed. We also can compact the live set by removing dead fields.
-
-Quad-color marking
-
-The GC status of an object is set by two bits, the mark bit and the gray bit. The mark bit is stored in a bitmap, can be white or black. The gray bit is stored in a boxed_value object, determining whether an object has been fully marked. Only traversable objects have a gray bit and hence quad colors. Non-traversable (leaf) objects have very simple state transitions (just white->black->white).
-
-.. graphviz::
-
-  digraph G {
-    "Newly allocated traversable object" [fillcolor=lightgray,style=filled]
-    s1 [label="Sweep"]
-    s2 [label="Sweep"]
-    wb1 [label="Write",fillcolor=lightgray,style=filled]
-    wb2 [label="Write"]
-    "Object Fully Traversed" [fillcolor=black,fontcolor=white,style=filled]
-    "Gray Stack" [fillcolor=grey22,fontcolor=white,style=filled]
-
-    "New Object" -> s1
-    s1 -> "Object Is Freed"
-    "Object Is Freed" -> s2
-    s2 -> "Sweep Resets To white"
-    "Sweep Resets To white" -> wb1
-    wb1 -> s1 [label="Flat"]
-    wb1 -> "Traversal Starts: Object Was Rooted Or Referenced"
-    "New Object" -> "Traversal Starts: Object Was Rooted Or Referenced"
-    "Traversal Starts: Object Was Rooted Or Referenced" -> "Push"
-    wb2 -> "Push"
-    "Object Fully Traversed" -> "Sweep Resets To white"
-    "Object Fully Traversed" -> wb2
-    "Push" -> "Gray Stack"
-    "Gray Stack" -> "Pop"
-    "Pop" -> "Add Referenced Objects To Gray Stack"
-    "Add Referenced Objects To Gray Stack" -> "Object Fully Traversed"
-  }
 
 local (“arena”) allocators speed up short-running programs, keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference."
 diffusion should not be confused with fragmentation–an entirely different phenomenon pertaining solely to (“coalescing”) allocators (not covered in this paper) where initially large chunks of contiguous memory decay into many smaller (non-adjacent) ones, thereby precluding larger ones from subsequently being allocated –even though there is sufficient total memory available to accommodate the request. Substituting a pooling allocator, such as theone used in this benchmark (AS7), is a well-known solution to the fragmentationproblems that might otherwise threaten long-running mission-critical systems."
-
-
-Newly allocated traversable objects are light-gray. Writing only changes the state of non-gray objects.
-
-When the object is marked during the mark phase, it's turned dark-gray (mark bit turned black) and pushed onto the gray stack. In case it's unreachable, the sweep phase can free a light-gray object like any other object marked white.
-
-Dark-gray objects are turned black after traversal (clearing the gray bit) and turned white after sweeping. The write barrier may trigger during this short period and move the barrier back by turning it dark-gray again.
-
-An object that survived one GC cycle is turned white like all other survivors. In case the object is written to after that, it's turned light-gray again. But this doesn't push the object onto the gray stack right away! In fact, only the gray bit needs to be flipped, which avoids further barriers as explained above.
-
-The main advantage of the quad-color algorithm is the ultra-cheap write barrier: just check the gray bit, which needs only 2 or 3 machine instructions. And due to the initial coloring and the specific color transitions, write barriers for e.g. tables are hardly ever triggered in practice. The fast path of the write barrier doesn't need to access the mark bitmap, which avoids polluting the cache with GC metadata while the mutator is running.
-
-The quad-color algorithm can easily fall back to the tri-color algorithm for some traversable objects by turning them white initially and using forward write barriers. And there's an obvious shortcut for non-traversable objects: marking turns a white object black right away, which touches the mark bitmap only. Since these kind of objects are in segregated arenas, they don't need to be traversed and their data never needs to be brought into the cache during the mark phase.
 
 
 Arena-based bump allocator for objects
@@ -506,65 +545,6 @@ I concluded after looking at it again that sharing parts of data structures shou
 Destructors
 ===========
 
-A destructor is a magic value created with the operation ``newDestructor : Op Destructor``. It supports equality, hashing, and an operation ``lastUse : Destructor -> Op Bool``. All calls to ``lastUse`` but the last in the program return false; the last ``lastUse`` returns true. There is also ``useForever : Destructor -> Command`` which ensures that ``lastUse`` always returns false.
-
-Stroscot checks a no-leak property for each destructor ``x`` that exactly one of the following holds:
-* ``lastUse x`` is called infinitely often, returning false each time
-* ``lastUse x`` returns true and is never called thereafter
-* ``useForever x`` is called
-
-If the control flow does not allow this no-leak property to hold, Stroscot will error.
-
-::
-
-  reduce (NewDestructor c) =
-    f = freshSymbol
-    reduce (c f)
-  reduce (Use f c) =
-    if will_call (Use f) c
-      reduce (c False)
-    else if !(could_call (Use f) c)
-      reduce (c True)
-    else
-      error
-
-TODO: can it be shared. need some way to coordinate control flow analysis across threads
-
-Destructors are very similar to finalizers. In fact we can use destructors to implement *prompt* finalizers, that guarantee ``free`` is called immediately after some ``use``:
-
-::
-
-  newPromptFinalizer free =
-    d = newDestructor
-    let f = PromptFinalizer free d
-    use f
-    return f
-  use (PromptFinalizer free d) =
-    l = lastUse d
-    if l
-      free
-
-However, a prompt finalizer would give an error on programs such as the following:
-
-::
-
-  f = newFinalizer (print "Freed.")
-  use f
-  b = input Bool
-  if b
-    print "A"
-    use f
-  else
-    print "B"
-
-With a prompt finalizer this program will error. With a normal finalizer, Stroscot will insert calls to ``free`` after the ``use f`` in the true branch and before the ``print "B"`` statement in the else branch.
-
-Finalizers are as prompt as prompt finalizers, on the programs where prompt finalizers do not error. With this guarantee, finalizers subsume manual memory management. Taking a program written with standard ``malloc/free``, we can change it:
-1. ``malloc`` is wrapped to return a tuple with ``newPromptFinalizer``, ``free`` is replaced with ``use``
-2. every operation is modified to call ``use``
-3. the prompt finalizer is replaced with a finalizer
-
-The finalizer program compiles identically to the original. Note that this transformation is a bit fragile though - if the uses corresponding to the frees are deleted, the lifetime of the finalizer is shortened and depending on the program structure the point at which ``free`` should be called may become hard to compute. But hopefully the analysis will be fairly robust and able to handle most cases.
 
 
 Copying, quad-color incremental, generational garbage collector

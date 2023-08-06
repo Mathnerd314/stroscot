@@ -1,6 +1,8 @@
 Logic programming
 #################
 
+logic programming: express goals in a declarative form and solve problems using automated reasoning.
+
 Motivation
 ==========
 

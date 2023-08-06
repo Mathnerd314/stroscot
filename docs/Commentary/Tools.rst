@@ -1,27 +1,39 @@
 Tools
 #####
 
-Nowadays every language comes with a tool suite, because a compiler alone is not enough. These tools have to be integrated with the compiler and use the same parser, ABI, etc. so that they are compatible. This page discusses those.
+Nowadays every language comes with a tool suite, because a compiler alone is not enough. As Walter Bright points out, if it's a separate download, what happens is people never use it. A third-party tool is never installed, or it's the wrong version. Users do not want to read the manual for a third party tool and will never consider using it. But when it's built into the language, they magically start using it. And there's synergies, like you can integrate the documentation with the style checker and stuff like that. The tools can all be integrated with the compiler and use the same parser, ABI, etc. so that they are always compatible.
+
+Bright says this is transformative - it's like a night and day difference. And the other advantage is, there's only one. If you leave it to third parties, you get an endless number of tools, all different. Two teams each pick a different documentation generator and now they can't be merged or they can't work together and then you'll have a big fight and what a waste of time. The built-in tool may not be the best, but it's always there. By building it in you sort of browbeat people into using it.
+
+Style checker
+=============
+
+This is really just compiler warnings - keep adding warnings until no program is safe. But commercial style checking tools have this cool search and filter interface. It would also be cool to prioritize warnings based on machine learning.
+
+Testing harness
+===============
+
+I don't just have unit testing and integration testing, I have model checking and formal verification. But there needs to be some interface for specifying how the model checker is run, like turning off tests and viewing summaries of results.
 
 Documentation generator
 =======================
 
 The documentation generator provides a nice way to browse through a large codebase, ensuring that code is easy-to-read and searchable. The documentation comments, type annotations, and argument names are pulled out for each function, and the implementation code is accessible though an expando. The code has hyperlinks for all terms to the place where they are defined, or opens a menu if the term is overloaded. Code is prettified to use Unicode or MathML formulas where appropriate. There's regex-based search, and special searches for identifiers. Also useful is the call graph, in particular showing what functions call a given function. This can just be a link.
 
-As far as targets, only HTML seems particularly important.
+As far as targeted output formats, only HTML seems particularly important.
 
 The notion of "well-documented" is hard to define. For one person the source code and function names may be sufficient, while for another a tutorial that has no relation to the codebase may be more useful.
 
 If we have good IDE integration that exposes doc comments then maybe a documentation generator is not too important.
 
-Refactorer
-==========
+Refactorer/reformatter
+======================
 
-The refactoring tool makes it easy to analyze source code, enabling tooling such as automatic code formatting and codebase maintenance. It reads a program from source file(s), rewrites the code according to specified rules, and writes the program back to the file(s). It automates easy, repetitive, tedious changes. When the rewrite cannot be done automatically the rule can insert ``TODO: check rule XXX`` markers. It provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms. The automated migration of code from old to new versions uses the refactoring API.
+The refactoring tool reads a program from source file(s), rewrites the code according to specified rules, and writes the program back to the file(s). It automates easy, repetitive, tedious changes. When the need for a rewrite can be detected but it cannot be done automatically, the rule can insert ``TODO: check rule XXX`` markers. Refactoring provides a way to rename or inline functions, eliminate dead code, and transform old idioms to new idioms. Integrating refactoring with the language allows automated migration of code from old to new versions of libraries, as in gofix. Unlike gofix, the refactoring tool should be more like a library than a program, because writing gofix rules is just too hard. Gofix mainly implements a template style - find this AST pattern, replace with this template - but its pattern language is not very powerful.
 
-With no rules, the refactoring tool functions as a reformatter. Python's Black started out as opinionated but eventually grew lots of options - probably the reformatter should be very flexible, but have a preset default that's used for the compiler.
+With no rewrite rules, the refactoring tool simply reads the code and writes it back out, functioning as a reformatter. Regarding style configurability, there is a continuum. `gofmt <https://go.dev/blog/gofmt>`__ is probably the most extreme - it has 0 style-related configuration options. Slightly higher in the continuum is Python's Black, an "opinionated" and "uncompromising" formatter which has a "purposefully limited" selection of options - really just line length and "magic trailing commas" that avoid collapsing lists onto one line. At the other end are tools like clang-format and GNU indent which have 154 and 82 options respectively. The gofmt page claims that its output is "uncontroversial" but there actually have been many discussions on `its lack of configurability <https://github.com/golang/go/issues/40028>`__, `tabs vs spaces <https://www.reddit.com/r/golang/comments/ee4dqn/how_to_make_gofmt_or_go_fmt_use_whitespaces/>`__, and lack of detailed prettification like `removing whitespace at the head of functions <https://www.reddit.com/r/golang/comments/rrce2e/is_there_a_better_alternative_to_gofmt/hqflh4i/>`__ and `aligning assignments <https://www.reddit.com/r/golang/comments/rt0hra/can_i_tell_gofmt_to_make_some_exceptions_when/>`__. It is clear that, contrary to Ian Taylor's assertion, gofmt is not adequate for everybody. To me, the statement by Ian Taylor "It is an intentional design choice" sounds suspiciously like "I can't be arsed to implement that", a sort of concealed indifference as to what formatting is actually aesthetically pleasing. In contrast, with clang-format's ever-increasing set of options, `a single space <https://github.com/llvm/llvm-project/issues/59729>`__ is a significant issue and actually gets addressed. The configurability of clang-format ensures an attention to detail and resulting improvement in formatting quality that the mono-style of gofmt does not. So I think, similarly to Stroscot at large, functionality must be prioritized above minimalism: the reformatter must be able to generate all code styles, or at least the ones that people care enough to implement. "We are too lazy to maintain this" is not an acceptable reason to reject a style, when it could be necessary for someone's screen reader or to address other readability or accessibility concerns.
 
-Inspired by gofix / `gofmt <https://go.dev/blog/gofmt>`__ .
+Ian does have a point about eliminating bike shed discussions, but that is IMO separate from the implementation of functionality. One can have a default "standard" or "core" coding style, just like having the default standard library and core API supported by the compiler. Standardization has the same benefits of raising the bikeshedding bar: if your format is really so much better, you should be able to convince the standards committee to switch it in the language-wide config file. Letting the language handle it rather than just the people at your organization is a step up in centralization and really has no downsides. But just because one style is standard doesn't mean that other styles shouldn't be accessible - it should be easy to override the language default style if an individual has other preferences. But, if an individual does want to deviate, it should be encouraged to run the reformatter as a checkout/checkin filter, so that repositories store code formatted in the standard style and code on the web still uses the standard format.
 
 Interactive shell
 =================
@@ -46,8 +58,8 @@ Full command list:
 * debugger commands
 * profiler commands
 
-IDE
-===
+IDE support
+===========
 
 A GUI interface is higher-bandwidth than the REPL. Typically an IDE allows editing text files but more recently there is the notebook interface which integrates the REPL format with multiline code and allows outputting images, graphs, and interactive components (which would require separate windows when running a text file and command line).
 
@@ -60,7 +72,7 @@ Language server
 
 VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server can provide:
 
-* syntax highlighting
+* syntax highlighting (the docs say you have to use TextMate grammars too, but I think LSP alone is actually performant enough)
 * tooltips
 * autocomplete suggestions
 * navigation outline

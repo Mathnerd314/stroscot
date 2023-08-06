@@ -1,6 +1,8 @@
 Types
 #####
 
+The type of a variable can always be determine at runtime. Sometimes developers want to specify the type at compile-time, and get compile-time type errors, and other times they'd rather just run the program without types. Stroscot allow specifying as many compile-time types as are needed, but doesn't require them.
+
 Stroscot has sets and assertions about whether values are in sets. But are sets types? Is Stroscot typed? These get down to the semantics of type systems. Unfortunately these terms are ambiguous in the literature.  This is an attempt to exhaustively answer the question by considering each definition.
 
 What is a type?

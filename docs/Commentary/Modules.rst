@@ -1,12 +1,12 @@
 Modules
 #######
 
-Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction.
-
-Stroscot's module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak's module systems. (TODO: reread the systems to see if I missed anything. But they're mostly type systems, rather than functionality)
+Developers can add new language features and functionality through libraries and modules.
 
 Module
 ======
+
+Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction. Stroscot's module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak's module systems. (TODO: reread the systems to see if I missed anything. But they're mostly type systems, rather than functionality)
 
 A module is a set of definitions - a set rather than a list because the order is not relevant. Some definitions are declared "visible" and are exposed/exported in the signature. We write: ``export a, b, c`` at the top of the module, with ``a, b, c`` a list of exported names.
 
@@ -36,6 +36,26 @@ Name lookup maps a name to the entities in various modules. Name lookup succeeds
 
 Lookup for a name n from a lexical scope s returns all entities such that there exists a name in the declaration space of s whose stem identifier is equal to the stem identifier of n. Outer scope entities are shadowed by inner scope entities, and later identifiers shadow earlier identifiers with the same name; shadowing generates a warning. Another warning checks for similarly-named identifiers based on `confusables <http://www.unicode.org/reports/tr39/#Confusable_Detection>`__.
 
+Some ways of importing (based on Python):
+
+* fully qualified: no import, write ``module_a.module_b.module_c.method()``
+* module import: ``import module_a.module_b.module_c``, ``module_c.method()``
+* member import: ``import module_a.module_b.module_c.method``, ``method()``.
+* wildcard import: ``import module_a.module_b.module_c.*``, ``method()``.
+* renamed module import: ``import module_a.module_b.module_c as module_d``, ``module_d.method()``
+* renamed member import: ``import module_a.module_b.module_c.method as method2``, ``method2()``.
+* namespace import: ``import module_a.module_b``, ``module_b.module_c.method()``
+
+Fully qualified names are mainly useful at the REPL, when you just want to access something but don't want to write two statements. They are also useful conceptually, as a way to talk about and use the global namespace. Indeed Nixpkgs does not expose some values in the global namespace and it is annoying to try to access them. In library code though, they are a bit verbose - it could be usable for a function that is only used in one place, or for a quick hack, but it is better style to list an explicit import. Still though, it seems worth supporting fully qualified names everywhere for consistency.
+
+The module import is clear about the origin of each function, avoiding name clashes and some modules deliberately use short, ambiguous names such as ``CSV.read`` so that they can only be used with module imports. It certainly is a common style that should be supported.
+
+The member import is the most concise, and for unambiguous math function like ``sin`` it doesn't make much sense to use the module import. So it also should be supported. Similarly importing all math functions is kind of annoying so the wildcard import makes a lot of sense.
+
+The renaming imports are useful to solve name clashes. But it is questionable whether name clashes need to be resolved in this way, and whether the renamed version is recognizable. For example, Haskell has gotten to the point where people write ``import Set as S``, a terrible name. It is because the names of functions clash (e.g. ``map`` in the Prelude and ``map`` on a ``Set``). But Stroscot has overloading so this clash isn't an issue at all. And a strong standard library committee means that there will be very few name clashes. Still though, I could see it being useful if third-party libraries conflict, or some other rare cases; it doesn't seem worth excluding renaming import entirely like Java.
+
+The namespace import is the bastard child of a fully qualified import and a renaming import. It is still pretty verbose, but it is a little clearer than renaming the module to something unrelated. I don't think it will be used much in practice, but if fully qualified imports are supported it makes sense to also allow partially qualified namespace imports.
+
 Type piracy
 ===========
 
@@ -52,7 +72,7 @@ Julia has "type piracy" where method definitions are visible even if you don't i
   import Base.*
   test = (Symbol "A") * (Symbol "B")
 
-Apparently in Julia B will use A's definition. This is not wanted, because it means there is a global rule definition space. In Stroscot only rules that are in the transitive closure of explicitly imported dependencies should apply.
+Apparently in Julia B will use A's definition. This is not wanted, because it means there is a global rule definition space. In Stroscot, only rules that are in the transitive closure of explicitly imported dependencies should apply.
 
 Speed
 =====

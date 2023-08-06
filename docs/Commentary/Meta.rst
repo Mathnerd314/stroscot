@@ -158,7 +158,7 @@ The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-a
 Forbidden words
 ---------------
 
-A fair amount of terminology in programming seem to be meaningless or ambiguous. So don't use it:
+A fair amount of terminology seems to be meaningless or ambiguous. So don't use it:
 
 * dynamic - As `Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ points out, this is a marketing term.
 
@@ -191,6 +191,7 @@ A fair amount of terminology in programming seem to be meaningless or ambiguous.
 * abomination - a fun word, but basically meaningless in a programming context where one person's "abomination" is another person's "cool hack"
 * "etc" and "..." - they're just too imprecise. Usually if it's a list, these can just be omitted. If there is an intentional omission it can be replaced with an angle bracket construction like ``<more numbers>``, or the ambiguity erased with set-builder notation.
 * homoiconic - per `Michael Arntzenius <https://futureofcoding.org/episodes/040>`__ it just means the language has a data structure that represents an AST. So as soon as you talk about an "AST value" you're talking about a homoiconic language. The Lisp folks make a big deal out of it, but even Python has an `AST node datatype <https://docs.python.org/3/library/ast.html>`__ in the standard library. Of course people don't seem to think of Python as homoiconic. The Julia folks apparently `stopped <https://stackoverflow.com/questions/31733766/in-what-sense-are-languages-like-elixir-and-julia-homoiconic>`__ calling themselves "homoiconic" because they were getting pushback. According to ChatGPT and Stefan Karpinski of Julia, a true homoiconic language is one where the syntax for writing code is the same as the syntax for writing the data structure representing the AST of the code. This pretty much means Lisp. Personally I think having a low-level Lisp representation like Stroscot does is sufficient to qualify, and arguably a good quasiquoting implementation would work too, but it's easier to just avoid the term and the endless debates.
+* African American - genetically this term is `all over the map <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1/figures/5>`__. Prefer "American of African culture".
 
 Avoiding this terminology is easy to forget so is enforced by periodic grep's of the code.
 

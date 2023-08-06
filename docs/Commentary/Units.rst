@@ -23,6 +23,7 @@ Basic units
 -----------
 
 These are the basic units you'll find in any system:
+
 * The 7 SI base units, like second, meter, kilogram
 * Derived units, like feet, kilometers, newtons, etc., and their SI prefixes
 
@@ -32,12 +33,14 @@ Angles
 ------
 
 Radians are better off as a base unit, because then degrees can be converted naturally to radians, instead of being shoehorned in as a multiplicative factor. See :cite:`quinceyImplicationsAdoptingPlane2016` or https://arxiv.org/pdf/2203.12392.pdf for how formulas adjust to accommodate angles as a dimension with an explicit dimensional constant. For example torque and work (energy) in a conventional setting are both force times length and have the same type and unit, but in fact they are not equivalent in two ways:
+
 * In a geometric algebra setting, torque is a 2-vector (exterior product) while energy is a scalar (dot or inner product). So the numeric types are different.
 * The proper unit for torque is ``N*m/rad``, rather than ``N*m``. :cite:`quinceyReplyCommentAngles2022`
 
 To return to SI you can do ``use radian_convention { }``, which sets ``1 rad = 1`` in the block. Conventions are discussed more later on.
 
 As far as types of angles, there are a lot:
+
 * Rotational angles, normal numeric type plus an angle unit
 * Classification of angles in [0,360]:
 
@@ -174,7 +177,7 @@ For logarithmic units adding/subtracting two of the same unit is fine. Adding or
 
 Percentage units are similar to dimensionless logarithmic units, adding/subtracting is ``a + x% = a * (1 + x/100)``/ ``a - x% = a * (1 - x/100)``. Multiplying percents multiplies their pure value, with other units and with itself ``a%*b%=(a*b/100)%``.
 
-For affine units, the only operations are those of an affine space: subtracting two affine quantities to get a vector difference, and adding/subtracting a vector from an affine quantity, like ``1 degC + 3 kelvin = 4 degC``. Multiplication and division aren't defined.
+For affine units, the only operations are those of an affine space: subtracting two affine quantities to get a vector difference, and adding/subtracting a vector from an affine quantity, like ``1 degC + 3 kelvin = 4 degC``. Multiplication and division aren't defined. For temperature, we could define them via conversion, e.g. ``1 degF / 2 = 255.927778 kelvin / 2 = 127.963889 kelvin = -229.33500 degF``, but such conversions are incredibly confusing.
 
 and other dimensionless operations is an issue.
 
@@ -184,6 +187,7 @@ Modes
 =====
 
 When working on a program with units I devised several modes of operation for units:
+
 * Unchecked: conversion by explicit multiplication, unit annotations in comments
 * Automatic unit conversion: unit annotations in code, conversions specified in a comprehensive list
 * Semi-automatic unit conversion: unit annotations in code, conversions specified contextually

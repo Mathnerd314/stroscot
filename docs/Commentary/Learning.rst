@@ -1,6 +1,8 @@
 Learning
 ########
 
+There is clear, comprehensive, and up-to-date documentation. It is easy for developers experienced with other languages to get started. There is a large and active community of users providing guidance and support. Programs run quickly and scale well. It is easy for experienced developers to understand and maintain programs.
+
 Learning a language takes time and effort. Typically, programmers are pressed for time, so the goal would be to learn a "minimum viable amount" of Stroscot in a short period of time. As a project, Stroscot should provide resources to help programmers learn Stroscot efficiently and in as pleasant a manner as possible.
 
 Formats

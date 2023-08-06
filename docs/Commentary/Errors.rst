@@ -1,6 +1,8 @@
 Errors
 ######
 
+The compiler gives clear and helpful error messages that make it easier for developers to identify and fix problems in their code.
+
 Error levels
 ============
 

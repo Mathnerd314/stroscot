@@ -1,5 +1,5 @@
 Profiling
-=========
+#########
 
 The goal of the profiler is to measure performance, and allow making optimization decisions based on that.
 
@@ -10,7 +10,7 @@ We model a computer using a "functional block diagram", i.e. blocks and buses. T
 
 Blocks:
 
-* processor
+* processor - time, caches, I/O bandwidth
 
   * 8x die - 4x DDR, 8x I/O, L3 cache
 
@@ -23,6 +23,16 @@ Blocks:
 
 * graphics card
 * memory
+
+  * physical memory used
+  * virtual memory allocated/committed
+  * virtual memory reserved (windows)
+  * private bytes - allocated to process, shared bytes - includes memory-mapped files, shared DLLs
+  * working set - set of pages accessed within a given time period (near future, near past)
+  * resident set - program memory current in physical memory
+  * `profiler <https://blog.mozilla.org/jseward/2011/01/27/profiling-the-browsers-virtual-memory-behaviour/>`__
+  * reported on Linux in /proc/<PID>/status - split: heap, stack, executable code, loaded DLLs
+
 * motherboard
 * storage
 * power supply - typically left out
@@ -40,6 +50,7 @@ Blocks:
   bpf-output
   cgroup-switches
   context-switches OR cs
+  system calls
   cpu-migrations OR migrations
   dummy
 

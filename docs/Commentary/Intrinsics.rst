@@ -138,3 +138,14 @@ The following changes are binary compatible:
 - Adding, reordering, or removing cases of a resilient enum.
 - Changing parsing rules
 
+C/C++
+-----
+
+Interop with C/C++ is a good target featuree. There are varying approaches (in increasing order of ease of use):
+
+* libffi just implements basic assembly stubs for setting registers. It doesn't handle function signatures, memory layout or anything else - calling is all manual.
+* `rust-bindgen <https://github.com/rust-lang/rust-bindgen>`__ parses headers with clang and generates FFI struct descriptions and function prototypes in Rust. It requires a separate build step. It doesn't handle many features properly, such as macros, inline methods, templates, inheritance, destructors, exceptions and non-trivial calling conventions.
+* `c2ffi <https://github.com/rpav/c2ffi>`__ parses headers with clang and generates JSON. There is hacked in support for some preprocessor macros and templates, but it is otherwise similar to rust-bindgen.
+* `dragonffi <https://github.com/aguinet/dragonffi>`__ again uses clang but it works by compiling code snippets. This allows the full range of C/C++ to be used.
+
+I think the dragonffi approach is the best, since it's the most powerful and least error prone. There is some effort to analyze the result of the compilation and integrate it with the rest of Stroscot, but deep integration with an existing C/C++ compiler seems better than trying to write one from scratch.

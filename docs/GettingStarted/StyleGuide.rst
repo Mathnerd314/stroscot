@@ -1,15 +1,15 @@
 Style guide
 ###########
 
-This guide outlines general conventions for Stroscot code. It's an evolving document though so nothing is final.
+This guide outlines general conventions for Stroscot code. It's an evolving document though so nothing is final. Think of it as the boot camp where the drill sergeant is yelling in your ears to scare you straight, rather than a description of fact.
 
 Naming Guidelines
 =================
 
 * Filenames should be meaningful and end in ``.sct``. Use all-lowercase ASCII names, with words separated by underscores or dashes.
-* Type names and constructor names should be CamelCase, like Haskell.
+* Type names and constructor names should be uppercase CamelCase, like Haskell.
 * Module names should be lower_with_under (snake case), like Python.
-* Function, constant, and variable names should be snake_case (all lowercase), like Julia, or camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.
+* Function, constant, and variable names should be snake_case (all lowercase), like Julia, or lowercase camelCase like Haskell, or kebab-case like Lisp or Raku. Generally, variable names should be nouns and function names should be verbs.
 * If an argument is unused use the wildcard pattern ``_`` or (less preferred) a name starting with ``_``
 * Use whole words unless you have a good reason. Single letters can be okay for internal variable names or to match a reference paper or algorithm but may be unreadable in a year so should be documented with comments. Don't use abbreviations, because they tend to be inconsistent and too terse; use a text editor with autocomplete.
 * Multi-word names are allowed, but consider whether the binding might be decomposable into separate values.
@@ -36,8 +36,8 @@ Whatever the auto-formatter gives is probably right. Guidelines for the auto-for
 * Use spaces around binary operators (e.g. ``x + y`` instead of ``x+y``), unless you need to compact the expression so it fits on one line. Another exception is keyword arguments, which can be squashed to emphasize the atomic nature of the call.
 * Use a single space after commas: ``[1, 2, 3]``.
 * Do not use extra spaces for unary operators, parentheses, or brackets. Use extra spaces for braces, ``{ x }``.
-* Use spaces around ``=``, ``x = y``, but only one pair (no ``x  = y`` to make it horizontally line up with another line)
-* Use 2 spaces for indentation; no tabs, ever.
+* Use spaces around ``=``, ``x = y``, but only one pair (no ``x    = y`` or ``x =    y`` to make it horizontally line up with another line)
+* Use 3 spaces for indentation; no tabs, ever.
 * No hard line limit, but use an editor that soft-wraps lines to 100 characters. This fits comfortably on a modern screen with a reasonably sized font. Wrapping is a good indication that you should encapsulate some of the work in a separate line.
 * Use semicolons to put multiple commands on one line only if they fit on one line.
 * Function calls, lists, etc. can be spaced out so each element is on its own line, with a single level of indentation:
@@ -77,17 +77,17 @@ Whatever the auto-formatter gives is probably right. Guidelines for the auto-for
     // B
 
 
-Generally the single newline style should be preferred, unless each group element takes up more than one screen (~50 lines). If a function exceeds about 40 lines, think about whether it can be broken up without harming the structure of the program. The multiple newline style suggests that your code is too complex and should be rewritten. The banner style is good for skimming and may be suitable if you have large sections of code, but splitting into more modules is probably better.
+  Generally the single newline style should be preferred, unless each group element takes up more than one screen (~50 lines). If a function exceeds about 40 lines, think about whether it can be broken up without harming the structure of the program. The multiple newline style suggests that your code is too complex and should be rewritten. The banner style is good for skimming and may be suitable if you have large sections of code, but splitting into more modules is probably better.
 
 * Numeric literals: Common digit groupings are every 3 decimal digits, every 4 binary digits, and every 2 hex digits, omitting the separator if there are only two groups. Other groupings may be used if appropriate, e.g. a date YYYY_MM_DD, a postal code 12345_7890, a double separator at 8 bytes, or other formats.
 
 Type Guidelines
 ===============
 
-* Use the largest types possible for type dispatch constraints. If the constraint were removed the function should not work as intended on value outside the type. If you want to document that a generic function works on some "known" types you should not use dispatch constraints but instead write separate type signature assertions.
+* Use the largest types possible for type dispatch restrictions. If the restrictions were removed, the function should not work as intended on value outside the type. If you want to document that a generic function works on some "known" types you should not restrict the function at all - instead, leave the domain unrestricted and write separate type signature assertions.
 * If you implicitly depend on values, like ``sum = foldl (+) 0``, then write those in the signature, like ``sum : { (+) : a -> a -> a, 0 : a } -> [a] -> a``.
-* Avoid converting to a known type ``f (x:Any) = convert Int x`` and instead use a type constraint ``f (x:Int) = x``. The conversion may fail, while the type constraint can be statically checked.
-* Avoid writing large union types - define a new type.
+* Avoid converting to a known type ``f (x:Any) = convert Int x`` and instead use a type constraint ``f (x:Int) = x`` or ``f (x:Convertible Int) = x``. It is better to require an explicit conversion, and the type constraint can be statically checked.
+* Avoid writing large union types ``A|B|C`` - define a new type ``SomeUnion`` and use the set syntax ``elem SomeUnion A``.
 * If an argument or field can be anything, explicitly annotate it with ``: Any``.
 * Assertions throw an exception and are enforced by the compiler pretty strongly so can be used for error handling/input checking/etc. It is better to prove the absence of errors than to try to handle them.
 
@@ -100,7 +100,7 @@ The standard library adheres to this general order as much as possible when call
 
 * Arguments overriding defaults: In Stroscot arguments overriding defaults are usually listed first, because they have to be syntactically part of the function call. For example the I/O stream is an argument that defaults to stdout, so one would write ``print {stream=stderr} "Hello error!"``.
 
-* Positional parameters should be the "primary data" that is operated on. There should be 3 or fewer positional parameters, otherwise positional-based calls become a big ball of mud. It's OK to have no positional parameters. Examples in order include:
+* Positional parameters should be the "primary data" that is operated on. There should be 3 or fewer positional parameters, otherwise positional-based calls become a big ball of mud. It's OK to have no positional parameters. Examples, in the order they should appear, include:
 
   * Input list, array, reference, etc.
   * Key or index
@@ -128,7 +128,7 @@ Common labels:
 * source - the source of an operation
 * destination - the destination of an operation
 * initial - the initial value for an iterator
-* comapre - a comparison function
+* compare - a comparison function
 * mode - an operation mode or a flag list
 
 Ideally, the function name, labels, and signature(s) should be enough to convey the function’s meaning and usage, because this information is easily available with the "all defs" page in the documentation index or at the REPL with ``:browse``, whereas reading the full function documentation is more involved.
@@ -137,7 +137,7 @@ Scoping
 =======
 
 * Generally naming functions is preferable as anonymous functions are implicitly converted to named functions anyways.
-* For clarity, imports should bring only the module into scope, rather than its members, and one should write ``module.function`` every time. But this can get verbose so decide on some more relaxed criteria for member imports. Of course some modules such as CSV are intended to be used qualified and use vague names such as ``CSV.read`` so should never have their members imported directly.
+* For clarity, imports should bring only the module into scope, rather than its members, and one should write ``module.function`` every time. But this can get verbose so if it's a common module with recognizable function names you can use member imports. Of course some modules such as CSV are intended to be used qualified and use vague names such as ``CSV.read`` so should never have their members imported directly.
 * A module should export all bindings that are part of the module's intended API. Non-exported bindings are typically internal and subject to change, unless the documentations states otherwise.
 * Put code in a function instead of the top-level, to allow re-using it and testing it more easily
 * Place code in a namespace, except if it is the main module of a throwaway script

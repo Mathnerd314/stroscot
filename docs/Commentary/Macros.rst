@@ -1,6 +1,9 @@
 Macros
 ######
 
+code generation: code generation, automatically generate code based on templates or other input.
+metaprogramming: metaprogramming, write code that can manipulate and generate other code at runtime.
+
 Macros are a facility that allows defining syntactic extensions to a programming language. Macros implement the essence of Lisp: code can be used as data, and data can be used as code. Although in Lisp the transformation of code into data (specifically, an AST tree) is obvious as the S-expression syntax is just nested lists, in Stroscot we choose to have more complex syntax and accompanying mental overhead. It should be noted that even McCarthy the inventor of Lisp intended to use an M-expression (mathematical expression) syntax and S-expressions were only a matter of convenience.
 
 Comparison
@@ -42,11 +45,19 @@ Hygiene
 
 Scheme macros are supposed to be "hygienic" in that they always evaluate expressions in the lexical environment of the macro's definition site, as opposed to use site. But :cite:`kiselyovHowWriteSeemingly2002` shows that in fact the environment of the use site is fully accessible through some tricks. The newer syntax-case allows explicit access through ``datum->syntax``.
 
+Formal definition
+=================
+
 Fexprs in contrast get an explicit environment. They can do staged lookup, ``eval $env (eval $env (f $args))``, where an expression evaluates to an AST symbol and the AST symbol is looked up, and other weird things. :cite:`shuttFexprsBasisLisp2010` chapter 5 discusses various hygiene-breaking problems and concludes they aren't too worrisome.
 
 ``eval`` is hard to compile, because it makes the full power of an interpreter available. But we can often simplify ``eval (a + b)`` to ``eval a + eval b``, reducing the amount of code that is evaluated each loop. If all of the variable lookups are static, we can furthermore optimize the environment to remove all unneeded variables. Hence we can recover macro-level performance on macros. Dynamic lookups need the full environment unfortunately. But dynamic lookups are essentially a REPL or debugging tool, so does not need to be too efficient, and we can warn that they are not optimized.
 
 Fexprs make the equational theory of ASTs trivial, (:cite:`shuttFexprsBasisLisp2010`, chapter 15) in that ASTs can be completely deconstructed, so no two ASTS are behaviorally equivalent. But this is good, because it means the programmer's intent can be fully examined. If ``(\x. x) y`` was equivalent to ``y`` then many DSL's would not be possible. The behavior of programs containing fexprs is decidedly nontrivial and quite varied.
+
+In Stroscot, as in Kernel :cite:`shuttFexprsBasisLisp2010`, fexprs are functions that take code AST's and a lexical environment instead of evaluated values. So when you write ``f a b``, and ``f`` is an operative, then ``f`` has a type like ``f : Env -> Ast -> ...``. The ``Env`` is an opaque map that might or might not have bindings for ``a`` and ``b``, and the AST is fragment like ``((Sym 'f') `App` (Sym 'a')) `App` (Sym 'b')``. Then ``f`` can do arbitrary operations with those, with the full power of the programming language, and in particular ``f`` can ``eval`` AST fragments with the env it's given (or with envs from elsewhere).
+
+The main power fexprs give over macros is that there's no phase distinction. A macro is like an fexpr that builds up a single AST and calls eval at the end. But fexprs can call eval multiple times, and these can depend on the results of previous evaluations, so for example you can lookup a variable name stored in an argument and evaluate that name.
+
 
 Parsing
 =======

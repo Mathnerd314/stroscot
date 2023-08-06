@@ -1,6 +1,8 @@
 Syntax
 ######
 
+Stroscot's syntax should be clear, readable, friendly, and consistent. It should be easy to learn and use for those who are new to programming. The language should be accessible to a wide range of users, including those with disabilities. Furthermore the syntax should be flexible, extensible, and customizable, so that developers can tailor aspects of the language to their specific needs and preferences.
+
 Customization
 =============
 
@@ -38,10 +40,11 @@ Stefik used a mixture of CS university students (freshman year novices and junio
 * programming experience. Stefik found that programmers will list experience with individual languages even when reporting no experience total, so it seems best to skip an overall experience question and ask individually with a language matrix. Since not all languages will be listed we'll have an "All other programming languages" catch-all at the end. Stefik presumably asked an empty-box "how many years of experience do you have with X" question. But a matrix requires choices. Taking his mean experience reported as the data points, for experienced programmers, dividing into 5 buckets we have 0-0.03,0.03-0.09,0.9-0.22,0.28-0.48,0.67-1.76. For inexperienced programmers, we have 0-0 as a large bucket and then the remaining range is split into 0-0.01,0.01-0.03,0.05-0.09,0.12-0.23. Combining experienced and inexperienced, the 0-0 bucket stays and we have 4 more buckets 0.01-0.03 (±0.11-0.16), 0.03-0.09 (±0.18-0.31), 0.11-.28 (±0.41-1.06),0.39-1.76 (±.0.7-1.87) Translating into familiar units, these buckets are no experience, <11 days, 11-33 days, 40-102 days (1.32-3.36 months), 4.68+ months. Given the wide uncertainties we can round to no experience, < 2 weeks, 2 weeks to 1 month, >1 month and <4 months, or 4+ months. It's not as accurate as the empty-box but hitting a circle on mobile is much easier. In terms of the survey of :cite:`siegmundMeasuringModelingProgramming2014`, it is a quantified version of the self-estimation that rates experience as 1-5. We can sum the (approximate) years of experience to obtain overall years of experience, which should lead to Siegmund's "professional programming experience" factor, which IMO is the correct factor to use to measure programming experience. But we would have to do another validation study with university students to verify that this metric correlates with the ones in Siegmund's study. In fact though I am mainly going to use the metric as a binary variable, novice vs. not, so it's not too important.
 
   As far as languages, Study 1 had HTML, C++, Java, Matlab, JavaScript, Basic, COBOL reported with experience for non-programmers and Study 2 was similar with the addition of PHP. Considering programmers among both studies, we would add C#, Python, Ruby, and COBOL as <1 month languages, and Perl and FORTRAN as <2 week languages. Meanwhile the SO language list top 15 is JavaScript, HTML/CSS, Python, SQL, Java, Node.js, TypeScript, C#, Bash, C++, PHP, C, Powershell, Go, Kotlin, with a clear break in popularity from C at 21% to Powershell at 10%. The question asked for "extensive development work in the past year" though so is not really a question about which languages are most likely to have beginner exposure. Contrariwise TIOBE does not consider HTML a programming language because it is not Turing complete, but does list SQL. We do not want to list too many languages, because marking lots of languages as "no experience" is tedious, but a good selection is key to defining the question and ensuring the catch-all is answered accurately. One design point would be to preselect "no experience" for all but the catch-all, solving the tedium issue, but the survey tool would have to support this.
+* reading experience: as an alternative to age, being able to gauge the vocabulary of the 
 
 * Have you heard of the Stroscot or Quorum programming languages before this survey? Yes/no. This is a question Stefik says he wished he had asked, to avoid confounding results. (2 questions actually)
 
-The meat of the survey is questions of the form "<English description of PL concept>; how do you think the syntax of <concept> should look like for <example>?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. We can of course use RosettaCode as the source of choices, top X choices either randomized or ranked. Stefik did individual rankings of each choice on a 0-100% scale by 10%'s, but I think "select first,second,third choice" is sufficient and less tedious.
+The meat of the survey is questions of the form "<English description of PL concept>; how do you think the syntax of <concept> should look like for <example>?". First we want an open-ended text field to get unprimed responses, then multiple-choice to compare against existing PL syntaxes. We can of course use RosettaCode as the source of choices, top X choices either randomized or ranked. Stefik did individual rankings of each choice on a 0-100% scale by 10%'s, but I think "select first,second,third choice" is sufficient and less tedious. The descriptions should be targeted to a reading level of age 8. This is because, per `this article <https://www.kinvert.com/age-teach-kids-python/>`__, children simply do not have the motor coordination to type on a keyboard or the reading skills to use a text-based language before ages 6-8, and kids outgrow Scratch around age 8 so age 8 is a good target. In the US, grade 3 is ages 8-9 correspond to grades 1-3, so 3rd grade is the target to aim for with the Flesch-Kincaid grade level. A test-taking child of age 8 knows about 10,000 words (`ref <https://www.economist.com/johnson/2013/05/29/lexical-facts>`__). Of course, the subjects of the survey will most likely be much older, but the restrictive vocabulary of this low grade will ensure that the use of jargon is minimized. Naturally, I will not actually be writing these, ChatGPT will. Large language models have been demonstrated to perform very well at identifying the reading level of prose and devising better ways to express concepts. I don't know how well prompting ChatGPT performs versus more specialized training models, but the results seem reasonable.
 
 Survey validity
 ---------------
@@ -197,17 +200,22 @@ It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging
 Familiarity
 ===========
 
+Let's say one design has readability arguments for it, and another design has only familiarity on its side. For example, using single = for both assignment and comparison is much less confusing for newbies, as they are not used to writing ``==`` like in C, and often forget to double it. But of course ``==`` for comparison has been adopted by many languages.
+
+
+
+ language designers of the future are implored to pick the former to stop propagating the same language design mistakes further and further into the future.
+
 Language designers should give careful thought to how strange their langauge is, and choose the right amount to accomplish what they’re trying to accomplish.
 
 Therefore, it’s best to treat familiarity as a tie-breaker: to be used sparingly, only when the pros and cons of different design options have been fully explored, and it has been determined that no design has an edge above the other.
 
-But if one design has arguments for it, and another design has only familiarity on its side, language designers of the future are implored to pick the former to stop propagating the same language design mistakes further and further into the future.6
+But if
 
- the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with the `notion <https://steveklabnik.com/writing/the-language-strangeness-budget>`__ of Rust's "strangeness budget", where a language can only be so weird before it gets discarded from consideration and can never become standard.
+ the benefits of familiarity are fleeting, because once your language becomes standard people will be familiar with it anyway. This conflicts with
 
 As Randomo shows, the choice of characters for operators is arbitrary. Using familiar syntax at least benefits existing programmers, while new programmers will be confused regardless.
 
-But cases where newbies can benefit, such as single = for assignment and comparison, do seem worth discarding familiarity for.
 
 Filenames
 =========
@@ -1125,17 +1133,6 @@ Conditionals
 There is a "unified" syntax by `Simon <https://github.com/soc/soc.me/tree/main/_languages>`__, also a very similar paper on the "ultimate" syntax :cite:`parreauxUltimateConditionalSyntax`. Interesting idea, but still has to be tested real-world somehow.
 
 Per the internet, Ruby's ``unless-else`` is unintuitive. Only support ``if-else`` and ``unless`` without the else. Also ``if not`` is a possible replacement for ``unless``.
-
-Integers
-========
-
-Flix says binary and octal literals are rarely used in practice, and uses this as a reason to drop support for them. Despite this most languages include support. Clearly there is a conflict here, so let's dive deeper.
-
-Per `Wikipedia <https://en.wikipedia.org/wiki/Octal>`__, octal is indeed rare these days because bytes do not divide evenly into octets whereas they do divide into 2 hex digits. But it can still be useful in certain cases like the ModRM byte which is divided into 2/3/3 just like how a byte divides unevenly into octets, or chmod's Unix file permission specifications which use 3-bit modes. Of course such usages are more likely to confuse than elucidate and using symbolic notation like ``modrm direct eax`` or ``u=rwx,g=rw,o=r`` is clearer. Nonetheless octal still crops up in legacy code as an omnipresent C feature, so should be included for compatibility. The main thing to avoid is the prefix 0 for octal, as leading zeros are useful for other purposes as well. ``0o`` has been introduced and widely adopted, with no obvious complaints.
-
-For binary literals, Java 7 added binary literals in 2011, C++ in 2014, and C# 7 in 2017, suggesting significant demand. The `Java proposal <https://mail.openjdk.org/pipermail/coin-dev/2009-March/000929.html>`__ lists bitmasks, bit arrays, and matching protocol specifications as killer usages. Hexadecimal is just artifical for these usages and obscures the intent of the code. Key to the usage of binary literals is a digit separator, so you can break up a long sequence like ``0b1010_1011_1100_1101_1110_1111``. In theory ``0b1`` could be confused with ``0xB1``, but teaching programmers about the standardized ``0-letter`` pattern should mostly solve this.
-
-The alternative to not including literal support is to use a function parsing a string, so one would write for example ``binary "001100"``. Since Stroscot does compile-time evaluation this would work with no runtime overhead and give compile-time exceptions. But it is a little more verbose than the ``0-letter`` literals. It is true that humans have 10 fingers but this isn't much reason to restrict literals to decimal, and once you have hex, binary and octal are just more cases to add.
 
 Tuples and records
 ==================

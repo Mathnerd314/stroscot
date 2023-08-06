@@ -177,3 +177,13 @@ Code layout: a little 1D `constraint language <https://developer.android.com/ref
 
 Generally the smaller layout wins, but more specifically the layout should be optimized for cache coherence - hot paths with hot, cold with cold.
 
+Testing
+=======
+
+The main strategy is "golden tests". To start you run some part of the compiler and serialize the output to some human-readable format. Then you store that data as the "expected" output, and run the test again every compile to make sure it still produces the expected output, comparing with diff or similar. Then you check a few changed outputs to find any bugs, fix what needs fixing, and for any non-bug changes, there should be a way to automatically update all the expected outputs to the current outputs.
+
+For a parser, the main test is "integration testing" by giving it examples of source code, full modules, and verifying that it parses to the right AST / fails with the expected output. There is also "unit testing" where you test each grammar production rule individually, e.g. parse an expression or a statement or a block.
+
+Another parser test is "stress testing", generating random valid code samples. The generator doesn't need to exercise every parser path, just the common ones. It pays off in that you understand the grammar better and you can test the performance of your parser.
+
+For the IR golden tests are fine (compare after each optimization pass).

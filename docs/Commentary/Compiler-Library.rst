@@ -102,6 +102,24 @@ Then there are the APIs that have caused endless bikeshedding:
 * random number generation
 * serialization (data persistence)
 
+Then there are the libraries suggested by ChatGPT, libraries for:
+
+* creating visually appealing and user-friendly graphical user interfaces and interactive applications
+* building games with high-performance 2D or 3D graphics and spatial audio
+* reading and writing files
+* making network requests
+* parsing and emitting data formats, such as audio, video, images, text, speech, and financial data.
+* high-performance numerical computation such as machine learning and data manipulation
+* data visualization and analysis
+* integrating with relational databases and NoSQL databases
+* building server-side applications and client-side web applications
+* building desktop applications
+* working with the command-line interface and operating system APIs for a variety of platforms, including desktop operating systems, Android, iOS, and web browsers.
+* working with robotics/control systems - sensors, actuators, and low-level hardware peripherals.
+* scaling across multiple processors, cores, machines, and cloud platforms, communicating and coordinating between processes, and in general doing concurrent, distributed, and parallel computing without getting bogged down in low-level details of data storage and processing
+* applications: automation, analytics, financial computing, data science, scientific computing, virtual and augmented reality
+* real-time data processing and real-time communication
+
 Booleans
 ========
 
@@ -150,7 +168,13 @@ Leadings 0's are significant - literals with leading zeros must be stored in a t
 
 It seems worth allowing extension of bases / exponential formats to characters other than xob / epb.
 
-Then there are the standard arithmetic operations, no need to mess with them.
+Flix says binary and octal literals are rarely used in practice, and uses this as a reason to drop support for them. Despite this most languages include support. Clearly there is a conflict here, so let's dive deeper.
+
+Per `Wikipedia <https://en.wikipedia.org/wiki/Octal>`__, octal is indeed rare these days because bytes do not divide evenly into octets whereas they do divide into 2 hex digits. But it can still be useful in certain cases like the ModRM byte which is divided into 2/3/3 just like how a byte divides unevenly into octets, or chmod's Unix file permission specifications which use 3-bit modes. Of course such usages are more likely to confuse than elucidate and using symbolic notation like ``modrm direct eax`` or ``u=rwx,g=rw,o=r`` is clearer. Nonetheless octal still crops up in legacy code as an omnipresent C feature, so should be included for compatibility. The main thing to avoid is the prefix 0 for octal, as leading zeros are useful for other purposes as well. ``0o`` has been introduced and widely adopted, with no obvious complaints.
+
+For binary literals, Java 7 added binary literals in 2011, C++ in 2014, and C# 7 in 2017, suggesting significant demand. The `Java proposal <https://mail.openjdk.org/pipermail/coin-dev/2009-March/000929.html>`__ lists bitmasks, bit arrays, and matching protocol specifications as killer usages. Hexadecimal is just artifical for these usages and obscures the intent of the code. Key to the usage of binary literals is a digit separator, so you can break up a long sequence like ``0b1010_1011_1100_1101_1110_1111``. In theory ``0b1`` could be confused with ``0xB1``, but teaching programmers about the standardized ``0-letter`` pattern should mostly solve this.
+
+The alternative to not including literal support is to use a function parsing a string, so one would write for example ``binary "001100"``. Since Stroscot does compile-time evaluation this would work with no runtime overhead and give compile-time exceptions. But it is a little more verbose than the ``0-letter`` literals. It is true that humans have 10 fingers but this isn't much reason to restrict literals to decimal, and once you have hex, binary and octal are just more cases to add.
 
 Digit grouping
 --------------
@@ -166,7 +190,7 @@ Rebol uses comma/period for decimal point so quote was a logical choice. There d
 Operations
 ----------
 
-Considering the multitude of forms, and the fact that representations are often changed late in a project, it seems reasonable to expect that most code should be representation-agnostic. The library should support this by making the syntax "monotonous", in the sense of `Jef Raskin <https://en.wikipedia.org/wiki/The_Humane_Interface>`__, meaning that there should be only one common way to accomplish an operation. For example, addition should have one syntax, ``a+b``, but this syntax should work on numerous forms. This avoids a profusion of operators such as ``+.`` for addition of floating-point in OCaml which is just noisy and hard to remember.
+Considering the multitude of forms, and the fact that representations are often changed late in a project, it seems reasonable to expect that most code should be representation-agnostic. The library should support this by making the syntax "monotonous", in the sense of `Jef Raskin <https://en.wikipedia.org/wiki/The_Humane_Interface>`__, meaning that there should be only one common way to accomplish an operation. For example, addition should have one syntax, ``a+b``, but this syntax should work on numerous forms. This avoids a profusion of operators such as ``+.`` for addition of floating-point in OCaml which is just noisy and hard to remember. Messing with the basic PEMDAS operations is a recipe for errors.
 
 Internally, each exposed operation is implemented as overloading the symbol for various more specific "primitive" operations, ``(+) = lub [add_int8, add_int16, ...]``. The compiler will be able to use profiling data to observe the forms of the numbers involved and select the appropriate primitive operation, so it should always be possible to replace a direct use of the primitive ``add`` with the normal ``+`` operation without significantly affecting performance. But for expressiveness purposes, it does seem worth exposing the primitives. Conceptually, since the primitives don't overlap, each primitive ``add`` operation is the restriction of the overloaded ``(+)`` to the domain of the specific primitive, so even if we didn't expose the primitives we could define them ourselves as ``add_int8 = (+) : Int8 -> Int8 -> Int8`` and so on. It makes sense to avoid this convolutedness and simply expose the primitives directly - in one stroke, we avoid any potential optimization problems, and we also ensure that the domains of the primitives are only defined in one place (DRY). Of course, such primitives are quite low-level and most likely will only be needed during optimization, as a sanity check that the representation expected is the representation in use.
 
