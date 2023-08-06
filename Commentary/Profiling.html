@@ -78,17 +78,20 @@
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Profiling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#metrics">Metrics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#action">Action</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#caches">Caches</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Profiling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#resources">Resources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metrics">Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methods">Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#action">Action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caches">Caches</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
@@ -132,13 +135,12 @@
   <section id="profiling">
 <h1>Profiling<a class="headerlink" href="#profiling" title="Permalink to this heading"></a></h1>
 <p>The goal of the profiler is to measure performance, and allow making optimization decisions based on that.</p>
-</section>
 <section id="resources">
-<h1>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h1>
+<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h2>
 <p>We model a computer using a “functional block diagram”, i.e. blocks and buses. The level of detail varies depending on the application. Buses typically have sufficient capacity for all data so can be trivialized, but for CPU internals, they are a bottleneck, so are left in. Similarly PSU and cooling are not usually a problem, but I left them in.</p>
 <p>Blocks:</p>
 <ul class="simple">
-<li><p>processor</p>
+<li><p>processor - time, caches, I/O bandwidth</p>
 <ul>
 <li><p>8x die - 4x DDR, 8x I/O, L3 cache</p>
 <ul>
@@ -154,7 +156,18 @@
 </ul>
 </li>
 <li><p>graphics card</p></li>
-<li><p>memory</p></li>
+<li><p>memory</p>
+<ul>
+<li><p>physical memory used</p></li>
+<li><p>virtual memory allocated/committed</p></li>
+<li><p>virtual memory reserved (windows)</p></li>
+<li><p>private bytes - allocated to process, shared bytes - includes memory-mapped files, shared DLLs</p></li>
+<li><p>working set - set of pages accessed within a given time period (near future, near past)</p></li>
+<li><p>resident set - program memory current in physical memory</p></li>
+<li><p><a class="reference external" href="https://blog.mozilla.org/jseward/2011/01/27/profiling-the-browsers-virtual-memory-behaviour/">profiler</a></p></li>
+<li><p>reported on Linux in /proc/&lt;PID&gt;/status - split: heap, stack, executable code, loaded DLLs</p></li>
+</ul>
+</li>
 <li><p>motherboard</p></li>
 <li><p>storage</p></li>
 <li><p>power supply - typically left out</p></li>
@@ -170,6 +183,7 @@
 <span class="nf">bpf</span><span class="o">-</span><span class="n">output</span>
 <span class="nf">cgroup</span><span class="o">-</span><span class="n">switches</span>
 <span class="nf">context</span><span class="o">-</span><span class="n">switches</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">cs</span>
+<span class="nf">system</span><span class="w"> </span><span class="n">calls</span>
 <span class="nf">cpu</span><span class="o">-</span><span class="n">migrations</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">migrations</span>
 <span class="nf">dummy</span>
 
@@ -200,7 +214,7 @@
 </div>
 </section>
 <section id="metrics">
-<h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h1>
+<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h2>
 <p>Key metric types:</p>
 <ul class="simple">
 <li><p>throughput: operations per second or similar. E.g. for disks, IOPS is reads and writes per second.</p></li>
@@ -213,11 +227,11 @@
 <p>Saturation is the catch-all metric, you can use it for almost all resources and anything at or over 100% is definitely a bottleneck. Of course it is also the hardest to measure. And exceptions are also important, and don’t really have a saturation point, just typical ranges.</p>
 </section>
 <section id="statistics">
-<h1>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading"></a></h1>
+<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading"></a></h2>
 <p>Throughput / utilization / saturation are all instantaneous measurements. Practically they cannot be recorded every cycle, so instead reporting 1-, 5-, and 15-minute averages is typical. But this can disguise short spikes; use better statistics. Also, for CPU utilization, if it’s just one core in use, but it hops around, the utilization can be misleading. The balance of CPU utilization among all cores must be considered.</p>
 </section>
 <section id="methods">
-<h1>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h1>
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>counters: most simply, number of times an operation was performed. They start at 0 and increment.</p></li>
 <li><p>event log: a list of timestamps. Can just count the events, but also you can calculate average rate, spikes, and other statistics.</p></li>
@@ -239,7 +253,7 @@
 <p>Intel VTune, perf, and various profilers available for different programming languages.</p>
 </section>
 <section id="action">
-<h1>Action<a class="headerlink" href="#action" title="Permalink to this heading"></a></h1>
+<h2>Action<a class="headerlink" href="#action" title="Permalink to this heading"></a></h2>
 <p>Once specific “hot paths” for optimization have been identified, the general strategy is to identify inefficiencies, such as:</p>
 <ul class="simple">
 <li><p>unnecessary operations - remove them</p></li>
@@ -256,10 +270,11 @@ many page misses in rest of program</p>
 </div></blockquote>
 </section>
 <section id="caches">
-<h1>Caches<a class="headerlink" href="#caches" title="Permalink to this heading"></a></h1>
+<h2>Caches<a class="headerlink" href="#caches" title="Permalink to this heading"></a></h2>
 <p>For caches there are a few basic metrics: putting stuff in the cache, taking it out, and the miss rate. There are many caches: OS page cache, cpu cache, BTB, TLB, GPU texture cache, disk cache, JITted code cache. It is important to attribute miss costs properly, e.g. one piece of “cold” code might put a lot of stuff in and then cause misses in the important “hot” code.</p>
 <p>For example, using XXHash made an individual function faster, but in a larger program it was slower than using Python’s native hash because Python’s hash was already in L1 instruction cache. Similarly, calling a function 100 times, then pass the results to another function, etc. for a total of 8 functions and 800 calls, is better than interleaving the function calls and doing the 8 functions on one item, then on another item, and so on.</p>
 <p>Hyperthreading</p>
+</section>
 </section>
 
 

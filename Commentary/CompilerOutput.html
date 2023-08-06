@@ -71,6 +71,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#aslr">ASLR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#elf">ELF</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#assembly">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
@@ -94,16 +95,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
@@ -290,6 +286,13 @@ code’s size cannot depend on the value of a symbol declared after the code in 
 * start/end of A is eq/leq/geq/lt/gt a constant plus start/end of B
 * align x A, ensure start of A is a multiple of x.</p>
 <p>Generally the smaller layout wins, but more specifically the layout should be optimized for cache coherence - hot paths with hot, cold with cold.</p>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this heading"></a></h2>
+<p>The main strategy is “golden tests”. To start you run some part of the compiler and serialize the output to some human-readable format. Then you store that data as the “expected” output, and run the test again every compile to make sure it still produces the expected output, comparing with diff or similar. Then you check a few changed outputs to find any bugs, fix what needs fixing, and for any non-bug changes, there should be a way to automatically update all the expected outputs to the current outputs.</p>
+<p>For a parser, the main test is “integration testing” by giving it examples of source code, full modules, and verifying that it parses to the right AST / fails with the expected output. There is also “unit testing” where you test each grammar production rule individually, e.g. parse an expression or a statement or a block.</p>
+<p>Another parser test is “stress testing”, generating random valid code samples. The generator doesn’t need to exercise every parser path, just the common ones. It pays off in that you understand the grammar better and you can test the performance of your parser.</p>
+<p>For the IR golden tests are fine (compare after each optimization pass).</p>
 </section>
 </section>
 

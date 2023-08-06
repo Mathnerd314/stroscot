@@ -97,16 +97,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
@@ -187,7 +182,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 </dd>
 <dt>cot</dt><dd><p>Similar to how the “trek” in “Star Trek” expresses a journey to find new worlds, the cot here expresses that Stroscot provides comfortable support while still being flexible, lightweight, portable, and compact.</p>
 </dd>
-<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id84" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
+<dt>imperative programming language</dt><dd><p>This is a riff of the assertion “Haskell is the world’s finest imperative programming language”, first said in  the awkward squad paper <span id="id3">[<a class="reference internal" href="../zzreferences.html#id85" title="Simon Peyton Jones. Tackling the awkward squad: monadic input/output, concurrency, exceptions, and foreign-language calls in Haskell. In Engineering Theories of Software Construction, 47–96. 2001. URL: https://www.microsoft.com/en-us/research/publication/tackling-awkward-squad-monadic-inputoutput-concurrency-exceptions-foreign-language-calls-haskell/.">Jon01</a>]</span> because “actions are first class values” in Haskell.</p>
 </dd>
 <dt>modern processors</dt><dd><p>This is mostly because I don’t want to have to write code generators for numerous archaic architectures. The plan for now is to only target 64-bit x86 / ARM and then later add a mode to generate LLVM IR.</p>
 </dd>
@@ -287,7 +282,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 </section>
 <section id="forbidden-words">
 <h3>Forbidden words<a class="headerlink" href="#forbidden-words" title="Permalink to this heading"></a></h3>
-<p>A fair amount of terminology in programming seem to be meaningless or ambiguous. So don’t use it:</p>
+<p>A fair amount of terminology seems to be meaningless or ambiguous. So don’t use it:</p>
 <ul class="simple">
 <li><p>dynamic - As <a class="reference external" href="https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/">Harper</a> points out, this is a marketing term.</p>
 <ul>
@@ -323,6 +318,7 @@ programs are freed to be written in their most pure and ideal form. Abstractions
 <li><p>abomination - a fun word, but basically meaningless in a programming context where one person’s “abomination” is another person’s “cool hack”</p></li>
 <li><p>“etc” and “…” - they’re just too imprecise. Usually if it’s a list, these can just be omitted. If there is an intentional omission it can be replaced with an angle bracket construction like <code class="docutils literal notranslate"><span class="pre">&lt;more</span> <span class="pre">numbers&gt;</span></code>, or the ambiguity erased with set-builder notation.</p></li>
 <li><p>homoiconic - per <a class="reference external" href="https://futureofcoding.org/episodes/040">Michael Arntzenius</a> it just means the language has a data structure that represents an AST. So as soon as you talk about an “AST value” you’re talking about a homoiconic language. The Lisp folks make a big deal out of it, but even Python has an <a class="reference external" href="https://docs.python.org/3/library/ast.html">AST node datatype</a> in the standard library. Of course people don’t seem to think of Python as homoiconic. The Julia folks apparently <a class="reference external" href="https://stackoverflow.com/questions/31733766/in-what-sense-are-languages-like-elixir-and-julia-homoiconic">stopped</a> calling themselves “homoiconic” because they were getting pushback. According to ChatGPT and Stefan Karpinski of Julia, a true homoiconic language is one where the syntax for writing code is the same as the syntax for writing the data structure representing the AST of the code. This pretty much means Lisp. Personally I think having a low-level Lisp representation like Stroscot does is sufficient to qualify, and arguably a good quasiquoting implementation would work too, but it’s easier to just avoid the term and the endless debates.</p></li>
+<li><p>African American - genetically this term is <a class="reference external" href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1/figures/5">all over the map</a>. Prefer “American of African culture”.</p></li>
 </ul>
 <p>Avoiding this terminology is easy to forget so is enforced by periodic grep’s of the code.</p>
 </section>

@@ -71,7 +71,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#ir-dump">IR dump</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#incremental-compilation">Incremental compilation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hot-reloading">Hot reloading</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
@@ -97,16 +96,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#resources">Resources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#metrics">Metrics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
@@ -149,6 +143,7 @@
              
   <section id="compiler-design">
 <h1>Compiler design<a class="headerlink" href="#compiler-design" title="Permalink to this heading"></a></h1>
+<p>The compiler should be fast and efficient and turn code into machine-readable instructions quickly.</p>
 <section id="definitions">
 <h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading"></a></h2>
 <p>We assume a mathematical function</p>
@@ -203,6 +198,7 @@ There’s no obvious entry point where you can say “this is me invoking the co
 <p>I’d rather write something like:
 writeFile (compileToExecutable main)</p>
 <p>where it’s clear that compileToExecutable is doing the work.</p>
+<p>the nanopass framework is pretty</p>
 </section>
 <section id="model">
 <h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
@@ -234,7 +230,7 @@ The equivalent of “object files” in the JIT model are the profiling data and
 <p>The interpreter:</p>
 <ul class="simple">
 <li><p>A parser - this is written using nondeterminism. Likely the full syntax will not be fast enough for practical purposes until late in the project, so for now the parser uses a deterministic Lisp-like syntax. The parser records file and line number information, token start/end, call stack, and other debugging information. Produces IR.</p></li>
-<li><p>Fexpr interpreter loop - this starts with the AST in the IR and produces a value. The main part is dispatching pattern matches. Uses the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id47" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://www.microsoft.com/en-us/research/publication/making-a-faster-curry-with-extensional-types/ (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>.</p></li>
+<li><p>Fexpr interpreter loop - this starts with the AST in the IR and produces a value. The main part is dispatching pattern matches. Uses the eval-apply model, similar to <span id="id1">[<a class="reference internal" href="../zzreferences.html#id48" title="Paul Downen, Zachary Sullivan, Zena M. Ariola, and Simon Peyton Jones. Making a faster curry with extensional types. In Proceedings of the 12th ACM SIGPLAN International Symposium on Haskell, Haskell 2019, 58–70. Berlin, Germany, August 2019. Association for Computing Machinery. URL: https://www.microsoft.com/en-us/research/publication/making-a-faster-curry-with-extensional-types/ (visited on 2020-06-14), doi:10.1145/3331545.3342594.">DSAPJ19</a>]</span>.</p></li>
 <li><p>Logic prover - a CDCL satisfiability search algorithm, handles nondeterminism such as dispatch, checking if a value is a member of a type (checking functions etc. is nondeterministic), explicit lub, checking property of program, etc.</p></li>
 <li><p>Memory management - uses logic prover</p></li>
 <li><p>A dynamic assembler / JIT code generator</p></li>
@@ -314,7 +310,7 @@ The equivalent of “object files” in the JIT model are the profiling data and
 <li><p>Cross compilation: In general, we have not one system, but two systems. To use the newer <a class="reference external" href="https://clang.llvm.org/docs/CrossCompilation.html">Clang</a> terminology, there is the <strong>host</strong> system where the program is being built, and the <strong>target</strong> system where the program will run. When the host and target systems are the same, it’s a native build; otherwise it’s a cross build.</p>
 <p>The older <a class="reference external" href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html">GNU terminology</a> uses a triple, build/host/target; but the “target” there is really a configuration option, namely the supported target of the compiler that will run on the host. It is a gcc-ism to specify the supported target, as Clang is generally built to support all supported targets. Since remembering whether the build system builds the host or vice-versa is tricky, overall the Clang terminology host/target/supported targets seems clearer than build/host/target.</p>
 </li>
-<li><p>Bootstrapping: We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build stage 1 <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code>, new compiler on old ABI (targeting the host), and stage 2 <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code>, new compiler on new ABI (targeting the target). We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. With multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, we can use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id169" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. Comment: PhD dissertation. Accepted by George Mason University, Fairfax, Virginia, USA's Volgenau School of Information Technology and Engineering in 2009. 199 single-side printed pages. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span> to increase our confidence in the correctness of the stage 2 compiler.</p></li>
+<li><p>Bootstrapping: We start with the source <code class="docutils literal notranslate"><span class="pre">s</span></code> and bootstrap compiler <code class="docutils literal notranslate"><span class="pre">cB</span></code>, an old compiler using the old ABI. Then we build stage 1 <code class="docutils literal notranslate"><span class="pre">c1=run(cB,s)</span></code>, new compiler on old ABI (targeting the host), and stage 2 <code class="docutils literal notranslate"><span class="pre">c2=run(c1,s)</span></code>, new compiler on new ABI (targeting the target). We can test stage 2 (the “compiler bootstrap test”) by building a new compiler <code class="docutils literal notranslate"><span class="pre">c3=run(c2,s)</span></code>. If the build is deterministic, <code class="docutils literal notranslate"><span class="pre">c3</span></code> should be bit-identical to <code class="docutils literal notranslate"><span class="pre">c2</span></code>. With multiple bootstrap compilers <code class="docutils literal notranslate"><span class="pre">cB</span></code>, we can use diverse double-compiling <span id="id2">[<a class="reference internal" href="../zzreferences.html#id170" title="David A. Wheeler. Fully countering trusting trust through diverse double-compiling. arXiv:1004.5534 [cs], April 2010. Comment: PhD dissertation. Accepted by George Mason University, Fairfax, Virginia, USA's Volgenau School of Information Technology and Engineering in 2009. 199 single-side printed pages. URL: http://arxiv.org/abs/1004.5534 (visited on 2020-09-13), arXiv:1004.5534.">Whe10</a>]</span> to increase our confidence in the correctness of the stage 2 compiler.</p></li>
 </ul>
 <p>The toolchain (gcc, llvm, as, ld, ar, strip, etc.) should be target-dependent, information stored in a YAML file or similar
 the package set is also target-dependent. some packages that are pure data are target-independent</p>
@@ -429,13 +425,6 @@ the graph itself can be represented as code. In particular, we can represent a n
 <p>The most basic implementation is to patch functions calls so they call a new function instead of an old one. A JIT already does this kind of patching when switching from interpreted to optimized code, so can do it easily. With ahead-of-time you can compile a new DLL, duplicate it to avoid locking, load it, and swap out the function pointer, but it requires specially marking the hot-reloadable methods.</p>
 <p>Functions generally assume a fixed set of types and a fixed memory representation for all types. Changing the types or their representation can break program invariants and cause memory corruption. But it is possible - there are some projects for live kernel patching that can patch in-memory data structures to the correct format.</p>
 <p>State is also an issue because the memory manager must be aware of the local state of a piece that reloaded and avoid leaking memory. In the case of handles such as an OpenGL context the desirable behavior is to transfer them over to the new code, but if the initialization code is changed then the handle should instead be closed and re-initialized. So we see some sort of incremental program execution going on.</p>
-</section>
-<section id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this heading"></a></h2>
-<p>The main strategy is “golden tests”. To start you run some part of the compiler and serialize the output to some human-readable format. Then you store that data as the “expected” output, and run the test again every compile to make sure it still produces the expected output, comparing with diff or similar. Then you check a few changed outputs to find any bugs, fix what needs fixing, and for any non-bug changes, there should be a way to automatically update all the expected outputs to the current outputs.</p>
-<p>For a parser, the main test is “integration testing” by giving it examples of source code, full modules, and verifying that it parses to the right AST / fails with the expected output. There is also “unit testing” where you test each grammar production rule individually, e.g. parse an expression or a statement or a block.</p>
-<p>Another parser test is “stress testing”, generating random valid code samples. The generator doesn’t need to exercise every parser path, just the common ones. It pays off in that you understand the grammar better and you can test the performance of your parser.</p>
-<p>For the IR golden tests are fine (compare after each optimization pass).</p>
 </section>
 </section>
 
