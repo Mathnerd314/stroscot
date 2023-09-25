@@ -80,6 +80,14 @@ In addition I've found some other paradigms too obscure for the WP list:
 * term rewriting systems are given by the rewriting relation
 * optimization problems are relations based on on objective functions
 * optimization solvers are functions from objective functions to a list of solutions
+* aspect-oriented: discussed on the "Aspects" page.
+
+Some more paradigms that aren't really paradigms at all, just libraries or syntactic tricks:
+
+* pattern matching: pattern matching, easily match and extract data from complex data structures.
+* functional reactive programming: build applications that respond to changes in data over time.
+* concurrent constraint programming: express and solve problems involving concurrent processes and constraints.
+* genetic programming: evolve solutions to problems using principles from genetics and natural selection.
 
 Graph of paradigms
 ------------------
@@ -268,7 +276,7 @@ This is an Ecstasy principle. But it's misleading - going infinitely downward wo
 Remember the Vasa
 ~~~~~~~~~~~~~~~~~
 
-Bjarne Stroustrup `seems fond <https://www.stroustrup.com/P0977-remember-the-vasa.pdf>`__ of the phrase "Remember the Vasa" to warn against large last-minute changes. According to `Wikipedia <https://en.wikipedia.org/wiki/Vasa_(ship)>`__, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship design "didn't have enough belly". So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot's principle to steal from great poets.
+Bjarne Stroustrup `seems fond <https://www.stroustrup.com/P0977-remember-the-vasa.pdf>`__ of the phrase "Remember the Vasa" to warn against large last-minute changes. According to `Wikipedia <https://en.wikipedia.org/wiki/Vasa_(ship)>`__, the Vasa was a ship that sunk because the center of gravity was too high. Despite rumors that it was redesigned, there is no evidence that any alterations were performed during construction. It appears to have been built almost exactly as its designer Henrik Hybertsson envisioned it. And the design was obviously incorrect - a survey of shipwrights at the inquest after the sinking said the ship design "didn't have enough belly". So the only lesson I get is to learn from experienced designers to avoid making mistakes. But this is just T.S. Eliot's principle to steal from great poets.
 
 Hungarian notation
 ~~~~~~~~~~~~~~~~~~

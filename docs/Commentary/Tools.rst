@@ -91,6 +91,17 @@ The modern workspace environment that's most popular is the Jupyter notebook int
 Debugger
 ========
 
+The debugger is design for a specific debugging workflow and supports that workflow by providing necessary information and context at each step. Debugging procedure:
+
+* Collect error messages, logs, and any available context, such as a stack trace.
+* Identify sufficient and necessary conditions that trigger the bug, so that it can be reproduced in a controlled manner.
+* Use error message documentation, code minimization, and bisection techniques to find the specific lines of code causing the issue. Debugging tools can help with navigation.
+* Review the relevant code. Look for syntax errors, typos, or missing semicolons. Reading the code backwards or writing comments above every line can help. If your code relies on external libraries or APIs, review the documentation and usage to ensure you're using them correctly. Static analysis tools and linters may also catch potential coding errors, style violations, and other issues, pointing out patterns that are difficult to spot by eye.
+* If no mistakes jumped out, trace the flow of data and logic through the code. Check if variables are being modified as expected and if conditional statements are behaving correctly.
+* If you still haven't found the bug, collaborate with a colleague to review the code together. A fresh pair of eyes can often spot issues that you might have missed.
+* At this point the bug may be unsolvable, but try taking a break and stepping away from the code. Returning with a fresh perspective can help you see the issue differently.
+* Once you have found (or not found) the bug, document the bug, your findings, and the steps you've taken to troubleshoot it. This documentation can be helpful for future reference. Implement the necessary changes or workarounds and thoroughly test and add test cases to ensure the bug is resolved without introducing new problems.
+
 The debugger's view of the program's state is as a large expression or term. This state evolves in steps, where each step applies a rule to a redex or calls into the OS to perform a primitive operation.
 
 One debugging technique useful in combination with reversible debugging is to use a step counter that starts at 0 at the beginning of the program and increments every time a reduction step is performed. The exact step that triggers a behavior can be determined by binary search. Similarly when we are debugging a phase of the compiler, we can use "fuel" - this specifies how many transformations can be performed during the phase of interest before moving on to the next phase.

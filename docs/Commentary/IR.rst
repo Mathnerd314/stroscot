@@ -29,12 +29,16 @@ Transformations
 
 As mentioned in the goals section, the in-memory form of IR should be suitable for all of the various transformations analyses. A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of GCC/LLVM performance: Inline, Unroll (& Vectorize), CSE, DCE, Code Motion, Constant Fold, Peephole. An ideal IR makes these optimizations as cheap as possible.
 
-Constant folding, inlining, and unrolling all fall under compile-time reduction. Specifically:
+Reduction
+---------
+
+Reduction covers constant folding, inlining, and unrolling. Specifically:
 
 * Constant folding reduces closed expressions, like ``1+2`` to ``3``.
-* Inlining replaces a term with its expansion, like a rewrite step in term rewriting. Per :cite:`peytonjonesSecretsGlasgowHaskell2002`, inlining subsumes copy propagation and jump elimination.
+* Inlining replaces a term with its expansion, like a rewrite step in term rewriting.  It differs from constant folding in that unevaluated expressions may be substituted, like ``2*x`` to ``x+x``. Per :cite:`peytonjonesSecretsGlasgowHaskell2002`, inlining subsumes copy propagation and jump elimination.
 * Loop-unrolling is typically phrased in an iterative setting, e.g. ``for (x = 0; x < 100; x++) delete(x)`` to ``for (x = 0; x < 100; x += 2) { delete(x); delete(x+1); }``. Phrased as recursion, we are transforming ``let loop x | x >= 100 = {}; loop x = { delete x; loop (x + 1) } in loop 0`` to ``let loop2 x | x >= 100 = {}; loop2 x = { delete x; delete (x+1); loop (x + 2) } in loop2 0``. This is clearly just inlining the definition of ``loop`` inside the body of ``loop`` and then performing some simplifying reductions.
 
+There are also user-specified rewrite rules, which make everything more complicated.
 
 Strong reduction can reduce inside lambdas and in any order of evaluation. It needs a careful definition of the interpreter's evaluation semantics to avoid changing behavior. Strong reduction can be extended to supercompilation / partial evaluation, so that a state graph is constructed based on global information flow. There are several issues with reduction:
 
@@ -42,30 +46,65 @@ Strong reduction can reduce inside lambdas and in any order of evaluation. It ne
 * name capture - the no-shadowing strategy: maintain the set of in-scope variables, and rename any bound variable for which there is an enclosing binding. Main advantage is idempotency. Another strategy is a graph representation, no names in the first place.
 * termination - Cut elimination on finite typed terms is terminating, but other forms of reduction such as TRS reduction are not, so in general reduction is Turing-complete. Reduction consumes compile time and may speed up runtime by avoiding work or slow it down by bloating code. It's not useful on on cold expressions. Bounding the number of reduction steps to normal form, via an ordering metric, might give a good estimate of reduction cost. Bounds like a maximum term depth and number of reduction steps avoid bloating, but are somewhat arbitrary and have to be stored in the IR to be idempotent. GHC uses loop-breakers for definition cycles, but again is somewhat arbitrary. It's possible to prove non-termination or divergence of expansion, then it's clear that no further work is useful. Another technique is to record the set of all observed states in an E-graph, then loops are obvious.
 
-Vectorization is an instruction selection task, but means that the interaction between instruction selection and reduction is non-trivial.
+Instruction selection
+---------------------
 
-Peephole is an instruction selection task as well, when it does not correspond to reduction.
+Once the IR has been reduced as far as possible, it must be converted to machine code. Vectorization and peephole optimization are essentially instruction selection features. They do interact a bit with reduction though - some peephole optimizations can also be cast as reductions, and some reductions may make it harder to recognize opportunities for vectorization.
 
-Common subexpression elimination is intimately related to graph reduction. Per :cite:`balabonskiUnifiedApproachFully2011`, graph reduction can be characterized as giving each term in the unshared IR a label, and using an implementation such that all terms with the same label are represented as a single object (node) and reduced as a unit. Common subexpression "elimination" is then identifying identical expressions in the IR and giving them the same label in the initial labelling. The specific technique to identify duplicate expressions is "hash-consing". Hash-consing can be applied incrementally, so that CSE can be applied continuosly as other transformations are applied. One issue is merging alpha-equivalent expressions, :cite:`maziarzHashingModuloAlphaEquivalence2021`, which can be dealt with by encoding variable backedges as paths through a spanning tree. :cite:`mauborgneRepresentationSetsTrees1999` gives an algorithm identifying sharable components in cyclic graphs, useful for recursive structures.
+CSE
+---
 
-As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies the Levy-labelling of terms with maximal sharing. The reduction ``(\x. E[x]) e --> E[e]`` shows that it will share all identical expressions, just as CSE with graph reduction. But it will also share an expression and its reduction, hence computing the labelling is at least of complexity :math:`\Sigma^0_1` - but if we restrict to family reductions, e.g. by pre-reducing to normal form, then this is not an issue. And it is fine if the analysis is conservative and does not necessarily identify maximal sharing, just some sharing. But it should at least merging obvious shared contexts, like the function call context ``g (h [])`` in ``g (h x)`` and ``g (h y)``. Ideally, this labelling should be the result of some actual initial expression and reduction history. To show that a maximal labelling exists, we need a join property of the form "for a term+history a, and another term+history b, there is a term+history c with all equivalences from a and also those from b". Then, because the set of possible labelings is finite (or in the infinite case appealing to the term depth being a well-ordering hence infinite joins existing), the greatest element must exist as the join of all labellings. But we would also like a more efficient way to compute the labelling than brute force. Noting that the labelled beta-reduction operation only concatenates labels, we can safely replace a set of labels where no label is a prefix of another with a set of fresh distinct labels, preserving some sharing.
+Common subexpression "elimination" is actually identifying identical expressions in the IR and giving them a shared representation in an IR graph. It is related to graph reduction, which per :cite:`balabonskiUnifiedApproachFully2011`, can be characterized as giving each term in the unshared IR a label, and using an implementation such that all terms with the same label are represented as a single object (node) and reduced as a unit.  The specific technique to identify duplicate expressions is "hash-consing". Hash-consing can be applied incrementally, so that CSE can be applied continuosly as other transformations are applied. One issue is merging alpha-equivalent expressions, :cite:`maziarzHashingModuloAlphaEquivalence2021`, which can be dealt with by encoding variable backedges as paths through a spanning tree. :cite:`mauborgneRepresentationSetsTrees1999` gives an algorithm identifying sharable components in cyclic graphs, useful for recursive structures.
+
+As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies the Levy-labelling of terms with maximal sharing. More formally, there are three ways to define the equivalence relation of optimal reduction. The first is Levy labelling - take an initial term with unique atomic labels for every subterm, perform reductions according to a special label-generation rule, then observe which labels are equivalent in the result. The second is extraction, which maps a redex and its history to its origin. The third is the zig-zig relation, the smallest equivalence relation containing the "copy of" relation, based purely on reduction history. All of these relations are equivalent. But to make the semantics as a reduction graph tractable, all of these are defined with respect to an initial lambda term. For compile-time usage though, we would like the maximal equivalence - a "hash consing" algorithm which takes an unlabelled term and produces the labelling with maximal sharing. In the zig-zag relation, we would like to equate all redexes that can be produced by copying from any initial term, not 
+
+
+The reduction ``(\x. E[x]) e --> E[e]`` shows that it will share all identical expressions, just as CSE with graph reduction. But it will also share an expression and its reduction, hence computing the labelling is at least of complexity :math:`\Sigma^0_1`.
+
+ To show that a maximal labelling exists, we need a join property of the form "for a term+history a, and another term+history b, there is a term+history c with all equivalences from a and also those from b".
+
+
+Let's avoid that by only considering terms pre-reduced to normal form.  Consider each case of lambda term:
+
+* Bound variable: a bound variable may unify with all of its other occurrences. But since the term is reduced, it cannot unify with anything else - each unique variable must have a unique label in the initial history. For example ``(λx.xx)((λy.y)``
+
+
+
+
+I am not sure how to prove this but let's look at `some examples <https://cs.stackexchange.com/questions/99492/confluence-of-beta-expansion>`__ of non-confluence.
+
+First we have ``(λx.bx(bc))c`` and ``(λx.xx)(bc)``. The first results in no sharing. The second results in ``(b^1 c^2) (b^1 c^2)``. This seems to be the maximal sharing.
+
+
+
+(Plotkin).
+(λx.a(bx))(cd)
+and a((λy.b(cy))d) (Van Oostrom).
+
+
+ then this is not an issue. And it is fine if the analysis is conservative and does not necessarily identify maximal sharing, just some sharing. But it should at least merging obvious shared contexts, like the function call context ``g (h [])`` in ``g (h x)`` and ``g (h y)``. Ideally, this labelling should be the result of some actual initial expression and reduction history.  Then, because the set of possible labelings is finite (or in the infinite case appealing to the term depth being a well-ordering hence infinite joins existing), the greatest element must exist as the join of all labellings. But we would also like a more efficient way to compute the labelling than brute force. Noting that the labelled beta-reduction operation only concatenates labels, we can safely replace a set of labels where no label is a prefix of another with a set of fresh distinct labels, preserving some sharing.
+
+DCE
+---
 
 "Dead code elimination" is an umbrella term per ChatGPT. In GHC it refers to eliminating unused bindings. Wikipedia also lists conditional branch elimination and unreachable code elimination, which require a more involved reachability analysis.
 
-Last is code motion.
+Code motion
+-----------
 
   * induction variable analysis to replace multiplication by a loop index with addition
   * loop reversal - changing condition to zero comparison
   * loop unswitching - moving conditional outside loop
-  * hoisting invariants, partial/total redundancy elimination
+  * hoisting invariants
+  * partial/total redundancy elimination
   * parallelization - multi-threaded or vectorized code
-
-
-, loop-invariant code motion (hoisting)
 
 * storing arrays on the heap in the most efficient of a few straightforward ways
 
 Because of unsharing fans it can share parents regardless of their other children; this doesn't increase the graph size and may decrease code size/computation.
+
+More on IR
+==========
 
 
 * Purely functional: Fixes evaluation order only for stateful operations, passes states explicitly. It is difficult to reason about imperative state mutation efficiently.

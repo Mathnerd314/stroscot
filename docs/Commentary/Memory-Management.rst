@@ -141,18 +141,16 @@ More formally, a finalizer is a magic value created with the one-argument functi
 
   transform : Task -> Task
   transform c =
-    if will_call (UseForever f) c
-      reduce c
-    else if will_call (Use f) c
-      let c' = continuation c
-      reduce (c { continuation = transform c' })
-    else if !(could_call (Use f) c || could_call (UseForever f) c)
+    if !(could_call (Use f) c || could_call (UseForever f) c)
       reduce (free {continuation = c})
+    else if will_definitely_call (UseForever f) c
+      reduce c
     else
-      assert(could_call (Use f) c || could_call (UseForever f) c)
-      info("Delaying finalizer due to conditional usage")
+      if not (will_definitely_call (Use f) c)
+        info("Delaying finalizer due to conditional usage")
       let c' = continuation c
       reduce (c { continuation = transform c' })
+
 
 Non-prompt finalization
 -----------------------
@@ -271,6 +269,12 @@ If doing automatic static memory management is so easy, why hasn't it been tried
 So the answer is, it seems novel to try to apply techniques from formal verification to memory management, and that's the only technique that seems powerful enough to implement finalizers in the way presented here, where the point of finalization is guaranteed. All previous approaches have focused on approximate analyses that aren't powerful enough to subsume manual memory management.
 
 Certainly there is some risk involved in implementing a novel analysis. But it doesn't seem like a `"cursed problem" <https://www.youtube.com/watch?v=8uE6-vIi1rQ>`__ where even trying to solve it is a waste of time - :cite:`corbynPracticalStaticMemory2020` got decent results with just 8 months or so of part-time work. I'd rather be spending a lot of effort on solving the right problem, even if it's hard, than getting sidetracked solving the wrong easy problem.
+
+Design
+------
+
+Java's finalizers have inherent problems because they are associated with GC. In particular, because the GC may not run, Java's finalizers have no guarantee of timeliness, and hence cannot be used to free resources. In contrast Stroscot's finalizers free as soon as it is statically known that they are no longer used. Java's finalizers have no ordering; Stroscot's run in the order defined. Java's finalizers do not report exceptions; Stroscot's finalizer methods are inserted into the program at the point the finalizer is run and can report exceptions. But like Java, the finalizer is considered done regardless of whether it throws an exception. Stroscot's finalizers are functions and are not directly associated with objects, so there is no possibility of resurrection like in Java.
+
 
 
 local (“arena”) allocators speed up short-running programs, keep long–running ones from slowing down over time. All global allocators eventually exhibit diffusion–i.e., memory initially dispensed and therefore (coincidentally) accessed contiguously, over time, ceases to remain so, hence runtime performance invariably degrades. This form of degradation has little to do with the runtime performance of the allocator used, but rather is endemic to the program itself as well as the underlying computer platform, which invariably thrives on locality of reference."
@@ -538,12 +542,11 @@ getPointer is like C#'s ``fixed`` block but it allows interleaving. Pinned block
 A very inefficient pattern is to randomly allocate and pin a large number of randomly-sized objects.
 
 
-Java's finalizers have inherent problems because they are associated with GC. In particular, because the GC may not run, Java's finalizers have no guarantee of timeliness, and hence cannot be used to free resources. In contrast Stroscot's finalizers free as soon as it is statically known that they are no longer used. Java's finalizers have no ordering; Stroscot's run in the order defined. Java's finalizers do not report exceptions; Stroscot's finalizer methods are inserted into the program at the point the finalizer is run and can report exceptions. But like Java, the finalizer is considered done regardless of whether it throws an exception. Stroscot's finalizers are functions and are not directly associated with objects, so there is no possibility of resurrection like in Java.
 
 I concluded after looking at it again that sharing parts of data structures should be pure, so my plan to use immutable references wasn't going to work because allocating a reference would be impure. So instead there is an allocation interface.
 
-Destructors
-===========
+Dumping ground
+==============
 
 
 

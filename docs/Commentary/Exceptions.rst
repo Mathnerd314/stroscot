@@ -6,7 +6,7 @@ Exceptions allow us to focus on the normal (non-exceptional) case when performin
 Exception menagerie
 ===================
 
-The first question is what an exception is. Let us try to classify all the exceptions, everything that can use an exception-like semantic. The space of exceptions is unquestionably large so this list is probably incomplete.
+The first question is what an exception is. Let us try to classify all the exceptions, everything that can use an exception-like semantic. The set of exceptions is unquestionably large so this list is probably incomplete.
 
 Failure
 -------

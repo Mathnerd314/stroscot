@@ -257,7 +257,7 @@ C2's syntax for sea-of-nodes looks like:
   24 Return ===  5  6  7  8  9 returns 23  [[ 0 ]]
   0 Root ===  0  24  [[ 0  1  3 ]] inner
 
-It's a debug syntax to output the node graph. The node names are supposed to be fixed width but as you can see they didn't hold to it with ``IfTrue``.
+It's a debug syntax to output the node graph. The node names are supposed to be all the same width (4 characters) but as you can see they didn't hold to it with ``IfTrue``.
 
 Normal Order Reduction
 ~~~~~~~~~~~~~~~~~~~~~~

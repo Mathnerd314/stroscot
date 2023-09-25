@@ -12,6 +12,22 @@ isPrime n =
 // q: can compiler optimize this to the sieve of Eratosthenes?
 primes = filter isPrime [1..]
 
+// a: no, it isn't smart enough to go from testing every factor to testing only prime factors
+
+count_primes_upto limit =
+  prime_knowledge = ref (fillMap [2..limit] Unknown)
+  for i=[2..(sqrt limit)]
+    case prime_knowledge[i] of
+      Prime -> assert false
+      Composite -> continue
+      Unknown ->
+        prime_knowledge[i] := Prime
+        for j in [i*i,i*(i+1)..limit]
+          prime_knowledge[j] := Composite
+
+  return count(filter (value == Prime) prime_knowledge)
+
+
 /* more exercises:
 based on https://en.wikipedia.org/wiki/Primality_test:
   do the 6k±1 optimization found in the example programs

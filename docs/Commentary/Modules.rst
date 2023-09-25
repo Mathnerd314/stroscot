@@ -6,7 +6,9 @@ Developers can add new language features and functionality through libraries and
 Module
 ======
 
-Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction. Stroscot's module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak's module systems. (TODO: reread the systems to see if I missed anything. But they're mostly type systems, rather than functionality)
+Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction. For example, one can create an "abstract data type" by defining a type in a module ``set C = { Csym a b c | a : Int, b : Float, c : Double }``  and not exporting its underlying constructor symbol ``Csym``. This is not really the mathematical notion of an ADT, where one takes the "free object" defined by the operations and constraints, but since Stroscot supports term rewriting it is possible to define the mathematical model as a series of rewrite rules and then export the symbols, fulfilling the concept of ADT in both theory and practice.
+
+Stroscot's module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak's module systems. (TODO: reread the systems to see if I missed anything. But they're mostly type systems, rather than functionality)
 
 A module is a set of definitions - a set rather than a list because the order is not relevant. Some definitions are declared "visible" and are exposed/exported in the signature. We write: ``export a, b, c`` at the top of the module, with ``a, b, c`` a list of exported names.
 

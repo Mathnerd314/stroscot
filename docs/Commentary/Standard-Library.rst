@@ -18,7 +18,8 @@ The standard library is essentially a shortcut for using 3rd party libraries in 
 * Determine objective quality: Is the code readable? Does it have good documentation?  Has the code been profiled and optimized?
 * Determine stability: How long has the project been around? What have the recent releases been called (patches, betas, etc.), and is there a promised support schedule? Do release notes frequently describe breaking changes? Is there a test suite and release checklist for ensuring quality?
 * Determine size: How large is the source code? How long does it take to build? What is the increase in binary size for a typical project?
-* Determine maintenance: Who will maintain the library? (Existing maintainer, standard library team) What platforms will be supported?
+* Determine maintenance: Who will maintain the library? (Existing maintainer, standard library team)
+* Determine compatibility: What platforms are supported? Does it use the FFI and link with code written in another programming language?
 * Choose the best choices among the alternatives, and make a pro/con matrix so it is easy to understand which library should be used where.
 * Fork the code and mirror the history into a Git repo. This makes it easy to maintain the code, particularly time-sensitive security patches, segregates the code so it is easy to track license/credit/necessary attributions, and avoids any issues with hosting going down.
 * Add metadata:
@@ -34,10 +35,11 @@ The standard library is essentially a shortcut for using 3rd party libraries in 
   * Hashes: technically this is in the git revisions, or git tags, but GPG signatures and SHA hashes should be recorded
   * Owners: at least two people on the standard library team, who have the responsibility to keep the library updated with upstream and any security packages. Of course most updates are automated, so it is really just fixing broken stuff.
 
-* Security review by the security team, license review by script or random person
+* Security review by the security team
+* File-by-file license review by script or person
 * Refactor other libraries to use the chosen library, so that there is not duplicate code
 
-Pretty much all these steps seem suitable as requirements to include something in the standard library.
+Pretty much all these steps seem suitable as requirements to evaluate something for inclusion in the standard library.
 
 Scope
 =====
@@ -48,12 +50,29 @@ Generally speaking, non-standard libraries should be in active development. The 
 
 The main goal of standardization is to solve fragmentation. With no effort to standardize, over time, sharing code becomes problematic because pieces of code become tied to one or another mutually incompatible libraries, and there are endless flamewars and newcomers get turned off by decision paralysis. Example: `scalaz vs cats <https://github.com/fosskers/scalaz-and-cats>`__ was an issue with Scala for a long time, before `it became clear <https://www.reddit.com/r/scala/comments/afor0h/scalaz_8_timeline/>`__ that Scalaz 8 would never be released and scalaz was effectively dead, thus making cats the go-to choice. There is a possibility that standardizing a solution in the standard library will crowd out other solutions, but discussing trade-offs and linking alternative libraries in the standard library documentation is probably sufficient, as after all the discussion process will presumably have created some intelligent reasoning behind choosing one library as standard. It doesn't really matter if the wrong decision is made because a robust evolution process means it can always be changed later, and in the short term 50% standardized is better than 0% standardized even if there is a (not-at-all obvious) 60% option. What is problematic is letting a split continue to fester without a clear path forward.
 
+The language itself can also suffer from ecosystem fragmentation, where programs end up being written in different "dialects" (specifically, the old and new versions, e.g. we are considering C++11 and C++14 as different dialects). So, we cannot prohibit fragmentation; it will happen regardless, unless we bury our hands in the sand and freeze everything entirely. But if we do that, then a new, completely incompatible language will arise and take over.
+
+Evolution
+=========
+
+Try as we might, no design is perfect. Languages and libraries inevitably change and extend their semantics over time. Most changes are simply the addition of new features or libraries, but sometimes the changes break compatibility. According to `Herb Sutter <https://youtu.be/fJvPBHErF2U?t=4827>`__, if you make a breaking change and don't provide a migration path beyond "modify your codebase wholesale", you can expect the old version to stick around for approximately 11-12 years, and maybe even beyond (Python had ~10% still using 2.x even after 12 years).
+
+Perl 6 trap - why did it end up Raku?
+
+Making breaking changes is hard. Just like merging was hard, before Git. It's a similar sort of situation: updating libaries and compilers is generally considered to be something really quite painful and hard in most programming languages. They're generally planned in advance for weeks, because they're a big deal, an all-or-nothing situation. That kind of planning wasn't acceptable to Linus Torvalds, because he did tens of merges a day. Similarly, a large, active library community could easily achieve 10 library updates a day. It shouldn't be acceptable for Stroscot to delay these updates. In fact, library updates should be instant: the change gets approved, it gets pushed to the servers, every system downloads it on the next build, and it's applied automatically. There should be zero human involvement in the actual update process. If updating to the new version requires changes, the changes should be automated as well. And it is unacceptable for the automation to fail - everyone has to update, and if the automatic update doesn't work, then people will make different workarounds for the update and everyone's source trees will go out of sync. As Guido van Rossum discusses, Python's 2to3 tool covered 95% of the rewrites needed, but that last 5% prevented anyone from taking 2to3 seriously. Projects ended up simply avoiding the API that the tool didn't handle and wrote in "Python 2 intersect 3", the least common denominator. If the change can't be automated then it should be handled by adding a new independent API, separate from the old one, creating "Python 2 union 3", rewriting what can be rewritten automatically and warning on what cannot, and then deprecating the old API and eventually removing it. This pattern happened for example with Java's ``nio`` ("new I/O") package, minus the removal part.
+
+If updating to the new version requires changes, the changes should be automated as well. And it is unacceptable for the automation to fail - everyone has to update, and if it isn't automated then people will make different workarounds for the update and everyone's source trees will go out of sync.
+
+If you're worried about security, improve the approval process - more reviewers, mandated waiting and comment periods, maybe add some cryptographic signatures. It's not like anyone actually looks at the list of thousands of downloaded/updated libraries when they do ``npm update``.
+
+How do we test these changes? Semver doesn't help - some newbie developer changes the defaults, and they're like "I didn't change the API" so they just bump the patch level. It's easy to miss API incompatibilities and no amount of manual review is going to catch everything. So update testing has to be automated as well - verify that the new version passes all the tests, and because the tests are incomplete, verify that the new version has identical behavior to the old version using bisimulation.
+
+
 Stability
 =========
 
-Try as we might, no design is perfect. Languages and libraries inevitably change or extend their semantics over time, resulting in ecosystem fragmentation where programs end up being written in different "dialects" (specifically, the old and new versions, e.g. we are considering C++11 and C++14 as different dialects). So, we cannot prohibit fragmentation; it will happen regardless, unless we bury our hands in the sand and freeze everything entirely.
 
-But, we can aim to minimize the disruption of the evolutionary process to existing code. In particular, by discretizing evolution into units of "features" and "versions", we can provide a compatibility promise that the source code of existing programs written for an old version can be automatically migrated to a new version.
+We can aim to minimize the disruption of the evolutionary process to existing code. In particular, by discretizing evolution into units of "features" and "versions", we can provide a compatibility promise that the source code of existing programs written for an old version can be automatically migrated to a new version.
 
 Furthermore, the versioning process aims to determine a standardized, stable set of features, so by encouraging the use of approved versions of the language, the overall community can avoid fragmentation, even if there are several dialects of the language in use at any one time.
 

@@ -1,6 +1,8 @@
 Intrinsics
 ##########
 
+Stroscot should work well with existing code written in other languages, either through natively importing and using that code or through easy-to-use bridges or interfaces.
+
 Hardware operations
 ===================
 
@@ -141,7 +143,7 @@ The following changes are binary compatible:
 C/C++
 -----
 
-Interop with C/C++ is a good target featuree. There are varying approaches (in increasing order of ease of use):
+Interop with C/C++ is a good target feature. There are varying approaches (in increasing order of ease of use):
 
 * libffi just implements basic assembly stubs for setting registers. It doesn't handle function signatures, memory layout or anything else - calling is all manual.
 * `rust-bindgen <https://github.com/rust-lang/rust-bindgen>`__ parses headers with clang and generates FFI struct descriptions and function prototypes in Rust. It requires a separate build step. It doesn't handle many features properly, such as macros, inline methods, templates, inheritance, destructors, exceptions and non-trivial calling conventions.

@@ -101,3 +101,19 @@ The wording may be important. A Java editor called Decaf intercepted and re-word
 Per Elm / `Tidyverse <https://style.tidyverse.org/error-messages.html>`__ the message should have a layout like "general summary, program code fragment (location),error details / hints / suggested fix". The general summary is shown on hover in VSCode, and can be expanded downwards to see the full message. The tooltip seems to be around 120 monospaced characters wide and 5 ish lines tall. The size differs based on popup type so recheck when developing for LSP; it used to be 50 characters wide for everything. There is `an old VSCode bug <https://github.com/microsoft/vscode/issues/14165>`__ open for expandable popups, and a `CSS hack <https://stackoverflow.com/questions/44638328/vs-code-size-of-description-popup>`__ that makes them larger, but probably Stroscot has to be designed to accommodate small popups.
 
 The code fragment shows the full line of input code with file/line number, and marks the failing expression with ``^^^```. The error and location marks should be colored red so they are easy to spot. Similarly Elm uses a blue separator line ``----`` to separate messages. With the LSP integration this is already taken care of because VSCode underlines the error location in the editor and has its own UI for browsing through errors.
+
+Debugging
+=========
+
+Consider debugging and error reporting. Tracking down bugs is a systematic process:
+
+* Step 1: Collect error messages, logs, and any available context, such as a stack trace.
+* Step 2: Identify sufficient and necessary conditions that trigger the bug, so that it can be reproduced in a controlled manner.
+* Step 3: Use code minimization and bisection techniques to find the specific lines of code causing the issue. Debugging tools can help with navigation.
+* Step 4: Review the relevant code. Look for syntax errors, typos, or missing semicolons. Reading the code backwards or writing comments above every line can help. If your code relies on external libraries or APIs, review the documentation and usage to ensure you're using them correctly. Static analysis tools and linters may also catch potential coding errors, style violations, and other issues, pointing out patterns that are difficult to spot by eye.
+* Step 5: If no mistakes jumped out, trace the flow of data and logic through the code. Check if variables are being modified as expected and if conditional statements are behaving correctly.
+* Step 6: If you still haven't found the bug, collaborate with a colleague to review the code together. A fresh pair of eyes can often spot issues that you might have missed.
+* Step 7: At this point the bug may be unsolvable, but try taking a break and stepping away from the code. Returning with a fresh perspective can help you see the issue differently.
+* Step 8: Once you have found (or not found) the bug, document the bug, your findings, and the steps you've taken to troubleshoot it. This documentation can be helpful for future reference. Implement the necessary changes or workarounds and thoroughly test to ensure the bug is resolved without introducing new problems. Automated CI tests can be very helpful at preventing regressions.
+
+Any improvement in error messages and the ability to spot and find bugs would be a massive improvement. A one character mistake in an XML file for a Java project can take a week to track down. If you read that XML file backwards, you might find it more easily. Similarly typing comments above every line force you to slow down and think in a different mode and they'll go "oh, that code is wrong". Just writing an email to your colleague explaining what you've done and asking a question can lead you to the answer. There are a lot of weird little mental hacks like that.

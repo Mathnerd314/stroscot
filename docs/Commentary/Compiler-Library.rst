@@ -565,7 +565,24 @@ In this case I think mapping ``==`` to ``compareSignalingEqual`` has become desi
 * It is not too hard to modify Stroscot to follow the standard: hide ``(==)`` from the default prelude and import it from IEEE. This can be accomplished at the top level in a per-project fashion so should not be too burdensome.
 * The ``compareSignalingEqual`` predicate was only created relatively recently, in the 2008 standard. AFAICT no other programming language has actually tried changing the behavior of ``==`` yet. Few recent language developers have actually read the IEEE 754 standard carefully enough to notice this issue, and discussions in the context of older languages such as `Python <https://mail.python.org/pipermail/python-ideas/2012-October/016627.html>`__ were hampered by compatibility constraints. So the time seems ripe to try it out and see if changing it annoys people, makes them happy, or doesn't really matter. It is easy to stop throwing an exception but hard to start.
 
-So (unless there is a flood of complaints) in Stroscot the result of ``NaN == NaN`` is some exceptional value like ``InvalidOperation``. Of course though ``universal_equal NaN NaN = true`` so there is a reflexive equality available. In fact IEEE provides a guide for ``universal_compare`` with its totalOrder predicate, namely ``-0 < +0``, ``-NaN < x < NaN``, ``10e1 < 1e2``, ``abs signalingNaN < abs quietNaN``, but there is a little more to define because (since inspecting the representation is possible by casting to a bytestring) all NaNs and encodings must be distinguished. There should be a note that different encodings of the value will compare unequal. Printing out "f32 0x1234 (un-normalized representation of 1.0)" for these values should make the failures clear.
+So (unless there is a flood of complaints) in Stroscot the result of ``NaN == NaN`` is some exceptional value like ``InvalidOperation``.
+
+Meanwhile there is the universal comparison and equality. This is of course reflexive, so``universal_equal NaN NaN = true``. For ``universal_compare`` IEEE provides its totalOrder predicate, ordering as follows from smallest to largest:
+
+* negative quiet NaN
+* negative signaling NaN
+* negative infinity
+* negative numbers
+* negative subnormal numbers
+* negative zero
+* positive zero
+* positive subnormal numbers
+* positive numbers (``10e1 < 1e2``)
+* positive infinity
+* positive signaling NaN
+* positive quiet NaN
+
+There is a little more to define because (since inspecting the representation is possible by casting to a bytestring) all NaNs and encodings must be distinguished. There should be a note that different encodings of the value will compare unequal. Printing out "f32 0x1234 (un-normalized representation of 1.0)" for these values should make the failures clear.
 
 Deep comparison compares the values of references rather than the reference identities. It's less common in Stroscot because more things are values, but it can still be useful for mutable structures. It basically is some logic to memoize comparisons of cyclic structures and then a call to a passed-in "value comparison" which should itself call back to the deep comparison for references.
 

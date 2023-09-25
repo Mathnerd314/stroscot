@@ -39,7 +39,7 @@ Code of Conduct
 
 ZOMG there's none!
 
-Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I haven't got around to picking one yet. No point in doing it until there is an actual community to conduct. The model codes I've seen need at least 10 people to fill in the different roles.
+Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I haven't got around to writing one down yet. No point in doing it until there is an actual community to conduct. I like the `FIRE code of conduct <https://www.thefire.org/research-learn/model-code-student-conduct>`__ but it needs at least 10 people to fill in the different roles.
 
 License
 =======
