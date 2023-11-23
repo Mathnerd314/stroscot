@@ -1,14 +1,39 @@
-Intrinsics
-##########
+Operational primitives
+######################
 
-Stroscot should work well with existing code written in other languages, either through natively importing and using that code or through easy-to-use bridges or interfaces.
+As used in Stroscot, operational primitives refer to the stateful operations that form the building blocks of imperative programs. Examples include memory operations (read, write), foreign function calls, compiler intrinsics, and OS system calls. It would also be possible to call them "primitive operations", but this term is less precise and could be read as including elements of the runtime such as lambda reduction and term rewriting.
 
-Hardware operations
+There is an operational interpretation of every expression in Stroscot. For example, the operational interpretation of a value is returning that value. The operational interpretation of addition on two machine integers consists of storing the integers to memory or fixed registers, executing the ``add`` assembly instruction, appropriately handling any error conditions or traps, packaging up the result as a value, and returning it. And so on. Generally, a program may be viewed as assembly instruction sequences interleaved together with higher-level "glue" code. During optimization, one goal is to convert and reduce as much of this "glue" code as possible into assembly. Each switch into "glue" code corresponds to a jump back into the interpreter, with associated overhead.
+
+Assembly
+========
+
+Operational primitives are naturally represented as assembly instruction sequences or templates. After all, the CPU cannot execute anything else. So with a built-in assembler, we have a complete set of operational primitives. By the nature of the definition, these are hardware and platform specific.
+
+Ideally we would model primitives as deterministic functions from input machine state to output machine state. We can use a `CRIU image <https://criu.org/Images>`__ to model the machine state (at least on Linux - Windows is left as an exercise). This allows more control than a traditional ELF image + exit code, as it captures the complete state of a process in the middle of its execution, like a debugger would. But the behavior of almost all assembly instructions can be affected by unpredictable external factors. Therefore we model primitives as functions that take an input CRIU state and an additional "recording" of external factors and produces an output CRIU state. Examples of recorded factors:
+
+* signal interrupts (any interruptible instruction)
+* memory order (for any instruction reading/writing shared memory)
+* system call results (for syscalls)
+* spurious failures (for load-linked/store-conditional)
+* CPU cycle count (rdtsc)
+* random numbers (rdrand)
+* current CPU / core id (cpuid)
+* FPU state (floating-point)
+* chip ID (if the instruction outputs undefined or "reserved for future definition" registers)
+
+Generally speaking, all assembly instructions are deterministic after recording and controlling these factors - otherwise, programs would not execute reliably. For most instructions there is a "default" recording that can be assumed (no signals, no memory interactions, etc.), so it would be possible to formulate these instructions without a recording, but as rdrand etc. are also instructions it is easier to formalize all instructions and instruction sequences as taking a recording.
+
+Recordings are not just theoretical; there are programs that implement record/replay. They use various techniques, such as ptrace/breakpoints (rr - single threaded), intercepting DLL calls (Replay.io - mainly for JS), dynamic instrumentation (PinPlay, Undo.io - multithreaded), and machine virtualization (research-level; a bit problematic as it requires emulating a whole system).
+
+When we are optimizing, we often want to replace one instruction sequence with another. For example, we may want to redo the register allocation, or replace an instruction sequence with a faster one. So we need a semantics for these instruction sequences that allows us to determine if two instruction sequences are equivalent, and then we can define operational primitives as equivalence classes of instruction sequences. In general, an instruction sequence may have arbitrary effects, and may be a complete program. So it is easier to think about comparing programs, and then we can define instruction sequences as equivalent if they have the same behavior when embedded in appropriate programs. Conceptually, comparing programs is simple: run the programs and see if they do the same thing. But programs on modern systems have a lot of parts.
+
+Abstracted assembly
 ===================
 
-Hardware instructions are a specific series of assembly instructions on a specific platform. This fixes the behavior in all cases quite strongly - we can always set up the machine to a given state and see what it does. Generally speaking the machine can be simulated deterministically as a function from machine state to machine state - otherwise programs would not execute reliably. We can examine emulator projects such as QEMU or a formal ISA semantics to get a good idea of what each instruction does. Due to out-of-order execution the execution time of each instruction is nondeterministic; this is not modeled.
+The nature of assembly is that it is a bit messy; we have to deal with register allocation and recordings and so forth. It is more convenient if we assume a fixed calling convention, say that all data for the operation (including the recording or decision to record de novo) is stored and returned in memory. Since all registers/flags/etc. can be stored/loaded to memory, and record/replay can be implemented on an instruction level, this does not lose any expressiveness - it merely adds significant overhead to executing the instruction. But in return it means operations work on immutable bitstrings rather than machine states. Generally these bitstrings are of a fixed, known width, such as 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX).
 
-To abstract the ISA we consider each hardware instruction as a deterministic function from inputs to outputs - these functions are called "operations". Operations don't reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX). The precise definition of inputs and outputs requires some care. E.g. for floating-point the FPU state must be considered an input, and RDRAND must have the hardware RNG state as input. Some registers are left in a state that the Intel SDM calls "reserved for future definition" and "undefined" - these must be excluded from outputs, or the precise chip-specific behavior determined and the chip ID considered part of the platform ID. But with suitable munging, operations are well-defined.
+
 
 Operations are exposed in Stroscot as intrinsic functions. This allows using Stroscot's typical syntax. For example the operations corresponding to x86-64 DIV, ADD, and ADC with 64-bit operands look like:
 
@@ -55,15 +80,6 @@ Accessing memory is handled by a separate operation - but in the ISA x86 has com
     else
       memory[a]
 
-Ideally we will expose every assembly instruction as a hardware instruction, for our supported platforms.
-
-Portable operations
-===================
-
-On non-native platforms, the given assembly instructions for a hardware operation will likely not exist. Generally it is better, rather than directly translating instruction-by-instruction, to create a portable API at a higher level, such as the limb-multiply routine in libGMP.
-
-So the API structure is that we have "native" modules providing native hardware instructions, which give compile-time errors on attempts to use it on non-native platforms, and a portable library that provides a cross-platform interface using switch statements like ``case platform of A -> implA; B -> implB; ...``. Some hardware operations are ubiquitous, so it makes sense to expose them directly as portable operations. Addition wraps on all 64-bit hardware in the same way so only needs one portable operation. Other instructions like division have differing behavior, so we can provide 0-returning (ARM native) and ``DivideByZero`` exception-throwing (Intel native) division as portable operations. There is also the intersection of these functions with signature ``Int -> Int\{0} -> Int``, which is useful when we want zero-overhead on multiple platforms and can prove that the divisor is non-zero. But ideally the compiler will be able to optimize the conditionals out of the 0-returning/exception-throwing versions, giving the native version without requiring a separate function.
-
 Runtime and OS calls
 ====================
 
@@ -81,6 +97,8 @@ The syscalls themselves take / modify C structs. So regardless of whether we lin
 
 FFI calls
 =========
+
+Stroscot should work well with existing code written in other languages, either through natively importing and using that code or through easy-to-use bridges or interfaces.
 
 The semantics of a call are inherently system/ABI dependent, to the point of not being captured in a target triple. The semantics thus have to be described at the call site. But the data format doesn't really matter as the call instruction will most likely be wrapped / generated. Maybe libffi can help.
 
@@ -151,3 +169,44 @@ Interop with C/C++ is a good target feature. There are varying approaches (in in
 * `dragonffi <https://github.com/aguinet/dragonffi>`__ again uses clang but it works by compiling code snippets. This allows the full range of C/C++ to be used.
 
 I think the dragonffi approach is the best, since it's the most powerful and least error prone. There is some effort to analyze the result of the compilation and integrate it with the rest of Stroscot, but deep integration with an existing C/C++ compiler seems better than trying to write one from scratch.
+
+
+-------
+
+
+Usually these are modeled using primitive operations, e.g. file descriptors are allocated with the open syscall rather than declaratively as ``{ fd1 = inode 1234 }``. But the more state we model as state, the more powerful our debugging tools get. A traditional debugger has no way to undo closing a file. However, a filestate-aware debugger can reopen the file. The less we view the program as an I/O machine the easier it is to use high-bandwidth interfaces such as io_uring to perform bulk state changes - describing what rather than how is the hallmark of a high-level language. Of course, in most cases the program will use state in a single-threaded manner and it will simply be compiled to the primitive operation API by the automatic destructive update optimization.
+
+
+
+ operational primitive as a function from input machine state to output machine state. This is actually a function because we can always set up the machine to a given state and see what it does.
+
+
+ Generally speaking the machine can be simulated deterministically as a function from machine state to machine state - otherwise programs would not execute reliably. We can examine emulator projects such as QEMU or a formal ISA semantics to get a good idea of what each instruction does. Due to out-of-order execution the execution time of each instruction is nondeterministic; this is not modeled.
+
+Yes, there are projects and tools that focus on ensuring reproducible execution, particularly by controlling and managing different aspects of the execution process. Some of these projects include:
+
+1. **rr (Record and Replay Debugger)**: rr is a lightweight tool that enables the recording and deterministic replaying of execution traces of multi-threaded programs. It allows for the precise replication of program execution, helping in the identification and debugging of complex issues.
+
+2. **Pernosco**: Pernosco provides a cloud-based collaborative debugging platform that allows developers to record, replay, and analyze the execution of complex software systems. It enables teams to collaboratively investigate and debug issues in a reproducible manner.
+
+3. **Pin Play**: Pin Play is an extension of the Pin dynamic binary instrumentation framework that enables the record and replay of the execution of parallel programs. It allows for the deterministic reproduction of thread schedules and memory accesses, aiding in debugging and analysis.
+
+4. **Deterministic Parallel Java (DPJ)**: DPJ is a programming model and runtime system that emphasizes determinism in parallel and concurrent Java programs. It provides constructs and mechanisms for controlling the execution of parallel threads, ensuring predictable and reproducible outcomes.
+
+5. **Chaos Engineering Tools**: While not specifically focused on reproducibility, Chaos Engineering tools such as Chaos Monkey, developed by Netflix, and similar tools aim to test the resiliency of systems by inducing controlled failures. These tools can help uncover non-deterministic behaviors in distributed systems, leading to improved reliability and predictability.
+
+These projects contribute to ensuring reproducible execution by providing tools and mechanisms to control and manage the concurrent execution of threads, handle I/O operations, and manage random number generation, thereby enabling the deterministic and consistent behavior of programs across different runs and environments.
+
+
+Store state
+-----------
+
+Most papers limit themselves to keeping the values of mutable variables in the store. But conceptually the state of a program could include the state of the computer, the stock market, quantum fluctuations, etc. - all information within the chronological past of a program. But practically we are limited to state that we can read and write deterministically. In particular the read operation must satisfy the associative array definition:
+
+::
+
+    read k (write j v D) = if k == j then v else read k D
+    read k emptyStore = MissingValue
+
+So one constraint to be a variable is that the state must be accessible. So for example the kernel limits us - we do not have full control over peripheral devices or processes not related to ours. We can represent this by shadowing access-controlled variables and returning ``WriteFailed`` for inaccessible variables.
+

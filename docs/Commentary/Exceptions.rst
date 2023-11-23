@@ -365,6 +365,16 @@ Swift:
 try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
 try X else Y - presubstitute Y on exception
 
+Finally
+=======
+
+Per `Stroustrup <https://www.stroustrup.com/bs_faq2.html#finally>`__, it is better to use destructors to release the resource, rather than using finally blocks. It is quite natural that acquiring a resource returns a resource handle with an accompanying a destructor for that handle, whereas there is not necessarily a natural point to place a finally clause. For example, with finally, the following are problematic:
+
+* Returning a handle - the caller must remember to use finally to free the returned handle
+* Overlapping handles - suppose we want Alloc-A Alloc-B Free-A Free-B. finally requires nesting so we will have to do some complex layout, like ``try { try { a = acquire; b = acquire } finally { release a } } finally { release b }``. It is unnatural and prone to error.
+
+In realistic systems, there are far more resource acquisitions (and destructions) than kinds of resources. Comparing the two, we see that ``a = acquireAndCreateDestructor; use a`` is significantly simpler and less code than ``try { a := acquire; use a } finally { release a }``. Therefore, Stroscot follows C++ in using RAII / destructors rather than having finally.
+
 no-throw
 ========
 
@@ -582,15 +592,16 @@ Callers have to code to handle the exceptions, so they need to know which except
 
 There are several warnings that check exception lists:
 
-* unused-exception - an exception or exception set is listed, but there is no way to throw it
+* unreachable-exception - an exception or exception set is listed, but there is no way to throw it
 * unlisted-exception - an exception may be thrown on a given input, but is not contained in the return type
-* duplicate-exception - supposing the return type is ``E1|E2|R``, both ``E1|R`` and ``E2|R`` are valid signatures
+* duplicate-exception - for example, supposing the return type is ``A|B|C``, ``A`` is duplicate if ``B|C`` also lists all exceptions
+* overlapping-exception - for ``A|B``, warns if any exception is in both ``A`` and ``B``
 
-Sample signature styles (enforced by the compiler where relevant):
+Sample signature styles (can be enforced by the compiler with the warnings):
 
-1. ``precise`` - the set of thrown exceptions is listed in the signature. All possible exceptions given the types of the arguments are listed, and no unreachable exceptions are allowed in the list.
-2. ``lower`` - a set of definitely thrown exceptions are listed, but other exceptions may be thrown
-3. ``upper`` - like precise, all possible exceptions must be listed, but unreachable excpetions may also be listed
+1. ``precise`` - the set of thrown exceptions is listed in the signature. All possible exceptions given the types of the arguments are listed (no unlisted exceptions), and no extraneous exceptions are allowed in the list (no unused or overlapping exceptions).
+2. ``lower`` - a set of definitely thrown exceptions are listed, but other exceptions may be thrown (no unreachable exceptions; duplicate exceptions only if A is a subset of B|C)
+3. ``upper`` - like precise, all possible exceptions must be listed, but unreachable exceptions may also be listed (no unlisted or duplicate exceptions)
 
 With ``lower`` it is not possible to say that a function doesn't throw, but with the other two it is.
 
@@ -610,7 +621,7 @@ The ``lower`` style of signature doesn't require any synonyms because exceptions
 With ``upper`` a synonym style is to define one exception set ``LibraryException`` with all the common exceptions your library throws (overflow, divide by zero, out of memory, etc.) and use that in each signature. It is not too hard to maintain a single exception set for a library. It's a little better than Java's ``throws Exception`` because the exception set is finite, but requires almost as little maintenance as ``lower``. Exceptions that people should care about can be documented by adding them redundantly to the signature, ``DivideByZero|LibraryException``. And exceptions that aren't thrown can be asserted by removing them, e.g. ``LibraryException\DivideByZero``.
 Application code can use set operations to build a combined set, ``AppException=(Library1Exception|Library2Exception)\(HandledException1|HandledException2)``.
 
-With ``precise``, the style I came up with is to have a built-in compiler function ``exceptions _`` that computes the exception set of each function. Then for the actual signature you can write a self-referential signature ``a : ... -> Int | exceptions a``, if you don't want to make any guarantees about exception behavior, or ``Int | (exceptions a \ SomeException)``, to say that ``SomeException`` is not thrown, or ``Int | (exceptions a | SomeException)``, to say that ``SomeException`` is definitely thrown. ``exception x`` is somewhat magical is that it knows the rest of the signature and scopes the list of exceptions appropriately, e.g. for the signature ``x : Int -> Int | ExceptionA``, ``exceptions x = ExceptionA``, but for the signature ``x : Bool -> Bool | ExceptionB``, ``exceptions x = ExceptionB``, and similarly in the signature ``x : Int | Bool -> Int | Bool | exceptions x``, ``exceptions x = ExceptionA | ExceptionB``.
+With ``precise``, the style I came up with is to have a built-in compiler function ``exceptions _`` that computes the exception set of each function. Then for the actual signature you can write a self-referential signature ``a : ... -> Int | exceptions a``, if you don't want to make any guarantees about exception behavior, or ``Int | (exceptions a \ SomeException)``, to say that ``SomeException`` is not thrown, or ``Int | (exceptions a | SomeException)``, to say that ``SomeException`` is definitely thrown. ``exception x`` is somewhat magical is that it knows the rest of the signature and scopes the list of exceptions appropriately, e.g. for the signature ``x : Int -> Int | ExceptionA``, ``exceptions x = ExceptionA``, but for the signature ``x : Bool -> Bool | ExceptionB``, ``exceptions x = ExceptionB``, and similarly in the signature ``x : Int | Bool -> Int | Bool | exceptions x``, ``exceptions x = ExceptionA | ExceptionB``. Or maybe it is simpler to use ``Exception`` which is just the type of all exceptions.
 
 With ``precise`` you can also write a specification without referencing ``exceptions a``. doing a "full list" of all the component exceptions, or a "computed list" writing the set as a computation of child functions. So if ``a`` returns ``Int`` normally and calls ``b`` and ``c`` and catches ``SomeException`` from ``b``, then the computed list would be ``a : Int | (exceptions b \ SomeException) | exceptions c``. Both types of list cost some thought but ensure reliability as every exception is accounted for. A full list ensures that control flow is local because newly thrown exceptions must be caught or added to the list for every method in the chain. A computed list does not list exceptions that propagate through the function, so is less verbose. To newly throw an exception, it only needs to listed where it is thrown and where it is caught.
 
@@ -619,7 +630,6 @@ Lists are somewhat mindless in that the compiler knows the exceptions thrown bet
 So with ``lower`` or the self-referential ``precise`` style, no extra work is required to throw an exception, with ``upper`` one synonym has to be changed (the global list), with ``precise`` "computed list" style two signatures have to be changed (the thrower and the catcher), and with ``precise`` "full list" style all signatures between thrower and catcher have to be changed.
 
 The full list style is attractive for small projects, but as Gunnerson says, for large projects this requires too much maintenance and thus decreases productivity and code quality. But there are various viable alternatives, with varying levels of precision.
-
 
 Java checked exceptions
 -----------------------
@@ -809,8 +819,9 @@ Interruptible cleanup
 
 Interruptible cleanup actions - the interaction of async exceptions and cleanups. A cleanup function which may block and should be interruptible to avoid a long delay in execution.
 
-When closing a file one often wants to flush buffers (fsync). So there are 3 variants of hClose:
-* The flush marks a checkpoint, and should retry until complete regardless of interruptions
+When closing a file one often wants to flush buffers (fsync). There are at least 3 variants of hClose w.r.t. fsync:
+
+* The flush marks a checkpoint, and should retry fsync until success regardless of interruptions
 * The flush is unnecessary, just close the file
 * The flush is productive but interruptible (EINTR), and should not be retried on interrupt. This avoids the situation where the flush takes a long time and the thread is unkillable. Note that it requires two async exceptions to kill the thread, one to enter the cleanup handler and another to interrupt the flush.
 
@@ -837,7 +848,7 @@ On Windows there is `no direct equivalent <https://stackoverflow.com/questions/3
 
 * The QueueUserAPCEx Windows driver implements an API to create a kernel-mode APC. But signing drivers on recent versions of Windows is impossible.
 * SuspendThread issues a kernel-mode APC (API intended for debuggers). So we pause the thread with SuspendThread, save its state via GetThreadContext, make a new context with the instruction pointer set to the handler, and resume the thread with SetThreadContext and ResumeThread. But it's low-level and requires several kernel roundtrips. Also GetThreadContext may `fail <https://stackoverflow.com/questions/3444190/windows-suspendthread-doesnt-getthreadcontext-fails>`__.
-* Windows 10 RS5 adds "Special User APCs" (QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC) which are delivered quickly via a kernel-mode APC, but then run as a user APC. The kernel-level API passes in a CONTEXT argument containing the registers from before the APC, like Linux's signal handler, but the documented API doesn't have this info. It may be possible to get it somehow with the documented API, or we can live dangerously and use the kernel-level API.
+* Windows 10 RS5 adds "Special User APCs" (QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC, `source <https://repnz.github.io/posts/apc/user-apc/>`__) which are delivered quickly via a kernel-mode APC, but then run as a user APC. The kernel-level API passes in a CONTEXT argument containing the registers from before the APC, like Linux's signal handler, but the documented API doesn't have this info. It may be possible to get it somehow with the documented API, or we can live dangerously and use the kernel-level API.
 
 System calls on Windows are implemented with layers of C in between, so the handler has to ensure the C code completes to ensure proper cleanup. So it walks the stack and overwrites the first user-mode frame with an exception handling information frame, skipping internal Windows stack frames. This functionality is also useful on Linux, if we're using glibc.
 

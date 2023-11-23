@@ -72,14 +72,27 @@ Language server
 
 VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server can provide:
 
-* syntax highlighting (the docs say you have to use TextMate grammars too, but I think LSP alone is actually performant enough)
+* syntax highlighting (the docs say you have to use TextMate grammars too, but from some examples it looks like LSP alone can be performant enough)
 * tooltips
 * autocomplete suggestions
-* navigation outline
+* navigation outline / object browser
 * debugger integration
-* navigate to definition
+* "navigate to definition" command
+* find all references
+* quick information / signature help
 * compiler errors/warnings/fixes
-* renaming or refactoring actions
+* rename symbol
+* refactoring actions - extract method
+* edit and continue
+* execute code snippets (REPL)
+
+Per `this post <https://rust-analyzer.github.io/blog/2020/07/20/three-architectures-for-responsive-ide.html>`__ a language server serves two goals: quickly processing new edits to source files, while also answering queries quickly. There are several potential designs:
+
+* Map Reduce - split analysis into a relatively simple indexing phase (per file, in parallel), and a separate full analysis phase (global). Example: Java, the indexer.
+* Precompiled Headers - declaration before use, all declaration in headers or equivalent interface files, snapshot the compiler's state immediately after imports for each compilation unit.
+* Query-based - all function calls inside the compiler are instrumented to record which other functions were called during their execution. The recorded traces are used to implement fine-grained incrementality. If after modification the results of all of the dependencies are the same, the old result is reused. If a function is re-executed due to a change in dependency, the new result is compared with the old one. If despite a different input they are the same, the propagation of invalidation stops.
+
+As Stroscot is dynamic, only a query-based approach is sufficiently general to work. The main drawback is extra complexity and slower performance (fine-grained tracking of dependencies takes time and memory). The performance can be alleviated by fine-tuning cache invalidation details and omitting some items from the cache, while the complexity is here to stay.
 
 Notebooks
 ---------
@@ -115,6 +128,25 @@ Let's assume we have symbols, then there are lots of operations available from a
 * stepping: single step, step out, continue thread / all threads until breakpoint, run ignoring breakpoints until stopped with interactive commnad
 * REPL / patching: evaluate pure expression in context of state, evaluate arbitrary code in current state (e.g. set variable to value), replace definition, hot-reload code changes, jump to address, return early from function. Pedantically, the patched state has no real history so the debugger should only be able to run forward from the state, but we can graft the patched state onto the old state to avoid losing context.
 * IPC: send signal, modify files
+
+
+searching for watchpoints/breakpoints
+build database of everything that happened
+replaying different segments of the execution in parallel
+applying different kinds of instrumentation to the same segments
+
+instruction-accurate recording of your software - syscalls, shared memory, signal timing
+this can be played forward and will always behave the same way
+several approaches - Just-In-Time instrumentation of machine code (Undo.io), ptrace (rr, https://pernos.co), https://replay.io
+
+to run backwards, we need more information - like if memory is overwritten, what was the value before? Unfortunately, if we recorded all memory changes explicitly, it would be slow and use up a lot of storage. Therefore debuggers use "Finnegan search" ("poor old Finnegan had to begin again...") - they start one or more forks of the process, and run these forks forward up until the desired target is reached. Usually there is a recent snapshot available so only that slice has to be re-executed during reverse stepping. The parallelism is mainly useful for larger breakpoints/watchpoints where the event of interest can be further back and multiple snapshots may have to be examined.
+
+
+we only have snapshots and the minimal information needed to run forward deterministically. So for most tasks, like breakpoints, we need to recompute intermediate states, like memory contents.
+
+JIT instrumentation
+hardware performance counters - not available in containers/virtual machines
+
 
 Debugging by querying a database of all program state by Kyle Huey
 The State Of Debugging in 2022 by Robert O’Callahan

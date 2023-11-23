@@ -136,6 +136,14 @@ It is also important to have some kind of demand-driven / streaming interface. P
 Another idea Per Vognsen brings up is that, for indexing, the full file-level AST is not needed. Only some relevant subsection needs to be parsed, and the rest just needs start/end of each declaration but no interior detail. He proposes "random access" to the AST, building a dictionary of name -> (src span, decl kind). But his performance hacks assume all legal top-level declarations must have a keyword in column 0, which isn't necessarily true
 
 
+For purposes of the language server, we want several properties of the syntax tree:
+
+* holds all the source information in full fidelity - can reconstruct source text
+* best-guess parse tree if the program is incomplete or malformed, representing skipped or missing tokens in the syntax tree.
+* immutable and thread-safe, persistent data structure
+* nodes: grammatical construct (declarations, statements, clauses, and expressions), lexical token (keywords, identifiers, literals, and punctuation), trivia (whitespace, comments, and preprocessor directives)
+  * structure: constructs contain constructs and tokens (never leaf node). tokens are always leaves. trivia is stored as leading/trailing attribute of tokens.
+* stores source position spans (beginning/end position). can be bytes, codepoints, line/column. The convention  is that zero-length is between two characters.
 
 Compilation
 ===========

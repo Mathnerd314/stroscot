@@ -46,7 +46,7 @@ UTC's only real advantage is its ubiquity - there are lookup tables (leap second
 Epochs
 ======
 
-The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, too many to list here. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.
+The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, and more being added (e.g. Jonathan Blow used the date of the Apollo 13 landing), but `Wikipedia <https://en.wikipedia.org/wiki/Epoch_(computing)#Notable_epoch_dates_in_computing>`__ lists some. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.
 
 ::
 

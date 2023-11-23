@@ -169,7 +169,7 @@ For ``mfix`` vs ``mdo``, there are many implicit laws promoted by the ``mdo`` no
 
 Unfortunately, the only known monad satisfying right shrinking is the lazy state monad ``s -> (a,s)`` (and its restrictions, the output monad ``Monoid w => (a,w)``, reader monad ``p -> a``, identity monad ``a``, and trivial monad ``Void``). Erkok has a proof 3.1.6 that the trivial monad ``const Void`` is the only monad satisfying left-strictness ``undefined >>= f = undefined``, right shrinking, strictness 2.1.1, and various other properties. The setup is the above right shrinking rule where ``f xs = return (1 : xs); g xs = case xs of [x] -> return x; _ -> return 1``. He says "It is easy to see that [the LHS mdo block] must yield bottom by the strictness property". Expanding on this, if we start with ``(z,w) = undefined``, then after one loop we get ``z=1:undefined`` and ``g z = undefined``, so the overall function returns ``undefined`` by the left-strictness property, so therefore by strictness 2.1.1 the overall ``mfix`` is also undefined. But of course, if we start with the fixed point of the RHS, ``(z,w) = (repeat 1,1)``, we get that back even in the LHS. So Erkok's proof relies on strictness and ``mfix`` producing the least fixed point. Using similar arguments about bottom, there is a proof that Haskell `cannot have a State monad <https://smallbone.se/no-state-monad.html>`__. Really, the discussion should focus on the monad's behavior for defined values and total functions, and not discuss bottom or seq at all. I think it's best to suppose that the premises of the proof are incorrect, but the fact remains that the only known right-shrinkable monad is the lazy state monad. Absent other monads, it seems the lazy state monad is really the canonical implementation of ``MonadFix``, similar to how lists are the only non-trivial implementation of ``MonadZip`` and everything else is just lifting.
 
-But Erkok had to write a thesis, so of course he can't just say "lazy state is MonadFix" and leave it there. Erkok proposes to leave out right shrinking and other properties to obtain a more general definition. The main issue with this is that ``mfix`` for the lazy state monad is no longer unique - there is a "shallow" mfix operations which simply apply the function to the bottom state. Erkok's definition of ``mfix`` for I/O is shallow in this sense. For ADT-style monads, ``mfix`` simply follows the structure of the monad (c.f. `GHC.Generics instances <https://hackage.haskell.org/package/base-4.18.0.0/docs/src/Control.Monad.Fix.html#line-140>`__). These operations are kind of useful for
+But Erkok had to write a thesis, so of course he can't just say "lazy state is MonadFix" and leave it there. Erkok proposes to leave out right shrinking and other properties to obtain a more general definition. The main issue with this is that ``mfix`` for the lazy state monad is no longer unique - there is a "shallow" mfix operations which simply apply the function to the bottom state. Erkok's definition of ``mfix`` for I/O is shallow in this sense. ``mfix`` cannot be implemented in general for ADT-style monads. (c.f. `GHC.Generics instances <https://hackage.haskell.org/package/base-4.18.0.0/docs/src/Control.Monad.Fix.html#line-140>`__). These operations are kind of useful for
 
 data    U1        p = U1                  -- lifted version of ()
 data    (:+:) f g p = L1 (f p) | R1 (g p) -- lifted version of Either
@@ -326,8 +326,7 @@ Due to the quantification, the operations on ``Ran`` are restricted.  In particu
 
 We call the values in ``M m`` continuations, and the values in ``m r`` actions. A continuation represents "the future of the program". Executing a continuation plugs this future into a program description with a hole - usually there is one hole, but the continuation can discard the future or run it multiple times. The implementation can compile continuations to jumps under most circumstances and closures otherwise, so the execution model is also conceptually simple. Continuations are the basis in formal denotational semantics for all control flow, including vanilla call flow, loops, goto statements, recursion, generators, coroutines, exception handling, and backtracking. This allows a uniform and consistent interface. Continuations are more powerful than goto.
 
-
-``Codensity`` is quite efficient - the case analysis is pushed to the monad's operations, and there is no pile-up of binds - all uses of the underlying monad's bind are right-associated. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity.
+``Codensity`` is quite efficient compared to most ADT-style monads - the case analysis is pushed to the monad's operations, and there is no pile-up of binds - all uses of the underlying monad's bind are right-associated. It converts the computation to continuation-passing style. In particular free tree-like monads :cite:`voigtlanderAsymptoticImprovementComputations2008` and `MTL monad stacks <http://r6.ca/blog/20071028T162529Z.html>`__ are much cheaper when implemented via Codensity. As a contrary point, in the `case <https://www.mail-archive.com/haskell-cafe@haskell.org/msg66512.html>`__ of the Maybe monad an ADT version seemed to be faster than a Church encoding. Unfortunately hpaste is defunct so the code can't be analyzed further. It's not clear if the "CPS" version mentioned was actually Codensity. SPJ also suspects that deeply nested continuations will not optimize properly compared to the world tokens.
 
 :cite:`meyerovichSocioPLTPrinciplesProgramming2012` mentions that generators and coroutines (one-shot continuations) have been preferred to multi-shot continuations, and if you read :cite:`elizarovKotlinCoroutinesDesign2021`, they say "The main reason for this is believed to be the
 inherent complexity of the continuation-based code, and the difficulty of making it performant." But here we are simply implementing continuations as lambdas, so there is not really any more complexity added, and it seems safe to assume that an efficient lambda implementation (e.g. using optimal reduction) will also lead to efficient continuations, although perhaps it will need some tweaking.
@@ -538,6 +537,8 @@ Haskell uses a state monad ``IO a = s -> (# s, a #))`` for implementing I/O, whe
 * It is not clear what the token represents: a thread? a core? a state? The semantics of an infinite program like ``x = write "x" >> x`` is tricky to specify - it is not really a function at all.
 * An I/O operation is an abstract function which makes it quite difficult to inspect IO values or implement simulations of I/O such as `PureIO <https://hackage.haskell.org/package/pure-io-0.2.1/docs/PureIO.html>`__.
 
+The one advantage it has (per SPJ) is speed - the world token is 0-bytes so has no calling convention overhead.
+
 Logic programming
 =================
 
@@ -621,20 +622,35 @@ Still though, a gap is a gap, so to get performance we must provide laziness or 
 Automatic destructive update
 ============================
 
-Although pure programs do not have operators for destructive update, they can still express similar programs using a copying update operation that returns a new data structure with the relevant index modified. For `example <https://prog21.dadgum.com/41.html>`__ counting the frequency of byte values within a block of binary data:
+Although non-side-effectful programs do not have operators for destructive update, they can still express similar programs using a copying update operation that returns a new data structure with the relevant index modified. For `example <https://prog21.dadgum.com/41.html>`__ counting the frequency of byte values within a block of binary data:
 
 ::
 
-  freq (b : Binary) = scanr (\arr x -> update x (+1) arr) (repeat 256 0) b
+  freq (b : Binary) = foldr (\arr x -> update x (+1) arr) (repeat 256 0) b
 
-  -- expands to:
+Maybe you are not familiar with ``scanr`` - in the core language, this would expand to a recursive function:
+
+::
 
   freq (b : Binary) = go b (repeat 256 0)
     where
       go (x:rest) arr = go rest (update x (+1) arr)
       go [] arr = arr
 
-The issue is that a naive implementation of "update" copies the entire array, using O(n) memory and time. :cite:`hudakAggregateUpdateProblem1985` shows that with a compiler analysis (hereafter called "automatic destructive update") a language can provide O(1) update-copy operations. The compiler searches through possible evaluation orders for an evaluation order that never accesses the old version of data after updating, and transforms such "single-threaded" programs to destructively update, giving the speedup. Programming with pure arrays in a "single-threaded" style is at least as expressive as imperative arrays - per Hudak, all the natural translations of imperative algorithms are single-threaded. Some of :cite:`okasakiPurelyFunctionalData1998`'s lazy data structures have a similar single-threaded use condition for amortized good performance, so the single-threaded condition seems reasonable. Also well-defined Ocaml programs that use side effects must be single-threaded, else there is a race condition.
+This can be compared with a solution in Java - in Stroscot the function parameter's modifying  takes the place of the mutable array:
+
+.. code-block:: Java
+
+  int[] calculateFrequency(byte[] data) {
+    int[] arry = new int[256];
+    for(int i = 0; i < data.length; i++) {
+      arry[data[i]]++;
+    }
+    return arry;
+  }
+
+
+The issue with the functional is that a naive implementation of "update" copies the entire array, using O(n) memory and time. :cite:`hudakAggregateUpdateProblem1985` shows that with a compiler analysis (hereafter called "automatic destructive update") a language can provide O(1) update-copy operations. The compiler searches through possible evaluation orders for an evaluation order that never accesses the old version of data after updating, and transforms such "single-threaded" programs to destructively update, giving the speedup. Programming with pure arrays in a "single-threaded" style is at least as expressive as imperative arrays - per Hudak, all the natural translations of imperative algorithms are single-threaded. Some of :cite:`okasakiPurelyFunctionalData1998`'s lazy data structures have a similar single-threaded use condition for amortized good performance, so the single-threaded condition seems reasonable. Also well-defined Ocaml programs that use side effects must be single-threaded, else there is a race condition.
 
 Roc and Koka seem to be going down the automatic destructive update route via alias analysis and ref-counting optimizations. It seems like a great optimization and it does not seem too hard to allow marking array uses as single-threaded so the compiler warns if it has to copy.
 
@@ -717,7 +733,7 @@ Most papers limit themselves to keeping the values of mutable variables in the s
     read k (write j v D) = if k == j then v else read k D
     read k emptyStore = MissingValue
 
-So one constraint to be a variable is that the state must be accessible. So for example the kernel limits us - we do not have full control over peripheral devices or processes not related to ours. We can represent this by using shadowing access-controlled variables and returning ``WriteFailed`` for inaccessible variables.
+So one constraint to be a variable is that the state must be accessible. So for example the kernel limits us - we do not have full control over peripheral devices or processes not related to ours. We can represent this by shadowing access-controlled variables and returning ``WriteFailed`` for inaccessible variables.
 
 Conveniently the CRIU project has a `list <https://criu.org/Images>`__ of what's in the state of a Linux user process. We reproduce it here:
 

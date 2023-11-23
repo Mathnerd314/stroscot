@@ -523,6 +523,13 @@ in the cache daemon.
 Reproducibility
 ===============
 
+traceability - It should be clear where the binary came from and how it was produced.
+automated reproducibility - Users can run one command to reproduce all binaries to verify that they have not been tampered with.
+
+Example: "this package was built by running <command> on revision <hash> of the distribution's package repository." A user can then easily reproduce the binary by fetching the specified sources and running the specified command. This build will in most cases depend on a previous generation of built binaries. Thus, we get a chain of verifiable binaries stretching back in time.
+
+Binaries may also come from upstream, with no clear production process. This would typically be the case when a language does not have a clear bootstrap process. The distribution should at least clearly label the provenance of the binary, e.g. "this binary was downloaded from https://upstream-compiler.example.org/upstream-compiler-20161211-x86_64-linux.tar.xz at time DDD with hash 123".
+
 Reproducibility check
 ---------------------
 
@@ -541,6 +548,11 @@ Non-reproducible rules
 If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.
 
 Similarly, some files may not be redistributable (copyright license or similar), these are reproducible but the data cannot be stored in the cloud cache.
+
+Bootstrap
+---------
+
+So that there is not a chicken-egg problem, it is important that the build system code itself can be boostrap-built with a shell script or other simple executable. Probably there should be a special mode of the build system's build system that emits the build system instructions as a shell script.
 
 Daemon-less mode
 ================

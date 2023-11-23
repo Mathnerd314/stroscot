@@ -15,18 +15,18 @@ Jumbo connectives
     \newcommand{\with}{\mathbin{\mathrm{\&}}}
     \newcommand{\par}{\mathbin{\mathrm{⅋}}}
     \newcommand{\multimapboth}{\mathbin{\mathrm{⧟}}}
-    \newcommand{\bang}{{\mathrm{!}}}
-    \newcommand{\whim}{{\mathrm{?}}}
+    \newcommand{\bang}{{\mathrm{!}^+}}
+    \newcommand{\whim}{{\mathrm{!}^-}}
     \newcommand{\ocin}{\mathrel{\raise{-1pt}{\mathrm{!}}\mathord{\in}}}
     \definecolor{mygray}{RGB}{156,156,156}
     \newcommand{\sk}[1]{{\color{mygray} #1}}
     \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta }}
-      {\Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
-      {\Pi_R}
+      {\Gamma \vdash \mathop{𝕁^-} \limits_{i} \left(\overrightarrow{A_i} \vdash \overrightarrow{B_i}\right), \Delta }
+      {𝕁^-_R}
     &
     \rule{\overrightarrow{ \sk{\Gamma_j} \vdash A_{i j}, \sk{\Delta_j} } \quad \overrightarrow{ \sk{\Theta_k}, B_{i k} \vdash \sk{\Lambda_k} }}
-      {\sk{\overrightarrow{\Gamma}}, \sk{\vec \Theta}, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \sk{\overrightarrow{\Delta}}, \sk{\vec\Lambda}}
-      {\Pi_{i} {}_{L}}
+      {\sk{\overrightarrow{\Gamma}}, \sk{\vec \Theta}, \mathop{𝕁^-} \limits_{i} \left(\overrightarrow{A_i} \vdash \overrightarrow{B_i}\right) \vdash \sk{\overrightarrow{\Delta}}, \sk{\vec\Lambda}}
+      {𝕁^-_{L} {}_{i}}
     \end{array}
 
 
@@ -34,19 +34,19 @@ Jumbo connectives
     :nowrap:
 
     \begin{array}{cc}
-    \rule{\overrightarrow{ \sk{\Gamma_k}, B_{i k} \vdash \sk{\Delta_k} } \quad \overrightarrow{ \sk{\Theta_j} \vdash A_{i j}, \sk{\Lambda_j} } }
-      {\sk{\overrightarrow{\Gamma}}, \sk{\overrightarrow{\Theta}} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \sk{\overrightarrow{\Delta}}, \sk{\overrightarrow{\Lambda}}}
-      {\Sigma_{i} {}_{R}}
+    \rule{\overrightarrow{ \sk{\Theta_j} \vdash A_{i j}, \sk{\Lambda_j} } \quad \overrightarrow{ \sk{\Gamma_k}, B_{i k} \vdash \sk{\Delta_k} }}
+      {\sk{\overrightarrow{\Gamma}}, \sk{\overrightarrow{\Theta}} \vdash \mathop{𝕁^+} \limits_{i} \left( \overrightarrow{A_i} \vdash \overrightarrow{B_i} \right), \sk{\overrightarrow{\Delta}}, \sk{\overrightarrow{\Lambda}}}
+      {𝕁^+_{R} {}_{i}}
     &
     \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }
-      {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
-      {\Sigma_L}
+      {\Gamma, \mathop{𝕁^+} \limits_{i} \left ( \overrightarrow{A_i} \vdash \overrightarrow{B_i} \right ) \vdash \Delta }
+      {𝕁^+_L}
     \end{array}
 
 Common connectives
 ------------------
 
-All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be expressed using :math:`\Sigma` and :math:`\Pi`. We use our notation for them.
+All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be expressed using :math:`𝕁^+` and :math:`𝕁^-`. We use our notation for them.
 
 .. list-table::
   :header-rows: 1
@@ -60,67 +60,67 @@ All of the standard operators 01⊕⊗⊤⊥&⅋⊸⧟ in linear logic can be ex
   * - :math:`F`
     - :math:`0`
     - False (Zero)
-    - :math:`\Sigma []`
+    - :math:`𝕁^+ []`
   * - :math:`1`
     - :math:`1`
     - One
-    - :math:`\Sigma [(\#s,[] - [])]`
+    - :math:`𝕁^+ [(\#s,[] - [])]`
   * - :math:`A \lor B`
     - :math:`A \oplus B`
     - Plus (coproduct, or)
-    - :math:`\Sigma [(\#l,[A] - []),(\#r,[B] - [])]`
+    - :math:`𝕁^+ [(\#l,[A] - []),(\#r,[B] - [])]`
   * - :math:`A \otimes B`
     - :math:`A \otimes B`
     - Times (tensor product)
-    - :math:`\Sigma [(\#s,[A,B] - [])]`
+    - :math:`𝕁^+ [(\#s,[A,B] - [])]`
   * - :math:`A^{\otimes n}`
     -
     - `Tensor power <https://en.wikipedia.org/wiki/Tensor_algebra#Construction>`__
-    - :math:`\Sigma [(\#s,\overbrace{[A,\ldots,A]}^n - [])]`
+    - :math:`𝕁^+ [(\#s,\overbrace{[A,\ldots,A]}^n - [])]`
   * - :math:`\smash{\stackrel{+}{\neg}} A`
     - :math:`A^{\bot}`
     - Positive Negation
-    - :math:`\Sigma [(\#s,[] - [A])]`
+    - :math:`𝕁^+ [(\#s,[] - [A])]`
   * - :math:`{↑}A`
     - :math:`A`
     - Up shift
-    - :math:`\Sigma [(\#s,[A] - [])]`
+    - :math:`𝕁^+ [(\#s,[A] - [])]`
   * - :math:`T`
     - :math:`\top`
     - True (Top)
-    - :math:`\Pi []`
+    - :math:`𝕁^- []`
   * - :math:`\bot`
     - :math:`\bot`
     - Bottom (contradiction)
-    - :math:`\Pi [(\#s,[] \multimap [])]`
+    - :math:`𝕁^- [(\#s,[] \multimap [])]`
   * - :math:`A \land B`
     - :math:`A \with B`
     - With (product, and)
-    - :math:`\Pi [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]`
+    - :math:`𝕁^- [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]`
   * - :math:`A \par B`
     - :math:`A \par B`
     - Par ("unless", classical or, parallel product, dual of tensor)
-    - :math:`\Pi [(\#s,[] \multimap [A,B])]`
+    - :math:`𝕁^- [(\#s,[] \multimap [A,B])]`
   * - :math:`A^{\par n}`
     -
     - Par power
-    - :math:`\Pi [(\#s,[] \multimap \overbrace{[A,\ldots,A]}^n)]`
+    - :math:`𝕁^- [(\#s,[] \multimap \overbrace{[A,\ldots,A]}^n)]`
   * - :math:`A \to B`
     - :math:`A \multimap B`
     - Lollipop (implication, internal hom)
-    - :math:`\Pi [(\#f,[A] \multimap [B])]`
+    - :math:`𝕁^- [(\#f,[A] \multimap [B])]`
   * - :math:`A \leftrightarrow B`
     - :math:`A \multimapboth B`
     - Equivalence
-    - :math:`\Pi [(\#l,[A] \multimap [B]),(\#r,[B] \multimap [A])]`
+    - :math:`𝕁^- [(\#l,[A] \multimap [B]),(\#r,[B] \multimap [A])]`
   * - :math:`\smash{\stackrel{-}{\neg}} A`
     - :math:`A^{\bot}`
     - Negative Negation
-    - :math:`\Pi [(\#s,[A] \multimap [])]`
+    - :math:`𝕁^- [(\#s,[A] \multimap [])]`
   * - :math:`{↓}A`
     - :math:`A`
     - Down shift
-    - :math:`\Pi [(\#s,[] \multimap [A])]`
+    - :math:`𝕁^- [(\#s,[] \multimap [A])]`
 
 The negations and shifts have identical derivation rules for each polarity, so we write :math:`\neg A` and :math:`\smash{\updownarrow}A` unless there is a need for the distinction.
 
@@ -177,18 +177,18 @@ We can also write some types common from programming:
      - Type
    * - :math:`\text{Bool}`
      - Booleans
-     - :math:`\Sigma [(\#F,[]-[]),(\#T,[]-[])]`
+     - :math:`𝕁^+ [(\#F,[]-[]),(\#T,[]-[])]`
    * - :math:`\text{Int}`
      - 32-bit integers
-     - :math:`\Sigma [(\#{-2}^{31},[]-[]),\ldots,(\#0,[]-[]),\ldots,(\#2^{31}-1,[]-[])]`
+     - :math:`𝕁^+ [(\#{-2}^{31},[]-[]),\ldots,(\#0,[]-[]),\ldots,(\#2^{31}-1,[]-[])]`
    * - :math:`L_A`
      - Linked list of A
-     - :math:`\Sigma [(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])]`
+     - :math:`𝕁^+ [(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])]`
    * - :math:`Arr_A`
      - Arbitrarily-sized tuple of A
-     - :math:`\Sigma [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]`
+     - :math:`𝕁^+ [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]`
 
-In general :math:`\Sigma` can represent any algebraic data type.
+In general :math:`𝕁^+` can represent any algebraic data type.
 
 Exponentials
 ============
@@ -200,9 +200,9 @@ Promotion
   :nowrap:
 
   \begin{array}{cc}
-    \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang}
+    \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang_R}
     &
-    \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim}
+    \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim_L}
 
   \end{array}
 
@@ -341,7 +341,7 @@ Substitution
 Quantifiers
 -----------
 
-For these the variable :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`.
+For these the variable :math:`x` must have no free occurrence in :math:`\Gamma` or :math:`\Delta`. In code we simply refer to quantifiers :math:`Q` and write :math:`Q^+ = \forall, Q^- = \exists`.
 
 .. math::
   :nowrap:

@@ -7,6 +7,10 @@ Code generation is NP-hard and affects performance a lot. There are three main o
 #. Register allocation - Spilling, Rematerialization
 #. Instruction scheduling - Code motion, Block ordering
 
+Generally it is required to write a native code generator, linker, C standard library, and so on. Zig and Roc are doing it, learn from them. It is important to ensure that such bespoke components outperform the established alternatives, and are state of the art. Few developers actually work in this area so it is not hard to beat them in terms of design. But actually getting it to work takes years. In contrast interpreters/bytecode generators are really easy to implement, focus on them first.
+
+It can be tempting to focus heavily on providing a fast implementation, such as a fast and memory efficient compiler, and one can easily spend months working on this. But it should only be done after the compiler is well-tested and the standard library is near-complete. Then you can start benchmarking as 20%-30% of effort.
+
 Constrained optimization
 ========================
 
@@ -24,91 +28,41 @@ Although optimality may not be often used in industrial code, there's at least o
 
 Optimizations
 =============
-calling convention/ABI
-  accumulate arguments on the stack vs popping them
-  omit frame pointer
-  tail recursive calls
-  scalar replacement of aggregates
-  removal of unused parameters
-  replacement of parameters passed by reference by parameters passed by value.
-  omitting unexported functions
-  automatic constructor/destructor implementation
-  null pointer dereference behavior
-  Emit function prologues only before parts of the function that need it, rather than at the top of the function.
-  alignment - functions, loops, jumps, labels
-instruction scheduling
-  reorder instructions
-  region size: basic blocks, superblocks
-  schedule instructions of the same type together
-instruction selection
-  combining instructions, e.g. fused multiply-add, decrement and branch
-  transformation of conditional jumps to branchless code (arithmetic and conditional moves)
-  remove redundant instructions
+
+Calling convention/ABI
+
+* accumulate arguments on the stack vs popping them
+* omit frame pointer
+* tail recursive calls
+* scalar replacement of aggregates
+* omitting unexported functions
+* automatic constructor/destructor implementation
+* null pointer dereference behavior
+* Emit function prologues only before parts of the function that need it, rather than at the top of the function.
+* alignment - functions, loops, jumps, labels
+
 register allocation
-  swing modulo scheduling
-  allow allocating "wide" types non-consecutively
-  Graph coloring algorithm: Chow's priority, Chaitin-Briggs
-  region size: loop, function
-  rematerialization
-  use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.
-  Use caller save registers if they are not used by any called function.
-  rename registers to avoid false dependencies
-optimizations
-  replace standard functions with faster alternatives when possible
-  inlining
-  deduplication of constants, functions, code sequences (tail merging / cross jumping)
-  common subexpression elimination (CSE)
-  dead code/store eliminate (DCE/DSE)
-  conditional dead code elimination (DCE) for calls to built-in functions that may set errno but are otherwise free of side effects
-  global constant and copy propagation
-  constant propagation - which values/bits of values passed to functions are constants, function cloning
-  value range propagation - like constant propagation but value ranges
-  sparse conditional constant propagation (CCP), including bit-level
-  elimination of always true/false conditions
-  move loads/stores outside loops
-  loop unrolling/peeling
-  loop exit test
-  cross-jumping transformation
-  constant folding
-  specializing call dispatch (possible targets, likely targets, test/branch)
-  Code hoisting - evaluate guaranteed-evaluated expressions as early as possible
-  copy propagation - eliminate unnecessary copy operations
-  Discover which variables escape
-  partial/full redundancy elimination (PRE/FRE)
-  modified/referenced memory analysis, points-to analysis, aliasing
-  strips sign operations if the sign of a value never matters
-  convert initialization in switch to initialization from a scalar array
-  termination checking
-  loop nest optimizer based on the Pluto optimization algorithms. It calculates a loop structure optimized for data-locality and parallelism.
-  graphite - loop distribution, loop interchange, unroll, jam, peel, split, unswitch, parallelize, copy variables, inline to use first iteration values, predictive commoning, prefetch
-  final value replacement - loop to calculation using initial value and number of loop iterations
-  explode structures to scalars in registers
-  vectorization - loop vectorization, basic block vectorization, cost free (for debugging), likely faster, or code size
-  reorder blocks, duplicate blocks, partition into hot/cold to improve paging and cache locality
-  specialization of division operations using knowledge of the denominator
 
-profiling:
-  generate approximate profile of new/modified code, guessing using heuristics
-  cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions
-  AutoFDO profile https://perf.wiki.kernel.org/
+* swing modulo scheduling
+* allow allocating "wide" types non-consecutively
+* Graph coloring algorithm: Chow's priority, Chaitin-Briggs
+* region size: loop, function
+* rematerialization
+* use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.
+* Use caller save registers if they are not used by any called function.
+* rename registers to avoid false dependencies
 
-live-patching: depending on optimizations, all callers maybe impacted, therefore need to be patched as well.
+instruction scheduling
 
+* reorder instructions
+* region size: basic blocks, superblocks
+* schedule instructions of the same type together
 
-floating-point variables
-  register or memory.
-  on machines such as 68881 and x86, the floating registers keep excess precision. For most programs, the excess precision does only good, but a few programs rely on the precise definition of IEEE floating point.
-  fast: allow higher precision / formula transformations if that would result in faster code. it is unpredictable when rounding to the IEEE types takes place and NaNs, signed zero, and infinities are assumed to not occur.
-  standard: follow the rules specified in ISO C99 or C++; both casts and assignments cause values to be rounded to their semantic types
-  strict: rounding occurs after each operation, no transformations
-  exception handling, mode handling
+instruction selection
 
-Magic numbers:
-  search space sizes - Increasing values mean more aggressive optimization, making the compilation time increase, but with diminishing improvement in runtime execution time. Generally a formula producing a boolean "try optimization" answer or an integer "maximum number of possibilities to consider".
-  memory limit - If more memory than specified is required, the optimization is not done.
-  analysis skipping - ignore objects larger than some size
-  ratios - if inlining grows code by more than this, cancel inlining. tends to be overly conservative on small functions which can increase by 300%.
-
+* combining instructions, e.g. fused multiply-add, decrement and branch
+* transformation of conditional jumps to branchless code (arithmetic and conditional moves)
+* remove redundant instructions
 
 Register allocation
 ===================

@@ -24,10 +24,59 @@ Unlike Java bytecode, the IR is target-specific. Specific instances of the IR wi
 
 For debugging and diagnostic purposes, it is important to define a reverse transformation back from IR to AST, so that error messages can display the relevant code. For example, inlining may expand a macro, and the error in the macro may require showing bits of the IR for context. The AST generated from the IR does not have to be the original AST, it should instead accurately depict the IR. But the IR should capture source locations and other information necessary for good error messages.
 
-Transformations
-===============
+Optimizations
+=============
 
-As mentioned in the goals section, the in-memory form of IR should be suitable for all of the various transformations analyses. A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of GCC/LLVM performance: Inline, Unroll (& Vectorize), CSE, DCE, Code Motion, Constant Fold, Peephole. An ideal IR makes these optimizations as cheap as possible.
+As mentioned in the goals section, the in-memory form of IR should be suitable for all of the various transformations and optimizations. An ideal IR makes these optimizations very cheap - not free (otherwise the initial IR wouldn't be a faithful representation of the source) but not more than a few operations either. In particular having to do a scan of the entire IR for a transformation is a no-no.
+
+
+
+* removal of unused parameters
+* replacement of parameters passed by reference by parameters passed by value.
+* replace standard functions with faster alternatives when possible
+* inlining
+* deduplication of constants, functions, code sequences (tail merging / cross jumping)
+* common subexpression elimination (CSE)
+* dead code/store eliminate (DCE/DSE)
+* conditional dead code elimination (DCE) for calls to built-in functions that may set errno but are otherwise free of side effects
+* global constant and copy propagation
+* constant propagation - which values/bits of values passed to functions are constants, function cloning
+* value range propagation - like constant propagation but value ranges
+* sparse conditional constant propagation (CCP), including bit-level
+* elimination of always true/false conditions
+* move loads/stores outside loops
+* loop unrolling/peeling
+* loop exit test
+* cross-jumping transformation
+* constant folding
+* specializing call dispatch (possible targets, likely targets, test/branch)
+* Code hoisting - evaluate guaranteed-evaluated expressions as early as possible
+* copy propagation - eliminate unnecessary copy operations
+* Discover which variables escape
+* partial/full redundancy elimination (PRE/FRE)
+* modified/referenced memory analysis, points-to analysis, aliasing
+* strips sign operations if the sign of a value never matters
+* convert initialization in switch to initialization from a scalar array
+* termination checking
+* loop nest optimizer based on the Pluto optimization algorithms. It calculates a loop structure optimized for data-locality and parallelism.
+* graphite - loop distribution, loop interchange, unroll, jam, peel, split, unswitch, parallelize, copy variables, inline to use first iteration values, predictive commoning, prefetch
+* final value replacement - loop to calculation using initial value and number of loop iterations
+* explode structures to scalars in registers
+* vectorization - loop vectorization, basic block vectorization, cost free (for debugging), likely faster, or code size
+* reorder blocks, duplicate blocks, partition into hot/cold to improve paging and cache locality
+* specialization of division operations using knowledge of the denominator
+
+Magic numbers:
+
+* search space sizes - Increasing values mean more aggressive optimization, making the compilation time increase, but with diminishing improvement in runtime execution time. Generally a formula producing a boolean "try optimization" answer or an integer "maximum number of possibilities to consider".
+* memory limit - If more memory than specified is required, the optimization is not done.
+* analysis skipping - ignore objects larger than some size
+* ratios - if inlining grows code by more than this, cancel inlining. tends to be overly conservative on small functions which can increase by 300%.
+
+
+
+
+ A `talk <http://venge.net/graydon/talks/CompilerTalk-2019.pdf>`__ by Graydon Hoare on compilers mentions the paper :cite:`allenCatalogueOptimizingTransformations1971`. He says we need 8 optimization passes to get 80% of GCC/LLVM performance: Inline, Unroll (& Vectorize), CSE, DCE, Code Motion, Constant Fold, Peephole.
 
 Reduction
 ---------
@@ -56,17 +105,22 @@ CSE
 
 Common subexpression "elimination" is actually identifying identical expressions in the IR and giving them a shared representation in an IR graph. It is related to graph reduction, which per :cite:`balabonskiUnifiedApproachFully2011`, can be characterized as giving each term in the unshared IR a label, and using an implementation such that all terms with the same label are represented as a single object (node) and reduced as a unit.  The specific technique to identify duplicate expressions is "hash-consing". Hash-consing can be applied incrementally, so that CSE can be applied continuosly as other transformations are applied. One issue is merging alpha-equivalent expressions, :cite:`maziarzHashingModuloAlphaEquivalence2021`, which can be dealt with by encoding variable backedges as paths through a spanning tree. :cite:`mauborgneRepresentationSetsTrees1999` gives an algorithm identifying sharable components in cyclic graphs, useful for recursive structures.
 
-As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies the Levy-labelling of terms with maximal sharing. More formally, there are three ways to define the equivalence relation of optimal reduction. The first is Levy labelling - take an initial term with unique atomic labels for every subterm, perform reductions according to a special label-generation rule, then observe which labels are equivalent in the result. The second is extraction, which maps a redex and its history to its origin. The third is the zig-zig relation, the smallest equivalence relation containing the "copy of" relation, based purely on reduction history. All of these relations are equivalent. But to make the semantics as a reduction graph tractable, all of these are defined with respect to an initial lambda term. For compile-time usage though, we would like the maximal equivalence - a "hash consing" algorithm which takes an unlabelled term and produces the labelling with maximal sharing. In the zig-zag relation, we would like to equate all redexes that can be produced by copying from any initial term, not 
+As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies the Levy-labelling of terms with maximal sharing. More formally, there are three ways to define the equivalence relation of optimal reduction. The first is Levy labelling - take an initial term with unique atomic labels for every subterm, perform reductions according to a special label-generation rule, then observe which labels are equivalent in the result. The second is extraction, which maps a redex and its history to its origin. The third is the zig-zig relation, the smallest equivalence relation containing the "copy of" relation, based purely on reduction history. All of these relations are equivalent on redexes. But to make the semantics as a reduction graph tractable, all of these are defined with respect to an initial lambda term. For compile-time usage though, we would like the maximal equivalence - a "hash consing" algorithm which takes an unlabelled term and produces the labelling with maximal sharing. In the zig-zag relation, we would like to equate all redexes that can be produced by copying from any initial term, not
+
+The reduction ``(\x. E[x]) e --> E[e]`` shows that it will share all identical expressions, just as CSE with graph reduction. But it will also share an expression and its reduction, hence computing the labelling is at least of complexity :math:`\Sigma^0_1`. Let's avoid that by only considering terms pre-reduced to normal form. Are there any other equivalences besides normal CSE?
 
 
-The reduction ``(\x. E[x]) e --> E[e]`` shows that it will share all identical expressions, just as CSE with graph reduction. But it will also share an expression and its reduction, hence computing the labelling is at least of complexity :math:`\Sigma^0_1`.
+
+
+
+  Consider each case of lambda term:
+
+* Bound variable with bound variable: a bound variable may equate with all of its other occurrences. But since the term is reduced, it cannot unify with anything else - each unique variable must have a unique label in the initial history. For example, for ``λy.y (λx.xx)``, the two bound appearances of ``x`` may be equated from an initial term ``λx.(λz.zz)x``. But we know that ``x`` and ``y`` cannot be equated, and similarly in ``λy.λy.x y``.
+
+* Lambda abstraction: A lambda abstraction cannot equate Suppose we have ``λx.M`` and ``λy.N``.
+
 
  To show that a maximal labelling exists, we need a join property of the form "for a term+history a, and another term+history b, there is a term+history c with all equivalences from a and also those from b".
-
-
-Let's avoid that by only considering terms pre-reduced to normal form.  Consider each case of lambda term:
-
-* Bound variable: a bound variable may unify with all of its other occurrences. But since the term is reduced, it cannot unify with anything else - each unique variable must have a unique label in the initial history. For example ``(λx.xx)((λy.y)``
 
 
 
@@ -123,9 +177,9 @@ CPS does expose control flow as continuation values, but it has problems. First,
 
 The CBV CPS encoding is quite annoying, e.g. :cite:`downenSequentCalculusCompiler2016` it inverts nested function calls ``map f (map g xs)`` as ``λk.map g (λh.h xs (λys.map f (λh'.h' ys k)))``. Per :cite:`maurerCompilingContinuations2016` this makes CSE harder, e.g. ``f (g x) (g x)`` vs ``g (\xv. g (\yv. f k xv yv) x) x``. Also rewrite rules are harder to apply. Even CBV has an encoding - :cite:`flanaganEssenceCompilingContinuations1993` point out that "realistic" CBV CPS compilers mark source function calls as using special continuation closures to allow efficient calls. The call-by-need transform is worse - :cite:`okasakiCallbyneedContinuationpassingStyle1994` describes how the thunk graph itself must be represented in the CPS term. It does have the benefit that the term graph is built incrementally, by gluing together subgraphs generated on demand by reduction, but the graph is still obfuscated as imperative code. :cite:`kennedyCompilingContinuationsContinued2007` states assigning names to continuations is really a benefit, but doesn't discuss the other drawbacks of the encoding.
 
-:cite:`sabryReasoningProgramsContinuationpassing1992` demonstrated that CBV CPS was reversible, and proved that beta-eta-reduction in CPS corresponded to the A-reductions plus call-by-value reduction on the original term. Hence, per :cite:`flanaganEssenceCompilingContinuations1993`, many compilers adopted reducing the expression to A normal form between other transformations as a replacement for CPS. However, per :cite:`kennedyCompilingContinuationsContinued2007`, ANF is not closed under beta-reduction - inlining can create nested lets, which then have to be "renormalized", floated out or rearranged via "commuting conversions". Similarly, the A-reduction ``E (if x then a else b) = if x then E a else E b`` duplicates the evaluation context, and as such is commonly left out. The workaround is to introduce a "join point", the ``e`` in ``let e z = ... in if x then e a else e b``. But join points are essentially continuations, second-class in that they are represented by function bindings. Even if specifically marked, they are fragile, in that per :cite:`maurerCompilingContinuations2016` the case-of-case transformation must handle join points specially, and similarly other transformations must preserve join points (e.g. not inlining the join point. Furthermore, they are not really functions, requiring a special calling convention to compile efficiently. As Kennedy says, "Better to start off with a language that makes continuations explicit."
+:cite:`sabryReasoningProgramsContinuationpassing1992` demonstrated that CBV CPS was reversible, and proved that beta-eta-reduction in CPS corresponded to the A-reductions plus call-by-value reduction on the original term. Hence, per :cite:`flanaganEssenceCompilingContinuations1993`, many compilers adopted reducing the expression to A normal form between other transformations as a replacement for CPS. However, per :cite:`kennedyCompilingContinuationsContinued2007`, ANF is not closed under beta-reduction - inlining can create nested lets, which then have to be "renormalized", floated out or rearranged via "commuting conversions". Similarly, the A-reduction ``E (if x then a else b) = if x then E a else E b`` duplicates the evaluation context, and as such is commonly left out. The workaround is to introduce a "join point", the ``e`` in ``let e z = ... in if x then e a else e b``. But join points are essentially continuations, second-class in that they are represented by function bindings. Even if specifically marked, they are fragile, in that per :cite:`maurerCompilingContinuations2016` the case-of-case transformation must handle join points specially, and similarly other transformations must preserve join points (e.g. not inlining the join point). Furthermore, they are not really functions, requiring a special calling convention to compile efficiently. As Kennedy says, "Better to start off with a language that makes continuations explicit."
 
-So both CPS and ANF suck. Fortunately, :cite:`downenSequentCalculusCompiler2016` presents Sequent Core, which retains the advantages of first-class continuations while avoiding the drawbacks. Sequent Core does not force choosing an evaluation order. A nested function application is munged a little, but the order is not inverted and CSE still works. ``Cut`` glues together graph pieces, but is itself part of the graph, hence does not need to encode its sub-graphs. Functions reduce to join points and other types of sequent, rather than the reverse. Reduction is uniformly cut-elimination, and does not require renormalization.
+So all of CPS, ANF, and joint points suck. Fortunately, :cite:`downenSequentCalculusCompiler2016` presents Sequent Core, which retains the advantages of first-class continuations while avoiding the drawbacks. Sequent Core does not force choosing an evaluation order. A nested function application is munged a little, but the order is not inverted and CSE still works. ``Cut`` glues together graph pieces, but is itself part of the graph, hence does not need to encode its sub-graphs. Functions reduce to join points and other types of sequent, rather than the reverse. Reduction is uniformly cut-elimination, and does not require renormalization. Downen at al. implemented Sequent Core, but the implementation was complex. I think though that this complexity was mainly due to the need to interface with GHC and closely follow the design of GHC's original System F-like Core. A novel implementation focusing on a "clean" sequent logic, and emphasizing duality and symmetries, like Stroscot's, should be able to avoid this implementation complexity. I asked SPJ and he was like "go for it."
 
 SSA represents code as procedures containing imperative blocks, and can't express higher-order features. But, per :cite:`appelSSAFunctionalProgramming1998`, SSA code blocks map directly to mutually recursive tail-called functions, with the procedure as a distinguished function. Indeed, the Swift Intermediate Language adopted block arguments instead of φ-nodes. SSA's basic blocks identify "small" functions that can be compiled easily, but this pass can be replicated in any IR. The other aspect of SSA, single static variable assignment, is reflected in a pass that remove mutable variables by replacing them with additional input and output arguments.
 

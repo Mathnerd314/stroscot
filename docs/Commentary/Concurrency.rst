@@ -142,3 +142,7 @@ But still, for complex data science computations we might want automatic paralle
 Haskell's "par" is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It's just as clear to use explicit fork/join operations, and indeed the ``rpar/rpar/rseq/rseq`` pattern proposed in `the Parallel Haskell book <https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html>`__ is just fork/join with different naming.
 
 As far as the actual task granularity, Cliff Click says the break-even point is somewhere around the middle of the microsecond range, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress in another thread.
+
+https://en.wikipedia.org/wiki/Communicating_sequential_processes
+
+

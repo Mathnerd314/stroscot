@@ -23,13 +23,15 @@ Overall, while I would be justified in calling Stroscot's sets types, as it is o
 Is Stroscot typed?
 ==================
 
-By a "typed" programming language, someone generally means that the language has a type system or type discipline. Wikipedia defines a type system as "a set of rules that assigns a property called a type to the various constructs of a computer program". This phrasing assumes each construct has exactly one "principal" type. But more complex type systems don't have this property. For example with a Haskell GADT ``data R where R : { unR : Int } -> R Int``, ``unR`` may have the type ``forall a. R a -> a`` or ``forall a. R a -> Int``, and these have no unifying type. Haskell just picks a type ``unR : R Int -> Int`` in this case. Really the mapping from expressions to types is many-to-many. Particularly, with Stroscot's definition of types as sets, any set containing the value is a valid type. For example, ``1 : Int``, but also ``1 : {1}`` and ``1 : Any``. So certainly Stroscot has some ambient notion of "the valid types for a value", but in Stroscot's case this is just set membership so it is a little vague in determining whether Stroscot has a type system. ChatGPT lists some features of type systems we can look for: type annotations, type errors, type compatibility, type conversion, type hierarchy.
+By a "typed" programming language, someone generally means that the language has a type system or type discipline that ensures type safety. Wikipedia defines a type system as "a set of rules that assigns a property called a type to the various constructs of a computer program". This phrasing assumes each construct has exactly one "principal" type. But more complex type systems don't have this property. For example with a Haskell GADT ``data R where R : { unR : Int } -> R Int``, ``unR`` may have the type ``forall a. R a -> a`` or ``forall a. R a -> Int``, and these have no unifying type. Haskell just picks a type ``unR : R Int -> Int`` in this case. Really the mapping from expressions to types is many-to-many. Particularly, with Stroscot's definition of types as sets, any set containing the value is a valid type. For example, ``1 : Int``, but also ``1 : {1}`` and ``1 : Any``. So certainly Stroscot has some ambient notion of "the valid types for a value", but in Stroscot's case this is just set membership so it is a little vague in determining whether Stroscot has a type system. ChatGPT lists some features of type systems we can look for: type annotations, type errors, type compatibility, type conversion, type hierarchy, type safety.
 
 The purpose of type annotations is clear if we consult `Robert Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__. Per him, a type system should allow "stating and enforcing the invariant that the value at a particular program point must be a certain type", in the form of a type declaration. Stroscot's set membership assertions have a specific syntax for type declarations and type restrictions, that accomplish exactly this purpose. There are also annotations for declaring the type of a value, for example ``int8 1`` is different from ``int32 1``.
 
 Type errors are also clear. Stroscot's type declarations have an operational semantics as assertions, they check membership in the type and throw an exception if it is not. The overlap with assertions may seem a bit strange but ultimately, they are both expressing program invariants, so in the end they are different syntaxes for the same feature. And assertions can be more natural in some cases than type declarations, e.g. ``divide a b = assert (b != 0); ...`` rather than ``divide : Int -> Int\{0} -> Int``. Although, higher-order types can be somewhat more succinct than writing out logical set membership assertions by hand, ``f : (Int -> Int) -> Int`` vs ``{ s = arbElem; a = arbElem; assume(a isElemOf Int); assume(s a isElemOf Int); assert(f s isElemOf Int) }``.
 
 Type compatibility follows naturally from type errors, for example assembly instructions can only operate on certain bitwidths. Stroscot has a natural form of type conversion and type hierarchy, subtype inclusion, but this is actually not too powerful and most conversions are explicit. Still though, we can talk about the normal data types like integers, floats, etc., so most programmers will find it natural.
+
+Type safety prevents data corruption or unexpected behavior due to type mismatches. Stroscot's dynamic semantics ensures that no strange errors like this occur, so Stroscot is type safe.
 
 It is also worth looking for "untyped" programming languages - ChatGPT lists assembly language, machine code, and Brainfuck. The particular feature of these languages is that all data is represented as bits, and there are no other types. Stroscot does have a related property of "untyped memory access", where for example a floating point number can be stored to memory and read back as an integer. But I would say that because Stroscot has types for non-bit data, like structs for example, it is not untyped.
 
@@ -58,43 +60,37 @@ Dynamic programming languages allow flexible and adaptable coding practices. But
 * Late-binding: Choosing methods at the latest possible moment during program execution. For example, method selection may depend on the real-time types of involved objects, the current state of the source code files (hot-reloading), complex dispatch conditions based on properties of the data, and/or values of unrelated variables in the code.
 * Flexible variables: Allowing variables to accommodate any possible data value during program execution.
 * Direct execution: Executing source code with a single command, without the need for an intermediate compilation step
-* Metaprogramming: Writing macros (code that manipulates other code), and executing code with eval.
-* Runtime modification: adding and modifying methods and properties, monkey patching, module loading at runtime
+* Metaprogramming, reflection and runtime modification: Writing macros (code that manipulates other code). Executing code with eval. Viewing, adding, and modifying methods and properties. Monkey patching. Module loading at runtime.
 * Good: As a rule of thumb, dynamic languages are good, all other things being equal.
 
-8. **Aspect-Oriented Programming:** Some dynamic languages support aspect-oriented programming, where you can modify the behavior of specific code segments (aspects) independently, allowing for cross-cutting concerns like logging or error handling to be added dynamically.
+Stroscot has these features, so can be considered dynamic.
 
-9. **Dynamic Class Creation:** Dynamic languages often allow you to create new classes at runtime. This is particularly useful for scenarios where you want to create new classes based on data-driven specifications or user inputs.
+Is Stroscot strong?
+===================
 
-10. **Dependency Injection and IoC Containers:** Some dynamic languages support runtime dependency injection and inversion of control (IoC) containers, allowing you to change the behavior and dependencies of objects without modifying their source code.
+Per `Plover <https://perl.plover.com/yak/12views/samples/slide045.html>`__, strong typing has at least 8 definitions:
 
-It's important to note that while these capabilities can offer significant flexibility and power, they also come with potential complexities and challenges, including maintenance difficulties and potential performance impacts. Additionally, misuse of runtime modification features can lead to code that is harder to understand and debug. Therefore, careful consideration and judicious use are recommended when employing such dynamic features.
+#. type annotations are associated with variable names, rather than with values.
+#. it contains compile-time checks for type constraint violations, rather than deferring checking to run time.
+#. it contains compile or run-time checks for type constraint violations, as opposed to no checking.
+#. conversions between different types are forbidden, as opposed to allowed.
+#. conversions between different types must be indicated explicitly, as opposed to being performed implicitly.
+#. there is no language-level way to disable or evade the type system, such as casts.
+#. it has a complex, fine-grained type system with compound types, as opposed to only a few types, or only scalar types
+#. the type of its data objects is fixed and does not vary over the lifetime of the object, as opposed to being able to change.
 
-For example, you can add or remove methods and attributes from objects dynamically.
+Going through these:
 
-2. **Limited Runtime Modifications:** While Java's reflection allows you to access and invoke methods and constructors at runtime, it doesn't provide the same level of flexibility as dynamic languages for modifying behavior, such as adding or removing methods dynamically.
+#. Stroscot allows type annotations on values, and specifying the set of values allowed in a mutable variable. It also allows type annotations on functions (by name). But, types are defined as sets of values, so overall it is more correct to say they are associated with values. Verdict: Not satisfied
+#. Stroscot does check at compile-time. Verdict: Satisfied
+#. Stroscot also allows deferring checks to run-time. But it always performs checks. Verdict: Satisfied
+#. It would make no sense to not allow conversion from float to double or similar. You could always write such a function yourself. Verdict: Not satisfied
+#. Stroscot does not do implicit conversions - either a value is a member of a type unmodified, or it is not a member. Verdict: Satisfied
+#. Stroscot follows its runtime semantics in all cases. Verdict: Satisfied
+#. Stroscot allows unions, intersections, dependent types, and so on. Verdict: Satisfied
+#. Values are immutable and do not change. Stroscot does allow stateful types though. If the value of a reference is modified, it may stop being a member of a stateful type. This is solved by not using stateful types. Verdict: Satisfied
 
-In summary, dynamic programming languages go beyond the introspection and access capabilities offered by static languages' reflection features. They allow you to modify and extend behavior more freely at runtime, making them particularly powerful for scenarios where adaptability and runtime customization are crucial. On the other hand, static languages like Java focus on providing information about class structures and allow for limited runtime interactions, but these interactions are still subject to compile-time type checking and restrictions.
-
-
-Here are some key characteristics of dynamic programming languages:
-
-3. **Reflection:** Dynamic languages often provide features that allow programs to inspect and manipulate their own structure and behavior at runtime. This is known as reflection and enables powerful meta-programming techniques.
-
-Some examples of dynamic programming languages include Python, Ruby, JavaScript, PHP, and Perl. These languages are well-suited for tasks where rapid development and flexibility are important, but they might sacrifice some performance optimizations that statically-typed languages offer through their compile-time checks and optimizations.
-
-    Dynamic Typing: On the other hand, "typed" languages can also refer to languages with dynamic typing, where variable types are determined at runtime. While dynamic typing offers flexibility, it can lead to runtime errors if incompatible types are used together.
-
-    Strong Typing: "Typed" languages typically exhibit strong typing, which means that type conversions and interactions between different types are strictly controlled. This prevents unintended type-related errors and promotes safer code.
-
-    Weak Typing: In contrast, some programming languages are weakly typed, allowing for implicit type conversions and interactions between different types with less strict control. "Typed" languages usually lean towards strong typing to ensure code robustness.
-
-    Type Inference: Many "typed" languages feature type inference, a mechanism that allows the compiler or interpreter to automatically deduce the data type of a variable based on its initialization and usage. This reduces the need for explicit type annotations while maintaining the benefits of static typing.
-
-    Type Annotations: In "typed" languages, developers often annotate variables and functions with explicit type information. These annotations serve as documentation and aid in code readability, while also enabling the type checker to catch potential errors.
-
-    Type Safety: "Typed" programming languages prioritize type safety by preventing operations that could lead to data corruption or unexpected behavior due to type mismatches. This contributes to more predictable and reliable software.
-
+Overall, Stroscot meets 6/8 definitions so you could say it is 75% strongly typed.
 
 Type inference
 ==============
@@ -181,15 +177,10 @@ In general, trying to prove any non-trivial property will find all the bugs in a
 
 "Soft typing" is similar to model checking, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell's "deferred type errors" flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.
 
-Roles
+Notes
 =====
 
 GHC's roles are just an optimization for ``coerce``. There are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.
-
-
-
-* strongly typed - `8 definitions <https://perl.plover.com/yak/12views/samples/slide045.html>`__, all different. It's the semantic equivalent of "amazing", i.e. "My language is strongly typed" == "My language is amazing". Again discussed solely in the "Types" page.
-
 
 `This post <https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/>`__ says "a [gradual] type is something that describes a set of values that have a bunch of operations in common", i.e. value space plus behavior. Stroscot's sets don't have behavior so are not gradual types.
 

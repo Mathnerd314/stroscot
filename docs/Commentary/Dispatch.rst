@@ -266,6 +266,7 @@ This depends on the ``lub`` primitive defined in `Conal's post <http://conal.net
 The dispatch semantics is that all methods are run in parallel using lub.
 
 The way Stroscot optimizes dispatch is:
+
 * eliminate all the statically impossible cases (cases that fail)
 * use profiling data to identify the hot paths
 * build a hot-biased dispatch tree

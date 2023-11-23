@@ -46,8 +46,9 @@ Neuroscience
 
 We can distinguish many tasks in programming:
 
-* writing code
-* skimming code
+* designing code - often happens purely in the head. Programmers take long walks or similar to figure out a problem, and then when they got home, they simply write out the code they have thought of. The "hard part" happens away from the computer.
+* writing code - mechanical typing, hard to tell if it's very cognitive
+* skimming code - relies on the language centres of the brain, the ventral lateral prefrontal cortex. (citation needed)
 * reading code carefully for bugs
 * learning a new programming language
 
@@ -56,6 +57,12 @@ All of these have different demands on the brain and people will be better at di
 Programming misconceptions aren't likely to release dopamine,
 
 For experienced programmers, a specific "Stroscot for Y programmers" guide series should be sufficient to retrain programmers away from their bad habits.
+
+working memory - when you’re thinking of a sequence of events, you need to keep the line of logical reasoning held in your working memory
+
+flow state - it’s easy to think ‘just one more compile’ and end up staying up all night.
+
+coding provides an immediate feedback loop with testing and seeing the results. This releases Dopamine (citation needed)
 
 TODO: check out the Unified Learning Model book
 

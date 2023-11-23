@@ -4,11 +4,22 @@ Evaluation strategy
 
 This page summarizes the arguments for different types of evaluation strategies:
 
+* pure vs impure - whether an expression has a denotational value, and how complex this denotation is
 * strict vs non-strict - whether to allow a function to return a result without fully evaluating its arguments
 * eager vs lazy - whether to make arguments non-strict by default
 * call-by-need vs optimal - if arguments are non-strict, whether to evaluate once per closure or do deeper sharing
 
  lazy evaluation and lazy vs optimal evaluation. The quick summary is that optimal reduction is optimal, hence has better reduction and expressiveness properties than lazy or strict, but it is a complex strategy and in some cases there may be significant space overhead compared to strict due to graph reduction overhead, and there are also cases where the graph reduction overhead exceeds the runtime of the program, so programs can be slower with optimal reduction. To address this Stroscot will special-case optimization for C-like programs to give the expected performance.
+
+"The next Haskell will be strict". - not necessarily. laziness may yet have a role as well.
+
+Traditionally a function is only defined on values, but lazy evaluation allows functions to produce useful behavior for non-values as well.
+
+
+Pure vs impure
+==============
+
+SPJ calls laziness "the hair shirt", and says the big benefit of wearing this shirt was the discovery of the benefits of purity. It is really great when the denotation of an integer is that integer, rather than a function or a tuple or whatever structure. Certainly some things like I/O do need more complex denotations, but by and large it is just a big conceptual win.
 
 Strict vs non-strict
 ====================
@@ -16,7 +27,9 @@ Strict vs non-strict
 Control constructs
 ------------------
 
-Non-strictness allows defining if-then-else and short-circuit functions. So generally non-strictness is required in a language, if you want to avoid giving control constructs special handling. E.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` evaluates its arguments first and throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x`` - Haskell has put non-strictness to good use.
+Non-strictness allows defining if-then-else and short-circuit functions. So generally some amount of non-strictness is required in a language. E.g. ``and c t = if c then t else False``. With strictness ``and false undefined`` evaluates its arguments first and throws even though its substitution does not. Another example is ``fromMaybe (error "BOOO") x``. Haskell has put non-strictness to good use with parser combinator libraries and so on.
+
+
 
 Function composition
 --------------------

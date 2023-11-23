@@ -72,7 +72,7 @@ writeFile (compileToExecutable main)
 where it's clear that compileToExecutable is doing the work.
 
 
-the nanopass framework is pretty 
+the nanopass framework is pretty
 
 Model
 =====
@@ -192,6 +192,8 @@ E.g. overloading/dispatch can be implemented in a variety of ways, specialized f
 
 Profile-guided optimization is an effective solution to this lack of information: we instrument a binary with counters for the various questions we might ask, and generate a profile with the answers. We might need to run a binary several different times to get good coverage so we also need a way to combine profiles together, i.e. profiles form a commutative monoid. Profiles themselves introduce a "Heisenbug" problem: we cannot measure the detailed performance of an unprofiled program, and turning profiling off may change the performance significantly. The solution is to build with profiling support for almost all of the compilation pipeline. We should only omit profiling instructions for non-profiled builds at the assembly level. And if we use hardware-assisted sampling profiling then we don't even need profiling instructions, in many cases, so profiling can simply be always enabled. Still, if we are using profile information all the time and making major decisions based on it, it is important to be mostly accurate even on the initial run, so a good approximation is also key. (TODO: approximation of profiles is probably a whole research area, explore)
 
+Direct Method Resolution: Optimizing method calls to assembly jumps to specific addresses during execution
+
 Optimization variables
 ======================
 
@@ -220,8 +222,19 @@ build stage 2 compiler with the stage 1 compiler using the stage 1 package datab
 Complex bootstrap
 =================
 
-Actually bootstrapping is more complex. The compiler is really two components, an interpreter and a specializer. The input program can take arguments. The interpreter can take arguments (dialects, libraries). The specializer can take arguments (bytecode, optimization instructions, plugins). The output program can take arguments (compiled objects, runtime components such as libc or a garbage collector). All of these arguments and options aren't handled easily.
+Software is bootstrappable when it does not depend on a binary seed, i.e. a seed that is not built from source. The “trusting trust” attack is only a symptom of an incomplete or missing bootstrap story - if every program is built from source, the attack is impossible. In practice, every software needs some bootstrap binaries, but the number and size of binary seeds should be a bare minimum.
 
+For example Guix uses bootstrap-seeds (hex0 binaries), bootar (extract tar), and a static build of GNU Guile 2.0.9 (for build scripts / utilities). Then it builds gash (Scheme implementation of bash), https://github.com/oriansj/stage0-posix, and GNU Mes. Mes is a mutually self-hosting Scheme interpreter, C compiler, and C runtime library. Maybe you don't trust GNU Guile as the bootstrap. You can use "diverse double-compiling" and substitute the Scheme implementation of your choice as the bootstrap host implementation. For example GNU Mes itself. As the build is reproducible and depends minimally on the build host, the resulting GNU Mes should be identical regardless. GNU Mes can thus be regarded as a high-assurance bootstrap seed, that pretty much verifies itself. From GNU Mes, Guix then builds tcc (patched TinyCC), old gzip/make/patch, gcc 2.95 + GNU tools, gcc 4.9.4 + GNU tools, and finally modern gcc and the rest of the software stack.
+
+So that is interesting and all, but how do we bootstrap Stroscot? Building a "self-hosted" compiler is a real challenge. You need to maintain at least two compilers (one to bootstrap your self-hosted compiler, and the self-hosted compiler itself). There is really a combination of strategies:
+
+* Chaining a prior build - we see from the gcc build that chaining prior builds is a valid strategy whenever there is a fundamental change in the build requirements / compiler language (such as GCC changing from C to C++). In fact it is technically valid to use the "natural bootstrap process" - build each commit from the version of the previous commit, down to the initial bootstrap. But it is a bit slow - to reproduce a build at commit N you have to build roughly N binaries. Also fragile, as what do you do with a commit that breaks the build. It is better to have a manually-specified custom chain. It is important to specify the bootstrap chain within the compiler repo, directly or as a commit hash of a different repo, so you don't run into git bisect issues like "I checked out an old commit but it uses a different bootstrap process so it doesn't build".
+
+* Seed compiler code - We can generate lower-level code from the source code, such as C, Java, Haskell, WASM, or a custom bytecode. The code can be generated automatically from the main compiler's source, as a backend target, but it is not clear if this is sufficiently verifiable - I guess it depends on how readable the code is and whether it can be matched efficiently with the original code. For example, much of the code is devoted to optimizing, backends, error messages, caching, and langauge server which is not necessary for bootstrapping. It is also possible to write this seed compiler code by hand, but then you have to maintain two compilers.
+
+* Seed interpreter/VM - Bootstrapping from machine code with Hex0 is possible but it makes a lot more sense for portability and sanity to use a higher-level language as the initial seed. We could use GNU Mes, GCC, the JVM, WASM, Haskell, etc. as the seed language. The key is that the interpreter/VM can process the seed compiler output. It does not need to be particularly optimized, it just has to bootstrap an initial self-hosted version - e.g. it most likely does not have to free memory. Practically it will be a recent self-hosted optimized build that is used as the final step of the chain, for git bisect etc.
+
+Actually bootstrapping is more complex. The compiler is really two components, an interpreter and a specializer. The input program can take arguments. The interpreter can take arguments (dialects, libraries). The specializer can take arguments (bytecode, optimization instructions, plugins). The output program can take arguments (compiled objects, runtime components such as libc or a garbage collector). All of these arguments and options aren't handled easily. Like platforms, probably it is easiest to bootstrap x86 first and then build other platforms by cross-compiling.
 
 Compile-time code execution
 ===========================
@@ -369,3 +382,4 @@ Functions generally assume a fixed set of types and a fixed memory representatio
 
 State is also an issue because the memory manager must be aware of the local state of a piece that reloaded and avoid leaking memory. In the case of handles such as an OpenGL context the desirable behavior is to transfer them over to the new code, but if the initialization code is changed then the handle should instead be closed and re-initialized. So we see some sort of incremental program execution going on.
 
+live-patching: depending on optimizations, all callers maybe impacted, therefore need to be patched as well.

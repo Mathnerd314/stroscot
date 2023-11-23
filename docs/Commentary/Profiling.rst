@@ -163,52 +163,44 @@ Benchmarking
 
 A good suite of benchmarks include microbenchmarks like optcarrot, small nontrivial programs like the language shootout tasks, and large applications like a production webserver. All of them are useful for detecting regressions.
 
-There are several timing methods:
+What is the ideal length of a benchmark? :cite:`suhEMPExecutionTime2017` measured programs of different runtimes - since the tasks were very similar, it is reasonable to try to fit standard deviation / runtime as a function of runtime. Going through the equations in Google Sheets and EMPv5 data (Table XIX), the linear law has R^2=0.84, overestimates all deviations up to 1000s, and barely fits the few long runs. The quadratic has R^2 = 0.931 and fits the data past 4s pretty well but again overestimates the 1,2,4s point. Also it makes little sense as a function, why would the deviation decrease past 15,000 s? The exponential and log functions are terrible. Finally, the power law has R^2 = 0.861. On a log-log graph it has a decent pattern of over/undershoot - it goes exactly through the 1s point, underestimates the next few, over estimates the next few, and finally underestimates the least few. The graph is mostly flat from 10s to 512s, so perhaps the first few results were unusually good and the last were affected by undiscovered sources of large errors. Plotting max-min as a function of duration (again log-log) we see this is the case - 1s is unusually low, then there is a mostly linear patch up to 1000s, then 2000-16,000s jumps sharply upwards. Again the power series is the best fit, R=0.817, by a long shot, with the next highest being the quadratic with R^2=0.572. Limiting just to 4s-1024s the fit is improved and the residuals look random for a power fit to max-min. For the standard deviation, excluding the outliers, a linear fit actually looks better than a power law. So we conclude that an ideal benchmark is 4s-1024s. And practically, shorter is better, so aiming for 4-8s is probably best. In particular the standard deviation is 23.634 t^0.505 without noise mitigation and 0.589241 t^0.342 with noise mitigation, where t is the runtime in seconds.
 
-If we can modify the program, we can use the rdtsc machine instruction to obtain the num-
-ber of clock cycles required by the program (a clock cycle on modern machines is a fraction of a
-nanosecond), which is quite repeatable. If we want ET (the three at the bottom right in the figure),
-there are a variety of timing methods available on Linux, to be examined shortly.
-If the program is not modifiable, such as if one is measuring a proprietary program, ET
-can be measured by an obvious timing tool such as time or Java’s popular timing API
-(System.currentTimeMillis()). Using ET, however, turns out to yield variability of about
-0:9%, which is not much better than what the sophisticated TTP achieves on programs with I/O.
-(The results given here and in the figure for execution time measurement protocol (EMP) concern
-INC8, which as we will describe shortly is a compute-only program running for about 8 s.)
-The purpose of this article is to show how to reduce this variability by over an order of magni-
-tude, to under 2 ms for INC8, or 0:02%. As we discuss in Section 8, more accurate measurements
-can produce better prediction models for execution time and can also reveal previously undetected
-phenomena within the operating system.
-Relying on ET measurement methods, therefore, may not be appropriate in circumstances in
-which it is important to know exactly how much actual time was spent only for the process. What
-is needed is a comprehensive timing protocol that provides both high resolution and low overhead,
-while eliminating extraneous factors.
+There are several metrics:
 
- such as the CPU frequency scaling. They are noisy, to the level of 2-3%, and so must be analyzed using statistical techniques for most improvements (in the initial phase, when 10%+ speedups are easy to obtain, this can probably be skipped). Some optimizations have small effects and it requires a lot of repeated runs to detect whether they are an improvement, but this doesn't mean the optimization is not useful. It may show good effects if you specifically write a microbenchmark for the optimization. The effects may show up more clearly in other metrics, such as CPU cycle count, machine code size, or amount of time spent in optimized code. There are techniques for mitigating/normalizing noise. I had a paper but lost it, it linked to a Github repo with a harness that looked interesting, but there are many papers exploring this area.
+* clock cycles, as measured by the rdtsc machine instruction or logic analyzer
+* wall clock time, as measured by stopwatch, the time command, or Java’s System.currentTimeMillis()
+* machine code size
+* one of the above for a specific program part, such as a method (as measured by profiling or sampling)
 
-:cite:`suhEMPExecutionTime2017` says to deactivate as many daemons as possible, activate the NTP daemon, lock the frequency and voltage, use an up-to-date Linux version, and discard runs during which a daemon ran for longer than some cutoff (as measured by increased process time).
+Different methods have different resolution (reporting capability), granularity (division of report into program parts), precision (variation betwen runs), and accuracy (closeness to "actual value", a difficult concept to define in benchmarking).
 
-What is the ideal length of a benchmark? :cite:`suhEMPExecutionTime2017` measured programs of different runtimes - since the tasks were very similar, it is reasonable to try to fit functions of runtime. Going through the equations in Google Sheets and EMPv5 data (Table XIX), the linear law has R^2=0.84, overestimates all deviations up to 1000s, and barely fits the few long runs. The quadratic has R^2 = 0.931 and fits the data past 4s pretty well but again overestimates the 1,2,4s point. Also it makes little sense as a function, why would the deviation decrease past 15,000 s? The exponential and log functions are terrible. Finally, the power law has R^2 = 0.861. On a log-log graph it has a decent pattern of over/undershoot - it goes exactly through the 1s point, underestimates the next few, over estimates the next few, and finally underestimates the least few. The graph is mostly flat from 10s to 512s, so perhaps the first few results were unusually good and the last were affected by undiscovered sources of large errors. Plotting max-min as a function of duration (again log-log) we see this is the case - 1s is unusually low, then there is a mostly linear patch up to 1000s, then 2000-16,000s jumps sharply upwards. Again the power series is the best fit, R=0.817, by a long shot, with the next highest being the quadratic with R^2=0.572. Limiting just to 4s-1024s the fit is improved and the residuals look random for a power fit to max-min. For the standard deviation, excluding the outliers, a linear fit actually looks better than a power law. So we conclude that an ideal benchmark is 4s-1024s. And practically, shorter is better, so aiming for 4-8s is probably best.
+Many variables affect precision and add noise. Often, we can control the variable to a fixed value, and remove its variance. But this may mean our results are unrealistic; for example frequency scaling is not usually turned off. A more clever approach is to measure the variable or proxies for the variable, and characterize the runtime as a function of the variable. This does generally require more benchmarking runs in order to gather the necessary statistical power. And even with many variables measured or controlled, there will still be noise. Still, it brings up what we want to measure: average? minimum? some theoretical ideal?
+
+In the initial stages of optimization, no statistical profiling is needed as 10%+ speedups are obvious. But as optimizations become more complex, speedups become smaller and powerful statistical techniques are of great help. Generally the task must be at least 5-10x larger than the measurement precision to get useful results without statistics. Thus, if the task is 10 msec, then the measurement technique must have better than 1 to 2 msec precision. This is only a rule of thumb; more precision is always better, but less precise measurements can be compensated for by doing more of them and analyzing statistics.
 
 
+Variables include:
 
- With this, the standard deviation goes from 23.634 t^0.505 to 0.589241 t^0.342 where t is the runtime in seconds, a 40x absolute improvement for 1s programs along with a 1.5x improvement in the nonlinear factor.
-*
+* CPU frequency and voltage scaling (proxy: performance counters :cite:`snowdonAccurateRuntimePrediction2007`)
+* execution of other programs/daemons (load)
+* CPU affinity
+* OS version
+* CPU temperature
+* filesystem cache, swap usage
+* processor-specific optimizations
+* Environment block contents. It contains strings which are generally consistent on one system but vary across systems, such as the username. It can lead to certain locations being aligned or misaligned, causing significant variations at run-time. It is mainly the size of the env block that matters.
+* ASLR - can be disabled globally or per-process basis with ``setarch -R``. But e.g. command-line arguments affect memory layout even when ASLR is disabled. Also the seed cannot be controlled. Most people run with ASLR enabled.
 
-Probably it is better to do a regression of daemon runtimes and frequency scaling vs. out
+
 * stabilizer - this randomizes memory layout, allowing the measurement of a layout-independent performance. Of course, if one is optimizing the memory layout then randomization is counterproductive.
 * `nanoBench <https://github.com/andreas-abel/nanoBench>`__ - this has a kernel module to allow reading hardware performance counters for microbenchmarks without incurring much overhead
 * `benchExec <https://github.com/sosy-lab/benchexec>`__ - this is very similar to the tool I remember, but focused on limiting resources rather than getting precise measurements
 * `hyperfine <https://github.com/sharkdp/hyperfine>`__ - this does some basic warmup and statistics, useful as a baseline for the bare minimum of Benchmarking
+* `temci <https://github.com/parttimenerd/temci>`__ sets up an environment
 
-The coarse-grain techniques are generally software-oriented and provide mea- surements with millisecond resolution. They are good for quick estimates of utilization.
-The fine-grain techniques are more elaborate and use specialized debugging hardware or logic analyzers, to provide microsecond resolution measurements.
+profiling:
 
-Execution time can be measured in different ways.
-The resolution is the limitation of the timing hardware's reporting capability - for example a stopwatch may report times with 0.01 sec resolution, /proc reports in ticks (microseconds), rtdsc reports in cycles (a few ns), and a logic analyzer might have 50 nsec resolution. There is also the granularity, whether times are reported for the progam, subroutine, loop, line of code, or assembly instruction.
-Precision is the variation in measurement from one run to the next. A perfectly precise method would deliver the same result for the same benchmark on every run. Usually precision is measured as the standard deviation of a large number of measurements. Generally, the variations from run to run are much larger than the resolution.
-Accuracy is the closeness of the measured value to the actual value. The actual value is generally not known in benchmarking, so it is difficult to measure accuracy. Generally it is assumed that the timing method is not systematically biased, so it can be estimated as the precision.
+* generate approximate profile of new/modified code, guessing using heuristics
+* cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions
+* AutoFDO profile https://perf.wiki.kernel.org/
 
-Generally the task must be at least 5-10x larger than the measurement precision to get useful results. Thus, if the task is 10 msec, then the measurement technique must have better than 1 to 2 msec precision. This is only a rule of thumb; more precision is always better, but less precise measurements can be compensated for by doing more of them.
-
-:cite:`snowdonAccurateRuntimePrediction2007` shows that frequency scaling can be accounted for by regression equations on performance counters, but there is still noise on the level of 2-7%.

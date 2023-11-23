@@ -63,14 +63,9 @@ A term is a symbol applied to other values.
 
 Note that if there is an appropriate syntax rule the second example could also be written as ``a ++++ b``, but it would be an equivalent value.
 
-Terms subsume algebraic data types, since an ADT value is a symbol applied to other values. An ADT is a "free" term that has no reduction rules defined.
+Terms subsume algebraic data types, since an ADT value is also a symbol applied to other values. An ADT is a "free" term that has no reduction rules defined, or conversely a term is an "untyped" ADT data constructor with no restrictions on its arguments.
 
-Terms also include the other function syntax, keyword arguments and so on.
-
-Infinite terms
---------------
-
-Sometimes it is useful to deal with terms that are solutions to a system of equations, like ``let x=cons 1 x in x``. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. ``let fib x y = cons x (fib y (x+y)) in fib 0 1`` requires infinitely many reductions to reduce to an infinite normal form.
+Term application also includes the other function syntax - keyword arguments, implicit arguments, and so on. This argument syntax is not usually reduced away, so is part of the term's value.
 
 Lists
 ======
@@ -297,6 +292,11 @@ Modules
 =======
 
 Modules are also first class, they are discussed in their own page.
+
+Infinite values
+===============
+
+Sometimes it is useful to deal with values that are solutions to a system of equations, like ``let x=cons 1 x in x``. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible expressions, e.g. ``let fib x y = cons x (fib y (x+y)) in fib 0 1`` requires infinitely many reductions to reduce to an infinite normal form (infinite list value).
 
 Rewriting system
 ================

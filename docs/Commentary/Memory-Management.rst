@@ -31,7 +31,7 @@ I guess it is possible that someone will have two versions of a function, one th
 Pointers
 ========
 
-Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of memory APIs and concluded that memory is best modeled as the global mutable array ``Memory = Map (Word,BitIdx) Status``. The status allows storing metadata, it's `a complex ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ which has various states like unallocated, committed, etc. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.
+Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of Windows/Linux memory APIs and concluded that memory is best modeled as the global mutable array ``Memory = Map (Word,BitIdx) Status``. The status allows storing metadata, it's `a complex ADT <https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs>`__ which has various states like unallocated, committed, etc. The array is indexed at the bit level because that's the granularity `Valgrind's Memcheck <https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine>`__ uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.
 
 It is simple enough to maintain "extra" status bits, and instrument memory functions to check the status of memory before operating. This is essentially what Valgrind does. With this it is possible to identify many common errors, like double free, use after free, access to undefined memory, and null pointer dereferencing. But there is still the possibility of overflowing a buffer into an adjacent allocation, or more generally `type punning <https://en.wikipedia.org/wiki/Type_punning>`__ by reading some memory as a format it was not written with. These sorts of possibilities are intrinsic to the "big array of bits" model, and many low-level hacks rely on such functionality, so I would say to use references if you want to avoid such things. But of course someone can easily add bounds-checking etc. on top of the basic pointer model as a library.
 
@@ -82,9 +82,14 @@ Eliminating a pointer write requires proving that the address is never read befo
 CHERI
 -----
 
-CHERI pointers are 129-bit, consisting of a 1-bit validity tag, bounds, permissions, object type, and actual pointer. Valid pointers may only be materialized in a register or memory by transforming an initial unbounded pointer obtained from the OS. This means that the simple model of pointers as integers is no longer valid. Instead, a pointer is the combination of an integer address and a capability. The `CHERI C/C++ API <https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf>`__ represents capabilities as ``void*``, addresses as ``vaddr_t``, and
+CHERI pointers are 129-bit, consisting of a 1-bit validity tag, bounds, permissions, object type, and actual pointer. Valid pointers may only be materialized in a register or memory by transforming an initial unbounded pointer obtained from the OS. This means that the simple model of pointers as integers is no longer valid. Instead, a pointer is the combination of an integer address and a capability. The `CHERI C/C++ API <https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf>`__ represents capabilities as ``void*`` and addresses as ``vaddr_t``.
 
 I tried to read further, but the model is complicated, essentially implementing a GC to avoid dangling pointers, so I am not sure it will ever become mainstream.
+
+Persistent memory
+-----------------
+
+The pointer API, assembly wrapping, and OS calls cover using persistent memory via standard file APIs or memory-mapped DAX. Memory is volatile while persistent memory is not, so persistent memory is faster storage, not weird RAM. And storage is complex enough that it seems best handled by libraries. Making the memory management system memkind-aware seems possible, like memory bound to NUMA nodes.
 
 References
 ==========
@@ -103,21 +108,6 @@ The location of the data of a reference is not fixed. If it's small enough it co
 Foreign operations like OS calls require a pointer to a memory address, because references don't necessarily exist in memory. The canonical way of doing this is simply reading the reference value and storing it in a buffer represented by a pointer ("materializing" it in memory). Internally, when compiling away the reference, the compiler tries to find a good way to store the reference - if it's lucky, it can backpropagate the pointer request and store the data there from the beginning, so that the "read and store" operation is actually a no-op that makes zero copies.
 
 But, in the fallback case of storing a few words, where a memory allocation is appropriate, the reference translates directly to a pointer allocation. The memory is configured to trap on stray user-level access, so that only the compiler-generated code has access. Even in this case, though, the reference's internal value is not the pointer itself, rather there is a more complex strategy of using a "handle" identifier that allows moving the data around after it is allocated.
-
-Representation
---------------
-
-A lot of languages have a fixed or default memory representation for values, e.g. a C struct, a Haskell ADT, and a Python object are always laid out in pretty much the same way. The more systems-level languages allow controlling the layout with flags, for example Rust has `type layout <https://doc.rust-lang.org/reference/type-layout.html>`__ which allows specifying the size and alignment/padding of its fields, and also C compatibility. But these flags are't really that powerful. Here's some examples of what can't be done:
-
-* specify the in-memory order of fields differently from their logical order
-* turn array-of-structs into struct-of-arrays
-* flattening a datatype, like ``Either Bool Int`` into ``(Bool,Int)``, or representing a linked list as a contiguous series of records.
-* NaN-boxing and NuN-boxing (`ref <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__ `2 <https://searchfox.org/mozilla-central/source/js/public/Value.h#526>`__), representing the JS ``Any`` type as a single 64-bit word.
-* parsing network packets into structured data
-
-Maybe some of these could be addressed by flags, but from the last two, it is clear that we are really looking for a general-purpose memory serialization interface. I looked at `Data.Binary <https://hackage.haskell.org/package/binary-0.8.9.1/docs/src/Data.Binary.Get.Internal.html#Decoder>`__, `store <https://hackage.haskell.org/package/store-core-0.4.4.4/docs/Data-Store-Core.html>`__, and :cite:`delawareNarcissusCorrectbyconstructionDerivation2019` and came up with the most general API I could, ``Write = Alloc (Size,Align) (Addr -> Write) | Store, Store = Map Addr MaskedWord`` and ``Unpack a = Maybe Addr -> Read -> a, Read = Map Addr Word``. This allows masked writes and multiple or fixed allocation addresses, but does not allow failing to read the value back. Also the ``pack`` function allows passing arbitrary side-band data to the ``unpack`` function.
-
-Maybe though, it is still not general enough, we should just have lens-like functions like ``write : Memory -> a -> Memory`` and ``read :: Memory -> a``. There still need to be constraints though, like that you get back what you wrote and non-interference of writes.
 
 .. _finalizers:
 
@@ -306,6 +296,52 @@ Portable mmap:
 * C++: https://github.com/mandreyel/mio
 * Rust: https://github.com/RazrFalcon/memmap2-rs
 
+Representation
+==============
+
+A lot of languages have a fixed or default memory representation for values, e.g. a C struct, a Haskell ADT, and a Python object are always laid out in pretty much the same way. The more systems-level languages allow controlling the layout with flags, for example Rust has `type layout <https://doc.rust-lang.org/reference/type-layout.html>`__ and also C compatibility. Layout is then defined by its size, alignment, padding/stride, and field offsets. Now it's great to have a compact representation of the memory layout - but only if you can actually write the memory layout you want using these features. But these flags are't really that powerful. Here's some examples of what can't generally be done with the current memory DSL's:
+
+* specify the in-memory order of fields differently from their logical order
+* specifying how to encode enumeration constants (per struct it appears in)
+* turn array-of-structs into struct-of-arrays
+* flattening a datatype, like ``Either Bool Int`` into ``(Bool,Int)``, or representing a linked list as a contiguous series of records.
+* storing some parts via pointer indirections (non-contiguous memory layout)
+* NaN-boxing and NuN-boxing (`ref <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__ `2 <https://searchfox.org/mozilla-central/source/js/public/Value.h#526>`__), representing the JS ``Any`` type as a single 64-bit word.
+* parsing network packets into structured data
+
+Maybe some of these could be addressed by flags, but from the last two, it is clear that we are really looking for a general-purpose memory serialization interface. I looked at `Data.Binary <https://hackage.haskell.org/package/binary-0.8.9.1/docs/src/Data.Binary.Get.Internal.html#Decoder>`__, `store <https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs>`__, and :cite:`delawareNarcissusCorrectbyconstructionDerivation2019`. Narcissus is too complex IMO:
+
+::
+
+  Format = Set (S, St, T, St)
+  Encode = S -> St -> Option (T, St)
+  Decode = T -> St -> Option (S, St)
+
+The state parameter can be gotten rid of by defining ``S = (S,St), T = (T,St)``:
+
+::
+
+  Format = Set (S, T)
+  Encode = S -> Option T
+  Decode = T -> Option S
+
+And we can make encode/decode total by defining ``S = {s | exists t. (s,t) in Format}``, ``T = {t | exists s. (s,t) in Format}``.
+
+I thought about letting ``pack`` narrow the range of values, e.g. rounding 1.23 to 1.2, but concluded that it would be surprising if storing a value to memory changed it. The rounding can be defined as a pre-pass over the data to convert it to a ``Measurement`` type that then has optimized storage.
+
+One tricky part is that the naive way to specify types interferes with overloading, subtyping and implicit conversions. ``pack (Int8 1)`` can give a byte as expected, but it can also implicitly convert to an ``Int32`` and give 4 bytes. Since we have dependent types this isn't a real issue, just make sure the code generated after representation specialization passes the type explicitly: ``pack Int32 (Int8 1)``.
+
+A few things need to optimize away for reasonable performance.  ``length . pack`` should optimize to something like ``const 20`` for most values, or at least something that doesn't allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.
+
+Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL's will be the standard / default, it'll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn't be hard.
+
+The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple ``(cell,unpack)``, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn't be an issue.
+
+So finally the most general API is ``Write = Alloc (Size,Align) (Addr -> Write) | Store, Store = Map Addr MaskedWord`` and ``Unpack a = Maybe Addr -> Read -> a, Read = Map Addr Word``. This allows masked writes and multiple or fixed allocation addresses, but does not allow failing to read the value back. Also the ``pack`` function allows passing arbitrary side-band data to the ``unpack`` function. Maybe though, it is still not general enough, we should just have lens-like functions like ``write : Memory -> a -> Memory`` and ``read :: Memory -> a``. There still need to be constraints though, like that you get back what you wrote and non-interference of writes.
+
+Now we also want to allow optimization of the memory representation. Consider some data points - if there is only one possible value, then the compiler should optimize this to a constant and not store it at all. If there are two possible values, the compiler should probably use a boolean flag and again hard-code the values as constants. If the potential values include all values of a given type (and nothing else), then the compiler should use the representation for that type. If the potential values include a given type, and also members of another type, then the compiler should use the most narrowly-defined representation that contains both of those types. And it should consider whether it can choose the representation of the union type so as to minimize the amount of conversion needed for the more commonly used type (as in NaN/NuN-boxing). If the potential values can be anything, then the compiler should use the universal representation.
+
+The process of fixing the memory representation of a program can be modeled as follows. We start with a program that passes around values. Then we insert conversion operations: on every declaration, we insert a conversion to binary, and on every use, we insert a conversion from binary. As the binary representation is defined so that a read of a write is is the identity, this transformation does not change the meaning of the program. Then we additionally write this binary representation to memory on the declaration, and read this binary representation from memory on use. Again this does not change the semantics due to the non-interference of writes property. Although, in reality it could change the semantics: maybe a cosmic ray or something could change what we have written. But at this point, our program operates purely on memory and does not have any values floating around.
 
 Model
 =====
@@ -335,45 +371,12 @@ locate memory leaks - places where allocated memory is never getting freed - mem
 
 Handling OOM gracefully - non-allocating subset of language. Should be enough to implement "Release some resources and try again" and "Save the user's work and exit" strategies. Dumping core is trivial so doesn't need to be considered.
 
-Layout is usually defined by its size, alignment, padding/stride, and field offsets, but this only specifies the representation of simple flat records. With enumerations, there is the question of how to encode constants. It gets even more complicated with ADTs, like JS's `value type <https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations>`__, and the choices often impact performance significantly. Finally there is the use of pointers. It complicates the memory management a bit to handle non-contiguous memory layouts, but the algorithms all deal with pointer trees anyway so I don't think it's intractable.
-
-The pack/unpack idea is similar to the `store library <https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs>`__ and the encode/decode functions used by Narcissus :cite:`delawareNarcissusCorrectbyconstructionDerivation2019`.
-
-Narcissus is too complex IMO:
-
-::
-
-  Format = Set (S, St, T, St)
-  Encode = S -> St -> Option (T, St)
-  Decode = T -> St -> Option (S, St)
-
-The state parameter can be gotten rid of by defining ``S = (S,St), T = (T,St)``:
-
-::
-
-  Format = Set (S, T)
-  Encode = S -> Option T
-  Decode = T -> Option S
-
-And we can make encode/decode total by defining ``S = {s | exists t. (s,t) in Format}``, ``T = {t | exists s. (s,t) in Format}``.
-
-I thought about letting ``pack`` narrow the range of values, e.g. rounding 1.23 to 1.2, but concluded that it would be surprising if storing a value to memory changed it. The rounding can be defined as a pre-pass over the data to convert it to a ``Measurement`` type that then has optimized storage.
-
-One tricky part is that the naive way to specify types interferes with overloading, subtyping and implicit conversions. ``pack (Int8 1)`` can give a byte as expected, but it can also implicitly convert to an ``Int32`` and give 4 bytes. Since we have dependent types this isn't a real issue, just make sure the code generated after representation specialization passes the type explicitly: ``pack Int32 (Int8 1)``.
-
-A few things need to optimize away for reasonable performance.  ``length . pack`` should optimize to something like ``const 20`` for most values, or at least something that doesn't allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.
-
-Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL's will be the standard / default, it'll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn't be hard.
-
-The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple ``(cell,unpack)``, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn't be an issue.
-
 A derived pointer is a reference plus an offset. When the address and layout of the object is known we can store the derived pointer as the sum of the value address and offset, allowing direct pointer dereferencing. But since the address is known we could also just store the derived pointer as the offset, so it's only useful if computing the sum is necessary and expensive.
 
 An object can be treated as an array, N[i] and N.length.
 
 The array part of shared memory is necessary because there is a double-word CAS operation on x86 (CMPXCHG16B), and also for efficiency.
 
-Supporting persistent memory: The pointer API, assembly wrapping, and OS calls cover using persistent memory via standard file APIs or memory-mapped DAX. Memory is volatile while persistent memory is not, so persistent memory is faster storage, not weird RAM. And storage is complex enough that it seems best handled by libraries. Making the memory management system memkind-aware seems possible, like memory bound to NUMA nodes.
 
 With persistent memory only word-sized stores are atomic, hence the choice of shared memory as an array of words. https://stackoverflow.com/questions/46721075/can-modern-x86-hardware-not-store-a-single-byte-to-memory says that there are in fact atomic x86 load/store instructions on the byte level.
 

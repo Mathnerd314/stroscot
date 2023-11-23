@@ -1,7 +1,9 @@
 Compiler library
 ################
 
-For the language to be useful it must have an implementation, and ideally a self-hosting implementation. In this framework the compiler, and hence the language, are really just another set of library modules. I will unimaginatively call this library the "compiler library". Per the standard library evolutionary design process, the compiler library will likely serve as the prototype for the standard library, so some investment is worthwhile.
+For the language to be useful it must have an implementation, and ideally a self-hosting implementation. In this framework the compiler, and hence the language, are really just another set of library modules. I will unimaginatively call this library the "compiler library". Per the standard library evolutionary design process, the compiler library will likely serve as the prototype for the standard library, so some investment is worthwhile. Writing a full-featured standard library is important for testing the compiler and getting the "feel" of the language.
+
+It is particularly important to have regression tests from the beginning, to catch near-infinite loop bugs and so on.
 
 Synthesizing
 ============
@@ -197,6 +199,15 @@ Internally, each exposed operation is implemented as overloading the symbol for 
 For fixed-precision integers and floating point, the operations work in stages: first, the numbers are converted to arbitrary-precision, then the operation is performed in arbitrary precision, then the result is rounded. In the case of fixed-precision integers, there are choices such as truncating (clamping/saturating), wrapping, or erroring on overflow. In the case of floating point, there are numerous rounding modes and errors as well.
 
 Commonly, the rounding is considered part of the operation, and the rounding mode is just fixed to some ambient default, but this is not optimal with respect to performance. Herbie provides a different approach. Given a real-valued expression and assumptions on the inputs, Herbie produces a list of equivalent computations, and computes their speed and accuracy for various choices of machine types and rounding. The programmer can then choose among these implementations, selecting the fastest, the most accurate, or some trade-off of speed and precision. The question is then how to expose this functionality in the language. The obvious choice is to make the rounding operation explicit. In interpreted mode arbitrary-precision is used, at least to the precision of the rounding, and in compiled mode Herbie is used. Or something like that.
+
+floating-point variables
+
+* register or memory.
+* on machines such as 68881 and x86, the floating registers keep excess precision. For most programs, the excess precision does only good, but a few programs rely on the precise definition of IEEE floating point.
+* fast: allow higher precision / formula transformations if that would result in faster code. it is unpredictable when rounding to the IEEE types takes place and NaNs, signed zero, and infinities are assumed to not occur.
+* standard: follow the rules specified in ISO C99 or C++; both casts and assignments cause values to be rounded to their semantic types
+* strict: rounding occurs after each operation, no transformations
+* exception handling, mode handling
 
 Matrix multiplication
 =====================
@@ -663,3 +674,225 @@ Function pipelines
 Haskell has function composition ``(.)`` and Julia has the "pipe" operator ``(|>)``.
 
 According to `YSAGuide <https://github.com/jrevels/YASGuide#other-syntax-guidelines>`__ pipelines like ``a . b . c`` are bad style and one should instead use intermediate results, ``\x -> { a1 = a x; b1 = b a1; c1 = c b1; return b1 }``, except with better named variables than ``x,a1,b1,c1``. The reason given is that debugging composed functions in the REPL is hard and clutters stacktraces. This sounds like a debugger problem - function pipelines are shorter and easier to read.
+
+Values
+======
+
+These are derived values, so they don't belong on the Values page.
+
+Lists
+-----
+
+A list is a function ``Nat -> Value|EndOfList``, with the proviso that if ``list i = EndOfList`` then ``list (i+k) = EndOfList`` for all ``k>=0``. Basic list syntax is the usual syntactic sugar for list values.
+
+::
+
+  [] // empty list
+  arr = [a, b, c]
+
+Heterogeneous lists are possible, ``[1,"x",int32 3]``.
+
+In Stroscot tuple is synonymous with list.
+
+
+Arrays
+------
+
+An indexing scheme is a function ``IndexValue -> [0..length]``. An array is a term ``array scheme list``. A typed array also specifies an element type, ``typed_array type scheme list``. Tensors are arrays that use compound values as indexes. Sparse arrays use indexing schemes that map many indices to one value.
+
+Strings
+-------
+
+A string is a list of bytes of a given length. Subtypes include C null-terminated strings, UTF-8 encoded strings, and characters (UTF-8 encoded strings containing exactly one grapheme cluster). Also filenames and paths.
+
+Bitvectors
+----------
+
+A bitvector is the symbol ``bits`` applied to a list of bits, ``bits [1,0,1]``.
+
+Date/time
+=========
+
+Various types of complete and incomplete date/time values. C.f. ISO 8601, `Wikipedia <https://en.wikipedia.org/wiki/Time_standard>`__
+
+* Timescale: TAI, TT, GPS, TCB, TCG, TDB, UT1, TST, LTST, UTC ``Z``, utc offset ``±hh:mm``, civil timezone, smeared UTC (3+ variants)
+* Instants:
+
+  * Named instants: Rata Die, Unix epoch, GPS epoch, ... (absolute or dependent on timescale)
+  * Offset time: offset, unit, instant
+  * complete date-time ``±YYYYY-MM-DDThh:mm:ss.ss`` + timescale
+  * time record: a collection of chronological key-value information sufficient to specify an instant (includes timescale). A date may be specified based on a calendar such as proleptic Gregorian or the many other calendars.
+
+* duration: a time difference as a collection of time fields (including a timescale)
+* partial date: a collection of time fields (including timescale) that has the semantics of replacing or overriding the fields of an instant with those of the partial date's
+* recurrence: RRule as documented in the iCalendar RFC. (https://dateutil.readthedocs.io/en/stable/rrule.html)
+
+Records
+=======
+
+A record is an ordered list of key-value pairs, ``record {a = 1, b = 2, c = 3}``.
+
+Maps
+----
+
+A map is an unordered set of key-value pairs, with the restriction that each key has one value. ``map {a = 1, b = 2, c = 3}``
+
+A table is a map from tuples to values.
+
+Multimap
+--------
+
+A multimap is an unordered bag of key-value pairs. ``multimap {a = 1, a = 1, b = 2, c = 2, c = 3}``
+
+Bags
+====
+
+A bags is a function ``numInstances :  Any -> Nat``.
+
+Pointers
+========
+
+Pointers are just a wrapper for particular bit patterns (integers), like ``pointer 0xdeadbeef``. You can do integer arithmetic and turn it into a pointer, but at least on x86-64 not all 64-bit integers are valid pointers.
+
+References
+==========
+
+References are a term ``ref r123``, where ``r123`` is a symbol. Most symbols are autogenerated inside the reference creation operation ``ref``, but there is no technical restriction on which symbols are allowed.
+
+Numbers
+=======
+
+A decimal number consists of a sign and a list of digits, a decimal marker, and more digits. A floating-point number is similar but adds a base and a separately specified exponent. A rational numbers is a ratio of two integers. A complex number is a real and an imaginary component, or a polar angle and magnitude, in both cases real numbers.
+
+Mathematical structures
+=======================
+
+A polynomial is a list or array of terms, where each term is the product of a number (coefficient) and zero or more variables, each raised to a power. A truncated power series is a polynomial in a single variable, starting from a constant and with terms increasing up to some power. A generating function is an infinite (formal) power series.
+
+An equation is a term where the top term is ``=`` and the left and right are mathematical expressions. A system of equations is a list of equations with ``and`` applied. A differential equation is an equation including partial derivatives or derivatives with respect to time.
+
+A probability distribution is a function from a sigma-algebra to a real number [0,1].
+
+A special function is a function over the real or complex numbers, usually taking one or two arguments and producing one output. Modular forms are special functions.
+
+Fields/rings/ideals are generally represented as simple symbols or terms.
+
+Piecewise/interpolated functions are terms that contain the data as a list.
+
+An optimization problem is a set (the search space, usually R^n or Z^n or so on with some constraints) together with an objective function mapping each possibility to a real number, that is either minimized or maximized.
+
+Intervals
+=========
+
+An interval has a start value, an end value, and two flags for whether each side is open or closed. There is also a "ball" representation as the middle and distance to each side. The values can be numbers but also other things like date/times.
+
+Units
+=====
+
+Units are symbols or terms. Quantities are terms ``quantity number unit``. See the Units page.
+
+Multimedia
+========
+
+I guess we use SVG as the main format for graphics, plots, and geometric objects. Raster images are just arrays of pixel colors. Similarly audio files and time-series data are arrays of samples.
+
+Graphs
+======
+
+Directed graphs are a set of vertices and a set of (vertex,vertex) pairs. Undirected graphs are the same but with the proviso that if (a,b) is present then (b,a) must be as well.
+
+Chemicals
+=========
+
+There are several ways of depicting these:
+
+* IUPAC name / CAS number - string/symbol
+* `SMILES <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__ - a string/term
+* Chemical markup language - XML
+* An annotated graph. Each bond (edge) has metadata, and the vertex stores 3D coordinates.
+
+Databases
+=========
+
+A database connection is a term with file handle data and other stuff. A database query is a term too. A database result is a list or a term or whatever.
+
+Regular expression
+==================
+
+A regular expression is a term with symbols for each formalism, like "or", concatenation, capture groups, quantifiers, the wildcard character, character classes, and so on.
+
+Finite-state machine
+====================
+
+A FSM is represented as some rewrite rules, each state/input rewrites to some new state.
+
+GIS
+===
+
+A geographic point has a geographic reference and 3 coordinates. Files may store vector and raster data. Raster is just an array with point information. Vector data may be points, lines, multi-lines (strings), or polygons. Topology information encodes topological connections between different shapes.
+
+Quantum computing
+=================
+
+Similarly to how a classical computation maps a RAM of n bits to another RAM of n bits, a quantum computation (gate) over n qubits is a unitary matrix of size 2^n by 2^n. A more structured representation involves forming quantum circuits out of qubit wires and quantum gates. There are also measure and set operations to interact with classical computations.
+
+Logical propositions
+====================
+
+These are just formulas, terms and binders built using the logical connectives (and, or, not, forall, exists, etc.) With sequent calculus we also allow the turnstile as a symbol.
+
+Infinite values
+===============
+
+A potentially-infinite expression is a function ``f : Nat -> Value`` that is Cauchy (under the term distance metric). Such expressions are considered equivalent to any other Cauchy sequence that is distance 0 away in the limit. There is a canonicalization or evaluation operation on potentially-infinite expressions; it either resolves the expression to a finite term, or proves that the term is not finite and resolves the expression to a canonical "simplest form" Cauchy sequence, or else errors.
+
+Generally such expressions are generated by evaluating with "fuel". For example, computing ``let fib x y = x:(fib y (x+y)) in fib 0 1`` with progressively more fuel generates the sequence ``0:*, 0:1:*, 0:1:1:*, 0:1:1:2:*``, etc. (where ``*`` is a long expression where evaluation ran out of fuel) This is Cauchy and not equivalent to any finite term, so it will be canonicalized as a "simplest form" Cauchy sequence, maybe as something like ``infiniteValue $ \n -> let fib x y = x:(fib y (x+y)) in take n (fib 0 1)``.
+
+One well-behaved subset of infinite values is the rational infinite values, which can be specified as the solution of a system of equations, for example ``let x=1:x in x``. These can be verified to be in normal form by ensuring no reduction in any equation.
+
+Programming with infinite data structures is simple, natural, and practical. But it is more complex than finite data structures. Computers do not have an infinite amount of memory, so these structures are not physically represented in memory, but rather symbolically. It is generally slower to access individual elements, and the execution engine may exhibit high resource usage if the computation is complex. Overall, performance is more unpredictable compared to a finite data structure. Some computations may not work at all. A simple rule of thumb is "demand" - the execution engine analyzes which parts of the structure are required, and generally a computation will work well if only a finite portion needs to be evaluated. But there are also tricks to evaluate computations with an infinite demand. If nothing works, the execution engine fails. But there are many tricks implemented - generally, if you can do it by hand the computer can do it too.
+
+So for example infinite lists, like the natural numbers starting with 1. We can try some operations:
+
+- when we print this infinite list, it is going to exceed our maximum output. So the right thing is to summarize the data - something like "[1,2,3,...]", where the ... indicates output was omitted. There are many heuristics to use for summarizing output.
+- summing the infinite list, this computes the limit as the list goes to infinity, so is infinity.
+- filtering the even numbers from an infinite list: this gives us the infinite list of all the even numbers.
+- filtering all the numbers less than 100: this again requires computing a limit, should be simple.
+- take - taking a certain number of elements of the list
+
+timeouts - is it better to just churn through a computation and let the user do Ctrl-C, or to enforce some limit like 5s per command? If the user running a long computation they will be very annoyed at an arbitrary timeout. What is more useful is "progress monitoring" - detecting "hangs" where evaluation is definitely not advancing productively.
+
+Infinite values separate control and data - first you construct an infinite value (data), then you decide what to do with it (control). In many languages, if you wanted to generate a list of 10 primes, and a list of 100 primes, you'd need to write a function to generate a finite list, and call it twice with a different amount of stuff to generate. But with more complicated usages of infinite data structures, it's not that simple - for example, if you want the first ten even numbers, with an infinite list it's just taking elements from the filtered list, but without, you would have to back-propagate the demand to generate 1 through 20. In general there is no clear way to do it up front by allocating a finite list.
+
+Numbers
+=======
+
+Normal numbers are simply terms, but a real number is a function ``ω+1 -> {-1,+1}`` excluding certain trivial sequences (c.f. `surreal numbers <https://en.wikipedia.org/wiki/Surreal_number>`__ S_ω "the field of real numbers" and sign expansion representation), and similarly p-adic numbers need special handling as the different metric completion of the rational numbers.
+
+Modules
+=======
+
+Modules are a set of rewriting rules together with exported and hidden symbols. These symbols are qualified to the module's value, in something of a recursive knot. The knot can be resolved by expanding the module out as an infinite term.
+
+Qualified symbols
+=================
+
+A qualified symbol or identifier is a term consisting of a bare symbol together with a module. A literal looks like ``qsym <module> sym123``. Normally you use the period operator ``.`` and write ``module.sym``, but the period operator is a function so this is an expression not a value. Examples of qualified symbols include the predefined symbols of the prelude, like ``null``, ``true``, and ``false`` - the latter two forming the boolean type.
+
+Portable operations
+===================
+
+Across platforms, hardware assembly instructions vary and many will likely not exist. So we need to abstract this. The API structure is that we have "native" modules providing direct hardware instructions, which give compile-time errors on attempts to use it on non-native platforms. Then on top we have a portable library that provides a cross-platform interface using switch statements like ``case platform of A -> implA; B -> implB; ...``. Most hardware operations are ubiquitous, so it makes sense to expose them directly as portable operations. Actually, it is hard to think of a reason not to expose a hardware primitive - probably every assembly instruction for our supported platforms should be exposed as a portable operation.
+
+Addition wraps on all 64-bit hardware in the same way so only needs one portable operation. Other instructions like division have differing behavior, so we can provide 0-returning (ARM native) and ``DivideByZero`` exception-throwing (Intel native) division as portable operations. There is also the intersection of these functions with signature ``Int -> Int\{0} -> Int``, which is useful when we want zero-overhead on multiple platforms. Ideally the compiler will be able to prove that the divisor is non-zero and so both of the 0-returning/exception-throwing versions will compile to one instruction on both ARM and x86.
+
+Then we also want portable APIs at a higher level, such as the limb-multiply routine in libGMP.
+
+Supporting different platforms (Linux, macOS, Windows, etc) is hard:
+
+* certain things aren't portable (e.g. the assembly used for switching thread stacks)
+* differences between Linux distributions - llvm-sys doesn't compile on Alpine Linux, and so Inko doesn't support Alpine Linux for the time being.
+* macOS ARM64 runners cost $0.16 per minute, and isn't available for forks / third-party contributors
+* Some platforms aren't supported on CI runners at all, like FreeBSD, so you need to use qemu or similar software to run FreeBSD in a VM
+
+Recommendation: err on the side of not supporting platforms, and document this, instead of sort-of-but-not-quite supporting it.
