@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Functional logic &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Intermediate representation" href="IR.html" />
+    <link rel="prev" title="As fast as C" href="Fastest.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Functional logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Functional logic</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/FunctionalLogic.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="functional-logic">
+<h1>Functional logic<a class="headerlink" href="#functional-logic" title="Link to this heading"></a></h1>
+<p>Curry, Verse, Flix, Oz, … all functional logic languages.</p>
+<p>Values. A value v is either a variable x or a head-normal form hnf. A variable counts as a value because an expression may evaluate to an as-yet-unknown logical variable.
+A head-normal form hnf is a conventional value.
+Expressions e include values v and other constructs:</p>
+<blockquote>
+<div><p>sequencing 𝑒𝑞; e. An “expression or equation” 𝑒𝑞 is either an ordinary (possibly failing) expression e, or an equation v = e; the syntax ensures that equations can only occur to the left of a “; ”.
+∃x. e - existential, introduces logical variable
+fail - yield no values
+choice e1 || e2 - yield multiple values (e1 followed by e2)
+one{e} - if e fails, fails, otherwise returns the first of the values yielded by e
+all{e} - reifies choices as a tuple; n choices mean tuple of length n</p>
+</div></blockquote>
+<p>A program 𝑝 ::= one{e} is a closed expression e (freevars(𝑒) = ∅) taking the first result. If the expression fails, the program fails.</p>
+<p>Rewrite rules:
+∃x1 x2 ··· xn. e means ∃x1. ∃x2. ···∃xn. e
+x := e1; e2 means ∃x. x = e1; e2
+⟨e1, ···, en⟩ means x1 := e1; ···; xn := en; ⟨x1, ···, xn⟩ where xi are fresh (again skip rebinding values)
+e1 = e2 means‡ x := e1; x = e2; x where x is fresh (skip if e1 is a value v and the equation is not the last in a sequence)
+if (∃x1 ···xn. e1) then e2 else e3 means (one{(∃x1 ···xn. e1; 𝜆⟨⟩. e2) || (𝜆⟨⟩. e3)})⟨⟩
+Note: In the rules marked with a superscript 𝛼, use 𝛼-conversion to satisfy the side condition</p>
+<p>A multi-equation pattern match such as
+function pat1 = body1
+function pat2 = body2</p>
+<p>desugars to</p>
+<p>function := λp.((∃x1 ··· xn. p = pat1; body1) || (∃x1 ··· xn. p = pat2; body2))</p>
+<p>Primops and literals:
+Hnfs include integer constants and primitive operators +, &gt;
+e1 + e2 means add⟨e1, e2⟩
+e1 &gt; e2 means gt⟨e1, e2⟩
+app-add add⟨k1, k2⟩ −→ k3 where 𝑘3 = 𝑘1 + 𝑘2
+app-gt gt⟨k1, k2⟩ −→ k1 if 𝑘1 &gt; 𝑘2
+app-gt-fail gt⟨k1, k2⟩ −→ fail if 𝑘1 ⩽ 𝑘2
+u-lit k1 = k2; e −→ e if 𝑘1 = 𝑘2</p>
+<p>Lambdas:
+A head-normal form hnf includes a lambda 𝜆x. e.
+Expressions e include applications v1 v2
+e1 e2 means f := e1; x := e2; f x, where f,x are fresh (skip rebinding values)
+𝜆⟨x1, ···, xn⟩. e means 𝜆p. ∃x1 ··· xn. p = ⟨x1, ···, xn⟩; e p fresh, n ⩾ 0
+app-beta𝛼 (𝜆x. e) (v) −→ e{v/x} if 𝑥 ∉ fvs(v)
+u-lambda a=b is stuck if a or b is a lambda</p>
+<p>Tuples:
+A head-normal form includes a tuple ⟨v1, ···, vn⟩.
+app-tup ⟨v0, ···, vn⟩(v) −→ ∃x. x = v; (x = 0; v0) || ··· || (x = n; vn) fresh x ∉ fvs(v, v0, ···, vn)
+app-tup-0 ⟨⟩(v) −→ fail
+u-tup ⟨v1, ···, vn⟩ = ⟨v′1, ···, v′n⟩; e −→ v1 = v′1; ···; vn = v′n; e
+all-choice all{v1 || ··· || vn } −→ ⟨v1, ···, vn⟩
+all-value all{v} −→ ⟨v⟩
+all-fail all{fail} −→ ⟨⟩</p>
+<p>Failure:
+u-fail hnf1 = hnf2; e −→ fail if no unification
+u-occurs x = V [ x ]; e −→ fail if V ≠ □ (i.e., all but x=x fail)
+fail-elim 𝑋 [ fail] −→ fail
+one-fail one{fail} −→ fail
+choose-r fail || e −→ e
+choose-l e || fail −→ e</p>
+<p>Existential:
+exi-elim ∃x. e −→ e if x ∉ fvs(e)
+eqn-elim ∃x. 𝑋 [ x = v; e ] −→ 𝑋 [ e ] if x ∉ fvs(𝑋 [ e ]) and v ≠ V [ x ]
+exi-float𝛼 𝑋 [ ∃x. e ] −→ ∃x. 𝑋 [ e ] if 𝑥 ∉ fvs(𝑋 )
+exi-swap ∃x. ∃y. e −→ ∃y. ∃x. e</p>
+<p>Equality:
+subst 𝑋 [ x = v; e ] −→ (𝑋 {v/x}) [ x = v; e{v/x} ] if v ≠ V [ x ]
+hnf-swap hnf = v; e −→ v = hnf ; e
+var-swap y = x; e −→ x = y; e if x ≺ y</p>
+<p>Sequences:
+seq-swap 𝑒𝑞; x = v; e −→ x = v; 𝑒𝑞; e unless (𝑒𝑞 is y = v′ and y ⪯ x)
+val-elim v; e −→ e
+seq-assoc (𝑒𝑞; e1); e2 −→ 𝑒𝑞; (e1; e2)
+eqn-float v = (𝑒𝑞; e1); e2 −→ 𝑒𝑞; (v = e1; e2)</p>
+<p>Choice:
+one-value one{v} −→ v
+one-choice one{v || e} −→ v
+choose-assoc (e1 || e2) || e3 −→ e1 || (e2 || e3)
+choose SX [𝐶𝑋 [ e1 || e2 ] ] −→ SX [𝐶𝑋 [ e1 ] || 𝐶𝑋 [ e2 ] ]</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Fastest.html" class="btn btn-neutral float-left" title="As fast as C" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="IR.html" class="btn btn-neutral float-right" title="Intermediate representation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -60,10 +60,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#namespacing">Namespacing</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#term">Term</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#infinite-terms">Infinite terms</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#term">Term</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lists">Lists</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tuple">Tuple</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#arrays">Arrays</a></li>
@@ -88,6 +85,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#modules">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#infinite-values">Infinite values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rewriting-system">Rewriting system</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pointers">Pointers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
@@ -133,12 +131,12 @@
            <div itemprop="articleBody">
              
   <section id="values">
-<h1>Values<a class="headerlink" href="#values" title="Permalink to this heading"></a></h1>
+<h1>Values<a class="headerlink" href="#values" title="Link to this heading"></a></h1>
 <p>In Stroscot values are defined to be expressions that are in normal form (strongly reduced), i.e. they evaluate to themselves. WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value. Traditionally a function is only defined on values, but lazy evaluation allows functions to produce useful behavior for non-values as well.</p>
 <p>Values are immutable (as <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">Rich Hickey says</a>) and have notions of equality, hashing, literal syntax, and deconstruction. In terms of memory management values can be copied freely, and discarded if they are no longer needed.</p>
 <p>For convenience, “value” really describes the equivalence class of expressions that reduce to a value. In particular here we describes values by their concise syntactic form. These syntactic forms typically are reducible terms, rather than normal forms - usually they reduce to a value of the compiler’s preferred data structure implementation. Programs may define the syntax here to other values.</p>
 <section id="symbols">
-<h2>Symbols<a class="headerlink" href="#symbols" title="Permalink to this heading"></a></h2>
+<h2>Symbols<a class="headerlink" href="#symbols" title="Link to this heading"></a></h2>
 <p>Symbols or identifiers are unique values. Bare symbols can be either ordinary or extended, vaguely like <a class="reference external" href="https://docs.raku.org/language/syntax#Identifiers">Raku</a>. However symbols defined in modules are qualified to that module, hence more specific.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span>
 <span class="nf">underscore_symbol</span>
@@ -148,29 +146,29 @@
 </pre></div>
 </div>
 <section id="ordinary">
-<h3>Ordinary<a class="headerlink" href="#ordinary" title="Permalink to this heading"></a></h3>
+<h3>Ordinary<a class="headerlink" href="#ordinary" title="Link to this heading"></a></h3>
 <p>An ordinary identifier matches the pattern <code class="docutils literal notranslate"><span class="pre">alphanum</span> <span class="pre">(alphanum|((apostrophe|hyphen)alphanum))*</span></code>, i.e. a sequence of digits/letters/underscores and isolated/embedded apostrophes or hyphens.</p>
 <p>“Alphabetic” means Unicode General Category value Letter (L), and the underscore _. “Numeric” includes characters with the Unicode General Categories value Number and Decimal Digit (Nd).</p>
 <p>Case is significant, thus <code class="docutils literal notranslate"><span class="pre">foo</span></code>, <code class="docutils literal notranslate"><span class="pre">Foo</span></code>, and <code class="docutils literal notranslate"><span class="pre">FOO</span></code> are distinct identifiers.</p>
 </section>
 <section id="extended">
-<h3>Extended<a class="headerlink" href="#extended" title="Permalink to this heading"></a></h3>
+<h3>Extended<a class="headerlink" href="#extended" title="Link to this heading"></a></h3>
 <p>Extended symbols use an escape sequence to allow more freedom. They have the form <code class="docutils literal notranslate"><span class="pre">&#64;&quot;sym</span> <span class="pre">str&quot;</span></code> (from Zig), which allows spaces etc. following the syntax for a string. An extended symbol matches a corresponding ordinary symbol if that form exists, i.e. <code class="docutils literal notranslate"><span class="pre">null</span> <span class="pre">==</span> <span class="pre">&#64;&quot;null&quot;</span></code>.</p>
 <p>In addition parsing rules for operator symbols may be suppressed with parentheses. For example <code class="docutils literal notranslate"><span class="pre">(+)</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">&#64;&quot;+&quot;</span></code>. There is also the empty parentheses symbol <code class="docutils literal notranslate"><span class="pre">()</span></code>, called “unit”.</p>
 </section>
 <section id="qualified">
-<h3>Qualified<a class="headerlink" href="#qualified" title="Permalink to this heading"></a></h3>
+<h3>Qualified<a class="headerlink" href="#qualified" title="Link to this heading"></a></h3>
 <p>A qualified symbol is a bare symbol together with a module reference. A literal looks like <code class="docutils literal notranslate"><span class="pre">qsym</span> <span class="pre">&lt;module&gt;</span> <span class="pre">sym123</span></code>. Normally you use the period operator <code class="docutils literal notranslate"><span class="pre">.</span></code> and write <code class="docutils literal notranslate"><span class="pre">module.sym</span></code>, but the period operator is a function not a constructor.</p>
 <p>Examples of qualified symbols include the predefined symbols of the prelude, like <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">false</span></code> - the latter two forming the boolean type.</p>
 <p>It is key to support side-by-side execution of multiple versions of the same functionality. So the module part of a qualified name includes a version number and a cryptographic hash.</p>
 </section>
 <section id="namespacing">
-<h3>Namespacing<a class="headerlink" href="#namespacing" title="Permalink to this heading"></a></h3>
+<h3>Namespacing<a class="headerlink" href="#namespacing" title="Link to this heading"></a></h3>
 <p>Identifiers can be qualified by periods: <code class="docutils literal notranslate"><span class="pre">a.b.c</span></code>. <code class="docutils literal notranslate"><span class="pre">.</span></code> is an infix left-associative operator that binds tighter than juxtaposition. This gets resolved to a nondeterministic set of qualified names.</p>
 </section>
 </section>
 <section id="term">
-<h2>Term<a class="headerlink" href="#term" title="Permalink to this heading"></a></h2>
+<h2>Term<a class="headerlink" href="#term" title="Link to this heading"></a></h2>
 <p>A term is a symbol applied to other values.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tree</span><span class="w"> </span><span class="p">(</span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span>
 <span class="p">(</span><span class="o">++++</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span>
@@ -178,15 +176,11 @@
 </pre></div>
 </div>
 <p>Note that if there is an appropriate syntax rule the second example could also be written as <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">++++</span> <span class="pre">b</span></code>, but it would be an equivalent value.</p>
-<p>Terms subsume algebraic data types, since an ADT value is a symbol applied to other values. An ADT is a “free” term that has no reduction rules defined.</p>
-<p>Terms also include the other function syntax, keyword arguments and so on.</p>
-<section id="infinite-terms">
-<h3>Infinite terms<a class="headerlink" href="#infinite-terms" title="Permalink to this heading"></a></h3>
-<p>Sometimes it is useful to deal with terms that are solutions to a system of equations, like <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x=cons</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">x</span></code>. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible terms, e.g. <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">fib</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">cons</span> <span class="pre">x</span> <span class="pre">(fib</span> <span class="pre">y</span> <span class="pre">(x+y))</span> <span class="pre">in</span> <span class="pre">fib</span> <span class="pre">0</span> <span class="pre">1</span></code> requires infinitely many reductions to reduce to an infinite normal form.</p>
-</section>
+<p>Terms subsume algebraic data types, since an ADT value is also a symbol applied to other values. An ADT is a “free” term that has no reduction rules defined, or conversely a term is an “untyped” ADT data constructor with no restrictions on its arguments.</p>
+<p>Term application also includes the other function syntax - keyword arguments, implicit arguments, and so on. This argument syntax is not usually reduced away, so is part of the term’s value.</p>
 </section>
 <section id="lists">
-<h2>Lists<a class="headerlink" href="#lists" title="Permalink to this heading"></a></h2>
+<h2>Lists<a class="headerlink" href="#lists" title="Link to this heading"></a></h2>
 <p>A list represents an ordered sequence of values that is empty or finite, but not infinite (only terms can be infinite).</p>
 <p>Basic list syntax is the usual syntactic sugar for list values.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">[]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">empty</span><span class="w"> </span><span class="n">list</span>
@@ -202,18 +196,18 @@
 <p><code class="docutils literal notranslate"><span class="pre">++</span></code> is just a symbol, so you can write <code class="docutils literal notranslate"><span class="pre">[1]</span> <span class="pre">++</span> <span class="pre">2</span></code> for example, i.e. the term <code class="docutils literal notranslate"><span class="pre">(++)</span> <span class="pre">(list</span> <span class="pre">1)</span> <span class="pre">2</span></code>.</p>
 <p>A list has push and pop operations from head and tail so can be used as a stack, queue, or double-ended queue (dequeue).</p>
 <section id="tuple">
-<h3>Tuple<a class="headerlink" href="#tuple" title="Permalink to this heading"></a></h3>
+<h3>Tuple<a class="headerlink" href="#tuple" title="Link to this heading"></a></h3>
 <p>In Stroscot tuple is synonymous with list - they’re both immutable. There’s not a different type with different semantics like in Python or Pure. You can use the tuple syntax <code class="docutils literal notranslate"><span class="pre">(a,b)</span></code> in place of list syntax <code class="docutils literal notranslate"><span class="pre">[a,b]</span></code> whenever convenient.</p>
 </section>
 <section id="arrays">
-<h3>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h3>
+<h3>Arrays<a class="headerlink" href="#arrays" title="Link to this heading"></a></h3>
 <p>(Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code> defines a 1-based array where <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">i</span></code>. Maybe there is also an element type, <code class="docutils literal notranslate"><span class="pre">typed_array</span> <span class="pre">int32</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code></p>
 <p>Mutable arrays are a reference pointing to an immutable array. Operations are optimized by the memory system, so it does in-place operations where possible but can still resize the array. Conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> to get the first element, i.e. taking an immutable snapshot and then reading/modifying it. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
 <p>There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. You can read a different type than you wrote, and it doesn’t have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.</p>
 <p><span id="id1">[]</span> says that “allowing the size of arrays to be decided at run time […] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas.” But Storscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time.</p>
 </section>
 <section id="tensors">
-<h3>Tensors<a class="headerlink" href="#tensors" title="Permalink to this heading"></a></h3>
+<h3>Tensors<a class="headerlink" href="#tensors" title="Link to this heading"></a></h3>
 <p>Tensors are just nested lists, e.g. here is a (3,2,5)-sized rank 3 tensor:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">[[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">],</span>
 <span class="w">  </span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">]],</span>
@@ -245,7 +239,7 @@
 </section>
 </section>
 <section id="strings">
-<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
+<h2>Strings<a class="headerlink" href="#strings" title="Link to this heading"></a></h2>
 <p>A string is a sequence of bytes of a given length. Subtypes include null-terminated strings like C and UTF-8 encoded strings.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Hello world!\n&quot;
 ``Hello user ${id}``
@@ -288,22 +282,22 @@ Escape sequences are defined:</p>
 </pre></div>
 </div>
 <section id="characters">
-<h3>Characters<a class="headerlink" href="#characters" title="Permalink to this heading"></a></h3>
+<h3>Characters<a class="headerlink" href="#characters" title="Link to this heading"></a></h3>
 <p>There is no explicit syntax for characters, instead a character is a Unicode string containing exactly one grapheme cluster. Unicode provides an algorithm for identifying grapheme clusters in UAX #29. The main notable feature of the algorithm is that a grapheme cluster / character is not just a single Unicode code point and may be arbitrarily long due to the use of combining characters/accents and ZWJs. For example, “G” + grave-accent is a character represented by two Unicode code points, and emojis similarly have lots of code points, as does Zalgo text. Hence a character is in general an arbitrary length sequence of codepoints and it is simplest and most correct to define a character as a type of string.</p>
 </section>
 </section>
 <section id="bitvectors">
-<h2>Bitvectors<a class="headerlink" href="#bitvectors" title="Permalink to this heading"></a></h2>
+<h2>Bitvectors<a class="headerlink" href="#bitvectors" title="Link to this heading"></a></h2>
 <p>Most data in a computer simply sits in storage and has no easily accessible interpretation. It is simply a sequence of bits. As such Stroscot provides bitvector values to represent binary data.</p>
 <p>The normal form of a bitvector is just the symbol <code class="docutils literal notranslate"><span class="pre">bits</span></code> applied to a list of bits, <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">[1,0,1]</span></code>. The symbol marks that the list should be stored compactly.</p>
 <p>A more compact way to write a bitvector is via a string <code class="docutils literal notranslate"><span class="pre">bits</span> <span class="pre">&quot;abcd\x0F&quot;</span></code>. This syntax uses UTF-8 characters and hexadecimal escapes, but is limited to expressing bitvectors whose length is a multiple of 8.</p>
 </section>
 <section id="date-time">
-<h2>Date/time<a class="headerlink" href="#date-time" title="Permalink to this heading"></a></h2>
+<h2>Date/time<a class="headerlink" href="#date-time" title="Link to this heading"></a></h2>
 <p>Date/time values are written using symbols applied to strings, lists, or records using ISO 8601 style formats, e.g. <code class="docutils literal notranslate"><span class="pre">instant</span> <span class="pre">&quot;2011-12-03T10:15:30.999999999Z&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">gregorianDate</span> <span class="pre">[2010,12,03]</span></code>, or <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">{</span> <span class="pre">hour</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">minute</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">second</span> <span class="pre">=</span> <span class="pre">12.3</span> <span class="pre">}</span></code>. This hides all internal representation details. Internally there is a more compact form, e.g. a 128-bit number.</p>
 </section>
 <section id="records">
-<h2>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h2>
+<h2>Records<a class="headerlink" href="#records" title="Link to this heading"></a></h2>
 <p>Records are like C structs or Python dictionaries. The order of the fields is remembered, so this data type is a list of key-value pairs.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">rec</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span>
 <span class="nf">rec</span><span class="o">.</span><span class="n">a</span><span class="w"> </span><span class="o">#</span><span class="w"> </span><span class="mi">1</span>
@@ -317,14 +311,14 @@ Escape sequences are defined:</p>
 </div>
 <p>Once you get to four values, it is best to make a record with named entries instead of using a tuple.</p>
 <section id="maps">
-<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this heading"></a></h3>
+<h3>Maps<a class="headerlink" href="#maps" title="Link to this heading"></a></h3>
 <p>Maps are the same as records except the fields are not ordered (set of pairs).</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">map</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
 <section id="multimap">
-<h3>Multimap<a class="headerlink" href="#multimap" title="Permalink to this heading"></a></h3>
+<h3>Multimap<a class="headerlink" href="#multimap" title="Link to this heading"></a></h3>
 <p>A multimap is a map where the values are nonempty bags.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">multimap</span><span class="w"> </span><span class="p">{</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span>
 <span class="c1">-- same as</span>
@@ -334,7 +328,7 @@ Escape sequences are defined:</p>
 </section>
 </section>
 <section id="sets">
-<h2>Sets<a class="headerlink" href="#sets" title="Permalink to this heading"></a></h2>
+<h2>Sets<a class="headerlink" href="#sets" title="Link to this heading"></a></h2>
 <p>Sets are the mathematical definition, i.e. a function <code class="docutils literal notranslate"><span class="pre">isElemOf</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{Present|Absent}</span></code>. They may be specified by logical formulas. Finite sets may be specified as lists with no repeated values, similar to a map whose values are all the symbol <code class="docutils literal notranslate"><span class="pre">Present</span></code>.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">universalSet</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="kr">_</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Present</span><span class="p">)</span>
 <span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
@@ -346,26 +340,30 @@ Escape sequences are defined:</p>
 <p>More notation for sets is discussed on the <span class="xref std std-ref">Sets</span> page.</p>
 </section>
 <section id="bags">
-<h2>Bags<a class="headerlink" href="#bags" title="Permalink to this heading"></a></h2>
+<h2>Bags<a class="headerlink" href="#bags" title="Link to this heading"></a></h2>
 <p>Bags are unordered multisets, similar to a map whose values are nonnegative integers.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">bag</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="priority-queue">
-<h3>Priority queue<a class="headerlink" href="#priority-queue" title="Permalink to this heading"></a></h3>
+<h3>Priority queue<a class="headerlink" href="#priority-queue" title="Link to this heading"></a></h3>
 <p>This is a bag plus an ordering operation.</p>
 </section>
 </section>
 <section id="lambdas">
-<h2>Lambdas<a class="headerlink" href="#lambdas" title="Permalink to this heading"></a></h2>
+<h2>Lambdas<a class="headerlink" href="#lambdas" title="Link to this heading"></a></h2>
 <p>Lambdas are first-class and hence values. Equality is determined by alpha beta eta equality (i.e., beta reduce to normal form, eta reduce, and compare modulo alpha equivalence).</p>
 </section>
 <section id="modules">
-<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h2>
+<h2>Modules<a class="headerlink" href="#modules" title="Link to this heading"></a></h2>
 <p>Modules are also first class, they are discussed in their own page.</p>
 </section>
+<section id="infinite-values">
+<h2>Infinite values<a class="headerlink" href="#infinite-values" title="Link to this heading"></a></h2>
+<p>Sometimes it is useful to deal with values that are solutions to a system of equations, like <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">x=cons</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">in</span> <span class="pre">x</span></code>. These are also values. For terms with no reduction rules, there is a way to compute the (unique) minimal graph representation, where loops in the graph represent infinite cyclic repetitions. There are also infinitely reducible expressions, e.g. <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">fib</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">cons</span> <span class="pre">x</span> <span class="pre">(fib</span> <span class="pre">y</span> <span class="pre">(x+y))</span> <span class="pre">in</span> <span class="pre">fib</span> <span class="pre">0</span> <span class="pre">1</span></code> requires infinitely many reductions to reduce to an infinite normal form (infinite list value).</p>
+</section>
 <section id="rewriting-system">
-<h2>Rewriting system<a class="headerlink" href="#rewriting-system" title="Permalink to this heading"></a></h2>
+<h2>Rewriting system<a class="headerlink" href="#rewriting-system" title="Link to this heading"></a></h2>
 <p>A rewriting system consists of a set of rewrite rules. They are defined over a fixed abstract rewriting system called the “substitution calculus” consisting of the proofs from Stroscot’s core logic, where reduction is cut elimination. Free variables etc. are incorporated by extending the <code class="docutils literal notranslate"><span class="pre">Use</span></code> rule. Terms are representatives of equivalence classes of proofs under <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;*</span></code> of the substitution calculus. Contexts are similarly representatives of precontexts.</p>
 <p>A (conditional) rewrite rule has the form <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">C1,</span> <span class="pre">...,</span> <span class="pre">Cn</span></code> where <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code> are both terms. The conditions take the form of predicates <code class="docutils literal notranslate"><span class="pre">Pi(x1,</span> <span class="pre">...,</span> <span class="pre">xm,</span> <span class="pre">-&gt;)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">xi</span></code> are the free variables of <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code>, and <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is the rewrite relation of the system. An unconditional rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span></code> is one where the conditions <code class="docutils literal notranslate"><span class="pre">Ci</span></code> are always true. Example predicates are:</p>
 <ul class="simple">
@@ -375,16 +373,16 @@ Escape sequences are defined:</p>
 <p>A term <code class="docutils literal notranslate"><span class="pre">M</span></code> rewrites to a term <code class="docutils literal notranslate"><span class="pre">N</span></code> by a rewrite rule <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">Ci</span></code> if, for some context <code class="docutils literal notranslate"><span class="pre">C</span></code> with one hole, and substitution <code class="docutils literal notranslate"><span class="pre">σ</span></code>, the propositions <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">C[l</span> <span class="pre">/.</span> <span class="pre">σ]</span></code>, <code class="docutils literal notranslate"><span class="pre">C[r</span> <span class="pre">/.</span> <span class="pre">σ]</span> <span class="pre">&lt;-&gt;*</span> <span class="pre">N</span></code>, and <code class="docutils literal notranslate"><span class="pre">Ci</span> <span class="pre">/.</span> <span class="pre">σ</span></code> all hold, where <code class="docutils literal notranslate"><span class="pre">C[l]</span></code> means <code class="docutils literal notranslate"><span class="pre">C</span></code> with the hole substituted by <code class="docutils literal notranslate"><span class="pre">l</span></code>, and <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;*</span></code> is the relation of the substitution calculus.</p>
 </section>
 <section id="pointers">
-<h2>Pointers<a class="headerlink" href="#pointers" title="Permalink to this heading"></a></h2>
+<h2>Pointers<a class="headerlink" href="#pointers" title="Link to this heading"></a></h2>
 <p>Pointers are just a wrapper for particular bit patterns (integers), like <code class="docutils literal notranslate"><span class="pre">pointer</span> <span class="pre">0xdeadbeef</span></code>. You can do integer arithmetic and turn it into a pointer, but at least on x86-64 not all 64-bit integers are valid pointers.</p>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
 <p>References are like pointers but use symbols instead of integers, we’ll go with <code class="docutils literal notranslate"><span class="pre">Ref</span> <span class="pre">r123</span></code> for syntax where <code class="docutils literal notranslate"><span class="pre">r123</span></code> is a symbol. The main difference from a pointer is that you can’t do arithmetic on symbols. Most symbols are autogenerated inside the reference creation operation <code class="docutils literal notranslate"><span class="pre">ref</span></code>, but you can also write reference values directly. This is mainly for convenience in debugging at the REPL, since fixed symbols are tantamount to global variables and hence are bad programming practice.</p>
 <p>Postfix ++ and – are statements</p>
 </section>
 <section id="data-structures">
-<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h2>
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Link to this heading"></a></h2>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Arrays
     Array
     Bit array

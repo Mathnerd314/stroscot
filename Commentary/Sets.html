@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -111,12 +113,14 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -149,14 +153,14 @@
            <div itemprop="articleBody">
              
   <section id="sets">
-<h1>Sets<a class="headerlink" href="#sets" title="Permalink to this heading"></a></h1>
+<h1>Sets<a class="headerlink" href="#sets" title="Link to this heading"></a></h1>
 <p>Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see <a class="reference internal" href="Verification.html#verification"><span class="std std-ref">Verification</span></a>). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.</p>
 <section id="id1">
-<h2>Sets<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<h2>Sets<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>Sets in Stroscots are defined by a predicate <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">isElementOf</span> <span class="pre">S</span> <span class="pre">:</span> <span class="pre">Value</span> <span class="pre">-&gt;</span> <span class="pre">Set</span> <span class="pre">-&gt;</span> <span class="pre">Bool</span></code>, where <code class="docutils literal notranslate"><span class="pre">Set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">|</span> <span class="pre">forall</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Any.</span> <span class="pre">(a</span> <span class="pre">isElemof</span> <span class="pre">s</span> <span class="pre">:</span> <span class="pre">Bool)</span> <span class="pre">}</span></code>. The predicate can describe any side effect free computation, so a set can describe any boolean function. As described in <a class="reference internal" href="Logic.html#paradoxes"><span class="std std-ref">Paradoxes</span></a> Stroscot avoids the set-theoretic paradoxes by requiring every set definition to be well-founded.</p>
 <p>Sets don’t contain null by default, you have to add it to the predicate as an allowed value.</p>
 <section id="definition-by-overloading">
-<h3>Definition by overloading<a class="headerlink" href="#definition-by-overloading" title="Permalink to this heading"></a></h3>
+<h3>Definition by overloading<a class="headerlink" href="#definition-by-overloading" title="Link to this heading"></a></h3>
 <p>The usual method combination mechanisms apply. In particular you can define sets by creating a fresh symbol and overloading <code class="docutils literal notranslate"><span class="pre">isElementOf</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">A</span>
 <span class="mi">1</span><span class="w"> </span><span class="n">isElementOf</span><span class="w"> </span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">true</span>
@@ -175,7 +179,7 @@
 </div>
 </section>
 <section id="set-syntax-definition">
-<h3>Set syntax definition<a class="headerlink" href="#set-syntax-definition" title="Permalink to this heading"></a></h3>
+<h3>Set syntax definition<a class="headerlink" href="#set-syntax-definition" title="Link to this heading"></a></h3>
 <p>You can also define sets with set-builder notation <code class="docutils literal notranslate"><span class="pre">{s</span> <span class="pre">:</span> <span class="pre">SomeSet</span> <span class="pre">|</span> <span class="pre">predicate</span> <span class="pre">s</span> <span class="pre">}</span></code>, set literals <code class="docutils literal notranslate"><span class="pre">{1,2,3}</span></code>, and set operations (union <code class="docutils literal notranslate"><span class="pre">|</span></code>, <code class="docutils literal notranslate"><span class="pre">intersect</span></code>, complement <code class="docutils literal notranslate"><span class="pre">not</span></code>, difference <code class="docutils literal notranslate"><span class="pre">-</span></code>, symmetric difference <code class="docutils literal notranslate"><span class="pre">symdiff</span></code>). Although it is possible to override the definitions of these sets with a definition like <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">isElementOf</span> <span class="pre">(Int|Bool)</span> <span class="pre">=</span> <span class="pre">false</span></code>, this is considered poor practice - it is better to define a fresh symbol for the set.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">}</span>
 <span class="p">{</span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">List</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">}</span>
@@ -189,7 +193,7 @@
 </div>
 </section>
 <section id="element-definition">
-<h3>Element definition<a class="headerlink" href="#element-definition" title="Permalink to this heading"></a></h3>
+<h3>Element definition<a class="headerlink" href="#element-definition" title="Link to this heading"></a></h3>
 <p>Because specifying a new element of a set is common, there is a special syntax using <code class="docutils literal notranslate"><span class="pre">symbol</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">A</span>
 
@@ -200,7 +204,7 @@
 </div>
 </section>
 <section id="poset-definition">
-<h3>Poset definition<a class="headerlink" href="#poset-definition" title="Permalink to this heading"></a></h3>
+<h3>Poset definition<a class="headerlink" href="#poset-definition" title="Link to this heading"></a></h3>
 <p>Sets form a poset under the subset relation (inclusion), which is called <code class="docutils literal notranslate"><span class="pre">Set</span></code>. It is possible to use the poset constraint language with this to define sets. For example this defines a set <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">{1}</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span>
 <span class="nf">elemR</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">}</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span>
@@ -213,7 +217,7 @@
 </div>
 </section>
 <section id="ranges">
-<h3>Ranges<a class="headerlink" href="#ranges" title="Permalink to this heading"></a></h3>
+<h3>Ranges<a class="headerlink" href="#ranges" title="Link to this heading"></a></h3>
 <p>The basic idea is that any numeric set of integers can be given via a lower and upper bound. In particular <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">isElementOf</span> <span class="pre">(range</span> <span class="pre">a</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">(n</span> <span class="pre">isElemOf</span> <span class="pre">Integer)</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">&lt;=</span> <span class="pre">n</span> <span class="pre">&lt;</span> <span class="pre">b</span></code>. Many typical integral data types could be represented as ranges in this way:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">unsigned</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">^</span><span class="n">n</span><span class="p">)</span>
 <span class="nf">signed</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">range</span><span class="w"> </span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">^</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">^</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -235,11 +239,11 @@
 </div>
 </section>
 <section id="fixed-point-rationals">
-<h3>Fixed-point rationals<a class="headerlink" href="#fixed-point-rationals" title="Permalink to this heading"></a></h3>
+<h3>Fixed-point rationals<a class="headerlink" href="#fixed-point-rationals" title="Link to this heading"></a></h3>
 <p>There are also fixed-point rational formats like <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">divided_by</span> <span class="pre">2^5</span> <span class="pre">:</span> <span class="pre">Scaled</span> <span class="pre">int</span> <span class="pre">(2^5)</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> is an integer and <code class="docutils literal notranslate"><span class="pre">2^5</span> <span class="pre">``</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">denominator.</span> <span class="pre">The</span> <span class="pre">definition</span> <span class="pre">is</span> <span class="pre">just</span> <span class="pre">``Scaled</span> <span class="pre">t</span> <span class="pre">d</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">Rational</span> <span class="pre">|</span> <span class="pre">numerator</span> <span class="pre">x</span> <span class="pre">isElemOf</span> <span class="pre">t</span> <span class="pre">and</span> <span class="pre">denominator</span> <span class="pre">x</span> <span class="pre">==</span> <span class="pre">d</span> <span class="pre">}</span></code>.</p>
 </section>
 <section id="enumeration">
-<h3>Enumeration<a class="headerlink" href="#enumeration" title="Permalink to this heading"></a></h3>
+<h3>Enumeration<a class="headerlink" href="#enumeration" title="Link to this heading"></a></h3>
 <p>An enumeration is a set of symbols but the order of the symbols is defined.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">enum</span><span class="w"> </span><span class="kt">Doneness</span><span class="w"> </span><span class="p">{</span><span class="kt">Rare</span><span class="p">,</span><span class="w"> </span><span class="kt">MediumRare</span><span class="p">,</span><span class="w"> </span><span class="kt">Medium</span><span class="p">,</span><span class="w"> </span><span class="kt">WellDone</span><span class="p">}</span>
 
@@ -249,7 +253,7 @@
 <p>It’s a macro that defines the symbols, a comparison operator, conversion to/from an integer, and other operations.</p>
 </section>
 <section id="adts">
-<h3>ADTs<a class="headerlink" href="#adts" title="Permalink to this heading"></a></h3>
+<h3>ADTs<a class="headerlink" href="#adts" title="Link to this heading"></a></h3>
 <p>Abstract data types are sets containing trees of uninterpreted symbols. So a datatype declaration (from <a class="reference external" href="https://github.com/UlfNorell/insane/blob/master/Context.agda">here</a>)</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">data</span><span class="w"> </span><span class="kt">Cxt</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="kt">Ty</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Cxt</span><span class="w"> </span><span class="kt">Ty</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kr">where</span>
 <span class="w">   </span><span class="n">nil</span><span class="w">  </span><span class="kt">:</span><span class="w"> </span><span class="kt">Cxt</span><span class="w"> </span><span class="kt">Ty</span>
@@ -268,14 +272,14 @@
 <p><span id="id2">[<a class="reference internal" href="../zzreferences.html#id46" title="Stephen Dolan and Alan Mycroft. Polymorphism, subtyping, and type inference in MLsub. In Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages, POPL 2017, 60–72. Paris, France, January 2017. Association for Computing Machinery. URL: https://doi.org/10.1145/3009837.3009882 (visited on 2020-06-15), doi:10.1145/3009837.3009882.">DM17</a>]</span> section 2.2 says the recursive appearance of <code class="docutils literal notranslate"><span class="pre">Cxt</span> <span class="pre">Ty</span></code> is interpreted using the least pre-fixed point and Bekić’s theorem, but I think any fixed point will do.</p>
 </section>
 <section id="records">
-<h3>Records<a class="headerlink" href="#records" title="Permalink to this heading"></a></h3>
+<h3>Records<a class="headerlink" href="#records" title="Link to this heading"></a></h3>
 <p>Record specifications can be closed, listing all properties, or open, allowing other associations not mentioned. For example <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">&quot;s&quot;,</span> <span class="pre">b:</span> <span class="pre">2}</span> <span class="pre">isElementOf</span> <span class="pre">OpenRec</span> <span class="pre">[(&quot;b&quot;,Int)]</span></code>. The fields can be ordered or unordered. Some fields can be omitted, i.e. they are optional. This is different from a <code class="docutils literal notranslate"><span class="pre">Maybe</span></code> type because <code class="docutils literal notranslate"><span class="pre">{a:</span> <span class="pre">Nothing}</span></code> is distinct from <code class="docutils literal notranslate"><span class="pre">{}</span></code>. This can be accomplished by writing <code class="docutils literal notranslate"><span class="pre">Rec</span> <span class="pre">[(&quot;b&quot;,Int,Optional)]</span></code>.</p>
 <p>Rich Hickey seems to think values like <code class="docutils literal notranslate"><span class="pre">(&quot;b&quot;,Int)</span></code> are important and should have names like <code class="docutils literal notranslate"><span class="pre">:b</span></code> and <code class="docutils literal notranslate"><span class="pre">:c</span></code>, so you can write <code class="docutils literal notranslate"><span class="pre">{b:</span> <span class="pre">2,</span> <span class="pre">c:</span> <span class="pre">3}</span> <span class="pre">isElementOf</span> <span class="pre">Rec</span> <span class="pre">[:b,opt</span> <span class="pre">:c]</span></code>. I guess? It could be useful if you use the same fields a lot, but it doesn’t save too much typing. The real optimization is defining collections of fields, so you can write <code class="docutils literal notranslate"><span class="pre">Rec</span> <span class="pre">([:b,:c]</span> <span class="pre">++</span> <span class="pre">standardfields)</span></code>.</p>
 <p>Clojure also has this thing about namespace qualification for records. XML had qualified names (namespaces), JSON doesn’t. Everybody has switched from XML to JSON. So it seems like namespaces are overcomplicating the issue. Generally formats have a single domain of authority and don’t need namespacing - the interpretation of a field is a property of the schema, not the value. This can be seen in the evolution of the <code class="docutils literal notranslate"><span class="pre">&lt;svg&gt;</span></code> element from</p>
 <p>If you do have user-defined fields and need some simple thing to avoid key collisions you can use long key names like “org.mycompany.thing”. This relies on the simple assumption that non-namespaced property names won’t have “.” in them. But unlike a namespace mechanism this doesn’t view unqualified names as incomplete qualified names, rather it sees qualified names as over-specialized names. “Over” is because you can’t access it like <code class="docutils literal notranslate"><span class="pre">obj.org.mycompany.thing</span></code>, you have to write <code class="docutils literal notranslate"><span class="pre">obj[&quot;org.mycompany.thing&quot;]</span></code>.</p>
 </section>
 <section id="tracing">
-<h3>Tracing<a class="headerlink" href="#tracing" title="Permalink to this heading"></a></h3>
+<h3>Tracing<a class="headerlink" href="#tracing" title="Link to this heading"></a></h3>
 <p>Often when checking if a value is in a set we want a detailed explanation why a value is not in a set, e.g. <code class="docutils literal notranslate"><span class="pre">(1,&quot;a&quot;)</span> <span class="pre">isElementOf</span> <span class="pre">(Int,Int)</span></code> could output <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">element:</span> <span class="pre">second</span> <span class="pre">component</span> <span class="pre">&quot;a&quot;</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">set</span> <span class="pre">Int</span></code>. More generally the message looks like <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">element:</span> <span class="pre">$at</span> <span class="pre">$val</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">set</span> <span class="pre">$set</span></code> and there is a stack of such messages from most specific to the overall expression.</p>
 <p>Alternately we could provide the reduction history, something like:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;a&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">isElementOf</span><span class="w"> </span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="kt">Int</span><span class="p">)</span>
@@ -289,7 +293,7 @@
 </section>
 </section>
 <section id="annotations">
-<h2>Annotations<a class="headerlink" href="#annotations" title="Permalink to this heading"></a></h2>
+<h2>Annotations<a class="headerlink" href="#annotations" title="Link to this heading"></a></h2>
 <p>Programmers can use annotations to say that a value is in a specific set. This restricts the possible range of values an identifier may take, allowing the compiler to optimize for a specific runtime representation.</p>
 <p>Set annotations are translated to assertions, and these assertions are statically checked, meaning values outside the set will give an assertion failure.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">assert</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="n">isElemOf</span><span class="w"> </span><span class="kt">T</span><span class="p">);</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">}</span>
@@ -298,7 +302,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">:</span></code> is a no-op to make analysis easy. There is also conversion <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">Int64</span> <span class="pre">2</span></code> which might get an infix operator.</p>
 </section>
 <section id="function-annotations">
-<h2>Function annotations<a class="headerlink" href="#function-annotations" title="Permalink to this heading"></a></h2>
+<h2>Function annotations<a class="headerlink" href="#function-annotations" title="Link to this heading"></a></h2>
 <p>The main function type declaration restricts the definition of the function so it is only applied on the type, i.e. without other definitions the function is not defined outside its type. You can define multiple restricted functions to obtain overloaded behavior on different types. The restriction shows up in documentation and IDE tooltips.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Int</span>
 <span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">...</span>
@@ -316,7 +320,7 @@
 <p>This behavior seems more similar to the type declarations found in other languages, hence why it is the default. E.g. in Rust <code class="docutils literal notranslate"><span class="pre">i32</span> <span class="pre">f(i32)</span></code> cannot be applied to <code class="docutils literal notranslate"><span class="pre">i64</span></code>, whereas with the <code class="docutils literal notranslate"><span class="pre">check</span></code> version <code class="docutils literal notranslate"><span class="pre">f</span></code> could be applied to <code class="docutils literal notranslate"><span class="pre">i64</span></code>.</p>
 <p>Function types are powerful. For example formatted printing, buffered I/O, compression, and pipes can all use a single type <code class="docutils literal notranslate"><span class="pre">Writer</span> <span class="pre">=</span> <span class="pre">ByteArray</span> <span class="pre">-&gt;</span> <span class="pre">IO</span> <span class="pre">{</span> <span class="pre">bytes_written</span> <span class="pre">:</span> <span class="pre">int,</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">bytes_written</span> <span class="pre">&lt;</span> <span class="pre">length</span> <span class="pre">p</span> <span class="pre">}</span></code>.</p>
 <section id="dependent-types">
-<h3>Dependent types<a class="headerlink" href="#dependent-types" title="Permalink to this heading"></a></h3>
+<h3>Dependent types<a class="headerlink" href="#dependent-types" title="Link to this heading"></a></h3>
 <p>The types can bind the value, so Stroscot can express dependent types. And the values are in scope in the type, so even <a class="reference external" href="https://github.com/UlfNorell/insane/">insanely dependent types</a> can be defined:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="n">s</span>
 <span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">...</span>
@@ -331,7 +335,7 @@
 </div>
 </section>
 <section id="check">
-<h3>Check<a class="headerlink" href="#check" title="Permalink to this heading"></a></h3>
+<h3>Check<a class="headerlink" href="#check" title="Link to this heading"></a></h3>
 <p>Another version of typing functions simply checks compatibility with a type, that the return value is in the expected set over the whole input range.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="o">...</span>
 
@@ -350,7 +354,7 @@
 </div>
 </section>
 <section id="total-check">
-<h3>Total check<a class="headerlink" href="#total-check" title="Permalink to this heading"></a></h3>
+<h3>Total check<a class="headerlink" href="#total-check" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">check</span></code> allows partial functions, i.e. nonterminating behavior or throwing exceptions. With a total check all behavior must be accounted for, similar to checked exceptions.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">total_check</span><span class="w"> </span><span class="p">(</span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Int</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="kt">Int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">DivideByZero</span><span class="p">)</span>
 </pre></div>
@@ -368,7 +372,7 @@
 </div>
 </section>
 <section id="contracts">
-<h3>Contracts<a class="headerlink" href="#contracts" title="Permalink to this heading"></a></h3>
+<h3>Contracts<a class="headerlink" href="#contracts" title="Link to this heading"></a></h3>
 <p>Spec#, Eiffel, Ada SPARK, and Argus have “contracts”, requires/ensures on methods. Many checks/throws in .NET and Java can be expressed as preconditions. In Stroscot preconditions can be represented using dependent types and a refinement type on the argument before the result. E.g. a “requires notnull” is written:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">total</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">xs</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="p">(</span><span class="n">null</span><span class="w"> </span><span class="n">xs</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">a</span>
 </pre></div>
@@ -384,7 +388,7 @@
 </div>
 </section>
 <section id="the-curse-of-restrictive-type-signatures">
-<h3>The curse of restrictive type signatures<a class="headerlink" href="#the-curse-of-restrictive-type-signatures" title="Permalink to this heading"></a></h3>
+<h3>The curse of restrictive type signatures<a class="headerlink" href="#the-curse-of-restrictive-type-signatures" title="Link to this heading"></a></h3>
 <p>If a function <code class="docutils literal notranslate"><span class="pre">foo</span></code> does something unexpected, there are three possibilities:</p>
 <ol class="arabic simple">
 <li><p>Some unusual implementation/overloading of foo was defined. That is that clause’s problem. You shouldn’t implement equals to return true only if the square root of one is the same as the other, and similarly you shouldn’t have overloaded foo and done something unexpected. Static verification can help with this by documenting and checking the expected properties. Solutions for this case are to change the behavior or rename the function to make its semantics clearer.</p></li>

@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Build system</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#justification">Justification</a></li>
@@ -94,6 +95,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#reproducibility">Reproducibility</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reproducibility-check">Reproducibility check</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#non-reproducible-rules">Non-reproducible rules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bootstrap">Bootstrap</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#daemon-less-mode">Daemon-less mode</a><ul>
@@ -122,8 +124,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -132,6 +134,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -144,12 +147,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -182,21 +187,21 @@
            <div itemprop="articleBody">
              
   <section id="build-system">
-<h1>Build system<a class="headerlink" href="#build-system" title="Permalink to this heading"></a></h1>
+<h1>Build system<a class="headerlink" href="#build-system" title="Link to this heading"></a></h1>
 <p>The name Cot is unimaginative but suffices for now.</p>
 <section id="justification">
-<h2>Justification<a class="headerlink" href="#justification" title="Permalink to this heading"></a></h2>
+<h2>Justification<a class="headerlink" href="#justification" title="Link to this heading"></a></h2>
 <p>The compiler needs a build system integrated so that intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.</p>
 <p>Also we need a way to do multi-language dependency management and ensure that there is a single version of each significant piece of code.</p>
 </section>
 <section id="scale">
-<h2>Scale<a class="headerlink" href="#scale" title="Permalink to this heading"></a></h2>
+<h2>Scale<a class="headerlink" href="#scale" title="Link to this heading"></a></h2>
 <p>As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-ish files) on an isolated system, in around the same time.</p>
 <p>There are several types of build. If we trust our build system, we never need to do a from-scratch build. But it is good to trust no one and to do from-scratch builds occasionally. Those might take seconds, hours, days, or weeks depending on the scale - it doesn’t really matter because they’re rare. They just have to be possible.</p>
 <p>No-op builds should be “instantaneous” (&lt;100 milliseconds per <a class="reference external" href="https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria">SO</a>), this is easy enough to do with a file change watcher. For incremental builds that do a small change to 1 file, let’s say it rebuilds from 1 - 1000 files depending on where it is in the dependency graph. Presumably you’ve architected the system so “change one file, rebuild a million” is rare. Taking average numbers (500 files, 2100 lines/file), achieving 10 second rebuild times (max acceptable UI lag per <cite>Nielsen &lt;https://www.nngroup.com/articles/response-times-3-important-limits/&gt;`__</cite>) requires 105k/s. Practically I think go’s 100k/s is probably adequate.</p>
 </section>
 <section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <div class="graphviz"><object data="../_images/graphviz-5480ef2e3023fefdbc6568c77029091d979d6aec.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph foo {
   rankdir=LR;
@@ -230,7 +235,7 @@
 <p>Another issue is “time travel”, a task reading a file from the previous build that hasn’t yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.</p>
 </section>
 <section id="tasks">
-<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this heading"></a></h2>
+<h2>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h2>
 <p>The design is based on iThreads <span id="id1">[<a class="reference internal" href="../zzreferences.html#id18" title="Pramod Bhatotia, Pedro Fonseca, Umut A. Acar, Björn B. Brandenburg, and Rodrigo Rodrigues. iThreads: A Threading Library for Parallel Incremental Computation. In Proceedings of the Twentieth International Conference on Architectural Support for Programming Languages and Operating Systems - ASPLOS '15, 645–659. Istanbul, Turkey, 2015. ACM Press. URL: https://www.cs.purdue.edu/homes/pfonseca/papers/asplos2015-ithreads.pdf (visited on 2020-10-25), doi:10.1145/2694344.2694371.">BFA+15</a>]</span>, which out of a half dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build.</p>
 <p>They call the units of computation “thunks”, but this term doesn’t have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value and simply modifies the shared keystate. So I’m using the term “task” in the sense of a task queue.</p>
 <p>It is relatively simple to add new synchronization operations; the only constraint is that they are executed on every build and rebuild, so should not be expensive.</p>
@@ -238,12 +243,12 @@
 <p>If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don’t care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.</p>
 </section>
 <section id="task-names">
-<h2>Task names<a class="headerlink" href="#task-names" title="Permalink to this heading"></a></h2>
+<h2>Task names<a class="headerlink" href="#task-names" title="Link to this heading"></a></h2>
 <p>Task naming adds some complexity to the implementation of a build system, as the task names also affect the way computations can be re-used. iThreads uses a simple “thread # task #” scheme, which assumes a fixed number of long-running threads and invalidates all of the tasks in a thread after a modified task. A scheme similar to <code class="docutils literal notranslate"><span class="pre">make</span></code> uses filenames; for each file f there are two tasks “run f” and “exec f”. The “run f” just does <code class="docutils literal notranslate"><span class="pre">Sequence</span> <span class="pre">[subtargets,[&quot;exec</span> <span class="pre">f&quot;]]</span></code> while “exec f” runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use task names like “exec f step #” but this leads to invalidating later tasks. Using names like “exec f step cmd” requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.</p>
 <p>Also, in a dynamic build, a direct file action map like this is not always available, and so the naming scheme must be relaxed to allow dependencies on things that aren’t files. For example, we may have one command that generates two files; so long as we use a consistent task name for this command there is no issue. For another example, we may have include headers that are picked up in a search path directory listing. To deal with this directly, we would need to introduce build logic into the search mechanism and run dependencies when seeing <code class="docutils literal notranslate"><span class="pre">#include</span></code>. But a phase separation handles it fine with minimal changes - we generate the files first and then call the compiler, filling in the build dependencies from an output list of used headers. In this case we would need tasks for each phase.</p>
 </section>
 <section id="model">
-<h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
 <p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../zzreferences.html#id140" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
 <style>
   .shal-trace-example tr:nth-child(1) td,
@@ -396,7 +401,7 @@
 <p>Here main.c’s modification time has been updated. We start from the top and load “run prog”; there are no changed inputs (or indeed any inputs), so we skip execution of the task, perform the record write operations to the key state, and execute the synchronization operation, which loads “run main”. “run main” loads “yacc” which has not changed, so control returns to “run main” and “cc main” is loaded. “cc main“‘s inputs have changed, so we run it, producing an updated main.o. Meanwhile “run parse” and “cc parse” have been loaded with no changes. Control returns to “run prog” and “ld” is executed as its inputs have changed, building the final executable “prog”.</p>
 </section>
 <section id="task-state">
-<h2>Task state<a class="headerlink" href="#task-state" title="Permalink to this heading"></a></h2>
+<h2>Task state<a class="headerlink" href="#task-state" title="Link to this heading"></a></h2>
 <p>Task state is a bit tricky to define precisely. So let’s work it out.</p>
 <p>First we define execution state. A task is enabled once a synchronization operation requests to execute the task. A task is resolved once it is enabled and its synchronization operation has begun execution. So a task starts out disabled, becomes enabled, and then is resolved.</p>
 <p>If a task is never enabled, then in a clean build the task would not be executed at all. There are two possibilities:</p>
@@ -427,7 +432,7 @@
 <p>A substitutable task can be clean or damaged but not dirty. So in total we have 8 states: unused, stale, new, dirty, clean-nonsubstitutable, clean-substitutable, damaged-nonsubstitutable, and damaged-substitutable. It’s a lot, but Cot deals with a lot of functionality.</p>
 </section>
 <section id="simulation">
-<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h2>
+<h2>Simulation<a class="headerlink" href="#simulation" title="Link to this heading"></a></h2>
 <p>It’s possible for a task to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged tasks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding task reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/issues/4012">randomized symbols names</a>), so picking the version influences the substitutability of other tasks.</p>
 <p>The problem is NP-hard since we can encode 3-SAT in the substitution versions <span id="id3">[<a class="reference internal" href="../zzreferences.html#id38" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>. Since it’s that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:</p>
 <ul class="simple">
@@ -439,17 +444,17 @@
 <p>To generate these constraints, Cot walks through the build graph and maintains a multi-valued state. So it would look like <code class="docutils literal notranslate"><span class="pre">Key</span> <span class="pre">i</span> <span class="pre">-&gt;</span> <span class="pre">[Value</span> <span class="pre">1</span> <span class="pre">S_1,</span> <span class="pre">Value</span> <span class="pre">1</span> <span class="pre">S_2,</span> <span class="pre">Value</span> <span class="pre">2</span> <span class="pre">S_3,</span> <span class="pre">Damaged</span> <span class="pre">S_leave]</span></code>. Then for each task (visited in normal traversal order) Cot generates the constraints for each possibility. Then Cot updates the possible values for the keys it writes.</p>
 <p>To deal with these constraints we need a MaxSAT solver - we can write a custom one or interface with an existing one. Using an off-the-shelf solver might save some effort, but there is significant overhead in serializing the constraints to an external solver, and this overhead can be avoided by using a native solver. The native solver will probably be naive and not have the finely tuned optimizations or heuristics of the off-the-shelf solvers, but most package version problems are very simple to solve. It’ll be easier to build the project with a native solver because all of the code will be in the same language (Haskell or Stroscot). In Cox’s list of package managers (at the end of <span id="id4">[<a class="reference internal" href="../zzreferences.html#id38" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>), the split is 9-5 in favor of a native solver (although 3 of the native-solver package managers allow using an external solver with an option, so more like 9-8). Overall it seems writing a native solver is the best course of action. But we don’t have to start from scratch as there is a Haskell MaxSAT solver in toysolver on Hackage.</p>
 <section id="wanted-files">
-<h3>Wanted files<a class="headerlink" href="#wanted-files" title="Permalink to this heading"></a></h3>
+<h3>Wanted files<a class="headerlink" href="#wanted-files" title="Link to this heading"></a></h3>
 <p>When using Cot as a package manager rather than a build system, we have lots of produced files that aren’t used by anything. Since Cot doesn’t see any users of the files it’ll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we’d run special tasks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These tasks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special tasks are actually the packages.</p>
 <p>We could also add functionality to force realizing specific damaged tasks.</p>
 </section>
 <section id="restarting">
-<h3>Restarting<a class="headerlink" href="#restarting" title="Permalink to this heading"></a></h3>
+<h3>Restarting<a class="headerlink" href="#restarting" title="Link to this heading"></a></h3>
 <p>The constraint model is only an approximation of the truth, in particular it doesn’t cover a newly-executed task that adds a dependency on damaged data. The restarting strategy restarts build execution from the damaged task on detection of a read, which allows the build to continue if there is an unexpected dependency on damaged data. It requires traversal of the build graph to reconstruct the keystate at the point of re-execution, and all the work done after the point of re-execution is thrown away, so its efficiency isn’t optimal. In particular it is possible to re-execute a unit several times, in the case where we execute a unit B, then go back and re-execute a unit A due to damage, then have to execute B another time due to A changing C changing input to B.</p>
 </section>
 </section>
 <section id="graph-pruning">
-<h2>Graph pruning<a class="headerlink" href="#graph-pruning" title="Permalink to this heading"></a></h2>
+<h2>Graph pruning<a class="headerlink" href="#graph-pruning" title="Link to this heading"></a></h2>
 <p>Pruning the build graph as pioneered by Tup can result in a big speedup, only having to load/inspect the part of the build graph that’s necessary. But it requires some auxiliary data structures and careful record-keeping in order to look up the pieces efficiently.</p>
 <p>We start with a change list, i.e. things that might have changed since our last build. The prototypical example is a list of changed files from a file-watching daemon. The alternative is scanning all the files for changes on startup. This can take several minutes with a hashing algorithm or a few seconds with modtimes.</p>
 <p>First we process the change list into a list of possibly-changed keys. There are many various options (digest, modtime, etc.), so we need a hash table that maps key writes to all the tasks with key reads, really a filename-&gt;(set of task) table.</p>
@@ -461,7 +466,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 <p>Anyway, the recorded state also records if the key is damaged and the task that regenerates it. So we can use this during our damage simulation to load in damaged tasks when referenced and re-run them if necessary.</p>
 </section>
 <section id="cleaning">
-<h2>Cleaning<a class="headerlink" href="#cleaning" title="Permalink to this heading"></a></h2>
+<h2>Cleaning<a class="headerlink" href="#cleaning" title="Link to this heading"></a></h2>
 <p>When we re-execute a task, it is a good idea to restore the state of the outputs of the task to their original state (typically deleting them). Also at the end of the run we should garbage collect any unused tasks from the old run by deleting their outputs. Also in (hopefully rare) cases we want to delete all the outputs regardless of status.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">-c</span>, <span class="option">--clean</span>, <span class="option">--remove</span></kbd></dt>
@@ -473,11 +478,11 @@ We also need to store the list of acquire/release lock operations, but most prog
 </dl>
 </section>
 <section id="exceptions">
-<h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading"></a></h2>
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading"></a></h2>
 <p>Shake tries to be exception-safe, but it’s not clear what to do with exceptions besides passing them along. The top-level build function can throw exceptions, or it can catch them, printing them and exiting with an error code.</p>
 </section>
 <section id="trace-database">
-<h2>Trace database<a class="headerlink" href="#trace-database" title="Permalink to this heading"></a></h2>
+<h2>Trace database<a class="headerlink" href="#trace-database" title="Link to this heading"></a></h2>
 <p>A robust build system design fundamentally depends on keeping a database of build traces. In particular to rebuild a command like <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">src/*</span></code> we must store the file list so as to detect deleted/added files.</p>
 <p>For now the database is just a simple SQLite database with a few indexes, as having a working system is 90% of the work. But there are likely ways to speed it up (the other 90% of work).</p>
 <p>We could store this in a file, but an append-only journal is crash-tolerant and less HD-intensive. Since file paths have lots of redundant components, some lightweight streaming compression like lz4 is appropriate.</p>
@@ -500,7 +505,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 </ul>
 </div></blockquote>
 <section id="in-memory">
-<h3>In-memory<a class="headerlink" href="#in-memory" title="Permalink to this heading"></a></h3>
+<h3>In-memory<a class="headerlink" href="#in-memory" title="Link to this heading"></a></h3>
 <p>In-memory keys are the simplest to handle, because they’re small and we can simply store the whole value, and also because we don’t have to worry about external modification. We record a write in our journal as “write key xyz = …” and a read as “read key xyz = …”. Then the trace is invalid if we read something different from what was written, or if the key was never written.</p>
 <p>If the key contents are large, we can intern it - journal an association “#5 = x”, then writes as “write key xyz is interned to #5 = …”, and reads as “read key xyz from intern #5”. We can’t use the key itself as #n because there might be multiple writes to the key.</p>
 <p>The simplest example of an in-memory key is the command line arguments; we can store the full initial command line, and then have a task that parses the command line and writes various option keys. Another example is versioning keys. The initial task writes a key for each task with the compiled-in version, <code class="docutils literal notranslate"><span class="pre">write</span> <span class="pre">(Version</span> <span class="pre">abc)</span> <span class="pre">v2.3</span></code>. Then each task reads its version and this read is stored in the task record, causing rebuilds when the version is changed.</p>
@@ -511,7 +516,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 </dl>
 </section>
 <section id="files">
-<h3>Files<a class="headerlink" href="#files" title="Permalink to this heading"></a></h3>
+<h3>Files<a class="headerlink" href="#files" title="Link to this heading"></a></h3>
 <p>Files are a little trickier because storing the whole contents of the file in the journal is infeasible. Instead we journal a proxy of the contents, stored in-memory. So writes look like “write file f with proxy p” and reads are “read file f with proxy p”. We assume that there aren’t any untracked writes during the build so the reads can be recorded using the in-memory value of p calculated from the writes.</p>
 <dl class="simple">
 <dt>trivial proxy</dt><dd><p>Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, “always rebuild” and “never rebuild”. In the never case, a task’s rebuild can still be triggered by a different file.</p>
@@ -540,7 +545,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 <li><p>modtime-then-watcher-then-digest, to get the fastest file tracking and fewest rebuilds</p></li>
 </ul>
 <section id="symlinks">
-<h4>Symlinks<a class="headerlink" href="#symlinks" title="Permalink to this heading"></a></h4>
+<h4>Symlinks<a class="headerlink" href="#symlinks" title="Link to this heading"></a></h4>
 <dl class="option-list">
 <dt><kbd><span class="option">-L</span>, <span class="option">--check-symlink-times</span></kbd></dt>
 <dd><p>On systems that support symbolic links, this option causes make to consider the timestamps on any symbolic links in addition to the timestamp on the file referenced by those links. When this option is provided, the most recent timestamp among the file and the symbolic links is taken as the modification time for this target file.</p>
@@ -548,11 +553,11 @@ We also need to store the list of acquire/release lock operations, but most prog
 </dl>
 </section>
 <section id="io-uring">
-<h4>io_uring<a class="headerlink" href="#io-uring" title="Permalink to this heading"></a></h4>
+<h4>io_uring<a class="headerlink" href="#io-uring" title="Link to this heading"></a></h4>
 <p>It’s a little overkill, but the io_uring interface on Linux allows batching up calls asynchronously, which can <a class="reference external" href="https://twitter.com/axboe/status/1205991776474955777">speed up stat()</a> and thus modtime reading . For hashing parallelism is likely counterproductive, as xxHash is I/O bound and parallelism turns sequential reads into random reads.</p>
 </section>
 <section id="access-tracing">
-<h4>Access Tracing<a class="headerlink" href="#access-tracing" title="Permalink to this heading"></a></h4>
+<h4>Access Tracing<a class="headerlink" href="#access-tracing" title="Link to this heading"></a></h4>
 <p>Specifying a lot of file read/write dependencies manually is tedious and error-prone, although writing a small script from scratch is not too difficult. So instead we want to use automatic tracing. There are various tracing methods:</p>
 <ul class="simple">
 <li><p>library preloading with fsatrace: fails on static linking, Go programs, and Mac system binaries</p></li>
@@ -565,7 +570,7 @@ We also need to store the list of acquire/release lock operations, but most prog
 </section>
 </section>
 <section id="network">
-<h3>Network<a class="headerlink" href="#network" title="Permalink to this heading"></a></h3>
+<h3>Network<a class="headerlink" href="#network" title="Link to this heading"></a></h3>
 <p>Often we wish to fetch data from over the network. There are a few common protocols:</p>
 <ul class="simple">
 <li><p>HTTP downloads: we can use wget, curl, aria2, or a custom library. The <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching">caching headers</a> are important for re-using old downloads.</p></li>
@@ -576,18 +581,18 @@ We also need to store the list of acquire/release lock operations, but most prog
 <p>If there are multiple containers that depend on each other, we have to encode the restarting behavior somehow. The easiest is probably to write a single script that takes all the configuration and starts up the containers in order, but this duplicates the build system task scheduling logic. So a script for each strongly-connected component.</p>
 </section>
 <section id="damage">
-<h3>Damage<a class="headerlink" href="#damage" title="Permalink to this heading"></a></h3>
+<h3>Damage<a class="headerlink" href="#damage" title="Link to this heading"></a></h3>
 <p>Cot allows writing to a file more than once, e.g. training a neural net with iterative optimization. The behavior is that changed inputs always rerun all affected tasks, but changed outputs only rerun the tasks if the simulation predicts that the output is needed. If a build cache is not used then tasks that generate files needed for the build will rerun as well.</p>
 </section>
 </section>
 <section id="options">
-<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-m,</span> <span class="pre">--metadata</span></code> The directory used for storing metadata files. All metadata files will be named <code class="docutils literal notranslate"><span class="pre">$files/$file-name</span></code>. If the ‘shakeFiles’ directory does not exist it will be created. If set to <code class="docutils literal notranslate"><span class="pre">Nothing</span></code> then no metadata files are read or written (clean build mode). Defaults to <code class="docutils literal notranslate"><span class="pre">.cot</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--flush</span> <span class="pre">N</span></code> How often to flush metadata files in seconds, or <code class="docutils literal notranslate"><span class="pre">--never-flush</span></code> to never flush explicitly. On abnormal termination the completion data that has not been flushed will be lost.</p></li>
 </ul>
 <section id="cached-build">
-<h3>Cached build<a class="headerlink" href="#cached-build" title="Permalink to this heading"></a></h3>
+<h3>Cached build<a class="headerlink" href="#cached-build" title="Link to this heading"></a></h3>
 <p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../zzreferences.html#id115" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">--cache-create <var>PATH</var></span></kbd></dt>
@@ -619,7 +624,7 @@ code back and forth.</p>
 </section>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
 <p>The cache is, for now, an opt-in feature. Add <cite>(cache enabled)</cite> to
 your dune configuration file (default <cite>~/.config/dune/config</cite>) to
 activate it. When turned on, built files will automatically be
@@ -629,7 +634,7 @@ the cache for hits.</p>
 *nix systems, and <cite>“HOME\Local Settings\Cache”</cite> on Windows.</p>
 </section>
 <section id="daemon">
-<h2>Daemon<a class="headerlink" href="#daemon" title="Permalink to this heading"></a></h2>
+<h2>Daemon<a class="headerlink" href="#daemon" title="Link to this heading"></a></h2>
 <p>By default, most cache operations go through the dune cache daemon, a
 separate process that dune instances connect to. This enables
 promotions to happen asynchronously and not slow the build
@@ -638,23 +643,23 @@ accessing the cache, and lives on for further use.</p>
 <p>Although the daemon concept is totally transparent, one can control it
 via the <cite>dune cache</cite> subcommand.</p>
 <section id="starting-the-daemon">
-<h3>Starting the daemon<a class="headerlink" href="#starting-the-daemon" title="Permalink to this heading"></a></h3>
+<h3>Starting the daemon<a class="headerlink" href="#starting-the-daemon" title="Link to this heading"></a></h3>
 <p>Use <cite>dune cache start</cite> to start the caching daemon if not running and
 print its endpoint, or retrieve the endpoint of the currently running
 daemon otherwise. A notable option is <cite>–foreground</cite> to not detach the
 daemon, which can help inspecting its log output.</p>
 </section>
 <section id="stopping-the-daemon">
-<h3>Stopping the daemon<a class="headerlink" href="#stopping-the-daemon" title="Permalink to this heading"></a></h3>
+<h3>Stopping the daemon<a class="headerlink" href="#stopping-the-daemon" title="Link to this heading"></a></h3>
 <p>Use <cite>dune cache stop</cite> to stop the caching daemon. Although the daemon,
 when idle, should consume zero resources, you may want to get rid of
 the process. Also useful to restart the daemon with <cite>–foreground</cite>.</p>
 </section>
 </section>
 <section id="filesystem-implementation">
-<h2>Filesystem implementation<a class="headerlink" href="#filesystem-implementation" title="Permalink to this heading"></a></h2>
+<h2>Filesystem implementation<a class="headerlink" href="#filesystem-implementation" title="Link to this heading"></a></h2>
 <section id="hardlink-mode">
-<h3>Hardlink mode<a class="headerlink" href="#hardlink-mode" title="Permalink to this heading"></a></h3>
+<h3>Hardlink mode<a class="headerlink" href="#hardlink-mode" title="Link to this heading"></a></h3>
 <p>By default the cache works by creating hardlinks to built files inside
 the cache directory when promoted, and in other build trees when
 retrieved. This has the great advantage of having zero disk space
@@ -668,14 +673,14 @@ practice in any case.</p></li>
 </ul>
 </section>
 <section id="copy-mode">
-<h3>Copy mode<a class="headerlink" href="#copy-mode" title="Permalink to this heading"></a></h3>
+<h3>Copy mode<a class="headerlink" href="#copy-mode" title="Link to this heading"></a></h3>
 <p>If one specifies <cite>(cache-duplication copy)</cite> in the configuration file,
 dune will copy files to and from the cache instead of using hardlinks.
 This can be useful if the build cache is on a different partition.</p>
 </section>
 </section>
 <section id="on-disk-size">
-<h2>On-disk size<a class="headerlink" href="#on-disk-size" title="Permalink to this heading"></a></h2>
+<h2>On-disk size<a class="headerlink" href="#on-disk-size" title="Link to this heading"></a></h2>
 <p>The cache daemon will perform periodic trimming to limit the overhead.
 Every 10 minutes, it will purge the least recently used files so the
 cache overhead does not exceed 10G. This is configurable through the
@@ -688,9 +693,13 @@ space.</p>
 in the cache daemon.</p>
 </section>
 <section id="reproducibility">
-<h2>Reproducibility<a class="headerlink" href="#reproducibility" title="Permalink to this heading"></a></h2>
+<h2>Reproducibility<a class="headerlink" href="#reproducibility" title="Link to this heading"></a></h2>
+<p>traceability - It should be clear where the binary came from and how it was produced.
+automated reproducibility - Users can run one command to reproduce all binaries to verify that they have not been tampered with.</p>
+<p>Example: “this package was built by running &lt;command&gt; on revision &lt;hash&gt; of the distribution’s package repository.” A user can then easily reproduce the binary by fetching the specified sources and running the specified command. This build will in most cases depend on a previous generation of built binaries. Thus, we get a chain of verifiable binaries stretching back in time.</p>
+<p>Binaries may also come from upstream, with no clear production process. This would typically be the case when a language does not have a clear bootstrap process. The distribution should at least clearly label the provenance of the binary, e.g. “this binary was downloaded from <a class="reference external" href="https://upstream-compiler.example.org/upstream-compiler-20161211-x86_64-linux.tar.xz">https://upstream-compiler.example.org/upstream-compiler-20161211-x86_64-linux.tar.xz</a> at time DDD with hash 123”.</p>
 <section id="reproducibility-check">
-<h3>Reproducibility check<a class="headerlink" href="#reproducibility-check" title="Permalink to this heading"></a></h3>
+<h3>Reproducibility check<a class="headerlink" href="#reproducibility-check" title="Link to this heading"></a></h3>
 <p>While default mode of operation of the cache is to speedup build times
 by not re-running some rules, it can also be used to check build
 reproducibility. If <cite>(cache-check-probability FLOAT)</cite> or
@@ -701,13 +710,17 @@ the resulting files against a potential cache hit. If the files
 differ, the rule is not reproducible and a warning will be emitted.</p>
 </section>
 <section id="non-reproducible-rules">
-<h3>Non-reproducible rules<a class="headerlink" href="#non-reproducible-rules" title="Permalink to this heading"></a></h3>
+<h3>Non-reproducible rules<a class="headerlink" href="#non-reproducible-rules" title="Link to this heading"></a></h3>
 <p>If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.</p>
 <p>Similarly, some files may not be redistributable (copyright license or similar), these are reproducible but the data cannot be stored in the cloud cache.</p>
 </section>
+<section id="bootstrap">
+<h3>Bootstrap<a class="headerlink" href="#bootstrap" title="Link to this heading"></a></h3>
+<p>So that there is not a chicken-egg problem, it is important that the build system code itself can be boostrap-built with a shell script or other simple executable. Probably there should be a special mode of the build system’s build system that emits the build system instructions as a shell script.</p>
+</section>
 </section>
 <section id="daemon-less-mode">
-<h2>Daemon-less mode<a class="headerlink" href="#daemon-less-mode" title="Permalink to this heading"></a></h2>
+<h2>Daemon-less mode<a class="headerlink" href="#daemon-less-mode" title="Link to this heading"></a></h2>
 <p>While the cache daemon provides asynchronous promotions to speedup
 builds and background trimming amongst other things, in some
 situations direct access can be preferable. This can be the case when
@@ -718,7 +731,7 @@ be obtained by specifying <cite>(cache-transport direct)</cite> in the
 configuration file or passing <cite>–cache-transport=direct</cite> on the
 command line.</p>
 <section id="remote-builds">
-<h3>Remote Builds<a class="headerlink" href="#remote-builds" title="Permalink to this heading"></a></h3>
+<h3>Remote Builds<a class="headerlink" href="#remote-builds" title="Link to this heading"></a></h3>
 <p>A remote build consists of a local build setup forwarding task invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.</p>
 <dl class="simple">
 <dt>cot ping-builders</dt><dd><p>Test whether connecting to each remote instance works. To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Cot installed. If you get the error <code class="docutils literal notranslate"><span class="pre">cot:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> then you need to ensure that the PATH of non-interactive login shells contains Cot.</p>
@@ -740,7 +753,7 @@ command line.</p>
 <p>To build only on remote builders and disable building on the local machine, you can use the option –max-jobs 0.</p>
 </section>
 <section id="debugging">
-<h3>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading"></a></h3>
+<h3>Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
 <p>browse dependency graph in a web browser
 show dependencies stored in the deps log
 output graphviz dot file for targets</p>
@@ -1146,7 +1159,7 @@ scons –tree=all,prune,status target</p>
 </dl>
 </section>
 <section id="parallel-execution">
-<h3>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Permalink to this heading"></a></h3>
+<h3>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Link to this heading"></a></h3>
 <dl class="option-list">
 <dt><kbd><span class="option">--random</span>, <span class="option">--random=<var>SEED</var></span>, <span class="option">--no-random</span></kbd></dt>
 <dd><p>Build dependencies in a random order (the default) or a deterministic order. This is useful to prevent various scheduling slowdowns in the build, and can reduce contention in a build farm.</p>
@@ -1171,7 +1184,7 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">aut
 <p>When finishing a task it wakes up all the pending tasks, this is implemented with callbacks.</p>
 </section>
 <section id="output-control">
-<h3>Output control<a class="headerlink" href="#output-control" title="Permalink to this heading"></a></h3>
+<h3>Output control<a class="headerlink" href="#output-control" title="Link to this heading"></a></h3>
 <blockquote>
 <div><dl class="option-list">
 <dt><kbd><span class="option">--interactive</span></kbd></dt>
@@ -1282,7 +1295,7 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">aut
 <p>With touch, the name of each modified task is printed, <code class="docutils literal notranslate"><span class="pre">touch</span> <span class="pre">$task</span></code>, unless ‘-s’ is used.</p>
 </section>
 <section id="command-options">
-<h3>Command Options<a class="headerlink" href="#command-options" title="Permalink to this heading"></a></h3>
+<h3>Command Options<a class="headerlink" href="#command-options" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>CommandOptions :: [CmdOption]</dt><dd><p>^ Defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>. Additional options to be passed to all command invocations.</p>
 </dd>
@@ -1375,7 +1388,7 @@ NoProcessGroup – ^ Don’t run the process in its own group. Required when run
 </dl>
 </section>
 <section id="querying-the-build-graph">
-<h3>Querying the build graph<a class="headerlink" href="#querying-the-build-graph" title="Permalink to this heading"></a></h3>
+<h3>Querying the build graph<a class="headerlink" href="#querying-the-build-graph" title="Link to this heading"></a></h3>
 <p>The build graph defines how to tell whether a task needs recompilation, and the entry point to update the task. But running the task is not always what you want; sometimes you only want to know what would be run.</p>
 <p>‘-n’
 ‘–dry-run’</p>
@@ -1389,7 +1402,7 @@ NoProcessGroup – ^ Don’t run the process in its own group. Required when run
 </div></blockquote>
 </section>
 <section id="forcing-avoiding-recompilation">
-<h3>Forcing/avoiding recompilation<a class="headerlink" href="#forcing-avoiding-recompilation" title="Permalink to this heading"></a></h3>
+<h3>Forcing/avoiding recompilation<a class="headerlink" href="#forcing-avoiding-recompilation" title="Link to this heading"></a></h3>
 <p>if your build system is broken then you can’t fix it with the <code class="docutils literal notranslate"><span class="pre">touch</span></code> utility. so a command <code class="docutils literal notranslate"><span class="pre">--touch</span></code> that forces files to be invalid seems necessary, although it wouldn’t be needed normally.</p>
 <p>‘-t’
 ‘–touch’</p>
@@ -1470,7 +1483,7 @@ Without the ‘-n’ or ‘-q’ flag, when make is actually executing recipes, 
 </div></blockquote>
 </section>
 <section id="error-handling">
-<h3>Error handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h3>
+<h3>Error handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
 <p>“k” [“keep-going”] (noArg $ s -&gt; s{shakeStaunch=True}) “Keep going when some targets can’t be made.”
 “S” [“no-keep-going”,”stop”] (noArg $ s -&gt; s{shakeStaunch=False}) “Turns off -k.”
 shake staunch mode: if an error is encountered during the middle of a build, unless –keep-going is specified we want to stop the build. we can stop all the threads immediately by sending cancel commands, or we can wait until each command finishes to interrupt.</p>
@@ -1507,7 +1520,7 @@ The usual behavior assumes that your purpose is to get the specified targets up 
 </section>
 </section>
 <section id="creating-a-build-system">
-<h2>Creating a build system<a class="headerlink" href="#creating-a-build-system" title="Permalink to this heading"></a></h2>
+<h2>Creating a build system<a class="headerlink" href="#creating-a-build-system" title="Link to this heading"></a></h2>
 <p>Initially a build system starts out as a list of commands. Then when we trace the commands, the list becomes a partially ordered set of commands because we can relax the ordering to write-read constraints. Then we abstract the commands, adding in-memory keys for configuration changes such as the command line, task arguments to share command handling logic, and a nesting relation for which tasks call which other tasks.</p>
 <p>To make using a self-hosting build system installable, there should also be a way to output a list of commands that implement the system.</p>
 </section>

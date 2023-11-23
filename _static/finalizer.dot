@@ -1,0 +1,18 @@
+digraph {
+
+    node [shape = oval];
+    init [label="f = open 'x.txt'"];
+    loop [label="while (not (atEof f))"];
+    body [label="process (read f)"];
+    exit [label="exit 0"];
+    iff [label="if (atEof f)"]
+    close [label="close fd"]
+
+    init -> loop;
+    loop -> body;
+    body -> iff;
+    iff -> loop;
+    iff -> close;
+    close -> loop;
+    loop -> exit;
+}

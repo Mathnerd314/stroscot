@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -103,7 +103,7 @@
            <div itemprop="articleBody">
              
   <section id="modules">
-<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h1>
+<h1>Modules<a class="headerlink" href="#modules" title="Link to this heading"></a></h1>
 <p>Modules from the programming perspective are records; they contain a list of bindings. But they have a top-level scope and take advantage of declaration syntax. They also define namespaces for symbols.</p>
 <p>A module starts with a module identifier followed by import declarations followed by other declarations.</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>module
@@ -115,12 +115,12 @@ b = 2
 </pre></div>
 </div>
 <section id="access">
-<h2>Access<a class="headerlink" href="#access" title="Permalink to this heading"></a></h2>
+<h2>Access<a class="headerlink" href="#access" title="Link to this heading"></a></h2>
 <p>By default bare symbols are interpreted as belonging to the current module. So <code class="docutils literal notranslate"><span class="pre">a</span></code> in module <code class="docutils literal notranslate"><span class="pre">A</span></code> refers to <code class="docutils literal notranslate"><span class="pre">A.a</span></code>.</p>
 <p>To access a member of a module we use dot notation <code class="docutils literal notranslate"><span class="pre">C.a</span></code>. Modules can be nested arbitrarily deep, <code class="docutils literal notranslate"><span class="pre">A.B.C.a</span></code>. The uniform notation with records seems cleaner than notation like <code class="docutils literal notranslate"><span class="pre">A::B::C::a.b</span></code>. The first component of the dotted name is still qualified to the current module, so <code class="docutils literal notranslate"><span class="pre">C.a</span></code> in module <code class="docutils literal notranslate"><span class="pre">A</span></code> refers to <code class="docutils literal notranslate"><span class="pre">A.C.a</span></code>. The recursive knot in the linker defines <code class="docutils literal notranslate"><span class="pre">A.C.a</span> <span class="pre">=</span> <span class="pre">&lt;global&gt;.C.a</span></code> after it sees that <code class="docutils literal notranslate"><span class="pre">A</span></code> imports <code class="docutils literal notranslate"><span class="pre">C</span></code>.</p>
 </section>
 <section id="with-statement">
-<h2>With statement<a class="headerlink" href="#with-statement" title="Permalink to this heading"></a></h2>
+<h2>With statement<a class="headerlink" href="#with-statement" title="Link to this heading"></a></h2>
 <p>To save on typing there is the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">#</span><span class="w"> </span><span class="n">equivalent</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">most</span><span class="w"> </span><span class="n">purposes</span>
 <span class="kt">C</span><span class="o">.</span><span class="n">a</span>
@@ -148,7 +148,7 @@ with D { with C { a } }
 </div>
 </section>
 <section id="exports-and-internal-symbols">
-<h2>Exports and internal symbols<a class="headerlink" href="#exports-and-internal-symbols" title="Permalink to this heading"></a></h2>
+<h2>Exports and internal symbols<a class="headerlink" href="#exports-and-internal-symbols" title="Link to this heading"></a></h2>
 <p>Module exports can similarly be limited:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">C</span><span class="w"> </span><span class="p">(</span><span class="nf">a</span><span class="p">)</span>
 
@@ -174,17 +174,17 @@ with D { with C { a } }
 </div>
 </section>
 <section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
 <p>Modules also take parameters, passed implicitly; every undefined identifier becomes a parameter. In a working program these parameters will mostly be other modules, but macro definitions can also be passed in. Undefined values in a declaration will be part of that declaration’s parameters rather than the module’s. Technically, what we have been talking are really module definitions rather than modules, i.e. they are functions producing modules. A fully instantiated module doesn’t take any parameters and is simply a record.</p>
 </section>
 <section id="linking">
-<h2>Linking<a class="headerlink" href="#linking" title="Permalink to this heading"></a></h2>
+<h2>Linking<a class="headerlink" href="#linking" title="Link to this heading"></a></h2>
 <p>Linking all of these module definitions together is done at the top level. The list of modules is defined in a project file, explicitly or as an enumeration of the file tree. Then they are all tied into one big recursive knot of overloaded definitions. But this process is actually defined by the project file; the project file acts like a build script and can do arbitrarily complex linking things if necessary. There’s a set of convenient functions that cover common cases.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">project</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;src/**.sct&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <section id="imports">
-<h3>Imports<a class="headerlink" href="#imports" title="Permalink to this heading"></a></h3>
+<h3>Imports<a class="headerlink" href="#imports" title="Link to this heading"></a></h3>
 <p>The primitive underlying the project file is the import; this reads a file path and parses it into an implicit function. The file path can be relative and resolved relative to the path of the importing file. For example, if the file dir1/dir2/foo contains import “bar”, the compiler will look for dir1/dir2/bar, and import “../bar” would be dir1/bar.</p>
 <p>Direct importing is easier to understand conceptually but the recursive fixed point is more powerful and supports libraries better. Direct importing allows IDE tools to statically analyze files without configuring the project file location.</p>
 <div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">}</span> <span class="o">=</span> <span class="kn">import</span> <span class="s2">&quot;Alphabet&quot;</span>          <span class="c1"># import a, b, c from Alphabet</span>
@@ -199,28 +199,28 @@ with D { with C { a } }
 </section>
 </section>
 <section id="overrides">
-<h2>Overrides<a class="headerlink" href="#overrides" title="Permalink to this heading"></a></h2>
+<h2>Overrides<a class="headerlink" href="#overrides" title="Link to this heading"></a></h2>
 <p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. This means a use <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code> refers to only the declarations within that module.</p>
 <p>Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>A = module
-  foo (x:{A}) = 1
-B = module
-  foo (x:{B}) = 2
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
+<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">A</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
+<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">B</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
 
-import A, B
-print (map foo [A,B])
-# [1,2]
-# print (force foo)
+<span class="kr">import</span><span class="w"> </span><span class="nn">A</span><span class="p">,</span><span class="w"> </span><span class="kt">B</span>
+<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">[</span><span class="kt">A</span><span class="p">,</span><span class="kt">B</span><span class="p">])</span>
+<span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="o">#</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="p">(</span><span class="n">force</span><span class="w"> </span><span class="n">foo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This defines two symbols <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">A</span> <span class="pre">-&gt;</span> <span class="pre">{1}</span></code> and <code class="docutils literal notranslate"><span class="pre">B.foo</span> <span class="pre">:</span> <span class="pre">B</span> <span class="pre">-&gt;</span> <span class="pre">{2}</span></code>, and resolves <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">foo</span> <span class="pre">[A,B]</span></code> to <code class="docutils literal notranslate"><span class="pre">[A.foo</span> <span class="pre">A,</span> <span class="pre">B.foo</span> <span class="pre">B]</span></code>. However, because the bare identifier ends up resolving to different symbols, there are cases where dispatch is not sufficient to resolve the ambiguity. In this example, <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> results in an error because it could be either <code class="docutils literal notranslate"><span class="pre">A.foo</span></code> or <code class="docutils literal notranslate"><span class="pre">B.foo</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span>A = module
-  foo (x:{A}) = 1
-B = module
-  import A
-  override foo
-  foo (x:{B}) = 2
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
+<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">A</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
+<span class="w">  </span><span class="err">import</span><span class="w"> </span><span class="nn">A</span>
+<span class="w">  </span><span class="n">override</span><span class="w"> </span><span class="n">foo</span>
+<span class="w">  </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="p">{</span><span class="kt">B</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
 </pre></div>
 </div>
 <p>defines one symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">{A,B}</span> <span class="pre">-&gt;</span> <span class="pre">{1,2}</span></code>. Thus <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> will resolve to the single symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span></code>.</p>

@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -74,8 +75,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -84,6 +85,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -96,12 +98,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -134,10 +138,10 @@
            <div itemprop="articleBody">
              
   <section id="concurrency">
-<h1>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this heading"></a></h1>
+<h1>Concurrency<a class="headerlink" href="#concurrency" title="Link to this heading"></a></h1>
 <p>As Go says, the rise of multicore CPUs means that a language should provide first-class support for concurrency and parallelism. But concurrency and multi-threaded programming have over time developed a reputation for difficulty. So let’s get it right.</p>
 <section id="model">
-<h2>Model<a class="headerlink" href="#model" title="Permalink to this heading"></a></h2>
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
 <p>The general idea with concurrency is there are multiple threads of execution. But practically there are several types of threads:</p>
 <ul class="simple">
 <li><p>An OS thread is the basic unit to which the operating system allocates processor time. A thread can execute any part of the process code, including parts currently being executed by another thread. A thread may be bound to a core or have that decided by the OS. There is thread-local storage but generally fiber-local storage should be preferred. (<a class="reference external" href="https://devblogs.microsoft.com/oldnewthing/20191011-00/?p=102989">1</a>, <span id="id1">[<a class="reference internal" href="../zzreferences.html#id120" title="Gor Nishanov. Fibers under the magnifying glass. November 2018. URL: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2018/p1364r0.pdf (visited on 2021-11-04).">Nis18</a>]</span> section 2.3.1)</p></li>
@@ -156,14 +160,14 @@
 <p>As far as storage, all immutable data exists in ambient space and is transparently copied by the memory management system as needed. Mutable data is stored in a specific location (TLS, process context, etc.) and is accessed via specialized, imperative concurrent operations.</p>
 </section>
 <section id="concurrent-operations">
-<h2>Concurrent operations<a class="headerlink" href="#concurrent-operations" title="Permalink to this heading"></a></h2>
+<h2>Concurrent operations<a class="headerlink" href="#concurrent-operations" title="Link to this heading"></a></h2>
 <p>At the lowest level, a thread uses a combination of hardware and OS operations. The hardware operations are read/write on mutable shared memory, and various memory barrier/fence instructions. The OS syscalls are a mess but can be roughly tagged as files, networking, process, (shared) memory, permissions, system clock, futex, System V IPC, and signals. In the cloud, a thread uses mostly network-centric operations, message-passing between nodes, while on a node the operations are mostly shared memory operations due to current machine architectures.</p>
 <p>There are many higher-level I/O concurrency abstractions: mutexes, condition variables, channels, MVars, transactional memory. These high-level interfaces are conceptually much simpler to reason about than mutable shared memory, in particular avoiding aliasing, even if there is still mutable shared memory under the covers. But mutable shared memory is a key feature of modern C++ concurrency implementations and it would significantly reduce expressiveness to forbid it from Stroscot. Sharing is caring.</p>
 <p>TODO: create complete list of higher-level abstractions and figure out how to nicely expose them in the language as libraries</p>
 <p>In Erlang we have the actor model. This had the following concurrent operations: spawn process (identified by ID), send message (any value) to process, receive next message (block indefinitely), receive next message (with timeout). These are implemented by a runtime, which ensures processes are lightweight, schedules and runs them, and manages memory like the message queues.</p>
 </section>
 <section id="memory-models-and-races">
-<h2>Memory models and races<a class="headerlink" href="#memory-models-and-races" title="Permalink to this heading"></a></h2>
+<h2>Memory models and races<a class="headerlink" href="#memory-models-and-races" title="Link to this heading"></a></h2>
 <p>The smallest examples of races runtimewise just have memory access. For example this program SB: <span id="id2">[<a class="reference internal" href="../zzreferences.html#id139" title="Peter Sewell, Susmit Sarkar, Scott Owens, Francesco Zappa Nardelli, and Magnus O. Myreen. X86-TSO: a rigorous and usable programmer's model for x86 multiprocessors. Communications of the ACM, 53(7):89–97, July 2010. URL: https://dl.acm.org/doi/10.1145/1785414.1785443 (visited on 2021-07-09), doi:10.1145/1785414.1785443.">SSO+10</a>]</span></p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
 <span class="nf">u</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="mi">0</span>
@@ -196,7 +200,7 @@ This program has a race condition, i.e. the order of writing and reading from A,
 </div></blockquote>
 </section>
 <section id="other-types-of-races">
-<h2>Other types of races<a class="headerlink" href="#other-types-of-races" title="Permalink to this heading"></a></h2>
+<h2>Other types of races<a class="headerlink" href="#other-types-of-races" title="Link to this heading"></a></h2>
 <p>Races not involving memory can also happen:</p>
 <ul class="simple">
 <li><p>Two acquires of a mutex with different continuations.</p></li>
@@ -207,17 +211,17 @@ This program has a race condition, i.e. the order of writing and reading from A,
 <p>Races could conceivably be desired, e.g. when writing litmus tests, so it is just a warning. Also a “race” like the order of writing to files is generally not important.</p>
 </section>
 <section id="blocking">
-<h2>Blocking<a class="headerlink" href="#blocking" title="Permalink to this heading"></a></h2>
+<h2>Blocking<a class="headerlink" href="#blocking" title="Link to this heading"></a></h2>
 <p>Acquiring a lock blocks until the lock is released. This introduces the problems of deadlock and starvation, which can be detected as the absence of progressing execution orders. With wait-free / atomic operations we never need to block.</p>
 <p>Go map operations do not grab a mutex and must be synchronized by some larger data structure or computation for access from multiple goroutines. This speeds up most programs but means some programs must add synchronization to avoid crashing. It is safe to use the map read-only, and a runtime check can report when a map is modified unsafely by concurrent execution.</p>
 </section>
 <section id="simulation">
-<h2>Simulation<a class="headerlink" href="#simulation" title="Permalink to this heading"></a></h2>
+<h2>Simulation<a class="headerlink" href="#simulation" title="Link to this heading"></a></h2>
 <p>On a program level Stroscot simulates the program’s (concurrent) execution, and will give a warning if it’s not deterministic or if deadlock is possible - the program is required to have the same result regardless of data race outcomes. This is checked by the verification system. Basically the simulation runs through the concurrency model and errors when the program behavior becomes visibly inconsistent. The verification system handles the nondeterminism somehow, check out papers on concurrency verification.</p>
 <p>It’s a bit lengthy to simulate the OS interface, but operations change infrequently, so it should be maintainable. The behavior of the OS scheduler is complicated and hard to model except as an adversary. The Linux scheduler might take an unreasonably long time to schedule a particular thread even if every other thread is sleeping or calls yield. Or it might decide to run it immediately, or move it on another core, etc.</p>
 </section>
 <section id="parallelism">
-<h2>Parallelism<a class="headerlink" href="#parallelism" title="Permalink to this heading"></a></h2>
+<h2>Parallelism<a class="headerlink" href="#parallelism" title="Link to this heading"></a></h2>
 <p>Parallelism - the root is “parallel” or “happening at the same time”. But with <a class="reference external" href="https://en.wikipedia.org/wiki/Relativity_of_simultaneity">relativity</a>, simultaneity is not absolute. We instead consider <a class="reference external" href="https://en.wikipedia.org/wiki/Causal_structure">causal structure</a> - event separation can be timelike or spacelike. Timelike separation communicates information from past to future, while no dependency is possible with spacelike separation. Hence we define an execution as a directed graph of information flow, where a node is a value and an edge is read “can casually influence” (we could also use the reverse “reads data from”). Assuming no time travel the graph is acyclic and its transitive closure forms a partial order or poset. Then things happen “in parallel” if neither causally influences the other.</p>
 <p>For example, <a class="reference external" href="https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm#Parallel_and_distributed_algorithms">multiplying</a> two 2x2 matrices:</p>
 <img alt="../_images/matrix-multiply.svg" src="../_images/matrix-multiply.svg" /><p>The multiplications all happen in parallel and the additions in parallel.</p>
@@ -236,6 +240,7 @@ This program has a race condition, i.e. the order of writing and reading from A,
 <p>But still, for complex data science computations we might want automatic parallelization that takes advantage of multicore hardware. So we can provide a DSL function <code class="docutils literal notranslate"><span class="pre">parallelize</span></code> to automatically rewrite pure computations to concurrent ones, implementing the “small on single thread, big splits into small” operations on top of fork/join model and taking the thread / task queue implementation as a parameter. Doug Lea’s work stealing task queues can be very efficient given the correct task granularity.</p>
 <p>Haskell’s “par” is interesting, but too fine-grained to be efficient. You have to manually add in a depth threshold and manually optimize it. It’s just as clear to use explicit fork/join operations, and indeed the <code class="docutils literal notranslate"><span class="pre">rpar/rpar/rseq/rseq</span></code> pattern proposed in <a class="reference external" href="https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/ch02.html">the Parallel Haskell book</a> is just fork/join with different naming.</p>
 <p>As far as the actual task granularity, Cliff Click says the break-even point is somewhere around the middle of the microsecond range, thousands of cycles / machine code instructions. Below that the overhead for forking the task exceeds the speedup from parallelism, but above you can make useful progress in another thread.</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Communicating_sequential_processes">https://en.wikipedia.org/wiki/Communicating_sequential_processes</a></p>
 </section>
 </section>
 

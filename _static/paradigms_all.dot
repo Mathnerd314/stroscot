@@ -1,0 +1,62 @@
+digraph paradigms {
+  action -> relation
+  array -> function
+  "nondet automata" -> relation
+  "det automata" -> function
+  concurrency -> command
+  actor -> concurrency
+  agent -> concurrency
+  flow -> concurrency
+  actor -> loop
+  agent -> loop
+  flow -> loop
+  "data-driven" -> loop
+  "data-driven" -> condition
+  "data-driven" -> function
+  "data-driven" -> command
+  declarative -> relation
+  declarative -> function
+  lambda -> function
+  function -> relation [color="red"]
+  relation -> set [color="red"]
+  boolean -> constraint [color="red"]
+  constraint -> optimization [color="red"]
+  dataflow -> block
+  reactive -> function
+  reactive -> command
+  query -> function
+  differentiable -> function
+  dynamic -> function
+  event -> function
+  event -> loop
+  generic -> function
+  command -> function
+  "mutable variable" -> function
+  procedure -> function
+  attribute -> function
+  macro -> function
+  nondeterministic -> relation
+  parallel -> block
+  parallel -> concurrency
+  process -> concurrency
+  probabilistic -> function
+  quantum -> function
+  quantum -> block
+  set -> boolean [color="red"]
+  stack -> function
+  loop -> function
+  loop -> recursion
+  conditional -> function
+  block -> function
+  object -> "mutable variable"
+  class -> type
+  recursion -> function
+  type -> set
+  "term rewriting" -> relation
+  optimization -> relation [color="red"]
+  optimization -> function [color="red"]
+  subgraph {
+    node [color="red"];
+    function, relation, set, boolean, constraint, optimization
+  }
+}

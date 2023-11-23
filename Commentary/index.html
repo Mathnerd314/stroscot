@@ -14,15 +14,15 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Assembly" href="Assembly.html" />
+    <link rel="next" title="Aspects" href="Aspects.html" />
     <link rel="prev" title="Errors" href="../Reference/Errors.html" /> 
 </head>
 
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Commentary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -87,12 +89,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -124,14 +128,22 @@
            <div itemprop="articleBody">
              
   <section id="commentary">
-<h1>Commentary<a class="headerlink" href="#commentary" title="Permalink to this heading"></a></h1>
+<h1>Commentary<a class="headerlink" href="#commentary" title="Link to this heading"></a></h1>
 <p>Every compiler needs an explanation of all the decisions made and possible options considered.</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="Aspects.html">Aspects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html#costs-and-benefits">Costs and benefits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html#uses">Uses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html#structure">Structure</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Assembly.html">Assembly</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html#architectures">Architectures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html#operating-systems">Operating systems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html#instruction-database">Instruction database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html#foreign-code">Foreign code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html#operations">Operations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="BuildSystem.html">Build system</a><ul>
@@ -227,6 +239,30 @@
 <li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#list-homomorphisms">List homomorphisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#serialization">Serialization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#function-pipelines">Function pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#values">Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#date-time">Date/time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#records">Records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#bags">Bags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#pointers">Pointers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#id9">Numbers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#mathematical-structures">Mathematical structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#intervals">Intervals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#units">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#multimedia">Multimedia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#graphs">Graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#chemicals">Chemicals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#databases">Databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#regular-expression">Regular expression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#finite-state-machine">Finite-state machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#gis">GIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#quantum-computing">Quantum computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#logical-propositions">Logical propositions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#infinite-values">Infinite values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#id10">Numbers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#qualified-symbols">Qualified symbols</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html#portable-operations">Portable operations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CompilerOutput.html">Compiler output</a><ul>
@@ -272,9 +308,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Errors.html#error-levels">Error levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Errors.html#error-types">Error types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Errors.html#error-messages">Error messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html#debugging">Debugging</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html#pure-vs-impure">Pure vs impure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html#strict-vs-non-strict">Strict vs non-strict</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html#lazy-vs-optimal">Lazy vs optimal</a></li>
 </ul>
@@ -287,6 +325,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#top-level">Top level</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#automatic-propagation">Automatic propagation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#syntax">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html#finally">Finally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#no-throw">no-throw</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#exception-api">Exception API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html#signatures">Signatures</a></li>
@@ -305,9 +344,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html#avoiding-slow-operations">Avoiding slow operations</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l1"><a class="reference internal" href="IR.html">Intermediate representation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="IR.html#goals">Goals</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IR.html#transformations">Transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#optimizations">Optimizations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html#more-on-ir">More on IR</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html#sequent-core">Sequent Core</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html#operations">Operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html#control-flow">Control flow</a></li>
@@ -316,24 +357,19 @@
 <li class="toctree-l2"><a class="reference internal" href="IR.html#values">Values</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Intrinsics.html">Intrinsics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html#hardware-operations">Hardware operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html#portable-operations">Portable operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html#runtime-and-os-calls">Runtime and OS calls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html#ffi-calls">FFI calls</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="Learning.html">Learning</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html#formats">Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html#experience">Experience</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html#neuroscience">Neuroscience</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html#content">Content</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Logic.html">Logic</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#logic-style">Logic style</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#type-annotations">Type annotations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html#jumbo-connectives">Jumbo connectives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html#jumbo-connective">Jumbo connective</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#common-connectives">Common connectives</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html#exponentials">Exponentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html#exponential">Exponential</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#classification-of-sequents">Classification of sequents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#polarized-logic">Polarized logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#structural-rules">Structural rules</a></li>
@@ -342,8 +378,6 @@
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#definitions">Definitions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#set-theory">Set theory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#recursion-and-infinite-structures">Recursion and infinite structures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html#hashing">Hashing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Logic.html#primitives">Primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#confluent-reduction">Confluent reduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html#levels">Levels</a></li>
 </ul>
@@ -369,10 +403,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#pointers">Pointers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#references">References</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#finalizers">Finalizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#representation">Representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#model">Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#allocator">Allocator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#pieces">Pieces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#destructors">Destructors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html#dumping-ground">Dumping ground</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Meta.html">Meta</a><ul>
@@ -399,6 +434,13 @@
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#inheritance">Inheritance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#polymorphism">Polymorphism</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html#design-patterns">Design patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="OpPrims.html">Operational primitives</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html#assembly">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html#abstracted-assembly">Abstracted assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html#runtime-and-os-calls">Runtime and OS calls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html#ffi-calls">FFI calls</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="PackageManager.html">Package manager</a><ul>
@@ -436,6 +478,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#action">Action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html#caches">Caches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html#benchmarking">Benchmarking</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Programs.html">Exemplary programs</a><ul>
@@ -447,6 +490,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Reduction.html">Reduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#def-use">Def/use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#hashing">Hashing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html#primitives">Primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html#linear-logic">Linear logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Reduction.html#implementation">Implementation</a></li>
 </ul>
@@ -468,6 +514,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Security.html">Security</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Security.html#best-practices">Best practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html#threat-modeling">Threat modeling</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Sets.html">Sets</a><ul>
@@ -479,6 +526,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Standard-Library.html">Standard library</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#library-checklist">Library checklist</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#scope">Scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#evolution">Evolution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#stability">Stability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#processes">Processes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html#blessed-prelude">Blessed prelude</a></li>
@@ -494,6 +542,15 @@
 <li class="toctree-l2"><a class="reference internal" href="State.html#limitations-of-purity">Limitations of purity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html#automatic-destructive-update">Automatic destructive update</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html#store">Store</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Symbolic.html">Symbolic computing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#design">Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#calculations">Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#polynomials">Polynomials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#staging">Staging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html#to-look-at">To look at</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Syntax.html">Syntax</a><ul>
@@ -579,13 +636,16 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Types.html">Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Types.html#what-is-a-type">What is a type?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html#what-is-a-type-system">What is a type system?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#are-sets-types">Are sets types?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#is-stroscot-typed">Is Stroscot typed?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#is-stroscot-static">Is Stroscot static?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#is-stroscot-dynamic">Is Stroscot dynamic?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#is-stroscot-strong">Is Stroscot strong?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#type-inference">Type inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#soundness-and-completeness">Soundness and completeness</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#unityping">Unityping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html#model-checking">Model checking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Types.html#roles">Roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html#notes">Notes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Units.html">Units</a><ul>
@@ -597,6 +657,15 @@
 <li class="toctree-l2"><a class="reference internal" href="Units.html#convention-contexts">Convention contexts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html#arithmetic">Arithmetic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html#modes">Modes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Values.html">Values</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#colors">Colors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#bare-symbols">Bare symbols</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#term">Term</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#functions-sets">Functions/Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#binders-logical-proofs">Binders/Logical proofs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html#rewriting-system">Rewriting system</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Verification.html">Verification</a><ul>
@@ -617,7 +686,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../Reference/Errors.html" class="btn btn-neutral float-left" title="Errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Assembly.html" class="btn btn-neutral float-right" title="Assembly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Aspects.html" class="btn btn-neutral float-right" title="Aspects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

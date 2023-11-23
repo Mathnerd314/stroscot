@@ -14,16 +14,16 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Build system" href="BuildSystem.html" />
-    <link rel="prev" title="Commentary" href="index.html" /> 
+    <link rel="prev" title="Aspects" href="Aspects.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,19 +51,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Assembly</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#architectures">Architectures</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#operating-systems">Operating systems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#instruction-database">Instruction database</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#data-sources">Data sources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#goals">Goals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#definition-of-an-instruction">Definition of an instruction</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#templates">Templates</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#affected-state">Affected state</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#classification">Classification</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#performance">Performance</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#memory-model">Memory model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metadata">Metadata</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-sources">Data sources</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#foreign-code">Foreign code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operations">Operations</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
@@ -79,8 +80,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -89,6 +90,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -101,12 +103,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -139,82 +143,60 @@
            <div itemprop="articleBody">
              
   <section id="assembly">
-<h1>Assembly<a class="headerlink" href="#assembly" title="Permalink to this heading"></a></h1>
-<p>A lot of languages aim for “no runtime overhead”. But this is unattainable, even C structs and arrays have to use memcpy occasionally. Stroscot merely aims to be as fast as C, which means compiling to good C is sufficient. But C is somewhat ill-defined and assembly can be faster in some cases, so it would be nice to do assembly directly as well.</p>
+<h1>Assembly<a class="headerlink" href="#assembly" title="Link to this heading"></a></h1>
+<p>Creating a high-level programming language with absolutely no runtime overhead is a challenging task. For example C has runtime overhead: the generated instruction sequences may not be optimal, memory management with malloc/free may be slower than a custom allocator, data type layouts may not be optimal, function calls follow the C calling convention which is not necessarily the fastest, and the standard library may be slower than hand-written routines.</p>
+<p>So writing code in assembly can be advantageous. It is best to think of a high-level programming language as a macro assembler with particularly complex macros - this begs the question of why most languages make it so hard to use inline assembly. Even in a JIT-style execution model, some amount of code is compiled to assembly. The difference is there are also jumps into the interpreter, which sort of “glues together” regions of compiled code.</p>
 <section id="architectures">
-<h2>Architectures<a class="headerlink" href="#architectures" title="Permalink to this heading"></a></h2>
-<p>The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn’t find a list of processor architectures by popularity, but from <a class="reference external" href="https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use">this quora answer</a> and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARMv8-A A64 (mobile devices).</p>
+<h2>Architectures<a class="headerlink" href="#architectures" title="Link to this heading"></a></h2>
+<p>The first step in dealing with assembly is to decide which instruction set architectures to support. I couldn’t find a list of processor architectures by popularity, but from <a class="reference external" href="https://www.quora.com/What-kind-of-instruction-set-architecture-do-modern-processors-use">this quora answer</a> and checking it by googling numbers of units sold for other random ISAs, the two primary architectures are x86-64 AMD64 (desktops) and ARM64 (mobile devices).</p>
 <p>Others to consider as well:</p>
 <ul class="simple">
-<li><p>ARMv9-A A64: It’s released, devices expected in 2022. Very similar to v8 so should be able to share the code as a microarchitecture. Verdict: on the roadmap</p></li>
-<li><p>C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. And some things like tail calls are really hard to encode in C, or add significant compilation overhead, so it can’t be the only option.</p></li>
+<li><p>C: compilation to a self-contained C program makes porting much easier, and obviates the need for many of these architectures. Verdict: on the roadmap. Note though that this is only compiling to a subset of C - not every C program can be produced. For example, jumps (tail calls) are hard to encode in C - you either do one massive function with goto’s, or <a class="reference external" href="https://en.wikipedia.org/wiki/Tail_call#Through_trampolining">trampolining</a>, or non-portable TCO conventions like Manticore’s JWA convention.</p></li>
 <li><p>WASM: it still doesn’t support <a class="reference external" href="https://github.com/WebAssembly/proposals/issues/17">tail calls</a>. Given the lack of progress it seems like a low priority. Verdict: Contributor.</p></li>
 <li><p>LLVM: The bitcode format may be worth targeting at some point. Per blog posts the API is much more unstable than the IR, and generating the IR in memory and parsing it is about as fast as using the API. Verdict: Contributor.</p></li>
 <li><p>RISC-V: There are $100-ish dev boards listed at <a class="reference external" href="https://riscv.org/exchange/boards/">https://riscv.org/exchange/boards/</a>. No non-dev systems yet. It’s a relatively simple ISA, similar to ARM. Verdict: Contributor</p></li>
 <li><p>32-bit ARM: Old phones, the Raspberry Pi Zero. The XML database is similar. Verdict: Contributor.</p></li>
 <li><p>32-bit x86: Old desktop PCs. From a time/effort perspective it seems cheaper to buy a new computer instead of writing support for these. Verdict: C backend or contributor.</p></li>
-<li><p>POWER: <a class="reference external" href="https://secure.raptorcs.com/content/base/products.html">Raptor</a> sells expensive systems. Much more niche than RISC-V. Verdict: C backend.</p></li>
+<li><p>POWER: <a class="reference external" href="https://secure.raptorcs.com/content/base/products.html">Raptor</a> sells $5K-ish systems. Much more expensive and niche than RISC-V. Verdict: C backend.</p></li>
 <li><p>MIPS: the company that develops it went bankrupt and is now doing RISC-V. There are consumer systems available in China (Loongson), but the rumor is that they too are moving to RISC-V or else to their own architecture LoongArch. Verdict: C backend.</p></li>
 <li><p>z/Architecture: really expensive, weird OS. Verdict: C backend.</p></li>
 <li><p>SPARC: It’s end-of-life but I guess you can still buy servers second-hand. Verdict: C backend.</p></li>
 </ul>
 <p>From a design perspective supporting 2 architectures is not much different from supporting 10, it’s just a larger set of cases, but 10 is 5x the work of 2. ARM support will be tested through QEMU, x86 natively. There are also CI services that could work (Drone). Code bloat is an issue but keeping each ISA in its own folder should avoid drift.</p>
-<p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed and has to be generated by running benchmarking programs, so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
+<p>In addition to the basic ISAs, there are also extensions and <a class="reference external" href="https://en.wikipedia.org/wiki/Microarchitecture">microarchitectures</a> to consider. For example ARM64 is divided into v8-A, v9-A, and others. <a class="reference external" href="https://www.cpubenchmark.net/share30.html">PassMark</a> has a list of CPU shares, it’s probably wildly skewed to gaming but it’s better than nothing. The data on CPU cycles, ports, etc. is rather detailed and has to be generated by running benchmarking programs, so it will probably depend on user submissions; for now I’ll use my own CPU (AMD A6-3650 APU).</p>
 </section>
 <section id="operating-systems">
-<h2>Operating systems<a class="headerlink" href="#operating-systems" title="Permalink to this heading"></a></h2>
+<h2>Operating systems<a class="headerlink" href="#operating-systems" title="Link to this heading"></a></h2>
 <p>In planned order:</p>
 <ol class="arabic simple">
 <li><p>Linux for AMD64, because it’s what I’m typing on now</p></li>
 <li><p>Android for ARM, because it’s my phone and it’s easy to hook up</p></li>
-<li><p>Windows for AMD64, which I can emulate with WINE and get access to fairly easily</p></li>
+<li><p>Windows for AMD64, which I can emulate with WINE and test fairly easily</p></li>
 </ol>
 <p>We’ll exclude Apple for now because their OS documentation sucks, they charge $100/year for a “developer license”, and their anti-competitive practices mean that they would probably find some way to shut Stroscot down once Stroscot starts being a serious competitor with Swift. Of course there is nothing stopping someone else from jumping through all the hoops needed to placate Apple and making a port.</p>
 </section>
 <section id="instruction-database">
-<h2>Instruction database<a class="headerlink" href="#instruction-database" title="Permalink to this heading"></a></h2>
-<section id="data-sources">
-<h3>Data sources<a class="headerlink" href="#data-sources" title="Permalink to this heading"></a></h3>
-<p>The basic goal is to have official data sources where possible and otherwise generate it automatically via measurement, that way new processors / ISAs can be added quickly. In terms of data sources for ISAs, for x86 the official sources are <a class="reference external" href="https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html">Intel’s SDM</a> / <a class="reference external" href="https://developer.amd.com/resources/developer-guides-manuals/">AMD’s Architecture Programmer’s Manual</a>, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. <a class="reference external" href="https://github.com/google/EXEgesis">EXEgesis</a> uses a hacky Xpdf parser but has some amount of effort invested by Google. <a class="reference external" href="https://github.com/HJLebbink/x86doc/tree/master/Python">x86doc</a> uses pdfminer to generate HTML which seems like a more friendly starting point.</p>
-<p>More structured but less official are x86 instruction databases:</p>
+<h2>Instruction database<a class="headerlink" href="#instruction-database" title="Link to this heading"></a></h2>
+<p>x86 has a lot of instructions - somewhere around 1000 unique mnemonics, and many variants of those instructions. ARM too has at least a thousand instruction variants. With so many, it is clear that a structured database of instruction information is needed.</p>
+<section id="goals">
+<h3>Goals<a class="headerlink" href="#goals" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p><a class="reference external" href="https://intelxed.github.io/">Intel XED</a> (<a class="reference external" href="https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt">file</a>). This might as well be official, although it is technically its own open-source project I think Intel uses it internally.</p></li>
-<li><p>LLVM <a class="reference external" href="https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/X86/X86.td">x86 tables</a></p></li>
-<li><p>NASM <a class="reference external" href="https://github.com/netwide-assembler/nasm/blob/master/x86/insns.dat">instruction table</a></p></li>
-<li><p><a class="reference external" href="https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/i386-opc.tbl;h=b0530e5fb82f4f4cd85d67f7ebf6ce6ebf9b45b5;hb=HEAD">GNU Assembler (gas)</a></p></li>
-<li><p><a class="reference external" href="https://github.com/icedland/iced/blob/65d1f49584247a09dcc2559727936a53014268f5/src/csharp/Intel/Generator/Tables/InstructionDefs.txt">iced</a></p></li>
-<li><p><a class="reference external" href="https://github.com/RRZE-HPC/OSACA/tree/master/osaca/data/isa">OSACA</a> is AGPL licensed and very incomplete</p></li>
-<li><p><a class="reference external" href="https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Processors/x86/data/languages/ia.sinc#L1594">Ghidra</a>, seems to have semantics</p></li>
-<li><p>emulators: <a class="reference external" href="https://github.com/colejohnson66/rbx86">https://github.com/colejohnson66/rbx86</a>, <a class="reference external" href="https://bochs.sourceforge.io/">https://bochs.sourceforge.io/</a></p></li>
-<li><p><a class="reference external" href="https://github.com/asmjit/asmjit">https://github.com/asmjit/asmjit</a>, <a class="reference external" href="https://github.com/bitdefender/bddisasm">https://github.com/bitdefender/bddisasm</a>, <a class="reference external" href="https://github.com/dyninst/dyninst">https://github.com/dyninst/dyninst</a>, <a class="reference external" href="https://github.com/herumi/xbyak">https://github.com/herumi/xbyak</a>, qemu/capstone, <a class="reference external" href="https://github.com/diegocarba99/bagheera">https://github.com/diegocarba99/bagheera</a>, <a class="reference external" href="https://github.com/mongodb-labs/disasm">https://github.com/mongodb-labs/disasm</a>, zydis, <a class="reference external" href="https://github.com/MahdiSafsafi/AMED">https://github.com/MahdiSafsafi/AMED</a>, <a class="reference external" href="https://github.com/nidud/asmc">https://github.com/nidud/asmc</a></p></li>
-<li><p>Go assembler <a class="reference external" href="https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go">https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go</a></p></li>
-<li><p><a class="reference external" href="https://github.com/Barebit/x86reference/blob/master/x86reference.xml">https://github.com/Barebit/x86reference/blob/master/x86reference.xml</a></p></li>
-</ul>
-<p>Semantics:</p>
-<ul class="simple">
-<li><p>For ARM, we have official XML <a class="reference external" href="https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools">Machine Readable Architecture instruction tables</a>, which is nice-ish XML, and the code has been validated against ARM’s conformance suite. There is a toy disassembler <a class="reference external" href="https://github.com/nspin/hs-arm">hs-arm</a> using the tables. EXEgesis also parses the XML. <a class="reference external" href="https://github.com/alastairreid/asl-interpreter">asl-interpreter</a> runs the descriptions which are written in a special language.</p></li>
-<li><p>For x86-64 some academics have created a <a class="reference external" href="https://github.com/kframework/X86-64-semantics">formal X86-64 semantics</a> containing most of the userspace Haswell instructions. It was mostly manually written and has been checked with fuzzing. It is written in the K Framework syntax. It is missing concurrency, crypto (AES), supervisor/privileged, x87 floating-point, MMX, and also has a bug where it rounds too much with fused multiply-add floating point precision.</p></li>
-</ul>
-<p>Timing:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions">https://github.com/e12005490/valgrind_timing/tree/117292a3a94f843c173bdb53e4933c6b79570240/variable_time_instructions</a></p></li>
-<li><p>I think EXEgesis or llvm-exegesis generates timings on the current x86 CPU</p></li>
-<li><p>ARM: ?</p></li>
+<li><p>99% Completeness - it is not too hard to cover all of the instructions mentioned in official sources, and all of the “undocumented” instructions discovered so far by tools such as sandsifter and haruspex. But outside of this, it is impossible to be complete - there are simply too many bit patterns. sandsifter/haruspex take days to run and do not even explore the full instruction space, making assumptions about the format of instructions. But these tools have confirmed that there are many undocumented instructions. Therefore, it must be assumed that the database is incomplete - more instructions may be discovered in the future. We should therefore allow raw bit patterns not present in the database, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code> or similar, throughout the pipeline.</p></li>
+<li><p>Accuracy - Generally, all data should either come directly from official sources or measurement, and be automatically generated. This allows adding new instructions, processors, and microarchitectures as quickly as they become available. Furthermore it is easy to verify the information by checking it against the sources or rerunning the tool.</p></li>
+<li><p>Consistency - the database should have a consistent format, structure, and representation, so that it can be easily used in the compiler. This format should be documented for accessibility.</p></li>
 </ul>
 </section>
 <section id="definition-of-an-instruction">
-<h3>Definition of an instruction<a class="headerlink" href="#definition-of-an-instruction" title="Permalink to this heading"></a></h3>
+<h3>Definition of an instruction<a class="headerlink" href="#definition-of-an-instruction" title="Link to this heading"></a></h3>
 <p>An instruction is a finite sequence of binary data (generally some number of bytes). The general idea is that instructions are a syntactic unit above bits, like words in a character string. Except unlike words, there’s no instruction separator character; instructions are all run together like <code class="docutils literal notranslate"><span class="pre">afewinstructions</span></code>. Segmenting ARM instructions is simple because they are all 32 or 64 bits. For x86, the length varies from 1 to 15 bytes and is affected by almost all parts of the instruction. <a class="reference external" href="https://github.com/xoreaxeaxeax/sandsifter">sandsifter</a> can determine the length of the first instruction in some bytes by finding an index for which <code class="docutils literal notranslate"><span class="pre">seq|uence</span></code> does not trigger a page fault, but <code class="docutils literal notranslate"><span class="pre">se|quence</span></code> does (where <code class="docutils literal notranslate"><span class="pre">|</span></code> is a page boundary). <a class="reference external" href="https://blog.can.ac/2021/03/22/speculating-x86-64-isa-with-one-weird-trick/">haruspex</a> is even more tricky and examines the microcode speculation buffer performance counters to see how many nops after the byte sequence were speculated. With these tools we can segment arbitrary data into x86 instructions, assuming access to the processor.</p>
-<p>We cannot build a 100% complete and verified list of instructions. As far as verification, there are simply too many; sandsifter/haruspex take days to run and do not even explore the full instruction space, making assumptions about the format of instructions. As far as completeness, these tools have been run on various processors and confirmed that there are many undocumented instructions, and there are likely more instructions that will be found in the future. But building a database that is 99% complete and probabilistically verified is not too hard; we take the officially documented instruction patterns, manually add whatever undocumented instructions we can find, and fuzz it a bit with sandsifter to check decoding.</p>
-<p>Still though, we should design for our instruction database being incomplete, and allow a syntax for writing raw instructions, <code class="docutils literal notranslate"><span class="pre">instr('f0</span> <span class="pre">0f')</span></code> or similar. It’s similar to a <code class="docutils literal notranslate"><span class="pre">.db</span></code> statement that allows include file headers or data in the <code class="docutils literal notranslate"><span class="pre">.data</span></code> section, but is meant specifically for executable data. Unfortunately with these raw instructions, if they are not in the database, many compiler optimizations are useless: pipelining, register allocation, etc. So for an optimizing compiler we need instruction metadata, like clobbered registers, cycles, possible traps, etc. There are generally sensible defaults in the absence of information (all registers clobbered, no reordering, all traps possible, etc.), but specifying this information allows optimizing raw instructions just as well as database instructions.</p>
 </section>
 <section id="templates">
-<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this heading"></a></h3>
-<p>Listing instructions out exhaustively one-per-line would be too much data due to combinatorial explosion, so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values. We choose each template so that it has similar behavior regardless of what is chosen for its explicit operands.</p>
-<p>The templates should have names. For automatically generating them it could be a hash of the template string, or else the smallest unique opcode prefix or something. But really we want to use the mnemonics from the docs.</p>
-<p>Intel has variable-length instructions and from the docs seems to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX has 3 bits of operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement). We could parse the Intel docs for this (EXEgesis + handling all the weird encoding stuff), but I think extracting Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates abstract over the complications of MODRM.</p>
-<p>ARM has fixed length instructions and uses a bit-based format, for example A64 ADDS is <code class="docutils literal notranslate"><span class="pre">sf</span> <span class="pre">0101011</span> <span class="pre">shift*</span> <span class="pre">0</span> <span class="pre">Rm****</span> <span class="pre">imm6*****</span> <span class="pre">Rn****</span> <span class="pre">Rd****</span></code>. Here each name is an operand and the stars represent extra bits of the operand - the operand is a fixed-length bitstring. hs-arm <a class="reference external" href="https://github.com/nspin/hs-arm/blob/8f10870a4afbbba010e78bd98e452ba67adc34e0/nix-results/harm.harm-tables-src/gen/Harm/Tables/Gen/Insn.hs">seems</a> to pull out this information just fine, although its operand names are a little weird.</p>
-<p>So the information for each template is:</p>
+<h3>Templates<a class="headerlink" href="#templates" title="Link to this heading"></a></h3>
+<p>Listing instructions out exhaustively one-per-line would be too much data due to exponential explosion, so instead we have a list of templates, each of which can turned into an instruction by filling in the holes. Following Xed we can call the data that is filled in “explicit operands”. The explicit operands are distinguished bitstrings and can refer to registers, addresses, and immediate values. We choose each template so that it has similar behavior regardless of what is chosen for its explicit operands.</p>
+<p>The templates should have names. For automatically generating them from sandsifter data, it could be a hash of the template string, or else the smallest unique opcode prefix, or something. But really we want to use the mnemonics from the official docs where possible, for standardization.</p>
+<p>Intel in their docs seems to use byte-based templates, for example 64-bit ADCX is <code class="docutils literal notranslate"><span class="pre">66</span> <span class="pre">&lt;REX.w&gt;</span> <span class="pre">0F</span> <span class="pre">38</span> <span class="pre">F6</span> <span class="pre">&lt;MODRM&gt;</span></code>. The REX is 1 byte with 3 bits of varying operand data; the modrm is an operand and can be 1-6 bytes (register or memory with optional SIB/displacement).</p>
+<p>ARM has fixed length instructions and uses a bit-based format, for example A64 ADDS is <code class="docutils literal notranslate"><span class="pre">sf</span> <span class="pre">0101011</span> <span class="pre">shift*</span> <span class="pre">0</span> <span class="pre">Rm****</span> <span class="pre">imm6*****</span> <span class="pre">Rn****</span> <span class="pre">Rd****</span></code>. Here each name is an operand and the stars represent extra bits of the operand - the operand is a fixed-length bitstring.</p>
+<p>A basic schema for each instruction template is:</p>
 <ul class="simple">
 <li><p>form name (string)</p></li>
 <li><p>explicit operands (list)</p>
@@ -230,64 +212,129 @@
 </ul>
 </li>
 <li><p>encoding function <code class="docutils literal notranslate"><span class="pre">[Operands]</span> <span class="pre">-&gt;</span> <span class="pre">Bits</span></code></p></li>
-<li><p>Xed’s isa_set field</p></li>
-<li><p>the condition on CPUID for this instruction to work</p></li>
-<li><p>the valid modes (32-bit, 64-bit, real, protected, etc.)</p></li>
 </ul>
-<p>The isa_set field and fields after are because there are lots of overlapping sets of instructions and maintaining one master set is easier than duplicating the data.</p>
 </section>
-<section id="affected-state">
-<h3>Affected state<a class="headerlink" href="#affected-state" title="Permalink to this heading"></a></h3>
-<p>Another important piece of data is the affected state, i.e. the list of read/written flags/registers/etc. This is used in instruction reordering/scheduling and register allocation to minimize <a class="reference external" href="https://en.wikipedia.org/wiki/Hazard_(computer_architecture)#Data_hazards">data hazards</a>.</p>
-<p>The affected things depend on the instruction (and the operands). Where can we get this info?</p>
-<p>It seems possible to automatically determine by fuzzing (weighted towards special cases like 0 and 1). But it’s probably really slow and the result is somewhat suspect - it can’t determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.</p>
-<p>In the Intel docs there is a little <code class="docutils literal notranslate"><span class="pre">(r,w)</span></code> or <code class="docutils literal notranslate"><span class="pre">(r)</span></code> after the operands. But this doesn’t include everything. The rest can be found by scanning the English text, but unless we use NLP this will only give a list of affected things and not read/write info. Xed has info on read/written standard flags. But it abbreviates other flag registers - for example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR. So I guess Xed is the best data source but we will have to use EXEgesis somehow to scrape the affected flags, and then manually mark them as read/write/conditional or just leave it at coarse reordering information.</p>
-<p>For ARM modifying asl-interpreter should give info on flags etc.</p>
-<p>So the affected state database schema:</p>
+<section id="metadata">
+<h3>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h3>
+<p>Although we should allow the possibility of having no data about an instruction besides its bit pattern, many compiler optimizations depend on having more data, such as pipelining, register allocation, instruction scheduling, and instruction selection. Basic list of data:</p>
 <ul class="simple">
-<li><p>form name</p></li>
-<li><p>affected things (list)</p>
+<li><p>conditions under which instruction is valid (processor, CPUID, valid modes such as 32-bit, real, protected, etc.)</p></li>
+<li><p>timing</p>
 <ul>
-<li><p>type:</p>
-<ul>
-<li><p>explicit operand (+ index)</p></li>
-<li><p>fixed register</p></li>
-<li><p>pseudo resource</p></li>
-<li><p>flag bit</p></li>
+<li><p>latency - number of clock cycles required for execution</p></li>
+<li><p>throughput - rate at which the instruction can be executed (cycles/instr)</p></li>
+<li><p>whether execution time is data dependent (for cryptography)</p></li>
+<li><p>micro-ops - if the instruction is broken down</p></li>
+<li><p>functional units - ALU, multiplier, divider, and load/store units</p></li>
 </ul>
 </li>
-<li><p>read: read / not read / conditionally read / unknown</p></li>
-<li><p>written:</p>
-<ul>
-<li><p>value: constant,  copied from input, input + constant, undefined/reserved, complex computation</p></li>
-<li><p>written with value, not written, conditionally written with value, unknown</p></li>
+<li><p>affected state - read/conditionally read/written/clobbered flags/general-purpose registers/stack pointer/memory/FP regs/SIMD regs/program counter - used in instruction reordering/scheduling and register allocation to minimize <a class="reference external" href="https://en.wikipedia.org/wiki/Hazard_(computer_architecture)#Data_hazards">data hazards</a>. “undefined” in the context of Intel means “arbitrary bit-pattern may be returned”. This is distinct from C’s UB but matches LLVM’s “undef”.</p></li>
+<li><p>possible traps/exceptions</p></li>
+<li><p>pseudo-resources - to represent non-deterministic instructions, like random number generation, monitors, etc.</p></li>
+<li><p>semantics - the mathematical function of state + pseudo-resources -&gt; state represented by the instruction</p></li>
+<li><p>Category: nop, movement, arithmetic, logic, floating point, string, cryptography, SSE, AVX, control flow, I/O, system call/privilege rings/virtualization, concurrency, (atomics, fences), cache control (prefetch/barrier), performance monitoring/debugging, virtual memory, interrupts/exceptions/traps</p></li>
 </ul>
-</li>
-</ul>
-</li>
-<li><p>possible exceptions</p></li>
-</ul>
-<p>Instructions with no data have all possible affected things present, with read/write unknown.</p>
-<p>Pseudo-resource includes things like load-link/store-conditional. LDXR sets monitors (write) and STXR checks monitors (read). A second LL clears the monitor so LL is actually read/write. Anyway the monitor is a pseudo resource, because it’s not a register.</p>
-<p>“undefined” in the context of Intel means “arbitrary bit-pattern may be returned”. This is distinct from C’s UB but matches LLVM’s “undef”.</p>
+<p>To handle novel instructions, there are generally sensible defaults in the absence of information (all registers set to arbitrary bit patterns, all traps possible, non-deterministic “anything goes” semantics, etc.).</p>
+<p>Since we represent sets of instruction using templates, the metadata is conceptually specified for a given template as a function <code class="docutils literal notranslate"><span class="pre">[Operands]</span> <span class="pre">-&gt;</span> <span class="pre">Metadata</span></code>.</p>
 </section>
-<section id="classification">
-<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this heading"></a></h3>
-<p>We can classify instructions:</p>
+<section id="data-sources">
+<h3>Data sources<a class="headerlink" href="#data-sources" title="Link to this heading"></a></h3>
+<p>For x86, the official sources are <a class="reference external" href="https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html">Intel’s SDM</a> / <a class="reference external" href="https://developer.amd.com/resources/developer-guides-manuals/">AMD’s Architecture Programmer’s Manual</a>, which use English and pseudocode and have numerous typos (if the experiences of others hold true). Also they are only distributed as PDFs. Parsing the PDFs is a lot of work. <a class="reference external" href="https://github.com/google/EXEgesis">EXEgesis</a> uses a hacky Xpdf parser but had some amount of effort invested in it by Google before they stopped maintaining it. <a class="reference external" href="https://github.com/HJLebbink/x86doc/tree/master/Python">x86doc</a> uses pdfminer to generate HTML which seems like a more friendly starting point.</p>
+<p>More structured but less official are x86 instruction databases:</p>
 <ul class="simple">
-<li><p>Data usage: does it read or write flags/general-purpose registers/stack pointer/memory/FP regs/SIMD regs/program counter?</p></li>
-<li><p>Category: nop, movement, arithmetic, logic, floating point, string, cryptography, SSE, AVX, control flow, I/O, system call/privilege rings/virtualization, concurrency, (atomics, fences), cache control (prefetch/barrier), performance monitoring/debugging, virtual memory, interrupts/exceptions/traps,</p></li>
+<li><p><a class="reference external" href="https://intelxed.github.io/">Intel XED</a> (<a class="reference external" href="https://github.com/intelxed/xed/blob/main/datafiles/xed-isa.txt">file</a>). This might as well be official - although it is technically its own open-source project, I think Intel uses it internally.</p></li>
+<li><p>LLVM <a class="reference external" href="https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/X86/X86.td">x86 tables</a></p></li>
+<li><p>NASM <a class="reference external" href="https://github.com/netwide-assembler/nasm/blob/master/x86/insns.dat">instruction table</a></p></li>
+<li><p><a class="reference external" href="https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/i386-opc.tbl;h=b0530e5fb82f4f4cd85d67f7ebf6ce6ebf9b45b5;hb=HEAD">GNU Assembler (gas)</a></p></li>
+<li><p><a class="reference external" href="https://github.com/icedland/iced/blob/65d1f49584247a09dcc2559727936a53014268f5/src/csharp/Intel/Generator/Tables/InstructionDefs.txt">iced</a></p></li>
+<li><p><a class="reference external" href="https://github.com/RRZE-HPC/OSACA/tree/master/osaca/data/isa">OSACA</a> is AGPL licensed and very incomplete</p></li>
+<li><p><a class="reference external" href="https://github.com/NationalSecurityAgency/ghidra/blob/master/Ghidra/Processors/x86/data/languages/ia.sinc#L1594">Ghidra</a>, seems to have semantics</p></li>
+<li><p>emulators: <a class="reference external" href="https://github.com/colejohnson66/rbx86">https://github.com/colejohnson66/rbx86</a>, <a class="reference external" href="https://bochs.sourceforge.io/">https://bochs.sourceforge.io/</a>, QEMU</p></li>
+<li><p><a class="reference external" href="https://github.com/asmjit/asmjit">https://github.com/asmjit/asmjit</a>, <a class="reference external" href="https://github.com/bitdefender/bddisasm">https://github.com/bitdefender/bddisasm</a>, <a class="reference external" href="https://github.com/dyninst/dyninst">https://github.com/dyninst/dyninst</a>, <a class="reference external" href="https://github.com/herumi/xbyak">https://github.com/herumi/xbyak</a>, qemu/capstone, <a class="reference external" href="https://github.com/diegocarba99/bagheera">https://github.com/diegocarba99/bagheera</a>, <a class="reference external" href="https://github.com/mongodb-labs/disasm">https://github.com/mongodb-labs/disasm</a>, zydis, <a class="reference external" href="https://github.com/MahdiSafsafi/AMED">https://github.com/MahdiSafsafi/AMED</a>, <a class="reference external" href="https://github.com/nidud/asmc">https://github.com/nidud/asmc</a></p></li>
+<li><p>Go assembler <a class="reference external" href="https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go">https://cs.opensource.google/go/go/+/master:src/cmd/internal/obj/x86/avx_optabs.go;l=1791?q=vfixupimmss&amp;ss=go</a></p></li>
+<li><p><a class="reference external" href="https://github.com/Barebit/x86reference/blob/master/x86reference.xml">https://github.com/Barebit/x86reference/blob/master/x86reference.xml</a></p></li>
+</ul>
+<p>Overall I think extracting Xed’s <a class="reference external" href="https://intelxed.github.io/ref-manual/xed-iform-enum_8h.html">iform list</a> and using Xed for encoding is the way to go. It doesn’t match the docs 1-1 but it saves on sanity - e.g. the separate memory / register templates abstract over the complications of MODRM.</p>
+<p>We also need instruction semantics. Some academics have created a <a class="reference external" href="https://github.com/kframework/X86-64-semantics">formal X86-64 semantics</a> containing most of the userspace Haswell instructions. It was mostly manually written and has been checked with fuzzing. It is written in the K Framework syntax. It is missing concurrency, crypto (AES), supervisor/privileged, x87 floating-point, MMX, and also has a bug where it rounds too much with fused multiply-add floating point precision. I don’t know how to manipulate K language stuff but the actual instruction semantics is pretty simple so maybe something could be hacked together.</p>
+<p>For affected state, there are some choices. In the Intel docs, there is a little <code class="docutils literal notranslate"><span class="pre">(r,w)</span></code> or <code class="docutils literal notranslate"><span class="pre">(r)</span></code> after the operands, that EXEgesis picks up, but this doesn’t include everything. For example (per the Intel documentation) VFIXUPIMMSS reads MXCSR.DAZ and conditionally updates MXCSR.IE and MXCSR.ZE, but these are not in the thing. Xed has info on read/written standard flags. But it abbreviates other flag registers - for VFIXUPIMMSS, Xed just records a MXCSR attribute. LLVM similarly just has <code class="docutils literal notranslate"><span class="pre">USES</span> <span class="pre">=</span> <span class="pre">[MXCSR]</span></code>. NASM and gas don’t seem to have flag information at all. iced does have flag info but no MXCSR. The K semantics don’t have MXCSR. So I guess Xed is the best data source but we will have to use EXEgesis somehow to scrape the affected flags from the instruction description, and then manually mark them as read/write/conditional or just leave it at coarse reordering information. It might be also possible to automatically determine it by fuzzing (weighted towards special cases like 0 and 1). But it’s probably really slow and the result is somewhat suspect - it can’t determine that a flag/register becomes undefined, and it may miss reads/writes that happen in rare circumstances.</p>
+<p>For ARM, we have official XML <a class="reference external" href="https://developer.arm.com/architectures/cpu-architecture/a-profile/exploration-tools">Machine Readable Architecture instruction tables</a>. It includes both the encoding and the semantics, and the code has been validated against ARM’s conformance suite. There is a toy disassembler <a class="reference external" href="https://github.com/nspin/hs-arm">hs-arm</a> using the tables. hs-arm <a class="reference external" href="https://github.com/nspin/hs-arm/blob/8f10870a4afbbba010e78bd98e452ba67adc34e0/nix-results/harm.harm-tables-src/gen/Harm/Tables/Gen/Insn.hs">seems</a> to pull out the template information just fine, although its operand names are a little weird. <a class="reference external" href="https://github.com/alastairreid/asl-interpreter">asl-interpreter</a> runs the descriptions, which are written in a special language - it should be possible to run this to get affected state.</p>
+<p>Timings:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.agner.org/optimize/instruction_tables.ods">https://www.agner.org/optimize/instruction_tables.ods</a></p></li>
+<li><p><a class="reference external" href="https://uops.info/">https://uops.info/</a></p></li>
+<li><p>I think EXEgesis or llvm-exegesis generates timings</p></li>
+<li><p>There are some papers on using ML and measured timings to predict block performance, probably more accurate than instruction-level data</p></li>
 </ul>
 </section>
-<section id="performance">
-<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h3>
-<p>the data present in LLVM for instruction scheduling (such as uops, execution ports/units, and latencies),</p>
-<p>If PSTATE.DIT is 1 the execution time is independent of the values.</p>
 </section>
-<section id="memory-model">
-<h3>Memory model<a class="headerlink" href="#memory-model" title="Permalink to this heading"></a></h3>
-<p>A memory model is needed to determine if reordering data writes will change the behavior of a concurrent program.</p>
+<section id="foreign-code">
+<h2>Foreign code<a class="headerlink" href="#foreign-code" title="Link to this heading"></a></h2>
+<p>One specific set of assembly sequences we care about is calling code in other languages, particularly C. Many functions use the C calling convention, such as C memory allocation and Windows system calls. The most straightforward way to call these is to look up the symbol’s in the object file, set up the stack and registers appropriately for the calling convention, and jump to it. It is a bit annoying for example as we must allocate space for the C stack; Go uses 4MB or so. Also the calling conventions are messy - we will have to extract them from libffi or <a class="reference external" href="https://github.com/llvm/llvm-project/blob/6243d7d28b923c9e4f881f2a7ac77c1d13486ab2/llvm/lib/Target/X86/X86CallingConv.td#L1136">LLVM</a>.</p>
+<p>Another solution is to create a stub C file with a method declared with a fixed, known calling convention containing the desired FFI code, This C file can then be compiled to assembly via clang or GCC. Then this assembly can then be processed by identifying the method in the output and converting the contents of that method and its dependencies to Stroscot’s IR, essentially decompiling it into Stroscot. The IR can then be optimized to remove the overhead of the intermediary known calling convention, directly assigning registers and returning values. So for example if we wanted to compile the ceiling function, ceil, we’d create a stub method stub_ceil, something like:</p>
+<div class="highlight-C notranslate"><div class="highlight"><pre><span></span><span class="n">fastcall</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">stub_ceil</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">ceil</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>So then we would compile that to assembly, decompile it to Stroscot, and patch it into the IR. Compared to calling the symbol, this approach is much more flexible - it handles:</p>
+<ul class="simple">
+<li><p>all calling conventions, and pretty much all languages (as they have FFI’s to be called from C)</p></li>
+<li><p>functions defined as macros</p></li>
+<li><p>inlined functions</p></li>
+<li><p>C++ template expansion</p></li>
+<li><p>writing arbitrary code, instead of just calling pre-defined functions - and it’s all optimized with the language’s native compiler <em>and</em> Stroscot’s decompiler+assembler</p></li>
+</ul>
+<p>So the stub function approach will handle pretty much everything - it is robust. The calling convention details are baked into the compiled stub, so with no optimization, we can simply include the stub as a blob and call the compiled stub using the known calling convention. And it is not too hard to analyze the assembly, remove intermediate register assignments, and ensure that calling a symbol with the C calling convention optimizes to a direct call just like the simple approach. The costs? We have to decompile assembly to IR, and also we still have to implement at least one C calling convention, albeit we can choose the simplest/easiest one.</p>
+<p>A third approach is to use the stub method but compile to LLVM IR instead of assembly. LLVM has a more structured representation, representing calling conventions and so on explicitly, so we have to implement all the calling conventions again like with the symbol approach. We also have to translate LLVM IR to Stroscot IR, a bit easier than decompiling aassembly as there are only 67 instructions. It may also be easier to optimize, as LLVM’s SSA form means we do not have to recover clobbered register information. It is also possible to use the Clang API to directly process C/C++ to LLVM in-memory, which should be faster than generating assembly via a separate process.</p>
+<p>Eventually, it would be good to support all of the methods. For the initial implementation, the LLVM stub seems the priority, as compiling C/C++ robustly and efficiently is the main goal. For simple cases, the compiled stub will likely consist of a call instruction and nothing else, so we can work on supporting that instruction and gradually add more support. So the initial work consists of implementing the C default calling convention and calling Clang/LLVM, giving functionality as good as the direct-symbol approach with about as much work. Then we can explore assembly stubs and direct symbol calls later .</p>
+<p>Now for importing a whole file, like a C header file, it’s a bit more involved, and we do actually have to work at the source level. The stub method let us evaluate any snippet of code, but we have to determine the symbols, types, and so on to use in those snippets. So we have to read the header file, process each declaration, and generate a stub for each. Or multiple, in the case of a C++ template function. Again, some things that may look like functions to the C programmer may actually be declared using macros or other techniques, but in this context there is not enough information to determine the desired Stroscot &lt;-&gt; foreign language mapping. So this process can be semi automated at most; it will be able to bind the functions in the common cases but programmers will have to write the stub code and signature manually in complicated cases.</p>
+<p>And then of course there’s linking - you have to specify the object file that you’re going to link with and so that’s sort of are so linking and stress cut straws cut all the jit execution model so of course you can just specify the object that run time as a file path and then stress cut will load that file and link with it um and so that complicates things because it means that you need the file to be available when you’re testing the program and when So yeah the whole model is dependent are having a running system And so for example if you want to test an embedded system you have to hook up the embedded system to the network with the first computer And so that the fast computer can do all the heavy lifting white compilation and optimization and stuff um So that’s a bit of complexity</p>
 </section>
+<section id="operations">
+<h2>Operations<a class="headerlink" href="#operations" title="Link to this heading"></a></h2>
+<p>To abstract the ISA we consider the instructions from a functional perspective - these functions are called “operations”. Operations are exposed in Stroscot as intrinsic functions. This allows using a familiar syntax.</p>
+<p>Operations don’t reference registers, the operations all take/return temporaries. Since all registers/flags/etc. can be stored/loaded to memory, temporaries are conceptually an immutable bitstring of a fixed bitwidth. These bitwidths vary by the instruction: x86 uses 1, 8, 16, 32, 64, 80, 128, 256, 512, etc. (for flags, segment registers, general-purpose registers, FPU registers, MMX/SSE/AVX).</p>
+<p>For example the operations corresponding to x86-64 DIV, ADD, and ADC with 64-bit operands look like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">divide</span><span class="w"> </span><span class="p">(</span><span class="n">src</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">high</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">low</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">divisor</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src</span>
+<span class="w">  </span><span class="n">dividend</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">high</span><span class="w"> </span><span class="o">++</span><span class="w"> </span><span class="n">low</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">divisor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">src1</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="o">^</span><span class="mi">64</span>
+<span class="w">      </span><span class="n">fault</span><span class="w"> </span><span class="kt">DE</span>
+<span class="w">    </span><span class="kr">else</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="n">quotient</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">quotient</span><span class="p">,</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="n">mod</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="p">}</span>
+
+<span class="nf">add</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span>
+<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span>
+
+<span class="nf">adc</span><span class="w"> </span><span class="p">(</span><span class="n">src1</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">src2</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">cf</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">B1</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">dest</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">src1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">src2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cf</span>
+<span class="w">  </span><span class="o">...</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">...</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="kt">OF</span><span class="p">,</span><span class="w"> </span><span class="kt">SF</span><span class="p">,</span><span class="w"> </span><span class="kt">ZF</span><span class="p">,</span><span class="w"> </span><span class="kt">AF</span><span class="p">,</span><span class="w"> </span><span class="kt">CF</span><span class="p">,</span><span class="w"> </span><span class="kt">PF</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Accessing memory is handled by a separate operation - but in the ISA x86 has combined read-add instructions:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">read</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Addr</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">B64</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B32</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B16</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">B8</span><span class="p">}</span>
+<span class="nf">read</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="ow">=</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">noncanonical</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">-- https://stackoverflow.com/questions/25852367/x86-64-canonical-address</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">referencesSSsegment</span><span class="w"> </span><span class="n">a</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">SS</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">GP</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="n">unaligned</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">enabled</span><span class="w"> </span><span class="n">alignment_checking</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">AC</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not_in_physical_memory</span><span class="w"> </span><span class="n">a</span>
+<span class="w">    </span><span class="n">fault</span><span class="w"> </span><span class="kt">PF</span><span class="p">(</span><span class="n">fault</span><span class="o">-</span><span class="n">code</span><span class="p">)</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="n">memory</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -295,7 +342,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Commentary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Aspects.html" class="btn btn-neutral float-left" title="Aspects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="BuildSystem.html" class="btn btn-neutral float-right" title="Build system" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

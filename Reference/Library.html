@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -119,12 +119,12 @@
            <div itemprop="articleBody">
              
   <section id="library">
-<h1>Library<a class="headerlink" href="#library" title="Permalink to this heading"></a></h1>
+<h1>Library<a class="headerlink" href="#library" title="Link to this heading"></a></h1>
 <section id="numerics">
-<h2>Numerics<a class="headerlink" href="#numerics" title="Permalink to this heading"></a></h2>
+<h2>Numerics<a class="headerlink" href="#numerics" title="Link to this heading"></a></h2>
 <p>In the computer world there are various ways to represent numeric spaces - we call each representation a format, a mapping from the mathematical set to a term.</p>
 <section id="integers">
-<h3>Integers<a class="headerlink" href="#integers" title="Permalink to this heading"></a></h3>
+<h3>Integers<a class="headerlink" href="#integers" title="Link to this heading"></a></h3>
 <div style="display: none">
 \[
 \newcommand{\abs}[1]{{\vert #1 \rvert}}
@@ -141,17 +141,17 @@
 </div></blockquote>
 </section>
 <section id="fractions">
-<h3>Fractions<a class="headerlink" href="#fractions" title="Permalink to this heading"></a></h3>
+<h3>Fractions<a class="headerlink" href="#fractions" title="Link to this heading"></a></h3>
 <p>The simplest is ratios <span class="math notranslate nohighlight">\(a / b\)</span>, using integers over some domain. Fixed-point arithmetic is a special case of this where <span class="math notranslate nohighlight">\(b\)</span> is fixed.</p>
 <p>Floating point numbers are an integer mantissa times an integer radix raised to an integer exponent. The radix is usually 2 but <cite>IEEE-754 &lt;https://en.wikipedia.org/wiki/IEEE_754&gt;</cite> has also defined decimal floating point (radix 10). The exponent itself is another integer, usually restricted to a quite small range. Typical floating point formats are single, double, and x86’s 80-bit format. MFPR provides a flexible software format.</p>
 <p>We can also include posits; these are mantissa * radix ^ exponent * useed ^ regime, where the first part is the floating point stuff, useed is 2 ^ 2 ^ maximum exponent size, and the regime is nonnegative.</p>
 </section>
 <section id="actual-types">
-<h3>Actual types<a class="headerlink" href="#actual-types" title="Permalink to this heading"></a></h3>
+<h3>Actual types<a class="headerlink" href="#actual-types" title="Link to this heading"></a></h3>
 <p>We could try to define generic integer/float types with a statically inferred range of possible values, but only a few have efficient arithmetic operations, and YAGNI. So in practice we have only <code class="docutils literal notranslate"><span class="pre">sN</span></code> / <code class="docutils literal notranslate"><span class="pre">uN</span></code> (for <code class="docutils literal notranslate"><span class="pre">N</span></code> restricted to 8/16/32/64), <code class="docutils literal notranslate"><span class="pre">Float</span></code>, and <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Differently-ranged integers, fixed-point arithmetic, unums, and posits can all be defined in libraries. It would also be good to have arbitrary-precision types, like <a class="reference external" href="https://gmplib.org/">GMP</a>’s integer/rational and <a class="reference external" href="https://www.mpfr.org/">MFPR</a>’s float that uses an s32/s64 exponent and an arbitrary precision mantissa. The binding could be at the C level like <a class="reference external" href="https://hackage.haskell.org/package/integer-gmp">Haskell’s integer-gmp</a> or it could use the assembly routines directly.</p>
 </section>
 <section id="operations">
-<h3>Operations<a class="headerlink" href="#operations" title="Permalink to this heading"></a></h3>
+<h3>Operations<a class="headerlink" href="#operations" title="Link to this heading"></a></h3>
 <p>For arithmetic we define implicit conversions, <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on to an arbitrary precision type <code class="docutils literal notranslate"><span class="pre">Arb</span></code> with the usual arithmetic operations, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span> <span class="pre">-&gt;</span> <span class="pre">Arb</span></code> and so on. Then narrowing the result back into a restrictive format is represented explicitly with an operation, <code class="docutils literal notranslate"><span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(2+30*x)</span></code> and so on. The compiler then figures out how to compute the answer as efficiently as possible. For floating point the narrowing also takes a precision argument, or optimizes for the best precision like Herbie, depending on whether speed or accuracy is preferred.</p>
 <p>For compatibility with other languages we can define narrowed arithmetic operations, like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">assert(a</span> <span class="pre">is</span> <span class="pre">s16</span> <span class="pre">&amp;&amp;</span> <span class="pre">b</span> <span class="pre">is</span> <span class="pre">s16);</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">narrow</span> <span class="pre">s16</span> <span class="pre">(a+b);</span> <span class="pre">assert(x</span> <span class="pre">is</span> <span class="pre">s16)</span></code>. These give an error if the result doesn’t fit. We can also support implicit conversions <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">:</span> <span class="pre">s8</span> <span class="pre">-&gt;</span> <span class="pre">s16</span></code> and so on; the compiler has to check that the narrowed arbitrary-precision computation matches the various fixed-width computations, but it should be resolvable.</p>
 <p>Floating points numbers don’t have implicit conversions between each other, besides the conversion from literals. The arithmetic operations are defined normally, <code class="docutils literal notranslate"><span class="pre">(+)</span> <span class="pre">::</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span> <span class="pre">-&gt;</span> <span class="pre">f32</span></code> and so on.</p>
@@ -164,7 +164,7 @@
 </section>
 </section>
 <section id="arrays">
-<h2>Arrays<a class="headerlink" href="#arrays" title="Permalink to this heading"></a></h2>
+<h2>Arrays<a class="headerlink" href="#arrays" title="Link to this heading"></a></h2>
 <p>Pure arrays (lists)</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
 <span class="nf">assert</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">a</span>
@@ -193,7 +193,7 @@ grid point. Thus, e.g., <code class="docutils literal notranslate"><span class="
 </dd>
 </dl>
 <section id="sorting">
-<h3>Sorting<a class="headerlink" href="#sorting" title="Permalink to this heading"></a></h3>
+<h3>Sorting<a class="headerlink" href="#sorting" title="Link to this heading"></a></h3>
 <p>Functions, e.g. sorting <code class="docutils literal notranslate"><span class="pre">[(1,1),(1,2),(2,1)]</span></code> with comparison on first:
 * stable sort, return elements sorted by comparison function, then by original order - <code class="docutils literal notranslate"><span class="pre">[(1,1),(1,2),(2,1)]</span></code>
 * arbitrary sort, return elements sorted by comparison function, then by global value order - same or <code class="docutils literal notranslate"><span class="pre">[(1,2),(1,1),(2,1)]</span></code> depending on global order
@@ -223,7 +223,7 @@ grid point. Thus, e.g., <code class="docutils literal notranslate"><span class="
 </section>
 </section>
 <section id="iterators">
-<h2>Iterators<a class="headerlink" href="#iterators" title="Permalink to this heading"></a></h2>
+<h2>Iterators<a class="headerlink" href="#iterators" title="Link to this heading"></a></h2>
 <p>Iterators are very similar to linked lists, but they have control effects - the next item requires executing a computation to extract it.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Iterator</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="w"> </span><span class="kt">Int</span><span class="p">,[</span><span class="n">a</span><span class="p">])</span>
 <span class="nf">getIterator</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Iterator</span><span class="w"> </span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
@@ -272,7 +272,7 @@ Java: <a class="reference external" href="https://docs.oracle.com/javase/8/docs/
 <a class="reference external" href="https://juliafolds.github.io/Transducers.jl/dev/">https://juliafolds.github.io/Transducers.jl/dev/</a></p>
 </section>
 <section id="strings">
-<h2>Strings<a class="headerlink" href="#strings" title="Permalink to this heading"></a></h2>
+<h2>Strings<a class="headerlink" href="#strings" title="Link to this heading"></a></h2>
 <p>The standard, terrible null-terminated C string will always be needed, but most purposes should be satisfied by using an array / buffer of bytes together with a length. There can be different encodings: UTF8, UTF16, UTF32, or some other encodings like Shift JIS or Big5. UTF8 is the most common so it should be the default, <a class="reference external" href="https://utf8everywhere.org/">UTF-8 everywhere</a>. Unicode-correct String implementation.
 Unboxed packed representation for short strings.</p>
 <p>Normalization to NFC is an operation. Refinement type for always-normalized, overloaded operations.</p>
@@ -291,7 +291,7 @@ Unboxed packed representation for short strings.</p>
 </ul>
 </section>
 <section id="i-o">
-<h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
+<h2>I/O<a class="headerlink" href="#i-o" title="Link to this heading"></a></h2>
 <p>The general API for I/O follows the io_uring design, we write a bunch of operations to a buffer and then execute callbacks based on the result.
 We also need datatypes for dealing with streaming I/O, but continuations work for that.</p>
 <p>The functions themselves are written in the token-passing style <code class="docutils literal notranslate"><span class="pre">RealWorld,</span> <span class="pre">a</span> <span class="pre">-o</span> <span class="pre">RealWorld,</span> <span class="pre">b</span></code>, passing around the <code class="docutils literal notranslate"><span class="pre">RealWorld</span></code> token.</p>
@@ -299,14 +299,14 @@ We also need datatypes for dealing with streaming I/O, but continuations work fo
 <p>Clocks: One cannot assume that execution of a piece of code will complete within a specific amount of wall-clock time. The API documentation should have a warning.</p>
 </section>
 <section id="concurrency">
-<span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this heading"></a></h2>
+<span id="concurrency-library"></span><h2>Concurrency<a class="headerlink" href="#concurrency" title="Link to this heading"></a></h2>
 <p>In practice the synchronization primitives one can use are a combination of those provided by the OS’s scheduler and the atomic operations / memory barriers provided by the hardware. Shared memory uses the memory model of the architecture, so all synchronization methods can be implemented/used according to their semantics.</p>
 <section id="memory-model">
-<h3>Memory model<a class="headerlink" href="#memory-model" title="Permalink to this heading"></a></h3>
+<h3>Memory model<a class="headerlink" href="#memory-model" title="Link to this heading"></a></h3>
 <p>Implementing the C++ and Java memory models should be no sweat, just add the right fences. Also the Linux memory <a class="reference external" href="https://github.com/torvalds/linux/blob/3d5c70329b910ab583673a33e3a615873c5d4115/tools/memory-model/linux-kernel.def">model</a></p>
 </section>
 <section id="mutex">
-<h3>Mutex<a class="headerlink" href="#mutex" title="Permalink to this heading"></a></h3>
+<h3>Mutex<a class="headerlink" href="#mutex" title="Link to this heading"></a></h3>
 <p>The interface is simple, lock/unlock and make the thread go to sleep if it’s blocked. Java’s syntax <code class="docutils literal notranslate"><span class="pre">synchronized(o)</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> seems reasonable. Zig’s <a class="reference external" href="https://github.com/ziglang/zig/blob/53523ef5d0413459bd2eb9d84d2338f2bc49d417/lib/std/Thread/Mutex.zig">suggestion</a> <code class="docutils literal notranslate"><span class="pre">lock;</span> <span class="pre">defer</span> <span class="pre">unlock</span></code> makes it harder to reason about when the lock is released. I think <code class="docutils literal notranslate"><span class="pre">withLock</span> <span class="pre">l</span> <span class="pre">{</span> <span class="pre">}</span></code> and <code class="docutils literal notranslate"><span class="pre">ifLockAvailable</span> <span class="pre">l</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span> <span class="pre">else</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> seem like the right syntax.</p>
 <p>Java’s ability to lock any Object is considered a misfeature (by someone, lost the reference), it should be restricted to a lock object.</p>
 <p>Mutexes are only useful if threads spend a significant amount of time sleeping. C++ std::mutex is a good cross-platform mutex. On Linux/Mac it’s a C pthread mutex and on Windows the Windows mutex. Rust implementation encapsulates the C version.</p>
@@ -315,21 +315,21 @@ We also need datatypes for dealing with streaming I/O, but continuations work fo
 <p>Zig has an adaptive spinlock-futex mutex on Linux without pthreads, it’s probably messed up in some way for exactly this reason. But messing around with adaptive mutexes and “test and test-and-set” and ticket spinlocks/mutexes and so forth is fun, as in <a class="reference external" href="https://probablydance.com/2019/12/30/measuring-mutexes-spinlocks-and-how-bad-the-linux-scheduler-really-is/">this blog post</a>.</p>
 </section>
 <section id="wait-free-data-types">
-<h3>Wait-free data types<a class="headerlink" href="#wait-free-data-types" title="Permalink to this heading"></a></h3>
+<h3>Wait-free data types<a class="headerlink" href="#wait-free-data-types" title="Link to this heading"></a></h3>
 <p>There are a few of these, standard (but complex) implementations.</p>
 </section>
 <section id="mvar">
-<h3>MVar<a class="headerlink" href="#mvar" title="Permalink to this heading"></a></h3>
+<h3>MVar<a class="headerlink" href="#mvar" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">MVar</span> <span class="pre">=</span> <span class="pre">Full</span> <span class="pre">value</span> <span class="pre">|</span> <span class="pre">Empty</span> <span class="pre">(Queue</span> <span class="pre">Process)</span></code></p>
 <p>Just copy it from Haskell’s RTS.</p>
 <p>Also interesting are the <a class="reference external" href="https://hackage.haskell.org/package/extra-1.7.8/docs/Control-Concurrent-Extra.html#t:Barrier">barrier</a> and <a class="reference external" href="https://hackage.haskell.org/package/data-ivar-0.30/docs/Data-IVar.html">IVar</a>.</p>
 </section>
 <section id="channels">
-<h3>Channels<a class="headerlink" href="#channels" title="Permalink to this heading"></a></h3>
+<h3>Channels<a class="headerlink" href="#channels" title="Link to this heading"></a></h3>
 <p>These are basically concurrency-safe queues, used for message passing. Copy from Go or Erlang.</p>
 </section>
 <section id="thread-pool">
-<h3>Thread pool<a class="headerlink" href="#thread-pool" title="Permalink to this heading"></a></h3>
+<h3>Thread pool<a class="headerlink" href="#thread-pool" title="Link to this heading"></a></h3>
 <p>A thread pool is a collection of worker threads that efficiently execute tasks on behalf of the application - each worker thread is locked to a core.</p>
 <p>A task represents an asynchronous operation. Tasks don’t block. Performing I/O with the standard (task-specific) library will push a continuation of the task to some auxiliary queue and yield control of the thread back to the thread pool until the I/O is completed. A spark <span id="id1">[<a class="reference internal" href="../zzreferences.html#id162" title="P. W. Trinder, K. Hammond, H.-W. Loidl, and Simon Peyton Jones. Algorithm + Strategy = Parallelism. Journal of Functional Programming, January 1998. URL: https://www.microsoft.com/en-us/research/publication/algorithm-strategy-parallelism/ (visited on 2020-08-02).">THLJ98</a>]</span> is a closure, even lower level than a task. In practice the thread pool runs sparks rather than tasks. Tasks support waiting, cancellation, continuations, robust exception handling, detailed status, and custom scheduling. (see C#)</p>
 <p>Tasks are queued. They run in fibers which run in the thread pool, but are even lighter memory-wise than fibers.</p>
@@ -343,7 +343,7 @@ libuv is significantly slower than blocking I/O for most common cases; for examp
 </section>
 </section>
 <section id="algorithms">
-<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
+<h2>Algorithms<a class="headerlink" href="#algorithms" title="Link to this heading"></a></h2>
 <p>Inorder, Preorder, Postorder Tree Traversals
 Binary Search Algorithm
 Breadth First Search (BFS) Algorithm

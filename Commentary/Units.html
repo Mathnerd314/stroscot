@@ -14,15 +14,15 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Verification" href="Verification.html" />
+    <link rel="next" title="Values" href="Values.html" />
     <link rel="prev" title="Types" href="Types.html" /> 
 </head>
 
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -87,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
@@ -112,6 +115,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#modes">Modes</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -144,20 +148,20 @@
            <div itemprop="articleBody">
              
   <section id="units">
-<h1>Units<a class="headerlink" href="#units" title="Permalink to this heading"></a></h1>
+<h1>Units<a class="headerlink" href="#units" title="Link to this heading"></a></h1>
 <p>Fortress, Julia, and Python all have unit libraries. So it seems worthwhile to implement these. Although quantities with units will probably never be the default values used by APIs, units are useful for safety.</p>
 <section id="quantities">
-<h2>Quantities<a class="headerlink" href="#quantities" title="Permalink to this heading"></a></h2>
+<h2>Quantities<a class="headerlink" href="#quantities" title="Link to this heading"></a></h2>
 <p>A quantity is a value represented by a number and a unit, <code class="docutils literal notranslate"><span class="pre">Quantity</span> <span class="pre">num</span> <span class="pre">unit</span></code>. For example “10 avoirdupois pounds”, “10 lbs”, “160 ounces” are all (distinct) quantities. The syntax is juxtaposition like <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">kg</span></code> or an infix “unit” operator <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">unit</span> <span class="pre">(kg^2)</span></code> for more complicated expressions. A pure number is a dimensionless quantity <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">unit</span> <span class="pre">1</span></code>, convertible to the raw numeric type.</p>
 <p>The number is usually a real number, but a vector or a complex number can be combined with a unit as well. A vector quantity is distinct from a vector of scalar quantities all with the same unit (but is interconvertible, discussed next) You can also have a vector of quantities with different units, e.g. <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">m,</span> <span class="pre">2</span> <span class="pre">s)</span></code>. Some units may technically not be defined for negative numbers, e.g. mass, but in practice using real numbers makes computation much more convenient. Also, complex number must have split units, as when you take the log of a pure complex quantities you get a real part in nepers and an imaginary part in radians.</p>
 <p>The number must be represented in some format, so quantities are further divided according to their number’s format, e.g. a <code class="docutils literal notranslate"><span class="pre">(10:float32)</span> <span class="pre">meter</span></code> is distinct from a <code class="docutils literal notranslate"><span class="pre">(10:float64)</span> <span class="pre">meter</span></code>. You can have special formats, e.g. binary radians are a format <code class="docutils literal notranslate"><span class="pre">{0</span> <span class="pre">..</span> <span class="pre">2^(n−1)}*2*pi/2^n</span></code> combined with the radian unit. As with all formats there are restrictions on the range and precision of numbers that may be represented.</p>
 <p>An expression like “10 pounds” may be interpreted as multiple quantities, e.g. “10 avoirdupois pounds” (a weight) or “10 British pounds” (a currency), depending on context. The context could be represented via an implicit argument or whatever, but it seems a lot easier to forbid ambiguity and devise a coherent set of unit names, e.g. Frink’s “pound is weight and GBP is currency”. So expressions are required to be unambiguous.</p>
 </section>
 <section id="id1">
-<h2>Units<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<h2>Units<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>The units we have are multiplicative units, affine units, logarithmic units, and percentages.</p>
 <section id="basic-units">
-<h3>Basic units<a class="headerlink" href="#basic-units" title="Permalink to this heading"></a></h3>
+<h3>Basic units<a class="headerlink" href="#basic-units" title="Link to this heading"></a></h3>
 <p>These are the basic units you’ll find in any system:</p>
 <ul class="simple">
 <li><p>The 7 SI base units, like second, meter, kilogram</p></li>
@@ -166,7 +170,7 @@
 <p>In addition we have the information unit nat, and counting units like bits, molecules, neutrons, atoms, cycles, etc., all of which are treated simply as base dimensions.</p>
 </section>
 <section id="angles">
-<h3>Angles<a class="headerlink" href="#angles" title="Permalink to this heading"></a></h3>
+<h3>Angles<a class="headerlink" href="#angles" title="Link to this heading"></a></h3>
 <p>Radians are better off as a base unit, because then degrees can be converted naturally to radians, instead of being shoehorned in as a multiplicative factor. See <span id="id2">[<a class="reference internal" href="../zzreferences.html#id133" title="Paul Quincey and Richard J. C. Brown. Implications of adopting plane angle as a base quantity in the SI. Metrologia, 53(3):998–1002, June 2016. Comment: 9 pages; accepted by Metrologia. URL: http://arxiv.org/abs/1604.02373 (visited on 2022-04-08), arXiv:1604.02373, doi:10.1088/0026-1394/53/3/998.">QB16</a>]</span> or <a class="reference external" href="https://arxiv.org/pdf/2203.12392.pdf">https://arxiv.org/pdf/2203.12392.pdf</a> for how formulas adjust to accommodate angles as a dimension with an explicit dimensional constant. For example torque and work (energy) in a conventional setting are both force times length and have the same type and unit, but in fact they are not equivalent in two ways:</p>
 <ul class="simple">
 <li><p>In a geometric algebra setting, torque is a 2-vector (exterior product) while energy is a scalar (dot or inner product). So the numeric types are different.</p></li>
@@ -206,19 +210,19 @@
 </ul>
 </section>
 <section id="substance-units">
-<h3>Substance units<a class="headerlink" href="#substance-units" title="Permalink to this heading"></a></h3>
+<h3>Substance units<a class="headerlink" href="#substance-units" title="Link to this heading"></a></h3>
 <p>Substance units are a unit plus a substance name, e.g. <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">NaCl</span></code> or <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">salt</span></code>. To motivate these, consider fuel consumption: in gallons per mile, it is a volume divided by a length, yielding base dimensions of Length^2. But adding fuel consumption to an area makes no sense. If the volume is a substance unit, then the length has no relation and we cannot reduce <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">fuel</span> <span class="pre">/</span> <span class="pre">m</span></code>, as is proper. Similarly the productivity of a lumber mill <code class="docutils literal notranslate"><span class="pre">feet</span> <span class="pre">timber</span> <span class="pre">/</span> <span class="pre">day</span></code> is not the same concept as speed <code class="docutils literal notranslate"><span class="pre">feet</span> <span class="pre">/</span> <span class="pre">day</span></code>, even though both have dimensions Length/Time. The calculations become clearer if we add types of material to units.</p>
 <p>Substance units also add power. Given the density of salt, a cup of salt is equivalent to some number of pounds of salt, and can be converted automatically. Similarly concentrations of salt in water can be given as V/V (e.g. mL Salt/L Water), W/V (g Salt/L Water), or W/W (g Salt/g Water) and with substance units these are automatically convertible. Without substance units, V/V would be dimensionless and would erroneously convert 1-1 to W/W.</p>
 <p>Barry N. Taylor of NIST has declared substance units verboten (<a class="reference external" href="https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-7-rules-and-style-conventions-expressing-values">link</a>, section 7.5) but he gives no justification and other scientists have complained about the overly strict conventions so it seems he is just another grammar stickler. Research shows <a class="reference external" href="https://www.theguardian.com/science/2017/nov/01/resistance-to-changes-in-grammar-is-futile-say-researchers">resistance to grammar change is futile</a> so it’s better to include substance units from the beginning - if you don’t like them don’t use them.</p>
 </section>
 <section id="affine-units">
-<h3>Affine units<a class="headerlink" href="#affine-units" title="Permalink to this heading"></a></h3>
+<h3>Affine units<a class="headerlink" href="#affine-units" title="Link to this heading"></a></h3>
 <p>So far all the units have been multiplicative units, so that a product of powers of units is a new unit. Essentially, the unit is a variable, e.g. when we say a mass is 10 grams, this means m = 10 * gram where “gram” is a variable.</p>
 <p>Then there are affine units, which are a scale and offset referenced to a derived multiplicative unit. Examples are Celsius referenced to Kelvin, Fahrenheit referenced to Rankine, timescales to second, dates to day, locations to 3D vector of kilometers. A GCS coordinate such as <code class="docutils literal notranslate"><span class="pre">(17.8416656,-124.0563834)</span> <span class="pre">WGS</span> <span class="pre">84</span></code> describes the location on the surface of the ellipsoid, which can be subtracted from another point such as “Null Island” at 0,0 or the center of the earth to obtain a 3D vector.</p>
 <p>A unit like <code class="docutils literal notranslate"><span class="pre">degF</span> <span class="pre">/</span> <span class="pre">kg</span></code> as used in old scientific work doesn’t mean the affine Fahrenheit scale, instead <code class="docutils literal notranslate"><span class="pre">degF</span></code> is interpreted as a temperature difference. This could be hacked in, but similar to pounds weight vs. pounds currency, it is easier to make it unambiguous by requiring <code class="docutils literal notranslate"><span class="pre">degR</span> <span class="pre">/</span> <span class="pre">kg</span></code> in this context and forbidding combining affine units with other units. Rankine has the same difference size as Fahrenheit and since it’s referenced to absolute zero it scales properly.</p>
 </section>
 <section id="logarithmic-units">
-<h3>Logarithmic units<a class="headerlink" href="#logarithmic-units" title="Permalink to this heading"></a></h3>
+<h3>Logarithmic units<a class="headerlink" href="#logarithmic-units" title="Link to this heading"></a></h3>
 <p>There are three kinds that seem worth exploring:</p>
 <ul class="simple">
 <li><p>Dimensioned logarithmic units, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">*</span> <span class="pre">log_b(x/r)</span></code>, where factor f, reference quantity r (with unit), and log base b are part of the unit. For example dBm.</p></li>
@@ -227,25 +231,25 @@
 </ul>
 </section>
 <section id="percentages">
-<h3>Percentages<a class="headerlink" href="#percentages" title="Permalink to this heading"></a></h3>
+<h3>Percentages<a class="headerlink" href="#percentages" title="Link to this heading"></a></h3>
 <p>Percentage seems like it should be a unit, similar to dimensionless logarithmic units but less well-behaved. Hence we forbid combining percentage units with other units.</p>
 </section>
 <section id="parts-per-notation">
-<h3>Parts per notation<a class="headerlink" href="#parts-per-notation" title="Permalink to this heading"></a></h3>
+<h3>Parts per notation<a class="headerlink" href="#parts-per-notation" title="Link to this heading"></a></h3>
 <p>As far as parts per million (ppm), ppb, ppt, etc., Wikipedia has a <a class="reference external" href="https://en.wikipedia.org/wiki/Parts-per_notation#SI-compliant_expressions">handy conversion table</a> to SI notation, and the SI notation seems much clearer. Furthermore with substance units the SI-like ratio doesn’t collapse to a dimensionless value, whereas ppm is ambiguous. So writing it out seems better.</p>
 </section>
 </section>
 <section id="subdivision-quantities">
-<h2>Subdivision quantities<a class="headerlink" href="#subdivision-quantities" title="Permalink to this heading"></a></h2>
+<h2>Subdivision quantities<a class="headerlink" href="#subdivision-quantities" title="Link to this heading"></a></h2>
 <p>These are new quantity types, equivalent to number + base unit, but expressed with multiple numbers representing subdivisions. For example DMS notation 1 degree 1 minute 1 second, equal to 1 + 1/60 + 1/360 degrees, or 6 feet 2 inches, equal to 74 inches.</p>
 </section>
 <section id="accessors">
-<h2>Accessors<a class="headerlink" href="#accessors" title="Permalink to this heading"></a></h2>
+<h2>Accessors<a class="headerlink" href="#accessors" title="Link to this heading"></a></h2>
 <p>Stripping a quantity gives the bare number, e.g. <code class="docutils literal notranslate"><span class="pre">strip</span> <span class="pre">(2</span> <span class="pre">mm)</span> <span class="pre">=</span> <span class="pre">2</span></code>. It’s safer to write the unit you expect to be stripped, <code class="docutils literal notranslate"><span class="pre">strip</span> <span class="pre">x</span> <span class="pre">mm</span></code>, which converts the unit if it doesn’t match and fails if unconvertible. This together with the <code class="docutils literal notranslate"><span class="pre">Quantity</span> <span class="pre">x</span> <span class="pre">unit</span></code> constructor allows interoperating with non-unit-aware APIs. The unit accessor <code class="docutils literal notranslate"><span class="pre">unit</span> <span class="pre">(2</span> <span class="pre">mm)</span> <span class="pre">=</span> <span class="pre">mm</span></code> allows writing higher-order functions on quantities. Recursive stripping removes units in vectors, <code class="docutils literal notranslate"><span class="pre">rstrip</span> <span class="pre">(2</span> <span class="pre">mm,</span> <span class="pre">3</span> <span class="pre">kg)</span> <span class="pre">=</span> <span class="pre">(2,3)</span></code>.</p>
 <p>There is also a <code class="docutils literal notranslate"><span class="pre">strip_substance</span></code> function, similar to strip but used for removing the substance part of the unit, like collapsing <code class="docutils literal notranslate"><span class="pre">mol</span> <span class="pre">A</span> <span class="pre">/</span> <span class="pre">mol</span> <span class="pre">B</span></code> to <code class="docutils literal notranslate"><span class="pre">mol/mol</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
 </section>
 <section id="conversions">
-<h2>Conversions<a class="headerlink" href="#conversions" title="Permalink to this heading"></a></h2>
+<h2>Conversions<a class="headerlink" href="#conversions" title="Link to this heading"></a></h2>
 <p>We want to convert quantities to other units, but the desired result format should also be specified, since the type may contain embedded dimensional units. So the main API is the basic <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">quantity</span> <span class="pre">type</span></code>. For example distributing units in a vector is <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">((1,2,3)</span> <span class="pre">m)</span> <span class="pre">[Real</span> <span class="pre">unit</span> <span class="pre">meter]</span>&#160; <span class="pre">=</span> <span class="pre">(1</span> <span class="pre">m,</span> <span class="pre">2</span> <span class="pre">m,</span> <span class="pre">3</span> <span class="pre">m)</span></code>. And of course there are the basics like <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(1</span> <span class="pre">km)</span> <span class="pre">(Real</span> <span class="pre">unit</span> <span class="pre">feet)</span> <span class="pre">=</span> <span class="pre">3280.8399</span> <span class="pre">feet</span></code>. Maybe there is also an automated unit guesser based on dimensional analysis so we can do <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(1</span> <span class="pre">foot)</span> <span class="pre">(Real</span> <span class="pre">unit</span> <span class="pre">GuessSI)</span> <span class="pre">=</span> <span class="pre">0.3048</span> <span class="pre">m</span></code>.</p>
 <p>The conversion should use the most precise calculation possible, passing the formula through a floating-point accuracy tool like Herbie. In practice it seems libraries implement conversions by converting to a reference unit and converting from the reference unit. This avoids writing a quadratic number of conversion functions.</p>
 <p>No-op conversions convert to the same unit, and distributing units in a vector is similar.</p>
@@ -257,7 +261,7 @@
 <p>There is syntax sugar for conversion. A unit applied to a quantity (as opposed to a numeric type) converts the quantity but preserves the numeric type. For example <code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">foot)</span> <span class="pre">meter</span></code> is <code class="docutils literal notranslate"><span class="pre">convert</span> <span class="pre">(1</span> <span class="pre">foot)</span> <span class="pre">(Real</span> <span class="pre">unit</span> <span class="pre">meter)</span></code>. The numeric type is guessed via a function.</p>
 </section>
 <section id="convention-contexts">
-<h2>Convention contexts<a class="headerlink" href="#convention-contexts" title="Permalink to this heading"></a></h2>
+<h2>Convention contexts<a class="headerlink" href="#convention-contexts" title="Link to this heading"></a></h2>
 <p>Conventions are “natural” equations obtained by setting a constant to a dimensionless 1. They relax the dimensional analysis by adding new conversions. For example, setting the speed of light to 1, one obtains the convention <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">299792458</span> <span class="pre">m</span></code>. Normal dimensional analysis would consider this an ill-formed equation due to the different dimensions. But it means we multiply or divide by the constant as appropriate, e.g. <code class="docutils literal notranslate"><span class="pre">1</span></code> can be converted to <code class="docutils literal notranslate"><span class="pre">299792458</span> <span class="pre">m</span> <span class="pre">/</span> <span class="pre">s</span></code>.  The procedure is to cancel the units as much as possible and then add them back at the end.</p>
 <p>Conventions can disagree, e.g. instead of the speed of light we could set gravity to 1 giving <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">9.8</span> <span class="pre">m</span></code>. If we try to use both the speed of light and gravity in the same context the dimensional analysis collapses with <code class="docutils literal notranslate"><span class="pre">9.8</span> <span class="pre">=</span> <span class="pre">299792458</span></code>.</p>
 <p>To prevent ambiguity conventions are limited to a context (block or formula) and the non-simplified units of the inputs and outputs must be known. So you write:</p>
@@ -276,7 +280,7 @@
 <p>One useful convention is <code class="docutils literal notranslate"><span class="pre">ignore_units</span></code>, where all units are set equal to 1 and the relationships between units are ignored, you can use it like <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">ignore_units</span> <span class="pre">{</span> <span class="pre">q</span> <span class="pre">unit</span> <span class="pre">km</span> <span class="pre">}</span></code> which is equivalent to <code class="docutils literal notranslate"><span class="pre">Quantity</span> <span class="pre">(strip</span> <span class="pre">q)</span> <span class="pre">km</span></code>.</p>
 </section>
 <section id="arithmetic">
-<h2>Arithmetic<a class="headerlink" href="#arithmetic" title="Permalink to this heading"></a></h2>
+<h2>Arithmetic<a class="headerlink" href="#arithmetic" title="Link to this heading"></a></h2>
 <p>Summing or subtracting quantities with the same derived units or substance units is simple, just add the numbers. E.g. <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">N</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">N</span> <span class="pre">=</span> <span class="pre">3</span> <span class="pre">N</span></code>. If the derived and substance units differ, we use a promotion rule to determine a common unit - the first argument’s unit, or the most specific unit, or whatever. Then we convert both arguments to that unit and perform the operation. If there is a surrounding <code class="docutils literal notranslate"><span class="pre">convert</span></code> we may be able to optimize the computation to use the desired output unit as the common unit, but conceptually the promotion rule still is applied.</p>
 <p>For multiplication and division, a different promotion rule identifies the most simplified form of <code class="docutils literal notranslate"><span class="pre">unitsA</span> <span class="pre">*</span> <span class="pre">unitsB</span></code> or <code class="docutils literal notranslate"><span class="pre">unitsA</span> <span class="pre">unitsB^-1</span></code>.</p>
 <p>For logarithmic units adding/subtracting two of the same unit is fine. Adding or subtracting a dimensionless logarithmic unit to a non-logarithmic unit multiplies by <code class="docutils literal notranslate"><span class="pre">b^(x/f)</span></code>. Adding/subtracting two distinct dimensionless logarithmic units uses promotion rules to pick a common dimensionless logarithmic unit. Dimensioned logarithmic units are similar but the addition/subtraction only works if the non-logarithmic units match. Adding dimensionless logarithmic units to dimensioned logarithmic units promotes the dimensionless unit to match the dimensioned. Multiplying or dividing a logarithmic unit by a pure number acts on the number; quantities that aren’t pure numbers generate an error.</p>
@@ -286,7 +290,7 @@
 <p>Molyneux’s approach can be extended to handling exponents, but raising a unit to a dimensionless power is the main operation and doesn’t need another type of unit.</p>
 </section>
 <section id="modes">
-<h2>Modes<a class="headerlink" href="#modes" title="Permalink to this heading"></a></h2>
+<h2>Modes<a class="headerlink" href="#modes" title="Link to this heading"></a></h2>
 <p>When working on a program with units I devised several modes of operation for units:</p>
 <ul class="simple">
 <li><p>Unchecked: conversion by explicit multiplication, unit annotations in comments</p></li>
@@ -305,7 +309,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Values.html" class="btn btn-neutral float-right" title="Values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

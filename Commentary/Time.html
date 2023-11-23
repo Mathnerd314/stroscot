@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -87,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Time API</a><ul>
@@ -111,6 +114,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -143,9 +147,9 @@
            <div itemprop="articleBody">
              
   <section id="time-api">
-<h1>Time API<a class="headerlink" href="#time-api" title="Permalink to this heading"></a></h1>
+<h1>Time API<a class="headerlink" href="#time-api" title="Link to this heading"></a></h1>
 <section id="instant">
-<h2>Instant<a class="headerlink" href="#instant" title="Permalink to this heading"></a></h2>
+<h2>Instant<a class="headerlink" href="#instant" title="Link to this heading"></a></h2>
 <p>An instant marks a proper time (real number) as measured by some observer.  Although relativity means not all events can be given a time as they happened with space-like separation from the observer, the speed of light is quite fast so most events on a human-level timescale do have timelike separation.</p>
 <p>A timescale T is a one-to-one function of the proper time, i.e. each instant corresponds to a value on the timescale.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">set</span><span class="w"> </span><span class="kt">Instant</span>
@@ -157,7 +161,7 @@
 <p>Timescales can be converted to each other, just convert to and from proper time or (practically) to and from a well-known timescale such as TAI.</p>
 </section>
 <section id="time-standards">
-<h2>Time standards<a class="headerlink" href="#time-standards" title="Permalink to this heading"></a></h2>
+<h2>Time standards<a class="headerlink" href="#time-standards" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>International Atomic Time (TAI)</p></li>
 <li><p>Terrestrial Time (TT)</p></li>
@@ -180,15 +184,15 @@
 <p>UTC’s only real advantage is its ubiquity - there are lookup tables (leap second table, DUT1) and formulas to convert UTC to other standards. Smeared UTC is its own thing, even more contrived than UTC.</p>
 </section>
 <section id="epochs">
-<h2>Epochs<a class="headerlink" href="#epochs" title="Permalink to this heading"></a></h2>
-<p>The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, too many to list here. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.</p>
+<h2>Epochs<a class="headerlink" href="#epochs" title="Link to this heading"></a></h2>
+<p>The simplest method of specifying an instant is to give it a name. A named instant is called an epoch. There are numerous epochs, and more being added (e.g. Jonathan Blow used the date of the Apollo 13 landing), but <a class="reference external" href="https://en.wikipedia.org/wiki/Epoch_(computing)#Notable_epoch_dates_in_computing">Wikipedia</a> lists some. The epochs may be a fixed instant in a given standard, such as the GPS epoch, or be dependent on a time standard to interpret as an instant, such as Rata Die.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">FixedEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Instant</span>
 <span class="kt">CalendarEpoch</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Instant</span>
 </pre></div>
 </div>
 </section>
 <section id="epoch-relative-time">
-<h2>Epoch-relative time<a class="headerlink" href="#epoch-relative-time" title="Permalink to this heading"></a></h2>
+<h2>Epoch-relative time<a class="headerlink" href="#epoch-relative-time" title="Link to this heading"></a></h2>
 <p>The form of specifying time most convenient for calculations is as a quantity of time elapsed relative to some particular epoch, where the quantity is a number and some time unit. The time standard must also be specified to fix the length of the time unit. So it looks as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">EpochTime</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">real</span><span class="p">,</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Epoch</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">TimeStandard</span><span class="w"> </span><span class="p">}</span>
 
@@ -199,7 +203,7 @@
 <p>Epoch times using days as the unit are called epoch dates. JD and MJD are common epoch date formats.</p>
 </section>
 <section id="time-record">
-<h2>Time record<a class="headerlink" href="#time-record" title="Permalink to this heading"></a></h2>
+<h2>Time record<a class="headerlink" href="#time-record" title="Link to this heading"></a></h2>
 <p>A time record specifies an instant using a collection of fields from the proleptic Gregorian calendar (ISO 8601), implicitly using the Rata Die epoch. The time standard must also be specified.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">AdjustField</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">InLeapSecond</span><span class="p">,</span><span class="w"> </span><span class="kt">TAIOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">InDST</span><span class="p">,</span><span class="w"> </span><span class="kt">UTCHourOffset</span><span class="p">,</span><span class="w"> </span><span class="kt">Fold</span><span class="p">}</span>
 
@@ -244,7 +248,7 @@
 <p>Regarding leap seconds in UTC, if none of the adjustment fields are specified, then seconds can have an integer part of 60, representing the leap second. With in_leap_second, it goes <code class="docutils literal notranslate"><span class="pre">[(59,false),(0,true),(0,false)]</span></code>. Similarly fold represents ambiguous times with 0=the earliest time, 1=the next earliest, etc.</p>
 <p>For civil time, there is also DST. Without adjustment fields this is represented by varying the number of hours in the day - useful for calculations, but probably not desired for display. InDST represents this unambiguously, or fold may be used - it takes on the value 2 if DST and the leap second overlap (unlikely).</p>
 <section id="other-calendars">
-<h3>Other calendars<a class="headerlink" href="#other-calendars" title="Permalink to this heading"></a></h3>
+<h3>Other calendars<a class="headerlink" href="#other-calendars" title="Link to this heading"></a></h3>
 <p>There are many other calendars besides Gregorian, e.g.:</p>
 <ul class="simple">
 <li><p>Buddhist, Chinese lunar, Ethiopian, Hindu, Lunar Hijri (Islamic), Solar Hijri, ISO week date</p></li>
@@ -254,7 +258,7 @@
 </section>
 </section>
 <section id="duration">
-<h2>Duration<a class="headerlink" href="#duration" title="Permalink to this heading"></a></h2>
+<h2>Duration<a class="headerlink" href="#duration" title="Link to this heading"></a></h2>
 <p>A duration identifies a time difference as a collection of time fields. All the fields are real:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Duration</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="kt">Real</span><span class="p">,</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
@@ -268,7 +272,7 @@
 </ul>
 </section>
 <section id="partial-date">
-<h2>Partial date<a class="headerlink" href="#partial-date" title="Permalink to this heading"></a></h2>
+<h2>Partial date<a class="headerlink" href="#partial-date" title="Link to this heading"></a></h2>
 <p>A partial date is just a collection of time fields, and a list of all of them for the complete date. There is an “update” operation which takes an instant and a partial date that has the semantics of replacing or overriding the fields of the instant with those of the partial date’s, when the instant is expressed as a time record in the given standard.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">PartialDate</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">complete</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="kt">ChronoField</span><span class="p">,</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Map</span><span class="w"> </span><span class="kt">ChronoField</span><span class="w"> </span><span class="p">(</span><span class="kt">Int</span><span class="o">|</span><span class="kt">Real</span><span class="o">|</span><span class="kt">DayOfWeek</span><span class="o">|</span><span class="kt">Month</span><span class="o">|</span><span class="kt">Era</span><span class="p">),</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Standard</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
@@ -276,7 +280,7 @@
 <p>For example a POSIX timestamp is a partial date with its InLeapSecond field unspecified.</p>
 </section>
 <section id="intervals">
-<h2>Intervals<a class="headerlink" href="#intervals" title="Permalink to this heading"></a></h2>
+<h2>Intervals<a class="headerlink" href="#intervals" title="Link to this heading"></a></h2>
 <p>Time intervals represent a closed interval <code class="docutils literal notranslate"><span class="pre">[s,e]</span></code> of instants.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">TimeInterval</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Instant</span><span class="p">}</span><span class="w"> </span><span class="c1">-- inclusive</span>
 </pre></div>
@@ -284,7 +288,7 @@
 <p>Probably the standard interval type is sufficient.</p>
 </section>
 <section id="recurrence">
-<h2>Recurrence<a class="headerlink" href="#recurrence" title="Permalink to this heading"></a></h2>
+<h2>Recurrence<a class="headerlink" href="#recurrence" title="Link to this heading"></a></h2>
 <p>This represents a recurrence rule as documented in the iCalendar RFC. (c.f. <a class="reference external" href="https://dateutil.readthedocs.io/en/stable/rrule.html">https://dateutil.readthedocs.io/en/stable/rrule.html</a>)</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">rrule</span><span class="w"> </span><span class="ow">=</span>
 <span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">dtstart</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="n">datetime</span>
@@ -298,7 +302,7 @@
 </div>
 </section>
 <section id="format-information">
-<h2>Format information<a class="headerlink" href="#format-information" title="Permalink to this heading"></a></h2>
+<h2>Format information<a class="headerlink" href="#format-information" title="Link to this heading"></a></h2>
 <p>This is used for pretty-printing and parsing instants.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">DateTimeFormat</span><span class="w"> </span><span class="ow">=</span>
 <span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="n">printerParser</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">CompositePrinterParser</span>
@@ -327,7 +331,7 @@
 </div>
 </section>
 <section id="time-zones">
-<h2>Time zones<a class="headerlink" href="#time-zones" title="Permalink to this heading"></a></h2>
+<h2>Time zones<a class="headerlink" href="#time-zones" title="Link to this heading"></a></h2>
 <p>Civil time standards refer to a time zone database for the UTC offset using a time zone ID string.</p>
 <p>A time zone is a list of transitions:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">ZoneOffsetTransition</span><span class="w"> </span><span class="ow">=</span>
@@ -361,12 +365,12 @@
 <p>TODO: Checkout Python zoneinfo, whatever Rust does, etc. for a better API</p>
 </section>
 <section id="libraries">
-<h2>Libraries<a class="headerlink" href="#libraries" title="Permalink to this heading"></a></h2>
+<h2>Libraries<a class="headerlink" href="#libraries" title="Link to this heading"></a></h2>
 <p>The JSR-310 <a class="reference external" href="https://www.threeten.org/">ThreeTen</a> library in <a class="reference external" href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/time/package-summary.html">Java</a> seems to have undergone the most peer review. It relies heavily on ISO 8601. Another is <a class="reference external" href="http://time4j.net/">http://time4j.net/</a>. For some reason these are all Java. Rust has a basic thing in <a class="reference external" href="https://doc.rust-lang.org/std/time/index.html">std</a>. There is a more complete Rust library but the author is <a class="reference external" href="https://github.com/time-rs/time/issues/406#issuecomment-989753838">opinionated</a>.</p>
 <p><a class="reference external" href="https://github.com/fifth-postulate/julian">https://github.com/fifth-postulate/julian</a></p>
 </section>
 <section id="os-interface">
-<h2>OS interface<a class="headerlink" href="#os-interface" title="Permalink to this heading"></a></h2>
+<h2>OS interface<a class="headerlink" href="#os-interface" title="Link to this heading"></a></h2>
 <p>A few functions:
 * guess civil time standard of the system (it’s a guess because the system could be crazy)
 * guess the current system time as an instant (possible because OS’s have leap second APIs to allow converting to TAI)</p>

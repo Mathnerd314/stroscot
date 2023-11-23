@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -87,8 +88,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -97,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -109,12 +111,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -147,9 +151,9 @@
            <div itemprop="articleBody">
              
   <section id="dispatch">
-<h1>Dispatch<a class="headerlink" href="#dispatch" title="Permalink to this heading"></a></h1>
+<h1>Dispatch<a class="headerlink" href="#dispatch" title="Link to this heading"></a></h1>
 <section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
 <p>A function is a pattern <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span> <span class="pre">=</span> <span class="pre">body</span></code> that matches some parameters <code class="docutils literal notranslate"><span class="pre">a,b,c</span></code> and transforms it to the body, an expression possibly referring to the parameters.</p>
 <p>The parameters can either be bound positionally, meaning the syntactic position at the call site determines what formal parameter an argument is bound to, or with a keyword associating the argument with the formal parameter. Keywords allows reordering parameters. Also keyword parameters can have a default value (optional parameter).</p>
 <p>The arity of a function is how many positional parameters it has. A function with arity 0 is nullary, arity 1 is unary, arity 2 is binary, arity 3 is ternary, and in general arity n is n-ary. Functions with no fixed arity are called variadic functions.</p>
@@ -157,10 +161,10 @@
 <p>Functions that have functions as parameters or results are called higher-order functions. Functions that don’t are called first-order functions.</p>
 </section>
 <section id="priorities">
-<h2>Priorities<a class="headerlink" href="#priorities" title="Permalink to this heading"></a></h2>
+<h2>Priorities<a class="headerlink" href="#priorities" title="Link to this heading"></a></h2>
 <p>Priority is novel AFAIK but powerful, and generalizes the CLOS dispatch system. I thought about making all clauses the same priority by default, but concluded that specificity was likely going to be confusing hence is better off opt-in. Specificity is found in predicate dispatch and Zarf’s rule based programming, but both are far off from practical languages.</p>
 <section id="clos-method-dispatch">
-<h3>CLOS method dispatch<a class="headerlink" href="#clos-method-dispatch" title="Permalink to this heading"></a></h3>
+<h3>CLOS method dispatch<a class="headerlink" href="#clos-method-dispatch" title="Link to this heading"></a></h3>
 <p>CLOS has method qualifiers <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, and <code class="docutils literal notranslate"><span class="pre">around</span></code>. The basic idea of method combination can be seen here:</p>
 <img alt="../_images/Method-combination.png" src="../_images/Method-combination.png" />
 <p>But it turns out these can simply be implemented with priorities <code class="docutils literal notranslate"><span class="pre">around_clause</span> <span class="pre">&gt;</span> <span class="pre">before_clause</span> <span class="pre">&gt;</span> <span class="pre">after_clause</span> <span class="pre">&gt;</span> <span class="pre">prioHigh</span></code> and next-method. <code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code>:</p>
@@ -175,14 +179,14 @@
 </section>
 </section>
 <section id="overloading">
-<h2>Overloading<a class="headerlink" href="#overloading" title="Permalink to this heading"></a></h2>
+<h2>Overloading<a class="headerlink" href="#overloading" title="Link to this heading"></a></h2>
 <p>Overloading is having methods with the same name but different type signatures. A special case is operator overloading, so you can add both floats and ints with <code class="docutils literal notranslate"><span class="pre">+</span></code>. Even <a class="reference external" href="https://go.dev/doc/faq#overloading">the Go FAQ</a>, an opponent of overloading, admits that overloading is useful and convenient. Overloading enables ad-hoc polymorphism and solves the expression problem. It is incredibly useful.</p>
 <p>Although in many cases using separate function names can lead to a clearer API, supporting overloading does not prevent this. And there are cases where overloading is the right choice. Suppose you are trying to wrap a Java library that makes heavy use of overloading. Name mangling using simple rules will give relatively long names like <code class="docutils literal notranslate"><span class="pre">divide_int_int</span></code>. More complicated rules will give shorter name like <code class="docutils literal notranslate"><span class="pre">div_ii</span></code>, but the names will be hard to remember. Either way, overloading means no mangling is needed in the API at all, a strictly better alternative. Similarly the Go API is full of families of functions like <code class="docutils literal notranslate"><span class="pre">FindAll</span> <span class="pre">:</span> <span class="pre">[Byte]</span> <span class="pre">-&gt;</span> <span class="pre">[[Byte]],</span> <span class="pre">FindAllString</span> <span class="pre">:</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">[String]</span></code> which differ only by their type. These additional name parts cannot be guessed easily and require looking up the API docs to determine the appropriate version. Overloading means only the base name needs to be remembered.</p>
 <p>Per the FAQ, Go supposedly “does not support overloading” and restricts itself to matching only by name. Actually, overloading is <a class="reference external" href="https://www.richyhbm.co.uk/posts/method-overloading-in-go/">still possible</a> in Go by defining a function which takes variadic arguments of the empty interface type and manually dispatches with <code class="docutils literal notranslate"><span class="pre">if</span></code> statements and runtime type analysis. What’s missing in Go is that the compiler does not implement an overloaded dispatch mechanism. The FAQ claims that implicit dispatch will lead to confusion about which function is being called. In particular <a class="reference external" href="https://github.com/golang/go/issues/21659#issuecomment-325382091">Ian Lance Taylor</a> brings up the situation where an overloaded function application could be resolved to multiple valid clauses. Any rule that assigns an implicit priority of clauses in going to be fragile in practice.</p>
 <p>Stroscot’s solution is to require the system to produce a unique normal form. So it is an error if the multiple valid clauses produce different results, and otherwise the interpreter will pick an applicable clause at random. When compiling, the most efficient implementation will be chosen.</p>
 </section>
 <section id="return-type-overloading">
-<h2>Return type overloading<a class="headerlink" href="#return-type-overloading" title="Permalink to this heading"></a></h2>
+<h2>Return type overloading<a class="headerlink" href="#return-type-overloading" title="Link to this heading"></a></h2>
 <p>In Haskell, typeclasses can cause ambiguity errors. For example <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">(read</span> <span class="pre">&quot;1&quot;)</span></code> gives “Ambiguous type variable ‘a0’ arising from ‘show’ and ‘read’ prevents the constraint ‘(Show a0, Read a0)’ from being solved.”</p>
 <p>Following <span id="id1">[<a class="reference internal" href="../zzreferences.html#id122" title="Martin Odersky, Philip Wadler, and Martin Wehr. A second look at overloading. In Proceedings of the Seventh International Conference on Functional Programming Languages and Computer Architecture - FPCA '95, 135–146. La Jolla, California, United States, 1995. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=224164.224195 (visited on 2022-06-07), doi:10.1145/224164.224195.">OWW95</a>]</span> the ambiguity can be further attributed to <code class="docutils literal notranslate"><span class="pre">read</span></code>. The function <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">::</span> <span class="pre">Show</span> <span class="pre">a</span> <span class="pre">=&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">String</span></code> takes a value of type <code class="docutils literal notranslate"><span class="pre">a</span></code>, so dynamic dispatch can deduce the type <code class="docutils literal notranslate"><span class="pre">a</span></code> and there is no ambiguity. In contrast <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&quot;1&quot;</span></code> produces a type out of nowhere and could be of type <code class="docutils literal notranslate"><span class="pre">Integer</span></code> or <code class="docutils literal notranslate"><span class="pre">Double</span></code>. Since <code class="docutils literal notranslate"><span class="pre">read</span></code> has a constraint <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">a</span></code> and does not take a value of type <code class="docutils literal notranslate"><span class="pre">a</span></code> as argument it is said to be return type overloaded (RTOed).</p>
 <p>A brief categorization of some RTO functions in GHC’s base libraries:</p>
@@ -197,7 +201,7 @@
 </ul>
 <p>GHC has several ways to resolve an RTOed expression:</p>
 <section id="defaulting">
-<h3>Defaulting<a class="headerlink" href="#defaulting" title="Permalink to this heading"></a></h3>
+<h3>Defaulting<a class="headerlink" href="#defaulting" title="Link to this heading"></a></h3>
 <p>Defaulting is considered by <a class="reference external" href="https://web.archive.org/web/20200107071106/https://prime.haskell.org/wiki/Defaulting">Haskell Prime Proposal 4</a> to be a wart of the language. <a class="reference external" href="https://www.reddit.com/r/haskell/comments/mprk2e/generalized_named_and_exportable_default/gubpfbn/">clinton84</a> want a switch NoDefaulting to remove it entirely. But GHC plans to move in the opposite direction, expanding its use by allowing more and more classes to be defaulted, and recently allowing defaulting rules to be exported. <a class="reference external" href="https://ghc-proposals.readthedocs.io/en/latest/proposals/0409-exportable-named-default.html">ref</a></p>
 <p>In Haskell 98 defaulting is limited to numeric types, where it allows numerical calculations such as <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">^</span> <span class="pre">2</span></code> - <code class="docutils literal notranslate"><span class="pre">^</span></code> is generic in the 2 so must be defaulted. This usage can be replaced with using a single arbitrary-precision type for all literals that can accurately hold both <code class="docutils literal notranslate"><span class="pre">Integer</span></code> and <code class="docutils literal notranslate"><span class="pre">Double</span></code>, and then Julia’s conversion/promotion mechanism in operations.</p>
 <p>With -XOverloadedStrings every string literal is wrapped in a call to <code class="docutils literal notranslate"><span class="pre">fromString</span> <span class="pre">:</span> <span class="pre">IsString</span> <span class="pre">s</span> <span class="pre">=&gt;</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">s</span></code>. The usage is that Haskell has several text types, such as <code class="docutils literal notranslate"><span class="pre">ByteString</span></code> and <code class="docutils literal notranslate"><span class="pre">Text</span></code>, and also some people define newtypes over them. The defaulting to <code class="docutils literal notranslate"><span class="pre">IsString</span> <span class="pre">String</span></code> seems to mainly be added for compatibility with existing source code. Probably Julia’s conversion/promotion mechanism is sufficient for this as well. The corresponding <code class="docutils literal notranslate"><span class="pre">IsList</span></code> class for -XOverloadedLists has no defaulting rules, and nobody is complaining.</p>
@@ -205,12 +209,12 @@
 <p>GHC also supports defaulting plugins, <a class="reference external" href="https://github.com/hasktorch/hasktorch/issues/514">supposedly</a> to specify default device types and numeric types for tensors in haskell-torch. The defaulting can likely be solved by using default or implicit parameters. And Haskell-torch is a port of PyTorch so everything can be solved by using dynamic types. AFAICT there are no working defaulting plugins currently available.</p>
 </section>
 <section id="signatures">
-<h3>Signatures<a class="headerlink" href="#signatures" title="Permalink to this heading"></a></h3>
+<h3>Signatures<a class="headerlink" href="#signatures" title="Link to this heading"></a></h3>
 <p>The most direct way to resolve RTO in Haskell is to specify the type. There is an inline signature <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">x</span> <span class="pre">::</span> <span class="pre">Float</span></code>, defining a helper <code class="docutils literal notranslate"><span class="pre">readFloat</span> <span class="pre">::</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">Float;</span> <span class="pre">readFloat</span> <span class="pre">=</span> <span class="pre">read</span></code>, or using type application <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">&#64;Float</span></code>. Rust traits are similar, the turbofish specifies the type explicitly, like <code class="docutils literal notranslate"><span class="pre">iterator.collect::&lt;Vec&lt;i32&gt;&gt;</span></code>, and the type inference for defaulting is local rather than global. Ada similarly can disambiguate by return type because the type of the LHS is specified.</p>
 <p>Inline signatures and type application can be replaced in a dynamic language by passing the type explicitly as a parameter, <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Double</span></code> or <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Float</span></code>, using normal overloading. Sometimes it can be shortened by making the type itself the function, <code class="docutils literal notranslate"><span class="pre">Vec</span> <span class="pre">i32</span> <span class="pre">iterator</span></code> or <code class="docutils literal notranslate"><span class="pre">Vec</span> <span class="pre">iterator</span></code> instead of <code class="docutils literal notranslate"><span class="pre">collect</span> <span class="pre">(Vec</span> <span class="pre">i32)</span> <span class="pre">iterator</span></code>. Either way, the resulting syntax is uniform, and more standard and simple than the observed Haskell / Rust syntax.</p>
 <p>Multiple parameters can be handled in the obvious way, <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">A</span> <span class="pre">B</span></code>, or we can pack them in a term <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">(term</span> <span class="pre">A</span> <span class="pre">B)</span></code>.</p>
 <section id="return-types-signatures">
-<h4>Return types signatures<a class="headerlink" href="#return-types-signatures" title="Permalink to this heading"></a></h4>
+<h4>Return types signatures<a class="headerlink" href="#return-types-signatures" title="Link to this heading"></a></h4>
 <p>Julia essentially uses the same syntax I’m planning, <code class="docutils literal notranslate"><span class="pre">zeros(Float64,0)</span></code>, with strict matching on the type <code class="docutils literal notranslate"><span class="pre">Float64</span></code>. Contrariwise Martin Holters, a professor in Germany researching audio processing (i.e. not a language designer), filed a <a class="reference external" href="https://github.com/JuliaLang/julia/issues/19206">Julia issue</a> to introduce more complex syntax <code class="docutils literal notranslate"><span class="pre">foo(x,y,z)::Type</span></code> that specifies the return type. The issue generated no substantial discussion for 5 years so could be ignored, but let’s go through it.</p>
 <p>Martin says a dedicated syntax would be clearer than the “return type as first argument” convention because the type passed is used inconsistently. He gives a list of function calls using <code class="docutils literal notranslate"><span class="pre">Float64</span></code>:</p>
 <ul class="simple">
@@ -226,7 +230,7 @@
 </section>
 </section>
 <section id="inference">
-<h3>Inference<a class="headerlink" href="#inference" title="Permalink to this heading"></a></h3>
+<h3>Inference<a class="headerlink" href="#inference" title="Link to this heading"></a></h3>
 <p>The case where a parameter approach falls down is when we desire an inferred type rather than specifying the type directly on the function. For example <code class="docutils literal notranslate"><span class="pre">(fromInteger</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">fromInteger</span> <span class="pre">2)</span> <span class="pre">::</span> <span class="pre">Int</span></code>, Haskell pushes the constraint down and deduces <code class="docutils literal notranslate"><span class="pre">fromInteger</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">Int</span></code>. If we went with giving the type as a parameter we would have to write <code class="docutils literal notranslate"><span class="pre">fromInteger</span> <span class="pre">Int</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">fromInteger</span> <span class="pre">Int</span> <span class="pre">2</span></code>, duplicating the type. With a function expression of fixed type <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">id</span> <span class="pre">::</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">in</span> <span class="pre">show</span> <span class="pre">(f</span> <span class="pre">$</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;)</span></code> or case statement <code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">(case</span> <span class="pre">read</span> <span class="pre">&quot;1&quot;</span> <span class="pre">of</span> <span class="pre">(1</span> <span class="pre">::</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">&quot;x&quot;)</span></code> the type is far removed from the ambiguous <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
 <p>It is arguable whether inference is desirable. The programmer has to perform the same type inference in their head to follow the path the compiler is taken, which can make code tricky to understand. The meaning of an expression is context-dependent. But the original typeclasses paper <span id="id2">[<a class="reference internal" href="../zzreferences.html#id168" title="P. Wadler and S. Blott. How to make ad-hoc polymorphism less ad hoc. In Proceedings of the 16th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages - POPL '89, 60–76. Austin, Texas, United States, 1989. ACM Press. URL: http://portal.acm.org/citation.cfm?doid=75277.75283 (visited on 2022-06-07), doi:10.1145/75277.75283.">WB89</a>]</span> mentions resolving overloaded constants based on the context as a feature. So this section discusses possible ways of implementing the context resolution.</p>
 <p>One approach is similar to <a class="reference external" href="https://artificial-mind.net/blog/2020/10/10/return-type-overloading">this C++ thing</a>. We create a “blob” type that represents an RTO value of unknown type as a function from type to value. Then we overload operations on the blob to return blobs, delaying resolution until the full type can be inferred. Furthermore the blob can store its type in a mutable reference and use <code class="docutils literal notranslate"><span class="pre">unsafePerformIO</span></code> to ensure that it resolves to the same type if it is used multiple times. Or it can be safe and evaluate at multiple types. This requires overloading every function to support the blob, so can be some boilerplate.</p>
@@ -236,7 +240,7 @@
 </section>
 </section>
 <section id="default-arguments">
-<h2>Default arguments<a class="headerlink" href="#default-arguments" title="Permalink to this heading"></a></h2>
+<h2>Default arguments<a class="headerlink" href="#default-arguments" title="Link to this heading"></a></h2>
 <p>Default arguments are very similar in expressiveness to overloading, so as one might expect <a class="reference external" href="https://talks.golang.org/2012/splash.article">Rob Pike</a> says Go deliberately does not support default arguments. Supposedly adding default arguments to a function results in interactions among arguments that are difficult to understand.</p>
 <p>Pike admits that it is really easy to patch API design flaws by adding a default argument. Expanding on this, it seems default arguments have a good place in the lifecycle of an API parameter:</p>
 <ol class="arabic simple">
@@ -264,7 +268,7 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <p>The verdict here is that defaulting, like overloading, is a power vs predictability tradeoff. The obvious choice given Stroscot’s principles is power. There are no easy solutions for adding new behavior to a function besides adding a default argument flag to modifying an API in a backwards-compatible way, so default arguments are necessary. And default arguments have been used in creative ways to make fluent interfaces, giving programmers the enjoyment of complex interface design. The added implementation complexity is small. Security concerns are on the level of misreading the API docs, which is possible in any case. Adding a warning that a default argument has not been specified, forcing supplying all parameters to every method, seems sufficient.</p>
 </section>
 <section id="currying">
-<h2>Currying<a class="headerlink" href="#currying" title="Permalink to this heading"></a></h2>
+<h2>Currying<a class="headerlink" href="#currying" title="Link to this heading"></a></h2>
 <p>Per <span id="id3">[<a class="reference internal" href="../zzreferences.html#id91">KKSV95</a>]</span>, an uncurried function symbol has an arity n and a function application <code class="docutils literal notranslate"><span class="pre">f(t1,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">tn)</span></code> is formed from <code class="docutils literal notranslate"><span class="pre">f</span></code> and n terms t1,…,tn. In a curried system there are no arities and function applications are formed starting from a nullary constant <code class="docutils literal notranslate"><span class="pre">f</span></code> and applying the binary “application” operator, like <code class="docutils literal notranslate"><span class="pre">App(...App(App(f,t1),...),tn)</span></code> but more concisely written as left-associative juxtaposition <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tn</span></code>. We ignore the partially-applied system mentioned by Kennaway here and just assume the use of term matching.</p>
 <p>Partial application creates a function that takes one or more omitted parameters and plugs them into f to produce a final result. Currying allows easy partial function application for lastmost positional parameters and keyword parameters, which in turn allows using higher-order functions more easily, e.g. passing a partially-applied function as the argument to map. For example <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">(add</span> <span class="pre">2)</span> <span class="pre">[1,2]</span> <span class="pre">=</span> <span class="pre">[3,4]</span></code>. Without currying this would have to use a lambda to perform the partial application like <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">(\x.</span> <span class="pre">add</span> <span class="pre">2</span> <span class="pre">x)</span></code>. So in Stroscot positional parameters and keyword parameters are curried. This allows passing any function “directly”, without “wrapping” it in an anonymous function.</p>
 <p>The parentheses for a curried function don’t matter, e.g. all of the following are equivalent:</p>
@@ -282,7 +286,7 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <p>for the various currying possibilities.</p>
 <p>R allows some kind of “partial matching” so you can write <code class="docutils literal notranslate"><span class="pre">f(x,</span> <span class="pre">,</span> <span class="pre">y)</span></code> instead of <code class="docutils literal notranslate"><span class="pre">\a</span> <span class="pre">-&gt;</span> <span class="pre">f(x,</span> <span class="pre">a,</span> <span class="pre">y)</span></code>. Seems stupid.</p>
 <section id="variadic-arguments">
-<h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Permalink to this heading"></a></h3>
+<h3>Variadic arguments<a class="headerlink" href="#variadic-arguments" title="Link to this heading"></a></h3>
 <p>A variadic function has no fixed arity. So can currying and variadic functions coexist? Well consider a variadic function <code class="docutils literal notranslate"><span class="pre">sum</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
 <span class="o">#</span><span class="w"> </span><span class="n">true</span>
@@ -311,7 +315,7 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 </ul>
 </section>
 <section id="optional-arguments">
-<h3>Optional arguments<a class="headerlink" href="#optional-arguments" title="Permalink to this heading"></a></h3>
+<h3>Optional arguments<a class="headerlink" href="#optional-arguments" title="Link to this heading"></a></h3>
 <p>A similar issue is optional arguments - when do we decide to put in the default value? Again Stroscot’s answer is it must be syntactically supplied.</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">opt</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span>
 
@@ -323,7 +327,7 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 <p><a class="reference external" href="reasonmlhub.com/exploring-reasonml/ch_functions.html">ReasonML</a> uses an empty tuple to mark the end of supplied arguments.</p>
 </section>
 <section id="keyword-arguments">
-<h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Permalink to this heading"></a></h3>
+<h3>Keyword arguments<a class="headerlink" href="#keyword-arguments" title="Link to this heading"></a></h3>
 <p>Keyword arguments allow passing arguments without regards to the order in the function definition, making the code more robust to forgetting argument order. Of course keyword-only arguments do not work with currying either. But if they are mixed keyword-positional arguments then specifying most of them using keywords and leaving the rest as curried positional parameters can work:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">kw</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span>
 
@@ -336,7 +340,7 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 </section>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h2>
 <p>The full dispatch mechanism is as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">dispatch</span><span class="w"> </span><span class="n">clauses</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">do</span>
 <span class="w">  </span><span class="n">warnIfAnyPrioEqual</span><span class="w"> </span><span class="n">clauses</span>
@@ -350,11 +354,13 @@ Present -&gt; Defaulted [label=&quot;4&quot;]
 </div>
 <p>This depends on the <code class="docutils literal notranslate"><span class="pre">lub</span></code> primitive defined in <a class="reference external" href="http://conal.net/blog/posts/merging-partial-values">Conal’s post</a>. <code class="docutils literal notranslate"><span class="pre">lub</span></code> evaluates both sides to HNF, in a timeboxed fashion. If both sides are exceptions then an exception is returned. If one side gives an exception but the other doesn’t, then the other side is returned. If both sides evaluate to HNF and the heads are equal, the result is the head followed by the lub of the sub-arguments. Otherwise the context is used, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">(a</span> <span class="pre">`lub`</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">a</span> <span class="pre">`lub`</span> <span class="pre">f</span> <span class="pre">b</span></code>. <code class="docutils literal notranslate"><span class="pre">lub</span></code> is an oracle, analyzing the whole program - we want return type overloading, and that return values not accepted by the surrounding context are discarded. This falls out naturally from doing the analysis on the CPS-transformed version of the program.</p>
 <p>The dispatch semantics is that all methods are run in parallel using lub.</p>
-<p>The way Stroscot optimizes dispatch is:
-* eliminate all the statically impossible cases (cases that fail)
-* use profiling data to identify the hot paths
-* build a hot-biased dispatch tree
-* use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)</p>
+<p>The way Stroscot optimizes dispatch is:</p>
+<ul class="simple">
+<li><p>eliminate all the statically impossible cases (cases that fail)</p></li>
+<li><p>use profiling data to identify the hot paths</p></li>
+<li><p>build a hot-biased dispatch tree</p></li>
+<li><p>use conditionals for small numbers of branches, tables for large/uniform branches (like switch statements)</p></li>
+</ul>
 <p>The standard vtable implementation of Java/C++ arises naturally as a table dispatch on a method name. It looks like ‘load klass pointer from object; load method from klass-vtable (fixed offset from klass pointer); load execution address from method (allows you to swap execution strategies, like interp-vs-C1-vs-C2, or multiple copies of C2 jit’d depending on context); jump’. But usually we can do better by building a custom table and fast-pathing the hot cases.</p>
 <p>Cliff says what we do for overloaded calls doesn’t matter so long as in practice, &gt;90% of calls are statically resolved to one clause.</p>
 <p>THe inline-cache hack observes that, while in theory many different things might get called here, in practice there’s one highly dominant choice.  Same for big switches: you huffman-encode by execution frequency.</p>

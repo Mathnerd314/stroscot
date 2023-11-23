@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -76,8 +77,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -86,6 +87,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -98,12 +100,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -136,15 +140,17 @@
            <div itemprop="articleBody">
              
   <section id="code-generation">
-<h1>Code generation<a class="headerlink" href="#code-generation" title="Permalink to this heading"></a></h1>
+<h1>Code generation<a class="headerlink" href="#code-generation" title="Link to this heading"></a></h1>
 <p>Code generation is NP-hard and affects performance a lot. There are three main operations that need to be done, encompassing many optimizations:</p>
 <ol class="arabic simple">
 <li><p>Instruction selection - Peephole optimization, Common subexpression elimination</p></li>
 <li><p>Register allocation - Spilling, Rematerialization</p></li>
 <li><p>Instruction scheduling - Code motion, Block ordering</p></li>
 </ol>
+<p>Generally it is required to write a native code generator, linker, C standard library, and so on. Zig and Roc are doing it, learn from them. It is important to ensure that such bespoke components outperform the established alternatives, and are state of the art. Few developers actually work in this area so it is not hard to beat them in terms of design. But actually getting it to work takes years. In contrast interpreters/bytecode generators are really easy to implement, focus on them first.</p>
+<p>It can be tempting to focus heavily on providing a fast implementation, such as a fast and memory efficient compiler, and one can easily spend months working on this. But it should only be done after the compiler is well-tested and the standard library is near-complete. Then you can start benchmarking as 20%-30% of effort.</p>
 <section id="constrained-optimization">
-<h2>Constrained optimization<a class="headerlink" href="#constrained-optimization" title="Permalink to this heading"></a></h2>
+<h2>Constrained optimization<a class="headerlink" href="#constrained-optimization" title="Link to this heading"></a></h2>
 <p>Per Unison, instruction selection, register allocation, and instruction scheduling are interdependent. Solving instruction scheduling first tends to increase the register pressure (number of live temporaries), which may degrade the result of register allocation. Conversely, solving register allocation first tends to increase the reuse of registers, which introduces additional dependencies between instructions and may degrade the result of instruction scheduling.</p>
 <p>Because of the interdependency, the “holy grail” of code generation (Roberto’s words) is to model code generation as a single combinatorial optimization problem, because the optimal solution can only be found when the search space is large enough. Stroscot aims for this holy grail: when run without compile time constraint, Stroscot should find the globally best solution, given the objective function for the runtime.</p>
 <p>We could take the traditional approach and just design a heuristic algorithm that solves these problems in sequence. But code generation is complex enough that there is just no way to solve it optimally without properly defining the search space, constraints, and the objective function, and conducting an actual search. Following the traditional approach, we could invest a lot of effort into kludges, like a second instruction scheduling pass, and yet still not be able to generate optimal code. Furthermore, with the traditional approach, it is easy to have bugs in the heuristics and generate incorrect code, caught only much later in production, whereas properly defining constraints allows them to be automatically checked in a “lint” mode. Furthermore, with the constrained optimization paradigm, it is easy to exercise all codepaths by overriding the objective function, enabling good testing of all optimizations.</p>
@@ -153,93 +159,45 @@
 <p>Although optimality may not be often used in industrial code, there’s at least one design factor requiring it. Stroscot encourages the use of assembly instruction intrinsics, rather than literal blocks of “inline assembly”. Since the assembly code gets munged, optimality is the only way to guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code, in various microbenchmarks.</p>
 </section>
 <section id="optimizations">
-<h2>Optimizations<a class="headerlink" href="#optimizations" title="Permalink to this heading"></a></h2>
-<dl class="simple">
-<dt>calling convention/ABI</dt><dd><p>accumulate arguments on the stack vs popping them
-omit frame pointer
-tail recursive calls
-scalar replacement of aggregates
-removal of unused parameters
-replacement of parameters passed by reference by parameters passed by value.
-omitting unexported functions
-automatic constructor/destructor implementation
-null pointer dereference behavior
-Emit function prologues only before parts of the function that need it, rather than at the top of the function.
-alignment - functions, loops, jumps, labels</p>
-</dd>
-<dt>instruction scheduling</dt><dd><p>reorder instructions
-region size: basic blocks, superblocks
-schedule instructions of the same type together</p>
-</dd>
-<dt>instruction selection</dt><dd><p>combining instructions, e.g. fused multiply-add, decrement and branch
-transformation of conditional jumps to branchless code (arithmetic and conditional moves)
-remove redundant instructions</p>
-</dd>
-<dt>register allocation</dt><dd><p>swing modulo scheduling
-allow allocating “wide” types non-consecutively
-Graph coloring algorithm: Chow’s priority, Chaitin-Briggs
-region size: loop, function
-rematerialization
-use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.
-Use caller save registers if they are not used by any called function.
-rename registers to avoid false dependencies</p>
-</dd>
-<dt>optimizations</dt><dd><p>replace standard functions with faster alternatives when possible
-inlining
-deduplication of constants, functions, code sequences (tail merging / cross jumping)
-common subexpression elimination (CSE)
-dead code/store eliminate (DCE/DSE)
-conditional dead code elimination (DCE) for calls to built-in functions that may set errno but are otherwise free of side effects
-global constant and copy propagation
-constant propagation - which values/bits of values passed to functions are constants, function cloning
-value range propagation - like constant propagation but value ranges
-sparse conditional constant propagation (CCP), including bit-level
-elimination of always true/false conditions
-move loads/stores outside loops
-loop unrolling/peeling
-loop exit test
-cross-jumping transformation
-constant folding
-specializing call dispatch (possible targets, likely targets, test/branch)
-Code hoisting - evaluate guaranteed-evaluated expressions as early as possible
-copy propagation - eliminate unnecessary copy operations
-Discover which variables escape
-partial/full redundancy elimination (PRE/FRE)
-modified/referenced memory analysis, points-to analysis, aliasing
-strips sign operations if the sign of a value never matters
-convert initialization in switch to initialization from a scalar array
-termination checking
-loop nest optimizer based on the Pluto optimization algorithms. It calculates a loop structure optimized for data-locality and parallelism.
-graphite - loop distribution, loop interchange, unroll, jam, peel, split, unswitch, parallelize, copy variables, inline to use first iteration values, predictive commoning, prefetch
-final value replacement - loop to calculation using initial value and number of loop iterations
-explode structures to scalars in registers
-vectorization - loop vectorization, basic block vectorization, cost free (for debugging), likely faster, or code size
-reorder blocks, duplicate blocks, partition into hot/cold to improve paging and cache locality
-specialization of division operations using knowledge of the denominator</p>
-</dd>
-<dt>profiling:</dt><dd><p>generate approximate profile of new/modified code, guessing using heuristics
-cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions
-AutoFDO profile <a class="reference external" href="https://perf.wiki.kernel.org/">https://perf.wiki.kernel.org/</a></p>
-</dd>
-</dl>
-<p>live-patching: depending on optimizations, all callers maybe impacted, therefore need to be patched as well.</p>
-<dl class="simple">
-<dt>floating-point variables</dt><dd><p>register or memory.
-on machines such as 68881 and x86, the floating registers keep excess precision. For most programs, the excess precision does only good, but a few programs rely on the precise definition of IEEE floating point.
-fast: allow higher precision / formula transformations if that would result in faster code. it is unpredictable when rounding to the IEEE types takes place and NaNs, signed zero, and infinities are assumed to not occur.
-standard: follow the rules specified in ISO C99 or C++; both casts and assignments cause values to be rounded to their semantic types
-strict: rounding occurs after each operation, no transformations
-exception handling, mode handling</p>
-</dd>
-<dt>Magic numbers:</dt><dd><p>search space sizes - Increasing values mean more aggressive optimization, making the compilation time increase, but with diminishing improvement in runtime execution time. Generally a formula producing a boolean “try optimization” answer or an integer “maximum number of possibilities to consider”.
-memory limit - If more memory than specified is required, the optimization is not done.
-analysis skipping - ignore objects larger than some size
-ratios - if inlining grows code by more than this, cancel inlining. tends to be overly conservative on small functions which can increase by 300%.</p>
-</dd>
-</dl>
+<h2>Optimizations<a class="headerlink" href="#optimizations" title="Link to this heading"></a></h2>
+<p>Calling convention/ABI</p>
+<ul class="simple">
+<li><p>accumulate arguments on the stack vs popping them</p></li>
+<li><p>omit frame pointer</p></li>
+<li><p>tail recursive calls</p></li>
+<li><p>scalar replacement of aggregates</p></li>
+<li><p>omitting unexported functions</p></li>
+<li><p>automatic constructor/destructor implementation</p></li>
+<li><p>null pointer dereference behavior</p></li>
+<li><p>Emit function prologues only before parts of the function that need it, rather than at the top of the function.</p></li>
+<li><p>alignment - functions, loops, jumps, labels</p></li>
+</ul>
+<p>register allocation</p>
+<ul class="simple">
+<li><p>swing modulo scheduling</p></li>
+<li><p>allow allocating “wide” types non-consecutively</p></li>
+<li><p>Graph coloring algorithm: Chow’s priority, Chaitin-Briggs</p></li>
+<li><p>region size: loop, function</p></li>
+<li><p>rematerialization</p></li>
+<li><p>use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.</p></li>
+<li><p>Use caller save registers if they are not used by any called function.</p></li>
+<li><p>rename registers to avoid false dependencies</p></li>
+</ul>
+<p>instruction scheduling</p>
+<ul class="simple">
+<li><p>reorder instructions</p></li>
+<li><p>region size: basic blocks, superblocks</p></li>
+<li><p>schedule instructions of the same type together</p></li>
+</ul>
+<p>instruction selection</p>
+<ul class="simple">
+<li><p>combining instructions, e.g. fused multiply-add, decrement and branch</p></li>
+<li><p>transformation of conditional jumps to branchless code (arithmetic and conditional moves)</p></li>
+<li><p>remove redundant instructions</p></li>
+</ul>
 </section>
 <section id="register-allocation">
-<h2>Register allocation<a class="headerlink" href="#register-allocation" title="Permalink to this heading"></a></h2>
+<h2>Register allocation<a class="headerlink" href="#register-allocation" title="Link to this heading"></a></h2>
 <p>Definitions:</p>
 <ul class="simple">
 <li><p>A temporary is an identifier for a bitstring value - it is not modified. A “virtual register” would be a temporary that has write access but these are eliminated by the codegen’s SSA pass.</p></li>
@@ -275,7 +233,7 @@ Oh yeah, and its by far the fastest register graph-coloring allocator I’ve eve
 <p>LuaJit register allocator (reinvented): <a class="reference external" href="https://www.mattkeeter.com/blog/2022-10-04-ssra/">https://www.mattkeeter.com/blog/2022-10-04-ssra/</a> simple and fast</p>
 </section>
 <section id="instruction-selection">
-<h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Permalink to this heading"></a></h2>
+<h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Link to this heading"></a></h2>
 <p>Instruction selection transforms a sequence of IR instructions into the cheapest/shortest sequence of processor-specific instructions.</p>
 <p>Blindell’s universal instruction selection thesis is the main reference here. STOKE can find probabilistically optimal straightline assembly sequences using a specialized search algorithm, which is also a form of instruction selection so should be integrated.</p>
 <p>for literal assembly, we can either emit it as-is or try to optimize it. If we can actually optimize it to a faster but equivalent sequence, great, but we don’t want to transform a compound operation into several simpler instructions, fuse the simpler instructions with nearby instructions from other operations, fail to identify the compound operation due to the fusion, and lose performance.</p>
@@ -301,7 +259,7 @@ A compiler can directly emit ISP or you can start with assembly instructions and
 </ul>
 </section>
 <section id="instruction-scheduling">
-<h2>Instruction Scheduling<a class="headerlink" href="#instruction-scheduling" title="Permalink to this heading"></a></h2>
+<h2>Instruction Scheduling<a class="headerlink" href="#instruction-scheduling" title="Link to this heading"></a></h2>
 <p>pre-calculate offsets, branch penalties, speculative execution, cache misses, code size</p>
 <p>Instruction scheduling assigns issue cycles to program instructions. Valid instruction schedules
 must satisfy instruction dependencies and constraints imposed by limited processor resources.</p>
@@ -343,7 +301,7 @@ must satisfy instruction dependencies and constraints imposed by limited process
 <p>branch prediction: branch target buffer (BTB), indirect branch target array, loop detector and renamed return stack buffer. mispredicted branch clears cache and restarts.</p>
 </section>
 <section id="jumps">
-<h2>Jumps<a class="headerlink" href="#jumps" title="Permalink to this heading"></a></h2>
+<h2>Jumps<a class="headerlink" href="#jumps" title="Link to this heading"></a></h2>
 <p>An important point is how control transfers between blocks. Cliff is always talking about inline jump target caches. These reduce use of the branch target buffer (BTB), improving the performance of programs that use a lot of jumps and calls. The BTB is a finite resource.  If you have a few hundred jmp-regs you’re calling lots, the BTB will cover you.  Somewhere above 1000’s it starts to get overwhelmed and you start getting misses on the J-R. The inline cache reduces BTB pressure at the expense of some code generation complexity, increased code size, and possible slowdown if the cache misses often. In a typical Java program, however, the inline cache will literally never fail over the program lifetime once it is generated by the JIT.</p>
 <p>The idea is to encode likely target addresses of the jump or call in the assembly as a ld/cmp/br/call or ld/call/cmp/br instruction sequence. Assuming there is a hit, the processor will jump directly to a fixed address, no entry in the BTB will be made, and the call can avoid several indirect memory fetches. Furthermore since the sequence is entirely predictable, the processor will likely be able to speculatively execute or skip the jump. In a typical Java program, because the failure rate is so low, no stats are kept and on first-fail, it directly flips to the fallback ld/ld/ld/jump-reg.</p>
 <p>The ld/cmp/br sequence is highly optimized by X86 and can wide issue. So call it ~1clk for the whole set of 4 ops. A bare static call is ~1/2clk (can wide issue with other stuff). A BTB miss is ~30clks. So the cache</p>
@@ -359,7 +317,7 @@ Cache misses: If the cache does not contain the target address of a jump or call
 <p>Overall, the advantages of jump target caches generally outweigh the disadvantages, especially in programs that have a lot of jumps and calls. However, as with any optimization technique, the effectiveness of jump target caches depends on the specific program and system configuration.</p>
 </section>
 <section id="layout">
-<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this heading"></a></h2>
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
 <p>For example getting rid of the jump here:</p>
 <div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">jmp</span><span class="w"> </span><span class="no">my_label</span>
 <span class="nl">my_label:</span>
@@ -369,7 +327,7 @@ Cache misses: If the cache does not contain the target address of a jump or call
 <p>Cliff says a list scheduler is generally sufficient</p>
 </section>
 <section id="c-target">
-<h2>C target<a class="headerlink" href="#c-target" title="Permalink to this heading"></a></h2>
+<h2>C target<a class="headerlink" href="#c-target" title="Link to this heading"></a></h2>
 <p>When we compile to C it is quite similar to writing an interpreter in C with specialized opcodes. So LuaJIT is relevant. LuaJIT’s interpreter is fast, because:</p>
 <ul class="simple">
 <li><p>It uses indirect threading (aka labeled goto in C).</p></li>
@@ -433,7 +391,7 @@ the CPU branch predictors.</p>
 <p>The C compiler does have these optimizations but figuring out the right C code to generate so that the program will optimize properly is hard.</p>
 </section>
 <section id="more-on-optimization">
-<h2>More on optimization<a class="headerlink" href="#more-on-optimization" title="Permalink to this heading"></a></h2>
+<h2>More on optimization<a class="headerlink" href="#more-on-optimization" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166">https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166</a></p>
 <p>high-performance programming</p>
 <p>coroutine switching and resource competition (I/uop cache, D cache, BTB) makes it slow - use buffering

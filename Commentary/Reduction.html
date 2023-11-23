@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,12 +76,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Reduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#def-use">Def/use</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hashing">Hashing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#primitives">Primitives</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linear-logic">Linear logic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
@@ -91,12 +96,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -129,12 +136,30 @@
            <div itemprop="articleBody">
              
   <section id="reduction">
-<h1>Reduction<a class="headerlink" href="#reduction" title="Permalink to this heading"></a></h1>
+<h1>Reduction<a class="headerlink" href="#reduction" title="Link to this heading"></a></h1>
 <p>In graph reduction, a graph node identifies a closed expression, and can be referenced by many other nodes. This sharing allows reduction in a more efficient manner, only computing the expression’s reduction once rather than repeatedly for each occurrence. But this sharing is relative to the initial term - if there are duplicated expressions in the initial program, or identical expressions arise from distinct reduction paths, graph reduction will not merge them.  But this labelling is only preserved under weak reduction, reduction not inside lambdas.</p>
 <p>An extension of graph reduction is optimal reduction.  In optimal reduction, terms with the same family / Levy-label are identified as one node, and strong reduction is valid, i.e. reducing any redex. Levy-labelling is again relative to the initial expression (each sub-term annotated with a unique label) and the reduction history from that expression to the current. There is then the implementation task of representing the shared redexes efficiently so that they may be reduced together.</p>
 <p>Although BOHM and Lambdascope have created interaction net machines where a Levy family beta-reduction is an atomic operation, it does not seem that these interaction net machines are actually that efficient. In <span id="id1">[<a class="reference internal" href="../zzreferences.html#id68" title="Stefano Guerrini and Marco Solieri. Is the optimal implementation inefficient? Elementarily not. In 2nd International Conference on Formal Structures for Computation and Deduction, 16 pages. Schloss Dagstuhl - Leibniz-Zentrum fuer Informatik GmbH, Wadern/Saarbruecken, Germany, September 2017. \subsection Other  Sharing graphs are a local and asynchronous implementation of lambda-calculus beta-reduction (or linear logic proof-net cut-elimination) that avoids useless duplications. Empirical benchmarks suggest that they are one of the most efficient machineries, when one wants to fully exploit the higher-order features of lambda-calculus. However, we still lack confirming grounds with theoretical solidity to dispel uncertainties about the adoption of sharing graphs. Aiming at analysing in detail the worst-case overhead cost of sharing operators, we restrict to the case of elementary and light linear logic, two subsystems with bounded computational complexity of multiplicative exponential linear logic. In these two cases, the bookkeeping component is unnecessary, and sharing graphs are simplified to the so-called &quot;abstract algorithm&quot;. By a modular cost comparison over a syntactical simulation, we prove that the overhead of shared reductions is quadratically bounded to cost of the naive implementation, i.e. proof-net reduction. This result generalises and strengthens a previous complexity result, and implies that the price of sharing is negligible, if compared to the obtainable benefits on reductions requiring a large amount of duplication. URL: http://drops.dagstuhl.de/opus/volltexte/2017/7733/ (visited on 2021-09-06), doi:10.4230/LIPICS.FSCD.2017.17.">GS17</a>]</span> they find a quadratic slowdown of the fan-fan swap interactions, relative to normal order reduction on lambdas. Furthermore in <span id="id2">[]</span> they find that a Levy family beta-reduction step can take time that is not elementary recursive. It seems like an easier path to optimal reduction is to track the families directly and perform family reductions individually using an efficient non-sharing algorithm such as <span id="id3">[]</span> or a limited-sharing algorithm such as graph reduction. Such an approach gives up the exponential speedups of sharing contexts, but has a much more understandable cost model. It is still “optimal” in the sense that outermost family reduction performs the minimal number of family reductions, and the overall reduction follows this strategy, hence the only inefficiency is the need to evaluate some unnecessary individual reductions as part of the family. Potentially, there is the possibility to use the homogeneity of the redexes within a family to speed up within-family reduction, but most likely not.</p>
+<p>Since reduction is confluent, it does not change anything to reduce in non-normal order for a time. The reduction will still terminate when going back to normal order. So terminating reductions can always be performed and even non-terminating reductions can be reduced somewhat. Hence during compilation we want to reduce the program as much as possible - ideally the compiled core should be cut-free. We can detect diverging terms and replace them with error terms. But we can’t eliminate cuts involving complex recursion, so have to create a heap or a stack allocation. For example the Fibonacci list <code class="docutils literal notranslate"><span class="pre">let</span> <span class="pre">fibs</span> <span class="pre">=</span> <span class="pre">0</span> <span class="pre">::</span> <span class="pre">1</span> <span class="pre">::</span> <span class="pre">zipWith</span> <span class="pre">(+)</span> <span class="pre">fibs</span> <span class="pre">(tail</span> <span class="pre">fibs)</span> <span class="pre">in</span> <span class="pre">{</span> <span class="pre">repeat</span> <span class="pre">forever</span> <span class="pre">{</span> <span class="pre">n</span> <span class="pre">&lt;-</span> <span class="pre">readInt;</span> <span class="pre">print</span> <span class="pre">(fibs</span> <span class="pre">!!</span> <span class="pre">n)</span> <span class="pre">}</span> <span class="pre">}</span></code>, this needs some kind of reduction graph or memo stack involved.</p>
+<section id="def-use">
+<h2>Def/use<a class="headerlink" href="#def-use" title="Link to this heading"></a></h2>
+<p>Graph reduction using def/use is not hard - assign each definition node a static integer identifier. Then the root is a distinguished definition, which is mutable, while everything else is copied into the root graph when reduction goes past its use point. Assuming the definition data is stored on disk and paged in/out as needed, we can minimize runtime memory use in a compiler pass by introducing as many use-def indirections as possible, one for every sequent in the derivation. This also makes the connections between rules uniform. But having lots of indirections is inefficient so a later pass would remove indirections that will be immediately used (chunkification).</p>
+<p>The optimal fixedpoint algorithm outlined in <span id="id4">[<a class="reference internal" href="../zzreferences.html#id141" title="Adi Shamir. The Fixedpoints of Recursive Definitions. PhD thesis, Weizmann Institute of Science, Rehovot, October 1976. URL: https://weizmann.primo.exlibrisgroup.com/permalink/972WIS_INST/1d4esio/alma990002185270203596.">Sha76</a>]</span> (10.18, PDF pages 240-242) is a variation of Tarjan’s strongly connected component algorithm. Cuts between two definitions <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span></code> are memoized in a list, and if the SCC algorithm finds a component <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">let</span> <span class="pre">g</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">in</span> <span class="pre">g</span> <span class="pre">(f</span> <span class="pre">x)</span></code> then this component is solved. If it has a unique solution then that’s the answer, otherwise <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span></code> diverges and is replaced with a <code class="docutils literal notranslate"><span class="pre">RecursionError</span></code> or <code class="docutils literal notranslate"><span class="pre">AmbiguousError</span></code>. We assume the solver allows uninterpreted “holes”, so that the SCC can be solved before its sub-computations.</p>
+<p>For comparison, to compute the least fixed point we would maintain a “working graph” and incrementally unfold the definition when encountered. But with the optimal fixed point we first reduce the definition to a value while copying other definitions in.</p>
+<p>The solver is an SMT solver on the predicate <code class="docutils literal notranslate"><span class="pre">SAT(y</span> <span class="pre">==</span> <span class="pre">g</span> <span class="pre">y)</span></code>, and for uniqueness <code class="docutils literal notranslate"><span class="pre">UNSAT(y</span> <span class="pre">==</span> <span class="pre">g</span> <span class="pre">y</span> <span class="pre">&amp;&amp;</span> <span class="pre">y</span> <span class="pre">!=</span> <span class="pre">y0)</span></code> where <code class="docutils literal notranslate"><span class="pre">y0</span></code> is the first solution found. We exclude error values as possible solutions since the recursion error will be more informative.</p>
+<p>The posets the paper uses appear to be pointed directed-complete partial orders <a class="reference external" href="https://en.wikipedia.org/wiki/Complete_partial_order">(cppo’s)</a>.</p>
+</section>
+<section id="hashing">
+<h2>Hashing<a class="headerlink" href="#hashing" title="Link to this heading"></a></h2>
+<p>To hash the graphs we can use the tree structure of the sequent derivations. Each upward slot in a node is hashed with a fixed value and each downward slot is hashed with a value corresponding to the path through the derivation tree followed by the label of the upward slot. It is written as a single DFS traversal with the leaves as base case that stores the hashed subtree and a map from edge name to partial path.</p>
+<p>Hashing infinite graphs is harder, we have to hash each SCC as a unit. See <span id="id5">[<a class="reference internal" href="../zzreferences.html#id109" title="Laurent Mauborgne. An incremental unique representation for regular trees. Nordic Journal of Computing, 7(4):290–311, December 2000.">Mau00</a>]</span>.</p>
+</section>
+<section id="primitives">
+<h2>Primitives<a class="headerlink" href="#primitives" title="Link to this heading"></a></h2>
+<p>Primitives (integers) can be handled by hacking special cases into Cut; we add primitive functions of type PiR that use the arguments provided by PiL during a cut, and also literals, special values of type SigmaR. Alternately we can use a specialized proof trees: 64-bit integers are represented as a sigma type with 2^64 possibilities. So addition is represented as a case expression, where each case contains another case expression, and then each case constructs the integer corresponding to the addition. There is a lot of fan-out at each step, which would require 2^128 values to represent, clearly infeasible. So although this is the conceptual representation, the actual representation has no fan-out for the cases - instead the case nodes create symbolic variables <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>, and the constructed value has the tag <code class="docutils literal notranslate"><span class="pre">a+b</span></code>.</p>
+</section>
 <section id="linear-logic">
-<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Permalink to this heading"></a></h2>
+<h2>Linear logic<a class="headerlink" href="#linear-logic" title="Link to this heading"></a></h2>
 <p>Linear logic has boxes, The difference is not observable if we do not use duplication. e.g. <code class="docutils literal notranslate"><span class="pre">(\x.print(x+1))</span> <span class="pre">{print(&quot;x&quot;);</span> <span class="pre">2}</span></code> can only print <code class="docutils literal notranslate"><span class="pre">x3</span></code>. But if we change <code class="docutils literal notranslate"><span class="pre">x+1</span></code> to <code class="docutils literal notranslate"><span class="pre">x+x</span></code> then CBV/optimal/lazy is <code class="docutils literal notranslate"><span class="pre">x4</span></code> while CBN is <code class="docutils literal notranslate"><span class="pre">xx4</span></code>.</p>
 <p>So how do we specify the difference between the two, in linear logic?</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">s</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">=</span>
@@ -149,7 +174,7 @@
 4. More complex cases enforced by a typing system, such as Elementary Affine Logic.</p>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h2>
 <p>Reduction is fairly simple to implement without duplication, as it is just pairs of constructors and destructors annihilating and joining their wires, or, for <code class="docutils literal notranslate"><span class="pre">case</span></code>, joining some eraser nodes. But what about duplication?</p>
 <p>Stroscot takes its general inspiration from the delimiter system found in Lambdascope. However, instead of having levels Stroscot keeps explicit track of “environments” or “scopes”. In particular a delimiter has an inside scope and an outside scope. Initially, all delimiters look like opening/closing delimiters where the outside scope is the default/root scope <code class="docutils literal notranslate"><span class="pre">0</span></code> and the inside scope is the scope of the multiplexer involved. When two delimiters meet, the touching outer scopes are compared for equality (they should always be equal) and one inner scope remains the inner scope while the other inner scope become the new delimiter’s outer scope.</p>
 <p>To determine which scope becomes the outer scope, delimiters are also marked as “head”, “full”, or “empty” depending on whether they represent a reference to the result of a duplication, the target of a duplication, or a path that crosses the scope but doesn’t duplicate. Interactions are allowed only between head delimiters and other delimiter; the head delimiter’s scope stays on the inside.</p>

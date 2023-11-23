@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Symbolic computing &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Syntax" href="Syntax.html" />
+    <link rel="prev" title="Stateful programming" href="State.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory-Management.html">Memory management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Symbolic computing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#design">Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#calculations">Calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polynomials">Polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#staging">Staging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#to-look-at">To look at</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Commentary</a></li>
+      <li class="breadcrumb-item active">Symbolic computing</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Symbolic.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="symbolic-computing">
+<h1>Symbolic computing<a class="headerlink" href="#symbolic-computing" title="Link to this heading"></a></h1>
+<p>Symbolic computation is mainly distinguished by what it is not: it is not “numerical computation” with machine precision numbers, where one arithmetic operation translates to one machine code instruction. Symbolic computation can provide exact solutions, perform algebraic manipulation, prove mathematical properties, and solve equations. In education, it allows using mathematical numbers without complications such as approximation error and number formats. In industry, it allows manipulating and analyzing complex equations in robust ways, and provides more accuracy and precision in cases where required.</p>
+<p>Machine precision numerical computation is typically much faster. In many tasks such as scientific simulations, data analysis, and engineering design, the approximation errors cancel out or are negligible and numerical computation delivers acceptable results in orders of magnitude less time. But often, these numerical equations are obtained with the help of symbolic computation. Many real-world problems require both numerical and symbolic analysis. Symbolic computing is thus a valuable tool, and Stroscot would be lacking if it left symbolic computing out of its functionality.</p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<p>One simple way of characterizing features is by the values (normal forms) they add to the language and then the operations on those values. There is a wide range of values supported by CAS’s such as Mathematica, Maple, Magma, and SAGE: symbolic expressions (terms - trees, including symbols, variables, and constants, and binders so as to write derivatives, integrals, and summations), numbers to a specified (arbitrary) precision, machine-precision numbers, rational numbers, (computable) real numbers, complex numbers, strings, lists, sets, polynomials, truncated power series, systems of equations, probability distributions, special functions, records, tables, units, arrays, matrices, tensors (including sparse), functions, graphics, images, plots, files, directories, directed and undirected graphs and networks, dates and times, geometric objects, piecewise and interpolated numerical functions, sound and audio data, signal (time-series) data, algebraic number fields/rings/ideals (finite fields, algebraic extensions, and elements thereof), crytographic keys, combinatorial objects (permutations, combinations, and partitions), generating functions, modular forms, p-adic numbers, combinatorial designs (block designs, Latin squares, orthogonal arrays), databases, logical connectives (and, or, not, forall, exists).</p>
+<p>Then we need algorithms and operations on these values. For the numbers, it is mainly arithmetic and special functions. For expression trees, there is simplification (and related transformations such as distributing, combining, and factoring), applying algebraic rules or equations (pattern matching and substitution, such as automatic differentiation), and equation solving. More complex algorithms such as automatic integration combine these in interesting ways. Then there are SMT solvers which can take almost any formula and determine if it is satisfiable.</p>
+</section>
+<section id="design">
+<h2>Design<a class="headerlink" href="#design" title="Link to this heading"></a></h2>
+<p>Following Stroscot’s philosophy of “minimal core”, as little as possible of the implementation should be in the language core. We will need to represent symbolic expressions - the easiest thing is to make these syntax trees, so that algorithms are macros that operate on syntax. But of course specific algorithms will operate on restricted subsets of syntax trees.</p>
+<p>Oscar Benjamin has been working on speeding up SymPy and has written about <a class="reference external" href="https://oscarbenjamin.github.io/blog/czi/post1.html">how he would redesign SymPy</a>. It is certainly worth taking his design points into consideration. According to Benjamin, fast symbolic computation depends on implementing three things efficiently: robust numerical evaluation, symbolic manipulation, and computational algebra.</p>
+</section>
+<section id="calculations">
+<h2>Calculations<a class="headerlink" href="#calculations" title="Link to this heading"></a></h2>
+<p>Consider the expression <code class="docutils literal notranslate"><span class="pre">e</span> <span class="pre">=</span> <span class="pre">cos(1)^2</span> <span class="pre">+</span> <span class="pre">(sin(1)^2</span> <span class="pre">-</span> <span class="pre">1)</span></code>. Evaluation can be done in several ways.</p>
+<ul class="simple">
+<li><p>The simplest and most common is machine-precision evaluation, where each operation is done to within a given tolerance (1 ulp usually). Numerical error can accumulate and there is no recourse other than to restructure the computation. <code class="docutils literal notranslate"><span class="pre">evalDouble</span> <span class="pre">e</span> <span class="pre">=</span> <span class="pre">double</span> <span class="pre">5.551115123125783e-17</span></code></p></li>
+<li><p>In arbitrary-precision evaluation (mpmath), each operation is done to a specified, configurable tolerance / precision. But error may still accumulate and cause catastrophic cancellation and other issues. This can be addressed by manually increasing the precision. <code class="docutils literal notranslate"><span class="pre">mpf</span> <span class="pre">e</span> <span class="pre">{digits=50}</span> <span class="pre">=</span> <span class="pre">mpf('1.3363823550460978230702682335757409394075984400525243e-51')</span></code></p></li>
+<li><p>In interval arithmetic, each number’s upper and lower bounds are tracked. Accumulated errors within computations are visible as large bounds relative to the number. The computation can be retried with more precision if it is not sufficiently accurate. <code class="docutils literal notranslate"><span class="pre">interval</span> <span class="pre">e</span> <span class="pre">{digits=3}</span> <span class="pre">=</span> <span class="pre">{low</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">high</span> <span class="pre">=</span> <span class="pre">1e-3</span> <span class="pre">}</span></code></p></li>
+<li><p>In robust numerical evaluation (sympy.evalf, Arb), the result is guaranteed to be within a given accuracy or tolerance. The precisions needed for each intermediate computation are calculated using back-propagation of error and estimates of the actual value. Robust numerics are generally formally verified to produce accurate results. <code class="docutils literal notranslate"><span class="pre">robust_evalf</span> <span class="pre">e</span> <span class="pre">{digits=50}</span> <span class="pre">=</span> <span class="pre">Float(-(1</span> <span class="pre">+-</span> <span class="pre">1)*2^(-531))</span></code> An algorithm to determine if an expression is equal to 0 would also fall under robust numerics.</p></li>
+<li><p>In symbolic computation, the expression is simplified through rewrite rules. The expression may be returned unchanged, or reduce to a number, depending on the expression and simplification rules. <code class="docutils literal notranslate"><span class="pre">simplify</span> <span class="pre">e</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+</ul>
+<p>Typically, operations on tree-expressions and polynomials use a combination of robust numeric evaluation and symbolic computation. Robust numerical evaluation uses a mixture of machine-precision, arbitrary-precision, and interval arithmetic.</p>
+</section>
+<section id="polynomials">
+<h2>Polynomials<a class="headerlink" href="#polynomials" title="Link to this heading"></a></h2>
+<p>Polynomials consist of a finite summation of terms, where each term is a product of a coefficient and powers of variables with integer exponents (generally positive). The coefficients are drawn from some domain (set), which can be integers, rationals, or symbolic expressions, while the variables are drawn from a different (finite) set of expressions. A univariate polynomial can be stored as a dense list of coefficients, while for multivariate polynomials it is generally more efficient to use a sparse representation. It is better to store all the coefficients using a uniform representation, so that operations do not have to check types. There is a conversion function that takes an arbitrary expression and converts it to the most efficient polynomial representation.</p>
+<p>One question is whether the variables should form a basis. For example, with <code class="docutils literal notranslate"><span class="pre">sin(t)</span></code> and <code class="docutils literal notranslate"><span class="pre">cos(t)</span></code>, the expression <code class="docutils literal notranslate"><span class="pre">sin^2(t)+cos^2(t)-1</span></code> is zero, even though its coefficient matrix <code class="docutils literal notranslate"><span class="pre">{(2,0):</span> <span class="pre">1,(0,2):</span> <span class="pre">1,(0,0):</span> <span class="pre">-1}</span></code> is not. It certainly makes it easier if the algorithms can assume that only the 0-coefficient polynomial is 0, but in general this doesn’t hold. The conclusion is that polynomials with orthogonal variables should be a subset. Arbitrary expressions should be usable as the “variables” of the polynomial as well as the coefficients.</p>
+</section>
+<section id="staging">
+<h2>Staging<a class="headerlink" href="#staging" title="Link to this heading"></a></h2>
+<p>Many systems do “automatic” simplification in that for example <code class="docutils literal notranslate"><span class="pre">print(cos(pi/4))</span> <span class="pre">=</span> <span class="pre">sqrt(2)/2</span></code>. Maybe this simplification is what you wanted, but if it is not (e.g. you wanted to evaluate the cosine with machine precision) you are stuck - the information about the original expression has been lost. Simplification and conversion is in general an expensive, lossy operation. Therefore the main API should be staged: first you construct an expression tree / polynomial / etc., and then you apply one or more functions to specify how to transform and evaluate it. This sort of API is precise and allows fine control over evaluation via tree manipulation, avoiding unexpected costs and unnecessarily repeated simplifications. Auto-simplifying operations can be defined on top of the staged API, like <code class="docutils literal notranslate"><span class="pre">(AutoSimplify</span> <span class="pre">a)</span> <span class="pre">+</span> <span class="pre">(AutoSimplify</span> <span class="pre">b)</span> <span class="pre">=</span> <span class="pre">AutoSimplify</span> <span class="pre">$</span> <span class="pre">simplify</span> <span class="pre">(a</span> <span class="pre">+</span> <span class="pre">b)</span></code>, and are useful if that’s the desired behavior. But it would be a mistake to expose only auto-simplifying operations.</p>
+</section>
+<section id="to-look-at">
+<h2>To look at<a class="headerlink" href="#to-look-at" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>SMTLIB2</p></li>
+<li><p>internal datatypes of z3</p></li>
+<li><p>logic programming - solve for input to program that produces value</p></li>
+<li><p>matrix manipulation library</p></li>
+<li><p>pde solver</p></li>
+<li><p><a class="reference external" href="https://github.com/uwplse/ruler">https://github.com/uwplse/ruler</a></p></li>
+<li><p><a class="reference external" href="http://www.sc-square.org/CSA/welcome.html">http://www.sc-square.org/CSA/welcome.html</a> They’re trying to bridge cas and smt.</p></li>
+<li><p>linear system in a finite field</p></li>
+<li><p>BLAS - just because both CAS and BLAS have A in them, does not mean they are the same thing.</p></li>
+<li><p><a class="reference external" href="https://herbie.uwplse.org/">https://herbie.uwplse.org/</a></p></li>
+<li><p><a class="reference external" href="https://egraphs-good.github.io/egglog/?example=herbie">https://egraphs-good.github.io/egglog/?example=herbie</a></p></li>
+<li><p><a class="reference external" href="https://flintlib.org/">https://flintlib.org/</a> - well-designed per Oscar Benjamin</p></li>
+<li><p>Maxima, Axiom and its two (!) forks, SymPy, REDUCE, Symbolics.jl, Mathics, SageMath, FORM, Yacas, Xcas, Oscar.jl, Macaulay2, Singular, <a class="reference external" href="https://github.com/mentat-collective/emmy/tree/main">emmy</a> - Axiom (or one of its forks) is probably the best-designed “winner” that everybody should copy (Lisp-based)</p></li>
+<li><p>Mathlib - could lead to a standardized language/format for machine-readable mathematics, like JSON or SMTLIB <a class="reference external" href="https://leanprover-community.github.io/">https://leanprover-community.github.io/</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="State.html" class="btn btn-neutral float-left" title="Stateful programming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -103,12 +105,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -141,11 +145,11 @@
            <div itemprop="articleBody">
              
   <section id="resource-management">
-<h1>Resource management<a class="headerlink" href="#resource-management" title="Permalink to this heading"></a></h1>
+<h1>Resource management<a class="headerlink" href="#resource-management" title="Link to this heading"></a></h1>
 <p>Resources are things that can be acquired and released, and are available in limited quantities due to OS or physical limitations. Examples include memory allocations, file handles, internet sockets, mutexes/locks, process table entries, and process identifiers (PIDs). A resource leak happens if the program does not promptly release a resource it has acquired after the program is finished with the resource. A resource management technique prevents resource leaks by releasing resources promptly.</p>
 <p>It is possible to manage resources by hand, but it is quite error-prone and tedious. Automatic resource management aims to provide a concise and safe replacement.</p>
 <section id="manual-approach">
-<h2>Manual approach<a class="headerlink" href="#manual-approach" title="Permalink to this heading"></a></h2>
+<h2>Manual approach<a class="headerlink" href="#manual-approach" title="Link to this heading"></a></h2>
 <p>The manual approach is to release sequentially after acquiring, for example:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
 <span class="nf">f2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file2.txt&quot;</span>
@@ -165,7 +169,7 @@
 </ul>
 </section>
 <section id="try-finally">
-<h2>try-finally<a class="headerlink" href="#try-finally" title="Permalink to this heading"></a></h2>
+<h2>try-finally<a class="headerlink" href="#try-finally" title="Link to this heading"></a></h2>
 <p>The try-finally modifies the basic approach by marking the do_something and release blocks explicitly. There are two patterns in Java 6, <a class="reference external" href="http://www.javapractices.com/topic/TopicAction.do?Id=25">standard pattern</a> and open-in-try (<a class="reference external" href="https://stackoverflow.com/questions/2699209/java-io-ugly-try-finally-block">here</a>):</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
 <span class="nf">try</span><span class="kt">:</span>
@@ -185,7 +189,7 @@
 <p>The unwinding protection solves the early exit leak. The failed acquire again doesn’t really matter. This pattern does not solve adjacency, encapsulation, or interleaving, meaning that it is still awkward and verbose. For adjacency, throws act as go-downs and you have to scan down almost the whole function to the finally block to see what cleanups are waiting and if an allocation has a matching clean-up. Also there is an indentation pyramid with nested try-finally.</p>
 </section>
 <section id="try-with-resources">
-<h2>try-with-resources<a class="headerlink" href="#try-with-resources" title="Permalink to this heading"></a></h2>
+<h2>try-with-resources<a class="headerlink" href="#try-with-resources" title="Link to this heading"></a></h2>
 <p>The try-with-resources solves adjacency by making <code class="docutils literal notranslate"><span class="pre">close</span></code> a Java built-in interface, but it still can’t do encapsulation or interleaving:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">try</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
@@ -195,7 +199,7 @@
 <p>C# has a similar <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">(f</span> <span class="pre">=</span> <span class="pre">newThing)</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> syntax, and Python has <code class="docutils literal notranslate"><span class="pre">with</span></code>.</p>
 </section>
 <section id="bracket">
-<h2>Bracket<a class="headerlink" href="#bracket" title="Permalink to this heading"></a></h2>
+<h2>Bracket<a class="headerlink" href="#bracket" title="Link to this heading"></a></h2>
 <p>Haskell has a <code class="docutils literal notranslate"><span class="pre">bracket</span> <span class="pre">acquire</span> <span class="pre">release</span> <span class="pre">action</span></code> combinator which functions similarly to try-with-resources. It similarly doesn’t support interleaving or encapsulation.</p>
 <p>The <a class="reference external" href="https://vimeo.com/97329153">D guy</a> claims you need an even larger combinator than bracket, which goes as follows:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="kr">then</span>
@@ -219,7 +223,7 @@
 <p>acquire has to be masked because there could be an async exception between the action and running next.</p>
 </section>
 <section id="scope-guard">
-<h2>Scope guard<a class="headerlink" href="#scope-guard" title="Permalink to this heading"></a></h2>
+<h2>Scope guard<a class="headerlink" href="#scope-guard" title="Link to this heading"></a></h2>
 <p>This approach involves a “deferred release”, which is called when the scope is exited. For example:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
 <span class="nf">defer</span><span class="w"> </span><span class="p">(</span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="p">)</span>
@@ -233,7 +237,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">defer</span></code> and <code class="docutils literal notranslate"><span class="pre">scope</span></code> do not allow returning a resource from a function and skipping the cleanup. They also introduce memory allocation questions since the deferred expressions can capture local variables. So no encapsulation.</p>
 </section>
 <section id="goto-cleanup">
-<h2>Goto cleanup<a class="headerlink" href="#goto-cleanup" title="Permalink to this heading"></a></h2>
+<h2>Goto cleanup<a class="headerlink" href="#goto-cleanup" title="Link to this heading"></a></h2>
 <p>C has this pattern:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file&quot;</span>
 <span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span>
@@ -249,7 +253,7 @@
 <p>This suffers from early return but addresses adjacency in that the cleanup label is present and can handle interleaving with conditionals. It is not encapsulated though and it is easy to mess up handling a failed acquire.</p>
 </section>
 <section id="garbage-collection">
-<h2>Garbage collection<a class="headerlink" href="#garbage-collection" title="Permalink to this heading"></a></h2>
+<h2>Garbage collection<a class="headerlink" href="#garbage-collection" title="Link to this heading"></a></h2>
 <p>GC almost solves the problem by making closing automatic. It looks like:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
 <span class="nf">do_something</span><span class="w"> </span><span class="n">f</span>
@@ -258,12 +262,12 @@
 <p>It solves all the issues of early exit, adjacency (implicit in the open), and encapsulation (the GC is based on global program flow). Unfortunately GC does not guarantee it will promptly call the finalizer, so in practice the semantics are not usable.</p>
 </section>
 <section id="raii">
-<h2>RAII<a class="headerlink" href="#raii" title="Permalink to this heading"></a></h2>
+<h2>RAII<a class="headerlink" href="#raii" title="Link to this heading"></a></h2>
 <p>C++ uses RAII, which looks like GC, but uses deterministic memory management, such as stack allocation or reference counting. It ensures you cannot insert any failure points between the allocation and the start of the cleanup’s scope. A resource can even be allocated with its corresponding cleanup in the middle of an expression. But defining a new class for every cleanup operation is tedious - fortunately in C++0x it is possible to define one “RAII lambda” class and be done. C++’s semantics define lambda memory handling so there is no allocation issue.</p>
 <p>With C++17 it is apparently possible to copy/move RAII types and store them in a data structure or return them from a function, but it seems fragile. In case of a complicated object graph, such as multiple objects sharing a resource, RAII falls down because the available strategies for deterministic memory management are insufficient.</p>
 </section>
 <section id="finalizers">
-<h2>Finalizers<a class="headerlink" href="#finalizers" title="Permalink to this heading"></a></h2>
+<h2>Finalizers<a class="headerlink" href="#finalizers" title="Link to this heading"></a></h2>
 <p>Stroscot’s finalizers are inspired by RAII and GC but free resources “promptly” as opposed to the “eventually” of GC or the stack or reference counting discipline of RAII. Similarly to <code class="docutils literal notranslate"><span class="pre">defer</span></code> the cleanup is placed near the acquire but similarly to <code class="docutils literal notranslate"><span class="pre">finally</span></code> there can be a marker for the end of the scope. The pattern is <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">f;</span> <span class="pre">...</span> <span class="pre">;</span> <span class="pre">use</span> <span class="pre">f;</span> <span class="pre">...;</span> <span class="pre">use</span> <span class="pre">f</span></code>. The finalizer will run after the last <code class="docutils literal notranslate"><span class="pre">use</span></code> if code flows normally and soon after raising an exception otherwise. Finalizers allow nesting, in the natural way <code class="docutils literal notranslate"><span class="pre">newFinalizer</span> <span class="pre">a;</span> <span class="pre">newFinalizer</span> <span class="pre">b;</span> <span class="pre">...;</span> <span class="pre">use</span> <span class="pre">b;</span> <span class="pre">use</span> <span class="pre">a</span></code>, and interleaving, by reordering to <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">a;</span> <span class="pre">use</span> <span class="pre">b</span></code>. But the execution order on an exception is latest-defined-first-run. Finalizers also support encapsulation such as returning the allocated resource. It is also possible to embed the finalizer in a resource handle and use RAII style programming - each operation calls <code class="docutils literal notranslate"><span class="pre">use</span></code> and extends the finalizer’s life.</p>
 <p>Finalizers directly implement D’s <code class="docutils literal notranslate"><span class="pre">scope(exit)</span></code>, and with an extra flag variable they can implement <code class="docutils literal notranslate"><span class="pre">scope(success)</span></code> and <code class="docutils literal notranslate"><span class="pre">scope(failure)</span></code>:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">scope_failure</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="ow">=</span>
@@ -284,7 +288,7 @@
 <p><a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4152.pdf">Herb Sutter</a> claims that the extra <code class="docutils literal notranslate"><span class="pre">use</span></code> is “tedious and fragile” and forces the programmer to think about the placement of failure determination. One can define a proper <code class="docutils literal notranslate"><span class="pre">scope_failure</span> <span class="pre">rollback</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> block structure, and even redefine return/continue/break to not run the rollback. But personally I think the finalizers are more powerful because they allow interleaving scopes. The combinators only allow nesting which isn’t as expressive. In Haskell land Snoyman created <a class="reference external" href="https://hackage.haskell.org/package/resourcet">ResourceT</a> even though there was <code class="docutils literal notranslate"><span class="pre">bracket</span></code>, exactly because of this.</p>
 </section>
 <section id="exceptions-in-finalizers">
-<h2>Exceptions in finalizers<a class="headerlink" href="#exceptions-in-finalizers" title="Permalink to this heading"></a></h2>
+<h2>Exceptions in finalizers<a class="headerlink" href="#exceptions-in-finalizers" title="Link to this heading"></a></h2>
 <p>What to do when throwing an exception from a finalizer? Say we have</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span>
 <span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newFinalizer</span><span class="w"> </span><span class="p">(</span><span class="n">throw</span><span class="w"> </span><span class="kt">Bar</span><span class="p">)</span>
@@ -306,7 +310,7 @@
 <p>Kalb proposes to “drop the second [destructor] exception on the floor and propagate the original one”, but this is a bad idea. Since (per Sutter’s convention) destructors generally don’t fail, an exception during a destructor is going to be fairly serious, such as an OOM. Ignoring this exception in favor of a trivial logic exception is the wrong approach.</p>
 </section>
 <section id="exception-safety">
-<h2>Exception safety<a class="headerlink" href="#exception-safety" title="Permalink to this heading"></a></h2>
+<h2>Exception safety<a class="headerlink" href="#exception-safety" title="Link to this heading"></a></h2>
 <p>Exception safe code is code that works correctly even when exceptions are thrown. The basic issue is in Rust/C++ almost everything is a resource. In Stroscot almost everything is a value, inert data - copy/clone is built into the language and can’t fail. Taking away explicit memory management makes it much easier to ensure exception safety. Reasoning about invariants with pure values is straightforward, and fail-fast coding styles mean that the program doesn’t live long. And when writing cleanups the programmer is already thinking about exception safety and restoring invariants, so will write an exception-safe cleanup.</p>
 <p>Still, what about exception safety for a mutable data structure? C++ has <a class="reference external" href="https://en.wikipedia.org/wiki/Exception_safety">levels of safety</a> for stateful functions based on what invariants are preserved.</p>
 <ul class="simple">
@@ -364,7 +368,7 @@
 </div>
 <p>Here add should have strong safety, i.e. it restores the state if an exception is thrown during the add.</p>
 <section id="poisoning">
-<h3>Poisoning<a class="headerlink" href="#poisoning" title="Permalink to this heading"></a></h3>
+<h3>Poisoning<a class="headerlink" href="#poisoning" title="Link to this heading"></a></h3>
 <p>Rust has “poisoning” for taking locks, which is a safeguard against trying to use data that was corrupted due to an exception, e.g. a concurrent heap that doesn’t have the heap property anymore. Poisoned data will tear down all connected threads.</p>
 <p>Essentially it uses the scope_failure cleanup to poison the lock on failure:</p>
 <div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">getGuard</span><span class="w"> </span><span class="n">mutex</span><span class="w"> </span><span class="ow">=</span>

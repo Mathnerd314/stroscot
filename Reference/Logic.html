@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -126,10 +126,10 @@
            <div itemprop="articleBody">
              
   <section id="logic">
-<h1>Logic<a class="headerlink" href="#logic" title="Permalink to this heading"></a></h1>
+<h1>Logic<a class="headerlink" href="#logic" title="Link to this heading"></a></h1>
 <p>The logic for Stroscot is based on a two-sided linear logic sequent calculus.</p>
 <section id="jumbo-connectives">
-<h2>Jumbo connectives<a class="headerlink" href="#jumbo-connectives" title="Permalink to this heading"></a></h2>
+<h2>Jumbo connectives<a class="headerlink" href="#jumbo-connectives" title="Link to this heading"></a></h2>
 <div class="math notranslate nohighlight">
 \begin{array}{cc}
 \newcommand{\rule}[3]{ \dfrac{\displaystyle ~~#1~~ }{\displaystyle ~~#2~~ } \  (#3)}
@@ -137,30 +137,30 @@
 \newcommand{\with}{\mathbin{\mathrm{\&amp;}}}
 \newcommand{\par}{\mathbin{\mathrm{⅋}}}
 \newcommand{\multimapboth}{\mathbin{\mathrm{⧟}}}
-\newcommand{\bang}{{\mathrm{!}}}
-\newcommand{\whim}{{\mathrm{?}}}
+\newcommand{\bang}{{\mathrm{!}^+}}
+\newcommand{\whim}{{\mathrm{!}^-}}
 \newcommand{\ocin}{\mathrel{\raise{-1pt}{\mathrm{!}}\mathord{\in}}}
 \definecolor{mygray}{RGB}{156,156,156}
 \newcommand{\sk}[1]{{\color{mygray} #1}}
 \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta }}
-  {\Gamma \vdash \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right), \Delta }
-  {\Pi_R}
+  {\Gamma \vdash \mathop{𝕁^-} \limits_{i} \left(\overrightarrow{A_i} \vdash \overrightarrow{B_i}\right), \Delta }
+  {𝕁^-_R}
 &amp;
 \rule{\overrightarrow{ \sk{\Gamma_j} \vdash A_{i j}, \sk{\Delta_j} } \quad \overrightarrow{ \sk{\Theta_k}, B_{i k} \vdash \sk{\Lambda_k} }}
-  {\sk{\overrightarrow{\Gamma}}, \sk{\vec \Theta}, \prod \limits_{i} \left(\overrightarrow{A_i} \multimap \overrightarrow{B_i}\right) \vdash \sk{\overrightarrow{\Delta}}, \sk{\vec\Lambda}}
-  {\Pi_{i} {}_{L}}
+  {\sk{\overrightarrow{\Gamma}}, \sk{\vec \Theta}, \mathop{𝕁^-} \limits_{i} \left(\overrightarrow{A_i} \vdash \overrightarrow{B_i}\right) \vdash \sk{\overrightarrow{\Delta}}, \sk{\vec\Lambda}}
+  {𝕁^-_{L} {}_{i}}
 \end{array}</div><div class="math notranslate nohighlight">
 \begin{array}{cc}
-\rule{\overrightarrow{ \sk{\Gamma_k}, B_{i k} \vdash \sk{\Delta_k} } \quad \overrightarrow{ \sk{\Theta_j} \vdash A_{i j}, \sk{\Lambda_j} } }
-  {\sk{\overrightarrow{\Gamma}}, \sk{\overrightarrow{\Theta}} \vdash \sum \limits_{i} \left( \overrightarrow{A_i} - \overrightarrow{B_i} \right), \sk{\overrightarrow{\Delta}}, \sk{\overrightarrow{\Lambda}}}
-  {\Sigma_{i} {}_{R}}
+\rule{\overrightarrow{ \sk{\Theta_j} \vdash A_{i j}, \sk{\Lambda_j} } \quad \overrightarrow{ \sk{\Gamma_k}, B_{i k} \vdash \sk{\Delta_k} }}
+  {\sk{\overrightarrow{\Gamma}}, \sk{\overrightarrow{\Theta}} \vdash \mathop{𝕁^+} \limits_{i} \left( \overrightarrow{A_i} \vdash \overrightarrow{B_i} \right), \sk{\overrightarrow{\Delta}}, \sk{\overrightarrow{\Lambda}}}
+  {𝕁^+_{R} {}_{i}}
 &amp;
 \rule{\overrightarrow{ \Gamma, \overrightarrow{A_{i j}} \vdash \overrightarrow{B_{i k}}, \Delta } }
-  {\Gamma, \sum \limits_{i} \left ( \overrightarrow{A_i} - \overrightarrow{B_i} \right ) \vdash \Delta }
-  {\Sigma_L}
+  {\Gamma, \mathop{𝕁^+} \limits_{i} \left ( \overrightarrow{A_i} \vdash \overrightarrow{B_i} \right ) \vdash \Delta }
+  {𝕁^+_L}
 \end{array}</div><section id="common-connectives">
-<h3>Common connectives<a class="headerlink" href="#common-connectives" title="Permalink to this heading"></a></h3>
-<p>All of the standard operators 01⊕⊗⊤⊥&amp;⅋⊸⧟ in linear logic can be expressed using <span class="math notranslate nohighlight">\(\Sigma\)</span> and <span class="math notranslate nohighlight">\(\Pi\)</span>. We use our notation for them.</p>
+<h3>Common connectives<a class="headerlink" href="#common-connectives" title="Link to this heading"></a></h3>
+<p>All of the standard operators 01⊕⊗⊤⊥&amp;⅋⊸⧟ in linear logic can be expressed using <span class="math notranslate nohighlight">\(𝕁^+\)</span> and <span class="math notranslate nohighlight">\(𝕁^-\)</span>. We use our notation for them.</p>
 <table class="docutils align-default" style="width: 100%">
 <colgroup>
 <col style="width: 13%" />
@@ -179,82 +179,82 @@
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(F\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(0\)</span></p></td>
 <td><p>False (Zero)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma []\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ []\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(1\)</span></p></td>
 <td><p>One</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,[] - [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#s,[] - [])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A \lor B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \oplus B\)</span></p></td>
 <td><p>Plus (coproduct, or)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#l,[A] - []),(\#r,[B] - [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#l,[A] - []),(\#r,[B] - [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(A \otimes B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \otimes B\)</span></p></td>
 <td><p>Times (tensor product)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,[A,B] - [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#s,[A,B] - [])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A^{\otimes n}\)</span></p></td>
 <td></td>
 <td><p><a class="reference external" href="https://en.wikipedia.org/wiki/Tensor_algebra#Construction">Tensor power</a></p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,\overbrace{[A,\ldots,A]}^n - [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#s,\overbrace{[A,\ldots,A]}^n - [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\smash{\stackrel{+}{\neg}} A\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A^{\bot}\)</span></p></td>
 <td><p>Positive Negation</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,[] - [A])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#s,[] - [A])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\({↑}A\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A\)</span></p></td>
 <td><p>Up shift</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#s,[A] - [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#s,[A] - [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(T\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\top\)</span></p></td>
 <td><p>True (Top)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi []\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- []\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\bot\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(\bot\)</span></p></td>
 <td><p>Bottom (contradiction)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#s,[] \multimap [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#s,[] \multimap [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(A \land B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \with B\)</span></p></td>
 <td><p>With (product, and)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#l,[] \multimap [A]),(\#r,[] \multimap [B])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A \par B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \par B\)</span></p></td>
 <td><p>Par (“unless”, classical or, parallel product, dual of tensor)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#s,[] \multimap [A,B])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#s,[] \multimap [A,B])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(A^{\par n}\)</span></p></td>
 <td></td>
 <td><p>Par power</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#s,[] \multimap \overbrace{[A,\ldots,A]}^n)]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#s,[] \multimap \overbrace{[A,\ldots,A]}^n)]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(A \to B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \multimap B\)</span></p></td>
 <td><p>Lollipop (implication, internal hom)</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#f,[A] \multimap [B])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#f,[A] \multimap [B])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(A \leftrightarrow B\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A \multimapboth B\)</span></p></td>
 <td><p>Equivalence</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#l,[A] \multimap [B]),(\#r,[B] \multimap [A])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#l,[A] \multimap [B]),(\#r,[B] \multimap [A])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\smash{\stackrel{-}{\neg}} A\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A^{\bot}\)</span></p></td>
 <td><p>Negative Negation</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#s,[A] \multimap [])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#s,[A] \multimap [])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\({↓}A\)</span></p></td>
 <td><p><span class="math notranslate nohighlight">\(A\)</span></p></td>
 <td><p>Down shift</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Pi [(\#s,[] \multimap [A])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^- [(\#s,[] \multimap [A])]\)</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -295,7 +295,7 @@
   &amp; \rule{\Gamma \vdash B, \Delta \quad \Theta, A \vdash \Lambda}{\Gamma, A \leftrightarrow B \vdash \Delta }{\leftrightarrow_{\leftarrow L}}
 \end{array}</div></section>
 <section id="programming-types">
-<h3>Programming types<a class="headerlink" href="#programming-types" title="Permalink to this heading"></a></h3>
+<h3>Programming types<a class="headerlink" href="#programming-types" title="Link to this heading"></a></h3>
 <p>We can also write some types common from programming:</p>
 <table class="docutils align-default">
 <thead>
@@ -307,59 +307,59 @@
 <tbody>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\text{Bool}\)</span></p></td>
 <td><p>Booleans</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#F,[]-[]),(\#T,[]-[])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#F,[]-[]),(\#T,[]-[])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\text{Int}\)</span></p></td>
 <td><p>32-bit integers</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\#{-2}^{31},[]-[]),\ldots,(\#0,[]-[]),\ldots,(\#2^{31}-1,[]-[])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\#{-2}^{31},[]-[]),\ldots,(\#0,[]-[]),\ldots,(\#2^{31}-1,[]-[])]\)</span></p></td>
 </tr>
 <tr class="row-even"><td><p><span class="math notranslate nohighlight">\(L_A\)</span></p></td>
 <td><p>Linked list of A</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\text{#nil},[]-[]),(\text{#cons},[A,L_A]-[])]\)</span></p></td>
 </tr>
 <tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(Arr_A\)</span></p></td>
 <td><p>Arbitrarily-sized tuple of A</p></td>
-<td><p><span class="math notranslate nohighlight">\(\Sigma [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(𝕁^+ [(\text{#0},[]-[]),(\text{#1},[A]-[]),(\text{#2},[A,A]-[]),\ldots]\)</span></p></td>
 </tr>
 </tbody>
 </table>
-<p>In general <span class="math notranslate nohighlight">\(\Sigma\)</span> can represent any algebraic data type.</p>
+<p>In general <span class="math notranslate nohighlight">\(𝕁^+\)</span> can represent any algebraic data type.</p>
 </section>
 </section>
 <section id="exponentials">
-<h2>Exponentials<a class="headerlink" href="#exponentials" title="Permalink to this heading"></a></h2>
+<h2>Exponentials<a class="headerlink" href="#exponentials" title="Link to this heading"></a></h2>
 <section id="promotion">
-<h3>Promotion<a class="headerlink" href="#promotion" title="Permalink to this heading"></a></h3>
+<h3>Promotion<a class="headerlink" href="#promotion" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \begin{array}{cc}
-  \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang}
+  \rule{\overrightarrow{\bang \Gamma_i } \vdash A, \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i } \vdash \bang A, \overrightarrow{\whim\Delta_i}}{\bang_R}
   &amp;
-  \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim}
+  \rule{\overrightarrow{\bang \Gamma_i } , A\vdash \overrightarrow{\whim\Delta_i} }{\overrightarrow{\bang \Gamma_i }, \whim A \vdash \overrightarrow{\whim\Delta_i}}{\whim_L}
 
 \end{array}</div></section>
 <section id="dereliction">
-<h3>Dereliction<a class="headerlink" href="#dereliction" title="Permalink to this heading"></a></h3>
+<h3>Dereliction<a class="headerlink" href="#dereliction" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \begin{array}{cc}
   \rule{\sk{\Gamma}, A \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang d}
 &amp; \rule{\sk{\Gamma} \vdash A, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim d}
 \end{array}</div></section>
 <section id="weakening">
-<h3>Weakening<a class="headerlink" href="#weakening" title="Permalink to this heading"></a></h3>
+<h3>Weakening<a class="headerlink" href="#weakening" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \begin{array}{cc}
     \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang w}
   &amp; \rule{\sk{\Gamma} \vdash \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim w}
   \end{array}</div></section>
 <section id="contraction">
-<h3>Contraction<a class="headerlink" href="#contraction" title="Permalink to this heading"></a></h3>
+<h3>Contraction<a class="headerlink" href="#contraction" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \begin{array}{cc}
     \rule{\sk{\Gamma}, \overrightarrow{\bang A, \bang A, \cdots} \vdash \sk{\Delta} }{\sk{\Gamma}, \bang A \vdash \sk{\Delta}}{\bang c_n}
   &amp; \rule{\sk{\Gamma} \vdash \overrightarrow{\whim A, \whim A, \cdots}, \sk{\Delta} }{\sk{\Gamma} \vdash \whim A, \sk{\Delta}}{\whim c_n}
 \end{array}</div></section>
 <section id="admissible-rules">
-<h3>Admissible rules<a class="headerlink" href="#admissible-rules" title="Permalink to this heading"></a></h3>
+<h3>Admissible rules<a class="headerlink" href="#admissible-rules" title="Link to this heading"></a></h3>
 <p>The following rules are derivable from the four rules above.</p>
 <p>Weak promotion, implied by promotion and dereliction:</p>
 <div class="math notranslate nohighlight">
@@ -385,27 +385,27 @@
 \end{array}</div></section>
 </section>
 <section id="structural-rules">
-<h2>Structural rules<a class="headerlink" href="#structural-rules" title="Permalink to this heading"></a></h2>
+<h2>Structural rules<a class="headerlink" href="#structural-rules" title="Link to this heading"></a></h2>
 <section id="exchange">
-<h3>Exchange<a class="headerlink" href="#exchange" title="Permalink to this heading"></a></h3>
+<h3>Exchange<a class="headerlink" href="#exchange" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \[\rule{\sk{\Gamma} \vdash \sk{\Delta}}{\sk{\sigma_L(\Gamma)} \vdash \sk{\sigma_R(\Delta)}}{\text{x}}\]</div>
 </section>
 <section id="cut">
-<h3>Cut<a class="headerlink" href="#cut" title="Permalink to this heading"></a></h3>
+<h3>Cut<a class="headerlink" href="#cut" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \[\rule{\sk{\Gamma} \vdash A, \sk{\Delta} \quad \sk{\Theta}, A \vdash \sk{\Lambda} }{\sk{\Gamma}, \sk{\Theta} \vdash \sk{\Delta}, \sk{\Lambda} }{\text{cut}}\]</div>
 </section>
 <section id="identity">
-<h3>Identity<a class="headerlink" href="#identity" title="Permalink to this heading"></a></h3>
+<h3>Identity<a class="headerlink" href="#identity" title="Link to this heading"></a></h3>
 <div class="math notranslate nohighlight">
 \[\rule{}{A \vdash A}{\text{id}}\]</div>
 </section>
 </section>
 <section id="higher-order-logic">
-<h2>Higher-order logic<a class="headerlink" href="#higher-order-logic" title="Permalink to this heading"></a></h2>
+<h2>Higher-order logic<a class="headerlink" href="#higher-order-logic" title="Link to this heading"></a></h2>
 <section id="predicates">
-<h3>Predicates<a class="headerlink" href="#predicates" title="Permalink to this heading"></a></h3>
+<h3>Predicates<a class="headerlink" href="#predicates" title="Link to this heading"></a></h3>
 <p>Terms consist of variables <span class="math notranslate nohighlight">\(x\)</span>, literal values <span class="math notranslate nohighlight">\(v\)</span>, and applications of terms to terms. Variables quantify over the universal set, smaller domains can be defined by the membership notation in <a class="reference internal" href="#set-theory"><span class="std std-ref">Set theory</span></a>.</p>
 <p>If the term is a predicate (set) then it may be used as an atomic formula. Such an atomic formula <span class="math notranslate nohighlight">\(t\)</span> must satisfy the identity rule:</p>
 <div class="math notranslate nohighlight">
@@ -413,7 +413,7 @@
 <p>Interpreted predicates may be defined using other rules so long as the identity rule is derivable and the rules are consistent.</p>
 </section>
 <section id="substitution">
-<h3>Substitution<a class="headerlink" href="#substitution" title="Permalink to this heading"></a></h3>
+<h3>Substitution<a class="headerlink" href="#substitution" title="Link to this heading"></a></h3>
 <p><span class="math notranslate nohighlight">\(A[\overrightarrow{x \mapsto t}]\)</span> stands for the proposition <span class="math notranslate nohighlight">\(A\)</span> where all free occurrences of the variables <span class="math notranslate nohighlight">\(\overrightarrow{x}\)</span> have been replaced by terms <span class="math notranslate nohighlight">\(\overrightarrow{t}\)</span> in the appropriate domains (and bound variables have been renamed to fresh ones when necessary).</p>
 <blockquote>
 <div><div class="math notranslate nohighlight">
@@ -422,8 +422,8 @@
 \end{array}</div></div></blockquote>
 </section>
 <section id="quantifiers">
-<h3>Quantifiers<a class="headerlink" href="#quantifiers" title="Permalink to this heading"></a></h3>
-<p>For these the variable <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>.</p>
+<h3>Quantifiers<a class="headerlink" href="#quantifiers" title="Link to this heading"></a></h3>
+<p>For these the variable <span class="math notranslate nohighlight">\(x\)</span> must have no free occurrence in <span class="math notranslate nohighlight">\(\Gamma\)</span> or <span class="math notranslate nohighlight">\(\Delta\)</span>. In code we simply refer to quantifiers <span class="math notranslate nohighlight">\(Q\)</span> and write <span class="math notranslate nohighlight">\(Q^+ = \forall, Q^- = \exists\)</span>.</p>
 <div class="math notranslate nohighlight">
  \begin{array}{cc}
     \rule{\Gamma \vdash A, \Delta}{\Gamma \vdash \forall x. A, \Delta}{\forall_R}
@@ -436,7 +436,7 @@
   \end{array}</div></section>
 </section>
 <section id="definitions">
-<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this heading"></a></h2>
+<h2>Definitions<a class="headerlink" href="#definitions" title="Link to this heading"></a></h2>
 <p>If we define some notation <span class="math notranslate nohighlight">\(A\defeq B\)</span>, then this means adding a pair of rules to our logic:</p>
 <div class="math notranslate nohighlight">
   \begin{array}{cc}
@@ -446,7 +446,7 @@
   \end{array}</div><p>The notation and rules are valid only if there is a finite proof of the identity sequent <span class="math notranslate nohighlight">\(B \vdash B\)</span>.</p>
 </section>
 <section id="infinite-proof-structures">
-<span id="infinite"></span><h2>Infinite proof structures<a class="headerlink" href="#infinite-proof-structures" title="Permalink to this heading"></a></h2>
+<span id="infinite"></span><h2>Infinite proof structures<a class="headerlink" href="#infinite-proof-structures" title="Link to this heading"></a></h2>
 <p>These have “use” and “def” rules (“def” is short for definition). The use is a “hole” that plugs in the derivation tree from the definition. The type of the use rule can performs a substitution on the free variables of the type of the assignment.</p>
 <div class="math notranslate nohighlight">
 \[\begin{array}{cc}
@@ -456,7 +456,7 @@
 \end{array}\]</div>
 </section>
 <section id="set-theory">
-<span id="id1"></span><h2>Set theory<a class="headerlink" href="#set-theory" title="Permalink to this heading"></a></h2>
+<span id="id1"></span><h2>Set theory<a class="headerlink" href="#set-theory" title="Link to this heading"></a></h2>
 <p>We define <span class="math notranslate nohighlight">\(t\in \{x\mid A\} \defeq A[x\mapsto t]\)</span>. Here the elements <span class="math notranslate nohighlight">\(t\)</span> of the sets are propositions; e.g. we can prove <span class="math notranslate nohighlight">\(\bot \in \{x\mid x \leftrightarrow \bot \}\)</span>. Usually the variables in set theory range over sets. Hence we introduce new variables <span class="math notranslate nohighlight">\(x^S\)</span> which range over sets. Since all sets <span class="math notranslate nohighlight">\(S\)</span> are of the form <span class="math notranslate nohighlight">\(\{x\mid X_S \}\)</span> these can be translated as follows:</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}x^S \defeq \{x\mid X_S \}\\\{x^S\mid X\} \defeq \{X_S \mid X\}\\\{x\mid X\} \in Y \defeq X \in Y\\\forall x^S. X \defeq \forall X. X\\\{x^S\mid X\} \subseteq \{x^S\mid Y\} \defeq X \to Y\end{aligned}\end{align} \]</div>
@@ -467,7 +467,7 @@
 \[ \begin{align}\begin{aligned}a \ocin B = \bang(a \in B)\\\left[ P(x) \vdash_{x\in A} Q(x) \right] = \left[ \bang(x\in A), P(x) \vdash Q(x) \right]\\\exists x\in A. P(x) = \exists x.(\bang(x \in A) \otimes P(x))\\\forall x\in A. P(x) = \forall x. (\bang(x\in A) \to P(x))\end{aligned}\end{align} \]</div>
 <p>We can prove the axiom schema of comprehension <span class="math notranslate nohighlight">\(\vdash \exists y. \forall x. x\in y \leftrightarrow \phi\)</span> for all formulas <span class="math notranslate nohighlight">\(\phi\)</span> with free variable <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <section id="equality">
-<h3>Equality<a class="headerlink" href="#equality" title="Permalink to this heading"></a></h3>
+<h3>Equality<a class="headerlink" href="#equality" title="Link to this heading"></a></h3>
 <p>Equality on sets is defined as follows:</p>
 <p><span class="math notranslate nohighlight">\(A=B \defeq \forall x. (x \in A \leftrightarrow x \in B)\)</span>.</p>
 <p>We can easily prove that this equality is an equivalence relation:</p>

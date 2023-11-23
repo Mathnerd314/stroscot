@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -96,10 +96,10 @@
            <div itemprop="articleBody">
              
   <section id="style-guide">
-<h1>Style guide<a class="headerlink" href="#style-guide" title="Permalink to this heading"></a></h1>
+<h1>Style guide<a class="headerlink" href="#style-guide" title="Link to this heading"></a></h1>
 <p>This guide outlines general conventions for Stroscot code. It’s an evolving document though so nothing is final. Think of it as the boot camp where the drill sergeant is yelling in your ears to scare you straight, rather than a description of fact.</p>
 <section id="naming-guidelines">
-<h2>Naming Guidelines<a class="headerlink" href="#naming-guidelines" title="Permalink to this heading"></a></h2>
+<h2>Naming Guidelines<a class="headerlink" href="#naming-guidelines" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Filenames should be meaningful and end in <code class="docutils literal notranslate"><span class="pre">.sct</span></code>. Use all-lowercase ASCII names, with words separated by underscores or dashes.</p></li>
 <li><p>Type names and constructor names should be uppercase CamelCase, like Haskell.</p></li>
@@ -113,7 +113,7 @@
 <p>Conversion into CamelCase follows the <a class="reference external" href="https://google.github.io/styleguide/javaguide.html#s5.3-camel-case">Google Java styleguide algorithm</a>. First substitute accented characters such as ü -&gt; ue and remove any apostrophes. Split into word-parts on spaces, hyphens, and camel-case (Ad-Words, but not i-OS). Lowercase everything (including acronyms), then uppercase the first letter of each word part. Join together; it is in upper CamelCase. Lowercase the first letter to get lowercase camelCase.</p>
 </section>
 <section id="comment-guidelines">
-<h2>Comment Guidelines<a class="headerlink" href="#comment-guidelines" title="Permalink to this heading"></a></h2>
+<h2>Comment Guidelines<a class="headerlink" href="#comment-guidelines" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Use proper English sentences with appropriate punctuation and case.</p></li>
 <li><p>TODO to mark todo comments</p></li>
@@ -124,7 +124,7 @@
 </ul>
 </section>
 <section id="spacing-guidelines">
-<h2>Spacing Guidelines<a class="headerlink" href="#spacing-guidelines" title="Permalink to this heading"></a></h2>
+<h2>Spacing Guidelines<a class="headerlink" href="#spacing-guidelines" title="Link to this heading"></a></h2>
 <p>Whatever the auto-formatter gives is probably right. Guidelines for the auto-formatter:</p>
 <ul class="simple">
 <li><p>All files should have a newline character at the end of the file. (Git)</p></li>
@@ -180,7 +180,7 @@
 </ul>
 </section>
 <section id="type-guidelines">
-<h2>Type Guidelines<a class="headerlink" href="#type-guidelines" title="Permalink to this heading"></a></h2>
+<h2>Type Guidelines<a class="headerlink" href="#type-guidelines" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Use the largest types possible for type dispatch restrictions. If the restrictions were removed, the function should not work as intended on value outside the type. If you want to document that a generic function works on some “known” types you should not restrict the function at all - instead, leave the domain unrestricted and write separate type signature assertions.</p></li>
 <li><p>If you implicitly depend on values, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">=</span> <span class="pre">foldl</span> <span class="pre">(+)</span> <span class="pre">0</span></code>, then write those in the signature, like <code class="docutils literal notranslate"><span class="pre">sum</span> <span class="pre">:</span> <span class="pre">{</span> <span class="pre">(+)</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a,</span> <span class="pre">0</span> <span class="pre">:</span> <span class="pre">a</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">[a]</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>.</p></li>
@@ -191,7 +191,7 @@
 </ul>
 </section>
 <section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
 <p>The standard library adheres to this general order as much as possible when calling functions to give a more consistent function call style:</p>
 <ul class="simple">
 <li><p>Output type: For a return-type-overloaded function such as <code class="docutils literal notranslate"><span class="pre">read</span></code> or <code class="docutils literal notranslate"><span class="pre">convert</span></code>, the output type must be specified. This comes early so that the function can be read as a single operation <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">Float</span></code> or <code class="docutils literal notranslate"><span class="pre">convert(To)Float</span></code>.</p></li>
@@ -232,7 +232,7 @@
 <p>Ideally, the function name, labels, and signature(s) should be enough to convey the function’s meaning and usage, because this information is easily available with the “all defs” page in the documentation index or at the REPL with <code class="docutils literal notranslate"><span class="pre">:browse</span></code>, whereas reading the full function documentation is more involved.</p>
 </section>
 <section id="scoping">
-<h2>Scoping<a class="headerlink" href="#scoping" title="Permalink to this heading"></a></h2>
+<h2>Scoping<a class="headerlink" href="#scoping" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Generally naming functions is preferable as anonymous functions are implicitly converted to named functions anyways.</p></li>
 <li><p>For clarity, imports should bring only the module into scope, rather than its members, and one should write <code class="docutils literal notranslate"><span class="pre">module.function</span></code> every time. But this can get verbose so if it’s a common module with recognizable function names you can use member imports. Of course some modules such as CSV are intended to be used qualified and use vague names such as <code class="docutils literal notranslate"><span class="pre">CSV.read</span></code> so should never have their members imported directly.</p></li>
@@ -244,14 +244,14 @@
 </ul>
 </section>
 <section id="structuring">
-<h2>Structuring<a class="headerlink" href="#structuring" title="Permalink to this heading"></a></h2>
+<h2>Structuring<a class="headerlink" href="#structuring" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Only create an intermediate variable if it has a meaningful name. But if an expression has a meaningful name, then put it in a variable.</p></li>
 <li><p>Refactor a case list with 15 or more cases to use a table or loop. <a class="reference external" href="https://github.com/MinBZK/woo-besluit-broncode-digid-app/blob/master/Source/DigiD.iOS/Services/NFCService.cs#L182">10 percentage cases</a> is pushing it but probably OK, but 100 Fizzbuzz cases written out is definitely a maintenance burden.</p></li>
 </ul>
 </section>
 <section id="sources">
-<h2>Sources<a class="headerlink" href="#sources" title="Permalink to this heading"></a></h2>
+<h2>Sources<a class="headerlink" href="#sources" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="http://reasonmlhub.com/exploring-reasonml/ch_functions.html">Exploring ReasonML</a></p></li>
 <li><p><a class="reference external" href="https://github.com/jrevels/YASGuide#other-syntax-guidelines">Yet Another Style Guide For Julia</a></p></li>

@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -85,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#methods">Methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#action">Action</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#caches">Caches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
@@ -95,12 +98,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -133,10 +138,10 @@
            <div itemprop="articleBody">
              
   <section id="profiling">
-<h1>Profiling<a class="headerlink" href="#profiling" title="Permalink to this heading"></a></h1>
+<h1>Profiling<a class="headerlink" href="#profiling" title="Link to this heading"></a></h1>
 <p>The goal of the profiler is to measure performance, and allow making optimization decisions based on that.</p>
 <section id="resources">
-<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h2>
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
 <p>We model a computer using a “functional block diagram”, i.e. blocks and buses. The level of detail varies depending on the application. Buses typically have sufficient capacity for all data so can be trivialized, but for CPU internals, they are a bottleneck, so are left in. Similarly PSU and cooling are not usually a problem, but I left them in.</p>
 <p>Blocks:</p>
 <ul class="simple">
@@ -214,7 +219,7 @@
 </div>
 </section>
 <section id="metrics">
-<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h2>
+<h2>Metrics<a class="headerlink" href="#metrics" title="Link to this heading"></a></h2>
 <p>Key metric types:</p>
 <ul class="simple">
 <li><p>throughput: operations per second or similar. E.g. for disks, IOPS is reads and writes per second.</p></li>
@@ -227,11 +232,11 @@
 <p>Saturation is the catch-all metric, you can use it for almost all resources and anything at or over 100% is definitely a bottleneck. Of course it is also the hardest to measure. And exceptions are also important, and don’t really have a saturation point, just typical ranges.</p>
 </section>
 <section id="statistics">
-<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading"></a></h2>
+<h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
 <p>Throughput / utilization / saturation are all instantaneous measurements. Practically they cannot be recorded every cycle, so instead reporting 1-, 5-, and 15-minute averages is typical. But this can disguise short spikes; use better statistics. Also, for CPU utilization, if it’s just one core in use, but it hops around, the utilization can be misleading. The balance of CPU utilization among all cores must be considered.</p>
 </section>
 <section id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>counters: most simply, number of times an operation was performed. They start at 0 and increment.</p></li>
 <li><p>event log: a list of timestamps. Can just count the events, but also you can calculate average rate, spikes, and other statistics.</p></li>
@@ -253,7 +258,7 @@
 <p>Intel VTune, perf, and various profilers available for different programming languages.</p>
 </section>
 <section id="action">
-<h2>Action<a class="headerlink" href="#action" title="Permalink to this heading"></a></h2>
+<h2>Action<a class="headerlink" href="#action" title="Link to this heading"></a></h2>
 <p>Once specific “hot paths” for optimization have been identified, the general strategy is to identify inefficiencies, such as:</p>
 <ul class="simple">
 <li><p>unnecessary operations - remove them</p></li>
@@ -270,10 +275,48 @@ many page misses in rest of program</p>
 </div></blockquote>
 </section>
 <section id="caches">
-<h2>Caches<a class="headerlink" href="#caches" title="Permalink to this heading"></a></h2>
+<h2>Caches<a class="headerlink" href="#caches" title="Link to this heading"></a></h2>
 <p>For caches there are a few basic metrics: putting stuff in the cache, taking it out, and the miss rate. There are many caches: OS page cache, cpu cache, BTB, TLB, GPU texture cache, disk cache, JITted code cache. It is important to attribute miss costs properly, e.g. one piece of “cold” code might put a lot of stuff in and then cause misses in the important “hot” code.</p>
 <p>For example, using XXHash made an individual function faster, but in a larger program it was slower than using Python’s native hash because Python’s hash was already in L1 instruction cache. Similarly, calling a function 100 times, then pass the results to another function, etc. for a total of 8 functions and 800 calls, is better than interleaving the function calls and doing the 8 functions on one item, then on another item, and so on.</p>
 <p>Hyperthreading</p>
+</section>
+<section id="benchmarking">
+<h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
+<p>A good suite of benchmarks include microbenchmarks like optcarrot, small nontrivial programs like the language shootout tasks, and large applications like a production webserver. All of them are useful for detecting regressions.</p>
+<p>What is the ideal length of a benchmark? <span id="id1">[]</span> measured programs of different runtimes - since the tasks were very similar, it is reasonable to try to fit standard deviation / runtime as a function of runtime. Going through the equations in Google Sheets and EMPv5 data (Table XIX), the linear law has R^2=0.84, overestimates all deviations up to 1000s, and barely fits the few long runs. The quadratic has R^2 = 0.931 and fits the data past 4s pretty well but again overestimates the 1,2,4s point. Also it makes little sense as a function, why would the deviation decrease past 15,000 s? The exponential and log functions are terrible. Finally, the power law has R^2 = 0.861. On a log-log graph it has a decent pattern of over/undershoot - it goes exactly through the 1s point, underestimates the next few, over estimates the next few, and finally underestimates the least few. The graph is mostly flat from 10s to 512s, so perhaps the first few results were unusually good and the last were affected by undiscovered sources of large errors. Plotting max-min as a function of duration (again log-log) we see this is the case - 1s is unusually low, then there is a mostly linear patch up to 1000s, then 2000-16,000s jumps sharply upwards. Again the power series is the best fit, R=0.817, by a long shot, with the next highest being the quadratic with R^2=0.572. Limiting just to 4s-1024s the fit is improved and the residuals look random for a power fit to max-min. For the standard deviation, excluding the outliers, a linear fit actually looks better than a power law. So we conclude that an ideal benchmark is 4s-1024s. And practically, shorter is better, so aiming for 4-8s is probably best. In particular the standard deviation is 23.634 t^0.505 without noise mitigation and 0.589241 t^0.342 with noise mitigation, where t is the runtime in seconds.</p>
+<p>There are several metrics:</p>
+<ul class="simple">
+<li><p>clock cycles, as measured by the rdtsc machine instruction or logic analyzer</p></li>
+<li><p>wall clock time, as measured by stopwatch, the time command, or Java’s System.currentTimeMillis()</p></li>
+<li><p>machine code size</p></li>
+<li><p>one of the above for a specific program part, such as a method (as measured by profiling or sampling)</p></li>
+</ul>
+<p>Different methods have different resolution (reporting capability), granularity (division of report into program parts), precision (variation betwen runs), and accuracy (closeness to “actual value”, a difficult concept to define in benchmarking).</p>
+<p>Many variables affect precision and add noise. Often, we can control the variable to a fixed value, and remove its variance. But this may mean our results are unrealistic; for example frequency scaling is not usually turned off. A more clever approach is to measure the variable or proxies for the variable, and characterize the runtime as a function of the variable. This does generally require more benchmarking runs in order to gather the necessary statistical power. And even with many variables measured or controlled, there will still be noise. Still, it brings up what we want to measure: average? minimum? some theoretical ideal?</p>
+<p>In the initial stages of optimization, no statistical profiling is needed as 10%+ speedups are obvious. But as optimizations become more complex, speedups become smaller and powerful statistical techniques are of great help. Generally the task must be at least 5-10x larger than the measurement precision to get useful results without statistics. Thus, if the task is 10 msec, then the measurement technique must have better than 1 to 2 msec precision. This is only a rule of thumb; more precision is always better, but less precise measurements can be compensated for by doing more of them and analyzing statistics.</p>
+<p>Variables include:</p>
+<ul class="simple">
+<li><p>CPU frequency and voltage scaling (proxy: performance counters <span id="id2">[]</span>)</p></li>
+<li><p>execution of other programs/daemons (load)</p></li>
+<li><p>CPU affinity</p></li>
+<li><p>OS version</p></li>
+<li><p>CPU temperature</p></li>
+<li><p>filesystem cache, swap usage</p></li>
+<li><p>processor-specific optimizations</p></li>
+<li><p>Environment block contents. It contains strings which are generally consistent on one system but vary across systems, such as the username. It can lead to certain locations being aligned or misaligned, causing significant variations at run-time. It is mainly the size of the env block that matters.</p></li>
+<li><p>ASLR - can be disabled globally or per-process basis with <code class="docutils literal notranslate"><span class="pre">setarch</span> <span class="pre">-R</span></code>. But e.g. command-line arguments affect memory layout even when ASLR is disabled. Also the seed cannot be controlled. Most people run with ASLR enabled.</p></li>
+<li><p>stabilizer - this randomizes memory layout, allowing the measurement of a layout-independent performance. Of course, if one is optimizing the memory layout then randomization is counterproductive.</p></li>
+<li><p><a class="reference external" href="https://github.com/andreas-abel/nanoBench">nanoBench</a> - this has a kernel module to allow reading hardware performance counters for microbenchmarks without incurring much overhead</p></li>
+<li><p><a class="reference external" href="https://github.com/sosy-lab/benchexec">benchExec</a> - this is very similar to the tool I remember, but focused on limiting resources rather than getting precise measurements</p></li>
+<li><p><a class="reference external" href="https://github.com/sharkdp/hyperfine">hyperfine</a> - this does some basic warmup and statistics, useful as a baseline for the bare minimum of Benchmarking</p></li>
+<li><p><a class="reference external" href="https://github.com/parttimenerd/temci">temci</a> sets up an environment</p></li>
+</ul>
+<p>profiling:</p>
+<ul class="simple">
+<li><p>generate approximate profile of new/modified code, guessing using heuristics</p></li>
+<li><p>cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions</p></li>
+<li><p>AutoFDO profile <a class="reference external" href="https://perf.wiki.kernel.org/">https://perf.wiki.kernel.org/</a></p></li>
+</ul>
 </section>
 </section>
 

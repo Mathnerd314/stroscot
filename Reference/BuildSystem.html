@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -117,42 +117,42 @@
            <div itemprop="articleBody">
              
   <section id="build-system">
-<h1>Build system<a class="headerlink" href="#build-system" title="Permalink to this heading"></a></h1>
+<h1>Build system<a class="headerlink" href="#build-system" title="Link to this heading"></a></h1>
 <p>Stroscot’s build system is called “Cot”.</p>
 <section id="tasks">
-<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this heading"></a></h2>
+<h2>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h2>
 <p>Cot structures the build into units of computation called tasks. Tasks are the smallest unit of execution addressable by the build system and constrain the amount of re-use that an incremental build can achieve. A task reads and writes shared state and then finishes with a synchronization operation. Synchronization operations enforce control dependencies and structure the flow of time in the program. Usually one task maps to one system command, but there may also be no-op tasks used for structuring the build via synchronization operations, or multiple commands may be run from one task if the intermediate state does not need to be cached.</p>
 <p>Each task is required to have a name, which can be any sequence of bytes. Any naming scheme may be used, but there is a distinguished initial task named “Start”. Each task only runs once during the build.</p>
 </section>
 <section id="scheduling">
-<h2>Scheduling<a class="headerlink" href="#scheduling" title="Permalink to this heading"></a></h2>
+<h2>Scheduling<a class="headerlink" href="#scheduling" title="Link to this heading"></a></h2>
 <p>Cot can execute several tasks at once. This is implemented using a resource system; by default each task consumes one “CPU” resource and there are as many CPU resources as there are physical processors. But you can specify the number of CPUs consumed and also define other resources - in general a task runs with a multiset of resources.</p>
 <p>Each task also has a priority (an integer) - higher priorities run first. Ties are broken by adjoining the priority with a random number and an incrementing ID.</p>
 </section>
 <section id="keys">
-<h2>Keys<a class="headerlink" href="#keys" title="Permalink to this heading"></a></h2>
+<h2>Keys<a class="headerlink" href="#keys" title="Link to this heading"></a></h2>
 <p>Cot provides types of keys.</p>
 <section id="wanted">
-<h3>Wanted<a class="headerlink" href="#wanted" title="Permalink to this heading"></a></h3>
+<h3>Wanted<a class="headerlink" href="#wanted" title="Link to this heading"></a></h3>
 <p>Sometimes we want to always do an action. In such a case we can use the wanted key - the task will run on every build. We say the task is a wanted task.</p>
 <p>Wanted tasks can be used for input - e.g. if you need the time the build was made, you can record it in a wanted task. This marks where the build is not reproducible.</p>
 <p>Another use is for marking the final outputs. In a build that exactly matches a cached build, the end results aren’t used by anything, so by default Cot won’t realize them. To fix this, at the end of the build process you should run wanted tasks that read in all the end products. Cot will then ensure that all the wanted outputs are up-to-date and available for use. From a package system viewpoint, these sorts of wanted tasks can be thought of as defining packages.</p>
 </section>
 <section id="dirty-bit">
-<h3>Dirty bit<a class="headerlink" href="#dirty-bit" title="Permalink to this heading"></a></h3>
+<h3>Dirty bit<a class="headerlink" href="#dirty-bit" title="Link to this heading"></a></h3>
 <p>The idea of a dirty bit is that the key is either dirty or clean. At the start of each build/rebuild the key is clean. If a task executes and writes the key, the key becomes dirty. But the key does not become dirty if the task is replayed. A task that reads a dirty key must execute. But a clean key does not force a rerun.</p>
 <p>A dirty bit doesn’t implement correct incremental rebuilds. But it doesn’t require any storage, just a little bit of memory during the build, so it can be useful for interactive systems.</p>
 </section>
 <section id="in-memory">
-<h3>In-memory<a class="headerlink" href="#in-memory" title="Permalink to this heading"></a></h3>
+<h3>In-memory<a class="headerlink" href="#in-memory" title="Link to this heading"></a></h3>
 <p>In-memory keys store the whole value in the database for every read and write. They are useful for small values such as timestamps and hashes.</p>
 </section>
 <section id="hashed">
-<h3>Hashed<a class="headerlink" href="#hashed" title="Permalink to this heading"></a></h3>
+<h3>Hashed<a class="headerlink" href="#hashed" title="Link to this heading"></a></h3>
 <p>Hashed keys are similar to in-memory keys but intern/hash their value in a separate table, so you can use larger strings without worrying about duplication.</p>
 </section>
 <section id="files">
-<h3>Files<a class="headerlink" href="#files" title="Permalink to this heading"></a></h3>
+<h3>Files<a class="headerlink" href="#files" title="Link to this heading"></a></h3>
 <p>Files store a proxy of the contents for each read and write. The read proxies and write proxies don’t necessarily have to match in format. Each read proxy should match the previous write proxy, if there aren’t any new file writes.</p>
 <dl class="simple">
 <dt>version number/custom detector</dt><dd><p>For toolchains in small projects, the version number from running <code class="docutils literal notranslate"><span class="pre">gcc</span> <span class="pre">-V</span></code> etc. is often sufficient. Although modtime is more robust, it’s worth listing this as an example of a custom file modification detector.</p>
@@ -177,7 +177,7 @@
 <li><p>modtime-then-watcher-then-digest, to get the fastest file tracking and fewest rebuilds</p></li>
 </ul>
 <section id="symlinks">
-<h4>Symlinks<a class="headerlink" href="#symlinks" title="Permalink to this heading"></a></h4>
+<h4>Symlinks<a class="headerlink" href="#symlinks" title="Link to this heading"></a></h4>
 <dl class="option-list">
 <dt><kbd><span class="option">-L</span>, <span class="option">--check-symlink-times</span></kbd></dt>
 <dd><p>On systems that support symbolic links, store and check the timestamps on any symbolic links in addition to the timestamp on the file referenced by those links.</p>
@@ -185,7 +185,7 @@
 </dl>
 </section>
 <section id="access-tracing">
-<h4>Access Tracing<a class="headerlink" href="#access-tracing" title="Permalink to this heading"></a></h4>
+<h4>Access Tracing<a class="headerlink" href="#access-tracing" title="Link to this heading"></a></h4>
 <p>Access tracing can verify or replace manually specified dependencies. There are various tracing methods:</p>
 <ul class="simple">
 <li><p>library preloading with fsatrace: fails on static linking, Go programs, and Mac system binaries</p></li>
@@ -196,7 +196,7 @@
 </section>
 </section>
 <section id="network">
-<h3>Network<a class="headerlink" href="#network" title="Permalink to this heading"></a></h3>
+<h3>Network<a class="headerlink" href="#network" title="Link to this heading"></a></h3>
 <p>Often we wish to fetch data from over the network. There are a few common protocols:</p>
 <ul class="simple">
 <li><p>HTTP downloads: we can use wget, curl, aria2, or a custom library. The <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching">caching headers</a> are important for re-using old downloads.</p></li>
@@ -208,11 +208,11 @@
 </section>
 </section>
 <section id="options">
-<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h2>
 <p>The remaining documentation lists options for the build system. If there is more than one option or options conflict, the last one is effective.</p>
 </section>
 <section id="metadata">
-<h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this heading"></a></h2>
+<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>-m, –metadata $files</dt><dd><p>The directory used for storing metadata files. All metadata files will be named <code class="docutils literal notranslate"><span class="pre">$files/$filename</span></code>. If the <code class="docutils literal notranslate"><span class="pre">$files</span></code> directory does not exist it will be created. If set to <code class="docutils literal notranslate"><span class="pre">Nothing</span></code> then no metadata files are read or written (clean build mode). Defaults to <code class="docutils literal notranslate"><span class="pre">.cot</span></code>.</p>
 </dd>
@@ -224,7 +224,7 @@
 </dl>
 </section>
 <section id="commands">
-<h2>Commands<a class="headerlink" href="#commands" title="Permalink to this heading"></a></h2>
+<h2>Commands<a class="headerlink" href="#commands" title="Link to this heading"></a></h2>
 <p>These options control the behavior of “commands”, new processes spawned by the build system.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">-C <var>dir</var></span>, <span class="option">--directory=<var>dir</var></span></kbd></dt>
@@ -245,7 +245,7 @@
 </dl>
 </section>
 <section id="cleaning">
-<h2>Cleaning<a class="headerlink" href="#cleaning" title="Permalink to this heading"></a></h2>
+<h2>Cleaning<a class="headerlink" href="#cleaning" title="Link to this heading"></a></h2>
 <dl class="option-list">
 <dt><kbd><span class="option">-c</span>, <span class="option">--clean</span>, <span class="option">--remove</span></kbd></dt>
 <dd><p>Clean up by removing the selected targets</p>
@@ -256,7 +256,7 @@
 </dl>
 </section>
 <section id="cached-build">
-<h2>Cached build<a class="headerlink" href="#cached-build" title="Permalink to this heading"></a></h2>
+<h2>Cached build<a class="headerlink" href="#cached-build" title="Link to this heading"></a></h2>
 <p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id115" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache. The cache system can also greatly speed up subsequent builds if not many files are changed.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">--cache-enable <var>PATH</var></span></kbd></dt>
@@ -289,7 +289,7 @@
 </dl>
 </section>
 <section id="remote-builds">
-<h2>Remote Builds<a class="headerlink" href="#remote-builds" title="Permalink to this heading"></a></h2>
+<h2>Remote Builds<a class="headerlink" href="#remote-builds" title="Link to this heading"></a></h2>
 <p>A remote build consists of a local build setup forwarding task invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.</p>
 <dl class="simple">
 <dt>cot ping-builders</dt><dd><p>Test whether connecting to each remote instance works. To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Cot installed. If you get the error <code class="docutils literal notranslate"><span class="pre">cot:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> then you need to ensure that the PATH of non-interactive login shells contains Cot.</p>
@@ -311,7 +311,7 @@
 <p>To build only on remote builders and disable building on the local machine, you can use the option –max-jobs 0.</p>
 </section>
 <section id="parallel-execution">
-<h2>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Permalink to this heading"></a></h2>
+<h2>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Link to this heading"></a></h2>
 <dl class="option-list">
 <dt><kbd><span class="option">--random</span>, <span class="option">--random=<var>SEED</var></span>, <span class="option">--deterministic</span></kbd></dt>
 <dd><p>Build dependencies in a random order (the default) or a deterministic order. This is useful to prevent various scheduling slowdowns in the build, and can reduce contention in a build farm.</p>
@@ -325,7 +325,7 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">det
 <code class="docutils literal notranslate"><span class="pre">load</span></code> represents the rounded system load on startup so <code class="docutils literal notranslate"><span class="pre">detect-load</span></code> would avoid conflicting with other tasks on the system. <code class="docutils literal notranslate"><span class="pre">infinity</span></code> means no limit. Defaults to <code class="docutils literal notranslate"><span class="pre">detect</span></code>.</p>
 </div></blockquote>
 <section id="querying-the-build-graph">
-<h3>Querying the build graph<a class="headerlink" href="#querying-the-build-graph" title="Permalink to this heading"></a></h3>
+<h3>Querying the build graph<a class="headerlink" href="#querying-the-build-graph" title="Link to this heading"></a></h3>
 <p>The build graph defines how to tell whether a task needs recompilation, and the entry point to update the task. But running the task is not always what you want; sometimes you only want to know what would be run.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">-n</span>, <span class="option">--dry-run</span></kbd></dt>
@@ -337,7 +337,7 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">det
 </dl>
 </section>
 <section id="overriding-recompilation">
-<h3>Overriding recompilation<a class="headerlink" href="#overriding-recompilation" title="Permalink to this heading"></a></h3>
+<h3>Overriding recompilation<a class="headerlink" href="#overriding-recompilation" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>-W, –what-if, –new-file, –assume-new, -B, –always-make, –rebuild=now, –rebuild=force [TASKS/KEYS]</dt><dd><p>Rebuild TASKS and tasks depending on KEYS regardless of input state or previous runs. Useful if the build system missed a dependency. May cause other tasks to execute, if the task output is different.</p>
 </dd>
@@ -355,7 +355,7 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">det
 </dl>
 </section>
 <section id="error-handling">
-<h3>Error handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h3>
+<h3>Error handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
 <dl class="option-list">
 <dt><kbd><span class="option">-k</span>, <span class="option">--keep-going</span>, <span class="option">-k</span>, <span class="option">--staunch <var>N</var></span></kbd></dt>
 <dd><p>Continue as much as possible, until N tasks fail (default=1, infinity is an option). The task that failed, and those that depend on it, will not be executed, but other tasks can continue. The build may finish early due to lack of tasks. Once N tasks fail, all tasks will be cancelled by sending cancel messages - they can mask the message to finish a command, or kill the command.</p>

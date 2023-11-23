@@ -14,11 +14,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Reference/index.html">Language Reference</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Aspects.html">Aspects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Assembly.html">Assembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Checklist.html">Checklist</a></li>
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Intrinsics.html">Intrinsics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Learning.html">Learning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
@@ -75,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Meta.html">Meta</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parsing.html">Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Posets.html">Posets</a></li>
@@ -94,12 +96,14 @@
 <li class="toctree-l2"><a class="reference internal" href="Sets.html">Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Time.html">Time API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tools.html">Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Types.html">Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Verification.html">Verification</a></li>
 </ul>
 </li>
@@ -132,13 +136,13 @@
            <div itemprop="articleBody">
              
   <section id="exemplary-programs">
-<h1>Exemplary programs<a class="headerlink" href="#exemplary-programs" title="Permalink to this heading"></a></h1>
-<p>A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged, but there is also a “halo effect” of “I like program X, therefore I like programming language L that X is written in”. Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.</p>
+<h1>Exemplary programs<a class="headerlink" href="#exemplary-programs" title="Link to this heading"></a></h1>
+<p>A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged - unit tests don’t work nearly as well as real applications. Such programs also act as a showcase for your language, making it easier for potential users to develop an understanding of what an average project in your language might look like. There is also a “halo effect” of “I like program X, therefore I like programming language L that X is written in”. Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.</p>
 <ul class="simple">
 <li><p>Fibonacci: The Best Benchmark Ever. Every new language announce uses it. Bonus points if recursive is faster than iterative.</p></li>
 </ul>
 <section id="social-network">
-<h2>Social network<a class="headerlink" href="#social-network" title="Permalink to this heading"></a></h2>
+<h2>Social network<a class="headerlink" href="#social-network" title="Link to this heading"></a></h2>
 <p>A social network is a large program for any web development / app development framework to cut its teeth on. For example, the Hack programming language was closely associated with Facebook.</p>
 <p>Basic features (a la Reddit clone)
 * creating a post
@@ -151,7 +155,7 @@
 <p>As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.</p>
 </section>
 <section id="high-performance">
-<h2>High performance<a class="headerlink" href="#high-performance" title="Permalink to this heading"></a></h2>
+<h2>High performance<a class="headerlink" href="#high-performance" title="Link to this heading"></a></h2>
 <p>High-performance programming in a systems programming language aims to get the most out of hardware. It tackles large problems on (relatively) slow hardware, such as wind tunnel simulations. Small efficiencies add up.</p>
 <p>Necessities:
 * ahead-of-time compilation to machine code (bare metal)
@@ -166,7 +170,7 @@
 * standard, cross-platform way to build programs, run tests and add dependencies.</p>
 </section>
 <section id="server">
-<h2>Server<a class="headerlink" href="#server" title="Permalink to this heading"></a></h2>
+<h2>Server<a class="headerlink" href="#server" title="Link to this heading"></a></h2>
 <p>A benchmark that people seem to pay attention to is network performance, writing web servers to handle as many clients as possible simultaneously.</p>
 <p>Choices:
 blocking I/O and one client per OS thread (read/write) - requires stack for each thread, memory exhaustion
@@ -180,11 +184,11 @@ Bring the TCP stack into userspace - netmap, Sandstorm
 Windows UMS - one thread can switch execution to another without stopping (discussed <a class="reference external" href="https://www.youtube.com/watch?v=KXuZi9aeGTw">here</a>).</p>
 </section>
 <section id="cdcl-prolog">
-<h2>CDCL Prolog<a class="headerlink" href="#cdcl-prolog" title="Permalink to this heading"></a></h2>
+<h2>CDCL Prolog<a class="headerlink" href="#cdcl-prolog" title="Link to this heading"></a></h2>
 <p>Just a fun experiment, what would Prolog look like if you replaced its backtracking SLD resolution algorithm with the algorithm from a modern SAT solver? CDCL (Conflict-driven clause learning) is the newest and fastest algorithm and seems like the one to use.</p>
 </section>
 <section id="other-ideas">
-<h2>Other ideas<a class="headerlink" href="#other-ideas" title="Permalink to this heading"></a></h2>
+<h2>Other ideas<a class="headerlink" href="#other-ideas" title="Link to this heading"></a></h2>
 <p>Trading engine (Stock, options, cryptocurrency…)
 Game engine (based on O3DE, Godot, or Unreal)
 UI toolkit
