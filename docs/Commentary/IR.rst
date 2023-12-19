@@ -105,11 +105,29 @@ CSE
 
 Common subexpression "elimination" is actually identifying identical expressions in the IR and giving them a shared representation in an IR graph. It is related to graph reduction, which per :cite:`balabonskiUnifiedApproachFully2011`, can be characterized as giving each term in the unshared IR a label, and using an implementation such that all terms with the same label are represented as a single object (node) and reduced as a unit.  The specific technique to identify duplicate expressions is "hash-consing". Hash-consing can be applied incrementally, so that CSE can be applied continuosly as other transformations are applied. One issue is merging alpha-equivalent expressions, :cite:`maziarzHashingModuloAlphaEquivalence2021`, which can be dealt with by encoding variable backedges as paths through a spanning tree. :cite:`mauborgneRepresentationSetsTrees1999` gives an algorithm identifying sharable components in cyclic graphs, useful for recursive structures.
 
-As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies the Levy-labelling of terms with maximal sharing. More formally, there are three ways to define the equivalence relation of optimal reduction. The first is Levy labelling - take an initial term with unique atomic labels for every subterm, perform reductions according to a special label-generation rule, then observe which labels are equivalent in the result. The second is extraction, which maps a redex and its history to its origin. The third is the zig-zig relation, the smallest equivalence relation containing the "copy of" relation, based purely on reduction history. All of these relations are equivalent on redexes. But to make the semantics as a reduction graph tractable, all of these are defined with respect to an initial lambda term. For compile-time usage though, we would like the maximal equivalence - a "hash consing" algorithm which takes an unlabelled term and produces the labelling with maximal sharing. In the zig-zag relation, we would like to equate all redexes that can be produced by copying from any initial term, not
+Optimal CSE
+-----------
 
-The reduction ``(\x. E[x]) e --> E[e]`` shows that it will share all identical expressions, just as CSE with graph reduction. But it will also share an expression and its reduction, hence computing the labelling is at least of complexity :math:`\Sigma^0_1`. Let's avoid that by only considering terms pre-reduced to normal form. Are there any other equivalences besides normal CSE?
+As optimal reduction is also a term labelling, there should be an "optimal hash-consing" technique that identifies maximal sharing according to optimal reduction. It is a bit tricky to define this precisely because the Levy-labelling used in optimal reduction is defined with respect to an initial term. This makes it easy to compute equivalence given the reduction history, but also limits the potential equivalences to sharing inherent to the term's reduction semantics. For compile-time usage, we would like the maximal equivalence - a "hash consing" algorithm which takes an unlabelled term and produces the labelling with maximal sharing.
+
+Following Asperti, there are three ways to define the term equivalence relation of optimal reduction:
+
+* Levy labelling - take an initial term with unique atomic labels for every subterm, perform reductions according to a special label-generation rule. Then terms with the same labels are Levy-equivalent. The Levy labelling is the only method that labels all parts of the term, rather than just redexes. The reduction ``(\x. E[x]) e --> E[e]`` shows that optimal CSE will share all identical expressions, just as CSE with graph reduction.
+* Extraction - this summarizes each redex's history as a shorter reduction sequence related to its origin
+* Zig-zig relation - the smallest equivalence relation on redexes-with-history containing the "is copy of" relation (5.1.7, 5.1.8). The set of equivalent redexes is called the "family" of the redex.
+
+The zig-zag definition is perhaps the simplest definition, we would simply like to generalize the "is copy of" relation from redexes-with-history to redexes-without-history. We can define this is-copy-of as follows:
+
+A redex S is a copy of a redex R, written R <= S, if and only if
+there is a history sigma, a history rho, and a derivation t such that rho t is permutation equivalent to sigma (rho t equiv sigma) and S is a residual of R with respect to t (S in R/t)
 
 
+
+A redex S with history sigma is a copy of a redex R with history rho, written
+rho R <= sigma S, if and only if
+
+there is a derivation t such that rho t is permutation equivalent to sigma (rho t equiv sigma)
+and S is a residual of R with respect to t (S in R/t)
 
 
 
@@ -172,6 +190,10 @@ Expanding machine code instructions into unpack, mathematical operations, round/
 
 Sequent Core
 ============
+
+So, the Curry-Howard correspondence maps logic to programming. A logical system specifies well-formed proofs of propositions. These correspond to well-formed programs in a simple type system. By proving the logic sound and complete, we get an expressive core programming language. Whereas a natural deduction logic results in reduction patterns similar to the lambda-calculus (lambda-apply), sequent calculus divides the program into values and continuations. Reduction always takes place at a cut point with a value and a continuation, and can produce multiple or zero values/continuations. Continuations are exposed as first-class manipulable variables, similar to CPS, but CPS-based IRs have drawbacks (fixing the evaluation order to CBV) that sequent calculus-style IRs do not.
+Then there is the join point stuff, which also promises to be an alternative to CPS; I have read it but it just seems overly complex compared to sequents. Because now you have functions, and join points, and continuation parameters. There is a definition of join point in the paper but it is semantic (no obvious distinction between join points and functions), whereas the definition of continuations in sequent calculus is syntactic (minus rule as opposed to plus). As Kennedy says, "Better to start off with a language that makes continuations explicit."
+So that is the summary, sequents are nice from a logical perspective, they seem to be a nice alternative to CPS, and I like them better than join points.
 
 CPS does expose control flow as continuation values, but it has problems. First, per :cite:`downenSequentCalculusCompiler2016`, there is not one CPS transform, but rather a family, each CPS transform fixing an evaluation order. One must choose among call-by-value, call-by-name, or call-by-need. As a benefit, the evaluation order of the translation target doesn't matter, and strong beta-eta reduction of the CPS'd term is sound. In fact, per :cite:`okasakiCallbyneedContinuationpassingStyle1994`, all CPS translations are based on CBV, and call-by-name/call-by-need CPS translations can be decomposed as a conversion to CBV pass followed by a CBV CPS translation. IOdeally, the compiler should be able to freely choose the evaluation order, to trade-off the locality of innermost vs. the hypernormalization of outermost. Being unable to safely perform out-of-order reductions is a deal-breaker.
 

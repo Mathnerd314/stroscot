@@ -23,7 +23,7 @@ Learning content can be provided in different ways:
 
 * Communities and Forums (50% retention): Participating in chats, communities and forums can be a valuable learning resource. Engaging with peers, mentors, and experts allows you to ask questions, seek guidance, and learn from others' experiences. It's a great way to stay updated with the latest trends and best practices, if other resources are not sufficient.
 
-* Active learning (90%): Trying out the programming language and directly learning what works and what doesn't is the most effective method of learning, after the basics are covered.
+* Active learning (90%): Trying out the programming language and directly learning what works and what doesn't is the most effective method of learning. It is a bit hard to get started with the basics this way though.
 
 * In-person instruction (5%-90% depending on activity): Although most programming languages are self-taught (SO 2019: 85.5% of respondents taught themselves a new language, framework, or tool without taking a formal course), one's first programming language is usually learned in a course. If Stroscot indeed takes over the world then it will be people's first programming language (or second, after an introductory graphical language), and they will most likely learn it via in-person instruction.
 
@@ -118,3 +118,155 @@ Build a Project: Create a small project or contribute to an open-source project 
 Review and Refine: Regularly review what you've learned to reinforce your understanding. Focus on areas where you feel less confident and seek clarification on any challenging topics. Refine your code, optimize your solutions, and strive for best practices.
 
 Seek Feedback: As you progress, seek feedback from experienced programmers or peers who are familiar with the language. They can review your code, provide suggestions, and help you improve your coding style.
+
+
+
+if you're debugging something, you're trying to find out how to fix something, a lot of times it's because a lack of focus on details. And the linguistic part of your brain is just skipping over the details while you're coding. If you read something backwards, that turns off the linguistic parts of your brain, and then you interpret them literally, so then you spot errors, differences, deltas, things like that, they pop out at you.
+
+typing comments above every line - That actually finds bugs because they'll type the comment above it and they think in a different mode and they go oh oh that code is wrong.
+
+sent an email asking a question and right after they send the email they go oh I got the answer
+
+a lot of the blockage for students to learn to code actually is a mixture of general fear, anxiety, problems with how they might have been taught how to learn when they're younger,
+
+
+most programming languages really suck. Beginners make the same common errors over and over again. And with a better design, they wouldn't.
+- what the hell is a dot comma (semicolon)? especially if you're in a country with a non-English keyboard.
+
+a lot of programming is rote knowledge, not skill. Sure you have to think, but for loops - you've got to know what they are. There's some debate as to how much is rote, vs. how much is googling skill, but we'll let that pass.
+
+If a programmer cannot inspect what a program is doing, she can't understand it.
+
+curriculum - what topics do we teach in what order.
+first one: "print hello world" or "draw a rectangle with an ellipsis that has an axis of 45 degrees across the plane that's a Cartesian plane that has X going from the Y to the top"
+
+left frontal temporal lobe - what is its role in programming
+- specifically, any implications for debugging, error reporting
+
+for the vast majority of people this ability to switch from linguistic processing to literal visual processing is really difficult
+
+how do you react when a student says "I don't understand"?
+- blame the student - "if you can't learn it you're just stupid" - everyone will feel stupid when learning
+- RTFM - So you go to read the docs. They're all over the place, horribly organized. There's no single doc that gets you started and gets going. You go, hey, the docs kind of suck. Well, read the code.
+- education research model - if it's not working, it's our fault. we didn't teach it right.
+
+evidence-based programming curriculums - do randomized experiments and see what works for teaching
+
+maybe teachability can be used as a proxy for usability - how well people learn it and how many mistakes they made should correlate with how quickly they implement programs afterwards
+
+because programmer are constantly learning and forgetting
+
+it's hard to define usability, but if it's easier for to learn it and it's easy to teach it then it's probably more usable
+
+mental models - detail is important. knowing a lot of details helps you debug. like the CPU registers and memory model and so on, when you're tracing a program in gdb you see all those. but if you're doing hello world you don't want to deal with it. so teach only a little bit at a time. don't go into the history, or the alternate designs, or anything, just give the minimum information needed to complete the task.
+
+invalid self-perception - you don't remember how you learned something, especially if you learned it when you're a kid. you don't have metacognition when you're a kid. most adults don't even know how they know things. So you think, "oh I learned because I actually went through a book and memorized everything". But you don't remember all the other things you did before that.
+
+Like musicians, they're like "you learn rhythm by playing with a metronome". But actually they played with a band and they had a drum and there's a lot of other things and the metronome was a pretty small part. Or guitar, he's like "you practice this with your hand", and he's got these massive fingers and you go "that's not gonna work, I can't play guita".
+
+bottom-up versus top-down - it's actually both. people hate that.
+you see this in like a lot of teaching texts, they just describe things starting at the infinite degree of detail and slowly build up to something useful
+but instead could go top down and paint some broad strokes
+kids you can throw a ton of details out and they'll probably pick up most of them on their own
+adults you gotta go slow, like they're on a diet. a tiny bit at a time and track your progress.
+
+one experiment: assembly language first, vs. Python first
+who can implement things better at the end
+how many drop out
+how many retain the knowledge
+how many are able to learn new programming languages
+
+"I can reason about this therefore I am right" - or more practically, "<complicated logic>, therefore I'm right". but it's a paper with evidence - you have to have more evidence to counter it, you can't just logically disprove it. logic is not superior to empiricism. All these people had reasons why it was invalid but they were just logic, no evidence.
+
+what is a beginner?
+- a lot of people by beginner they mean junior programmer. Been through college, just showed up at work. doesn't know shit but can code.
+-  I mean someone who has never opened the terminal. a "total beginner".
+
+learn to code before you understand the concept - I was lazy, and I just did one big chunk of code instead of pieces. And I found that it was easier to walk through a big chunk of code and explain it piece-by-piece than it is to try to explain the concepts before the code and they have no idea what you're talking about. Especially, if you don't have shared vocabulary, they have no idea.
+
+education research - go read education research journals!  in fact in most sciences and disciplines there's a branch of that discipline on just how to teach that discipline. CS is young so it doesn't have as much research in that area, but there's still tons of stuff if you look.
+
+
+overly complicated obtuse error messages
+
+hack-fix cycle - the code builds up a history, all these minutia of fixes and hacks. then six months later you can't work with the code because you forgot those things and it looks like spaghetti. Whereas, you pull back and do up-front thinking, you come up with the actual theme and a clean design. Write code so that someone can come in with no history of its creation and understand it immediately.
+
+pushing bad ideas - they made Python 3. Nobody switched. Why? They didn't bother finding out, they just kept pushing Python 3.
+
+pride - they go, well, that's to reduce the number of functions you have to remember. What? it's two fucking functions to convert a string to a timestamp, and one of them in a different. They back into their justification to cover up a design flaw, and then blame you when you don't agree with that justification. But it's just kind of covering pride. Inconsistent APIs due to a lack of a global view.
+
+What kind of programming language would I recommend to beginners, eight-year-old? it sort of doesn't matter, as long as it's one that doesn't have a lot of difficulty to handle crashes and things like that. So Python would be a good start. The reason why it doesn't matter is, first off, all programming languages kind of aren't targeted for beginners. They suck. And second, the language itself is not the hard part for a beginner. It's the computational concepts, like looping, hierarchy, variables, scope. So any language kind of teaches that. Plain old basic with go-tos would also be a really good one. That's a good beginner language. OK, feel free to come up and talk to me and tell me I'm full of shit. Thank you very much. Thank you.
+
+Documentation
+=============
+
+Sphinx
+------
+
+GH Pages/Jekyll can't do forward/back links. Checking out various projects, Sphinx is used by Clang, GHC, and Futhark. It has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, ... so far it's proving its worth. It's run via a Github actions script and the generated docs are stored in the gh-pages branch.
+
+Alternatives include Rust's self-written mdBook. But their `documentation <https://rust-lang.github.io/mdBook/format/markdown.html>`__ is itself ill-formatted, with the first line of each Markdown example indented for some random reason, which does not inspire confidence. There is also Java's javadoc, but it's not used much outside Java.
+
+Organization
+------------
+
+The documentation is organized according to `this system <https://diataxis.fr/>`_, because it shows up when you google "documentation system" and I couldn't find anything better.
+
+The four functions:
+
+* Tutorial  ("getting started") - overview information for newcomers, learning oriented (aim for a 1-week course)
+* how-to guides - specific tasks / goals, e.g. solve specific error messages
+* technical reference - describe the machinery, with as little fluff as possible
+* commentary/explanation - understanding, explain the possible alternatives and why a choice was made
+
+The categorization procedure:
+
+* Does it describe specific actions the reader should take (1), or is it theoretical (2)?
+* Is it an exploratory piece of art (A), or is it a descriptive quick-reference (B)?
+* 1A: getting started
+* 1B: how-to guide
+* 2A: commentary
+* 2B: reference
+
+Currently Stroscot is still in the design stage so the majority of content is commentary.
+
+Quotes before commas
+--------------------
+
+The `MLA style guide <https://style.mla.org/the-placement-of-a-comma-or-period-after-a-quotation/>`__ doesn't explicitly forbid it, mentioning that it's similar to British style, and it matches the logical structure (hence is called "logical quotation"). Proper nesting is important in programming and it seems strange to ignore this. And it's the `official style on Wikipedia <https://en.wikipedia.org/wiki/MOS:LQUOTE>`__.
+
+Forbidden words
+---------------
+
+A fair amount of terminology seems to be meaningless or ambiguous. So don't use it:
+
+* types - 5 definitions, an ambiguous term. Use "set" as it unambiguously refers to Stroscot's usage of a type as a value space (set of values). Discussed solely in the "Types" page.
+* dynamic/static - As `Harper <https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/>`__ points out, these are marketing terms. Again discussed solely in the "Types" page. Some translations of related terms to avoid grep occurrences:
+
+  * static lifetime - program lifetime, bound when program starts and freed by OS when program terminates
+  * static method - utility method, not bound to any object instance
+  * static/dynamic library - cached compiled code, compiled with/without position independent code. There are also format differences, use shared library ``.so`` / object archive ``.a`` for clarity.
+  * static linkage - self-contained image generation
+  * static linking - direct binding, resolving jumps to fixed memory addresses
+  * static imports - scoped import, import members of modules
+  * dynamic linking - shared library linking
+  * dynamic loading - loading during execution
+
+* strongly typed - `8 definitions <https://perl.plover.com/yak/12views/samples/slide045.html>`__, all different. It's the semantic equivalent of "amazing", i.e. "My language is strongly typed" == "My language is amazing". Again discussed solely in the "Types" page.
+* pure - this is just an umbrella term, we can use more specific terminology
+
+  * pure function - a mathematical function, a function that always produces the same output for the same input and has no implicit side effects.
+  * pure data, pure state, pure value - immutable data/state/value, cannot be modified and does not depend on any external factors
+  * pure expression - Side-effect-free expression, evaluates to a value without any side effects. Also, deterministic expression, for an expression that has only one value. Instead of "impure expression" refer to an expression that has no value (unevaluatable expression) or multiple values (ambiguous expression) or executes side effects (imperative expression). Actually with the TRS formalism I use every expression is evaluatable so we don't worry about unevaluatable expressions.
+  * pure programming language - a language that models the program as a mathematical function and enforces a clear distinction between immutable values and mutable or side-effectful expressions. Kind of a broad concept so doesn't need a term.
+
+* undecidable - people use this word to imply that it's unimplementable, when there are working solvers like the ones in `termCOMP <https://termination-portal.org/wiki/Termination_Competition>`__ that solve many useful cases. Godel's theorem only means that pathological examples exist for each specific implementation, which is true even with Hindley-Milner (linear for real-world programs, worst-case exponential). Prefer "complexity at least :math:`\Sigma^0_1`", where :math:`\Sigma^0_1` is in the `arithmetic hierarchy <https://en.wikipedia.org/wiki/Arithmetical_hierarchy>`__, or a more precise class if known. Note that decidable problems / computable sets are in :math:`\Delta_{1}^{0} \subsetneq \Sigma^0_1`.
+* primitive - as per `Wikipedia <https://en.wikipedia.org/wiki/Primitive_data_type>`__, primitive is ambiguous and can mean "the base cases of an inductive definition", in which case use "base", or "whatever is provided by a particular processor or compiler", in which case use "built-in". Note that built-in does not mean base, e.g. integers can be defined in terms of booleans hence are not base cases.
+* :math:`\subset` - per `Wikipedia <https://en.wikipedia.org/wiki/Subset#%E2%8A%82_and_%E2%8A%83_symbols>`__ this is ambiguous, use :math:`\subsetneq` and :math:`\subseteq`
+* abomination - a fun word, but basically meaningless in a programming context where one person's "abomination" is another person's "cool hack"
+* "etc" and "..." - they're just too imprecise. Usually if it's a list, these can just be omitted. If there is an intentional omission it can be replaced with an angle bracket construction like ``<more numbers>``, or the ambiguity erased with set-builder notation.
+* homoiconic - per `Michael Arntzenius <https://futureofcoding.org/episodes/040>`__ it just means the language has a data structure that represents an AST. So as soon as you talk about an "AST value" you're talking about a homoiconic language. The Lisp folks make a big deal out of it, but even Python has an `AST node datatype <https://docs.python.org/3/library/ast.html>`__ in the standard library. Of course people don't seem to think of Python as homoiconic. The Julia folks apparently `stopped <https://stackoverflow.com/questions/31733766/in-what-sense-are-languages-like-elixir-and-julia-homoiconic>`__ calling themselves "homoiconic" because they were getting pushback. According to ChatGPT and Stefan Karpinski of Julia, a true homoiconic language is one where the syntax for writing code is the same as the syntax for writing the data structure representing the AST of the code. This pretty much means Lisp. Personally I think having a low-level Lisp representation like Stroscot does is sufficient to qualify, and arguably a good quasiquoting implementation would work too, but it's easier to just avoid the term and the endless debates.
+* African American - genetically this term is `all over the map <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1/figures/5>`__. Prefer "American of African culture". And try to avoid any personal labels in general, we're here to discuss code not politics.
+
+Avoiding this terminology is easy to forget so is enforced by periodic grep's of the code.
+

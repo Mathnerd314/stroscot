@@ -3,6 +3,15 @@ Modules
 
 Developers can add new language features and functionality through libraries and modules.
 
+Terminology
+===========
+
+* an *entity* is a value, such as a function or constant. It is generally referred to by an associated name path. For example, in ``stdlib.getTime stdlib.clocks.SystemClock``, ``stdlib.getTime`` is resolved to an entity which is an I/O action and ``stdlib.clocks.SystemClock`` is resolved to an entity which is a symbol.
+* a *name path* is a dot-separated list of identifiers or symbols. For example, ``stdlib.getTime`` is a name path and ``stdlib`` and ``getTime`` are identifiers. A bare identifier ``getTime`` is a trivial name path; generally name paths can be shortened to bare identifiers using imports.
+* *libraries* are considered an output format in Stroscot. Similarly to building an executable, you can build a shared or static library. The nomenclature of "library" is not otherwise used in programming Stroscot.
+* a *module* or namespace is a convenience grouping of entities, more formally a map from names to entities. Modules may be nested, recursively/cyclically, and an entity may appear in multiple modules. The dot-notation and name paths are closely associated with accessing a module's entities.
+* a *package* is a group of files, and is the standard unit for distribution (i.e., a package is typically downloaded as a zip file or such). A package may contain many modules or none at all as-is (providing only top-level entities), but with careful importing any package may be encapsulated as a module and most are.
+
 Module
 ======
 
@@ -10,7 +19,7 @@ Modules are reusable components containing code that are themselves first-class 
 
 Stroscot's module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak's module systems. (TODO: reread the systems to see if I missed anything. But they're mostly type systems, rather than functionality)
 
-A module is a set of definitions - a set rather than a list because the order is not relevant. These definitions use various symbols. Some symbols are declared "visible" and are exposed/exported in the signature. We write: ``export a, b, c`` at the top of the module, with ``a, b, c`` a list of exported names.
+A module is a set of definitions - a set rather than a list because the order is not relevant. These definitions use various symbols. Some symbols are declared "visible" and are exposed/exported in the signature. We write: ``export a, b, c`` at the top of the module, with ``a, b, c`` a list of exported names. There should be a reasonable definition of the module in the absence of imports/exports, so no module syntax is needed to write simple programs. For example, the Prelude is implicitly imported, and all symbols are exported.
 
 Symbols not in the signature are considered "internal". Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these symbols through the ``_internal`` pseudo-module, like ``a._internal.b``. Thus definitions are always accessible somehow. This avoids Java's issue of reflection allowing access to "private" data. If you really want to lock an API down then you can clear out ``_internal`` by defining an immediately invoked function expression that first computes the module as a value and then returns a separate module that only re-exports the public definitions. But it is probably better to make the methods themselves use a secret password, token, crypto, etc. to prevent unauthorized access.
 
@@ -81,24 +90,66 @@ Speed
 
 Stroscot has no forward declarations and no header files; everything is declared exactly once. This is in contrast to C++ header includes which are slow because each include must be scanned every time it is included, as much as 30x in bad cases. This explodes code from 2000 files totaling 4.2 MB to 8 GB of disk usage. See for example how Go caches compiled files hence avoiding C++'s issues.
 
-Libraries
-=========
+Split definition
+================
 
-Modules are collected into mini-libraries, and mini-libraries into larger libraries, eventually agglomerating into large collections such as the standard library.
+`Carbon <https://github.com/carbon-language/carbon-lang/blob/trunk/docs/design/code_and_name_organization/README.md#small-programs>`__ mentions the possibility of splitting definitions into interface and implementation, and putting these into separate files, similar to the standard C .h / .c split. They give two reasons for liking this: (1) may help organize code. (2) may let the build system distinguish between the dependencies of the API itself and its underlying implementation.
 
-The full form of a module identifier should have the following (`MS <https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview>`__):
+Organizing code seems reasonable. It is definitely possible for someone to get enthusiastic with the modules and to end up with a mutually recursive import cycle. Like Carbon's example:
 
-* Name: A memorable name chosen by the module developer. Names are not guaranteed to be unique in the general ecosystem, but are unique to a given publisher.
+::
+
+  module A {
+    import B
+    symbol Red, Blue, Green
+    set Color = {Red, Blue, Green}
+    name : Color -> String
+  }
+  module B {
+    import A
+    name Red = "Red"
+    name Blue = "Blue"
+    name Green = "Green"
+  }
+
+Now in practice, I have read many arguments against recursive imports. For example Go prohibits import cycles (`thread <https://github.com/golang/go/issues/30247#issuecomment-463940936>`__). Summary of Pike's arguments:
+
+* with recursive dependencies, the dependency graph tends towards one huge cyclical blob
+* programmers are less lazy and manage their dependencies better
+* the dependency graph is cleaner and more understandable to developers
+* builds are faster
+* it is simpler to implement
+* it is simpler to trace import chains ("detangle")
+
+But it is less convenient - programs that "should" compile don't. One's brain naturally accepts circular dependencies and so there is a mismatch. One wants a definition at a particular place in the module hierarchy and it is only while implementing that one notices it requires circular imports. Many libraries use circular imports - Go standard library, Haskell standard library, etc. When one want to express a circular import structure in Go, one has to contort it - either by manually condensing the definitions into SCC's, or by using hacks such as ``compile:"together"``, interfaces, or runtime private calls with ``go:linkname``. View in the context of these workarounds, Pike's arguments are less convincing:
+
+* at the conceptual level, the dependency structure is unchanged
+* programmers are actively working against the language to achieve their desired dependency structure
+* the module layout is artificially constrained and end up with huge, bloated, difficult-to-navigate modules
+* the builds are slow anyway, with the hacks included
+* the workarounds waste significantly more developer time than just implementing cyclic imports
+* detangling import chains is more difficult with the hacks than if it was built-in
+
+For Stroscot, we are doing whole-program analysis anyway for optimization purposes, so it is fairly straightforward to allow recursive imports. The incremental build system is designed to handle recursive imports and other such oddities. Pike's concerns about understandability can be addressed by a lint analysis that finds recursive imports and suggests ways to resolve them.
+
+I don't agree though with Carbon's second point - I think there is not much advantage to specifically distinguishing API vs implementation, versus a general module separation.
+
+Module versioning
+=================
+
+With packages, we have not only simple modules in our app like ``MyModule`` but also versioned modules like ``packageA-1.2.3.4:SomeModule``. One may ask how much information is needed in the version. Based on `MS <https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview>`__, the full form of a versioned module identifier should have the following information about its package:
+
+* Package Name: A memorable name chosen by the package developer. Names are not guaranteed to be unique in the general ecosystem, but are unique to a given publisher.
 * Publisher: The real-world author, as identified by their signing certificate's public key. Pretty much globally unique, the hard part is rather identifying when two certificates represent the same entity.
 * Version: Version number of the package, ordered by some canonical version comparison algorithm. The module developer can choose arbitrary version numbers, or just leave it 0 if the date is sufficient, but usually they will follow guidelines like `SemVer <https://semver.org/>`__, "Major.Minor.Build.Revision" or so.
 
   * Version comparison algorithm: Split both strings into parts, ``[A-Za-z0-9~]`` and complement, and compare starting from left to right. Then if the first character of both parts is a tilde, it is trimmed. Otherwise, the ~ (tilde) character indicates that a given package or version should be considered older (even if it is numerically larger), so if ``a`` begins with a tilde, ``b`` is newer, and vice-versa. Numbers and words are popped off as units and compared in the following order: any string not found in this list < dev < alpha = a < beta = b < pre < RC = rc < # < pl = p. If one side runs out of characters, the other side is newer, except that a present release specifier is treated as comparing with an absent number. Otherwise, if the last part compares equal, the versions are equal.
 
-* Date: The date of the module's release, used for preferring updated versions of package. The dates must monotically increase, i.e. it is forbidden to release a mainline version of a module with a date earlier than a previously released module.
-* Hash: Sometimes you want to fork a module rather than update it. As such there is a hash, to specify Git-like fine grained updates while avoiding collisions.
+* Date: The date of the module's release, used for preferring updated versions of package.
+* Hash: Sometimes you want to fork a module rather than update it. As such there is a hash, to specify Git-like fine grained changes while avoiding collisions.
 
-The module identifier specifies the module source, not its built form, so processor architecture is not really relevant.
+Versioned module identifiers in source code should primarily use name. Publisher and version can be used to disambiguate. Neither publisher keys, dates, nor hashes should appear in actual source code, to avoid the "magic number" antipattern. Instead, they should be centralized in a lock file. Publisher keys should be named by the lockfile and their symbolic name used in the code, to support key expiration and so on. If a module depends on modules with colliding names, the lockfile should specify renamings for the modules so that they can be used together. The lockfile also solves issues like diamond dependencies and import cycles. E.g. suppose we have foo-1:A and bar-1:B depending on each other. If foo-2 is released, do we want foo-2:A -> bar-1:B <-> foo-1:a or else foo-2:A <-> bar-1:B.
 
-Modules in source code should primarily use name, and only occasionally publisher or version. Neither dates nor hashes should appear in actual source code, to avoid the "magic number" antipattern. Instead, they should be centralized in a lock file,  If a module depends on modules with colliding names, the lockfile should specify renamings for the modules so that they can be used together.
+The module identifier specifies the module source, not its built form, so processor architecture as given by MS is not really relevant.
 
-The modules should also be downloadable independently, so really the "standard library" is a software repository with high standards for inclusion.
+I wanted a constraint that the dates must monotically increase, but it is hard to express. For example we may release (in chronological order) 1.0, 2.0, 1.0.1, 2.0.1, 1.1.0. It is really a constraint of the package repository that nobody may release back-dated software, always stamped with the current date, but we have no way of verifying this client-side just given the package list.

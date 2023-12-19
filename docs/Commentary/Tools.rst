@@ -70,6 +70,11 @@ According to the `StackOverflow 2022 survey <https://survey.stackoverflow.co/202
 Language server
 ---------------
 
+https://petevilter.me/post/datalog-typechecking/
+
+https://www.youtube.com/watch?v=WxyyJyB_Ssc
+
+
 VSCode comes with an extensive protocol for language integration, LSP. Other IDEs do support LSP to some extent, but generally not fully and you have to install plugins. There's a `specification <https://microsoft.github.io/language-server-protocol/specification>`__. As an overview, an LSP server can provide:
 
 * syntax highlighting (the docs say you have to use TextMate grammars too, but from some examples it looks like LSP alone can be performant enough)

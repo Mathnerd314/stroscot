@@ -72,7 +72,10 @@ writeFile (compileToExecutable main)
 where it's clear that compileToExecutable is doing the work.
 
 
-the nanopass framework is pretty
+the nanopass framework is pretty good
+
+
+Using the best incremental build algorithms, what matters is not the size of the repo but the number of affected files. Let's say a 1-file change rebuilds from 1 - 1000 files depending on where it is in the dependency graph. Presumably you've architected the system so "change one file, rebuild a million" is rare. Taking average numbers (500 files, 2100 lines/file), achieving 10 second rebuild times (max acceptable UI lag per `Nielsen <https://www.nngroup.com/articles/response-times-3-important-limits/>`__`) requires a 105kLOC/s raw compiler speed. Practically I think go's 100kLOC/s compiler speed is probably adequate.
 
 Model
 =====

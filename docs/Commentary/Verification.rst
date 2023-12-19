@@ -15,6 +15,13 @@ Verification
 
    -- `Linus Torvalds <https://lkml.org/lkml/2022/9/19/1250>`__
 
+.. epigraph::
+
+   If you are willing to settle for anything less than full [static] verification of all properties then you might as well give up and use a dynamic type system.
+
+   -- Stroscot
+
+
 Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior, for example that array accesses are not out of bounds. In most cases these can be ensured statically by the verification system.
 
 Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazingly robust programs to emerge.

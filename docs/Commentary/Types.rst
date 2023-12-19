@@ -3,6 +3,8 @@ Types
 
 Stroscot has sets and assertions about whether values are in sets. But are sets types? Is Stroscot typed? If so, is Stroscot statically typed or dynamically typed? Is it strongly typed? Weakly typed? Gradually typed? These sound like reasonable questions. Unfortunately, these terms are ambiguous and controversial. This is an attempt to answer these questions by enumerating definitions, considering each definition, and ultimately discussing it to death.
 
+Short answer: Stroscot lets you to build a prototype/simple script in a short amount of time, without any annotations. So it is dynamically typed. It also lets you add type annotations, so it is statically typed.
+
 Are sets types?
 ===============
 

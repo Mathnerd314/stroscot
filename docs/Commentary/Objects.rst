@@ -3,6 +3,8 @@ Objects
 
 Many people like to use the word "object", as in "object-oriented programming". Stroscot aims to support all the paradigms, so being able to claim that Stroscot is OOP would be a great feature. But our analysis is stymied before it begins: per the C2 wiki, `nobody agrees on what OO is <https://wiki.c2.com/?NobodyAgreesOnWhatOoIs>`__ and there are `many definitions for OO <https://wiki.c2.com/?DefinitionsForOo>`__. For that reason the word "object" is not used in the rest of the documentation. But here we try to figure out what OO is and how to make Stroscot support OO.
 
+For example, Julia sort of is OO but users have `said <https://discourse.julialang.org/t/workaround-for-traditional-inheritance-features-in-object-oriented-languages/1195/27>`__ "Julia doesn’t do a good job here" and "[Inheritance] can help you build deep hierarchies that present data as nice, rolled up extension points for consumers of your library. Currently I don’t see any way to do something similar in Julia without a bunch of trickery/hackery/copying/shims."
+
 Definition
 ==========
 
@@ -289,11 +291,11 @@ Now with multiple implementations floating around we often want to use these as 
 Design patterns
 ===============
 
-Design patterns are not really OO, but :cite:`gammaDesignPatternsElements1994` is subtitled "reusable object-oriented software", and the naming patterns of extremely long Java class names like ``AbstractVisitorManagerFactoryProvider`` originated from that book, so there's not really a better place to discuss it. Essentially, the "Gang of Four" described 23 patterns of structuring objects. Since then, the patterns have held up pretty well - per :cite:`obrienDesignPatterns15` the authors did a session in 2005, and the only changes they wanted to make would be dropping Singleton, combining Abstract Factory and Factory Method to Factory, and adding Null Object, Type Object, Dependency Injection, and Extension Object from Pattern Languages of Program Design 3. They would also redo the categories, but those aren't essential. Similarly, besides the Gang of Four patterns, Wikipedia has only added 14 "other" patterns to its "Software design patterns" infobox. But Wikipedia also lists new categories of "concurrency", "network architecture", and "functional" patterns.
+Design patterns are not really OO, but :cite:`gammaDesignPatternsElements1994` is subtitled "reusable object-oriented software", and the naming patterns of extremely long Java class names like ``AbstractVisitorManagerFactoryProvider`` originated from that book, so there's not really a better place to discuss it. Essentially, the "Gang of Four" described 23 patterns of structuring objects. Since then, the patterns have held up pretty well - only a few changes per :cite:`obrienDesignPatterns15` (which I have added). I have also included other patterns from Wikipedia's "Software design patterns" infobox (`rev <https://en.wikipedia.org/w/index.php?title=Template:Design_patterns&oldid=1032062304>`__).
 
-As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wiki/Software_design_pattern#Criticism>`__ and `C2 <https://wiki.c2.com/?DesignPatternsAreMissingLanguageFeatures>`__, design patterns are really missing language features. The point of examining these patterns is to ensure that Stroscot can easily express each pattern with minimal boilerplate, rather than to hold them up as examples of great program design. To use :cite:`norvigDesignPatternsDynamic1996`'s words, the patterns should be "invisible", so much a part of the language that you don’t notice using them.
+As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wiki/Software_design_pattern#Criticism>`__ and `C2 <https://wiki.c2.com/?DesignPatternsAreMissingLanguageFeatures>`__, design patterns are not examples of great program design, but rather desirable language features. To use :cite:`norvigDesignPatternsDynamic1996`'s words, in an expressive language, the patterns should be "invisible", so much a part of the language that you don’t notice using them. The point of examining these patterns is to ensure that Stroscot can easily express each pattern's intent with minimal boilerplate.
 
-
+* Abstract factory - In Stroscot, if there is a need for a cross-platform or pluggable interface, then overloading can be used to seamlessly combine multiple implementations into one interface. Each implementation can guard that a configuration option is a specific value. This option can be specified as an implicit parameter, rather than as an option on a singleton. As in the book's Smalltalk example, the creation methods themselves can be redefined using implicit parameters to use specialized behavior for a specific type of object creation.
 * Active object
 * Active record
 * Actor
@@ -327,19 +329,15 @@ As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wik
 * DDD
 * Decorator - In a unityped language, this is just defining a wrapper around another value. Hard to distinguish from the adapter or facade patterns.
 * Delegation - this is overloading each method to also work on the wrapper. Maybe can be automated with a macro.
-* Dependency injection - Constructor injection is simply including a field. Stroscot allows a simple form of setter injection by validating the fields of an object before classifying it as a member of a type. One can also write an explicit setter method, and properly express the type as ``PartiallyInitializedObject -> FullyInitializedObject``. Interface injection can be expressed by defining a type that is a broader set of objects than one specific class, but it is just type hackery and doesn't really affect the semantics. DI frameworks that create objects from textual specifications can be expressed as macros.
+* Dependency injection - from PLOP3 per :cite:`obrienDesignPatterns15`. Constructor injection is simply including a field. Stroscot allows a simple form of setter injection by validating the fields of an object before classifying it as a member of a type. One can also write an explicit setter method, and properly express the type as ``PartiallyInitializedObject -> FullyInitializedObject``. Interface injection can be expressed by defining a type that is a broader set of objects than one specific class, but it is just type hackery and doesn't really affect the semantics. DI frameworks that create objects from textual specifications can be expressed as macros.
 * Double-checked locking - The goal of this is lazy initialization, it is really the implementation of that pattern.
 * ECB
 * ECS
 * EDA
 * Event-based asynchronous
+* Extension Object - from PLOP3 per :cite:`obrienDesignPatterns15`
 * Facade - this is writing a record with multiple fields and an operation on those fields. not particularly complex.
-* Factory
-
-  * Abstract factory - In Stroscot, if there is a need for a cross-platform or pluggable interface, then overloading can be used to seamlessly combine multiple implementations into one interface. Each implementation can guard that a configuration option is a specific value. This option can be specified as an implicit parameter, rather than as an option on a singleton. As in the book's Smalltalk example, the creation methods themselves can be redefined using implicit parameters to use specialized behavior for a specific type of object creation.
-
-  * Factory method - As discussed in the section "No constructors" above, in Stroscot, every "constructor" is simply an ordinary unrestricted function and has the power of a factory method to return multiple types of concrete objects and hide these behind an abstract type signature.
-
+* Factory - renamed from "factory method" per :cite:`obrienDesignPatterns15`. As discussed in the section "No constructors" above, in Stroscot, every "constructor" is simply an ordinary unrestricted function and has the power of a factory method to return multiple types of concrete objects and hide these behind an abstract type signature.
 * Fiber
 * Filters
 * Flyweight - this is just using a shared reference, and I think Stroscot will hash cons shared immutable data automatically or at least use optimal reduction to avoid duplicating data too much
@@ -393,7 +391,7 @@ As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wik
 * MVVM
 * Naked objects
 * Nuclear
-* Null object
+* Null object - from PLOP3 per :cite:`obrienDesignPatterns15`
 * Object pool - this is a memory/resource management technique, combined with the factory method pattern
 * Observer
 * ORB
@@ -416,7 +414,7 @@ As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wik
 * Servant
 * Service locator
 * Sharding
-* Singleton - this is essentially a global variable, and is now considered an antipattern. Stroscot instead has implicit variables, which are passed down from the program start to its site of usage.
+* Singleton - this is essentially a global variable, and is now considered an antipattern per :cite:`obrienDesignPatterns15`. Stroscot instead has implicit variables, which are passed down from the program start to its site of usage.
 * SN
 * SOA
 * Specification
@@ -428,5 +426,6 @@ As many have observed, e.g. as cited on `Wikipedia <https://en.wikipedia.org/wik
 * Thread-local storage
 * Throttling
 * Twin - this seems like implementing multiple inheritance manually
+* Type object - from PLOP3 per :cite:`obrienDesignPatterns15`
 * Type tunnel
 * Visitor

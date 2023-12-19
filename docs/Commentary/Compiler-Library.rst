@@ -125,9 +125,26 @@ Then there are the libraries suggested by ChatGPT, libraries for:
 Booleans
 ========
 
-four distinct 2-valued types, for true/false, yes/no, on/off, and 0/1
+Booleans are complex. To summarize `Wikipedia <https://en.wikipedia.org/wiki/Boolean_data_type>`__:
 
-Per :cite:`pradelGoodBadUgly2015` the only acceptable coercions are coercing to bool in ``if-else``, ``!x``, ``x && y``, and ``x || y``.
+* Algol was the first to have an explicit boolean data type, in 1960
+* Fortran added a boolean data type after ALGOL came out
+* Languages with enumerated types use that for their boolean data types (Pascal, Haskell, etc.)
+* Python, SQL, JS, Lua, Pl/I, and Java don't have enum types but have special bool types that are kind of enum-like
+* Perl, Rexx, Lisp, Tcl, Ruby, Forth doesn't have booleans, they use various values of other types as true/false
+* C didn't have enumerations initially, so used integers. But in C89 added enumerations and in C99 a boolean data type. But there is an implicit conversion from booleans to integers. C++/Objective-C are similar.
+
+In Cliff's AA language he has taken the Rexx approach, where ``true`` and ``false`` are just integer constants defined as ``0`` and ``1``, no dedicated boolean values. But this is bad for the same reasons as magic constants. Per ChatGPT, having a separate boolean type is more readable, clearer, easier to understand, more intuitive, and more precise. It can avoid unintended type mismatches. We can see that even "weakly-typed" C deliberately added a boolean type later on - clearly it is worth it.
+
+We can see some discussion in `this VHDL question <https://electronics.stackexchange.com/questions/22592/boolean-in-vhdl-when-does-0-1-fail>`__:
+
+* In a "strongly typed" language (high-level language?), there are many different data types. You could use integers for representing a state of a state machine, but an enum works optimally in that there are not extraneous values and printing the values shows human-readable names. This prevents bugs (invalid states), and also the compiler can optimize the encoding of the enum into integers.
+* For a boolean type - the advantage is similarly the semantics - equal values compare equal, there are no extraneous values, and the true/false are more human-readable. The price is that some operations require explicit conversion syntax whereas before they were invisible because of re-using the same data type. Compiler-wise it is a win - in the simplest case it just a little code to translate to 0/1, but mostly likely the compiler can optimize further.
+* Particularly with 0/1 and VHDL, there is a confusion between logic states, signal states, and weak/strong drive. That is why in VHDL there is a 9-valued ``std_logic`` type defined in `IEEE 1164 <https://en.wikipedia.org/wiki/IEEE_1164>`__, with several pairs of values such as 0/1 and L/H. Maybe the explicit conversions are burdensome to some, but it costs a lot more to debug the wrong implicit conversion than to add the right explicit conversion. And some conversions can be implicit without much trouble, e.g. using std_logic in conditionals (falsey/truthy discussed at the end).
+
+But if one boolean type is great, what about more? In `YAML <https://yaml.org/type/bool.html>`__ and `IBM IAS <https://www.ibm.com/docs/en/ias?topic=list-boolean-values>`__ there are four pairs, true/false, yes/no, on/off, and 0/1. There is a code smell called `"boolean blindness" <https://runtimeverification.com/blog/code-smell-boolean-blindness>`__ and combating this by encouraging everyone to create their own boolean-style "toggle" types by predefining some in the library seems a great idea. They just have to be used consistently according to some style guide so that one does not run into situations where you are passing a ``YesNo`` to an ``OnOff`` and there is no advantage to the different types.
+
+Separate from the definition of the boolean type / set of boolean values is what is considered "falsy" and "truthy" in conditions. Per :cite:`pradelGoodBadUgly2015` it is acceptable and quite useful to coerce to bool in ``if-else``, ``!x``, ``x && y``, and ``x || y``. Probably also in rule guards like ``a | b = c``. Many languages have coercions like this. There should be one standard coercion function ``isFalsey`` or ``isTruthy`` or something used across all of these, for uniformity of behavior. Languages vary on what is considered truthy/falsy, this will have to be decided by vote or experiment or something.
 
 Numbers
 =======
@@ -224,6 +241,19 @@ Text types::
   Lazy = Empty | Chunk Text Lazy
 
 Interpolation and internationalization are two things that have to work together, copy JS i18n and Python interpolation like ``i'{x} {y}'.format(locale_dict)``.
+
+Conversions: https://profpatsch.de/notes/rust-string-conversions
+
+Filenames
+=========
+
+There are different definitions of filenames on different platforms:
+
+* On Linux, the kernel defines filenames as arbitrary byte sequences that do not contain ASCII / or null, compared by byte equality. Most applications expect filenames in UTF-8, and produce NFC UTF-8, but this is not enforced.
+* On Windows, NTFS defines filenames as sequences of 16 bit characters excluding 0x0000, compared case insensitively using an uppercase mapping table. The Windows APIs will error on filenames containing on the UTF-16 characters ``<>:"/\|?*``, and the UTF-16 filenames CON, PRN, AUX, CLOCK$, NUL, COM[0-9], LPT[0-9], $Mft, $MftMirr, $LogFile, $Volume, $AttrDef, $Bitmap, $Boot, $BadClus, $Secure, $Upcase, $Extend, $Quota, $ObjId and $Reparse are reserved by the system for internal use, including with file extensions such as aux.c or NUL.txt. Proper UTF-16 encoding is not enforced but most applications including the shell use NFC normalized UTF-16. The Windows shell does not support a filename ending with a UTF-16 space or a period, or displaying decomposed Hangul.
+* On macOS, filenames are UTF-8, normalized via Unicode 3.2 NFD (HFS+) or not (APFS). Case is preserved but filename comparison is case insensitive and normalized via Unicode 3.2 NFD (NFS+) or modern NFD (APFS).
+
+Taking union, we have that a filename is always a byte sequence. Taking intersection, we have that NFC-normalized sequences of Unicode codepoints excluding ``<>:"/\|?*`` and the Windows reserved names are 1-1 transformable to filenames on all platforms.
 
 Poison values
 =============

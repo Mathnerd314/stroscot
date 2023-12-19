@@ -104,3 +104,22 @@ Logic programming
 =================
 
 Sometimes the requirement that the value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.
+
+Sets
+====
+
+Suppose you wanted to declare an enum::
+
+  enum Color { Red, Blue, Green }
+
+In many languages this would be a built-in language construct. In Stroscot, ``enum`` is a macro, it expands as follows::
+
+  symbol Red
+  symbol Blue
+  symbol Green
+  set Color default_closed
+  elem Color Red
+  elem Color Blue
+  elem Color Green
+
+This declares the symbols Red, Blue, and Green, and adds them to the set Color. You can thinks of sets as what languages call types, but Stroscot's sets correspond closely to mathematical sets so "set" is a more appropriate term (and shorter).

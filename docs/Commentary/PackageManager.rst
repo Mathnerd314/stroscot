@@ -335,3 +335,5 @@ If any test fails I bisect to figure out who should be rejected, but don't rejec
 As a small tweak, if there are two patches in the queue from the same person, where one is a superset of the other, I ignore the subset. The idea is that if the base commit has an error I don't want to track it down twice, once to the first failing commit and then again to the second one.
 
 If there is a failure when compiling, it caches that failure, and reports it to each step in the bisection, so Bake tracks down the correct root cause.
+
+https://antonz.org/writing-package-manager/
