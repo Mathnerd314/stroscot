@@ -1,9 +1,9 @@
 Community
 #########
 
-Carbon says promoting a "healthy and vibrant community" is their overarching goal. For Stroscot, per the checklist, adoption is an outcome of the design process, not an explicit goal. It is worth tracking adoption closely to identify possible defects in the design process, but if it turns out that some strongly-held principle of Stroscot is affecting community growth, then it is likely the community growth that will have to suffer in the end. But it is not like I have deliberately chosen principles and values that will conflict with community adoption. The principles are vague and there is significant leeway for conforming to social pressure. And of course there is the bus-factor and other such considerations which mean that some minimal community is necessary regardless - the question is really about feel, "cozy community" vs. "huge community". And even with just me developing it, Stroscot has already gotten complex enough that communications about it have become tricky.
+Carbon says promoting a "healthy and vibrant community" is their overarching goal. For Stroscot, per the checklist, adoption is an outcome of the design process, not an explicit goal. It is worth tracking adoption closely to identify possible defects in the design process, but if it turns out that some strongly-held principle of Stroscot is affecting community growth, then it is likely the community growth that will have to suffer in the end. But it is not like I have deliberately chosen principles and values that will conflict with community adoption. The guidelines are vague and there is significant leeway for conforming to social pressure. And of course there is the bus-factor and other such considerations which mean that some minimal community is necessary regardless - the question is really about feel, "cozy community" vs. "huge community". And even with just me developing it, Stroscot has already gotten complex enough that communications about it have become tricky. So Stroscot should maintain a large and active community of users providing guidance and support.
 
-So this page is a collection of thoughts about communication and social expectations regarding Stroscot.
+This page is a collection of thoughts about communication and social expectations regarding Stroscot.
 
 Open source
 ===========
@@ -26,9 +26,7 @@ More on open source in the open source way book.
 Code of Conduct
 ===============
 
-ZOMG there's none!
-
-Not an un-CoC like `NCoC <https://github.com/domgetter/NCoC>`_, just that I haven't got around to setting one up yet. No point in doing it until there is an actual community to conduct. I like the `FIRE code of conduct <https://www.thefire.org/research-learn/model-code-student-conduct>`__ but it needs at least 10 people to fill in the different roles, also it is needs to be adapted to be less school-centric.
+This is filled in now. But it needs at least 10 people to fill in the different roles, so for now people will just have to do with less justice. Or maybe I could fill in the roles with ChatGPT.
 
 Communication methods
 =====================
@@ -138,75 +136,39 @@ Culture
 
 Stroscot has its identity, values, and tone of voice as a project, and when speaking on behalf of Stroscot it is important to follow these. The community around Stroscot is more diverse and naturally some off-brand messages will also be introduced. On the one hand it is important to be inclusive and transparent and allow these messages in communication channels, on the other it is also important to be constructive and responsive and to point out the deviation in these messages from the culture of Stroscot.
 
-Per Carbon, ["culture eats strategy for breakfast"](https://techcrunch.com/2014/04/12/culture-eats-strategy-for-breakfast/). Carbon's goal is asn
+Carbon has an overarching goal of promoting a healthy and vibrant community with an inclusive, welcoming, and pragmatic culture. They say `"culture eats strategy for breakfast" <https://techcrunch.com/2014/04/12/culture-eats-strategy-for-breakfast/>`__. That article describes a "Get Stuff Done" attitude where nobody can complain - if something is wrong, the complainer must come up with a solution and fix it. Anything can be changed and nobody is a victim.
 
-welcoming, and pragmatic
+Stroscot naturally has different goals and culture but it is still instructive to think about vision, mission, values, and purpose. It is important to "own the culture" with training, monthly communications, performance-appraisal, and role models.
 
-corporate culture matters
+* Board decisions are typically made through a consensus-building process, with a majority vote and the president having the final say in the event of a tie.
+* Use collaborative tools for virtual meetings and decision tracking, like Docs, Zoom, forums, Discord, etc.
+* Have regular board meetings and maintain transparent communication channels - publish meeting minutes, project updates, and financial reports regularly.
+* Finances - regular audits or just publish the detailed ledger
+* Channels for community feedback and suggestions.
+* Surveys or open forums to gather input on significant project decisions.
+* System for recognizing and rewarding outstanding contributions to the project.
+* Community-voted awards or acknowledgments during project milestones.
 
-vision
-mission
-values - respect for the individual, superlative customer service, pursuit of excellence, productivity
-meaningful purpose
-team unity
-energy and excitement
-enthusiastic employee
-allowing people to be honest about their mistakes, driving them to rectify them, and then celebrate and immortalize the technical efforts that brought the solutions to life.
+Safe space
+==========
 
-primary market research and marketing techniques to drive market traction
+One idea is to have a designated safe space channel, prohibiting inappropriate language or harmful language, including:
 
+#. Behavior that is rude, disrespectful, or inconsiderate
+#. Comments or jokes of a sexual nature
+#. Sexually explicit or violent material
+#. Language or behavior that belittles or diminishes others
+#. Language that is explicitly racist or sexist
+#. Using language or making jokes that denigrate or discriminate against individuals with disabilities
+#. Using language or making jokes that discriminate based on Protected Attributes
+#. Promoting or endorsing behavior that violates the established code of conduct
+#. Personal internet or social media activities unrelated to project goals
+#. Gossip or rumors about contributors or the project
+#. False or harmful information (misinformation)
 
-humility during the hiring process
-checklist to enforce their “no assholes” rule
-GSD (Get Stuff Done) attitude
-“You can’t complain here. If you see something wrong, you must fix it. We say it is a great opportunity to come up with a solution, and this is where many of our best programs have come from. Anything can be changed. We aren’t victim to anyone.
+I can certainly make such a channel and even enforce its rules with a little 13b language model Discord bot. If it is successful, maybe the majority of beginner channels can be made safe spaces.
 
-own the culture - training, monthly communications, performance-appraisal, role models
+Culture policing
+================
 
-“culture eats strategy for breakfast, technology for lunch, and products for dinner, and soon thereafter everything else too.”
-
-company culture Edgar Schein, is the operationalizing of an organization’s values. Culture guides employee decisions about both technical business decisions and how they interact with others. Good culture creates an internal coherence in actions taken by a very diverse group of employees.
-
-culture happens whether you want it to or not.
-
-culture does not work for all people and all companies
-
-A strong product plan is great, but it also takes strong culture to handle potentially adverse scenarios in a positive way. A positive culture gets stronger with random events
-
-Carbon has an overarching goal of promoting a healthy and vibrant community with an inclusive, welcoming, and pragmatic culture. `"culture eats strategy for breakfast" <https://techcrunch.com/2014/04/12/culture-eats-strategy-for-breakfast/>`__.
-
-
-
-Rules of Procedure
-------------------
-
-1. **Decision-Making:**
-   - Board decisions are typically made through a consensus-building process, with the president having the final say in the event of a tie.
-   - Critical decisions may require a supermajority vote.
-
-2. **Meetings:**
-   - Schedule regular board meetings and maintain transparent communication channels.
-   - Use collaborative tools for virtual meetings and decision tracking.
-
-3. **Transparency:**
-   - Publish meeting minutes, project updates, and financial reports regularly.
-   - Encourage open communication within the community through forums and designated channels.
-
-4. **Code of Conduct:**
-   - Establish a clear and enforceable code of conduct for both project contributors and community members.
-   - Clearly define unacceptable behavior and the consequences for violations.
-
-5. **Financial Management:**
-   - Implement financial oversight mechanisms, such as regular audits or financial reports, to ensure transparent use of funds.
-
-### 3. **Community Engagement:**
-
-1. **Feedback Mechanisms:**
-   - Establish channels for community feedback and suggestions.
-   - Use surveys or open forums to gather input on significant project decisions.
-
-2. **Recognition and Rewards:**
-   - Implement a system for recognizing and rewarding outstanding contributions to the project.
-   - Consider community-voted awards or acknowledgments during project milestones.
-
-This framework should provide a solid foundation for your open-source project's administrative structure. Adjustments may be necessary based on the project's growth and evolving needs. Regularly review and refine these structures to ensure they align with the project's goals and values.
+Something different is culture policing, ensuring communication stays on-tone in project channels. This too can be automated but it is a little more tricky because the bot should not censor speech, only fight speech with more speech. So somehow we have to get the AI to understand a concept like `Graham's hierarchy of disagreement <https://themindcollection.com/revisiting-grahams-hierarchy-of-disagreement/>`__ and make productive comments that encourage discussions to go up the hierarchy rather than down. Just calling out name-calling as name-calling is unlikely to dissuade a contributor from their path of unintelligent argument. Indeed calling their argument unintelligent is itself a form of name-calling, although when an emotionless language model says your argument is unintelligent it does carry a bit more weight. But if the bot can make level-6 arguments like "you said X is an idiot but actually X has won the Nobel prize", even if the information is hallucinated, it will still be funny enough to derail the conversation onto a more productive track. And if instead the bot starts an argument with a troll and the troll spends all their time arguing with the bot, that is in some sense a win too.

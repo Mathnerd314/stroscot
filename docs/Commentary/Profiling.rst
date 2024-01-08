@@ -3,6 +3,8 @@ Profiling
 
 The goal of the profiler is to measure performance, and allow making optimization decisions based on that.
 
+Code performance is unpredictable; even simple programs may be optimized in ways that the reader or writer does not expect. Performance often depends on undocumented and obscure details of the program's environment, making background knowledge or heuristics and guidelines useless. Therefore, profiling must be available from the first time the program is run so as to establish baseline performance.
+
 Resources
 =========
 

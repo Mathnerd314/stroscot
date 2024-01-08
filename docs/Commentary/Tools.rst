@@ -5,6 +5,37 @@ Nowadays every language comes with a tool suite, because a compiler alone is not
 
 Bright says this is transformative - it's like a night and day difference. And the other advantage is, there's only one. If you leave it to third parties, you get an endless number of tools, all different. Two teams each pick a different documentation generator and now they can't be merged or they can't work together and then you'll have a big fight and what a waste of time. The built-in tool may not be the best, but it's always there. By building it in you sort of browbeat people into using it.
 
+* Software design tools
+* Interface design tools
+* Database design tools
+* Reusability-support tools
+* Reverse-engineering tools
+* Reengineering tools
+* Code restructuring tools
+* Change management tools
+* Optimization tools
+* Code editors
+* Static analysis tools
+* Standards-checking tools
+* Complexity-analysis tools
+* Bounds checkers
+* Execution simulation tools
+* Record/playback tools
+* Debugging tools
+* Defect-repairing tools
+* Defect-tracking tools
+* Troublesome code identification
+* Code removal tools (dead or otherwise)
+* Inspection-support tools
+* Testing-support tools
+* Groupware/communication/customer support tools
+* Viral protection tools
+* Migration or conversion tools
+* Translation /internationalization tools
+* Mass update tools
+* Refactoring tools
+* Dependency update tools
+
 Style checker
 =============
 

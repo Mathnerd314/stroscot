@@ -1,86 +1,25 @@
 Code of conduct
 ###############
 
-This code of conduct is based on FIRE's `Model Code of Student Conduct <https://www.thefire.org/research-learn/model-code-student-conduct>`__, which is itself based on Edward Stoner and John Lowery’s influential and widely cited Model Conduct Code, published in 2004 in the Journal of College and University Law.\ [#ftn-2]_ Universities have existed for thousands of years, and as a result their policies and procedures are naturally more comprehensive than other codes of conduct. FIRE's code of conduct in particular places an emphasis on the rights of contributors and citations of case law, elements missing from other codes of conduct. Indeed, many project codes of conduct seem to have had no input from a lawyer at all. Although the FIRE code as written is intended for college and university administrations to govern student life, the school-student relationship is quite similar to the project-contributor relationship, and the adaptation is mainly a search-and-replace of terminology. The section on Title XI allegations was combined with the non-Title XI section as open-source projects are not subject to it.
+What is the most moral system of action? One principle is utilitarianism: the end justifies the means. Utilitarianism introduces useful principles such as enumerating alternatives, ranking realistic choices, and sacrificing in the short term for the greater good in the long term. The main issue is how to aggregate utility across society, ideally producing a sort of universal moral calculus. Unfortunately, one person's gain may be another's loss, causing inequality or injustice. Arrow's impossibility theorem shows that any system of aggregating preferences will have some amount of unfairness. Naive attempts to correct this unfairness will simply increase it. The solution therefore is not to aggregate preferences, but to encourage communication of subjective payoff matrices: once the space of solutions is mapped out, the project can naturally devise incentive systems that force people to cooperate and achieve the best outcome for themselves given others' preferences. Self-modification and external incentives via the concept of a moral or legal framework can achieve outcomes that are unreachable otherwise due to potential non-cooperation. By applying rational and objective judgement to the design of this framework, the project can achieve a near-optimal outcome for both contributors and the project as a whole. No one is omniscient - estimates of such outcomes will naturally be delicate, messy, imprecise, and uncertain. But reasoning about the outcomes of actions seems better than any alternative. Particularly, by examining the ills and injustices of the past, we can pave the way to a post-racist, post-sexist world.
 
-The Code strives for completeness and fundamental fairness and should be understood as a normative guide rather than an assertion of positive law. Although the "procedural rights" specified in this document may not necessarily be enforceable in criminal or civil law, they are morally justifiable and every member of the community should honor these obligations.
+The overall structure of the code of conduct is based on FIRE's `Model Code of Student Conduct <https://www.thefire.org/research-learn/model-code-student-conduct>`__, which is itself based on Edward Stoner and John Lowery’s influential and widely cited Model Conduct Code, published in 2004 in the Journal of College and University Law.\ [#ftn-2]_ Universities have existed for thousands of years, and as a result their policies and procedures are naturally more comprehensive than other codes of conduct. FIRE's code of conduct in particular places an emphasis on the rights of contributors and citations of case law, elements missing from other codes of conduct. Indeed, many project codes of conduct seem to have had no input from a lawyer at all. Although the FIRE code as written is intended for college and university administrations to govern student life, the school-student relationship is quite similar to the project-contributor relationship, and the adaptation is mainly a search-and-replace of terminology. The section on Title XI allegations was combined with the non-Title XI section as open-source projects are not subject to it. Actually, after editing, the FIRE code of conduct is quite similar to the Contributor Covenant in some aspects - evidence of convergent evolution.
 
-The structure of the code is as follows. It begins with a list of basic definitions to inform the rest of the discussion. Next, it moves to the project's jurisdiction, answering the important question of who is covered under this Code. It is followed by provisions regarding prohibited conduct. The Code then walks through the disciplinary process, starting with preliminary measures, then mediation and rights, and concluding with the appeals process and confidentiality provisions. Each section is accompanied by notes giving deeper discussion and the rationale for each provision.
+FIRE's goal was to craft procedures that are responsive to government mandates while ensuring fundamental due process for all parties. This commentary gives their notes, providing deeper discussion, the rationale for each provision, and the principles underlying each procedure.
 
-Special attention should be given to the section "Procedures for Allegations", which describe procedures for adjudicating misconduct. FIRE's goal was to craft procedures that are responsive to government mandates while ensuring fundamental due process for all parties. The notes following this section are of particular importance, as they discuss the principles underlying each procedure.
-
-Although based on a sound foundation, the Code is a first draft and is not necessarily perfect. Laws change and the code may evolve according to circumstances. We look forward to discussing the principles of community governance and how to best ensure successful leadership and an engaged community. Notably, the project at present has a severe lack of manpower. To set up the code as written, it requires a president, 4 appeal board members, 4 conduct board members, and a Conduct Administrator, a total of 10 distinct people.
+One specific difficulty with the code as written is that the project at present has a severe lack of manpower. To set up the code as written, it requires a president, 4 appeal board members, 4 conduct board members, and a Conduct Administrator, a total of 10 distinct people.
 
 Definitions
 ===========
 
-All of the terms in this Code of Conduct (“Code”) are in line with their common dictionary meanings. The following terms, however, should be interpreted to have the specific meanings listed below.
+I turned "Academic Misconduct" into "Project Contributions", it is a bit weird but it made sense given how it was used. The precise scope of what is considered to be a project contribution is much less clear than in a school environment, where academic responsibilities are clearly defined. I put in this vague wording about "the identity of the project". The Contributor Covenant's "Scope" section only specifies official accounts and representatives, but I think if someone writes a post like "Stroscot sucks: here's why", it is only natural to be able to discipline the author of said post for its inaccuracies. Of course Stroscot as a project is founded on principles of intellectual freedom as well, so inaccuracies would most likely be corrected or rebutted rather than used as grounds for rejection, but for example if someone fabricates some benchmark data solely to discredit Stroscot, it makes sense to be able to expel them. Also with something like the Zig/Zen fork, if a fork mislicenses or misrepresents the source of the work, it makes sense to have the power to ban them (and take legal action).
 
-**Project:** The project promulgating this Code.
+"Free speech rights" was listed as `Warning sign <https://otter.technology/blog/2017/12/28/code-of-conduct-enforcement-warning-signs/>`__ #9 of an unenforced code of conduct. I understand why FIRE included it, as they are all about freedom of expression, but even they left it a bit vague in the Model CoC, "The expressive rights protected by the First Amendment". I expanded it based on their `Guide to Free Speech on Campus <https://www.thefire.org/research-learn/fires-guide-free-speech-campus>`__ - it ended up being folded into the list of Prohibited Conduct, as even FIRE acknowledges that free speech is defined by what it is not rather than what it is. In fact, the campus guide derides such "Savings Clauses" that state that speech protected by the First Amendment is excepted.
 
-**Project Contributions:** Any public or proffered resource that may be incorporated in the project, or that speaks to the identity of the project, presented as the contributor's own work. Examples include (but are not limited to) GitHub forks, financial contributions, comments in discussions, and blog posts discussing the project.
-
-**Project Spaces:** All physical or virtual spaces managed by the project. This includes websites, chat systems, forums, emails (on lists or between members), issue trackers, events, and any other spaces that the community uses for communication. All communication and conduct in these spaces is considered to happen in the Project Spaces, including emails, chats, things you say, slides, videos, posters, signs, or even t-shirts you display in these spaces.
-
-**Contributor:** Any person who has become involved with the project by participating in the Project Spaces or making a Project Contribution. This includes persons who withdraw from these spaces, such as those who are prohibited from Project Spaces as an interim measure while disciplinary charges are pending, or who have ceased involvement with the project.
-
-**Project Official:** A member of the project administration.
-
-**President:** The chief executive officer of the project.
-
-**Community:** All persons interested in the project, including contributors, officials, and moderators.
-
-**Conduct Administrator:** A project employee who is responsible for the implementation of this Code, including Title IX coordinators, investigators, and decision-makers.
-
-**Conduct Board (Board):** An impartial body of no fewer than three members with an additional non-voting presiding member authorized by the President of the project to determine whether a contributor has violated the Code and, upon a finding of such a violation, to impose appropriate sanctions.
-
-**Conduct Board Hearing (Hearing):** The formal forum attended by Parties in which evidence is presented, witnesses are heard, and decisions concerning responsibility and sanctions, if applicable, are made.
-
-**Appellate Panel (Panel):** An impartial body of no fewer than three members convened to consider an appeal from a Conduct Board's finding that a Respondent has violated the Code.
-
-**Complainant:** Any member of the community who alleges that a contributor violated the Code.
-
-**Respondent:** Any contributor accused of violating this Code.
-
-**Responsible contributor:** A Respondent determined to have violated the Conduct Code.
-
-**Parties:** The Complainant(s) and Respondent(s) in a Conduct Code case.
-
-**Free Speech Rights:** The expressive rights protected by the First Amendment for contributors to the project that promise their freedom of expression.
-
-**Interim Measures:** Project action taken on a temporary basis that limits the Respondent's access to Project Spaces before the case can be heard in order to protect the physical health or safety of the Complainant or other members of the Community.
-
-**Supportive Measures:** Non-disciplinary, non-punitive individualized services offered as appropriate, as reasonably available, and without fee or charge to the Complainant or the Respondent before or after the filing of a formal complaint or where no formal complaint has been filed.\ [#ftn-3]_
-
-Interpretive Principles
-=======================
-
-#. The authority of the Code derives directly from the governing body of the project (such as a Board of Trustees). The President of the project is responsible for ensuring that this Code is implemented as written and is applied in an impartial and consistent manner.
-
-#. Nothing in this Code shall be interpreted to abridge the constitutional or statutory rights of any contributor or to contradict the project's promises and representations to contributors.
-
-#. All Respondents are presumed innocent until an authorized disciplinary Board finds them responsible for a violation of this Code after a prompt, fair, and impartial Hearing.
-
-#. A sound decision may be achieved only by a fundamentally fair adjudicatory process. This Code should therefore be interpreted consistently, regardless of the alleged Code violation. Those responsible for the disciplinary process shall implement it in a way that is transparent, credible, and rigorous, and that generates confidence in its determinations.
+I guess this brings up the question of why to use FIRE's code of conduct rather than another, if the difference between codes is simply the extent of the conduct they prohibit. I would say, I like FIRE's proposition "A contributor is entitled to protection from sticks and stones, but not from words." (based on the `Sticks and Stones <https://en.wikipedia.org/wiki/Sticks_and_Stones>`__ rhyme). The question should not be how much one can restrict speech, but rather what level of speech restrictions are minimally necessary. Most codes go in the opposite direction, having either overbroad or vague restrictions on speech.
 
 Jurisdiction
 ============
-
-#. Contributors are required to follow the Code in all interactions with the project. The Code shall apply to a contributor's conduct even if the contributor withdraws from the project while a disciplinary matter is pending.
-
-#. The Code shall apply to all conduct that occurs in the Project Spaces. The Code shall also apply to Project Contributions regardless of location, even if the Project Contributions are conveyed in a non-project space.
-
-#. With the exception of Project Contributions, the Code shall not apply to conduct outside Project Spaces unless it:
-
-   #. Occurs in a context in which the project exercises substantial control over both the location and the Respondent; or
-   #. Triggers the project's responsibilities under federal, state, or local law.
-
-#. If necessary to protect the rights and safety of the Community, the project may suspend any contributor charged with a felony in any jurisdiction until charges are dropped, the case is dismissed, or a judgment of conviction or acquittal is secured. The project must comport with the procedures for allegations before taking this action.
-
-#. If necessary to protect the rights and safety of the Community, the project may expel any contributor who has been convicted of a felony. If the contributor's conviction is overturned on appeal, the project shall allow the contributor to re-enroll. The project must comport with the procedures for allegations when taking this action.
-
-Notes
------
 
 This Section aims to balance three competing interests: that of the project in maintaining a productive environment and its reputation, that of the contributor to be free from unwarranted interference from the project, and the right of all contributors to an environment in which they can partake of the opportunities that the project offers.\ [#ftn-8]_
 
@@ -95,96 +34,31 @@ The last two provisions make clear, however, that a project may take appropriate
 Prohibited Conduct
 ==================
 
-#. Examples of proscribed conduct in the "Prohibited Conduct" section are illustrative and should not be read as a comprehensive list. However, the project may punish contributors under the Code only if their conduct is explicitly and lawfully prohibited by the Code or by law.
-
-#. Any contributor under the project's jurisdiction found responsible for committing, or attempting to commit, the conduct prohibited in this Section is subject to disciplinary sanctions.
-
-#. Project Officials have broad discretion in prohibiting conduct related to Project Contributions. Examples of prohibited conduct include (1) plagiarism and (2) providing false information to ensure the contribution is accepted or to secure any other advantage.
-
-#. Deliberately and maliciously deceiving any Project Official by knowingly providing false information in connection with the discharge of the Official's duties is prohibited.
-
-#. Forgery of any project document, record, or form of identification is prohibited.
-
-#. True threats are prohibited. A true threat is (1) a serious expression of intent to commit an act of unlawful violence against a particular individual or identifiable group, if (2) the individual or group would reasonably fear the threatened violence. This includes threats to self.
-
-#. Intimidation is prohibited. Intimidation is physical conduct threatening specific individual(s) with the intent to place those individuals in fear of bodily harm or death.
-
-#. Stalking is prohibited. Stalking is (1) a course of conduct committed with the intent to kill, injure, harass, or intimidate another person that (2) places that person in reasonable fear of the death of, or serious bodily injury to (3) that person, an immediate family member, a spouse, or an intimate partner of that person; or (4) causes, attempts to cause, or would be reasonably expected to cause substantial emotional distress to a person listed above.
-
-#. Substantially and materially disrupting the normal operations of the project, or inciting others to do so, is prohibited. Contributors shall not intentionally cause a substantial and material disruption to any of the following activities:
-
-   #. Project development;
-   #. Administrative functions;
-   #. Disciplinary proceedings;
-   #. Other project-sponsored activities, on or off Project Spaces; or
-   #. Other authorized or permissible activities that take place on Project Spaces.
-
-#. Discriminatory harassment is prohibited. Discriminatory harassment is (1) a pattern of targeted, unwelcome conduct (2) directed at an individual (3) that is discriminatory on the basis of race, color, national origin, disability, religion, age, sex, sexual orientation, gender, gender identity, or other immutable status, and (4) that a reasonable person would determine is so severe, pervasive, and objectively offensive that it effectively denies a person equal access to the project's programs or activities.
-
-#. Sexual Misconduct is prohibited. Sexual Misconduct includes any violation of this Code or criminal law involving non-consensual conduct of a sexual nature, including behaviors that have been determined to constitute discrimination under Title IX of the Education Amendments of 1972.\ [#ftn-19]_ These behaviors consist of:
-
-   #. **Sexual Harassment**—Sexual Harassment takes two forms:
-
-      #. **Quid pro quo sexual harassment** occurs when a person in authority causes a contributor to believe that he or she must submit to unwelcome sexual conduct in order to participate in a project program or activity. It can also occur when an employee causes a contributor to believe that the employee will make an decision based on whether the contributor submits to unwelcome sexual conduct.
-      #. **Hostile environment sexual harassment** is (1) a pattern of targeted, unwelcome conduct (2) directed at an individual (3) that is discriminatory on the basis of basis of sex, sexual orientation, gender, gender identity, and (4) that a reasonable person would determine is so severe, pervasive, and objectively offensive that it effectively denies a person equal access to the project's programs or activities.
-
-   #. **Sexual Assault**—Sexual Assault is nonconsensual physical sexual contact that either: 1) meets the definition of rape, fondling, incest, statutory rape, dating violence, domestic violence, or stalking as defined in the Clery Act; or 2) violates the sexual assault laws of the state in which the project sits. A person is incapable of giving consent when incapacitated or under unlawful coercion or threat of violence. Contributors are subject to local, state, and federal laws that prohibit rape and Sexual Assault. Violation of these laws on Project Spaces or at project-sponsored activities constitutes Sexual Misconduct.
-
-#. The project's power to punish contributors for violations of local, state, or federal law is limited to the following circumstances:
-
-   #. If necessary to protect the rights and safety of the Community, per its jurisdiction over contributors who have committed serious crimes, the project may take any action up to suspension against a contributor who has been charged with any felony and up to expulsion against a contributor who has been convicted of any felony.
-   #. The project may punish contributors for any criminal act bearing a substantial nexus to the project's property, programs, or Community.
-   #. The project may punish contributors for the violation of any law involving drugs or alcohol on its property or as part of its activities.
-
-#. Contributors shall not abuse their access to Project Spaces by engaging in any of the following:
-
-   #. Unauthorized entry to, or use of, project facilities, property, or resources; or
-   #. Misuse of project or personal property to create a safety hazard, or unauthorized use of safety equipment.
-   #. Deliberately setting off a false fire alarm or knowingly giving a false report of a crime or emergency is prohibited.
-
-#. Contributors shall comply with lawful directions of Project Officials or law enforcement officers acting in the good faith performance of their duties and shall identify themselves to these persons when reasonably requested to do so. Nothing in this provision should be interpreted as abridging the Fifth Amendment privilege against self-incrimination or the First Amendment right to anonymous speech.
-
-#. Unlawfully endangering the health, safety, or privacy of others is prohibited, including:
-
-   #. Illegal or unauthorized possession of firearms, explosives, other weapons, or dangerous chemicals;
-   #. Obstruction of the free flow of pedestrian or vehicular traffic;
-   #. Creation or publication of an audio or video recording without the subject's consent if that person has a reasonable expectation of privacy or if the recording is prohibited by state law; or
-   #. Physical assault of another person.
-
-#. Theft, vandalism, and destruction of property owned by the project or any other person or group are prohibited.
-
-#. Hazing is prohibited. Hazing is conditioning new or continued membership in a group or organization upon any act that is in violation of the Code, or that recklessly endangers a person's mental health or physical safety.
-
-#. Abuse of computer facilities and resources is prohibited, namely:
-
-   #. Unauthorized access or transfer of an electronic file or files;
-   #. Unauthorized use of another individual's identification or password;
-   #. Use of computing facilities and resources to materially interfere with the work of another contributor or Project Official;
-   #. Sending a large volume of unsolicited emails or other data with the intent to severely impair the functionality of the project's computer network;
-   #. Repeated use of the project network to send unsolicited emails with the primary purpose of proposing a commercial transaction;
-   #. Use of computing facilities and resources to knowingly share copyrighted materials in violation of state or federal law;
-   #. Use of computing facilities and resources to transmit unlawful obscenity; or
-   #. Use of computing facilities and resources to campaign for public office, or to perform official duties on behalf of an election campaign, or in any other manner that reasonably suggests the project itself is participating in political activity, campaigning, or fundraising, or attempting to influence legislation. Merely sharing or discussing personal political beliefs through the project's computing facilities and resources is not a violation of this subsection.
-
-#. This Code incorporates all other project rules regarding Conduct, but only if:
-
-   #. The rule is published in hard copy or available electronically, and is readily available to contributors; and
-   #. The rule does not conflict with this Code or with the rights of contributors.
-
-Notes
------
-
 Due process requires that prohibitions be articulated so that the average person can understand what conduct is not allowed. While the level of detail required for project codes of conduct is relaxed compared to criminal law, the requirement of clarity still applies.\ [#ftn-20]_ For all incorporated rules, proper notice is required; no contributor may be punished under a rule that is not readily accessible or is impermissibly vague.\ [#ftn-21]_ This bar is set particularly high where Free Speech Rights are implicated.\ [#ftn-22]_
 
-This list of proscribed conduct is divided into two categories: Project Contributions and behavioral misconduct. The project has broad discretion in adjudicating allegations relating to project matters. However, even in these cases, the project must adhere to basic standards of fairness and cannot rely on allegations that are based on “either hearsay, anonymous notes or . . . sheer speculation.”\ [#ftn-23]_ Accordingly, the Project Contributions clause in this Code is designed to comport with due process yet leave the project the latitude necessary to maintain project integrity.
+The list of proscribed conduct is divided into two categories: Project Contributions and behavioral misconduct. The project has broad discretion in adjudicating allegations relating to project matters. However, even in these cases, the project must adhere to basic standards of fairness and cannot rely on allegations that are based on “either hearsay, anonymous notes or . . . sheer speculation.”\ [#ftn-23]_ Accordingly, the Project Contributions clause in this Code is designed to comport with due process yet leave the project the latitude necessary to maintain project integrity.
+
+Sample prohibited conduct for Project Contributions is taken from FIRE (deception forgery) and suggestions from ChatGPT.
 
 The disruption clause prohibits substantially and materially disrupting an event via violence or other means to prevent a speaker from speaking, otherwise known as a “heckler's veto.” This should not be construed to prevent contributors from peacefully protesting and demonstrating against speakers at project-sponsored or other authorized events when those activities do not create a substantial or material disruption to the functions of the project, or a project-sponsored or other authorized event, or substantially or materially prevent others from exercising their Free Speech Rights.
 
 In evaluating whether conduct is substantially and materially disruptive, the project must consider whether a person, with the intent to or knowledge of doing so, significantly hinders another person's or group's expressive activity, prevents the communication of a message, or prevents the transaction of the business of a lawful meeting, gathering, or procession. Such intent may be demonstrated by violence, seriously disruptive behavior, or physically blocking or hindering another person from attending, listening to, viewing, or otherwise participating in expressive activity. This prohibition does not include engaging in conduct that is protected under the First Amendment. For example, the project may not restrict lawful protests or counterprotests in the outdoor areas of Project Spaces generally accessible to the members of the public, except during times when those areas have been reserved in advance for other events. Nor may the project punish minor, brief, or fleeting nonviolent disruptions of events that are isolated and short in duration.
 
-The harassment definitions are adopted from *Davis v. Monroe County Board of Education*, which provides the standard for contributor-on-contributor (or peer) hostile environment harassment in the context under Title IX.\ [#ftn-24]_ It is vital that the project refrain from using harassment policies to punish or investigate protected speech, and the project may protect the freedom of speech while prohibiting actionable harassment by tracking this Code's definitions. Straying from these definitions may result in successful litigation against the project.\ [#ftn-25]_
+The FIRE code prohibits "discriminatory harassment". This seems to be an artifact of the way harassment is litigated in education law - Title IX as written only prohibits sex discrimination, and it is the U.S. DOE and the courts that have determined that sexual harassment is a form of sex discrimination, `34 CFR 106.30(a) “Sexual harassment” (2) <https:/​/​www.ecfr.gov/​current/​title-34/​part-106/​subpart-D#p-106.30(a)(Sexual​%20harassment)>`__. The courts have adopted a "but for" test for Title IX to require showing that the harassment would not have taken place if the victim's sex was different. Similarly racial harassment is prohibited by Title VI under a similar no-racial-discrimination clause.\ [#ftn-majeed]_ So when FIRE generalized the definition of harassment, they kept that it must be discriminatory on the basis of a protected attribute, as many universities seem to have done. But definitions in common or state law of harassment include no such discrimination provision. It seems to me that it is sufficient that the conduct is directed at a specific individual. The victim can't change who they are (their identity), so that is in a sense an immutable attribute. Harassment does not suddenly become free speech because the harasser chose someone to harass by drawing a name from a hat instead of based on a protected characteristic. I think the Davis standard is sufficient for protecting free speech - we do not need a "but for the individual being ..." test, and broadly prohibiting "harassment" as opposed to "discriminatory harassment" is more appropriate.
+
+Fighting words, intentional infliction of emotional distress, doxing, trolling, hate speech, and personal attacks I would say are covered under the provisions for harassment and stalking. When they are speech, they are harassment and covered by the Davis standard, and when they are infliction of harm, they are stalking.
+
+The stalking definition is drawn from the federal anti-stalking law created by the Violence Against Women Act.\ [#ftn-34]_ It also covers cyberstalking, which is stalking done through electronic communications such as social media. The intent requirement is intended to prevent the project from using this Section to punish contributors for protected expression.\ [#ftn-35]_
+
+The Davis standard "... so severe, pervasive, and objectively offensive that it effectively bars the victim’s access to an project opportunity or benefit" is adapted from *Davis v. Monroe County Board of Education*. The DOE agrees this is the right standard in its `Commentary on Title IX Regulations <https://www2.ed.gov/about/offices/list/ocr/docs/titleix-regs-unofficial.pdf>`__, using "and" not "or" and so on. The Davis decision specifically states that only harassment reaching this extent is actionable in an educational institution. As FIRE says, "It is vital that the project refrain from using harassment policies to punish or investigate protected speech, and the project may protect the freedom of speech while prohibiting actionable harassment by [tracking the Davis standard]. Straying from [the Davis standard] may result in successful litigation against the project."\ [#ftn-25]_ Notably, there is the Title VII standard "sufficiently severe or pervasive to alter the conditions of [the victim’s] employment and create an abusive working environment"\ [#ftn-majeed]_ - in racial discrimination cases, the courts have used the Title VII standard in some cases but the Davis standard in others.
+
+The harassment definition covers bullying, intimidation, doxing, and invasion of privacy. Some publications use "hostile climate" instead of "hostile environment".
+
+The sexual harassment definition is adapted from UN bulletin `ST/SGB/2008/5 <https://documents-dds-ny.un.org/doc/UNDOC/GEN/N08/238/36/PDF/N0823836.pdf?OpenElement>`__. It is intended to provide clarification on the further definitions of hostile environment and quid pro quo sexual harassment.
 
 There are two main principles the project must keep in mind when enforcing harassment policies. First, contributors cannot be punished solely on the basis of speech that third parties find subjectively offensive, as offensive speech is generally protected by the First Amendment.\ [#ftn-26]_ The second principle is that the speech in question must be directed at an individual in order to constitute harassment.\ [#ftn-27]_ This targeting requirement ensures that contributors are not charged with harassment merely because third parties happen to overhear remarks they find subjectively offensive.\ [#ftn-28]_ By faithfully following the Code's definition and declining to punish contributors for “free-floating” offensive speech, the project will create an environment where contributors may have robust discussions without fear of being charged with harassment for giving subjective offense.\ [#ftn-29]_
+
+Per the Campus Guide, federal law requires prohibiting quid pro quo harassment. Restrictions on quid pro quo harassment do not pose any free speech issues.
 
 The Sexual Assault definition tracks the Federal Bureau of Investigation’s Uniform Crime Reporting definitions, which schools must adopt for crime reporting purposes under the Clery Act.\ [#ftn-7]_ This allows the project to use consistent definitions to address community crime and report crime statistics. The project must specify the definition being used when charging contributors with Sexual Assault under this Code.
 
@@ -198,45 +72,21 @@ The Drug Free Schools and Communities Act requires schools to enforce drug and a
 
 Another provision prohibits destroying or defacing any kind of expressive display owned by the project or another person or group on the grounds that it is offensive to the viewer.\ [#ftn-32]_ It is important for the Community to understand that there is no right to a “heckler's veto”; contributors cannot suppress someone else's speech because they find the speaker's message offensive.\ [#ftn-33]_
 
-The stalking definition is drawn from the federal anti-stalking law created by the Violence Against Women Act.\ [#ftn-34]_ It also covers cyberstalking, which is stalking done through electronic communications such as social media. The intent requirement is intended to prevent the project from using this Section to punish contributors for protected expression.\ [#ftn-35]_
+The Code of Conduct is limited to a list of prohibited conduct. A lot of codes of conduct seem to go in the other direction, focusing on positive conduct. For example, the `"Speak Up" <http://web.archive.org/web/20141109123859/http://speakup.io/coc.html>`__ code of conduct says "This isn't an exhaustive list of things that you can't do.", and then lists positive attributes such as "be welcoming", "be considerate", and "be respectful". The issue is that such attributes are quite vague - for example, hazing could be advertised as "a welcoming right of passage that respectfully and considerately inducts them into the group's culture". There may be some cognitive dissonance in this positive outlook, but only a negative definition draws a bright line and hence can be enforced. It is similar to how one doesn't know how messed up a cult is until one leaves it and gets an objective view; everything can be rationalized as being done "for good". `This post <https://otter.technology/blog/2017/12/28/code-of-conduct-enforcement-warning-signs/>`__ #6-7 points out that focusing on positive language and not spelling out the negatives means that the code of conduct is simply not equipped to handle anything worse than some "mean words". Particularly wth FIRE's due notice requirement, if serious crimes were not covered, then most likely they would have to be dismissed under the requirement for proper notice.
 
 Conduct Code Administrative Structure
 =====================================
 
-The president serves as the overall leader and decision-maker for the project. Responsibilities include strategic planning, community engagement, and overseeing project operations.
+This Section was reserved by FIRE for a description of the project's administrative structure. Per them, it should include "a description of personnel; oversight, selection, and training of the Conduct Board and Appellate Panel members; and dissemination of information about the Code itself". I just put in a basic thing from ChatGPT.
 
-The board allows including others in decision-making and provides expertise in various areas (development, marketing, community management, etc.). Responsibilities include attending regular meetings, contributing to discussions, and assisting in project development. Term limits are 2 years with the possibility of extension. Board members are selected based on community engagement, knowledge of project guidelines, and conflict resolution skills. Applications are considered by the president and existing board.
+There are some free training materials from `Otter Tech <https://gitlab.com/otter-tech/coc-incident-response-workshop/>`__ and `Frame Shift Consulting <https://frameshiftconsulting.com/resources/code-of-conduct-book/>`__.
 
-New board members follow a training process, and there is a written exam at the end with a minimum passing score of 70%. Materials must not rely on stereotypes, and must instead promote impartial investigations and adjudications of misconduct.\ [#ftn-118]_
+One idea is to use `Debian's constitution <https://www.debian.org/devel/constitution>`__ as the basic administrative structure. There is the suggestion in :cite:`parkesComplexityofStrategicBehaviorComparisonSchulze2021` to use ranked pairs instead of Schulze - it seems Schulze has less ties, but this is also why it is easier to game. Also ranked pairs satisfies LIIA which Schulze does not (c.f. `Table <https://en.wikipedia.org/wiki/Template:Comparison_of_Schulze_to_preferential_voting_systems>`__).
 
-Conduct Boards and Appellate Panels consist of at least 4 board members selected by random draw, with one board member a non-voting presiding member.
+Also check out these posts: `Python-style governance <https://chrisholdgraf.com/blog/2019/2019-10-27-jupyter-governance-python/>`__, `Rust-style governance <https://chrisholdgraf.com/blog/2019/2019-10-13-rust-jupyter-governance/>`__
 
 Interim Measures
 ================
-
-#. If a senior Project Official authorized to impose Interim Measures determines that a Respondent poses a direct threat (a significant risk to the physical health or safety of the Complainant or other members of the Community), that Official may impose Interim Measures while the case is being resolved.
-
-#. Interim Measures may include, but are not limited to:
-
-   #. Restricting or removing the Respondent's participation in project activities and access to Project Spaces.
-   #. Enforcing a no-contact order with the other Party or others.
-
-#. In cases involving a contributor who poses a direct threat due to a mental health condition, the project's determination that Interim Measures are necessary shall be confirmed or rejected as soon as possible by a licensed mental health professional. The medical health professional must be qualified to make this determination by the laws of the state in which the project is located.
-
-#. The determination of whether Interim Measures are warranted must be made on a case-by-case basis through an individualized and objective assessment of the Parties' needs and of the Respondent's alleged misconduct.
-
-#. Imposing Interim Measures is an extraordinary remedy. Interim Measures cannot take effect until a Project Official provides the Respondent with written notice, or actual notice followed within 24 hours by written notice, of the reasons for the limitations. Written notice must include a proposed time for an Interim Measures Hearing. The Interim Measures Hearing must take place within 72 hours of receipt of the written notice. The Respondent may, in writing, waive this Hearing or elect to have it at a date not to exceed fifteen business days from the receipt of notice.
-
-#. The Interim Measures Hearing shall determine whether the Interim Measures shall remain in force pending the resolution of the disciplinary process.
-
-#. Because the Respondent is presumed innocent, Interim Measures should place only those restrictions on the Respondent's access to Project Spaces that are necessary to ensure the physical safety of the Community in light of the complaint. The Respondent must be afforded the reasonable opportunity to prepare his or her defense and maintain his or her standing pending the resolution of the disciplinary process.
-
-#. If the continued imposition of Interim Measures is established at the Interim Measures Hearing, the Respondent has two business days in which to appeal by submitting a request for review and reasons that the precautions are unnecessary in writing to a senior Project Official who did not impose the Interim Measures. The project must review and lift, alter, or confirm the Interim Measures in writing within five business days of this filing. During the pendency of the appeal, all or some of the Interim Measures may remain in place at the sole discretion of the project.
-
-#. If the Respondent is found not responsible for the offense which he or she is charged, any Interim Measures in effect shall be immediately withdrawn and the project shall endeavor to restore the Respondent to the position he or she was in prior to the implementation of the Interim Measures. This shall include whatever measures are reasonable and necessary to ensure that the Respondent's career is not permanently damaged by the imposition of the Interim Measures.
-
-Notes
------
 
 Suspending a contributor without a Hearing is generally a violation of due process.\ [#ftn-37]_ However, when Project Spaces safety is at issue, the project may take immediate action to suspend a contributor based upon reliable information that his or her presence on Project Spaces could threaten physical safety, but “the necessary notice and rudimentary Hearing should follow as soon as practicable.”\ [#ftn-38]_ The project must have this authority to ensure that Project Spaces remains safe while conducting investigations and disciplinary processes. It is worth emphasizing that even in an emergency situation, the level of due process required depends on “a balancing of the different interests involved.”\ [#ftn-39]_
 
@@ -249,87 +99,19 @@ Nothing in this Section shall limit the project's ability to offer contributors 
 Procedures for Allegations
 ==========================
 
-The following procedures shall apply all allegations of misconduct addressed by the project.
+Reporting
+---------
+
+Although disciplinary Hearings are not legal proceedings, they require sufficient safeguards to ensure accuracy, fairness, and confidence in the result. Therefore, the timeliness of the claim is an important consideration. The Supreme Court has noted that statutes of limitations “are found and approved in all systems of enlightened jurisprudence.”\ [#ftn-51]_ Encouraging Complainants to present their claims within a reasonable time protects Respondents from having to respond under circumstances “in which the search for truth may be seriously impaired by the loss of evidence, whether by death or disappearance of witnesses, fading memories, disappearance of documents, or otherwise.”\ [#ftn-52]_ This problem is particularly acute if contributors are affiliated with the project only for a limited time, not present in the Project Spaces, or not available to participate in a Hearing. Accordingly, this Code encourages reporters to initiate a complaint within six months of the alleged Code violation. By recommending that complaints be lodged approximately within a semester, the likelihood remains high that Parties, and contributor witnesses, will still be enrolled at the project and able to attend a Hearing.\ [#ftn-53]_
+
+Anonymous complaints are in tension with the fundamental principle that the accused must be able to confront his or her accuser.\ [#ftn-54]_ To ensure that no contributor is wrongfully punished, a disciplinary body must be able to hear both sides of the story fully and ask clarifying questions.\ [#ftn-55]_ Such a probing inquiry is not possible when the Complainant does not come forward.\ [#ftn-56]_ Disciplinary Hearings should be presumed inappropriate when the anonymous nature of a complaint compromises a Respondent's ability to test the credibility of an accusation. The project should strive to develop identifying information from anonymous complaints in order to conduct a fair Hearing.
+
+By providing strong technological measures for anonymous reporting, the project shifts the burden of maintaining anonymity to the reporter, allowing the project to use its powers of investigation to the fullest extent. GlobaLeaks appears to be the simplest and easiest Tor webservice to set up, although SecureDrop's air-gap architecture offers more protection.
+
+`This post <https://otter.technology/blog/2017/12/28/code-of-conduct-enforcement-warning-signs/>`__ lists having a single person, a single generic email, or no contact information as a warning sign of an unenforced code of conduct. Particularly, the reporter must be able to find a conduct administrator who is uninvolved with the incident, so that their complaint is evaluated fairly. The GlobaLeaks software apparently has a specific mode for this where you can send to a group address for faster response or to specific individuals for avoiding conflict of interest.
 
 Preliminary Procedures
 ----------------------
-
-#. Any contributor or project official or member may file a complaint against a contributor with the Conduct Administrator for violations of this Code. Complaints submitted orally or submitted by the Conduct Administrator shall be memorialized at the time of submission.
-
-#. The complaint should be submitted as soon as practicable. Unreasonable filing delays could result in the dulling of memories and a loss of relevant evidence and witness testimony. Delays in filing shall not affect the Complainant's eligibility for Supportive Measures from the project.
-
-#. Because the project is bound by its obligation to provide a fundamentally fair process, anonymous complaints may be filed, but anonymity may limit the project's ability to respond and may preclude disciplinary action.
-
-#. When a complaint is received, if possible, the Conduct Administrator will reply to the reporter to confirm receipt within 24 hours of the complaint being submitted.
-
-#. Within seven business days of receiving a complaint, the Conduct Administrator must decide whether the factual allegations of the complaint, if taken as true, constitute a Code violation, and communicate this decision to Parties. The Conduct Administrator shall dismiss a formal complaint if the factual allegations of the complaint, if taken as true, either:
-
-   #. Fail to constitute a Code violation;
-   #. Occur outside the project's jurisdiction; or
-   #. Constitute an exercise of a contributor's Free Speech Rights\ [#ftn-104]_
-
-#. If the Conduct Administrator decides that the factual allegations of the complaint, if taken as true, do not constitute a plausible Code violation or constitute an exercise of a contributor's Free Speech Rights, the investigation will end immediately.
-
-#. If the Conduct Administrator decides that the factual allegations of the complaint, if taken as true, do constitute a plausible Code violation, the project must provide Parties with:
-
-   #. Parties involved in the incident;
-   #. A written copy of the complaint as filed; or, if no written submission exists, as memorialized by the Conduct Administrator;
-   #. Written notice of the specific Section(s) of the Code that the Respondent is charged with violating and written notice of the specific actions or conduct alleged to have violated them, including the time, date, place, and people involved;
-   #. Instructions on procedures for responding;
-   #. Relevant procedural dates, including the Hearing date;
-   #. Deadlines for responding;
-   #. Contact information for the Conduct Administrator coordinating the Hearing;
-   #. Contact information for all Project Spaces contributor defenders groups;
-   #. Guidance regarding Interim Measures and Supportive Measures, if applicable; and
-   #. A statement of the rights and resources to which Parties are entitled, including:
-
-      #. Respondent's right to be presumed not responsible for the alleged conduct;
-      #. Statement that a determination regarding responsibility is made at the conclusion of the grievance process;
-      #. The right to an advisor of their choice, who may be an attorney; and
-      #. The right to request to inspect and review evidence.
-
-   #. A warning that knowingly making false statements or knowingly submitting false information during the grievance process is prohibited.\ [#ftn-103]_
-
-#. At least three days after the Conduct Administrator provides Parties with all the information detailed in the previous point, the Conduct Administrator shall promptly meet with the Complainant and Respondent separately to discuss the allegation and any informal resolution procedures, including voluntary alternative resolution procedures, for immediately resolving the dispute in a way Parties might agree upon, precluding the need for further action.\ [#ftn-105]_ The Conduct Administrator shall also explain the adjudication process and answer any questions Parties may have.
-
-#. After the preliminary meetings with Parties, the Conduct Administrator shall determine if the factual allegations of the complaint, if taken as true, constitute a Code violation, in which case the matter will go to the Board for adjudication. The Conduct Administrator shall diligently attempt to make this determination within five business days, but may take additional time if reasonably necessary. In the event of a delay, at the end of the five-day period, the Conduct Administrator will inform Parties in writing of the reason for the delay and the anticipated new decision date.
-
-#. In addition to meeting with Parties, the Conduct Administrator shall initiate an independent investigation, as necessary. If a law enforcement investigation has been initiated, the project will take reasonable measures to avoid undue interference with the law enforcement investigation.
-
-#. At least twenty business days before a Hearing, the Conduct Administrator shall ensure that Parties and their advisors have the right to access, review, and make copies of any and all information obtained by the Conduct Administrator related to the case. This shall include the identity of Parties and any witnesses, and both inculpatory and exculpatory evidence, regardless of whether the project intends to present such evidence in the Hearing. Parties shall have at least ten business days to submit to the Conduct Administrator leading the investigation a written response, which the investigator will consider prior completing the investigation.\ [#ftn-106]_
-
-#. At least ten business days before a Hearing, the project must share with Parties and their advisors an investigative report that fairly summarizes relevant evidence.\ [#ftn-107]_ Parties shall have at least ten business days to submit to the Conduct Administrator leading the investigation a written response, which the investigator will consider prior completing the investigation.\ [#ftn-108]_
-
-#. At least ten business days before a Hearing, the project shall send all evidence it has gathered to Parties and their advisors in an electronic format or a hard copy, including evidence the project does not intend to present or does not believe is relevant. Evidence not disclosed to Parties may not be used by the project in any disciplinary proceeding.\ [#ftn-109]_
-
-#. Parties must be advised of their obligations to:
-
-   #. Respond to all notices to appear for a meeting or Hearing and requests for information;
-   #. Participate in the process in good faith; and
-   #. Provide true and accurate information to the best of their ability.
-
-#. Parties have the right to access, review, and make copies of any and all information obtained by the Conduct Administrator related to the case, including the identity of Parties and any witnesses. The Conduct Administrator shall ensure that all such information is made available to Parties at least five business days before the Hearing.
-
-#. Parties have the right to the advisor of their choosing, including legal counsel. The advisor may actively participate in all proceedings potentially resulting in criminal sanctions, expulsion, or a suspension of more than nine days, including preliminary meetings. In cases of Project Contributions, the project may bar the active participation of legal counsel for Respondent so long as the right to test witness credibility is preserved. The project shall not be responsible for any Party's advising costs unless otherwise provided.
-
-#. At any time in the pre-hearing process, the Respondent may admit in writing to violating this Code. A Hearing will then be held to determine the appropriate sanction(s). The Respondent may bring an advisor of choice to this Hearing or, at his or her informed option, waive such a Hearing and accept a punishment determined by the Conduct Administrator.
-
-#. While investigating the complaint, the project must:
-
-   #. Ensure that both the burden of proof and the burden of gathering evidence sufficient to reach a determination regarding responsibility rest on the project and not on Parties;
-   #. Provide equal opportunity for Parties to present witnesses and other inculpatory and exculpatory evidence;
-   #. Warn Parties that statements made to project administrators may be used against them in civil or criminal proceedings;
-   #. Allow the active participation of a Party's advisors, including attorneys, at all stages of the disciplinary process and related meetings;\ [#ftn-110]_
-   #. Not restrict the ability of either Party to discuss the allegations under investigation or to gather and present relevant evidence;
-   #. Provide to the Party whose participation is invited or expected written notice of the date, time, location, participants, and purpose of all Hearings, investigative interviews, or other meetings with a Party, with sufficient time for the Party to prepare to participate; and
-   #. Provide Parties an equal opportunity to inspect and review all evidence obtained as part of the project's investigation, including the evidence the project does not intend to present or rely upon when determining responsibility.\ [#ftn-50]_\ [#ftn-111]_
-
-Notes
-~~~~~
-
-Although disciplinary Hearings are not legal proceedings, they require sufficient safeguards to ensure accuracy, fairness, and confidence in the result. Therefore, the timeliness of the claim is an important consideration. The Supreme Court has noted that statutes of limitations “are found and approved in all systems of enlightened jurisprudence.”\ [#ftn-51]_ Encouraging Complainants to present their claims within a reasonable time protects Respondents from having to respond under circumstances “in which the search for truth may be seriously impaired by the loss of evidence, whether by death or disappearance of witnesses, fading memories, disappearance of documents, or otherwise.”\ [#ftn-52]_ This problem is particularly acute if contributors are affiliated with the project only for a limited time, not present in the Project Spaces, or not available to participate in a Hearing. Accordingly, this Code encourages Complainants (or the project) to initiate a complaint within six months of the alleged Code violation. By recommending that complaints be lodged approximately within a semester, the likelihood remains high that Parties, and contributor witnesses, will still be enrolled at the project and able to attend a Hearing.\ [#ftn-53]_
-
-Anonymous complaints are in tension with the fundamental principle that the accused must be able to confront his or her accuser.\ [#ftn-54]_ To ensure that no contributor is wrongfully punished, a disciplinary body must be able to hear both sides of the story fully and ask clarifying questions.\ [#ftn-55]_ Such a probing inquiry is not possible when the Complainant does not come forward.\ [#ftn-56]_ Disciplinary Hearings should be presumed inappropriate when the anonymous nature of a complaint compromises a Respondent's ability to test the credibility of an accusation. The project should strive to develop identifying information from anonymous complaints in order to conduct a fair Hearing.
 
 When investigating a complaint, the project must conduct an objective evaluation of all relevant evidence—including both inculpatory and exculpatory evidence—and ensure that credibility determinations are not based on a person's status as a Complainant, Respondent, or witness.\ [#ftn-116]_ As the project conducts an investigation, it has a continuing obligation to provide newly discovered evidence to the Respondent.
 
@@ -352,28 +134,6 @@ The project may establish rules for how advisors conduct themselves when partici
 Mediation
 ---------
 
-#. Mediation is a non-adversarial process in which Parties exchange views to enhance mutual understanding and fashion a solution to the dispute that is developed by Parties themselves. The Conduct Administrator should determine if the dispute may potentially be resolved through mediation facilitated by a professional and independent mediator. If so, the Conduct Administrator should provide Parties with the opportunity to resolve their dispute through this mechanism. All mediators must adhere to the American Bar Association's Model Standards of Conduct for Mediators.
-
-#. Mediation may be used to resolve a dispute any time prior to reaching a determination regarding responsibility. Before undergoing mediation, the project must provide to Parties a written notice disclosing:
-
-   #. The allegations;
-   #. The requirements of the mediation process including the circumstances under which it precludes Parties from resuming a formal complaint arising from the same allegations, if any;
-   #. Whether records of the process will be maintained or could be shared; and
-   #. Any consequences of the process, including a warning that Parties' statements during this process may be admissible against them in subsequent criminal proceedings.\ [#ftn-120]_
-
-#. The project must obtain Parties' voluntary, written consent to mediation.\ [#ftn-121]_ Parties must agree to participate without coercion, pressure, or the use of incentives. The Conduct Administrator must make clear to Parties that they may withdraw from mediation at any time prior to a decision or agreement being reached, whereupon the formal Hearing process will begin.
-
-#. In order to encourage an open exchange of views and maximize the chances of agreement, mediation sessions shall be confidential and may not be recorded, unless Parties agree to a different arrangement. No statements in the mediation session may be used in any subsequent Hearing.
-
-#. Any mediated agreement shall be in writing and shall represent the final resolution of the case, unless one of Parties fails to adhere to the terms of the agreement.
-
-#. The mediator or his or her designee shall continue to be available to Parties to facilitate resolution of the implementation of any agreement for up to 2 years after the agreement.
-
-#. If Parties do not agree to mediation, the mediation is unsuccessful, or mediation is not appropriate due to the nature of the complaint, the formal Hearing process may begin.\ [#ftn-61]_
-
-Notes
-~~~~~
-
 Alternative dispute resolution, such as mediation, is allowed so long as all Parties make a voluntary, informed decision to engages in such procedures. Under no circumstance may the project require or in any way pressure contributors to go through the informal resolution process.\ [#ftn-122]_ The project must use professional, certified, and experienced mediators for this process.
 
 Mediation plays an important role in resolving many of the disputes that most frequently occur on Project Spaces. It is most effective in situations where the Respondent acknowledges that his or her behavior overstepped a norm, such as a roommate conflict. It focuses on finding a shared solution developed by Parties rather than submitting the dispute to a disciplinary body. As long as mediation is truly voluntary and the mediator is trained and complies with the applicable professional standards, the process may be productive for all Parties.
@@ -383,65 +143,7 @@ It is critical that Parties understand that either side may withdraw from the pr
 Procedural Rights
 -----------------
 
-The following guidelines should be followed by the project for all proceedings. These guidelines are designed to protect due process for all Parties, and the project will help to ensure fair and accurate proceedings by adhering to the following principles.
-
-#. Meaningful Presumption of Innocence. Respondents shall be afforded a clearly stated presumption of innocence, including a statement that their silence shall not be held against them. The project has the burden of proof to establish each element of any Code violation with which the Respondent is charged.
-
-#. Timely and Adequate Written Notice. Adequate notice shall include the time and place of alleged policy violations, a specific statement of which policies were allegedly violated and by what actions, and a list of people allegedly involved in and affected by those actions.
-
-#. Adequate Time to Prepare. contributors shall have adequate time to prepare for all phases of the disciplinary process and shall have access to all evidence to be used at the Hearing during that time.
-
-   #. Project investigators shall preserve all evidence and, absent a compelling reason, record all interviews.
-   #. Newly discovered evidence shall be shared with Parties as soon as practicable. To give adequate time to prepare, this may require delaying the Hearing date.
-   #. A Hearing may be postponed if the Respondent can satisfactorily demonstrate that more time is necessary to secure exculpatory evidence.
-
-#. Right to Impartial Factfinders. There shall be a right to impartial factfinders, including the right to challenge factfinders for bias or any conflicts of interest with the potential to undermine the integrity of the disciplinary process. This challenge may not be heard by the factfinders themselves. Upon request, the project shall provide Parties with the contents of the factfinders' training materials.\ [#ftn-123]_
-
-#. Right to a Meaningful Hearing Process. Cases shall be adjudicated by individuals distinct from those who conducted the investigation. Parties and the factfinder must be able to see and hear the presentation of all evidence, including testimony, in real time at a live Hearing.
-
-   #. At the request of either Party, the project must provide for the Complainant to testify in a separate room from the Respondent.\ [#ftn-124]_
-   #. When conducting a live Hearing with Parties in separate rooms, the project must provide technology enabling the decisionmaker(s) and Parties to simultaneously see and hear the Party answering questions.\ [#ftn-125]_
-   #. Live Hearings may be conducted with all Parties physically present in the same geographic location or, at the project's discretion, any or all Parties, witnesses, and other participants may appear at the live Hearing virtually, with technology enabling participants simultaneously to see and hear each other.\ [#ftn-126]_
-   #. The project must create an audio or audiovisual recording, or transcript, of any live Hearing and make it available to Parties for inspection and review.\ [#ftn-127]_
-
-   Parties and the factfinder must be able to see and hear the presentation of all evidence, including testimony, in real time at a live Hearing.\ [#ftn-128]_
-
-#. Right to Present Relevant Evidence Directly to Adjudicators. Contributors may not be restricted to presenting evidence only through a third party, summary, or report. The investigator shall not control the scope of evidence that the Board may consider. A Hearing chair may limit the presentation of evidence only if it is not relevant; it may not limit evidence based on its own determination of credibility or set limits on the quantity of evidence presented.\ [#ftn-128]_
-
-#. Right to Meaningful Cross-Examination. This includes the right to pose relevant questions to witnesses—including the Complainant—in real time and respond to another Party's version of events.
-
-   #. Questions may be relayed through a third party, such as a contributor's advisor or the Board.\ [#ftn-129]_
-   #. Questions may be limited by the Board only if they are irrelevant or repetitive.
-   #. Questions and evidence about the Complainant's sexual predisposition or prior sexual behavior are not relevant, unless such questions and evidence about the Complainant's prior sexual behavior are offered to prove that someone other than the Respondent committed the conduct alleged by the Complainant, or if the questions and evidence concern specific incidents of the Complainant's prior sexual behavior with respect to the Respondent and are offered to prove consent.\ [#ftn-131]_
-   #. Before a Party or witness answers a cross-examination question, the Board must determine whether the question is relevant and, if it refuses to allow a particular question, it must explain its decision to Parties and document the reasons for refusal on the record.\ [#ftn-132]_
-   #. If a Party or witness does not submit to cross-examination at the Hearing, the Board must not rely on any statement of that Party or witness in reaching a determination regarding responsibility.\ [#ftn-133]_
-
-#. Active Participation of Advisor or Advocate. Contributors shall have the right to the full active participation of an advisor or advocate of choice, such as an attorney (at the contributor's sole discretion), at all proceedings. For sexual misconduct cases, if a Party does not provide their own advisor, the project shall provide each Party with an advisor, without fee or charge, to conduct cross-examination on behalf of that Party.\ [#ftn-130]_
-
-#. Meaningful Right to Appeal. Parties have a right to appeal a finding or sanction.\ [#ftn-134]_
-
-   #. Grounds for appeal shall include (1) any procedural irregularity that affected the outcome; (2) the discovery of new evidence that was not reasonably available when the determination of responsibility was made that could affect the outcome; (3) the project investigator or decision-maker had a conflict of interest or bias that affected the outcome; or (4) findings not supported by the record.\ [#ftn-135]_
-   #. The appeal must go to a Panel that does not include the same investigator or Board members as the original Hearing.\ [#ftn-62]_\ [#ftn-136]_
-
-#. Expulsion By Unanimous Findings. The decision to expel a contributor shall be made by a unanimous vote of the Conduct Board.
-
-#. Standard of Proof. Conduct Boards may not find a Respondent responsible for a Code violation unless that violation is proved by clear and convincing evidence.\ [#ftn-137]_
-
-#. Written Decision. Parties must receive a written decision of the result of the Hearing, containing:
-
-   #. Identification of the section(s) of the Code alleged to have been violated;
-   #. A description of the procedural steps taken from the receipt of the complaint through the determination, including any notifications to Parties, interviews with Parties and witnesses, site visits, methods used to gather other evidence, and Hearings held;
-   #. Findings of fact supporting the determination;
-   #. Conclusions regarding the application of the Code to the facts;
-   #. A statement of, and rationale for, the result as to each allegation, including a determination regarding responsibility;
-   #. Any sanctions the project imposes on the Respondent;
-   #. Any remedies provided to the Complainant designed to restore or preserve access to the project's education program or activity; and
-   #. The project's procedures and permissible bases for Parties to appeal.\ [#ftn-138]_
-
-Notes
-~~~~~
-
-The goal of these procedures is not to unnecessarily protect contributors or unduly burden the project, but rather to ensure that disciplinary Hearings obtain results based on an accurate and impartial presentation of the facts. Above all, this truth-seeking function is the crux of why due process must be upheld regardless of the circumstances of the proceeding.\ [#ftn-63]_
+The goal of these procedural rights is not to unnecessarily protect contributors or unduly burden the project, but rather to ensure that disciplinary Hearings obtain results based on an accurate and impartial presentation of the facts. Above all, this truth-seeking function is the crux of why due process must be upheld regardless of the circumstances of the proceeding.\ [#ftn-63]_
 
 Although the project is encouraged to employ procedural protections in Project Contributions proceedings, this Code is mindful of the Supreme Court's reluctance to mandate how schools make academic determinations.\ [#ftn-64]_ Project Contributions proceedings should be fundamentally fair but may be best governed by the standards of the relevant academic discipline rather than the procedures of this Section.
 
@@ -488,69 +190,12 @@ When the project limits a Respondent's right to cross-examine witnesses, the pro
 Appeals
 -------
 
-#. In all cases, either Party may appeal an adverse decision or sanction by submitting a written notice stating the intent to appeal to the Conduct Administrator within seven business days of receiving the Board's written decision.\ [#ftn-147]_ The project shall notify the Parties of the notice of appeal no later than one business day after it is received.
-
-#. The Conduct Administrator will convene a three-member Appellate Panel of official and/or administrators to review the Board's decision. The composition of the Panel shall be impartial to avoid prejudice. The Panel shall be convened no sooner than seven business days after the submission of an intent to appeal and no later than thirty days after such a submission.
-
-#. Parties have the right to challenge the Panel for bias or any conflicts of interest with the potential to undermine the integrity of the appellate process. This challenge may not be heard by the Panel itself, although Panel members shall recuse themselves from a case if they have a conflict of interest or if they cannot perform their duties in an unbiased manner for whatever reason. Neither the Conduct Administrator nor any member of the Board may serve on the Panel for a case in which they were previously involved.
-
-#. The appealing Party must submit a written statement to the Panel no later than five business days in advance of its meeting explaining why the Board's decision should be changed. The Panel shall forward this statement to the other Party no later than one business day after it is received. The other Party and third Parties may submit statements to the Panel, but are not required to do so.
-
-#. Either Party or their representative may choose to address the Panel directly in a short oral statement. If one Party chooses to address the Panel, the other Party shall then be offered the same opportunity. The Panel, in its discretion, may ask either Party questions within the scope of the appeal.
-
-#. The Panel's review will be limited to determining whether:
-
-   #. Established procedures were followed;
-   #. Parties were treated equitably;
-   #. Parties had a reasonable opportunity to prepare and present material information;
-   #. The Board's factual determinations are free from obvious error or failure to consider any material evidence;
-   #. The Board's decision was based on substantial information in the record and is rational;
-   #. The Board's reasoning is clear from its letter explaining its decision;
-   #. No new, previously unavailable evidence has emerged that would materially affect the outcome of the case;
-   #. The sanction levied is proportional to the violation(s) committed;
-   #. The Responsible contributor's conduct was prohibited by the Code; and
-   #. The Board's determination was consistent with higher controlling law.\ [#ftn-148]_
-
-#. If the Panel finds reason for concern about any of these issues, then it must consider whether the error, or newly-discovered evidence, could have affected the outcome of the Hearing. If the shortcoming was inconsequential, or the new evidence is irrelevant, then the decision may be affirmed. If, however, there is a reasonable possibility that the outcome might have been different, or that the sanction was disproportionate, the Board's decision must be modified accordingly or the case must be sent back for a rehearing.
-
-#. Appeals from the Respondent may not result in increased sanctions.
-
-#. The Panel will promptly inform Parties of its conclusions and the reasons for those conclusions in writing.
-
-#. Either Party may appeal the Panel's decision to the President of the project within seven business days of receiving the decision. If no such appeals are made, the matter is closed. Decisions of the President in disciplinary appeals shall be final unless otherwise required by law or regulation.
-
-#. A notice of appeal may be submitted after the deadline if the appealing Party shows that new, previously unavailable evidence came to light or that there is a compelling reason for the delay.
-
-Notes
-~~~~~
-
 The appeals process is not intended to undermine the original factfinders or undertake an entirely new investigation. Rather, the reviewing body should focus on identifying flaws in the initial Hearing that may have compromised the result, such as a lack of impartiality or the insufficiency of supporting evidence. This requires the project to provide a reliable record of what was said at the Hearing, including transcripts of any Hearing for violations punishable by expulsion.\ [#ftn-100]_ Also, like the initial disciplinary Hearing, the appeals process must comport with requirements of due process.\ [#ftn-101]_ Departing from the procedures outlined in the Code may itself constitute a due process violation.\ [#ftn-102]_
 
 Under Title IX, and this Code, Complainants are allowed to appeal an adverse decision or sanction.\ [#ftn-149]_ However, there are serious due process concerns with repeatedly subjecting the Respondent to disciplinary proceedings after he or she is found not responsible for the alleged act.\ [#ftn-150]_ The Fifth Amendment prohibition against double jeopardy is a core principle of any system that respects due process such as the one proposed by this Code.\ [#ftn-151]_ For the same reasons of fundamental fairness that our criminal justice system forbids double jeopardy, there are significant issues with allowing the Complainant to appeal.\ [#ftn-152]_ Nonetheless, many countries have exceptions to double jeopardy. For example, the appeal offers an opportunity to continue the case proceedings in the light of new evidence.
 
 Sanctions
 =========
-
-#. Sanctions must be reasonable and proportionate to the seriousness of the violation. The Conduct Administrator must accurately advise the disciplinary body of sanctions that have been imposed for similar violations in the past in order to ensure consistency and equity across time.
-
-#. Any sanction imposed on a Respondent will take one or more of the following forms:
-
-   #. Verbal warning, public or private;
-   #. Written reprimand, public or private;
-   #. Probation and/or suspension in abeyance;
-   #. Loss of privileges for a specific period of time, such as refusal of alcoholic beverage purchases, ending a talk/tutorial/etc early, not publishing the video or slides of a talk, or not allowing future talks;
-   #. Restitution through community service or fine;
-   #. Special assignments, training programs, or community service;
-   #. A no-contact order;
-   #. Suspension from one or more Project Spaces, including terms for readmission;
-   #. Expulsion from one or more Project Spaces;
-   #. Suspension from the project, including terms for readmission; and/or
-   #. Complete expulsion from the project.
-
-#. Contributor organizations and their officers and members, in their capacity as such, may be subject to the sanctions in Section VIII.2, as applicable, only upon a clear and convincing showing of actual participation in, or actual authorization or ratification of, a violation of the Code. In making this determination, the project shall consider whether the organization’s members were acting in accord with its practices and policies, or with the knowledge or approval of a substantial number of its members or leadership.
-
-Notes
------
 
 Courts may review the constitutionality of not only the procedures employed in disciplinary proceedings but also any resulting sanctions. For instance, punishments found “arbitrary, capricious, or wholly unrelated to the legitimate state goal of maintaining an atmosphere conducive to learning” may run afoul of substantive due process rights.\ [#ftn-153]_ In re Kickertz offers several other potential bases for invalidating particular sanctions: if the sanction was too harsh for the offense,\ [#ftn-154]_ if the sanction imposed an unreasonable cost on the contributor,\ [#ftn-155]_ if the disciplinary body failed to consider extenuating circumstances,\ [#ftn-156]_ or if the sanction raised equal protection issues.\ [#ftn-157]_
 
@@ -561,24 +206,9 @@ The standard by which the project may punish contributor groups is drawn from fe
 Confidentiality
 ===============
 
-#. Records related to any aspect of discipline against a contributor may not be released by the project without the contributor's authorization. This prohibition does not apply to contributors in possession of their own records. Only exceptions authorized under the Family Educational Rights and Privacy Act (FERPA) will be permitted. Specifically, the project may release records:
-
-   #. To comply with a judicial order or a lawfully issued subpoena;
-   #. To inform the Complainant in a case involving allegations of a crime of violence or a non-forcible sex offense of the final results of a related disciplinary Hearing;
-   #. To inform any third party, including the public or other projects, of the final results of a disciplinary proceeding related to a crime of violence or non-forcible sex offense if the Respondent is found responsible;
-   #. To any contributor's parents or significant other;
-   #. To address a health or safety emergency.\ [#ftn-163]_
-
-#. For alleged sexual misconduct, the project shall keep confidential the identity of any Complainant, Respondent, and witness, except as permitted by FERPA, required by law, or necessary to conduct any investigation, Hearing, or judicial proceeding arising under the grievance process.\ [#ftn-164]_
-
-#. Disclosure of final results to third Parties shall include only the name of the Responsible contributor, the violation committed, and any sanction imposed. The disclosure must not include the name of any other contributor, including a victim or witness, without the written consent of that other contributor.
-
-#. Upon a contributor's request, the project will expunge a contributor's disciplinary records three years after the contributor's final day of involvement with the project, unless the sanction involved suspension or expulsion.
-
-Notes
------
-
 This Section is based on the restatement of the requirements for confidentiality contained in Department of Education guidance.\ [#ftn-165]_ Nothing in this Section shall be construed to violate any obligations the project may have under FERPA or the Clery Act.\ [#ftn-166]_
+
+TODO: GPDR compliance?
 
 Footnotes
 =========
@@ -600,7 +230,7 @@ Footnotes
 .. [#ftn-21] Goss v. Lopez, 419 U.S. 565, 581 (1975).
 .. [#ftn-22] Stephenson v. Davenport Cmty. Sch. Dist., 110 F.3d 1303, 1309 (8th Cir. 1997) (noting “a proportionately greater level of scrutiny is required because the regulation reaches the exercise of free speech.”).
 .. [#ftn-23] *See* Papelino v. Albany Coll. of Pharm. of Union Univ., 633 F.3d 81, 87 (2d Cir. 2011) (describing New York state appellate court decision to annul an expulsion based on an invalid “statistical compilation” purportedly showing that the plaintiffs cheated).
-.. [#ftn-24] 526 U.S. 629, 651 (1999); *see also* U.S. Dep’t of Educ, Office for Civil Rights, *Commentary on Title IX Regulations*, 449–529 (May 7, 2020), (describing how the *Davis* standard protects free speech while allowing educational institutions to address and prevent sexual harassment), *available at* https://www2.ed.gov/about/offices/list/ocr/docs/titleix-regs-unofficial.pdf.
+.. [#ftn-majeed] "The Misapplication of Peer Harassment Law on College and University Campuses and the Loss of Student Speech Rights,"" by Azhar Majeed, The Journal of College and University Law, Vol. 35, No. 2, 2009.
 .. [#ftn-25] *See* McCauley v. Univ. of the Virgin Islands, 618 F.3d 232, 237 (3d Cir. 2010) (striking down university harassment policy prohibiting “any act which causes . . . mental harm or which . . . frightens, demeans, degrades or disgraces any person”); DeJohn v. Temple Univ., 537 F.3d 301, 319 (3d Cir. 2008) (permanently enjoining university from enforcing overbroad sexual harassment policy that “provides no shelter for core protected speech”); Dambrot v. Central Mich. Univ., 55 F.3d 1177, 1184 (6th Cir. 1995) (finding university racial harassment policy prohibiting “negative” and “offensive” speech unconstitutionally vague and overbroad); Booher v. Bd. of Regents, N. Kentucky Univ., No. 2:96-CV-135, 1998 WL 35867183, at \*9 (E.D. Ky. July 22, 1998) (finding university sexual harassment policy unconstitutionally vague because subjective language failed to give students notice of what was prohibited).
 .. [#ftn-26] *E.g.*, Papish v. Bd of Curators of the Univ. of Missouri, 410 U.S. 667, 670 (1973) (“[T]he mere dissemination of ideas—no matter how offensive to good taste—on a state university campus may not be shut off in the name alone of ‘conventions of decency.’”); Texas v. Johnson, 491 U.S. 397, 414 (1989) (“If there is a bedrock principle underlying the First Amendment, it is that the government may not prohibit the expression of an idea simply because society finds the idea itself offensive or disagreeable.”). Note that speech accompanied by non-consensual physical contact is more likely to constitute punishable harassment. *Compare* Riccio v. New Haven Bd. of Educ., 467 F. Supp. 2d 219, 222 (D. Conn. 2006) (repeatedly being called “bitch,” “dyke,” “freak,” “lesbian,” “gothic,” and other derogatory names was not severe or pervasive enough to amount to actionable harassment) *with* Vance v. Spencer Cty. Pub. Sch. Dist., 231 F.3d 253, 259 (6th Cir. 2000) (persistent requests for sexual favors combined with inappropriate touching and a physical attack constituted harassment) *and* Doe v. Brimfield Grade Sch., 552 F. Supp. 2d 816, 819–20 (C.D. Ill. 2008) (repeatedly “grabbing, twisting, and hitting” plaintiff’s genitals, teasing him about the incidents, reprimanding him for complaining, and telling him to “stick up for himself” constituted harassment).
 .. [#ftn-27] *See* Lyle v. Warner Bros. Television Prods., 132 P.3d 211, 223, 225 (Cal. 2006) (finding that “annoying or merely offensive comments” that “did not involve and were not aimed at plaintiff” did not constitute actionable workplace harassment).

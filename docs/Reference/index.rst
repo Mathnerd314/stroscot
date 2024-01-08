@@ -3,14 +3,6 @@ Language Reference
 
 .. toctree::
   :maxdepth: 2
+  :glob:
 
-  Logic
-  Syntax
-  Values
-  Library
-  Fexprs
-  Modules
-  Dispatch
-  Memory
-  BuildSystem
-  Errors
+  *

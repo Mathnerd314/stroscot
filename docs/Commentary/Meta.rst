@@ -92,3 +92,14 @@ Releases and deadlines
 Software development is notoriously unpredictable, missing deadlines left and right. There is also the fact that Stroscot is an open-source project, with no funding. I like the `SuperTux FAQ <https://github.com/SuperTux/supertux/wiki/SuperTux_FAQ>`__ answer - "When will [it] be released? This is by far the most frequently asked question of all, and the answer is simple: When it's done. Honestly, we don't have a release date yet. Just like many of you, we'd like to see [Stroscot] finished and released to the public as soon as possible, but since we all are busy with other, probably less interesting things, the amount of time we are able to put into this is limited. Please be patient." I'm not in any hurry and I think getting things right is more important that rushing for time. I would also say that Stroscot, like SuperTux and most software projects, is already released in a "continuous release" sense - the docs build, there's a website, and at any time you can checkout and build the mainline and play around with it.
 
 But, this would be categorized as a "nightly" or unstable release. What about declaring an alpha/beta/stable release? Stroscot is mostly on paper at the moment. In the future, there may be questions like "Why isn't this fully out yet? It feels finished and it works great. Just get it out there.", and that's where the objective criteria come in. I would say, the alpha state is a self-hosting language that's mostly usable, maybe with a uniform Lisp-like syntax, an incomplete standard library, and so on. The beta state is when the final syntax of the core language has been pretty much decided on. The stable release is when the standard library has been fleshed out and reached some level of completeness.
+
+Criticisms
+==========
+
+These criticisms from the `programming language checklist <https://www.mcmillen.dev/language_checklist.html>`__ seem valid.
+
+* Stroscot lacks reflection.
+* Stroscot relies on an optimization which has never been shown possible
+* Stroscot requires the compiler to be present at runtime
+* Stroscot requires the language runtime to be present at compile-time
+* Dangerous behavior is only a warning

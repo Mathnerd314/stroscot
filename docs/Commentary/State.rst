@@ -10,9 +10,11 @@ One issue with this denotational semantics view is that most programs these days
 
 Following Haskell, what we need is do-notation. In Haskell, this is by default tied to monads, but with GHC's language extensions such as RebindableSyntax and QualifiedDo, there are really no restrictions on the types. The basic syntax is three productions::
 
-  statement {e} = e
+  simple statement {e} = e
   command {e;stmts} = e >> {stmts}
   operation {pat <- e; stmts} = e >>= \x -> case x of { pat -> {stmts}; _ -> fail "" }
+
+There is the general principle that any statement may be replaced with a sequence of commands, operations, and statements.
 
 In Haskell, ``e >> m = e >>= \_ -> m``, and the type is ``(>>) : IO a -> IO b -> IO b``. I actually consider this a mistake. First, ``IO a`` makes it too easy to ignore return values - it should at least be a fixed type like ``IO ()``. But even ``()`` has some use, e.g. to allow returning exceptions, so really ``()`` should be replaced with a specialized type like ``FixedReturnValue``. At that point it seems worth defining a separate type synonym. So we can really consider statements to be two disjoint categories, ``Command = IO FixedReturnValue`` and ``Operation a = IO (a \ FixedReturnValue)``. If we hide ``FixedReturnValue`` then we just get two opaque types ``Command`` and ``Operation a`` and a combination ``IO a = Command | Operation a``. At that point there is essentially no linkage and we can just take ``Command`` and ``Operation a`` as two distinct types to begin with. So really ``(>>)`` should not be hardcoded to its monadic definition, for example it is useful to take ``(>>)`` to be function composition or category composition.
 
@@ -275,19 +277,16 @@ I/O monad showdown
 One choice for operations
 -------------------------
 
-We might think that there are a lot of monads. After all, every library defines a few. But actually, there is a universal construction for monads. Specifically, ``Codensity m a`` in `kan-extensions <https://hackage.haskell.org/package/kan-extensions-0.5.0/docs/Control-Monad-Codensity.html>`__ is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ - it is a monad regardless of ``m`` (`see comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__), and if ``m`` is a monad, then the monad values ``m a`` can be embedded and retrieved via ``lift :: m a -> Codensity m a`` and ``lowerCodensity :: Codensity m a -> m a``.
-
- ``(>>=)`` and retrieved via ``\f -> f return``. That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
-
-
+We might think that there are a lot of monads. After all, almost every Haskell library defines a few. But actually, there is a universal construction for monads. Specifically, ``Codensity m a`` in `kan-extensions <https://hackage.haskell.org/package/kan-extensions-0.5.0/docs/Control-Monad-Codensity.html>`__ is `the mother of all monads <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html>`__ - it is a monad regardless of ``m`` (`see comment <http://blog.sigfpe.com/2008/12/mother-of-all-monads.html#c3279179532869319461>`__), and if ``m`` is a monad, then the monad values ``m a`` can be embedded and retrieved via ``lift :: m a -> Codensity m a`` and ``lowerCodensity :: Codensity m a -> m a``. Furthermore the monad operations of Codensity are compatible with these embedded operations, like ``lowerCodensity (lift a >>= \x -> lift (b x)) == a >>= b``. That blog post gives a generic way to implement monads via the continuation monad, but the direct implementation is pretty clean. For example the `StateT monad <https://github.com/Mathnerd314/stroscot/blob/master/tests/Continuations-State.hs>`__.
 
 Monad constructions
 -------------------
 
 A monad transformer is a way of constructing monads from other monads - given a basic monad ``m a``, and a transformer ``T``, ``T m a`` is a new monad with a function ``lift :: m a -> T m a``. It is also generally possible to implement something like the inverse function ``lower :: T m a -> (m a | Fail)``, such that ``lower (lift x) == x``. Note though that ``T m a`` is generally larger, so ``lower`` erases some information and is partial. Monad transformers seem attractive - who doesn't want extra functionality in their I/O monad? But following this line of reasoning, applying a monad transformer once is not enough - we could apply the monad transformer a second time, and get even more functionality. To maximize functionality we would need an infinite monad transformer stack. But of course most type systems don't handle infinite types very well. The conclusion is that monad transformers are actually a clunky way to express functionality and we are better off implementing the functionality provided by monad transformers as dedicated features of the language. But to get rid of monad transformers completely, we need to ensure that these dedicated features provide functionality equivalent to arbitrary numbers of monad transformers, for every type of monad transformer.
 
-
 Let's go through the list of existing monad transformers. I checked <https://hackage.haskell.org/package/transformers>`__, ChatGPT, and used various Google queries such as "monad transformer -MaybeT - StateT -...".
+
+::
 
     IdentityT ``m a``
     MaybeT/OptionT ``m (Maybe a)``
@@ -302,13 +301,12 @@ Let's go through the list of existing monad transformers. I checked <https://hac
     Free monad transformer ``mu T. m (Pure a | Free (f T))``
     ListZipperT: Transforms a base monad into a monad that supports efficient list manipulations.
     ParsecT: Enables building parser combinators using monadic style.
-
     LogicT
     SelectT
 
-we see this is pretty much the case for Stroscot. The I/O store (discussed later in this document) allows implementing any number of StateT's (mutable variables). AccumT / WriterT is a mutable variable that's not read, and similarly ReaderT is a mutable variable that's not written. We can also use implicit parameters to get ambient values like ReaderT provides. Exceptions are a more general and powerful version of MaybeT/ErrorT/ExceptT/MonadFail. Logic-programming style nondeterminism covers ListT / SelectT.
+We see that Stroscot pretty much has all of these monads. The I/O store (discussed later in this document) allows implementing any number of StateT's (mutable variables). AccumT / WriterT is a mutable variable that's not read, and similarly ReaderT is a mutable variable that's not written. We can also use implicit parameters to get ambient values like ReaderT provides. Exceptions are a more general and powerful version of MaybeT/ErrorT/ExceptT/MonadFail. Logic-programming style nondeterminism covers ListT / SelectT.
 
-The remaining monad transformer is ContT. ContT is not really a well-behaved monad transformer - although we can lift values ``m a -> ContT m a``, we cannot lift continuations, i.e. no function ``ContT Identity r a -> ContT m r a`` exists. Applying ``ContT`` twice, we find ``ContT r (ContT s m) a = ContT s m (Either (a, r -> m s) r)``
+The remaining monad transformer is ContT. ContT is not really a well-behaved monad transformer - although we can lift values ``m a -> ContT m a``, we cannot lift continuations, i.e. no function ``ContT Identity r a -> ContT m r a`` exists. Applying ``ContT`` twice, we find ``ContT r (ContT s m) a = ContT s m (Either (a, r -> m s) r)``, so the biggest issue is that blocks returning values must be isomorphic to values.
 
 Continuations
 -------------

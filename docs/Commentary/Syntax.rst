@@ -8,11 +8,46 @@ For now S-expressions are probably sufficient, there is not a huge need for nice
 Customization
 =============
 
-Lots of old crappy languages are still in use, terrible design choices or not. Most people can get used to almost any syntax, and some will even come to like it, even if that syntax performs terribly vs other options in controlled studies. So in that sense, most PL syntax decisions do not really have a "bad" option - whatever syntax we end up on will be the syntax used, each individual choice will probably not impact language adoption that much, and even if there are a lot of complaints about the syntax, there probably will not be a consensus so it will stay unchanged for many years. Since the syntax doesn't really matter, it makes sense to make it pluggable and customizable - switch out the standard library, switch out the syntax. This allows supporting many small use cases, like non-English coding, demonstrations of new/changed syntax, etc. Most likely they will only be simple formatting customizations like indentation size, tabs vs spaces, line length, and layout vs braces, but once there is a syntax definition file it makes sense to allow putting more things in it. One specific issue is allowing per-checkout customization, so someone can write a git smudge/clean filter that runs the formatter on checkout/commit.
+Lots of old crappy languages are still in use, terrible design choices or not. Most people can get used to almost any syntax, and some will even come to like it, even if that syntax performs terribly vs other options in controlled studies. So in that sense, most PL syntax decisions do not really have a "bad" option - whatever syntax we end up on will be the syntax used, each individual choice will probably not impact language adoption that much, and even if there are a lot of complaints about the syntax, there probably will not be a consensus so it will stay unchanged for many years. Since the syntax doesn't really matter, it makes sense to make it pluggable and customizable - switch out the standard library, switch out the syntax. This allows supporting use cases like non-English coding and demonstrations of new/changed syntax. Most likely common uses will only be simple formatting customizations like indentation size, tabs vs spaces, line length, and layout vs braces, but once there is a syntax definition file it makes sense to allow putting more things in it. One specific issue is allowing per-checkout customization, so someone can write a git smudge/clean filter that runs the formatter on checkout/commit.
 
-On the other hand, some choice of syntax is necessary for writing the compiler, standard libraries, and documentation examples. Let's call this the "default syntax", since it makes sense to use the same syntax for all of these. Although the impact of individual choices may be minor, overall the default syntax is quite important - it defines the "feel" of the language and is probably the biggest factor of whether people try out the language or close the homepage. Also, just guessing from https://blog.mozilla.org/metrics/2009/08/11/how-many-firefox-users-customize-their-browser/, about 1/3 of people will bother to use some amount of customization, while 2/3 will use the default settings. The 1/3 that customize obviously have their reasons for wanting the customization. But with a million users, 2/3 of a million is quite a lot. Syntax is decided by usage, so the default syntax will most likely become the most popular. But it could also be that as the language becomes popular, an alternative syntax emerges and takes over, ending up in an evolution of the default syntax. So none of the choices of the default syntax are final, but neither should they be arbitrary. It's similar to the discussion of the IDE where I settled on VSCode - of course I'm not going to force a choice of IDE, but neither am I going to spend much effort on supporting other IDEs, besides some basic hooks, at least until the language gets popular.
+On the other hand, some choice of syntax is necessary for writing the compiler, standard libraries, and documentation examples. Let's call this the "default syntax", since it makes sense to use the same syntax for all of these. Although the impact of individual choices may be minor, overall the default syntax is quite important - it defines the "feel" of the language and is probably the biggest factor of whether people try out the language or close the homepage. As a rough sketch, using numbers from https://blog.mozilla.org/metrics/2009/08/11/how-many-firefox-users-customize-their-browser/, about 1/3 of people will bother to use some amount of customization, while 2/3 will use the default settings. The 1/3 that customize obviously have their reasons for wanting the customization. But with a million users, 2/3 of a million is quite a lot. Syntax is decided by usage, so the default syntax will most likely become the most popular. But it could also be that as the language becomes popular, an alternative syntax emerges and takes over, ending up in an evolution of the default syntax. So none of the choices of the default syntax are final, but neither should they be arbitrary. It's similar to the discussion of IDEs, where I settled on VSCode - of course I'm not going to force a choice of IDE, but neither am I going to spend much effort on supporting other IDEs, at least until the language gets popular and contributors start working on IDE support themselves.
 
 Some studies use a "Randomo" language which randomizes design choices. It would be useful to implement syntax randomization as part of the customization, so choices could be compared and tested. Basically this uses the per-checkout customization and stores code in the repository as a non-readable base64 or Lisp-like AST dump. Then people get an initial randomized style, but can customize it to their liking, and once we reach 100 users we collect styles/opinions and decide on a final choice as default.
+
+Principles
+==========
+
+Syntax is essentially the UI of the language. As such UI guidelines apply. One such book is `The Humane Interface <https://en.wikipedia.org/wiki/The_Humane_Interface>`__, we can go through the principles:
+
+* Modelessness – in a programming context, this means the same program always produces the same output. It is a bit harder to interpret this principle in the context of language because language is naturally ambiguous with homophones and contextual meanings.
+* Monotony of design – there should be only one way to accomplish a certain atomic task in an application, as opposed to toolbar button, menu dropdown, and keyboard shortcut. This principle makes sense when applied to programming design, one syntax for a given language feature, but is perhaps a bit subtle in the definition of "atomic" - for example Haskell has ``let`` and ``where`` which are almost identical syntaxes, except one puts the main expression above the definitions while the other puts the main expression below.
+* Universal undo/redo – in programming undo/redo is handled by a combination of the IDE and VCS; the IDE does a limited undo/redo for small changes, and the VCS saves changes persistently and allows full control. Certainly a universal system for programming would be a better UI but it would most likely require making a new IDE. That will have to wait. For debugging there is also reversible debugging that allows undo/redo of execution.
+* Elimination of warning screens – modern software applications often ask the user "are you sure?" before some potentially harmful action. In the context of programming, I think this is most similar to Rust's "unsafe" blocks or Kotlin's "experimental API opt-in" annotations. I agree with Raskin's argument that they are unhelpful because users tend to ignore them out of habit - in an IDE it just adds a monotonous "auto-fix all the stupid compiler issues" step.
+* Universal use of text – this is discussed more in the `Text-based`_ section, certainly it seems that an icon-based language would be less usable
+
+Another set of principles is Constantine and Lockwood's principles of usage-centered design:
+
+* The structure principle - According to Domain Driven Design, the design of the code should follow the structure of the problem domain, as such the programmer must have most of the control over the layout of the code and it is not really a good idea to have brittle or opinionated syntax. It is also worth considering the overall structure of the standard library, the compiler, and the documentation.
+* The simplicity principle: I would rephrase this as "common tasks should be easy and clear, difficult tasks should not be obscured by the syntax". This is an overall principle for Stroscot but I guess it needs special attention in the syntax.
+* The visibility principle: This can go a few different ways. One is that a function should generally be at most one screenful of code. Another is that IDE navigation support is a must. Another is that if the programmer has a mockup, design document, or reference paper, then this should be able to be included in the code somehow. You can pretty much do this with comments (VSCode even hyperlinks them) but maybe there is a better solution. On the flip side, it also means syntax should not be noisy and it should always be clear how to write a program in the best style.
+* The feedback principle: A program by itself is inert, no feedback. This principle therefore applies to the compiler: compilation progress, execution progress, program state, debugger state, warnings and errors. I am not sure it applies to syntax except to ensure that each syntactic construct is localized so it can give a good underline error in VSCode.
+* The tolerance principle: This is sort of Stroscot's principle of no fatal compiler errors. Another interpretation is to tolerate syntax errors, e.g. using a large language model that will identify (some approximation of) intent of the program and allow varied syntaxes and input notation.
+
+ The design should be flexible and tolerant, reducing the cost of mistakes and misuse  while also preventing errors
+* The reuse principle: The design should reuse internal and external components and behaviors, maintaining consistency with purpose rather than merely arbitrary consistency, thus reducing the need for users to rethink and remember.
+
+Going through these, they are a bit hard to apply. Per `Wikipedia <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__  there is the law of least astonishment, which in 1972 read as follows:
+
+    For those parts of the system which cannot be adjusted to the peculiarities of the user, the designers of a systems programming language should obey the “Law of Least Astonishment.” In short, this law states that every construct in the system should behave exactly as its syntax suggests. Widely accepted conventions should be followed whenever possible, and exceptions to previously established rules of the language should be minimal.
+
+Defaults should match typical usage patterns.
+
+* easy for humans to type, parse, and scan
+* no confusable symbols
+* conceptual integrity: anywhere you look in your system, you can tell that the design is part of the same overall design. Uniform/coherent formatting, identifier naming, and module structure. This makes it much easier to take a problem with a program's behavior and trace it to a problem in the source code.
+* Everything implicit: verbosity adds cognitive overhead and does not significantly reduce the amount of context the reader must remember
+* do not try to prevent developers from misusing features
+
 
 Design procedure
 ================
@@ -149,6 +184,8 @@ Another study :cite:`buseMetricSoftwareReadability2008` identified factors for r
 
 They constructed several models using these factors, mainly a Bayesian classifier, all of which predicted average readability scores better than the original human raters. But the model is not public.
 
+An Ada guideline is "language constructs which do not express similar ideas should not look similar".
+
 Proportional fonts
 ------------------
 
@@ -199,6 +236,24 @@ Example DSLs:
 
 It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging computations, like passes that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.
 
+Typeable
+--------
+
+Per `Coding Horror <https://blog.codinghorror.com/we-are-typists-first-programmers-second/>`__, coding is just typing. So one amazing idea is to make the syntax easy to type. Here is ChatGPT's list of what makes text hard to type:
+
+* Extremely Long, Complex, and Rare Words: Use long words or those with complex spelling patterns (like words with silent letters, double letters, or unusual letter combinations). Texts that frequently alternate between left-hand and right-hand typing can be more difficult, as they require greater coordination. Strings of the same letter or very similar keystrokes in succession can cause mistakes, especially if they're fast. Use highly specialized jargon, technical terms, or colloquialisms from fields like quantum physics, advanced mathematics, law, or philosophy that the typist is unfamiliar with. Words from scientific disciplines, like chemistry or medicine, can be incredibly lengthy and complex.
+* Frequent and Unusual Punctuation: Incorporate a high frequency of commas, periods, semicolons, and other symbols. Also consider including unusual punctuation marks, such as interrobangs (‽), pilcrows (¶), and uncommon diacritics.
+* Randomized Capitalization and Letter Case Switching: Randomly capitalize letters or switch between upper and lower case in a non-standard pattern.
+* Numeric and Symbolic Content: Mix in long sequences of random numbers and symbols in unpredictable patterns that are hard to memorize and type accurately.
+* Multiple Languages with Different Scripts: Integrate words from languages that use different scripts, such as Arabic, Russian (Cyrillic), Mandarin (Chinese characters), or Hindi (Devanagari). This requires the typist to constantly switch keyboard layouts.
+* Palindrome and Anagram Overload: Create sentences that are palindromes or consist largely of anagrams, which are challenging to read and type.
+* Syntax Scrambling: Write sentences with deliberately scrambled and awkward syntax or grammar that still somehow maintain grammatical correctness, making them difficult to process. Long sentences with multiple clauses, especially if they include subordinating conjunctions and relative pronouns, can be challenging to type quickly and accurately.
+* Alliteration and Tongue Twisters: Use sentences that are full of alliteration or are tongue twisters, which are tricky to type quickly.
+* Esoteric Literary References: Include obscure literary references or quotes in archaic language, which are hard to understand and type without prior knowledge.
+* Incorporate ASCII Art or Unicode Art: This would require precise spacing and character placement, vastly increasing the difficulty.
+
+I have seen pretty much all of these in real-world programs, besides maybe the palindromes. You might think the difference between ``pos`` and ``position`` is trivial but it's not - one is an English word, one is programming jargon. Many programmers have written about how their keyboards screwed up their hands and their livelihoods with RSI and other such conditions.
+
 Familiarity
 ===========
 
@@ -218,6 +273,34 @@ But if
 
 As Randomo shows, the choice of characters for operators is arbitrary. Using familiar syntax at least benefits existing programmers, while new programmers will be confused regardless.
 
+Hungarian notation
+==================
+
+Hungarian notation puts abbreviated type annotations in variable names, so humans can check that the types are correct. But the compiler already checks declared types, automatically and much more thoroughly. So in the end it is noise. Mathematicians do use single-letter variables with subscripts, but these do not encode types, they are just abbreviations - e.g. ``x`` stands for "first coordinate". Per `Stroustrup <https://www.stroustrup.com/bs_faq2.html#Hungarian>`__ it is "a maintenance hazard and a serious detriment to good code. Avoid it as the plague."
+
+Keep syntax and semantics separate
+==================================
+
+Although both syntax and semantics are essential to a programming language, they are not on an equal footing. A given semantics may have many valid syntaxes, but there is generally only one semantics for a given construct (otherwise, it would be a different construct). Most considerations involve both syntactic and semantic components. Consider some examples:
+
+* Allowing both ``1+2`` and ``1.0+2.0``: One "solution" is to use syntactically different operators, such as ``+`` and ``+.`` in OCaml. But actually allowing the same syntax to mean different things requires a semantic solution, such as typeclasses, overloading, or union types.
+* Allowing ``a.b()`` for a method defined outside a class: Again, there is a "solution" of writing ``b(a)``. But actually allowing this requires a semantic solution of extension methods or implicit classes, which Flix mentions requires a lot of semantic baggage and can incur unexpected performance penalties.
+* Lambdas: There is a "solution" of passing a function pointer and closure struct. But actually allowing this in C++ required (just in the standard) 28 lines of BNF (~1/2 page) plus a note for syntax, and 6.5 pages plus 2 mentions for semantics.
+
+The addition example makes it clear that it's pretty hard to design any sort of syntax without taking into account the semantics. You may want to emulate the syntax of another language (or mathematics, in this case), but it may not be possible. So Stroscot takes the approach of "form follows function": first design the semantics, then design the syntax based on that. Thus there is a clear dependency relationship, rather than them being separate.
+
+Of course, the distinction is more fuzzy in practice. Papers define a syntax along with their semantics, and for clarity, we use that syntax when describing the semantics in the commentary. Similarly, the semantics of extension methods were proposed in order to allow a certain syntax. But formally speaking, most of the commentary is only considering semantics. As discussed in :ref:`Syntax`, the final syntax will be decided upon by a survey describing the abstract semantics of each language construct, with all preconceived ideas for syntax removed from the descriptions as much as possible.
+
+Another question is where to draw the line of syntactic sugar vs. language feature. Per `Wikipedia <https://en.wikipedia.org/wiki/Syntactic_sugar>`__, syntactic sugar is a shorthand for an operation canonically expressed in a more verbose form. I would say that syntactic sugar can be clearly identified by being able to write the translation as an unconditional function or macro, like the parser combinator ``some x = x <|> some x`` or the for loop:
+
+::
+
+  for ( init; condition; update) { body } = init; go
+    where
+      go | condition = body; update; go
+         | otherwise = return ()
+
+Anything more complex is a language or library feature (I don't distinguish the language and the standard library). So for example, lambdas are a language feature, not because they introduce new syntax for lambda expressions, but because the syntax for calling a lambda overlaps with the syntax for calling a function.
 
 Filenames
 =========
@@ -705,14 +788,16 @@ Using two characters to start a comment helps prevent the accidental starting of
 
 Multiline block comments have the issue of forgetting the end terminator and matching some other end terminator. Some languages only have EOL comments, presumably to avoid this problem. Nesting solves this because there will be an unterminated comment. Similarly forbidding block start indicators from appearing in a block comment will work. The compiler can also check each line and see if it looks like code, although this prevents commenting out code.
 
-Whitespace
-==========
+Identifiers
+===========
 
 Whitespace in identifiers... this doesn't work well with Haskell syntax. With whitespace ``do something = ...``` would define the identifier ``do something``, but in Haskell it's a clause ``do _`` that binds ``something``.
 
 OTOH using a string works fine: ``"do something" = ...``
 
 You could also make something an atom, then you can write ``do something`` in code but the clause definition is ``do ^something = ...``. The semantics are similar to a single identifier but different enough that I don't think it counts.
+
+The alternatives are snake case, camel case, kebab-case, and so on. I think all should be allowed.
 
 Indentation
 ===========
@@ -862,6 +947,8 @@ Haskell uses parentheses for most grouping, ``{}`` for replacing whitespace with
 Seems a bit weird, he cites Python as an example but Python still uses list literals: the syntax for a NumPy array is ``np.array([1, 2, 3, 4, 5])``. The only thing overloaded is access ``arr[i] = x``.
 
 Julia doesn't require parens around conditions in ``if`` and ``while``, ``if a == b`` instead of ``if (a == b)``.
+
+Ada uses round brackets for array component references. use round rather than square brackets "The advantage of  this is a uniform notation within an expression for reference to array components and for function calls. The same argument of uniform referents justifies using the same syntax for component selection of records."
 
 Function syntax
 ===============
@@ -1356,6 +1443,8 @@ This doesn't solve the issue of picking a default style for the standard library
 Layout
 ======
 
+The arrangement of characters in the document is primarily to assist the human reader. However, as Python and Haskell have shown, making the interpretation of the program indentation-sensitive can avoid mismatches between the compiler and the reader. A free format, in constrast, can lead to confusing situations where the compiler interprets a missing brace unexpectedly.
+
 The most obvious instance of layout is the module declaration list, but blocks, lists, and records can start layout as well. For readability, clauses may span multiple lines, so some way of distingishing the start / end of clauses must be defined. This amounts to adding braces and semicolons so as to make it layout-insensitive. The inserted braces are "virtual": they don't grammatically match with braces explicitly written in the file, but are otherwise semantically identical.
 
 ::
@@ -1832,3 +1921,17 @@ Type declarations
   a = 2 : s8
   a = s8 2
 
+
+Reasoning footprint
+===================
+
+Per `this Rust blog post <https://blog.rust-lang.org/2017/03/02/lang-ergonomics.html#implicit-vs-explicit>`__, the "reasoning footprint" is the information needed to confidently understand what a particular line of code is doing. Generally one has no control over the reasoning footprint - like an engine, complicated code has a lot of moving parts, and if you just look at a component without knowledge of the overall design you'll be lost.
+
+So what is important is ensuring that the necessary contextual knowledge is easy to find. This can include documentation, but more specifically it means a chain of misbehavior is easy to track down to its source.
+
+In the absence of any cues, a programmer might naturally assume that nothing interesting is going on in a piece of code. But maybe this code is very important - then the programmer will want to annotate the code, making it more verbose and noisy even though it is not necessary. A comment would suffice, but apparently programmers don't read comments, because comments aren't checked by the compiler and are often out-of-date. So what we want is syntactic control - the author can insert details of the code's execution, to explaibn how the code works in the context of the system. More formally we want properties as follows:
+
+* All information can be elided, without any heads-up that this is happening
+* The elided information can radically change program behavior
+* The elided information can depend on the entire execution context (the rest of the code) to fill itself in
+* There should be a clear process for inserting elided details and making it more explicit, without changing behavior

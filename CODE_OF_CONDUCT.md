@@ -1,1 +1,1 @@
-See [docs/Commentary/Code-of-conduct.rst](docs/Commentary/Code-of-conduct.rst).
+See [docs/Reference/Code-of-conduct.rst](docs/Reference/Code-of-conduct.rst).

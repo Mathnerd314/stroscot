@@ -50,6 +50,7 @@ The proposals of the various languages can be useful, as they include motivation
 * `Rust <https://github.com/rust-lang/rfcs/pulls>`__ (`accepted <https://rust-lang.github.io/rfcs/>`__)
 * `Go <https://github.com/golang/go/labels/Proposal>`__
 * `PHP <https://wiki.php.net/rfc>`__
+* `Carbon <https://github.com/carbon-language/carbon-lang/tree/trunk/proposals>`__
 
 TODO: go through these, unfortunately there’s a lot
 
@@ -730,6 +731,8 @@ Arrays
 
 An indexing scheme is a function ``IndexValue -> [0..length]``. An array is a term ``array scheme list``. A typed array also specifies an element type, ``typed_array type scheme list``. Tensors are arrays that use compound values as indexes. Sparse arrays use indexing schemes that map many indices to one value.
 
+As well as being constructed from a list and indexing scheme, arrays have a non-positional syntax ``{17..20 => 100, 11..16 & 1..6 => 0, 7..10 => 100}``, inspired by Ada, similar to record notation.
+
 Strings
 -------
 
@@ -822,7 +825,7 @@ Units
 Units are symbols or terms. Quantities are terms ``quantity number unit``. See the Units page.
 
 Multimedia
-========
+==========
 
 I guess we use SVG as the main format for graphics, plots, and geometric objects. Raster images are just arrays of pixel colors. Similarly audio files and time-series data are arrays of samples.
 
@@ -926,3 +929,26 @@ Supporting different platforms (Linux, macOS, Windows, etc) is hard:
 * Some platforms aren't supported on CI runners at all, like FreeBSD, so you need to use qemu or similar software to run FreeBSD in a VM
 
 Recommendation: err on the side of not supporting platforms, and document this, instead of sort-of-but-not-quite supporting it.
+
+Testing
+=======
+
+Per `Borretti <https://borretti.me/article/test-autodiscovery-silver-bullet>`__, the process for writing and running a unit test in Rust, from scratch, is:
+
+::
+
+  $ cargo new hello-world
+  $ cd hello-world
+  $ mkdir tests
+  $ echo '#[test]
+  fn test_two_plus_two() {
+      assert_eq!(2+2, 4);
+  }' > tests/test.rs
+  $ cargo test
+  running 1 test
+  test test_two_plus_two ... ok
+  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+In an existing codebase, it’s just opening a test module and adding a function.
+
+Now Stroscot has these sorts of tests where you can test by overloading. But also it makes sense to include a unit testing framework.
