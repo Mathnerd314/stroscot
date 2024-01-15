@@ -14,7 +14,6 @@ Links:
 Contents:
 
 .. toctree::
-  :maxdepth: 2
 
   GettingStarted/index
   HowTo/index

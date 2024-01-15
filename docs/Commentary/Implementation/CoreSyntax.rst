@@ -17,7 +17,7 @@ We use a simple program, boolean "and", presented in a Haskell-ish language:
 Derivation tree
 ~~~~~~~~~~~~~~~
 
-See the connectives :math:`\text{B} = \text{Bool}` and :math:`\multimap` defined :ref:`above <connectives>`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function instead of currying, expand out the identity, etc.).
+See the connectives :math:`\text{B} = \text{Bool}` and :math:`\multimap` defined in :ref:`Reference/Logic:Common connectives`. :math:`\multimap` is right associative as usual. Our program then has the following derivation tree, among others (we could add a bang to the first argument, use a multiple-argument function instead of currying, expand out the identity, etc.).
 
 .. image:: /_static/Stroscot_AND_Proof_Tree.svg
 

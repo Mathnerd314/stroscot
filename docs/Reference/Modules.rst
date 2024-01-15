@@ -128,7 +128,9 @@ Overrides
 
 By default, methods are scoped to their module. Every definition ``foo = a`` binds the identifier ``Module.foo``, and each module creates a new identifier. This means a use ``Module.foo`` refers to only the declarations within that module.
 
-Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example::
+Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example:
+
+.. code-block:: none
 
   A = module
     foo (x:{A}) = 1
@@ -140,10 +142,11 @@ Dispatch will resolve bare identifiers to their appropriate modules when it can 
   # [1,2]
   # print (force foo)
 
-
 This defines two symbols ``A.foo : A -> {1}`` and ``B.foo : B -> {2}``, and resolves ``map foo [A,B]`` to ``[A.foo A, B.foo B]``. However, because the bare identifier ends up resolving to different symbols, there are cases where dispatch is not sufficient to resolve the ambiguity. In this example, ``force foo`` results in an error because it could be either ``A.foo`` or ``B.foo``.
 
-The ``override`` statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following::
+The ``override`` statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following:
+
+.. code-block:: none
 
   A = module
     foo (x:{A}) = 1

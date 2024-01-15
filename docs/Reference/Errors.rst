@@ -207,7 +207,9 @@ Missing override
     - Correct
 
   * - .. literalinclude:: errors/missing-override.txt
+         :language: none
     - .. literalinclude:: errors/missing-override-fixed.txt
+         :language: none
 
 .. include:: errors/missing-override-message.rst
 

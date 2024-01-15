@@ -120,7 +120,7 @@ PyPL index (top 28)
 
 * good standard library design and documentation, probably worth copying
 * voted "most loved" by StackOverflow
-* ownership model/borrow checker has been found difficult to use by several studies (`1 <https://arxiv.org/pdf/1901.01001.pdf>`__, `2 <https://arxiv.org/pdf/2011.06171.pdf>`__, `https://dl.acm.org/doi/pdf/10.1145/3510003.3510107`__). Also it is incomplete - can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. In practice Rust programmers `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting or GC to ensure memory safety in complex cases
+* ownership model/borrow checker has been found difficult to use by several studies (`1 <https://arxiv.org/pdf/1901.01001.pdf>`__, `2 <https://arxiv.org/pdf/2011.06171.pdf>`__, `3 <https://dl.acm.org/doi/pdf/10.1145/3510003.3510107>`__). Also it is incomplete - can't even write linked lists without `endless pain <https://rcoh.me/posts/rust-linked-list-basically-impossible/>`__. In practice Rust programmers `end up <https://rust-unofficial.github.io/too-many-lists/third-layout.html>`__  using reference counting or GC to ensure memory safety in complex cases
 * concurrency safe, but async suffers from "borrow checker"-itis and uses atomic reference counting
 * learning experience circa 2015 was "rough"
 * compatibility pendulum has swung towards "too stable" - many changes that "should" be made for a better language that can't be

@@ -370,14 +370,14 @@ Generally it seems that Yoneda solves a different problem than an I/O monad.
 Algebraic effects
 -----------------
 
-Codensity and algebraic effects are quite similar, both using a data type to represent operations. In fact the two are macro-expressively equivalent. :cite:`forsterExpressivePowerUserDefined2017` But Codensity doesn't require new syntax unlike the handler functionality. In the effect approach, computations are not first-class values.
+Codensity and algebraic effects are quite similar, both using a data type to represent operations. In fact the two are macro-expressively equivalent. :cite:`forsterExpressivePowerUserdefined2017` But Codensity doesn't require new syntax unlike the handler functionality. In the effect approach, computations are not first-class values.
 
 OTOH effect types are quite useful, because you can define code that is polymorphic over the effect type, hence can be used as both pure and impure code. They use a monadic translation and then pure code is the identity monad. This can be shoehorned into continuations too by using a symbol marker with cases for pure and impure but maybe it is not as nice.
 
 Call by push value
 ------------------
 
-CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation is also a value. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it seems to be a disguised version of monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbyPushValueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
+CBPV has "values" and "computations". The original presentation has these as separate categories, but :cite:`eggerEnrichedEffectCalculus2014` presents an alternative calculus EC+ where every computation is also a value. There is exactly one primitive that sequences computation, ``M to x. N``, which acts like the monadic bind ``M >>= \x -> N``, and similarly there is ``return``. And the evaluation is CBV. So stripping away the thunk stuff it seems to be a disguised version of monads. And the thunk stuff is a rather fragile way to implement CBN - it doesn't generalize to call by need. :cite:`mcdermottExtendedCallbypushvalueReasoning2019` And then there is jump-with-argument (JWA) which uses continuations and is equivalent to CBPV.
 
 Applicative
 -----------
@@ -565,7 +565,7 @@ It has been established that PURE ⊆ CYCLE ⊊ HASK ⊆ IMPURE as far as expres
 
 * For the third relation, the thunk mechanism of HASK can be emulated in IMPURE, showing inclusion. :cite:`ben-amramNotesPippengerComparison1996` theorizes that for IMPURE programs following a read-update-write structure, there is a correspondingly efficient HASK program. Since Haskell 1.0 programs use a lazy stream ``[Response] -> [Request]`` for I/O, this read-update-write model seems to encompass all programs, hence it seems likely that the two languages are of equal efficiency, although nobody has formally proved this (TODO).
 
-The log(n) gap between CYCLE and HASK is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. (:cite:`strakaFunctionalDataStuctures2013`, chapter 5) Straka's implementation uses vEB trees which have a huge constant factor and space usage, but y-fast trees probably work too for a practical implementation.
+The log(n) gap between CYCLE and HASK is calculated using the cost of updating a balanced binary tree. This is the cost of the predecessor problem in the `pointer machine <https://en.wikipedia.org/wiki/Pointer_machine>`__. In the more accurate RAM model the update cost is optimally O(log log m) time under some assumptions. (:cite:`strakaFunctionalDataStructures2013`, chapter 5) Straka's implementation uses vEB trees which have a huge constant factor and space usage, but y-fast trees probably work too for a practical implementation.
 
 Still though, a gap is a gap, so to get performance we must provide laziness or destructive update. And programming efficient amortized pure lazy data structures is quite complex, and not well-studied. It seems that any practical programming language will have to provide destructive update.
 

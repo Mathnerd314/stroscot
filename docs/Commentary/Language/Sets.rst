@@ -1,12 +1,12 @@
 Sets
 ####
 
-Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see :ref:`Verification <Verification>`). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.
-
-Sets
-====
+Stroscot allows specifying properties about execution, which the compiler then attempts to prove or at least fuzz (see :ref:`Commentary/Language/Verification:Verification`). The most common form of property is membership in a set of values, described here. Constraining the set of values enables many useful optimizations to be performed.
 
 Steelman 3C "It shall be possible to define new data types in programs. A type may be defined as an enumeration, an array or record type, an indirect type, an existing type, or a subtype of an existing type. It shall be possible to process type definitions entirely during translation. An identifier may be associated with each type. No restriction shall be imposed on user defined types unless it is imposed on all types."
+
+Definition
+==========
 
 Sets in Stroscots are defined by a predicate ``a isElementOf S : Value -> Set -> Bool``, where ``Set = { s : Any | forall a : Any. (a isElemof s : Bool) }``. The predicate can describe any side effect free computation, so a set can describe any boolean function. As described in :ref:`paradoxes` Stroscot avoids the set-theoretic paradoxes by requiring every set definition to be well-founded.
 

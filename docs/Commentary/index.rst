@@ -5,6 +5,8 @@ Every language needs an explanation of all the decisions made and possible optio
 
 .. toctree::
   :maxdepth: 2
-  :glob:
 
-  *
+  Language/index
+  Implementation/index
+  Libraries/index
+  Meta/index

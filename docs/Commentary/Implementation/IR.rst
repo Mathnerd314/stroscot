@@ -195,7 +195,7 @@ Turner writes https://www.cs.kent.ac.uk/people/staff/dat/miranda/manual/30.html:
 
 1. easier to read - six separate chunks of information rather than one big one
 2. easier to debug - each of its functions can be exercised separately, on appropriate test data, within a Miranda session
-3. more robust for future development - for example if we later wish to add a second `main' function that solves a different problem by using the same five auxiliary functions in another way, we can do so without having to restructure any existing code.
+3. more robust for future development - for example if we later wish to add a second ``main`` function that solves a different problem by using the same five auxiliary functions in another way, we can do so without having to restructure any existing code.
 4. in the current implementation, functions defined inside a "where" clause cannot have their types explicitly specified
 
 In practice, programmers tend to use fewer than ten parameters, but little nesting, with a mixture of parameter lifting/dropping and block floating/sinking.
@@ -327,16 +327,11 @@ A basic block is a mixture of jump and non-jump instructions that is complete, i
 
 Although phi nodes were an interesting idea all the `cool kids <https://mlir.llvm.org/docs/Rationale/Rationale/#block-arguments-vs-phi-nodes>`__ are now using block arguments. Blocks arguments fit better into various analysis passes.
 
-Blocks
-======
-
 From a user perspective there are two types of jumpable addresses:
 
-memory - effective address computation
-SIB addressing form, where the index register is not used in address calculation, Scale is ignored. Only the base and displacement are used in effective address calculation.
-VSIB memory addressing
-
-
+* memory - effective address computation
+* SIB addressing form, where the index register is not used in address calculation, Scale is ignored. Only the base and displacement are used in effective address calculation.
+* VSIB memory addressing
 
 Memory and the program counter are virtualized as well, using labels. A label refers to a memory location with a specific block of code loaded. The blocks are not ordered, so unconditional jumps must be inserted between blocks if necessary. The block order can be determined using profiling, removing the unconditional jump that is taken most often.
 
@@ -355,7 +350,7 @@ There are also constraints from the ABI calling convention: https://gitlab.com/x
 Values
 ======
 
-Since all values are representable in memory, we could use bytes in the IR for values. But this would lose the type information. So instead we must support all the value types listed in :ref:`Values`.
+Since all values are representable in memory, we could use bytes in the IR for values. But this would lose the type information. So instead we must support all the value types listed in `Values`_.
 
 Thorin
 ======

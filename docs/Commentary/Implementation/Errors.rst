@@ -101,7 +101,7 @@ The wording may be important. A Java editor called Decaf intercepted and re-word
 
   StackOverflow and compiler error messages used 3 argument layouts: claim alone, a simple argument consisting of claim, grounds, and warrant, and an extended argument which is a simple argument plus backing. These layouts are multiplied times 2 depending on whether there was a resolution in the claim; my notation is that "claim" means a claim without resolution. The tested results were claim < {simple,extended}, extended < claim+resolution (claim+resolution being dubbed a non-logical "quick fix" instruction).
 
-  Per the thesis :cite:`barikErrorMessagesRational` extended arguments are mainly useful for novices and unfamiliar code. Theorizing, if the developer knows what's going on, they likely want brief messages and their preference is claim+resolution > simple > extended > others. But with an ``--explain`` flag their preference is more like extended+resolution > simple+resolution > claim+resolution > extended > simple > others. It's probably worth a survey comparing error messages of varying verbosities to confirm.
+  Per the thesis :cite:`barikErrorMessagesRational2018` extended arguments are mainly useful for novices and unfamiliar code. Theorizing, if the developer knows what's going on, they likely want brief messages and their preference is claim+resolution > simple > extended > others. But with an ``--explain`` flag their preference is more like extended+resolution > simple+resolution > claim+resolution > extended > simple > others. It's probably worth a survey comparing error messages of varying verbosities to confirm.
 
 * Report errors at the right time: Generally one wants to see errors as soon as possible, using static analysis tools.
 

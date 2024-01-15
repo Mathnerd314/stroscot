@@ -54,8 +54,8 @@ Briefly looking at the other definitions on C2:
 * Chris Date "An object is essentially just a value (if immutable) or a variable (otherwise)." - certainly a good property, but I think the dictionary definitions capture much more of the intuition
 * Binding Behavior to References - unless "binding behavior" means dictionaries, it's missing a key component of OO, the field and method names
 
-Objects
-=======
+Definition of object
+====================
 
 For the first part of OO, we must define objects, and explain how they can contain properties and methods. For the most part I agree with `ObjectsAreDictionaries <https://wiki.c2.com/?ObjectsAreDictionaries>`__, i.e. objects are a mapping from strings to values. But I want one fewer concept in the core language so I will instead define objects to be modules, in the ML sense: a module is a list of definitions, and these definitions collectively define a mapping from expressions to values. The expression evaluated in the context of an object/module will usually be an identifier, corresponding to a dictionary lookup, but this definition lets us define values for function calls and other bits of syntax as well, so we can write DSLs more easily.
 
@@ -102,7 +102,7 @@ ML modules, because only ML modules provide sophisticated sharing mechanisms tha
 
 Cook goes on to state that "any programming model that allows inspection of the representation of more than one abstraction at a time is not object-oriented." So by his definition C++ and Java are not object-oriented - bleh. In fact this is just a limitation of ML - ML cannot inspect/pattern match on functions; they are opaque. In Stroscot, it is possible to match on the lambdas in Cook's Figure 8 and determine if an ISet was constructed via the Empty, Insert, or Union implementations. We might as well have written ``data ISet = Empty | Insert int ISet | Union ISet ISet`` as in the ADT implementation, except that the lambda presentation is an open data type that allows adding more cases. In Stroscot, we use multimethods to solve the expression problem, so it is just defining symbols and adding more dispatch cases to the relevant multimethods.
 
-::
+.. code-block:: none
 
   interface ISet = {
     isEmpty : bool,
@@ -206,7 +206,7 @@ More generally, all combinations of subtyping and inheritance are possible:
 * S is not a subtype but is a child type of T - S child of T, S -> S is not a subtype of T -> T
 * S is both a subtype and a child type of T - when all inherited fields and methods of the derived type have types which are subtypes of the corresponding fields and methods from the inherited type, and the type is an "open record"
 
-Note that subtype + derived type is only possible with open records - with closed records no derived type is a proper subtype. :cite:`abdelgawadNOOPDomainTheoreticModel2018` formalizes this notion of open records and shows that in Java and other nominally-typed OOP languages, "inheritance is subtyping". More specifically, "a class B is a subtype
+Note that subtype + derived type is only possible with open records - with closed records no derived type is a proper subtype. :cite:`abdelgawadNOOPDomaintheoreticModel2018` formalizes this notion of open records and shows that in Java and other nominally-typed OOP languages, "inheritance is subtyping". More specifically, "a class B is a subtype
 of a class A, in the open record sense, iff B inherits from A." But this property is obtained by placing restrictions on inheritance - in Java, a method only overrides its parent method if its type matches the parent method, and methods cannot be removed. :cite:`taivalsaariNotionInheritance1996` calls this "strict inheritance". Strict inheritance is a pretty weird restriction from a unityped perspective - for example in Smalltalk we can override a field and change its value from an int to a string. So this "inheritance is subtyping" property is a form of type discipline, rather than a free property.
 
 Inheritance-as-subtyping is easy to misuse and the Java platform libraries made numerous mistakes: Stack extends Vector, Properties extends Hashtable - in both cases, not using inheritance and thus avoiding the accompanying field/property inclusion would have been preferable. For example, with Properties (`1 <https://codeblog.jonskeet.uk/2006/03/04/inheritancetax/>`__), ``(Properties) p.getProperty(key)`` takes defaults into account, while ``p.get(key)`` which is inherited from Hashtable does not, and direct access to the underlying Hashtable allows adding non-String objects, when the designers intended that Properties should only be Strings. Once this invariant is violated, it is no longer possible to use other parts of the Properties API (load and store). Without inheritance-as-subtyping, ``get`` could have been overridden to be a subtype, and the other Hashtable methods deleted.

@@ -106,7 +106,7 @@ Mutable arrays are a reference pointing to an immutable array. Operations are op
 
 There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like ``readOffset Int 0 ptr``. You can read a different type than you wrote, and it doesn't have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.
 
-:cite:`Tremblay` says that "allowing the size of arrays to be decided at run time [...] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas." But Storscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time.
+:cite:`tremblayTheoryPracticeCompiler1985` page 73 says that "allowing the size of arrays to be decided at run time [...] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas." But Stroscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time. Most languages these days have dynamically-sized arrays.
 
 Tensors
 -------
@@ -267,7 +267,7 @@ Sets are the mathematical definition, i.e. a function ``isElemOf : Any -> {Prese
   b = map { 1 = Present, 2 = Present, 3 = Present }
   a = set (\x -> lookup {default=Absent} b x)
 
-More notation for sets is discussed on the :ref:`Sets` page.
+More notation for sets is discussed on the `Sets`_ page.
 
 Bags
 ====

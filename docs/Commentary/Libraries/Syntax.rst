@@ -31,9 +31,7 @@ Another set of principles is Constantine and Lockwood's principles of usage-cent
 * The simplicity principle: I would rephrase this as "common tasks should be easy and clear, difficult tasks should not be obscured by the syntax". This is an overall principle for Stroscot but I guess it needs special attention in the syntax.
 * The visibility principle: This can go a few different ways. One is that a function should generally be at most one screenful of code. Another is that IDE navigation support is a must. Another is that if the programmer has a mockup, design document, or reference paper, then this should be able to be included in the code somehow. You can pretty much do this with comments (VSCode even hyperlinks them) but maybe there is a better solution. On the flip side, it also means syntax should not be noisy and it should always be clear how to write a program in the best style.
 * The feedback principle: A program by itself is inert, no feedback. This principle therefore applies to the compiler: compilation progress, execution progress, program state, debugger state, warnings and errors. I am not sure it applies to syntax except to ensure that each syntactic construct is localized so it can give a good underline error in VSCode.
-* The tolerance principle: This is sort of Stroscot's principle of no fatal compiler errors. Another interpretation is to tolerate syntax errors, e.g. using a large language model that will identify (some approximation of) intent of the program and allow varied syntaxes and input notation.
-
- The design should be flexible and tolerant, reducing the cost of mistakes and misuse  while also preventing errors
+* The tolerance principle: This is sort of Stroscot's principle of no fatal compiler errors. Another interpretation is to tolerate syntax errors, e.g. using a large language model that will identify (some approximation of) intent of the program and allow varied syntaxes and input notation. "The design should be flexible and tolerant, reducing the cost of mistakes and misuse while also preventing errors"
 * The reuse principle: The design should reuse internal and external components and behaviors, maintaining consistency with purpose rather than merely arbitrary consistency, thus reducing the need for users to rethink and remember.
 
 Going through these, they are a bit hard to apply. Per `Wikipedia <https://en.wikipedia.org/wiki/Principle_of_least_astonishment>`__  there is the law of least astonishment, which in 1972 read as follows:
@@ -212,36 +210,6 @@ TODO: test it out by modifying https://github.com/isral/elastic_tabstops_mono.vs
 
 The advantage of tablike spaces over elastic tabstops is that the underlying text file looks fine when viewed in a monospaced font. So it's only the visual presentation that changes, hence it can be used on a team.
 
-DSLs
-----
-
-Stroscot aims to be a "pluggable" language, where you can write syntax, type checking, etc. for a DSL and have it embed seamlessly into the main language. This may be possible due to macros, which allows pattern-matching the AST of any expression, like ``javascript (1 + "abc" { 234 })``, or may need special handling in the parser to also do character-level embedding or seamless integration of parsers / escape sequences.
-
-Example DSLs:
-
-* SQL
-
-::
-
-  run_sql_statement { SELECT ... }
-
-* Assembly and C++.
-
-::
-
-  result = asm { sumsq (toregister x), (toregister y) }
-  my_func = load("foo.cpp").lookup("my_func")
-
-* TeX / mathematical expressions:
-
-::
-
-   tex { result = ax^4+cx^2 }
-   math { beta = phi lambda }
-
-
-It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging computations, like passes that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.
-
 Typeable
 --------
 
@@ -360,12 +328,12 @@ There are several reasons to allow the use of Unicode mathematical symbols in St
 
 Stroscot's user-defined syntax is flexible enough to create symbolic operators if desired. But compare this example of computing the prime numbers less than ``R`` in APL vs. a Haskell lexical+prefix style:
 
-::
+.. code-block:: apl
 
   T←1↓⍳R
   (~T∊T∘.×T)/T
 
-::
+.. code-block:: haskell
 
   T = drop 1 (count R)
   scan (not (isElementOf T (tie 0 (*) T T))) T
@@ -397,7 +365,9 @@ NFKC
 
 NFKC is often brought up as an alternative/extension of NFC. For example `Python <https://peps.python.org/pep-3131/>`__ uses NKFC for identifiers, and Go similarly has a `proposal <https://github.com/golang/go/issues/27896>`__ to use NFKC.
 
-There are two choices for using NFKC, requiring input to be NFKC or applying NFKC to the input. Python only applies NFKC, so `the following <https://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/QcRz1gdfAQAJ>`__ is a valid Python program::
+There are two choices for using NFKC, requiring input to be NFKC or applying NFKC to the input. Python only applies NFKC, so `the following <https://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/QcRz1gdfAQAJ>`__ is a valid Python program
+
+.. code-block:: python
 
   def 𝚑𝓮𝖑𝒍𝑜():
     try:
@@ -420,7 +390,9 @@ There are two choices for using NFKC, requiring input to be NFKC or applying NFK
     𝒉eℓˡ𝗈()
 
 
-If we required the input to be in NFKC it would have to look like::
+If we required the input to be in NFKC it would have to look like:
+
+.. code-block:: python
 
  def hello():
   try:
@@ -443,7 +415,7 @@ If we required the input to be in NFKC it would have to look like::
 
 Meanwhile with NFC the variable names would have to be consistent and built-in names could not be transformed, so a program could look like:
 
-::
+.. code-block:: python
 
   def 𝚑𝓮𝖑𝒍𝑜():
       try:
@@ -541,7 +513,7 @@ TR31
 
   where these classes are defined as follows
 
-  ::
+  .. code-block:: none
 
     $T = \p{Joining_Type=Transparent}
     $RJ = [\p{Joining_Type=Dual_Joining}\p{Joining_Type=Right_Joining}]
@@ -624,6 +596,104 @@ One feature of Atomo I liked and thought was cool was that all the syntax was de
 Assignment
 ==========
 
+Steelman 5A. It shall be possible to declare constants of any type. Such constants shall include both those whose values-are determined during translation and those whose value cannot be determined until allocation. Programs may not assign to constants.
+
+Steelman 5D. Procedures, functions, types, labels, exception situations, and statements shall not be assignable to variables, be computable as values of expressions, or be usable as nongeneric parameters to procedures or functions.
+
+Stroscot does allow sets to be assigned to variables, also exceptions and labels and statements (blocks). Procedures and functions are a bit strange; you can store the symbol of the procedure/function, and you can store a lambda, but the rewrite rule itself is stored in a module and you can't really access it alone except as an AST.
+
+
+`Discussion <https://craftofcoding.wordpress.com/2021/02/19/evolution-of-the-assignment-operator/>`__. Stroscot's assignment syntax is complicated because I want separate initialization (declarative assignment) and reassignment (mutating assignment).
+
+.. list-table:: Comparison
+   :header-rows: 1
+
+   * - Language
+     - Initialization
+     - Reassignment
+     - Equality
+   * - Mathematics
+     - ``=``
+     - ``⟹`` or ``=>``
+     - ``=``
+   * - Algol
+     - ``:=``
+     - ``:=``
+     - ``=``
+   * - Fortran
+     - ``=``
+     - ``=``
+     - ``.EQ.``
+   * - PL/I
+     - ``=``
+     - ``=``
+     - ``=``
+   * - BCPL
+     - ``=``
+     - ``:=``
+     - ``=``
+   * - B
+     - ``=``
+     - ``:=``
+     - ``==``
+   * - C
+     - ``=``
+     - ``=``
+     - ``==``
+   * - APL
+     - ``←``
+     - ``←``
+     - ``=``
+   * - R
+     - ``<-``
+     - ``<-``
+     - ``==``
+   * - J
+     - ``=:``
+     - ``=:``
+     - ``=``
+
+Looking at precedents, the only languages with distinct initialization and reassignment are B and BCPL, so reassignment should definitely be ``:=``. Then we can either follow mathematical convention and PL/I in making initialization and comparison use the same symbol, or simplify parsing by making equality ``==``. Quorum uses the same symbol and apparently this is what novices expect. :cite:`stefikEmpiricalInvestigationProgramming2013`
+
+Chained assignment
+------------------
+
+Chained assignment is an expression like ``w = x = y = z``. The value of ``z`` is assigned to multiple variables ``w``, ``x``, and ``y``. The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution - C's "the assignment returns the lvalue" semantics seems contrived.
+
+The evaluation strategy differs between languages. For simple chained assignments, like initializing multiple variables, the evaluation strategy does not matter, but if the targets (l-values) in the assignment are connected in some way, the evaluation strategy affects the result. Here C's RTL semantics makes more sense and seems more useful than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>`__ semantics. So a chain ``a := b := 2`` should expand to ``b := 2; a := b`` rather than ``t = 2; a := t; b := t`` .
+
+Chained update with ``:=``, like ``a := b := 2``, seems the most useful to shorten some assignments. Chained ``a = b = 2`` with value semantics doesn't really seem that useful when you could just replace ``a`` with ``b`` in the rest of the expression and save yourself an identifier. Also it conflicts with using ``=`` for comparison, because it can be interpreted as ``a = (b == 2)``.
+
+There is an issue with running I/O multiple times. For example if you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable, but in Stroscot ``[]`` is pure so this is fine.
+
+Embedded assignment
+-------------------
+
+This embeds assignments in expressions, like
+
+::
+
+  a = (b = 1) + (c = 2)
+
+Clearly it conflicts with ``=`` as comparison.
+
+But for chained update it is unambiguous and returning the value would be possible:
+
+::
+
+  a = (b := 1) + (c := 2)
+
+But then statements like
+
+::
+
+  b := 1
+
+would have an unused return value. Maybe this value could be marked as optional somehow.
+
+Binding ambiguity
+-----------------
+
 As a syntax ambiguity, there are two different interpretations of assignment, pattern binding and clause definition. The difference:
 
 ::
@@ -681,7 +751,7 @@ Haskell has a division between constructors and functions:
 * identifiers starting with lowercase letters are functions, and can only be used with function bindings.
 * identifiers starting with uppercase letters are constructors, and assignments of the form ``X a b = ...`` are pattern bindings.
 
-This rule reduces maintainability. If the representation is changed there is no way to replace the dumb constructor with a smart constructor. So instead libraries are littered with boilerplate pseudo-constructors like ``mkThing = Thing`` to get around this syntactic restriction. In fact in :cite:`kahrsNonOmegaOverlappingTRSsAre2016` there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating ``foo`` into a constructor ``Foo`` and a function ``foo``, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example ``k x y = x; s x y z = (x z) (y z)`` turns into:
+This rule reduces maintainability. If the representation is changed there is no way to replace the dumb constructor with a smart constructor. So instead libraries are littered with boilerplate pseudo-constructors like ``mkThing = Thing`` to get around this syntactic restriction. In fact in :cite:`kahrsNonomegaoverlappingTRSsAre2016` there is a boilerplate trick to turn any TRS into a constructor TRS, by duplicating ``foo`` into a constructor ``Foo`` and a function ``foo``, converting subterms of the original rules to match on constructors, and adding rules that turn stuck patterns into constructors. For example ``k x y = x; s x y z = (x z) (y z)`` turns into:
 
 ::
 
@@ -749,6 +819,11 @@ There is also the question of how module declaration work - technically these sh
 Type declarations
 =================
 
+::
+
+  a = 2 : s8
+  a = s8 2
+
 ``a = 2 : s8`` and ``a = s8 2`` seem more logical compared to other choices such as ``a : s8 = 2`` (Swift,Jai - hard to find the = with long types) or ``s8 a = 2`` (C,Rust - overlaps with function definition). The name is simply a syntactic handle to refer to the value; it doesn't have an innate type. In contrast the representation of the value must be specified to compile the program. The second syntax ``s8 2`` is similar to assembler syntax such as ``dword 0``.
 
 `This <https://soc.me/languages/type-annotations>`__ says name should be ahead of type annotation, which only ``s8 a = 2`` breaks. The consistency stuff is not relevant.
@@ -772,6 +847,17 @@ This might seem overly complicated, but it's based on Zarf's `rule-based program
 
 Comments
 ========
+
+Steelman 2I "The language shall permit comments that are introduced by a special (one or two character) symbol and terminated by the next line boundary of the source program." This is just the simplest EOL comment, but there are other types.
+
+::
+
+  // comment
+  /* multiline
+      comment */
+  (* nesting (* comment *) *)
+   if(false) { code_comment - lexed but not parsed except for start/end }
+  #! shebang at beginning of file
 
 Comments allow writing documentation inline with the code. This speeds up development by keeping all the information in one file and avoiding having to jump around. It also encourages a standardized documentation format.
 
@@ -840,7 +926,7 @@ Indentation
 The tabs vs. spaces debate is still going. So let's make some people unhappy by baking the decision into the default syntax.
 
 * `Pike <https://groups.google.com/g/golang-nuts/c/iHGLTFalb54/m/zqMoq9JRBAAJ>`__ says tabs allow choosing 2,4,8 spaces. But this flexibility means linebreaking suffers. For example, assume 100 character lines. Then someone with a 2-space tab and an 8 tab indent can fit 84 characters of code, but someone with an 8-space tab will see that 84 characters of code as a 148 character line, 150% of a line and needing a linebreak. It's better that everyone sees pretty much the same thing. Linus Torvalds `says <https://www.yarchive.net/comp/linux/coding_style.html>`__ tabs are 8 spaces and not adjustable. Also `he says <https://www.kernel.org/doc/html/latest/process/coding-style.html>`__ the line-limit argument is invalid because 3 levels of indentation suffices, but deep indentation often comes up with nested literal data. Another point against Pike is that browsers offer no means to change the width of tabs, so this customization is incomplete - using spaces will at least ensure the display is consistent with the editor.
-* Style guides for large companies/projects all agree on "no tabs" (e.g. `this <https://github.com/jrevels/YASGuide#linealignmentspacing-guidelines >`__)
+* Style guides for large companies/projects all agree on "no tabs" (e.g. `this <https://github.com/jrevels/YASGuide#linealignmentspacing-guidelines>`__)
 * `GitHub stats <https://hoffa.medium.com/400-000-github-repositories-1-billion-files-14-terabytes-of-code-spaces-or-tabs-7cfe0b5dd7fd#.o7n8zeezx>`__ show spaces winning in the majority of languages
 * The `2017 SO survey <https://stackoverflow.blog/2017/06/15/developers-use-spaces-make-money-use-tabs/>`__ showed spaces make 8.6% more salary
 * "Tabs + spaces" still has the issues with resizing tabs, and more because the hardcoded spaces may be larger than the tabs. For example resizing an 8-space tab plus 4 spaces to a 2-space tab plus spaces will break. And it is even less common.
@@ -1213,104 +1299,6 @@ Pattern matching / conditionals
 
 The condition can be split between a common discriminator and individual cases. This requires doing away with mandatory parentheses around the conditions. This strongly suggests using a keyword (then) to introduce branches, instead of using curly braces, based on readability considerations.
 
-Assignment
-==========
-
-Steelman 5A. It shall be possible to declare constants of any type. Such constants shall include both those whose values-are determined during translation and those whose value cannot be determined until allocation. Programs may not assign to constants.
-
-Steelman 5D. Procedures, functions, types, labels, exception situations, and statements shall not be assignable to variables, be computable as values of expressions, or be usable as nongeneric parameters to procedures or functions.
-
-Stroscot does allow sets to be assigned to variables, also exceptions and labels and statements (blocks). Procedures and functions are a bit strange; you can store the symbol of the procedure/function, and you can store a lambda, but the rewrite rule itself is stored in a module and you can't really access it alone except as an AST.
-
-
-`Discussion <https://craftofcoding.wordpress.com/2021/02/19/evolution-of-the-assignment-operator/>`__. Stroscot's assignment syntax is complicated because I want separate initialization (declarative assignment) and reassignment (mutating assignment).
-
-.. list-table:: Comparison
-   :header-rows: 1
-
-   * - Language
-     - Initialization
-     - Reassignment
-     - Equality
-   * - Mathematics
-     - ``=``
-     - ``⟹`` or ``=>``
-     - ``=``
-   * - Algol
-     - ``:=``
-     - ``:=``
-     - ``=``
-   * - Fortran
-     - ``=``
-     - ``=``
-     - ``.EQ.``
-   * - PL/I
-     - ``=``
-     - ``=``
-     - ``=``
-   * - BCPL
-     - ``=``
-     - ``:=``
-     - ``=``
-   * - B
-     - ``=``
-     - ``:=``
-     - ``==``
-   * - C
-     - ``=``
-     - ``=``
-     - ``==``
-   * - APL
-     - ``←``
-     - ``←``
-     - ``=``
-   * - R
-     - ``<-``
-     - ``<-``
-     - ``==``
-   * - J
-     - ``=:``
-     - ``=:``
-     - ``=``
-
-Looking at precedents, the only languages with distinct initialization and reassignment are B and BCPL, so reassignment should definitely be ``:=``. Then we can either follow mathematical convention and PL/I in making initialization and comparison use the same symbol, or simplify parsing by making equality ``==``. Quorum uses the same symbol and apparently this is what novices expect. :cite:`stefikEmpiricalInvestigationProgramming2013`
-
-Chained assignment
-------------------
-
-Chained assignment is an expression like ``w = x = y = z``. The value of ``z`` is assigned to multiple variables ``w``, ``x``, and ``y``. The `literature <http://www.cse.iitm.ac.in/~amannoug/imop/tr-3.pdf>`__ classifies this as "syntactic sugar", so handling it in the parser like Python seems the reasonable solution - C's "the assignment returns the lvalue" semantics seems contrived.
-
-The evaluation strategy differs between languages. For simple chained assignments, like initializing multiple variables, the evaluation strategy does not matter, but if the targets (l-values) in the assignment are connected in some way, the evaluation strategy affects the result. Here C's RTL semantics makes more sense and seems more useful than `Python's LTR <https://docs.python.org/3/reference/simple_stmts.html#assignment-statements>` semantics. So a chain ``a := b := 2`` should expand to ``b := 2; a := b`` rather than ``t = 2; a := t; b := t`` .
-
-Chained update with ``:=``, like ``a := b := 2``, seems the most useful to shorten some assignments. Chained ``a = b = 2`` with value semantics doesn't really seem that useful when you could just replace ``a`` with ``b`` in the rest of the expression and save yourself an identifier. Also it conflicts with using ``=`` for comparison, because it can be interpreted as ``a = (b == 2)``.
-
-There is an issue with running I/O multiple times. For example if you need multiple variables with the same value then you would write ``[a,b,c] = replicateM 3 (ref 0)`` rather than using a chain, because a chain would alias to the same variable. Python already has this problem with aliasing for ``a = b = []``, because ``[]`` is mutable, but in Stroscot ``[]`` is pure so this is fine.
-
-Embedded assignment
--------------------
-
-This embeds assignments in expressions, like
-
-::
-
-  a = (b = 1) + (c = 2)
-
-Clearly it conflicts with ``=`` as comparison.
-
-But for chained update it is unambiguous and returning the value would be possible:
-
-::
-
-  a = (b := 1) + (c := 2)
-
-But then statements like
-
-::
-
-  b := 1
-
-would have an unused return value. Maybe this value could be marked as optional somehow.
-
 Conditionals
 ============
 
@@ -1464,6 +1452,33 @@ variables, simple control flow are expressed using a light-weight notation (shor
 DSLs
 ====
 
+Stroscot aims to be a "pluggable" language, where you can write syntax, type checking, etc. for a DSL and have it embed seamlessly into the main language. This may be possible due to macros, which allows pattern-matching the AST of any expression, like ``javascript (1 + "abc" { 234 })``, or may need special handling in the parser to also do character-level embedding or seamless integration of parsers / escape sequences.
+
+Example DSLs:
+
+* SQL
+
+::
+
+  run_sql_statement { SELECT ... }
+
+* Assembly and C++.
+
+::
+
+  result = asm { sumsq (toregister x), (toregister y) }
+  my_func = load("foo.cpp").lookup("my_func")
+
+* TeX / mathematical expressions:
+
+::
+
+   tex { result = ax^4+cx^2 }
+   math { beta = phi lambda }
+
+
+It is not just fancy syntax. DSLs that use vanilla syntax are useful for staging computations, like passes that fuse multiple operations such as expmod and accuracy optimizers that figure out the best way to stage a computation.
+
 Scala and JS have support for native XML literals. Scala had one syntax in 2 and a new syntax in 3. Similarly JS had E4X, but client-side E4X is dead today, replaced by server-side React JSX which is honestly pretty similar. More recently XML has been perceived as verbose and JSON has become popular. JSON is native to Javascript hence literals/interpolation are aleady supported, and then browsers added parsers/pretty printers. The lesson is not (like Flix says) that no support should be present - rather it is that the design should be flexible and allow easily adding markup syntaxes.
 
 ::
@@ -1588,6 +1603,10 @@ Most operators are textual:
     5 mod 2 == 1
 
 Minus is both a unary prefix operator and a binary infix operator with special support to disambiguate the two. ``(-)`` denotes the binary minus operator and ``neg`` the unary minus operation.
+
+Operators are syntactic sugar for functions. Enclosing an operator in parentheses turns it into an ordinary function symbol, thus ``x+y`` is exactly the same as ``(+) x y``.
+
+String concatenation is ``++``.
 
 Expressions
 ===========
@@ -1793,15 +1812,6 @@ The general idea of inheritance is, for ``Foo`` a child of ``Bar`` to rewrite ca
     }
   }
 
-Operators
----------
-
-Operators are syntactic sugar for functions. Enclosing an operator
-in parentheses turns it into an ordinary function symbol, thus ``x+y`` is
-exactly the same as ``(+) x y``.
-
-String concatenation is ``++``.
-
 Lambdas
 =======
 
@@ -1916,7 +1926,7 @@ This is pretty interesting, sort of a Python-style thing where variables are in 
 
 This is pretty vague with regards to what constitutes a "point" but I interpret it as the condition enforced on imperative program threads that they execute one action at a time and this action must be chosen deterministically. It seems that Stroscot's use of the continuation monad enforces this structured approach so it isn't an issue.
 
-::
+.. code-block:: none
 
   a = if true then 1 else 2 -- just a function if_then_else_ : Bool -> a -> a -> a
   {
@@ -1933,7 +1943,7 @@ This is pretty vague with regards to what constitutes a "point" but I interpret 
     if (x % 2 == 0)
       break
 
-::
+.. code-block:: none
 
   check {
      risky_procedure
@@ -1947,7 +1957,7 @@ More here: https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/com
 
 Also the do-while block from `Rune <https://github.com/google/rune/blob/main/doc/rune4python.md#looping>`__:
 
-::
+.. code-block:: none
 
   do
     c = getNextChar()
@@ -1956,7 +1966,7 @@ Also the do-while block from `Rune <https://github.com/google/rune/blob/main/doc
 
 The do-block always executes, and the while-block only executes if the condition is true, after which we jump to the start of the do-block. If the condition is false, the loop terminates. This avoids the common C/C++ assignment-in-condition hack:
 
-::
+.. code-block:: cpp
 
   int c;
   while ((c = getNextChar()) != '\0') {
@@ -2029,29 +2039,6 @@ So top-level statements and function calls are allowed. For example you can impl
       a = 1
    else
       a = 2
-
-
-Comments
-========
-
-Steelman 2I "The language shall permit comments that are introduced by a special (one or two character) symbol and terminated by the next line boundary of the source program." This is just the simplest EOL comment, but there are other types.
-
-::
-
-  // comment
-  /* multiline
-      comment */
-  (* nesting (* comment *) *)
-   if(false) { code_comment - lexed but not parsed except for start/end }
-  #! shebang at beginning of file
-
-Type declarations
-=================
-
-::
-
-  a = 2 : s8
-  a = s8 2
 
 
 Reasoning footprint

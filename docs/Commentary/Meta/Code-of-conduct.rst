@@ -81,7 +81,7 @@ This Section was reserved by FIRE for a description of the project's administrat
 
 There are some free training materials from `Otter Tech <https://gitlab.com/otter-tech/coc-incident-response-workshop/>`__ and `Frame Shift Consulting <https://frameshiftconsulting.com/resources/code-of-conduct-book/>`__.
 
-One idea is to use `Debian's constitution <https://www.debian.org/devel/constitution>`__ as the basic administrative structure. There is the suggestion in :cite:`parkesComplexityofStrategicBehaviorComparisonSchulze2021` to use ranked pairs instead of Schulze - it seems Schulze has less ties, but this is also why it is easier to game. Also ranked pairs satisfies LIIA which Schulze does not (c.f. `Table <https://en.wikipedia.org/wiki/Template:Comparison_of_Schulze_to_preferential_voting_systems>`__).
+One idea is to use `Debian's constitution <https://www.debian.org/devel/constitution>`__ as the basic administrative structure. There is the suggestion in :cite:`parkesComplexityofstrategicbehaviorComparisonSchulze2021` to use ranked pairs instead of Schulze - it seems Schulze has less ties, but this is also why Schulze is easier to game. Also ranked pairs satisfies LIIA which Schulze does not (c.f. `Table <https://en.wikipedia.org/wiki/Template:Comparison_of_Schulze_to_preferential_voting_systems>`__).
 
 Also check out these posts: `Python-style governance <https://chrisholdgraf.com/blog/2019/2019-10-27-jupyter-governance-python/>`__, `Rust-style governance <https://chrisholdgraf.com/blog/2019/2019-10-13-rust-jupyter-governance/>`__
 

@@ -169,6 +169,8 @@ A decimal number consists of a sign and a list of digits, a decimal marker, and 
 Representation
 --------------
 
+Normal number literals are simply terms, but a real number is a function ``ω+1 -> {-1,+1}`` excluding certain trivial sequences (c.f. `surreal numbers <https://en.wikipedia.org/wiki/Surreal_number>`__ S_ω "the field of real numbers" and sign expansion representation), and similarly p-adic numbers need special handling as the different metric completion of the rational numbers.
+
 3-3B. Range, precision, and scale specifications shall be required for each component of appropriate numeric type.
 
 There are various ways to represent these numbers. Naturals are generally represented as a list of digits in some base (a decimal). Integers are naturals with a sign. Rationals may be written as a (possibly improper) fraction of integers, a terminating or infinitely repeating decimal, a "mixed number" an integer and a proper fraction, or a floating point of a decimal times an exponent 1/2^n. For the complete fields such as reals and p-adics there are even more representations:
@@ -918,11 +920,6 @@ timeouts - is it better to just churn through a computation and let the user do 
 
 Infinite values separate control and data - first you construct an infinite value (data), then you decide what to do with it (control). In many languages, if you wanted to generate a list of 10 primes, and a list of 100 primes, you'd need to write a function to generate a finite list, and call it twice with a different amount of stuff to generate. But with more complicated usages of infinite data structures, it's not that simple - for example, if you want the first ten even numbers, with an infinite list it's just taking elements from the filtered list, but without, you would have to back-propagate the demand to generate 1 through 20. In general there is no clear way to do it up front by allocating a finite list.
 
-Numbers
-=======
-
-Normal numbers are simply terms, but a real number is a function ``ω+1 -> {-1,+1}`` excluding certain trivial sequences (c.f. `surreal numbers <https://en.wikipedia.org/wiki/Surreal_number>`__ S_ω "the field of real numbers" and sign expansion representation), and similarly p-adic numbers need special handling as the different metric completion of the rational numbers.
-
 Modules
 =======
 
@@ -956,7 +953,7 @@ Testing
 
 Per `Borretti <https://borretti.me/article/test-autodiscovery-silver-bullet>`__, the process for writing and running a unit test in Rust, from scratch, is:
 
-::
+.. code-block:: none
 
   $ cargo new hello-world
   $ cd hello-world

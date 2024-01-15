@@ -11,7 +11,7 @@ A value represent an element within the `universe of discourse <https://en.wikip
 
 * Non-Reducibility: Ideally, values are normal forms, meaning they are not subject to evaluation, reduction, or computation. For example, "1/3" and "let x=3 in 1/x" may be equivalent under reduction, but only "1/3" is considered a value because it cannot be further reduced or evaluated. WHNF is not sufficient to ensure a value, e.g. ``[1,undefined]`` reduces to ``undefined`` hence is not a value. In practice, reduction rules are dependent on context, so we take a liberal perspective and accept values as "values" even if they are not normal forms in all contexts.
 
-On account of their canonical representation, the simplest concrete representation of a value is as a string, but in practice values will generally be represented in memory as more efficient formats, for example a list as a contiguous array of pointers - see :ref:`Memory`. This representation must be lossless, in the sense that converting from a string to the format and then back to the string should be the identity.
+On account of their canonical representation, the simplest concrete representation of a value is as a string, but in practice values will generally be represented in memory as more efficient formats, for example a list as a contiguous array of pointers - see :ref:`Commentary/Language/Memory:Memory`. This representation must be lossless, in the sense that converting from a string to the format and then back to the string should be the identity.
 
 Values are immutable (as `Rich Hickey says <https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg>`__). In terms of memory management, values are just data - they can be copied freely, and discarded once they will no longer be used.
 
@@ -65,7 +65,7 @@ Binders/Logical proofs
 
 Conceptually a binder is a structure with some number of "slots" and numbered references to these slots in the body (a value but with "holes" for the slots). In practice, the binder is specified using variables (symbols), and these variable names are preserved for debugging purposes. Nonetheless, renaming the variables should not change the meaning of the binder (alpha-equivalence). The easiest way to ensure this is to use a nameless graph representation but to preserve variable names at the site of the binder as metadata. For example, a lambda expression ``\x. x x`` is really more like ``(\. 1 1, x)``.
 
-The sequent calculus is used to represent binders via derivation trees built up using the various rules. We use the logic described in :ref:`Logic`.
+The sequent calculus is used to represent binders via derivation trees built up using the various rules. We use the logic described in :ref:`Reference/Logic:Logic`.
 
 * Jumbo: The Jumbo break rule contains a set of values and a function from those values to a derivation tree. It also specifies a target in each derivation for each side formula. The Jumbo build rule takes a value and a list of left/right derivation trees and combines them, specifying a target for each tree.
 * Exponentials: Promotion specifies a target for each formula in the sequent. Dereliction has one target, Weakening has no target, contraction has n (n>2) targets.

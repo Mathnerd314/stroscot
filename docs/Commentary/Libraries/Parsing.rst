@@ -40,7 +40,7 @@ Per :cite:`mightParsingDerivativesFunctional2011`, a parser combinator consumes 
 
 Then we have derived combinators:
 
-* ``p - q = p <&&> not q``, ``p {reject} q`` - set subtraction, relative complement, reject production. Acts as p but fails if q would succeed. :cite:`brachthauserParsingFirstClassDerivatives` has ``p <|> not (p <> always) <&&> q``. This maps 1-1 to the "prefer literals" implicit lexer rule, via the transform in :cite:`visserSyntaxDefinitionLanguage1997` section 3.6.
+* ``p - q = p <&&> not q``, ``p {reject} q`` - set subtraction, relative complement, reject production. Acts as p but fails if q would succeed. :cite:`brachthauserParsingFirstclassDerivatives` has ``p <|> not (p <> always) <&&> q``. This maps 1-1 to the "prefer literals" implicit lexer rule, via the transform in :cite:`visserSyntaxDefinitionLanguage1997` section 3.6.
 * ``p {prefer} q = p <|> (q - p)``, ``q {avoid} p`` - Biased (preferential) choice, similar to that used in PEG's or backtracking parsers. If ``p`` matches, returns only the parses from ``p``. Otherwise, acts as ``q``.
 * ``always = not mzero`` - always succeeds, consumes an arbitrary amount of input
 * ``x <&&> y = lookAhead x <> y, and x y`` - conjunction / set intersection. must match both x and y, returns parse tree of ``y``.
@@ -111,7 +111,7 @@ Character/byte/token combinators:
 
 "Selective" combinators  (Mokhov et al. 2019) decide which branch to take based on the result of another parser, somewhere between monads and applicatives. For example ``branch either left right`` parses ``either``, then, if successful and ``Left`` is returned, tries ``left`, otherwise, if ``Right`` is produced, the parser ``right`` is executed. This can be mimicked without the dependent behavior by narrowing the productions, ``eitherL left <|> eitherR right`` where ``eitherL`` is the language of ``either`` that returns ``Left`` and similarly for ``eitherR``. I don't really like having to compute the set of all strings for which a function returns a given value, so it seems good to avoid this. But maybe it can be implemented easily.
 
-Per :cite:`brachthauserParsingFirstClassDerivatives` it is worth exposing the derivative function as a parser combinator ``feed p c = p << c``. It's not clear though if this functionality is useful without being able to do monadic bind and write something like ``char >>= \c -> feed p c``.
+Per :cite:`brachthauserParsingFirstclassDerivatives` it is worth exposing the derivative function as a parser combinator ``feed p c = p << c``. It's not clear though if this functionality is useful without being able to do monadic bind and write something like ``char >>= \c -> feed p c``.
 
 Layout: per :cite:`erdwegLayoutsensitiveGeneralizedParsing2013`, can be implemented with "layout constraints", specialized semantic predicates. The constraints examine the starting/ending line and column of the first/last/leftmost of middle lines/rightmost of middle lines characters of each direct sub-tree of the parse. Then they can express boolean formulas of comparison constraints (equal, less than, greater than), e.g. the offside rule is ``1.first.startCol < 1.left.startCol``. :cite:`adamsPrincipledParsingIndentationsensitive2013` says it can be done in a more principled manner by annotating each production with its column and using constraints that the sub-production must be at column 0 or must be equal, greater than, or greater than or each to to the column of the start of of the production. :cite:`amorimDeclarativeSpecificationIndentation2018` specifies some higher-level constaints like ``align`` that can be used for both parsing (translating to column-based layout constraints) and for pretty-printing, and gives the full algorithm for incrementally constructing parse trees with column information.
 
@@ -215,7 +215,9 @@ Intersection: closed for recursively enumerable languages
 
 it's easier and faster to match in a byte oriented way than to decode utf-8 in a preprocessing step. It works because there is only one representation of each character as a UTF-8 byte sequence.
 
-Normalizing/compacting grammars is important for equality comparison and efficiency::
+Normalizing/compacting grammars is important for equality comparison and efficiency
+
+.. code-block:: none
 
   (r∗)∗ ≈ r∗
   ∅∗ ≈ ε
@@ -244,7 +246,7 @@ Normalizing/compacting grammars is important for equality comparison and efficie
 
 A nullable expression is one that matches the empty string. Nullability is important to know, as the derivative of a concatenation (defined next) depends on whether the first expression is nullable. Recursion is handled via the least fixed point of the equations (e.g., ``L = L & L`` is not nullable).
 
-::
+.. code-block:: none
 
   ν(∅) = F
   ν(ε) = T
@@ -257,7 +259,9 @@ A nullable expression is one that matches the empty string. Nullability is impor
   ν(r & s) = ν(r) && ν(s)
   ν(r + s) = ν(r) || ν(s)
 
-The derivative of an grammar expression E with respect to a character (or set of strings) C is a grammar expression d_C E such that its language is { s : exists c in C. c s in L(E) }. I.e., you take the strings in L(E) that begin with C, and then you chop off the C. For example the derivative of ``ab|ac|de`` w.r.t. ``a`` is ``b|c``. Some derivatives are as follows::
+The derivative of an grammar expression E with respect to a character (or set of strings) C is a grammar expression d_C E such that its language is { s : exists c in C. c s in L(E) }. I.e., you take the strings in L(E) that begin with C, and then you chop off the C. For example the derivative of ``ab|ac|de`` w.r.t. ``a`` is ``b|c``. Some derivatives are as follows:
+
+.. code-block:: none
 
   ∂a ∅ = ∅
   ∂a ε = ∅
@@ -276,7 +280,9 @@ With this we can already implement an interpreter-style recognizer, by computing
 
 To compile a derivative parser to a DFA, we do a traversal of the state graph of grammar expressions, e.g. depth-first. Starting at the original expression ``E``, we compute successive derivatives with respect to all possible characters, normalize the resulting expressions, and minimize the resulting DFA state graph by interning equivalent grammar expressions. The nullable expressions are accepting states. The textbook approach to compiling regular expressions constructs an NFA, constructs the DFA from that, and then minimizes the DFA. But derivative parsing allows you to avoid the NFA entirely, and produces a result much closer to the minimal DFA right off the bat, saving a lot of work.
 
-An important speedup of minimization is identifying partitions of state transitions w.r.t. byte values. Basically, rather than computing the derivatives w.r.t. 0, 1, 2, up to 255 individually and checking for equality afterwards, you can determine from the structure of the expression that it can transition to up to n other states and that each of some set of byte values will transition to a given state. This can be represented by n bitsets of length 256 for n possible next states, with the AND of any two bitsets 0 and the OR of all of them the bitset of all 1's (basically redgrep's representation, although it specifically inverts the first one to model it as a "default" case), or as a packed array-table with ceil(log_2(n)) bits for each byte value, or maybe with ranges if the states are generally clustered in contiguous ranges. The rules for partitions are as follows::
+An important speedup of minimization is identifying partitions of state transitions w.r.t. byte values. Basically, rather than computing the derivatives w.r.t. 0, 1, 2, up to 255 individually and checking for equality afterwards, you can determine from the structure of the expression that it can transition to up to n other states and that each of some set of byte values will transition to a given state. This can be represented by n bitsets of length 256 for n possible next states, with the AND of any two bitsets 0 and the OR of all of them the bitset of all 1's (basically redgrep's representation, although it specifically inverts the first one to model it as a "default" case), or as a packed array-table with ceil(log_2(n)) bits for each byte value, or maybe with ranges if the states are generally clustered in contiguous ranges. The rules for partitions are as follows:
+
+.. code-block:: none
 
   C(∅) = {Σ}
   C(ε) = {Σ}

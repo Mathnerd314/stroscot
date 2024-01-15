@@ -189,11 +189,14 @@ Being able to break big complicated bytecode instructions down into more simple 
 
 
 Example: Fibonacci function
-def fibonacci(n)
-  a, b = 0, 1
-  for _ in range(n): # inner loop
-    a, b = b, a + b # update a and b by adding them together
-  return a
+
+.. code-block:: python
+
+  def fibonacci(n)
+    a, b = 0, 1
+    for _ in range(n): # inner loop
+      a, b = b, a + b # update a and b by adding them together
+    return a
 
 The bytecode for the loop is something like this:
 FOR_ITER
@@ -229,35 +232,39 @@ LuaJIT
 
 see paper for benchmarks, of course multiple tiers are better, but tl;dr is copy-and-patch is a nice middle tier. It is a template JIT compiler. In particular, it works by copying over a static pre-compiled machine code "template" into executable memory, and then going through that machine code and patching up instructions that need to have runtime data encoded in them. This is sort of like the relocation phase of linking/loading an ELF file. And actually we can use LLVM to build an ELF object file and generate our templates. For example:
 
-extern int MAGICALLY_INSERT_THE_OPARG;
-extern int MAGICALLY_CONTINUE_EXECUTION(_PyInterpreterFrame *frame, PyObject **stack_pointer);
-int load_fast(_PyInterpreterFrame *frame, PyObject **stack_pointer)
-{
-  int oparg = &MAGICALLY_INSERT_THE_OPARG;
-  PyObject *value = frame->localsplus[oparg];
-  Py_INCREF(value);
-  *stack_pointer++ = value;
-  __attribute__((musttail)) return MAGICALLY_CONTINUE_EXECUTION(frame, stack_pointer);
-}
+.. code-block:: c
+
+  extern int MAGICALLY_INSERT_THE_OPARG;
+  extern int MAGICALLY_CONTINUE_EXECUTION(_PyInterpreterFrame *frame, PyObject **stack_pointer);
+  int load_fast(_PyInterpreterFrame *frame, PyObject **stack_pointer)
+  {
+    int oparg = &MAGICALLY_INSERT_THE_OPARG;
+    PyObject *value = frame->localsplus[oparg];
+    Py_INCREF(value);
+    *stack_pointer++ = value;
+    __attribute__((musttail)) return MAGICALLY_CONTINUE_EXECUTION(frame, stack_pointer);
+  }
 
 So there are extern placeholders for inserting the oparg and continuing execution.
 For the oparg, we use the address of the extern for our oparg. This generates more efficient code because the relocation inserts the constant directly, instead of needing to dereference the address.
 And for continuing execution, we use LLVM's `musttail` so we get a single jump to the next opcode, and even better, if that jump happens to be of length zero, we can just skip the jump entirely. So, the object file that we get out of this looks like this:
 
-.static
-00: 48 b8 00 00 00 00 00 00 00 00 movabsq $0x0, %rax
-0a: 48 98 cltq
-0c: 49 8b 44 c5 48 movq 0x48(%r13,%rax,8), %rax
-11: 8b 08 movl (%rax), %ecx
-13: ff c1 incl %ecx
-15: 74 02 je 0x19 <load_fast+0x19>
-17: 89 08 movl %ecx, (%rax)
-19: 48 89 45 00 movq %rax, (%rbp)
-1d: 48 83 c5 08 addq $0x8, %rbp
-21: e9 00 00 00 00 jmp 0x26 <load_fast+0x26>
-.reloc
-02: R_X86_64_64 MAGICALLY_INSERT_THE_OPARG
-22: R_X86_64_PLT32 MAGICALLY_CONTINUE_EXECUTION - 0x4
+.. code-block:: none
+
+  .static
+  00: 48 b8 00 00 00 00 00 00 00 00 movabsq $0x0, %rax
+  0a: 48 98 cltq
+  0c: 49 8b 44 c5 48 movq 0x48(%r13,%rax,8), %rax
+  11: 8b 08 movl (%rax), %ecx
+  13: ff c1 incl %ecx
+  15: 74 02 je 0x19 <load_fast+0x19>
+  17: 89 08 movl %ecx, (%rax)
+  19: 48 89 45 00 movq %rax, (%rbp)
+  1d: 48 83 c5 08 addq $0x8, %rbp
+  21: e9 00 00 00 00 jmp 0x26 <load_fast+0x26>
+  .reloc
+  02: R_X86_64_64 MAGICALLY_INSERT_THE_OPARG
+  22: R_X86_64_PLT32 MAGICALLY_CONTINUE_EXECUTION - 0x4
 
 We have the machine code, and the relocations, and we know the calling convention. And so we can take this, parse it out and put it in static header files as data, and then we can implement copy and patch for real. There is python code https://github.com/brandtbucher/cpython/tree/justin/Tools/jit (c4904e44167de6d3f7a1f985697710fd8219b3b2) that handles actually extracting all the cases, compiling each one, parsing out the ELF (by dumping with LLVM to JSON), and then generating the header files. Then the final build has no LLVM dependency and is a self-contained JIT. And because clang/LLVM is portable, you can cross-compile for all platforms from Linux, or do whatever.
 

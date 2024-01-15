@@ -161,42 +161,6 @@ Each mode is a function from inputs to a set of outputs (or output / Maybe, in t
 
 Logic programming allows writing very concise code, although it can be unusably inefficient in some cases. For this, we can allow writing optimized imperative code, and asserting that this implements a specific mode of a predicate. Then the predicate becomes optimized. But with a smart compiler, the imperative code can be avoided most of the time, saving the need for duplication - just tune the hot cases. Similarly writing imperative code in the first place avoids the issue altogether, although it precludes most of the benefits of logic programming.
 
-Unification
-===========
-
-Unification is the problem of finding all solutions to a system of equations. First-order unification solves a set of equalities ``a1=b1, a2=b2, ...`` over tree terms and variables. This can be extended to the "dual unification" problem that also includes disequations ``c1 != d1`` in the list that must not be satisfied. Constraint logic programming requires solving systems of equations over reals or other sets. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution, together with constraints over those free variables. A substitution is a set of assignments from variables to expressions.
-
-Unification isn't really part of the semantics of logic programming, as the semantics is phrased in terms of satisfiability. But it is a standard technique used in implementing logic programming, and in practice the implementation defines the semantics. Prolog only implements first-order unification. Teyjus / λProlog limit to higher-order "pattern lambdas". With ZipperPosition :cite:`vukmirovicEfficientFullHigherOrder2021` there is outlined a full higher-order unification algorithm extending Huet's semi-algorithm - the need to support multiple unifiers for a complete set complicates things a bit.
-
-The outline of every unification algorithm is that it randomly applies simplifying reduction operations to an equation until it results in a substitution, then applies the substitution to the remaining equations (dereferencing). Here we show :cite:`vukmirovicEfficientFullHigherOrder2021`'s, adapted to match the presentation on `Wikipedia <https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm>`__:
-
-* delete: ``s=s`` is removed
-* decompose: ``a s1 ... sm = a t1 ... tm`` to equations ``{s1 = t1, ..., sm = tm }``
-* rigid/rigid conflict: ``a sm = b tn`` fails if a and b are different rigid heads
-* dereference: ``F s1 ... sn = t`` to ``(F /. σ) ... = t``, if the substitution σ from another equation maps F
-* empty equation list: trivially soluble
-* alpha/eta normalization: ``λxm.s = λyn.t`` to ``λxm.s = λxm.t' xn+1 . . . xm``, where ``m ≥ n``, ``xi`` disjoint from ``yj``, and ``t' = t /. {y1 → x1 , ... , yn → xn }``
-* beta normalization: reduce left/right to hnf
-* under lambda: apply rule for ``a = b`` to ``λx. a = λx. b``
-
-ZipperPosition has more complex reductions for hard cases:
-
-* oracle fail: ``s=t`` fails if oracle determines to be insoluble
-* oracle success: ``s=t`` has finite CSU, branch to each solution σ_i
-* bind: try projections with the following binding substitutions:
-
-  * flex-rigid ``P(λx. F s = λx. a t)``: try an imitation of a for F, if a is constant, and all Huet-style projections for F, if F is not an identification variable.
-  * flex-flex with different heads ``P(λx. F s = λx. G t)``: all identifications and iterations for both F and G, and all JP-style projections for non-identification variables among F and G.
-  * flex-flex with identical heads and the head is an elimination variable, ``P(λx. s = λx. t)``: no bindings.
-  * flex-flex with identical heads, ``P(λx. F s = λx. F t)``: all iterations for F at arguments of functional type and all eliminations for F.
-
-The flex-binding step is slow, but a good set of oracles makes the algorithm efficient for most practical cases. Of course it would be better to find reduction rules that solve things generally rather than oracles which work on specific cases, but this is hard.
-
-The unifier search can be integrated with the overall logical search for satisfiable formulas.
-
-By default Prolog does not use the `occurs check <https://en.wikipedia.org/wiki/Occurs_check>`__ in unification. This means for ``x == f x`` the substitution ``x -> f x`` is obtained. Denotationally this can be accommodated by allowing states to contain infinite rational terms, :cite:`weijlandSemanticsLogicPrograms1990` ``x = f (f (f (...)))`` in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. :cite:`aptWhyOccurcheckNot1992` Prolog defines a ``unify_with_occurs_check`` predicate, and has an option for doing the occurs check in the implicit unification when dispatching predicates. Meanwhile miniKanren always uses the occurs check. The occurs check is needed in first order logic theorem-proving, where skolemization turns quantifiers into variables and is sound only if the occurs check is used.
-
-
 Sources
 =======
 

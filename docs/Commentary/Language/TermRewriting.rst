@@ -4,7 +4,7 @@ Term rewriting
 Higher-order rewriting
 ======================
 
-The definition is vaguely based on :cite:`vanoostromConfluenceAbstractHigherOrder1994`. But Ooostrom's HORS definition, like Terese, uses closed terms and no separate substitution, avoiding free variables by adding additional binders, e.g. he writes the rule ``f x = 1`` as ``\x. f x -> \x. 1``. I don't like this because it's unclear how it interacts with currying, eta reduction, and conditional rewriting, so I added the substitution back.
+The definition is vaguely based on :cite:`vanoostromConfluenceAbstractHigherorder1994`. But Ooostrom's HORS definition, like Terese, uses closed terms and no separate substitution, avoiding free variables by adding additional binders, e.g. he writes the rule ``f x = 1`` as ``\x. f x -> \x. 1``. I don't like this because it's unclear how it interacts with currying, eta reduction, and conditional rewriting, so I added the substitution back.
 
 There is some question of whether context substitution is capture-avoiding, i.e. does ``(\x. □)[□ := x]`` not resolve to ``(\x. x)``. Terese says it captures. With Oostrom this substitution is forbidden since ``x`` is not a closed term. In our more liberal definition this resolves to ``(\y. x)`` by alpha-renaming the variable.
 
@@ -85,18 +85,18 @@ This set, like the real numbers, is uncountably large and includes terms with no
 There are various extensions of the transitive closure to infinitary reduction, so the question arises as to which one to use. :cite:`kahrsInfinitaryRewritingClosure2013` discusses several and provides an ordering so that each is mostly a proper subset of the next (not sure about P* subset bi-infinite). Many of these use the monotonic closure operator \*. Specifically X* is the least fixedpoint of the function G defined as G(R) = X(R) union R, which by the (transfinite) Kleene fixed-point theorem exists and is the limit/union of the sequence :math:`X^0 = \emptyset, X^{n+1} = G(X^n), X^\delta = \bigcup_{\alpha < \delta} X^\alpha`.
 
 * S*, the monotonic closure of strongly converging reduction sequences, "strong" being a requirement that the depth of the redexes contracted in successive steps tends to infinity. S=S* for "compatible" TRSs, ones where t R u imply C[t] R C[u] for any context C, which all iTRSs satisfy.
-* W*=A=A*, the monotonic closure of weakly converging reduction sequences, and also the `adherent points <https://en.wikipedia.org/wiki/Adherent_point>`__ of reduction sequences in the metric space. Weak convergence by itself is not transitively closed, e.g. ``a = b; f x a = f (g x) a`` has ``f c a -ω> f (g (g (g ...))) a -> f (g (g (g ...))) b`` :cite:`dershowitzRwriteRewriteRewrite1991` :cite:`simonsenWeakConvergenceUniform2010`, hence the need for closure. By definition of adherent point, each w-reduct is either an accumulation point, i.e. a appears arbitrarily close infinitely often in a reduction sequence, or an isolated point which can be reached in a finite number of reductions.
+* W*=A=A*, the monotonic closure of weakly converging reduction sequences, and also the `adherent points <https://en.wikipedia.org/wiki/Adherent_point>`__ of reduction sequences in the metric space. Weak convergence by itself is not transitively closed, e.g. ``a = b; f x a = f (g x) a`` has ``f c a -ω> f (g (g (g ...))) a -> f (g (g (g ...))) b`` :cite:`dershowitzRewriteRewriteRewrite1991` :cite:`simonsenWeakConvergenceUniform2010`, hence the need for closure. By definition of adherent point, each w-reduct is either an accumulation point, i.e. a appears arbitrarily close infinitely often in a reduction sequence, or an isolated point which can be reached in a finite number of reductions.
 * P*: the monotonic closure of the pointwise closure of the reflexive transitive closure (finite multi-step relation).
 * bi-infinite rewriting, defined in :cite:`endrullisCoinductiveFoundationsInfinitary2018` Section 6.2 as the greatest relation R such that R = the reflexive transitive closure of single-step rewriting union R lifted to apply to subterms.
 * T*: the monotonic closure of T, the topological closure of the reflexive transitive closure. T itself is not transitively closed, e.g. ``leq 0 x = true; leq (s x) (s y) = leq x y; inf = s inf`` has ``leq inf inf T leq (mu x. s x) (mu y. s y) T true`` (by topological closure of finite approximations of the S towers) but not ``leq inf inf T true`` (because the terms are of finite depth). Alternatively I have defined T* as the smallest relation M such that M is reflexively, transitively, and topologically closed and contains the single-step relation, which I think is equivalent.
 
 S* is the standard in the literature but doesn't have much going for it besides that. If there is a reduction that switches heads, ``a X = b (c X); b X = a (c X)``, then S* says there are no w-reductions. W* has ``a e -w> a (mu x. c x)`` and ``a e -w> b (mu x. c x)``. TRSs are in general nondeterministic, so the "strongly converging" definition that requires a single limit to exist is too strong.
 
-For cycle condensation we would like to equate as many terms as possible to get large SCCs, and similarly a large reduction relation means there will be an escape from infinite regresses. As an example, with bi-infinite rewriting or T*, the hypercollapsing term ``mu x. C x`` with rule ``C x = x`` will reduce to every term (limit of approximations ``C^n f = f``), making it ambiguous, while with W* and P* the hypercollapsing term only reduces to itself hence is a condensed normal form. Similarly with ``C A = A`` where ``A`` is a constant, ``mu x. C x = A`` with bi-infinite/T* but W*/P* don't reduce at all. Bi-infinite and T* seem equally simple to formalize since they are both single fixed points, so it seems T* wins because it's larger.
+Hypercollapsing terms are a good question. With bi-infinite rewriting or T*, the hypercollapsing term ``mu x. C x`` with rule ``C x = x`` will reduce to every term (limit of approximations ``C^n f = f``), making it ambiguous, while with W* and P* the hypercollapsing term only reduces to itself hence is a condensed normal form. In contrast, with ``C A = A`` where ``A`` is a constant, ``mu x. C x`` reduces to ``A`` with bi-infinite/T* but W*/P* don't reduce at all. More generally, if we have a predicate ``P`, then ``mu x. C x`` with ``C x | P x = x`` reduces to all terms where ``P`` holds under bi-infinite / T* but does not reduce under W* / P*. The other alternative is to reduce Hypercollapsing terms to a ``Meaningless`` exception. I think the behavior of ``T*`` is the most useful - most likely it will give an error due to ambiguity, but there are cases where it can produce usable values. In contrast W* / P* / meaningless all sort of give up on the reduction of hypercollapsing terms.
 
 Also conditional rewriting can interact with infinite reduction and cause unwanted behavior with a weak closure. For example consider the system ``ds x y | x == y = e`` and reducing the infinite term ``G = ds G G`` (in :cite:`klopCombinatoryReductionSystems1980` this is achieved by the system ``G = a = c a; c x = ds x (c x)``). Since ``e`` is a normal form hence equal to itself, all finite terms defined by ``T = { x : x == e or x in ds T T }`` reduce to ``e``. So using a bi-infinite closure, ``G`` uniquely reduces to ``e``. But with a weak closure ``X = ds e X`` is a normal form and the system becomes nondeterministic. Similarly with ``dk x y | x == y = e x`` and ``G = dk G G``, we should get ``e (e (e ...))`` as the unique result, but with a weak closure we don't. Another tricky system is ``c x | x == c x = e; b = c b`` - the obvious reduction is ``b = mu x. c x = e``, but this system has a hidden circularity of the form ``mu x. c x = e`` if ``mu x. c x = e``. So again based on this we would like a bi-infinite or T* closure.
 
-Overall I think T* is the simplest and easiest to understand, so that's what I picked.
+Overall, from these examples, it seems clear that allowing a reduction is better than forbidding it. Cycle condensation means that we would like to equate as many terms as possible to get large SCCs, and similarly a large reduction relation means there will be an escape from infinite regresses. Bi-infinite and T* seem equally simple to formalize since they are both single fixed points, so it seems T* wins because it's larger.
 
 Meaningless terms
 =================
@@ -129,6 +129,13 @@ A meaningless term set forms an easy set, :cite:`bucciarelliGraphEasySets2016` m
 
 With these reductions every term has a normal form. Proof :cite:`kennawayInfinitaryLambdaCalculus1997`: A term t is either meaningless or not (ignoring reductions to ``Meaningless``). If it is meaningless, it reduces to the normal form ``Meaningless``. If it is not, then it can be reduced to a root-stable term ``s``. Repeating the construction recursively on the subterms of s at depth 1 constructs a reduction of t to a term which is stable at every depth, i.e. a normal form.
 
+It is a bit tricky to come up with an example of a meaningless term, as the cycle condensation and infinitary rewriting make a lot of examples meaningful. For example, :cite:`klopInfinitaryNormalization2005` gives ``A(1)`` with the reduction rule ``A(x) = A(B(x)``. Without infinitary rewriting, the limit would not be in the reduction closure, therefore the reduction closure would consist only of partial reducts, each having a top-level redex, and ``A(1)`` would be root-active and meaningless. Similarly, without cycle condensation, there would be the reduction ``A(B(B(...))) -> A(B(B(...)))``, so the limit would be root-active and meaningless. But in our semantics, the limit ``A(B(B(...)))`` exists, and the cycle is condensed, therefore it is a normal form and ``A(1)`` is not meaningless. Similarly in :cite:`kennawayMeaninglessTermsRewriting1999` there are some examples:
+
+* ``Last(Ones)`` with the rules ``Last(Cons(x,y)) = Last(y)`` and ``Ones=Cons(1,Ones)``. This rewrites to ``Last([1,1,...])`` which then rewrites to every term following the reduction ``Last([1,1,...,x])=x``. So it is ambiguous, but not meaningless.
+* ``A`` with ``A = B A; B x = x``. Again this rewrites to ``B (B (...))`` which rewrites to every term and is not meaningless.
+* ``fix identity`` (``Y I``), where ``fix f = f (fix f); identity x = x``  - This rewrites to terms of the form ``I I ... (fix I)``, which again rewrites to every term.
+
+To be meaningless in our system, a term cannot be root-stable, and to avoid cycle condensation, it must cycle through an infinite non-repeating set of roots. So for example, ``1`` in a system like ``1 = 2; 2 = 3; 3 = 4; ...`` is meaningless; it is not affected by cycle condensation and has no limit points. But note how fragile this is; for example ``1`` in the system ``x=x+1`` reduces to the limit ``((...+1)+1)+1`` which most likely is not meaningless.
 
 Every TRS with unique normal forms (UN=) can be extended to a confluent TRS with the same set of normal forms by adding bottom terms and reductions to normal forms and bottoms that preserve the equivalence classes of terms. :cite:`middeldorpModularAspectsProperties1989` Meaningless terms don't accomplish this extension because a term ``1 amb meaningless`` can reduce to ``Meaningless`` instead of ``1`` hence breaking even UNR.
 
@@ -165,121 +172,3 @@ Terese's example 4.11.5 that join equality is not confluent does not work becaus
 Overall strict equality is the most conservative (least accepting), and the one whose behavior seems easiest to understand. It does reduce the laziness of the language a bit but even Haskell's ``==`` function is strict. So we'll go with strict equality.
 
 There is some question about reducible expressions as patterns, e.g. ``a = b; f a@x x = x``. I think this can be handled separately from non-linear patterns.
-
-Confluence
-----------
-
-Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem:  Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. :cite:`klopExtendedTermRewriting1991` So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.
-
-Confluence avoids situations where a system may branch into two distinct diverging states. It makes finding a normalizing strategy much easier as the strategy only has to avoid getting stuck evaluating a term infinitely (using the same rule infinitely often), as opposed to UN→ where the strategy must avoid using the wrong reduction rule at every step.
-
-The Knuth-Bendix algorithm produces a confluent system from a set of non-oriented equations, but the rules in programs are oriented, so using this would be confusing. Not to mention that the algorithm fails often. So that's out.
-
-A necessary condition for confluence is weak/local confluence, i.e. each critical pair is convergent. But this is not sufficient. Newman's lemma is that a terminating locally confluent TRS is confluent. But termination is quite strong. A generalization is a critical pair system :cite:`hirokawaDecreasingDiagramsRelative2009` (also called decreasingly confluent): the system must be left-linear, locally confluent, and its critical pair steps must be *relatively terminating*, i.e. the relation 'arbitrary steps followed by a critical pair step followed by arbitrary steps' is terminating. Trivial critical pair steps can be excluded, hence this includes weakly orthogonal TRSs. For a terminating TRS the TRS syntactic equality notion is equivalent to strict equality, hence the system is left linear in the CTRS sense, hence why this includes Newman's lemma.
-
-We say → has random descent (RD), if for each R:a ↔∗b with b in normal form, all maximal reductions from a have length d(R) and end in b. Systems with random descent are confluent.
-
-Normalization
--------------
-
-
-A hypernormalizing strategy is a strategy that is normalizing even if arbitrary reduction steps are taken before and after steps of the strategy. This allows the compiler to make optimizations without changing the behavior of the program. A hypernormalizing strategy allows aggressive optimizations and program transforms.
-
-There are also stronger properties than normalization. A Church-Rosser strategy is one with common reducts, i.e. there exist m and n, such that :math:`F^m(t)=F^n(u)` for every t and u equal via forward/backward evaluation. A normalizing strategy is Church-Rosser if the system is confluent and weakly normalizing (i.e. all objects have a normal form). In general a many-step CR strategy exists for effective ARS's, i.e. countable (in a computable fashion) and with a computable reduction relation. But the strategy is quite hard to compute, as it has to synchronize reducing subterms so that all components are reduced the same amount. And it's not clear that this synchronization offers anything to the programmer.
-
-Cofinal strategies are weaker than Church-Rosser but stronger than normalizing: for every term a, if a reduces in a finite number of steps to b, then there is an object c obtained by applying the strategy some number of times to a such that b reduces to c. For critical pair TRSs any "fair" strategy that ensures every redex is eventually contracted is cofinal. The cofinal property provides slick proofs - it ensures every redex not part of a cycle is contracted. But at runtime non-normalizing terms have indistinguishable behavior (infinite loop), hence this means the cofinal strategy is doing unnecessary work.
-
-There are also termination properties like strong convergence that ensure that for every term, there exists some number of reduction steps after which the head cannot be rewritten.
-To ensure that term rewriting halts we probably also want a property like strong convergence, but this is a property of the rewriting strategy, not the TRS proper.
-
-Evaluation strategy
-===================
-
-For convergent (confluent and strongly normalizing) programs, such as the simply typed lambda calculus, all strategies are normalizing and the result is the same no matter how they are reduced. So the focus is on inferring convergence and doing reduction efficiently. "In the small" leftmost innermost ensures "complete development", i.e. a subterm is reduced completely before the outer term, hence we can compute the subterm fully and only store an optimized representation of the normal form. So we can compile to fast assembly like a state machine. "In the large" optimal reduction ensures the smallest number of steps so we can avoid duplicating work and performing unneeded work.
-
-But strongly normalizing implies not Turing complete, hence the termination verification will cause problems for complex programs. We need a fallback for these complex programs. Leftmost outermost reduction is the basis of lazy evaluation and is hypernormalizing for the lambda calculus. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated - the simplest example is parallel outermost) - it's hypernormalizing for critical pair TRSs (decreasingly confluent TRSs), in particular weakly orthogonal TRSs. :cite:`hirokawaStrategiesDecreasinglyConfluent2011` So outermost fair seems a reasonable default, but there are non-orthogonal systems where it fails. The optimal reduction stuff is defined for match sequential TRSs but is a normalizing strategy that computes a result in the smallest number of reduction steps.
-
-We could do user-specified strategies like Stratego, but then how would we know that they're normalizing.
-
-There are is also lenient evaluation which evaluates all redexes in parallel except inside the arms of conditionals and inside lambdas, but it adds extra memory overhead for parameter passing.
-
-Now, one can argue about which computational strategy is better (time, space, parallelism, ...)
-Stroscot: be accepting of programs, ensure a normalizing strategy. But after that aim for most efficient in time/space for strict programs.
-
-Q: can normalizing be as efficient as strict
-profiling, other optimization tricks
-
-So The way we handle cycles in the rewrite engine is something like:
-
-* detect cyclic term via rule cycle detection or presence of AC operator
-* use specialized matching (eg AC matching or Tarjan SCC + memo hash table) to identify all reductions out of SCC
-* end with condensed normal form if no reduction out of SCC
-* otherwise, pick a reduction out of the SCC
-
-Then this infinite term is computed in chunks and fed to the surrounding context on demand (laziness), ensuring that a finite normal form is reached if possible and otherwise implementing an infinite stream of commands.
-
-Higher-order matching
----------------------
-
-If the substitution calculus is convergent, then terms can be represented by preterms in normal form.
-
-Handling lambdas in RHSs is fairly straightforward, just beta-reduce as much as possible when they are encountered. But in higher-order term rewriting systems the lambdas can show up on the left hand side, in the pattern. The rewriting system is then defined modulo lambda reduction.
-
-Finding the contexts ``C`` is fairly straightforward, just enumerate all the subterms of ``t``. But solving the equation ``s = lθ`` is an instance of higher-order unification (specifically higher-order matching).  The λ-superposition calculus relies on complete sets of unifiers (CSUs). The
-CSU for s and t, with respect to a set of variables V , denoted by CSUV (s, t), is a
-set of unifiers such that for any unifier % of s and t, there exists a σ ∈ CSUV (s, t)
-and θ such that %(X) = (σ◦θ)(X) for all X ∈ V . The set X is used to distinguish
-between important and auxiliary variables. We can normally leave it implicit
-
-Higher order matching is decidable for the simply typed lambda calculus. But the proof is of the form "the minimal solution is of size at most 2^2^2^2..., the number of 2's proportional to the size of the problem". There are 3 transformations presented in the proof which reduce a larger solution to a smaller solution. These might be usable to prune the search tree. But at the end of the day it's mostly brute-force.
-
-The proof relies on some properties of the STLC, namely normalization and that terms have a defined eta long form (canonical form).
-
-It is not clear if there is a way to do untyped higher order matching for general lambda patterns.
-
-As a consequence of confluence each rewrite step is composed of an expansion in the substitution calculus, a replacement by applying some rule, and a reduction in the substitution calculus, so it is M <<- C[l] and C[r] ->> N
-
-
-If reduction does not end in a condensed normal form, then the sequence of terms must be infinitely expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s. Otherwise, assuming a finite number of term symbols, there are only finitely many terms of size < s, so there would be a cycle in the reduction and reduction would end in a condensed normal form.
-
-A context is linear if every hole occurs exactly once.
-
-Verifying confluence
-====================
-
-We often want to prove confluence. There are some key algorithms:
-
-* The decreasing diagrams technique is a complete method for confluence on countable abstract rewrite systems.
-
-* Computing critical pairs. A non-joinable critical pair means the system is not confluent. If all critical pairs are joinable the system is said to be locally confluent. An orthogonal system is one with no critical pairs, while a weakly orthogonal system is one with critical pairs that are trivially joinable. For an HORS there are more constraints to be orthogonal in addition to no critical pairs ("every set of redexes is pairwise simultaneous"). The substitution calculus must be complete, only needed for gluing, a descendant rewriting system, parametric, have head-defined rules, and be naturally closed under substitution. Parallel rewrite steps must be serializable and left-hand sides of rules must be linear.
-
-  V. van Oostrom. Developing developments. TCS, 175(1):159–181, 1997.
-  V. van Oostrom and F. van Raamsdonk. Weak orthogonality implies confluence: The higher order case. In Proc. 3rd LFCS, volume 813 of LNCS, pages 379–392, 1994.
-
-* Proving termination. The Knuth Bendix Criterion (Newmann's lemma) says a terminating system is confluent iff it is locally confluent. Termination can be shown by exhibiting a well-ordering, such as recursive path ordering, dependency graph decomposition, and the subterm criterion.
-
-  WANDA has more advanced techniques. Cynthia Kop. Higher Order Termination. PhD thesis, Vrije Universiteit, Amsterdam, 2012
-
-  TTT2 also has some good techniques.
-
-  Gramlich–Ohlebusch’s criterion says for innermost-terminating TRSs R with no innermost critical pairs, R is confluent if and only if all critical pairs are joinable by innermost reduction. There are innermost terminating systems that aren't terminating so this criterion can prove some systems that Knuth-Bendix can't.
-
-* Decomposition: Several properties allow dividing the system into smaller, more tractable systems. First is modularity, that the disjoint union of two systems with the property has the property. We also usually have the converse, the disjoint union has the property only if the subsystems have the property.
-
-  * Weak normalization and consistency (w.r.t. equivalence) are modular for first-order systems.
-  * Left linearity, confluence, and unique normal forms (w.r.t. equivalence) are modular for semi-equational CTRSs.
-  * Confluence is modular for join and semi-equational CTRSs. In fact if the disjoint union is confluent then the component systems must be confluent.
-  * Confluence plus left linearity is modular for higher-order TRSs.
-  * Weak termination, weak innermost termination, and strong innermost termination are modular for CTRSs in combination with confluence or the property that there are no extra variables in the conditions.
-  * NF, unique normal forms with respect to reduction, and consistency with respect to reduction are modular in combination with left linearity. Consistency w.r.t. reduction means that there is no term reducing to two distinct variables; it is implied by the unique normal form property w.r.t. reduction as variables are normal forms.
-  * Strong normalization plus consistency w.r.t. reduction plus left linearity is modular. This likely holds for CTRSs without extra variables as well.
-
-  Order-sorted decomposition uses persistence of confluence. If sorts can be assigned to all terms and rule variables such that all rules don't increase the sort, then confluence can be separately considered for each sort and confluence as a whole follows from confluence on well-sorted terms.
-
-  Decreasing diagrams allows decomposing a left-linear TRS into duplicating and non-duplicating rules. The TRS is confluent if all critical peaks are decreasing with respect to a rule labeling and the duplicating rules are terminating relative to the non-terminating rules.
-
-  Layer-preserving decomposition decomposes TRSs into minimal pieces such that taking pieces pairwise they form layer-preserving combinations, i.e. rules in one piece operate only on terms of that piece. It is used in CSI.
-
-
-* J. Nagele, B. Felgenhauer, and A. Middeldorp. Improving automatic confluence analysis of rewrite systems by redundant rules. In Proc. 26th RTA, volume 36 of LIPIcs, pages 257–268, 2015.
-

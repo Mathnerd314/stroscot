@@ -14,8 +14,8 @@ The number must be represented in some format, so quantities are further divided
 
 An expression like "10 pounds" may be interpreted as multiple quantities, e.g. "10 avoirdupois pounds" (a weight) or "10 British pounds" (a currency), depending on context. The context could be represented via an implicit argument or whatever, but it seems a lot easier to forbid ambiguity and devise a coherent set of unit names, e.g. Frink's "pound is weight and GBP is currency". So expressions are required to be unambiguous.
 
-Units
-=====
+Types of units
+==============
 
 The units we have are multiplicative units, affine units, logarithmic units, and percentages.
 

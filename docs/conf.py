@@ -13,6 +13,7 @@ author = 'Mathnerd314'
 extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.graphviz',
+    "sphinx.ext.autosectionlabel",
     'sphinxcontrib.bibtex',
     # ,'sphinxcontrib.fulltoc'
     'sphinx_rtd_theme',
@@ -27,6 +28,8 @@ graphviz_output_format = 'svg'
 # References
 bibtex_bibfiles = ['references.bib']
 
+# Make sure cross-reference targets are unique
+autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
