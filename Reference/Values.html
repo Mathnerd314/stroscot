@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Values &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -22,7 +24,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Library" href="Library.html" />
+    <link rel="next" title="Commentary" href="../Commentary/index.html" />
     <link rel="prev" title="Syntax" href="Syntax.html" /> 
 </head>
 
@@ -50,7 +52,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Values</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#symbols">Symbols</a><ul>
@@ -92,13 +102,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#data-structures">Data Structures</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -204,7 +207,7 @@
 <p>(Immutable) arrays are lists together with an indexing scheme. The indexing scheme specifies the length of the list and how index values map to integer indexes of the list. For example <code class="docutils literal notranslate"><span class="pre">array</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code> defines a 1-based array where <code class="docutils literal notranslate"><span class="pre">arr[i]</span> <span class="pre">=</span> <span class="pre">i</span></code>. Maybe there is also an element type, <code class="docutils literal notranslate"><span class="pre">typed_array</span> <span class="pre">int32</span> <span class="pre">(range_inclusive</span> <span class="pre">1</span> <span class="pre">3)</span> <span class="pre">[1,2,3]</span></code></p>
 <p>Mutable arrays are a reference pointing to an immutable array. Operations are optimized by the memory system, so it does in-place operations where possible but can still resize the array. Conceptually you are doing <code class="docutils literal notranslate"><span class="pre">(read</span> <span class="pre">arr)[0]</span></code> to get the first element, i.e. taking an immutable snapshot and then reading/modifying it. This is hidden normally because <code class="docutils literal notranslate"><span class="pre">arr[0]</span></code> and <code class="docutils literal notranslate"><span class="pre">arr[0]</span> <span class="pre">:=</span> <span class="pre">1</span></code> are overloaded to read/write mutable arrays.</p>
 <p>There is also an array of mutable cells (bytes), similar to C pointers / arrays. You can do something like <code class="docutils literal notranslate"><span class="pre">readOffset</span> <span class="pre">Int</span> <span class="pre">0</span> <span class="pre">ptr</span></code>. You can read a different type than you wrote, and it doesn’t have to be aligned (although aligned accesses may be faster depending on architecture). This type is useful for low-level munging but mutable arrays are probably safer.</p>
-<p><span id="id1">[]</span> says that “allowing the size of arrays to be decided at run time […] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas.” But Storscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time.</p>
+<p><span id="id1">[<a class="reference internal" href="../zzreferences.html#id258" title="Jean-Paul Tremblay and Paul G. Sorenson. The Theory and Practice of Compiler Writing. McGraw-Hill College, New York, first edition edition, January 1985. ISBN 978-0-07-065161-6.">TS85</a>]</span> page 73 says that “allowing the size of arrays to be decided at run time […] introduces considerable implementation problems and interferes with compile-time error checking. This feature may be of only limited value in certain applications areas.” But Stroscot is based on an interpeter model - so the only time the size of an array could be decided is at run-time. Most languages these days have dynamically-sized arrays.</p>
 </section>
 <section id="tensors">
 <h3>Tensors<a class="headerlink" href="#tensors" title="Link to this heading"></a></h3>
@@ -337,7 +340,7 @@ Escape sequences are defined:</p>
 <span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="p">(</span><span class="nf">\</span><span class="n">x</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">lookup</span><span class="w"> </span><span class="p">{</span><span class="kr">default</span><span class="ow">=</span><span class="kt">Absent</span><span class="p">}</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>More notation for sets is discussed on the <span class="xref std std-ref">Sets</span> page.</p>
+<p>More notation for sets is discussed on the <a class="reference internal" href="#sets">Sets</a> page.</p>
 </section>
 <section id="bags">
 <h2>Bags<a class="headerlink" href="#bags" title="Link to this heading"></a></h2>
@@ -595,7 +598,7 @@ Other
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Syntax.html" class="btn btn-neutral float-left" title="Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Commentary/index.html" class="btn btn-neutral float-right" title="Commentary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

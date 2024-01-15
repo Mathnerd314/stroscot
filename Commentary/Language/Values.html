@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Values &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Verification" href="Verification.html" />
+    <link rel="prev" title="Types" href="Types.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Values</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#colors">Colors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bare-symbols">Bare symbols</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#term">Term</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scc">SCC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infinite-term">Infinite term</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions-sets">Functions/Sets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#binders-logical-proofs">Binders/Logical proofs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rewriting-system">Rewriting system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Values</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Values.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="values">
+<h1>Values<a class="headerlink" href="#values" title="Link to this heading"></a></h1>
+<p>A value represent an element within the <a class="reference external" href="https://en.wikipedia.org/wiki/Domain_of_discourse">universe of discourse</a>. As Stroscot aims to maximize functionality, the goal is to have an unfettered universe of discourse in which all applications of words are understood according to their common conditions and meanings. The notion of value in Stroscot is thus more a linguistic property, like “proper noun”, than a semantic property. Specifically we can define a value in Stroscot as follows:</p>
+<ul class="simple">
+<li><p>Canonical representation - A value has a canonical representation, usually via text (UTF-8) but perhaps a binary file format like a PNG or network packet. This representation should generally be used consistently for writing and displaying the value. It can also be hashed and compared for equality. Generally, equality is obvious, but for lambdas etc. I will define it as observable equality.</p></li>
+<li><p>Variations - A value may have minor variations in syntax or notation that do not change its meaning. For example, “1/3” and “⅓” represent the same rational number value, but they differ in orthography, or a list (tuple) may be written as <code class="docutils literal notranslate"><span class="pre">[1,2]</span></code> or <code class="docutils literal notranslate"><span class="pre">(1,2)</span></code>, or a regex value may be written as <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Regex(&quot;[0-9]+&quot;)</span></code>.</p></li>
+<li><p>Context-Independence: Values maintain their meaning and significance across different contexts and languages. Beyond variations in syntax, they are not dependent on the context in which they appear, the specific programming language used, or compilation options.</p></li>
+<li><p>Non-Reducibility: Ideally, values are normal forms, meaning they are not subject to evaluation, reduction, or computation. For example, “1/3” and “let x=3 in 1/x” may be equivalent under reduction, but only “1/3” is considered a value because it cannot be further reduced or evaluated. WHNF is not sufficient to ensure a value, e.g. <code class="docutils literal notranslate"><span class="pre">[1,undefined]</span></code> reduces to <code class="docutils literal notranslate"><span class="pre">undefined</span></code> hence is not a value. In practice, reduction rules are dependent on context, so we take a liberal perspective and accept values as “values” even if they are not normal forms in all contexts.</p></li>
+</ul>
+<p>On account of their canonical representation, the simplest concrete representation of a value is as a string, but in practice values will generally be represented in memory as more efficient formats, for example a list as a contiguous array of pointers - see <a class="reference internal" href="Memory.html#memory"><span class="std std-ref">Memory</span></a>. This representation must be lossless, in the sense that converting from a string to the format and then back to the string should be the identity.</p>
+<p>Values are immutable (as <a class="reference external" href="https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/PersistentDataStructure/00.11.36.jpg">Rich Hickey says</a>). In terms of memory management, values are just data - they can be copied freely, and discarded once they will no longer be used.</p>
+<section id="colors">
+<h2>Colors<a class="headerlink" href="#colors" title="Link to this heading"></a></h2>
+<p>So each value has at least two parts (conceptually): there is the “human-readable” value, like for example the integer 1. Then there is the “color” or user annotated type, and that’s generally a symbol like <code class="docutils literal notranslate"><span class="pre">MyAmazingInteger64</span></code>. So when we talk about a value in Stroscot, we are talking about the human-readable value plus the color - <code class="docutils literal notranslate"><span class="pre">MyAmazingInteger64</span> <span class="pre">1</span></code>. Stroscot has no way to talk about the human-readable value alone, because it would be ambiguous; every value in Stroscot has a color. Would we be talking about the <code class="docutils literal notranslate"><span class="pre">1</span></code> stored as the standard library’s color (written as just <code class="docutils literal notranslate"><span class="pre">1</span></code>)? Or about a more specific library’s colored <code class="docutils literal notranslate"><span class="pre">1</span></code>? The question is somewhat pedantic, because we can generally easily convert between values of different colors, and most of the time this conversion is somewhat automatic. But, for purposes of the language semantics, values of different colors are not “equal”, because it is easy to distinguish the color.</p>
+<p>Once we get into optimization, we may start using identical memory representations for values of different colors, erasing checks and conversions and so on, because checking the color at each point is slow. For example, SQLSafeString and String will most likely have the same memory representation (it’s not like there’s an amazingly efficient way of representing sanitized strings that’s different from representing normal strings). But during optimization, we are already considering equivalence classes of programs rather than programs - simply by optimizing, we are improving the speed of the program, which is an observable property, and therefore we are changing the behavior of the program by optimizing. The reason this is allowed is because optimization considers programs with the same output value to be equivalent.</p>
+</section>
+<section id="bare-symbols">
+<h2>Bare symbols<a class="headerlink" href="#bare-symbols" title="Link to this heading"></a></h2>
+<p>Bare symbols are perhaps the simplest value. Bare symbols are simply a sequence of characters. Vaguely like <a class="reference external" href="https://docs.raku.org/language/syntax#Identifiers">Raku</a>, an ordinary bare symbol is a Unicode word, and an extended symbol uses an escape sequence <code class="docutils literal notranslate"><span class="pre">&#64;&quot;sym</span> <span class="pre">str&quot;</span></code> to allow spaces etc. following the syntax for a string. An extended symbol matches a corresponding ordinary symbol if that form exists, i.e. <code class="docutils literal notranslate"><span class="pre">null</span> <span class="pre">==</span> <span class="pre">&#64;&quot;null&quot;</span></code>. It is a bit tricky to write a bare symbol in proper Stroscot as most symbols are understood to be qualified.</p>
+</section>
+<section id="term">
+<h2>Term<a class="headerlink" href="#term" title="Link to this heading"></a></h2>
+<p>A term is a value applied to other values, with no reduction rules applicable.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">tree</span><span class="w"> </span><span class="p">(</span><span class="n">combine</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">leaf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="o">++++</span><span class="p">)</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">b</span>
+<span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">some</span><span class="w"> </span><span class="p">(</span><span class="n">weird</span><span class="w"> </span><span class="n">thing</span><span class="p">))</span><span class="w"> </span><span class="mi">12</span>
+<span class="mi">1</span><span class="w"> </span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>Terms subsume algebraic data types. Whereas an ADT value is a symbol applied to other values, with restrictions on the types of those values, a term is “untyped” and has no restrictions on its constructor or arguments.</p>
+<p>Term application also includes the other function syntax - keyword arguments, implicit arguments, and so on - so is more than just positional application.</p>
+</section>
+<section id="scc">
+<h2>SCC<a class="headerlink" href="#scc" title="Link to this heading"></a></h2>
+<p>An SCC value is a strongly connected component of terms that reduce to each other but not anything else. For example <code class="docutils literal notranslate"><span class="pre">\(\x.</span> <span class="pre">x)(\x.</span> <span class="pre">x)</span></code> is an SCC because it reduces to itself and not anything else. It is a bit strange as a value though because there may be multiple ways of writing it; for example with the rewrite system <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b;</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">a</span></code>, both <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> refer to the same SCC. Because of this strangeness SCCs are specially handled by the execution engine.</p>
+</section>
+<section id="infinite-term">
+<h2>Infinite term<a class="headerlink" href="#infinite-term" title="Link to this heading"></a></h2>
+<p>According to the infinite term reduction semantics, we may get an infinite term, defined as a Cauchy sequence of finite terms or simply a Cauchy sequence of terms. If there are no reduction of this infinite term then it is a value. For example with a definition <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[1,...x]</span></code> we may get the infinite list <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[1,1,1,...]</span></code>. To avoid issues with nontermination, infinite terms also need special handling by the execution engine.</p>
+</section>
+<section id="functions-sets">
+<h2>Functions/Sets<a class="headerlink" href="#functions-sets" title="Link to this heading"></a></h2>
+<p>Ostensibly, a function is a set consisting of tuple pairs <code class="docutils literal notranslate"><span class="pre">(a,b)</span></code> with the property that for each value of <code class="docutils literal notranslate"><span class="pre">a</span></code> there is at most one value of <code class="docutils literal notranslate"><span class="pre">b</span></code>. But this definition is circular, so we also hack in many special “base” cases for functions, such as lambdas, rewrite rules, and primitive symbols.</p>
+<p>Similarly, a set is ostensibly a function <code class="docutils literal notranslate"><span class="pre">isElemOf</span> <span class="pre">:</span> <span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">{Present|Absent}</span></code>, but it also has hacked in special instances.</p>
+</section>
+<section id="binders-logical-proofs">
+<h2>Binders/Logical proofs<a class="headerlink" href="#binders-logical-proofs" title="Link to this heading"></a></h2>
+<p>Conceptually a binder is a structure with some number of “slots” and numbered references to these slots in the body (a value but with “holes” for the slots). In practice, the binder is specified using variables (symbols), and these variable names are preserved for debugging purposes. Nonetheless, renaming the variables should not change the meaning of the binder (alpha-equivalence). The easiest way to ensure this is to use a nameless graph representation but to preserve variable names at the site of the binder as metadata. For example, a lambda expression <code class="docutils literal notranslate"><span class="pre">\x.</span> <span class="pre">x</span> <span class="pre">x</span></code> is really more like <code class="docutils literal notranslate"><span class="pre">(\.</span> <span class="pre">1</span> <span class="pre">1,</span> <span class="pre">x)</span></code>.</p>
+<p>The sequent calculus is used to represent binders via derivation trees built up using the various rules. We use the logic described in <a class="reference internal" href="../../Reference/Logic.html#logic"><span class="std std-ref">Logic</span></a>.</p>
+<ul class="simple">
+<li><p>Jumbo: The Jumbo break rule contains a set of values and a function from those values to a derivation tree. It also specifies a target in each derivation for each side formula. The Jumbo build rule takes a value and a list of left/right derivation trees and combines them, specifying a target for each tree.</p></li>
+<li><p>Exponentials: Promotion specifies a target for each formula in the sequent. Dereliction has one target, Weakening has no target, contraction has n (n&gt;2) targets.</p></li>
+<li><p>Identity: This is a unique value.</p></li>
+<li><p>Quantifiers: This has quantifier build/break, a bit similar to promotion. No-ops at the untyped level.</p></li>
+<li><p>Use/def: We must have a global map from identifiers to definitio0ns, and use nodes then list these identifiers</p></li>
+<li><p>Syntax definition (equality, sets): These don’t even have build/break duality. Again no-ops at the untyped level.</p></li>
+</ul>
+<p>These rules are not included in values of the sequent calculus:</p>
+<ul class="simple">
+<li><p>Cut: Since cut-reduction can eliminate all cuts, a proof tree containing cut is a reducible expression.</p></li>
+<li><p>Exchange: This is represented by the target pointers in the derivation tree.</p></li>
+</ul>
+</section>
+<section id="rewriting-system">
+<h2>Rewriting system<a class="headerlink" href="#rewriting-system" title="Link to this heading"></a></h2>
+<p>A rewriting system consists of a set of rewrite rules. A (conditional) rewrite rule has the form <code class="docutils literal notranslate"><span class="pre">l</span> <span class="pre">-&gt;</span> <span class="pre">r</span> <span class="pre">|</span> <span class="pre">C1,</span> <span class="pre">...,</span> <span class="pre">Cn</span></code> where <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code> are both (open) values, i.e. some set of symbols is declared as pattern variables in <code class="docutils literal notranslate"><span class="pre">l</span></code>/<code class="docutils literal notranslate"><span class="pre">r</span></code>. The conditions are combined with <code class="docutils literal notranslate"><span class="pre">and</span></code>, and take the form of predicates <code class="docutils literal notranslate"><span class="pre">Pi(x1,</span> <span class="pre">...,</span> <span class="pre">xm,</span> <span class="pre">-&gt;)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">xi</span></code> are the pattern variables of <code class="docutils literal notranslate"><span class="pre">l</span></code> and <code class="docutils literal notranslate"><span class="pre">r</span></code>, and <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is the rewrite relation of the system. Example predicates are type predicates <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">B</span></code>, and <code class="docutils literal notranslate"><span class="pre">a</span></code> joins with, rewrites to, or is convertible to <code class="docutils literal notranslate"><span class="pre">b</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Types.html" class="btn btn-neutral float-left" title="Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Verification.html" class="btn btn-neutral float-right" title="Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

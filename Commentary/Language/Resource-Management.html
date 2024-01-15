@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resource management &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Security" href="Security.html" />
+    <link rel="prev" title="Posets" href="Posets.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Resource management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#manual-approach">Manual approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#try-finally">try-finally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#try-with-resources">try-with-resources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bracket">Bracket</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scope-guard">Scope guard</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#goto-cleanup">Goto cleanup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#garbage-collection">Garbage collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#raii">RAII</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#destructors">Destructors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exception-safety">Exception safety</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Resource management</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Resource-Management.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resource-management">
+<h1>Resource management<a class="headerlink" href="#resource-management" title="Link to this heading"></a></h1>
+<p>Resources are things that can be acquired and released, and are available in limited quantities due to OS or physical limitations. Examples include memory allocations, file handles, internet sockets, mutexes/locks, process table entries, and process identifiers (PIDs). A resource leak happens if the program does not promptly release a resource it has acquired after the program is finished with the resource. A resource management technique prevents resource leaks by releasing resources promptly.</p>
+<p>It is possible to manage resources by hand, but it is quite error-prone and tedious. Automatic resource management aims to provide a concise and safe replacement. Stroscot’s solution is called “destructors” or “finalizers” or something like that.</p>
+<section id="manual-approach">
+<h2>Manual approach<a class="headerlink" href="#manual-approach" title="Link to this heading"></a></h2>
+<p>The manual approach is to release sequentially after acquiring, for example:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">f2</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file2.txt&quot;</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f1</span><span class="w"> </span><span class="n">f2</span>
+<span class="nf">close</span><span class="w"> </span><span class="n">f1</span>
+<span class="nf">do_something_2</span><span class="w"> </span><span class="n">f2</span>
+<span class="nf">close</span><span class="w"> </span><span class="n">f2</span>
+</pre></div>
+</div>
+<p>There are several issues:</p>
+<ul class="simple">
+<li><p>Early exit leak: There is a resource leak if do_something contains a return, exception, goto, break, or continue out of the do_something block. <a class="reference external" href="https://web.archive.org/web/20201017213150/https://devblogs.microsoft.com/oldnewthing/?p=36783">Raymond Chen</a> complains about C++ macros hiding return and goto statements in the function body.</p></li>
+<li><p>Failed acquire: if open fails, do_something and close will be called on an invalid value. But with automatic exception propagation this will be fine since <code class="docutils literal notranslate"><span class="pre">close</span> <span class="pre">InvalidHandle</span> <span class="pre">=</span> <span class="pre">InvalidHandle</span></code>.</p></li>
+<li><p>Adjacency: If do_something is long, the release is far from the acquisition, so manual inspection cannot easily identify if the corresponding release function is actually called.</p></li>
+<li><p>Encapsulation: the release requirement exposes a detail of the value, namely that it is a resource. This means it cannot be stored in a data structure or returned from a function without special care to call release later.</p></li>
+<li><p>Interleaving: Not a problem here, but many solutions impose the requirement that f2 is freed before f1, a LIFO nesting.</p></li>
+</ul>
+</section>
+<section id="try-finally">
+<h2>try-finally<a class="headerlink" href="#try-finally" title="Link to this heading"></a></h2>
+<p>The try-finally modifies the basic approach by marking the do_something and release blocks explicitly. There are two patterns in Java 6, <a class="reference external" href="http://www.javapractices.com/topic/TopicAction.do?Id=25">standard pattern</a> and open-in-try (<a class="reference external" href="https://stackoverflow.com/questions/2699209/java-io-ugly-try-finally-block">here</a>):</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">try</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">finally</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
+
+<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">var</span><span class="w"> </span><span class="kt">InvalidHandle</span>
+<span class="nf">try</span><span class="kt">:</span>
+<span class="w">    </span><span class="n">f</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
+<span class="nf">finally</span><span class="kt">:</span>
+<span class="w">  </span><span class="kr">if</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span>
+<span class="w">    </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>The unwinding protection solves the early exit leak. The failed acquire again doesn’t really matter. This pattern does not solve adjacency, encapsulation, or interleaving, meaning that it is still awkward and verbose. For adjacency, throws act as go-downs and you have to scan down almost the whole function to the finally block to see what cleanups are waiting and if an allocation has a matching clean-up. Also there is an indentation pyramid with nested try-finally.</p>
+</section>
+<section id="try-with-resources">
+<h2>try-with-resources<a class="headerlink" href="#try-with-resources" title="Link to this heading"></a></h2>
+<p>The try-with-resources solves adjacency by making <code class="docutils literal notranslate"><span class="pre">close</span></code> a Java built-in interface, but it still can’t do encapsulation or interleaving:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">try</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>In particular <a class="reference external" href="https://stackoverflow.com/questions/12552863/correct-idiom-for-managing-multiple-chained-resources-in-try-with-resources-bloc">chained resources</a> are awkward.</p>
+<p>C# has a similar <code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">(f</span> <span class="pre">=</span> <span class="pre">newThing)</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> syntax, and Python has <code class="docutils literal notranslate"><span class="pre">with</span></code>.</p>
+</section>
+<section id="bracket">
+<h2>Bracket<a class="headerlink" href="#bracket" title="Link to this heading"></a></h2>
+<p>Haskell has a <code class="docutils literal notranslate"><span class="pre">bracket</span> <span class="pre">acquire</span> <span class="pre">release</span> <span class="pre">action</span></code> combinator which functions similarly to try-with-resources. It similarly doesn’t support interleaving or encapsulation.</p>
+<p>The <a class="reference external" href="https://vimeo.com/97329153">D guy</a> claims you need an even larger combinator than bracket, which goes as follows:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">if</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">when</span><span class="w"> </span><span class="o">!</span><span class="n">next</span>
+<span class="w">    </span><span class="n">rollback</span>
+<span class="w">  </span><span class="n">release</span>
+</pre></div>
+</div>
+<p>With masking this looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">generalBracket</span><span class="w"> </span><span class="n">acquire</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">mask</span><span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="nf">\</span><span class="n">unmasked</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">    </span><span class="n">resource</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">acquire</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">unmasked</span><span class="w"> </span><span class="p">(</span><span class="n">next</span><span class="w"> </span><span class="n">resource</span><span class="p">)</span><span class="w"> </span><span class="p">`</span><span class="n">catch</span><span class="p">`</span><span class="w"> </span><span class="nf">\</span><span class="n">e</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kr">do</span>
+<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">      </span><span class="kr">_</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">      </span><span class="n">throw</span><span class="w"> </span><span class="n">e</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="n">resource</span>
+<span class="w">    </span><span class="n">return</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>acquire has to be masked because there could be an async exception between the action and running next.</p>
+</section>
+<section id="scope-guard">
+<h2>Scope guard<a class="headerlink" href="#scope-guard" title="Link to this heading"></a></h2>
+<p>This approach involves a “deferred release”, which is called when the scope is exited. For example:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">defer</span><span class="w"> </span><span class="p">(</span><span class="n">close</span><span class="w"> </span><span class="n">f</span><span class="p">)</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>It is available in C++ as the ScopeGuard class, in Go and Zig as the defer statement, and in D via the <a class="reference external" href="http://ddili.org/ders/d.en/scope.html">scope</a> keyword, where there are <code class="docutils literal notranslate"><span class="pre">scope(exit)</span></code>, <code class="docutils literal notranslate"><span class="pre">scope(success)</span></code>, and <code class="docutils literal notranslate"><span class="pre">scope(failure)</span></code> (referring to exiting the scope unconditionally as with <code class="docutils literal notranslate"><span class="pre">defer</span></code>, without exception, or by exception respectively).</p>
+<p>It does solve early exit.</p>
+<p>The pattern nests in the sense that <code class="docutils literal notranslate"><span class="pre">defer</span></code>-ed statements are run latest-defined to earliest-defined on exit, but again doesn’t allow interleaving.</p>
+<p>It solves adjacency by putting the cleanup before the code that uses the resource, right after the code that’s being cleaned up after. It’s easy to verify that allocations match up with their nearby cleanups, but the clean-up is delayed to the scope’s exit. The syntax is very compact, just specify a cleanup function, but is a statement rather than an expression, meaning that the acquire must also be a statement.</p>
+<p><code class="docutils literal notranslate"><span class="pre">defer</span></code> and <code class="docutils literal notranslate"><span class="pre">scope</span></code> do not allow returning a resource from a function and skipping the cleanup. They also introduce memory allocation questions since the deferred expressions can capture local variables. So no encapsulation.</p>
+</section>
+<section id="goto-cleanup">
+<h2>Goto cleanup<a class="headerlink" href="#goto-cleanup" title="Link to this heading"></a></h2>
+<p>C has this pattern:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file&quot;</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">InvalidHandle</span><span class="p">)</span>
+<span class="w">  </span><span class="n">return</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something</span><span class="w"> </span><span class="n">f</span><span class="p">))</span>
+<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span>
+<span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">isException</span><span class="w"> </span><span class="p">(</span><span class="n">do_something_2</span><span class="w"> </span><span class="n">f</span><span class="p">))</span>
+<span class="w">  </span><span class="n">goto</span><span class="w"> </span><span class="n">cleanup</span>
+<span class="nf">cleanup</span><span class="kt">:</span>
+<span class="w">  </span><span class="n">close</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>This suffers from early return but addresses adjacency in that the cleanup label is present and can handle interleaving with conditionals. It is not encapsulated though and it is easy to mess up handling a failed acquire.</p>
+</section>
+<section id="garbage-collection">
+<h2>Garbage collection<a class="headerlink" href="#garbage-collection" title="Link to this heading"></a></h2>
+<p>Java’s GC almost solves the problem by making closing automatic. It looks like:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="s">&quot;file.txt&quot;</span>
+<span class="nf">do_something</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>It solves all the issues of early exit, adjacency (implicit in the open), nesting, and encapsulation (the GC is based on global program flow). Unfortunately, Java’s GC does not guarantee it will promptly call the finalizer, so in practice the semantics are not usable.</p>
+</section>
+<section id="raii">
+<h2>RAII<a class="headerlink" href="#raii" title="Link to this heading"></a></h2>
+<p>C++ uses RAII, which looks like GC, but uses deterministic memory management, such as stack allocation or reference counting. It ensures you cannot insert any failure points between the allocation and the start of the cleanup’s scope. A resource can even be allocated with its corresponding cleanup in the middle of an expression. But defining a new class for every cleanup operation is tedious - fortunately in C++0x it is possible to define one “RAII lambda” class and be done. C++’s semantics define lambda memory handling so there is no allocation issue.</p>
+<p>With C++17 it is apparently possible to copy/move RAII types and store them in a data structure or return them from a function, but it seems fragile. In case of a complicated object graph, such as multiple objects sharing a resource, RAII falls down because the available strategies for deterministic memory management are insufficient.</p>
+</section>
+<section id="destructors">
+<h2>Destructors<a class="headerlink" href="#destructors" title="Link to this heading"></a></h2>
+<section id="design">
+<h3>Design<a class="headerlink" href="#design" title="Link to this heading"></a></h3>
+<p>Stroscot’s destructors (or finalizers, or whatever name) are inspired by C++’s RAII and Java’s GC. I am still waffling on the name because they behave a lot more like C++-style RAII, but they are also not quite as prompt, closer to Java’s GC finalizers. Java’s finalizers have inherent problems because they are associated with GC. In particular, because the GC may not run, Java’s finalizers have no guarantee of timeliness or ordering, and hence cannot be used to free resources. In contrast, with the “automatic static” analysis of <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id212" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span>, Stroscot’s destructors free as soon as it is statically known that they are no longer used, so they are much closer conceptually to the stack or reference counting discipline of RAII, even though they have the syntactic cleanliness of a GC solution.</p>
+<p>It is not really a big assumption that there is exactly one best place to release the resource, “immediately after the last use of the operation”. Semantics-wise, identifying the best location for the release operation is a static, completely solvable problem. It is just of a high complexity <span class="math notranslate nohighlight">\(\Sigma^0_1\)</span>. So if we are willing to accept potentially long compile times, we can eliminate resource management errors. Such an analysis is more precise than traditional GC, because GC looks at what references are “in scope” and cannot free an unused reference embedded in a structure whose other parts are in use.</p>
+<p>Compared to Java’s finalizers and C++’s RAII, I made destructors functions, not directly associated with any objects. This avoids issues with resurrection and so on - the destructor is just a lambda so it can do whatever and still be freed without issues.</p>
+<p>Similarly to <code class="docutils literal notranslate"><span class="pre">defer</span></code>, the cleanup is placed at the top, near or within the acquire call.</p>
+<p>Destructors directly implement D’s <code class="docutils literal notranslate"><span class="pre">scope(exit)</span></code>, and with an extra flag variable they can implement <code class="docutils literal notranslate"><span class="pre">scope(success)</span></code> and <code class="docutils literal notranslate"><span class="pre">scope(failure)</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">scope_failure</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rollback</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">else</span><span class="w"> </span><span class="p">{})</span>
+<span class="w">  </span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span>
+
+<span class="nf">use</span><span class="w"> </span><span class="p">(</span><span class="kt">ScopeFailure</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">   </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span>
+<span class="w">   </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+
+
+<span class="nf">s</span><span class="w"> </span><span class="ow">&lt;-</span><span class="w"> </span><span class="n">scope_failure</span><span class="w"> </span><span class="n">rollback</span>
+<span class="nf">code</span>
+<span class="nf">use</span><span class="w"> </span><span class="n">s</span>
+</pre></div>
+</div>
+<p>Similarly to <code class="docutils literal notranslate"><span class="pre">finally</span></code>, there is a marker for the end of the destructor, <code class="docutils literal notranslate"><span class="pre">use</span></code>. <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4152.pdf">Herb Sutter</a> claims that the extra <code class="docutils literal notranslate"><span class="pre">use</span></code> is “tedious and fragile” and forces the programmer to think about the placement of failure determination. One can define a proper <code class="docutils literal notranslate"><span class="pre">scope_failure</span> <span class="pre">rollback</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code> block structure, and even redefine return/continue/break to not run the rollback. But personally I think the destructors are more powerful because they allow interleaving scopes. The combinators only allow nesting which isn’t as expressive. In Haskell land Snoyman created <a class="reference external" href="https://hackage.haskell.org/package/resourcet">ResourceT</a> even though there was <code class="docutils literal notranslate"><span class="pre">bracket</span></code>, exactly because of this.</p>
+<p>Destructors allow nesting, in the natural way <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">a;</span> <span class="pre">newDestructor</span> <span class="pre">b;</span> <span class="pre">...;</span> <span class="pre">use</span> <span class="pre">b;</span> <span class="pre">use</span> <span class="pre">a</span></code>, and interleaving, by reordering to <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">a;</span> <span class="pre">use</span> <span class="pre">b</span></code>. Destructors also support encapsulation such as returning the allocated resource. It is also possible to embed the destructor in a resource handle and use RAII style programming - each operation calls <code class="docutils literal notranslate"><span class="pre">use</span></code> and extends the destructor’s life.</p>
+</section>
+<section id="formal-definition">
+<h3>Formal definition<a class="headerlink" href="#formal-definition" title="Link to this heading"></a></h3>
+<p>More formally, a destructor is a magic value created with the one-argument function <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">:</span> <span class="pre">(free</span> <span class="pre">:</span> <span class="pre">Command)</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Destructor</span></code>. It supports equality, hashing, and command <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Command</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Command</span></code>. The semantics is that <code class="docutils literal notranslate"><span class="pre">free</span></code> will be called as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> will not be called. Calling <code class="docutils literal notranslate"><span class="pre">use</span></code> delays finalization until after the <code class="docutils literal notranslate"><span class="pre">use</span></code>, and <code class="docutils literal notranslate"><span class="pre">useForever</span></code> cancels the destructor and returns the free operation. The general transformation:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">NewDestructor</span><span class="w"> </span><span class="n">free</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freshSymbol</span>
+<span class="w">  </span><span class="n">transform</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="n">free</span><span class="p">,</span><span class="n">f</span><span class="p">}</span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span>
+<span class="nf">reduce</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="n">free</span>
+
+<span class="nf">transform</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Task</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Task</span>
+<span class="nf">transform</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">could_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">free</span><span class="w"> </span><span class="p">{</span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">c</span><span class="p">})</span>
+<span class="w">  </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">will_definitely_call</span><span class="w"> </span><span class="p">(</span><span class="kt">UseForever</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="n">c</span>
+<span class="w">  </span><span class="kr">else</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="p">(</span><span class="n">will_definitely_call</span><span class="w"> </span><span class="p">(</span><span class="kt">Use</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">      </span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Delaying destructor due to conditional usage&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">let</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="n">c</span>
+<span class="w">    </span><span class="n">reduce</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">continuation</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">transform</span><span class="w"> </span><span class="n">c&#39;</span><span class="w"> </span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="non-prompt-finalization">
+<h3>Non-prompt finalization<a class="headerlink" href="#non-prompt-finalization" title="Link to this heading"></a></h3>
+<p>Destructors do not really free memory “immediately after the last use”, as the <cite>info(“Delaying destructor due to conditional usage”)`</cite> message points out. Rather they free “immediately before the first point of non-use”. This distinction is clear when the location to free depends on further input:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span>
+<span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="n">af</span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="kt">Bool</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;d&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+</pre></div>
+</div>
+<p>Because <code class="docutils literal notranslate"><span class="pre">a</span></code> might be used in the else branch, it cannot be freed between the <code class="docutils literal notranslate"><span class="pre">newDestructor</span> <span class="pre">af</span></code> and <code class="docutils literal notranslate"><span class="pre">input</span> <span class="pre">Bool</span></code> statements, even though this would be the earliest place to free for a “true” input. Instead, <code class="docutils literal notranslate"><span class="pre">a</span></code> is freed as soon as it is known it will (unconditionally) not be used, hence this program is equivalent to:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">af</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="kt">Bool</span>
+<span class="kr">if</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">af</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">af</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;d&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+</pre></div>
+</div>
+<p>Non-prompt finalization can be made into an error/warning if prompt memory management is desired.</p>
+<p>I also started out with a different API, instead of a <code class="docutils literal notranslate"><span class="pre">free</span></code> operation that gets called at random times, destructors had this operation <code class="docutils literal notranslate"><span class="pre">lastUse</span> <span class="pre">:</span> <span class="pre">Destructor</span> <span class="pre">-&gt;</span> <span class="pre">Op</span> <span class="pre">Bool</span></code>, that returns false for every call except the last. The pattern for using this API is to make each use check if it’s the <code class="docutils literal notranslate"><span class="pre">lastUse</span></code>, like <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">(PromptDestructor</span> <span class="pre">free</span> <span class="pre">d)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">l</span> <span class="pre">=</span> <span class="pre">lastUse</span> <span class="pre">d;</span> <span class="pre">if</span> <span class="pre">l</span> <span class="pre">{</span> <span class="pre">free</span> <span class="pre">}</span> <span class="pre">}</span></code>. But eventually I proved that this API is equivalent to the current API: the use function works to implement the current API with the old (minus the non-prompt finalization), and you can implement the old API with the current one:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">isFinalized</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">false</span>
+<span class="nf">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">isFinalized</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">true</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">lastUse</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+<span class="w">  </span><span class="n">read</span><span class="w"> </span><span class="n">isFinalized</span>
+</pre></div>
+</div>
+<p>This implementation of destructors works just fine in programs where the warning is not triggered. But with non-prompt finalization, delaying until known, the contract is not valid because <code class="docutils literal notranslate"><span class="pre">lastUse</span></code> could return false even though it is the last use (delaying the destructor after the read).</p>
+</section>
+<section id="subsuming-manual-memory-management">
+<h3>Subsuming manual memory management<a class="headerlink" href="#subsuming-manual-memory-management" title="Link to this heading"></a></h3>
+<p>By construction, destructors without the warning are as prompt as destructors with the warning, on the programs where the warning does not trigger. In particular, destructors subsume prompt destructors subsume manual memory management. Taking a program written with standard <code class="docutils literal notranslate"><span class="pre">malloc/free</span></code>, we can gradually change it:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">malloc</span></code> is wrapped to return a tuple with <code class="docutils literal notranslate"><span class="pre">newDestructor</span></code>, <code class="docutils literal notranslate"><span class="pre">free</span></code> is replaced with <code class="docutils literal notranslate"><span class="pre">use</span></code></p></li>
+<li><p>every operation is modified to call <code class="docutils literal notranslate"><span class="pre">use</span></code></p></li>
+<li><p>the destructor warning is turned off</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">use</span></code> calls corresponding to <code class="docutils literal notranslate"><span class="pre">free</span></code> are removed</p></li>
+</ol>
+<p>Up until step 4, the destructor program compiles identically to the original. It’s step 4 that’s a bit fragile - the lifetime of the destructor could be shortened and, depending on the program structure, the point at which <code class="docutils literal notranslate"><span class="pre">free</span></code> should be called may become much harder to compute. But hopefully the analysis will be fairly robust and able to handle most cases. At worst, the programmer will have to provide additional help to the destructor analysis in the form of inserting the <code class="docutils literal notranslate"><span class="pre">use</span></code> statements corresponding to <code class="docutils literal notranslate"><span class="pre">free</span></code>. Either way, since all operations call <code class="docutils literal notranslate"><span class="pre">use</span></code>, the program behavior is not changed, only its resource management.</p>
+</section>
+<section id="destructor-order">
+<h3>Destructor order<a class="headerlink" href="#destructor-order" title="Link to this heading"></a></h3>
+<p>If multiple destructors simultaneously become able to call <code class="docutils literal notranslate"><span class="pre">free</span></code>, then destructor instruction insertions are run in the order of creation, first created first. This means the free calls will execute most recent first, e.g. if there is an exception.</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">a</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="p">)</span>
+<span class="nf">b</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">(</span><span class="n">print</span><span class="w"> </span><span class="s">&quot;b&quot;</span><span class="p">)</span>
+
+<span class="kr">if</span><span class="w"> </span><span class="n">randomBool</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">exit</span>
+<span class="kr">else</span>
+<span class="w">  </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;c&quot;</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">a</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">b</span>
+<span class="w">  </span><span class="n">exit</span>
+
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">false</span><span class="kt">:</span><span class="w"> </span><span class="n">cab</span>
+<span class="o">#</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">true</span><span class="kt">:</span><span class="w"> </span><span class="n">bac</span>
+</pre></div>
+</div>
+</section>
+<section id="freed-on-exit">
+<h3>Freed on exit<a class="headerlink" href="#freed-on-exit" title="Link to this heading"></a></h3>
+<p>Many resources are automatically freed by the OS on exit: memory, file handles, etc. This automatic freeing is generally more efficient than releasing each resource one by one. So as an optimization, one would like to <em>not</em> free these resources earlier, but rather hold on to them until the program exits and the OS frees them itself. So what we need is an analysis that determines at what point in the program there are sufficient spare resources that any further allocation can be satisfied without deallocation. This measure “the remaining amount of additional memory the program might use” will not necessarily be compared against the remaining memory amount of free physical memory actually available, but more likely a configurable parameter like 2MB. Once this point is determined the compiler can insert <code class="docutils literal notranslate"><span class="pre">useForever</span></code> calls to mark all the in-use resources as not needing manual finalization.</p>
+</section>
+<section id="sloppy-frees">
+<h3>Sloppy frees<a class="headerlink" href="#sloppy-frees" title="Link to this heading"></a></h3>
+<p>GC is more composable and it can also be faster than manual memory management <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id12" title="Andrew W. Appel. Garbage collection can be faster than stack allocation. Information Processing Letters, 25(4):275–279, June 1987. URL: https://www.cs.princeton.edu/~appel/papers/45.pdf (visited on 2020-07-24), doi:10.1016/0020-0190(87)90175-X.">App87</a>]</span>. As Appel points out, even if freeing an individual object is a single machine instruction, such as a stack pop, freeing a lot of objects still has significant overhead compared to copying out a small amount of useful data and just marking a whole region of objects as free. In a similar vein, sometimes we do not actually want the destructor to run as promptly as possible, but rather batch it with other allocations and free it all in one go. The opportunities for batching are hard to detect and even harder to implement by hand. Setting some “slop factor” of memory that can be delayed-freed is quite useful - the only downside is that if the program is pushing the limits of memory maybe it will crash at 1.9GB instead of 2GB.</p>
+<p>Really, we are distinguishing “unused” or “dead” memory from memory that is released back to the OS or the rest of the program.</p>
+</section>
+<section id="evaluation-order">
+<h3>Evaluation order<a class="headerlink" href="#evaluation-order" title="Link to this heading"></a></h3>
+<p>There are also “space leaks” where memory could be freed earlier by evaluating expressions in a specific order but some other order is chosen. Certainly there is some evaluation order that results in minimum RAM usage, but maybe a less compact order is more time-efficient. So there is some amount of time-space tradeoff for this category. Destructors kind of skirt this issue by being completely imperative, but with unsafePerformIO this becomes relevant again.</p>
+</section>
+<section id="on-borrowing">
+<h3>On borrowing<a class="headerlink" href="#on-borrowing" title="Link to this heading"></a></h3>
+<p>Rust has gotten much attention with the borrow checker, documented in <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id274" title="Aaron Weiss, Daniel Patterson, Nicholas D. Matsakis, and Amal Ahmed. Oxide: the essence of Rust. arXiv:1903.00982 [cs], March 2019. Comment: In submission. URL: http://arxiv.org/abs/1903.00982 (visited on 2020-05-17), arXiv:1903.00982.">WPMA19</a>]</span>. Similar to destructors, Rust also has a concept of the “lifetime” of each reference. But, whereas in Stroscot the lifetime is simply the set of program states during which the reference is not dead, in Rust a lifetime is a <em>region</em> consisting of annotating each program point with the set of <em>loans</em> of the reference, where each loan is either unique or shared. At each point, a reference may have no loans, one unique loan, or many shared loans - no other possibilities are allowed. This restrictive set of allowed access patterns means that Rust does not allow simple cyclic pointer patterns such as doubly-linked lists.</p>
+<p>Similarly, Val’s <a class="reference external" href="https://www.jot.fm/issues/issue_2022_02/article2.pdf">mutable value semantics</a> is even more restrictive than Rust, dropping references altogether and simply using the function parameter annotation <code class="docutils literal notranslate"><span class="pre">inout</span></code>. But it once again cannot represent any sort of cyclic pointer structure. It is really just the trick for representing state as the type <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">-&gt;</span> <span class="pre">(a,s)</span></code>, and doesn’t handle memory management at all.</p>
+<p>In practice, Rust developers have a variety of escapes from the borrow checker.  code frequently switches to the <code class="docutils literal notranslate"><span class="pre">Rc</span></code> reference counted type, which besides cycles has the semantics of GC. There is even a <a class="reference external" href="https://github.com/Others/shredder">library</a> for a <code class="docutils literal notranslate"><span class="pre">Gc</span></code> type that does intrusive scanning.</p>
+<p>Per <span id="id4">[<a class="reference internal" href="../../zzreferences.html#id212" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span>, destructors and the “free after last use” criterion subsume both region-based memory management and reference counting. <span id="id5">[<a class="reference internal" href="../../zzreferences.html#id61" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> implemented a buggy incomplete version and showed even that version is comparable to Rust.</p>
+</section>
+<section id="implementability">
+<h3>Implementability<a class="headerlink" href="#implementability" title="Link to this heading"></a></h3>
+<p>If doing automatic static memory management is so easy, why hasn’t it been tried before? Well, it has. For example, <span id="id6">[<a class="reference internal" href="../../zzreferences.html#id110" title="Samuel Z. Guyer, Kathryn S. McKinley, and Daniel Frampton. Free-Me: a static analysis for automatic individual object reclamation. In Proceedings of the 27th ACM SIGPLAN Conference on Programming Language Design and Implementation, PLDI '06, 364–375. New York, NY, USA, June 2006. Association for Computing Machinery. URL: https://doi.org/10.1145/1133981.1134024 (visited on 2023-07-18), doi:10.1145/1133981.1134024.">GMF06</a>]</span> has a similar notion of automatically inserting frees, and they report good results. But that paper focused on reachability, rather than lack of use, and their analysis was local to function blocks, rather than global. So it didn’t see much adoption.</p>
+<p><span id="id7">[<a class="reference internal" href="../../zzreferences.html#id212" title="Raphaël L Proust. ASAP: As Static As Possible memory management. Technical Report UCAM-CL-TR-908, University of Cambridge Computer Laboratory, July 2017. URL: https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-908.pdf.">Pro17</a>]</span> presented the theory and the formulation of the problem fairly well, but he fell into the trap of thinking that since the complexity of determining “waste blocks” was <span class="math notranslate nohighlight">\(\Sigma_0^1\)</span>, any analysis had to be approximate. There are techniques for solving such high-complexity problems precisely, as evidenced in the TERMCOMP termination analysis competition, but such techniques really only got started in 2007 or so. From his citations list, Proust didn’t really get into this area of the literature.</p>
+<p>So the answer is, it seems novel to try to apply techniques from formal verification to memory management, and that’s the only technique that seems powerful enough to implement destructors in the way presented here, where the point of finalization is guaranteed. All previous approaches have focused on approximate analyses that aren’t powerful enough to subsume manual memory management.</p>
+<p>Certainly there is some risk involved in implementing a novel analysis. But it doesn’t seem like a <a class="reference external" href="https://www.youtube.com/watch?v=8uE6-vIi1rQ">“cursed problem”</a> where even trying to solve it is a waste of time - <span id="id8">[<a class="reference internal" href="../../zzreferences.html#id61" title="Nathan Corbyn. Practical Static Memory Management. Bachelor's Thesis, King’s College, May 2020. URL: http://nathancorbyn.com/nc513.pdf.">Cor20</a>]</span> got decent results with just 8 months or so of part-time work. I’d rather be spending a lot of effort on solving the right problem, even if it’s hard, than getting sidetracked solving the wrong easy problem.</p>
+</section>
+<section id="exceptions-in-destructors">
+<h3>Exceptions in destructors<a class="headerlink" href="#exceptions-in-destructors" title="Link to this heading"></a></h3>
+<p>What to do when throwing an exception from a destructor? Say we have</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">x</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">(</span><span class="n">throw</span><span class="w"> </span><span class="kt">Bar</span><span class="p">)</span>
+<span class="w">  </span><span class="n">throw</span><span class="w"> </span><span class="kt">Foo</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+
+<span class="nf">y</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="n">catch</span><span class="w"> </span><span class="nf">\</span><span class="kr">case</span>
+<span class="w">        </span><span class="kt">Foo</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;foo&quot;</span>
+<span class="w">        </span><span class="kt">Bar</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="s">&quot;bar&quot;</span>
+</pre></div>
+</div>
+<p>Per Stroscot’s semantics, the destructor runs as soon as it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> will not be called - i.e. immediately after constructing the destructor, before the <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Foo</span></code> (because <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">f</span></code> is unreachable). So <code class="docutils literal notranslate"><span class="pre">x</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Bar;</span> <span class="pre">throw</span> <span class="pre">Foo</span></code>. Then per normal exception semantics <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Bar</span></code> wins since it is first and <code class="docutils literal notranslate"><span class="pre">y</span></code> outputs <code class="docutils literal notranslate"><span class="pre">bar</span></code>.</p>
+<p>If we had an I/O operation <code class="docutils literal notranslate"><span class="pre">writeOrThrow</span></code> instead of <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Foo</span></code>, then <code class="docutils literal notranslate"><span class="pre">use</span> <span class="pre">f</span></code> is reachable. So then we have two cases:</p>
+<ul class="simple">
+<li><p>if <code class="docutils literal notranslate"><span class="pre">writeOrThrow</span></code> throws, then it is known that <code class="docutils literal notranslate"><span class="pre">use</span></code> will not be called. The destructor will be delayed until just before the first I/O operation executed after the <code class="docutils literal notranslate"><span class="pre">writeOrThrow</span></code>, in this case <code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">&quot;foo&quot;</span></code>. So <code class="docutils literal notranslate"><span class="pre">y</span></code> will exit with a <code class="docutils literal notranslate"><span class="pre">Bar</span></code> error without printing anything.</p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">writeOrThrow</span></code> doesn’t throw, then the destructor will execute after the last <code class="docutils literal notranslate"><span class="pre">use</span></code>. Again <code class="docutils literal notranslate"><span class="pre">y</span></code> will exit with a <code class="docutils literal notranslate"><span class="pre">Bar</span></code> error without printing anything.</p></li>
+</ul>
+<p>As far as I can tell this is a logical choice. C++ instead decided to terminate the program on the <code class="docutils literal notranslate"><span class="pre">throw</span> <span class="pre">Bar</span></code> in the destructor. The justification seems to be that it slightly simplified the implementation of unwinding, and that the C++ STL wanted to “arbitrarily require that [destructors] may not throw.” (<a class="reference external" href="https://ptgmedia.pearsoncmg.com/imprint_downloads/informit/aw/meyerscddemo/DEMO/MAGAZINE/SUTTER.HTM">Herb Sutter</a>, also Item 16 “Destructors That Throw and Why They’re Evil” of his 1999 book Exceptional C++) <a class="reference external" href="http://web.archive.org/web/20130728131646/cpp-next.com/archive/2012/08/evil-or-just-misunderstood/">John Kalb and David Abraham</a> say “The reason we can’t have throwing destructors is that nobody worked out how to deal with multiple exceptions wanting to propagate through the same set of stack frames. […] we think termination is a bit draconian. Frankly, we don’t think it’s so hard to nail down the final details of how this should work.”</p>
+<p>Kalb proposes to “drop the second [destructor] exception on the floor and propagate the original one”, but this is a bad idea. Since (per Sutter’s convention) destructors generally don’t fail, an exception during a destructor is going to be fairly serious, such as an OOM. Ignoring this exception in favor of a trivial logic exception is the wrong approach.</p>
+</section>
+</section>
+<section id="exception-safety">
+<h2>Exception safety<a class="headerlink" href="#exception-safety" title="Link to this heading"></a></h2>
+<p>Exception safe code is code that works correctly even when exceptions are thrown. The basic issue is in Rust/C++ almost everything is a resource. In Stroscot almost everything is a value, inert data - copy/clone is built into the language and can’t fail. Taking away explicit memory management makes it much easier to ensure exception safety. Reasoning about invariants with pure values is straightforward, and fail-fast coding styles mean that the program doesn’t live long. And when writing cleanups the programmer is already thinking about exception safety and restoring invariants, so will write an exception-safe cleanup.</p>
+<p>Still, what about exception safety for a mutable data structure? C++ has <a class="reference external" href="https://en.wikipedia.org/wiki/Exception_safety">levels of safety</a> for stateful functions based on what invariants are preserved.</p>
+<ul class="simple">
+<li><p>no-throw means forward progress is guaranteed. It’s nice when you can give this, but most functions can fail due to insufficient memory.</p></li>
+<li><p>Strong safety means that state transitions happen atomically and a failure will return to the old state. To ensure this one needs basic safety and to copy the relevant data beforehand and write it back afterwards.  This is infeasible for even simple data structures in C++ due to overloaded assignment and copy operators being able to throw.</p></li>
+<li><p>Basic safety means that the final state will be valid, i.e. all invariants hold. You need to safeguard against each function call throwing. This requires adding handling code to each call and trusting the documentation for the list of thrown exceptions (or using no-throw).</p></li>
+</ul>
+<p>These levels only work for stateful data structures that call a small and easily auditable set of other functions.</p>
+<p>In Stroscot there are two steps to making code exception-safe:</p>
+<ul class="simple">
+<li><p>identify invariants. These can be written as assertions using the pure read operations on stores. With this the static verification will identify the function and the exceptional control flow that breaks the invariant.</p></li>
+<li><p>place exception cleanup handlers to restore broken invariants</p></li>
+</ul>
+<p>This code in Rust or C++ is not exception safe: (based on <a class="reference external" href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/1995/N0623.asc">this code</a> and <a class="reference external" href="https://github.com/rust-lang/rfcs/blob/master/text/1236-stabilize-catch-panic.md#background-what-is-exception-safety-in-rust">this code</a>)</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">push_ten_more</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="o">|</span><span class="n">uninitialized</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">push_ten_more</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="o">@</span><span class="p">(</span><span class="n">readRef</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">arr</span><span class="p">))</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">new_arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">alloc</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">indexes</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span>
+<span class="w">    </span><span class="n">copy</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">new_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">    </span><span class="n">delete</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">  </span><span class="n">this</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Vector</span><span class="w"> </span><span class="n">new_arr</span>
+
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">(</span><span class="n">ptr</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">t</span><span class="o">.</span><span class="n">clone</span><span class="nb">()</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The update to the Vector happens when the next 10 elements are uninitialized, and <code class="docutils literal notranslate"><span class="pre">Vec</span></code> has an internal invariant that its elements are safe to deallocate. So if <cite>t.clone</cite> throws then the initialization will not be called. Vec’s destructor that assumes the invariant will then free uninitialized memory.</p>
+<p>In Stroscot, most values are passed directly, not by reference. So there is no need for copying, cloning, or explicitly calling destructors, and the whole operation can fail only with OOM or an async exception (which is common to most functions so it’s left implicit). Similarly the array has no path where it is returned uninitialized. So here is the corresponding Stroscot code:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">push_ten_more</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Vec</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Op</span><span class="w"> </span><span class="p">(</span><span class="kt">Vec</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span>
+<span class="nf">push_ten_more</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">new_arr</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">alloc</span><span class="w"> </span><span class="p">(</span><span class="n">length</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="n">uninitialized</span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">indexes</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span>
+<span class="w">    </span><span class="n">new_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">  </span><span class="n">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="n">len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">t</span>
+<span class="w">  </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Another example is <code class="docutils literal notranslate"><span class="pre">TwoList</span></code>, which maintains two mutable linked lists with the invariant that they are the same. What does adding an element look like?</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">List</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">head</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">read</span><span class="w"> </span><span class="n">l</span>
+<span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="kt">Cons</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">head</span>
+
+<span class="c1">-- not exception safe</span>
+<span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span>
+</pre></div>
+</div>
+<p>This is not exception safe for the invariant, because an async exception between the two adds may add a to l1 but not l2. So we fix it by (1) adding the assertion and (2) adding a cleanup handler (following the scope guard destructor pattern).</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="c1">-- (1) add the assertion</span>
+<span class="nf">add</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">TwoList</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l2</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">TwoList</span><span class="w"> </span><span class="n">l3</span><span class="w"> </span><span class="n">l4</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l3</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l4</span><span class="w"> </span><span class="p">}</span>
+<span class="nf">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="p">(</span><span class="kt">TwoLists</span><span class="w"> </span><span class="n">l1</span><span class="w"> </span><span class="n">l2</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="c1">-- (2) add a cleanup handler</span>
+<span class="w">  </span><span class="n">finishedFlag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">false</span>
+<span class="w">  </span><span class="n">l1_old</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l1</span>
+<span class="w">  </span><span class="n">l2_old</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="n">l2</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">when</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">finishedFlag</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">      </span><span class="n">l1</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">unfreeze</span><span class="w"> </span><span class="n">l1_old</span>
+<span class="w">      </span><span class="n">l2</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">unfreeze</span><span class="w"> </span><span class="n">l2_old</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l1</span>
+<span class="w">  </span><span class="n">add</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">l2</span>
+<span class="w">  </span><span class="c1">-- disarm cleanup handler</span>
+<span class="w">  </span><span class="n">finishedFlag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>Here we have strong safety, i.e. it restores the state if an exception is thrown during the add. If we didn’t use the cleanup handler, the assertion would fail because we wouldn’t necessarily have strong safety.</p>
+<section id="poisoning">
+<h3>Poisoning<a class="headerlink" href="#poisoning" title="Link to this heading"></a></h3>
+<p>Rust has “poisoning” for taking locks, which is a safeguard against trying to use data that was corrupted due to an exception, e.g. a concurrent heap that doesn’t have the heap property anymore. Poisoned data will tear down all connected threads.</p>
+<p>Essentially it uses the scope_failure cleanup to poison the lock on failure:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">getGuard</span><span class="w"> </span><span class="n">mutex</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">acquireLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">mut</span><span class="w"> </span><span class="n">true</span>
+<span class="w">  </span><span class="n">f</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">newDestructor</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">      </span><span class="n">poisonLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">    </span><span class="n">releaseLock</span><span class="w"> </span><span class="n">mutex</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span>
+
+<span class="nf">finishGuard</span><span class="w"> </span><span class="p">(</span><span class="kt">Guard</span><span class="w"> </span><span class="n">flag</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span>
+<span class="w">  </span><span class="n">flag</span><span class="w"> </span><span class="kt">:=</span><span class="w"> </span><span class="n">false</span>
+<span class="w">  </span><span class="n">use</span><span class="w"> </span><span class="n">f</span>
+</pre></div>
+</div>
+<p>Once the lock is poisoned then locking the mutex will throw an exception.</p>
+<p>However, the invariant checking approach to exception safety discussed above will throw an exception anyway when trying to use a data structure operation on a corrupted data structure. It also covers the single-threaded case where no mutex is used but the recovery from an exception is incomplete. So poisoning isn’t really that useful. But a PoisoningMutex can at least be in the standard library for those who want the functionality.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Posets.html" class="btn btn-neutral float-left" title="Posets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Security.html" class="btn btn-neutral float-right" title="Security" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

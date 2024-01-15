@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code generation &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Compiler design" href="Compiler.html" />
+    <link rel="prev" title="Implementation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Implementation</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Code generation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#constrained-optimization">Constrained optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optimizations">Optimizations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#register-allocation">Register allocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instruction-selection">Instruction selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instruction-scheduling">Instruction Scheduling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jumps">Jumps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#layout">Layout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c-target">C target</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#more-on-optimization">More on optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Implementation.html">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Tools.html">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Implementation</a></li>
+      <li class="breadcrumb-item active">Code generation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Implementation/Code-Generation.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="code-generation">
+<h1>Code generation<a class="headerlink" href="#code-generation" title="Link to this heading"></a></h1>
+<p>Code generation is NP-hard and affects performance a lot. There are three main operations that need to be done, encompassing many optimizations:</p>
+<ol class="arabic simple">
+<li><p>Instruction selection - Peephole optimization, Common subexpression elimination</p></li>
+<li><p>Register allocation - Spilling, Rematerialization</p></li>
+<li><p>Instruction scheduling - Code motion, Block ordering</p></li>
+</ol>
+<p>Generally it is required to write a native code generator, linker, C standard library, and so on. Zig and Roc are doing it, learn from them. It is important to ensure that such bespoke components outperform the established alternatives, and are state of the art. Few developers actually work in this area so it is not hard to beat them in terms of design. But actually getting it to work takes years. In contrast interpreters/bytecode generators are really easy to implement, focus on them first.</p>
+<p>It can be tempting to focus heavily on providing a fast implementation, such as a fast and memory efficient compiler, and one can easily spend months working on this. But it should only be done after the compiler is well-tested and the standard library is near-complete. Then you can start benchmarking as 20%-30% of effort.</p>
+<section id="constrained-optimization">
+<h2>Constrained optimization<a class="headerlink" href="#constrained-optimization" title="Link to this heading"></a></h2>
+<p>Per Unison, instruction selection, register allocation, and instruction scheduling are interdependent. Solving instruction scheduling first tends to increase the register pressure (number of live temporaries), which may degrade the result of register allocation. Conversely, solving register allocation first tends to increase the reuse of registers, which introduces additional dependencies between instructions and may degrade the result of instruction scheduling.</p>
+<p>Because of the interdependency, the “holy grail” of code generation (Roberto’s words) is to model code generation as a single combinatorial optimization problem, because the optimal solution can only be found when the search space is large enough. Stroscot aims for this holy grail: when run without compile time constraint, Stroscot should find the globally best solution, given the objective function for the runtime.</p>
+<p>We could take the traditional approach and just design a heuristic algorithm that solves these problems in sequence. But code generation is complex enough that there is just no way to solve it optimally without properly defining the search space, constraints, and the objective function, and conducting an actual search. Following the traditional approach, we could invest a lot of effort into kludges, like a second instruction scheduling pass, and yet still not be able to generate optimal code. Furthermore, with the traditional approach, it is easy to have bugs in the heuristics and generate incorrect code, caught only much later in production, whereas properly defining constraints allows them to be automatically checked in a “lint” mode. Furthermore, with the constrained optimization paradigm, it is easy to exercise all codepaths by overriding the objective function, enabling good testing of all optimizations.</p>
+<p>Within the constrained optimization framework, there is still a lot of room for heuristics. Finding the optimal solution requires ruling out all other solutions, and with the branch-and-bound method it is important to have a near-optimal solution that is known to work. Furthermore, brute-force search is slow, and good search heuristics can allow finding the optimal solution faster. Good bounding heuristics can allow pruning the search much earlier.</p>
+<p>When there is a constraint on compile time, as there is in most real-world scenarios, the initial-solution heuristic ends up being most of the execution. Specifically, for cold code (the majority!), the focus is simply to produce correct code in the shortest amount of time, and even a 10x inefficiency doesn’t particularly matter. For hot code, a better heuristic such as graph coloring can be used, and again this will probably take up most of the compile time spent on that function. It is only in extremely hot code that searching is worthwhile. Furthermore, searching has diminishing returns, so in most cases the search will not be to optimality, as the optimality gap can be bounded and the time spent searching for that last 2% efficiency is better spent on other optimizations.</p>
+<p>Although optimality may not be often used in industrial code, there’s at least one design factor requiring it. Stroscot encourages the use of assembly instruction intrinsics, rather than literal blocks of “inline assembly”. Since the assembly code gets munged, optimality is the only way to guarantee that the code generated from intrinsics will meet or beat anything someone could hand-code, in various microbenchmarks.</p>
+</section>
+<section id="optimizations">
+<h2>Optimizations<a class="headerlink" href="#optimizations" title="Link to this heading"></a></h2>
+<p>Calling convention/ABI</p>
+<ul class="simple">
+<li><p>accumulate arguments on the stack vs popping them</p></li>
+<li><p>omit frame pointer</p></li>
+<li><p>tail recursive calls</p></li>
+<li><p>scalar replacement of aggregates</p></li>
+<li><p>omitting unexported functions</p></li>
+<li><p>automatic constructor/destructor implementation</p></li>
+<li><p>null pointer dereference behavior</p></li>
+<li><p>Emit function prologues only before parts of the function that need it, rather than at the top of the function.</p></li>
+<li><p>alignment - functions, loops, jumps, labels</p></li>
+</ul>
+<p>register allocation</p>
+<ul class="simple">
+<li><p>swing modulo scheduling</p></li>
+<li><p>allow allocating “wide” types non-consecutively</p></li>
+<li><p>Graph coloring algorithm: Chow’s priority, Chaitin-Briggs</p></li>
+<li><p>region size: loop, function</p></li>
+<li><p>rematerialization</p></li>
+<li><p>use registers that are clobbered by function calls, by emitting extra instructions to save and restore the registers around such calls.</p></li>
+<li><p>Use caller save registers if they are not used by any called function.</p></li>
+<li><p>rename registers to avoid false dependencies</p></li>
+</ul>
+<p>instruction scheduling</p>
+<ul class="simple">
+<li><p>reorder instructions</p></li>
+<li><p>region size: basic blocks, superblocks</p></li>
+<li><p>schedule instructions of the same type together</p></li>
+</ul>
+<p>instruction selection</p>
+<ul class="simple">
+<li><p>combining instructions, e.g. fused multiply-add, decrement and branch</p></li>
+<li><p>transformation of conditional jumps to branchless code (arithmetic and conditional moves)</p></li>
+<li><p>remove redundant instructions</p></li>
+</ul>
+</section>
+<section id="register-allocation">
+<h2>Register allocation<a class="headerlink" href="#register-allocation" title="Link to this heading"></a></h2>
+<p>Definitions:</p>
+<ul class="simple">
+<li><p>A temporary is an identifier for a bitstring value - it is not modified. A “virtual register” would be a temporary that has write access but these are eliminated by the codegen’s SSA pass.</p></li>
+<li><p>A location is a logical register or virtual memory address.</p></li>
+<li><p>An instruction takes some temporaries as inputs and produces other output temporaries, then jumps to an address. A program point is the logical start of the execution of an instruction (as opposed to the logical end). To encode an instruction each temporary must be assigned to a fixed location supported by the instruction (proper register class or encodable memory location) at the program point.</p></li>
+<li><p>A (logical) register is a register identifier as encoded in an instruction. The number of logical/ISA registers is relatively small, e.g. 31 on ARM and 16 on AMD64. Logical registers are dynamically renamed/mapped to physical registers, storage locations in the microarchitecture’s physical register file, making many logical register assignment decisions immaterial. For example, per <a class="reference external" href="https://www.anandtech.com/show/3922/intels-sandy-bridge-architecture-exposed/3T">Anandtech</a>, Sandy Bridge has 160 physical integer registers.</p></li>
+<li><p>A “subregister”, mainly in x86, is a logical register that is really part of a larger logical register. For example, on x86-64, rax has subregisters eax, ax, al, ah. These allow some instruction encoding tricks for sub-64-bit bitstrings, but have to be specially handled to detect conflicts.</p></li>
+<li><p>A register class is the set of logical registers that can be used for a specific operand for a specific instruction. ARM only has a small number of register classes used consistently across all of its instructions, e.g. floating point registers, (scalar) integer registers, or vector registers, and any register in the class can be used with any instruction. But on x86 there are exceptions, e.g. the div instruction hardcodes edx:eax, so div uses its own special register class for those operands.</p></li>
+<li><p>Register allocation creates a multimap at each program point from temporaries to registers or memory. Similarly at each program point there is a 1-1 map from registers and memory to bitstrings. Memory is not really 1-1 because of the memory model but private memory for register allocation is deterministic so we can ignore it.</p></li>
+</ul>
+<p>Registers and memory have relatively similar APIs, read and write, so they can be exposed as temporaries or virtual registers before codegen. But on the hardware, registers have shorter access times, and are required for many instructions, but they are limited in number, forcing temporaries to be stored in a mixture of registers and memory. The straightforward approach “spill-everywhere” is to wrapping each instruction with spill instructions that load each input from memory and then store each output to memory, and then use standard memory allocation techniques. But it’s slow. So the problem is to apply various conflicting optimizations to get the fastest program:</p>
+<ul class="simple">
+<li><p>Register assignment: Store a temporary in a register and use that register instead of reading from memory</p></li>
+<li><p>Spilling is “materializing” a temporary in memory by generating spill code, instructions that store/load the value in memory. In practice C2 talks about “live range splitting” instead of spilling - if a temporary is used in several places, C2 makes an effort to reuse the same register, which in post-regalloc will coalesce and emit no instructions, but otherwise the reg-reg or mem-reg movement instructions are emitted post-regalloc. A temporary t is live at a program point if t holds a value that might be used later by another instruction j. The instruction j is said to be dependent on i. LRS maps a temporary to different registers in different parts of its live range. An interference point is a program point where each of a set of output temporaries is live (could be used later).</p></li>
+<li><p>Multi-allocation: Map a temporary to a register as well as memory</p></li>
+<li><p>Load-store optimization: Reuse values loaded in previous parts of the spill code</p></li>
+<li><p>Rematerialization: Recompute values at their use points rather than loading them from memory</p></li>
+<li><p>Coalescing: Eliminate move instructions by ensuring the source and destination are the same.</p></li>
+<li><p>Packing: assign temporaries of small bit-widths to subregisters of larger-width registers</p></li>
+</ul>
+<p>There are various heuristics, e.g. assigning the most used variables to registers first. Because of register renaming / memory buffering, the actual register / address assignment doesn’t matter, only the spill pattern. (TODO: check this with some benchmarks)</p>
+<p>C2 register allocator per Cliff:</p>
+<ul class="simple">
+<li><p>all the X86 registers &amp; constraints are directly represented; no special code for e.g. div/mod</p></li>
+<li><p>stack gets colored just like a register (which makes temps “free” when thinking about them). “stack” registers have an infinite number, so always color in one pass.</p></li>
+<li><p>SSA form thru the entire reg allocation process. No requirement for special cycle-breaking for any registers, including XMM, other than you got a “free” break when the SSA form got linearized.</p></li>
+<li><p>During the copy-coalesce phases C2 can skip some lds if a the value in already known to be in the correct place. Can “rematerialize” constants, and can have a value in a cpu register and in a “stack” register. There’s no “home” location like in some other allocators (home locations never played well with the JMM)</p></li>
+<li><p>If coloring fails on the cpu regs, the live range(s) are split with copies that can sink/source stack and cpu regs &amp; you color again.</p></li>
+</ul>
+<p>algorithm: you start with a single large live range, of many def’s and use’s, of many branches &amp; arms &amp; cycles in the cfg. This is over coalesced to make max live ranges. This typically over-constrains colors (returning reg from fcn Call is in RAX, but needed in argument RCX for next call) and fails to color, so you split it at places with hard register constraints. Still has huge live ranges and fails to color, but in fewer places. Track the losers and split the losers around high-pressure/high-frequency blocks. Still fails to color, but again fewer losers. Construct a “hard win” split, an inefficient coloring that uses many smaller ranges, connected by copies into stack. Very rarely must repeat hard win splitting a few times. Then you try to coalesce things, under the hard-win max split by picking colors from copy-connected live ranges to match - “smart coloring” based on neighbors and split history. In the absence of better options, you pick colors based on the original hard-win split, figuring that those live ranges are “more likely” to re-coalesce together. At no time after splitting a v to the stack, do you later spill v again to the stack, you already got that one done. There is another post-pass smart coloring attempt using local history and not live ranges.</p>
+<p>End result is typically very good on all the hot paths, never very bad on cold paths and never gets into a death-spiral of spilling.  I’ve done at least 4 for-production-use allocators in my life, including C2.
+Oh yeah, and its by far the fastest register graph-coloring allocator I’ve ever seen.  Key point for a JIT, as reg-alloc can be expensive.  Its often about 40% of C2’s compile budget.</p>
+<p>LuaJit register allocator (reinvented): <a class="reference external" href="https://www.mattkeeter.com/blog/2022-10-04-ssra/">https://www.mattkeeter.com/blog/2022-10-04-ssra/</a> simple and fast</p>
+</section>
+<section id="instruction-selection">
+<h2>Instruction selection<a class="headerlink" href="#instruction-selection" title="Link to this heading"></a></h2>
+<p>Instruction selection transforms a sequence of IR instructions into the cheapest/shortest sequence of processor-specific instructions.</p>
+<p>Blindell’s universal instruction selection thesis is the main reference here. STOKE can find probabilistically optimal straightline assembly sequences using a specialized search algorithm, which is also a form of instruction selection so should be integrated.</p>
+<p>for literal assembly, we can either emit it as-is or try to optimize it. If we can actually optimize it to a faster but equivalent sequence, great, but we don’t want to transform a compound operation into several simpler instructions, fuse the simpler instructions with nearby instructions from other operations, fail to identify the compound operation due to the fusion, and lose performance.</p>
+<p>The IR is split into a series of instruction patterns, a forest of trees. Usually a tree rewrite system is used - bottom up rewrite generator (BURG). See pyburg. One way is to write a lot of patterns and try all these patterns in turn. If a pattern matches a specific sequence of instructions, the pattern can be applied, and the instructions are substituted by the pattern substitute.</p>
+<p>The combiner approach per <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id67" title="Jack W. Davidson and Christopher W. Fraser. The design and application of a retargetable peephole optimizer. ACM Transactions on Programming Languages and Systems, 2(2):191–202, April 1980. URL: https://dl.acm.org/doi/10.1145/357094.357098 (visited on 2021-07-30), doi:10.1145/357094.357098.">DF80</a>]</span> integrates peephole optimizations. The effects of instructions are specified in a machine-independent register transfer language ISP. The definition of ISP is somewhat vague but basically you have read and assign register/memory, literals, conditionals, and math.
+A compiler can directly emit ISP or you can start with assembly instructions and convert one-at-a-time into ISP using the effect descriptions. Then there are standard optimization like dead store elimination.</p>
+<blockquote>
+<div><p>Another way, is to define per instruction the effects of the instruction, and a combiner that specifies how to combine two instructions given their effects, if there exist an instruction which has the same effect as the combined effect of the two original instructions. This is the combiner approach as described by [Davidson1980]. The advantage of specifying effects is that the amount of work to define peephole optimization patterns is N * N + M rather than M * M, where N is the number of effect patterns and M=81 is the number of instructions.</p>
+</div></blockquote>
+<ul class="simple">
+<li></li>
+<li><p>Peephole optimizations / strength reduction - like <code class="docutils literal notranslate"><span class="pre">x*2</span></code> by <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">x+x</span></code>, or setting a register to 0 using XOR instead of a mov, exploiting complex instructions such as decrement register and branch if not zero.</p></li>
+<li><p>Sparse conditional constant propagation - dead code / dead store elimination, constant folding/propagation</p></li>
+<li><p>Partial evaluation</p></li>
+<li><p>common subexpression elimination, global value numbering - tricky with blocks</p></li>
+<li><p>code factoring - CSE but for control flow</p></li>
+<li><p>Test reordering - do simpler tests first - treat control flow as data</p></li>
+<li><p>Removing conditional branch cases if can prove won’t be taken</p></li>
+<li><p>Inlining</p></li>
+<li><p>Space optimizations - anti-inlining</p></li>
+<li><p>Trampolines allow placing code at low addresses</p></li>
+<li><p>Macro compression compresses common sequences of code</p></li>
+</ul>
+</section>
+<section id="instruction-scheduling">
+<h2>Instruction Scheduling<a class="headerlink" href="#instruction-scheduling" title="Link to this heading"></a></h2>
+<p>pre-calculate offsets, branch penalties, speculative execution, cache misses, code size</p>
+<p>Instruction scheduling assigns issue cycles to program instructions. Valid instruction schedules
+must satisfy instruction dependencies and constraints imposed by limited processor resources.</p>
+<dl class="simple">
+<dt>Latency</dt><dd><p>the minimum number of cycles that must elapse between the issue of the depending instructions. Variable latencies (such as those arising from cache memory accesses) are typically handled by assuming the best case and relying on the processor to stall the execution otherwise.</p>
+</dd>
+<dt>Resources</dt><dd><p>resource model where each resource s has a capacity cap(s) and each instruction i consumes con(i, s) units of each resource s during dur(i, s) cycles. VLIW processors can be modeled by an additional resource with capacity equal to the processor’s issue width.</p>
+</dd>
+</dl>
+<p>CPU model:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Fetch</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">decode</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">fuse</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">ops</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">queues</span>
+<span class="kt">Retrieve</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">uop</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">queues</span><span class="o">.</span>
+<span class="nf">record</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">names</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">inputs</span>
+<span class="nf">assign</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="n">logical</span><span class="w"> </span><span class="n">registers</span>
+<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">free</span><span class="o">.</span>
+<span class="nf">assign</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span>
+<span class="nf">stall</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">become</span><span class="w"> </span><span class="n">available</span><span class="o">.</span>
+<span class="nf">execute</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">station</span><span class="o">.</span>
+<span class="w">  </span><span class="n">store</span><span class="o">/</span><span class="n">load</span><span class="w"> </span><span class="n">interact</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="n">buffer</span>
+<span class="w">    </span><span class="n">memory</span><span class="w"> </span><span class="n">prefetching</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="kt">Processor</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="n">lookahead</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">fetches</span><span class="w"> </span><span class="n">early</span><span class="o">.</span><span class="w"> </span><span class="kt">Stall</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">available</span><span class="o">/</span>
+<span class="w">  </span><span class="n">zeroing</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">no</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">registers</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">initialized</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">zero</span>
+<span class="w">  </span><span class="s">&quot;retired&quot;</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">finished</span><span class="w"> </span><span class="n">executing</span>
+<span class="nf">buffer</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="n">earlier</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">completed</span>
+<span class="nf">un</span><span class="o">-</span><span class="n">stall</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">stations</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">inputs</span><span class="w"> </span><span class="n">available</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">cycles</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">cross</span><span class="o">-</span><span class="n">station</span><span class="w"> </span><span class="kt">RAW</span><span class="w"> </span><span class="n">dependencies</span>
+</pre></div>
+</div>
+<p>The instruction scheduler schedules the instructions intelligently to avoid stalling, i.e. an instruction requesting data before it is available. Ideally each instruction arrives at the front of the pipeline at the exact cycle when the necessary data and execution station become available.</p>
+<p>Data hazards: RAW is unavoidable. WAR/WAW are eliminated in modern processors by renaming as in the <a class="reference external" href="https://en.wikipedia.org/wiki/Tomasulo_algorithm">Tomasulo algorithm</a>. WAW can be also ignored if the value isn’t used.</p>
+<p>timing of instructions - most are fixed. load operations depend on what’s cached.</p>
+<ul class="simple">
+<li><p>Scheduling / reordering / pipelining</p></li>
+<li><p>minimize pipeline stalls, when an instruction in one stage of the pipeline depends on the result of another instruction ahead of it in the pipeline but not yet completed.</p></li>
+<li><p>ensure the various functional units are fully fed with instructions to execute.</p></li>
+<li><p>avoid cache misses by grouping accesses</p></li>
+<li><p>clear out unconditional jumps (inlining). Avoid inlining so much that it cannot fit in the cache.</p></li>
+<li><p>splitting/combining recursive calls / basic blocks</p></li>
+<li><p>Bias conditional jumps towards the common case</p></li>
+</ul>
+<p>branch prediction: branch target buffer (BTB), indirect branch target array, loop detector and renamed return stack buffer. mispredicted branch clears cache and restarts.</p>
+</section>
+<section id="jumps">
+<h2>Jumps<a class="headerlink" href="#jumps" title="Link to this heading"></a></h2>
+<p>An important point is how control transfers between blocks. Cliff is always talking about inline jump target caches. These reduce use of the branch target buffer (BTB), improving the performance of programs that use a lot of jumps and calls. The BTB is a finite resource.  If you have a few hundred jmp-regs you’re calling lots, the BTB will cover you.  Somewhere above 1000’s it starts to get overwhelmed and you start getting misses on the J-R. The inline cache reduces BTB pressure at the expense of some code generation complexity, increased code size, and possible slowdown if the cache misses often. In a typical Java program, however, the inline cache will literally never fail over the program lifetime once it is generated by the JIT.</p>
+<p>The idea is to encode likely target addresses of the jump or call in the assembly as a ld/cmp/br/call or ld/call/cmp/br instruction sequence. Assuming there is a hit, the processor will jump directly to a fixed address, no entry in the BTB will be made, and the call can avoid several indirect memory fetches. Furthermore since the sequence is entirely predictable, the processor will likely be able to speculatively execute or skip the jump. In a typical Java program, because the failure rate is so low, no stats are kept and on first-fail, it directly flips to the fallback ld/ld/ld/jump-reg.</p>
+<p>The ld/cmp/br sequence is highly optimized by X86 and can wide issue. So call it ~1clk for the whole set of 4 ops. A bare static call is ~1/2clk (can wide issue with other stuff). A BTB miss is ~30clks. So the cache</p>
+<p>Advantages:</p>
+<blockquote>
+<div><p>Reduced memory access: By caching the target addresses of jumps and calls, the processor can reduce the number of memory accesses it needs to perform. This can result in less contention for the memory bus and can help improve overall system performance.</p>
+</div></blockquote>
+<p>Disadvantages:</p>
+<blockquote>
+<div><p>Increased code size: The inline jump target caches can increase the size of the code, which can make the program larger and require more memory to store.
+Cache misses: If the cache does not contain the target address of a jump or call, the processor must fetch the address from memory. This can result in increased memory access times and can negate the performance benefits of the cache.</p>
+</div></blockquote>
+<p>Overall, the advantages of jump target caches generally outweigh the disadvantages, especially in programs that have a lot of jumps and calls. However, as with any optimization technique, the effectiveness of jump target caches depends on the specific program and system configuration.</p>
+</section>
+<section id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
+<p>For example getting rid of the jump here:</p>
+<div class="highlight-asm notranslate"><div class="highlight"><pre><span></span><span class="nf">jmp</span><span class="w"> </span><span class="no">my_label</span>
+<span class="nl">my_label:</span>
+</pre></div>
+</div>
+<p>even if the jump can’t be avoided, memory layout can affect program performance. see profile guided memory layout thesis</p>
+<p>Cliff says a list scheduler is generally sufficient</p>
+</section>
+<section id="c-target">
+<h2>C target<a class="headerlink" href="#c-target" title="Link to this heading"></a></h2>
+<p>When we compile to C it is quite similar to writing an interpreter in C with specialized opcodes. So LuaJIT is relevant. LuaJIT’s interpreter is fast, because:</p>
+<ul class="simple">
+<li><p>It uses indirect threading (aka labeled goto in C).</p></li>
+<li><p>It has a very small I-cache footprint (the core of the interpreter fits in 6K).</p></li>
+<li><p>The parser generates a register-based bytecode.</p></li>
+<li><p>The bytecode is really a word-code (32 bit/ins) and designed for fast decoding.</p></li>
+<li><p>Bytecode decode and dispatch is heavily optimized for superscalar CPUs.</p></li>
+<li><p>The bytecode is type-specialized and patched on-the-fly.</p></li>
+<li><p>The dispatch table is patched to allow for debug hooks and trace recording. No need to check for these cases in the fast paths.</p></li>
+<li><p>It uses NaN tagging for object references. This allows unboxed FP numbers with a minimal cache footprint for stacks/arrays. FP stores are auto-tagging.</p></li>
+<li><p>It inlines all fast paths.</p></li>
+<li><p>It uses special calling conventions for built-ins (fast functions).</p></li>
+<li><p>Tuning and tricks.</p></li>
+</ul>
+<p>The control-flow graph of an interpreter with C switch-based dispatch looks like this:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">repeat</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">load</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">  </span><span class="n">dispatch</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">  </span><span class="n">switch</span><span class="p">(</span><span class="n">instruction_type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kr">case</span><span class="w"> </span><span class="kt">X:</span>
+<span class="w">      </span><span class="n">decode</span><span class="w"> </span><span class="n">operations</span>
+<span class="w">      </span><span class="kr">if</span><span class="w"> </span><span class="n">good</span>
+<span class="w">        </span><span class="n">fast</span><span class="w"> </span><span class="n">instruction</span><span class="w"> </span><span class="n">execution</span>
+<span class="w">      </span><span class="kr">else</span>
+<span class="w">        </span><span class="n">slow</span><span class="w"> </span><span class="n">execution</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>There are dozens of instructions and hundreds of slow paths. The compiler doesn’t know which paths are fast. Even if it did, it’s still a single giant loop body. The standard register allocation heuristics fail at this scale, so the compiler has trouble keeping important variables in registers. There’s just no way to give it a goal function like “I want the same register assignment before each goto”. Diamond-shaped control-flow is known to be the worst-case scenario for most optimizations and for register allocation. Nested diamond-shaped control-flow is even worse. Tail-merging and CSE will happily join all these common tails of each instruction and generate a single dispatch point. Ick. You can try to disable some optimizations for this piece of code, but this will negatively impact all paths. Almost nothing can be hoisted or eliminated, because there will be a slow path where an aliasing store kills all opportunities.. The slow paths kill the opportunities for the fast paths and the complex instructions kill the opportunities for the simpler instructions.</p>
+<p>We can use direct or indirect threading with computed goto. clang/LLVM optimizes the looped switch to indirect threading at <code class="docutils literal notranslate"><span class="pre">-O</span></code>. (<a class="reference external" href="https://internals.rust-lang.org/t/computed-gotos-tco-threaded-interpreters-experiments-and-findings/4668/6">ref</a>)</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">static</span><span class="w"> </span><span class="n">void</span><span class="o">*</span><span class="w"> </span><span class="n">dispatch_table</span><span class="kt">[]</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="kt">OP2</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">};</span>
+
+<span class="o">//</span><span class="w"> </span><span class="n">indirect</span>
+<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">goto</span><span class="w"> </span><span class="o">*</span><span class="n">dispatch_table</span><span class="p">[</span><span class="n">memory</span><span class="p">[</span><span class="n">ip</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">12</span><span class="p">]</span>
+<span class="o">//</span><span class="w"> </span><span class="n">direct</span>
+<span class="o">#</span><span class="n">define</span><span class="w"> </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span><span class="w"> </span><span class="n">jump</span><span class="w"> </span><span class="o">*</span><span class="n">ip</span><span class="o">++</span>
+
+<span class="kt">DISPATCH</span><span class="nb">()</span><span class="p">;</span>
+
+<span class="kt">OP:</span>
+<span class="w">    </span><span class="n">decode</span><span class="w"> </span><span class="n">operands</span>
+<span class="w">    </span><span class="n">execute</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">    </span><span class="n">ip</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="n">reg</span><span class="p">[</span><span class="kt">R_PC</span><span class="p">]</span><span class="o">++</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span>
+<span class="w">    </span><span class="kt">DISPATCH</span><span class="p">(</span><span class="n">ip</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">dispatch</span><span class="w"> </span><span class="n">next</span><span class="w"> </span><span class="n">instruction</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>This effectively replicates the load and the dispatch, which helps
+the CPU branch predictors.</p>
+<p>If you compile directly to assembly, you can do better:</p>
+<ul class="simple">
+<li><p>Total control over the register assignment</p></li>
+<li><p>Can fix the calling convention and keep all important state in registers for the fast paths. Spill/reload only in the slow paths. (No C compiler manages to do that on x86.)</p></li>
+<li><p>Only a single fast path in every bytecode instruction</p></li>
+<li><p>The fast paths are always the straight line fall-through paths.</p></li>
+<li><p>Move the slow paths elsewhere, to help with I-Cache density.</p></li>
+<li><p>Pre-load instructions and pre-decode operands.</p></li>
+<li><p>Remove stalls. Interleave operations based on the data dependencies.</p></li>
+</ul>
+<p>The C compiler does have these optimizations but figuring out the right C code to generate so that the program will optimize properly is hard.</p>
+</section>
+<section id="more-on-optimization">
+<h2>More on optimization<a class="headerlink" href="#more-on-optimization" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166">https://mastodon.social/&#64;zwarich&#64;hachyderm.io/109559009711883166</a></p>
+<p>high-performance programming</p>
+<p>coroutine switching and resource competition (I/uop cache, D cache, BTB) makes it slow - use buffering
+SIMD/AVX2 branch-free code
+avoid branch mispredictions. Branch mispredicts are highly data dependent so it’s all about your use case. There’s a lot of variance. The more you micro-optimize for one case, the bigger the variance gets for others. Part of optimizing is building an understanding of the empirical statistics of your data so you can make the right optimization trade-offs. Reducing L1D pressure while increasing branch mispredicts can be a net win (L1 load latency 4-6 cycles).</p>
+<p>“hot state” should be in registers at all times. Store non-hot state in memory. Register allocators can really only be trusted to do two things: move spill code out of loops and reduce the impact of calling conventions. Register allocation in handwritten bytecode interpreters often relies on reasoning of the form “this opcode is going to be slower anyways, so it’s okay to put the spill code there”, which is not captured by most register allocators. The compiler is not perfect. In some cases better usage of profile info by the register allocator would suffice. In other cases, a better cost model for spill code would be required, e.g. Proebsting &amp; Fischer’s work on “probabilistic” register allocation: <a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/143103.143142">https://dl.acm.org/doi/abs/10.1145/143103.143142</a> Once you are trying to optimize things to this level you really want control. Systems languages should really have more ways of constraining the compiler (best-effort constraints as well constraints that generate compile-time errors if they can’t be satisfied). From a constraint solving perspective it should be exactly as easy/hard as constraining the hot state to be in the ABI argument registers and ABI register targeting for function calls is already a core competency of any usable register allocator.</p>
+<p>This affects coding style for dispatch loops:</p>
+<ul class="simple">
+<li><p>a loop with a big switch statement. In theory, the loop-switch gives the compiler the ability to look at the whole block graph and make optimal decisions about register allocation, hoisting, etc. In practice, the compiler will make terrible decisions (e.g. register pressure on one rare branch will screw all the other branches) and there’s no tools available to control the compiler’s register allocation.</p></li>
+<li><p>unchecked table load - you can compress an 8 byte pointer to a 2 byte offset. You just have to use a separate linker section so you can guarantee they’re physically clustered. Only the “head blocks” that are targeted by a jump table need to be in the section. So most space-efficient option.</p></li>
+<li><p>tailcalls - can let you control the convention at the IR level, but still no control at language level</p></li>
+<li><p>inline assembly. you can specify the register convention with input/output constraints. But not really maintainable.</p></li>
+<li><p>computed goto - sort of like tailcalls + asm - decoupling of having separate functions, maintainable and reliable</p></li>
+</ul>
+<p>The intrinsic branch mispredict penalty (IBMP) is the minimum time it takes from when a mispredicted control dependency retires to when the first uops from the correct PC can retire. It is always &lt;= to the minimum pipeline depth starting at the uop cache and finishing at retirement; the pipeline depth may be larger because there are additional “clean-up” cycles that have to be serialized with the pipeline redirect and restart. For x86 the penalty is around 20 cycles, although some say it can be as low as 15. I always use 20 cycles as a round number regardless of uarch.</p>
+<p>If a dependency chain is only consumed as a control dependency, its latency essentially doesn’t matter (within limits) if the branch never mispredicts. But as soon as the consuming branch mispredicts, you end up paying for that latency in full. In two versions of the same code where you add 10 extra cycles of latency to a mispredicted control dependency for one version but not the other, the effective mispredict penalty increases by 10 cycles because you discover the mispredict 10 cycles later than in the other version. So I define the effective mispredict penalty, effective_penalty = IBMP + control_latency. But it doesn’t always work like that because control latency is affected by other things. However, you often find that, if I reduce the latency of this control dependency by 10 cycles, it should reduce the effective mispredict penalty by 10 cycles.</p>
+<p>ops already in flight, from before the mispredicted branch, will have IBMP cycles of free time relative to the same path if the branch had been correctly predicted. Or to put it differently, when you restart at a PC after a mispredict, reading a register for the result of a pre-branch mid-latency op like an L2 load is effectively zero latency. So before you take a hard-to-predict branch, you really want to issue as many of these medium latency ops as you can, even speculatively hoisting those ops from different successors into the common predecessor, so long as you have free pipeline slots to spare. branch-free computations are inherently latency sensitive, so need the data preloaded. This preloading idea is effective both in the ideal dependency graph sense (which assumes infinite pipeline width and lookahead) and also that after restarting from a branch mispredict the scheduling window starts out very narrow and so as a programmer if you manually kick off critical ops early like you were on an in-order machine, it’s going to reduce latency.</p>
+<p>A high fan-out jump table is the most efficient when a branch is really unpredictable e.g. 8 choices with 1/8 probability. For more skewed conditions use a series of conditional tests.</p>
+<p>uica analysis</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Implementation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Compiler.html" class="btn btn-neutral float-right" title="Compiler design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

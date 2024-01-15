@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Implementation &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Memory model" href="Memory.html" />
+    <link rel="prev" title="Intermediate representation" href="IR.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#language">Language</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Tools.html">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Implementation</a></li>
+      <li class="breadcrumb-item active">Implementation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Implementation/Implementation.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="implementation">
+<h1>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h1>
+<p>Steelman 1F. “The language shall be composed from features that […] can be implemented. […] To the extent that it does not interfere with other requirements, the language shall facilitate the production of translators that are easy to implement and are efficient during translation.”</p>
+<p>13C. Translators shall implement the standard definition. Every translator shall be able to process any syntactically correct program. Every feature that is available to the user shall be defined in the standard, in an accessible library, or in the source program.</p>
+<p>13E. Translators for the language will be written in the language and will be able to produce code for a variety of object machines. The machine independent parts of translators should be separate from code generators. Although it is desirable, translators need not be able to execute on every object machine. The internal characteristics of the translator (i.e., the translation method) shall not be specified by the language definition or standards.</p>
+<p>13F. Translators shall fail to translate otherwise correct programs only when the program requires more resources during translation than are available on the host machine or when the program calls for resources that are unavailable in the specified object system configuration. Neither the language nor its translators shall impose arbitrary restrictions on language features. For example, they shall not impose restrictions on the number of array dimensions, on the number of identifiers, on the length of identifiers, or on the number of nested parentheses levels.</p>
+<section id="language">
+<h2>Language<a class="headerlink" href="#language" title="Link to this heading"></a></h2>
+<p>A near-term goal is to write Stroscot in itself. However, it has to generate code first. I originally picked JavaScript to start for a number of reasons:</p>
+<ul class="simple">
+<li><p>It’s the fastest interpreted language available</p></li>
+<li><p>It has reasonably up-to-date syntax and features thanks to TC39</p></li>
+<li><p>A lot of the inspiring projects were written in JS (Wat, macro lambda calculus)</p></li>
+<li><p>LLVM compiles to JS and there are LLVM bindings available for JS</p></li>
+<li><p>TypeScript doesn’t add much besides compilation overhead</p></li>
+</ul>
+<p>Since then, development has shifted to Haskell, for other reasons:</p>
+<ul class="simple">
+<li><p>The compiler/type system prevents a lot of common errors (particularly typos, which JS doesn’t detect until late)</p></li>
+<li><p>A lot of other compiler-theory-heavy projects are written in Haskell or similar functional languages</p></li>
+<li><p>I’m most familiar with Haskell.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="IR.html" class="btn btn-neutral float-left" title="Intermediate representation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Memory.html" class="btn btn-neutral float-right" title="Memory model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

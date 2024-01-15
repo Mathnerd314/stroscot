@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Implementation" href="../Implementation/index.html" />
+    <link rel="prev" title="Values" href="Values.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Verification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scalability">Scalability</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configurable-program-analysis">Configurable Program Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#properties">Properties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sat-solving">SAT solving</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#thread-safety">Thread safety</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Verification</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Verification.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="verification">
+<h1>Verification<a class="headerlink" href="#verification" title="Link to this heading"></a></h1>
+<blockquote class="epigraph">
+<div><p>1B. The language shall be designed to […] maximize automatic detection of programming errors.
+1E. There shall be no language restrictions that are not enforceable by translators.</p>
+<p class="attribution">—Steelman</p>
+</div></blockquote>
+<blockquote class="epigraph">
+<div><p>The attitude today is that you can write any sloppy piece of code and the compiler will run diagnostics. If it doesn’t spit out an error message, it must be done correctly.</p>
+<p class="attribution">—<a class="reference external" href="https://www.technologyreview.com/2002/07/01/40875/why-software-is-so-bad/">Peter G. Neumann</a></p>
+</div></blockquote>
+<blockquote class="epigraph">
+<div><p>Compile-time static checking is wonderful, and as much as possible should be done 100% statically so that people cannot write incorrect programs.</p>
+<p class="attribution">—<a class="reference external" href="https://lkml.org/lkml/2022/9/19/1250">Linus Torvalds</a></p>
+</div></blockquote>
+<blockquote class="epigraph">
+<div><p>If you are willing to settle for anything less than full [static] verification of all properties then you might as well give up and use a dynamic type system.</p>
+<p class="attribution">—Stroscot</p>
+</div></blockquote>
+<p>Stroscot aims to be a practical programming language, but it also aims to provide strong guarantees about program behavior, for example that array accesses are not out of bounds. In most cases these can be ensured statically by the verification system.</p>
+<p>Verification is the process of verifying that a system satisfies a property. Static verification and symbolic execution is a natural extension of unit testing, and much more powerful. Building it into the language with a standardized API and UX will allow many amazingly robust programs to emerge.</p>
+<section id="scalability">
+<h2>Scalability<a class="headerlink" href="#scalability" title="Link to this heading"></a></h2>
+<p>Verification suffers from <em>extreme</em> scalability limitations. “State space explosion” is a thing, i.e. the combinations of program states increases exponentially. Midori says: “The theorem proving techniques simply did not scale for our needs; our core system module took over a day to analyze using the best in breed theorem proving analysis framework!” Verification is always a time and memory hog.</p>
+<p>To get around this there are various tricks:</p>
+<ul class="simple">
+<li><p>coarsen: combine “equivalent” states into abstract states, where equivalence is defined relative to the properties we are checking</p></li>
+<li><p>approximate: check a property that implies or is implied by the property we interested in. Can give positive / negative result but failure provides no information.</p></li>
+<li><p>optimization: check individual states really fast, so larger state spaces can be checked in a given amount of time</p></li>
+<li><p>smart fuzzing: change the order states are explored. Speeds up verification of some properties, but verifying the negation still requires exploring the full state space.</p></li>
+</ul>
+<p>TLA+ can’t check deep properties on 200KLOC, but can affordably verify them on 2KLOC. And meanwhile we can check “shallow” properties on arbitrarily large codebases without a state space explosion. There is a lot of room for optimization and clever design. Per <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id31" title="R.D. Bergeron, J.D. Gannon, D.P. Shecter, F.W. Tompa, and A. Van Dam. Systems Programming Languages. In Advances in Computers, volume 12, pages 175–284. Elsevier, 1972. URL: https://linkinghub.elsevier.com/retrieve/pii/S0065245808605100 (visited on 2023-12-23), doi:10.1016/S0065-2458(08)60510-0.">BGS+72</a>]</span> a 50% slowdown for additional error checking (relative to e.g. C) is completely manageable.</p>
+<p>Rice’s theorem and <a class="reference external" href="https://en.wikipedia.org/wiki/Halting_problem#Approximations">halting problem approximation results</a> show that no algorithm can evaluate a nontrivial property with perfect accuracy; there is an upper limit to accuracy (below 1) that no algorithm can surpass consistently. But these results do not prevent evaluating a nontrivial property with possible outputs Yes/No/IDK to a reasonable level of accuracy on practical programs, which have structure not found in random programs. Still, the verifier is developed on a “commercially reasonable effort” basis, where it is a bug in the compiler if the analysis returns IDK on a program, but the bug will only be fixed given sufficient funding and evidence of the usefulness of the program (e.g. that it works in other languages). So verification will likely be an area of development forever. There is no panacea, but we can provide options for the programmer if the analysis fails (returns IDK):</p>
+<ul class="simple">
+<li><p>reject: reject programs for which the algorithm fails as wrong (like <code class="docutils literal notranslate"><span class="pre">-Werror</span></code>)</p></li>
+<li><p>defer: insert runtime checks if needed and throw an error when the property fails (like Haskell’s <code class="docutils literal notranslate"><span class="pre">-fdefer-type-errors</span></code>)</p></li>
+<li><p>override: behave as if the algorithm gave answer A (could crash at runtime, but allows bypassing bugs).</p></li>
+<li><p>scripting: allow specifying tactics and proof sketches so that the verifier has hints for how to search through the state space.</p></li>
+</ul>
+<p>For definite bugs the options are similar, although the override option implies a somewhat foolish promise that “poison” inputs will be avoided, in exchange for a minimal speedup and the loss of safety.</p>
+<p>The seL4 microkernel (8700 lines of C) has been successfully statically modeled and verified. Linux is 7.9 million lines of C (&gt;50% drivers) and has not been. But simple type-checking-like things are probably not the blocker; most effort in the seL4 verification went towards concurrency things like interrupts, data races, and IPC.</p>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h2>
+<p>The implementation in Stroscot will be “from scratch” - custom SAT/SMT solver, custom state space explorer, etc. The main reasons are to avoid the overhead present in existing tools of translating to/from the constraint specification languages such as SMTLIB or specialized XML formats, and to allow Stroscot to be self-hosted. But the implementation will use the techniques from various existing implementations such as Z3.</p>
+<p>The field of verification is quite large but is centralized around various subjects/competitions:</p>
+<ul>
+<li><p>model checkers: <a class="reference external" href="https://www.cprover.org/cbmc/">CBMC</a>, Verdi, Ironfleet, JSCert, Cosette, FSCQ, Chapar, CertiKOS, Linksem, miTLS and HACL*, Versat and IsaSAT, CakeML</p></li>
+<li><p>Concolic (Concrete-Symbolic) testing or dynamic symbolic execution: DART, CUTE, KLEE, <a class="reference external" href="https://github.com/javapathfinder">NASA’s Java Pathfinder</a>, jCUTE, SAGE</p></li>
+<li><p>SV-COMP:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Overall: <a class="reference external" href="https://github.com/diffblue/2ls">2LS</a>, <a class="reference external" href="https://www.cprover.org/cbmc/">CBMC/CProver-witness2test</a>, <a class="reference external" href="https://gitlab.com/sosy-lab/software/coveriteam">CoVeriTeam-Verifier (AlgoSelection, ParallelPortfolio)</a>, <a class="reference external" href="https://cpachecker.sosy-lab.org">CPAchecker, CPALockator, CPA-BAM-BnB, CPA-BAM-SMG, CPA-witness2test</a>, <a class="reference external" href="https://divine.fi.muni.cz/">DIVINE</a>, <a class="reference external" href="https://esbmc.org/">ESBMC-kind, ESBMC-incr</a>, <a class="reference external" href="https://goblint.in.tum.de/">Goblint</a>, <a class="reference external" href="https://github.com/staticafi/symbiotic">Symbiotic, Symbiotic-Witch</a>, <a class="reference external" href="https://ultimate.informatik.uni-freiburg.de">UAutomizer, UGemCutter, UKojak, UTaipan</a>, <a class="reference external" href="https://www.tcs.com/designing-complex-intelligent-systems">VeriFuzz/VeriAbs</a></p></li>
+<li><p>Concurrency: <a class="reference external" href="https://gitlab.com/emersonwds/cseq">CSeq</a>, <a class="reference external" href="https://github.com/omainv/cseq/releases">Lazy-CSeq</a>, <a class="reference external" href="https://github.com/hernanponcedeleon/Dat3M">Dartagnan</a>, <a class="reference external" href="https://github.com/thufv/Deagle">Deagle</a>, <a class="reference external" href="https://github.com/fatimahkj/EBF">EBF</a>, <a class="reference external" href="http://www.cs.umd.edu/projects/PL/locksmith/">Locksmith</a></p></li>
+<li><p>Java: <a class="reference external" href="https://www.cs.sun.ac.za/coastal">COASTAL</a>, <a class="reference external" href="https://github.com/tudo-aqua/gdart-svcomp">GDart</a>, <a class="reference external" href="https://github.com/vaibhavbsharma/java-ranger">Java-Ranger</a>, <a class="reference external" href="https://github.com/jayhorn/jayhorn">JayHorn</a>, <a class="reference external" href="https://github.com/diffblue/cbmc">JBMC</a>, <a class="reference external" href="https://github.com/tudo-aqua/jdart">JDart</a>, <a class="reference external" href="https://github.com/SymbolicPathFinder/jpf-symbc">SPF</a></p></li>
+<li><p>Reachability: <a class="reference external" href="https://github.com/brick-tool-dev/BRICK-2.0">BRICK</a>, <a class="reference external" href="https://crux.galois.com/">Crux</a>, <a class="reference external" href="https://github.com/ftsrg/theta">Theta</a>, <a class="reference external" href="https://github.com/ftsrg/gazer">Gazer-Theta</a>, <a class="reference external" href="https://github.com/will-leeson/cpachecker">Graves-CPA</a>, <a class="reference external" href="https://github.com/xlauko/lart">LART</a>, <a class="reference external" href="https://github.com/sbjoshi/Pinaka">Pinaka</a>, <a class="reference external" href="https://github.com/cedricrupb/cpachecker">PeSCo</a></p></li>
+<li><p>Overflow checking: <a class="reference external" href="https://gitlab.com/sosy-lab/software/frama-c-sv">Frama-C-SV</a>, <a class="reference external" href="https://fbinfer.com/">Infer</a></p></li>
+<li><p>Loop invariants: <a class="reference external" href="https://github.com/gernst/korn">Korn</a></p></li>
+<li><p>Memory safety: <a class="reference external" href="https://www.fit.vutbr.cz/research/groups/verifit/tools/predator-hp/">PredatorHP</a>, <a class="reference external" href="https://spencerl-y.github.io/SESL/">SESL</a></p></li>
+<li><p>Software systems: <a class="reference external" href="https://smackers.github.io/">SMACK</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference external" href="https://termcomp.herokuapp.com/Y2022/">TermComp</a>: TRS: <a class="reference external" href="https://aprove.informatik.rwth-aachen.de/references">AProVE</a>, matchbox, MnM, <a class="reference external" href="http://zenon.dsic.upv.es/muterm/index.php/documentation/">MU-TERM</a>, NaTT, NTI+cTI, TTT2 (Tyrolean Termination Tool 2); Higher-order: SOL, Wanda; C: irankfinder, LoAT; Complexity: tct_trs;</p></li>
+<li><p><a class="reference external" href="https://web.archive.org/web/20200516055926/http://rec.gforge.inria.fr/">Rewrite engines competitions</a></p></li>
+</ul>
+<p>VU - Vrije Universiteit Amsterdam</p>
+<blockquote>
+<div><p>Prof.dr. Jan Willem Klop (VU)
+Dr. Roel de Vrijer (VU)
+Drs. Jörg Endrullis (VU) - Jambox termination tool
+Dr. Clemens Grabmayer (VU)
+Drs. Helle Hvid Hansen (VU)
+Dr. Dimitri Hendriks (VU)
+Drs. Ariya Isihara (VU)
+Femke van Raamsdonk (VU)</p>
+</div></blockquote>
+<p>UU - Universiteit Utrecht</p>
+<blockquote>
+<div><p>Vincent van Oostrom (UU)
+Albert Visser (UU)
+Clemens Grabmayer (UU)
+Jeroen Ketema</p>
+</div></blockquote>
+<p>CWI Amsterdam</p>
+<blockquote>
+<div><p>Dr. Frank de Boer (CWI)
+Drs. Clemens Kupke (CWI)
+Prof.dr. Jan Rutten (VU/CWI)</p>
+</div></blockquote>
+<p>Astrée
+B. Blanchet, P. Cousot, R. Cousot, J. Feret, L. Mauborgne, A. Miné, D. Monniaux, and
+X. Rival. A Static Analyzer for Large Safety-Critical Software. In Proc. of PLDI’03, San
+Diego, California, USA, June 2003. ACM Press.</p>
+<p>P. Baudin, A. Pacalet, J. Raguideau, D. Schoen, and N. Williams. CAVEAT: a Tool for
+Software Validation. In DSN. IEEE Computer Society, 2002.</p>
+</section>
+<section id="configurable-program-analysis">
+<h2>Configurable Program Analysis<a class="headerlink" href="#configurable-program-analysis" title="Link to this heading"></a></h2>
+<div style="display: none">
+\[
+\newcommand{\true}{\mathit{true}}
+\newcommand{\false}{\mathit{false}}
+\newcommand{\seq}[1]{{\langle #1 \rangle}}
+\newcommand{\sem}[1]{[\![ #1 ]\!]}
+\newcommand{\setsem}[1]{\bigcup_{e \in #1} \sem{e}}
+\newcommand{\locs}{\mathit{L}}
+\newcommand{\op}{\mathit{op}}
+\newcommand{\pc}{\mathit{pc}}
+\newcommand{\pcvar}{\mathit{pc}}
+\newcommand{\pco}{\mathit{pc_0}}
+\newcommand{\pce}{\mathit{pc_{err}}}
+\newcommand{\meet}{\sqcap}
+\newcommand{\cpa}{\mathbb{D}}
+\newcommand{\Nats}{\mathbb{N}}
+\newcommand{\Bools}{\mathbb{B}}
+\newcommand{\Ints}{\mathbb{Z}}
+\newcommand{\strengthen}{\mathord{\downarrow}}
+\newcommand{\transconc}[1]{\smash{\stackrel{#1}{\rightarrow}}}
+\newcommand{\transabs}[2]{\smash{\stackrel[#2]{#1}{\rightsquigarrow}}}
+\newcommand{\merge}{\mathsf{merge}}
+\newcommand{\stopop}{\mathsf{stop}}
+\newcommand{\wait}{\mathsf{waitlist}}
+\newcommand{\reached}{\mathsf{reached}}
+\newcommand{\result}{\mathsf{result}}
+\newcommand{\compare}{\preceq}
+\renewcommand{\implies}{\Rightarrow}
+\newcommand{\BUG}{{\sc fa}}
+\newcommand{\flag}{\mathit{flag}}
+\newcommand{\Itp}[3]{\smash{\mbox{\sc Itp}{(#2,#3)(#1)}}}
+\]
+</div><p>A <em>configurable program analysis</em> (CPA) specifies — independently of the analysis algorithm —
+the abstract domain and a set of operations that control the program analysis.
+Such a CPA can be plugged in as a component into the software-verification framework
+without the need to work on program parsers, exploration algorithms, and
+their general data structures.</p>
+<p>A <em>program</em> is represented by a <em>control-flow automaton</em> (CFA) / Kripke structure <span class="math notranslate nohighlight">\((C, Ops, \transconc{})\)</span>,
+which consists of</p>
+<ul class="simple">
+<li><p>A set <span class="math notranslate nohighlight">\(C\)</span> of concrete states. Many papers use a simple state model consisting of a program counter/location and a data store mapping variable names to integers.</p></li>
+<li><p>A set <span class="math notranslate nohighlight">\(Ops\)</span> of program operations (alphabet). Typical operations include:</p>
+<ul>
+<li><p>Computation, where the state evolves with no input</p></li>
+<li><p>External interactions of the system; e.g. IO operations <code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">1</span></code> for a read that returned 1 or <code class="docutils literal notranslate"><span class="pre">Write</span></code> for a write.</p></li>
+<li><p>Havoc operations, similar to external operations</p></li>
+</ul>
+</li>
+<li><p>A concrete transition function <span class="math notranslate nohighlight">\(\mathord{\transconc{}} \subseteq C \times Ops \times C\)</span> defining a (labeled) transition relation of how concrete states evolve into other concrete states. Papers usually allow at most one concrete state succeeding a given concrete state and program operation, but it is possible to be nondeterministic, and we allow halting states with no available operations and a state to evolve differently with different operations. We define the notation <span class="math notranslate nohighlight">\(\mathord{\transconc{o}} = \{ (c,o,c') \in \mathord{\transconc{}} \}\)</span>. We write <span class="math notranslate nohighlight">\(c \transconc{o} c'\)</span> if <span class="math notranslate nohighlight">\((c, o, c') \in \mathord{\transconc{}}\)</span> and <span class="math notranslate nohighlight">\(c \transconc{} c'\)</span> if there exists an <span class="math notranslate nohighlight">\(o\)</span> with <span class="math notranslate nohighlight">\(c \transconc{o} c'\)</span>.</p></li>
+</ul>
+<p>A concrete path <span class="math notranslate nohighlight">\(\sigma = \langle (c_1, o_1 , c_2 ), (c_2 , o_2 , c_3 ), \ldots , (c_{n-1} , o_{n-1} , c_n ) \rangle\)</span> is a sequence of consecutive concrete states. A concrete path is called a program path if it starts with the initial state <span class="math notranslate nohighlight">\(c_I\)</span>. A path is called feasible if the transitions are concrete transitions, <span class="math notranslate nohighlight">\(c_i \transconc{o_i} c_{i+1}\)</span>; paths are assumed to be feasible unless declared infeasible. A state <span class="math notranslate nohighlight">\(c\)</span> is called reachable if there exists a feasible program path from <span class="math notranslate nohighlight">\(c_I\)</span> to <span class="math notranslate nohighlight">\(c\)</span>.</p>
+<p>Dealing with concrete states will immediately lead to state explosion. So we introduce abstract states, that are sets of concrete states, and abstract operations, that are sets of concrete operations. An abstract domain <span class="math notranslate nohighlight">\(D = ({\cal E}, G, \leadsto)\)</span> consists of</p>
+<ul class="simple">
+<li><p>a set <span class="math notranslate nohighlight">\({\cal E} \subseteq 2^C\)</span> of abstract states</p></li>
+<li><p>a set <span class="math notranslate nohighlight">\(G \subseteq 2^{Ops}\)</span> of abstract operations.</p></li>
+<li><p>a transfer relation <span class="math notranslate nohighlight">\(\leadsto \subseteq E × G × E\)</span>  of (labeled) abstract state transitions. We define <span class="math notranslate nohighlight">\(\overset{g}{\leadsto}\)</span>, <span class="math notranslate nohighlight">\(s \leadsto s'\)</span>, and abstract paths and reachability, in a manner similar to concrete states.</p></li>
+</ul>
+<p>We have to tie this to our program. The domain <em>covers</em> the program if each reachable concrete state is contained in some abstract state in <span class="math notranslate nohighlight">\({\cal E}\)</span> and each operation encountered during a feasible path is contained in some abstract operation in <span class="math notranslate nohighlight">\(G\)</span>. The domain is <em>compatible</em> with the program if <span class="math notranslate nohighlight">\((e,g,e')\in\leadsto \iff \exists c\ in e, c' \in e', o \in g. c,o,c' \in \mathord{\transconc{}}\)</span>.</p>
+<p>To support loop acceleration we could extend our notion of compatibility to allow mapping multiple concrete state transitions to one abstract transition. But which abstract operation would the intermediate concrete operations map to? It seems better to model loop acceleration as a transformation on the concrete state transition graph that is reflected into a transformation on the abstract state graph.</p>
+<p>The simplest covering domain is <span class="math notranslate nohighlight">\(({C},{Ops})\)</span>. Slightly more complicated is the domain containing an abstract state for each program location. But the real meat lies in creating an abstract domain with complicated predicates on concrete states.</p>
+<section id="cpachecker-algorithm">
+<h3>CPAChecker algorithm<a class="headerlink" href="#cpachecker-algorithm" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>A transfer operator that identifies successor abstract states to a given abstract state as well as their abstract operations, <span class="math notranslate nohighlight">\(t : E → 2^{(E,G)}\)</span>.</p></li>
+<li><p>a merge operator <span class="math notranslate nohighlight">\(\merge :  E × E → E\)</span> specifies if and how to merge abstract states when control flow meets. The operator weakens/widens the abstract state that is given as second parameter depending on the first parameter. Note that the operator <span class="math notranslate nohighlight">\(\merge\)</span> is not commutative, and is not necessarily the same as the join operator of the lattice. <span class="math notranslate nohighlight">\(e' \subseteq \merge(e, e') \subseteq \top\)</span>. Two simple ones are <span class="math notranslate nohighlight">\(\merge_{sep}(e,e')=e'\)</span> and <span class="math notranslate nohighlight">\(\merge_{join}(e,e')=e \cup e'\)</span>.</p></li>
+<li><p>The termination check <span class="math notranslate nohighlight">\(\stopop : E × 2^E \to \{Stop,Continue\}\)</span> checks whether the abstract state <span class="math notranslate nohighlight">\(e\)</span> that is given as first parameter is covered by the set <span class="math notranslate nohighlight">\(R\)</span> of abstract states given as second parameter. Usually this is <span class="math notranslate nohighlight">\(\stopop_{join}(e, R) = e \subseteq \bigcup R\)</span> but we can also use <span class="math notranslate nohighlight">\(\stopop_{sep}(e, R) = \exists e' \in R . e \subseteq e'\)</span>.</p></li>
+</ul>
+</section>
+</section>
+<section id="properties">
+<h2>Properties<a class="headerlink" href="#properties" title="Link to this heading"></a></h2>
+<p>The most common property is membership in a set (bound checks, type safety, etc.). But there are “temporal” properties which cannot be described as sets - liveness, termination etc.</p>
+<section id="reachability">
+<h3>Reachability<a class="headerlink" href="#reachability" title="Link to this heading"></a></h3>
+<p>A reachability (safety) task consists of a program annotated with a set of error states, with the goal to show that the error states are unreachable, or otherwise to find a feasible program path to an error state. This can be used to verify assertions and check for type errors.</p>
+<p>To prove unreachability we exhibit a covering domain with no concrete error states in any of the abstract states. To prove reachability we produce a concrete feasible path ending in an error state. The counterexample can then be fed into a debugger to determine what changes to make to the program.</p>
+<section id="exceptions">
+<h4>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading"></a></h4>
+<p>The main reachability analysis figures out which exceptions a piece of code may throw. Top-level unhandled exceptions are reported as warnings.</p>
+</section>
+<section id="assertions">
+<h4>Assertions<a class="headerlink" href="#assertions" title="Link to this heading"></a></h4>
+<p>10F. It shall be possible to include assertions in programs. If an assertion is false when encountered during execution, it shall raise an exception. [Note that assertions can be used to aid optimization and maintenance.]</p>
+<p>Assertions have a simple form <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">expr</span></code> that throws <code class="docutils literal notranslate"><span class="pre">AssertionFailed</span></code>, equivalent to <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">expr</span> <span class="pre">(throw</span> <span class="pre">AssertionFailed)</span></code>. Java’s complex form <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">expr</span> <span class="pre">:</span> <span class="pre">exception</span></code> that throws a specific <code class="docutils literal notranslate"><span class="pre">exception</span></code> on failure seems pointless - it’s only a little less verbose than <code class="docutils literal notranslate"><span class="pre">when</span> <span class="pre">expr</span> <span class="pre">(throw</span> <span class="pre">exception)</span></code>. Could be worth it though, throw it to the standard library to decide.</p>
+<p>!0F. It shall also be possible to include assertions, such as the expected frequency for selection of a conditional path, that cannot be verified.</p>
+<p>This part we can ignore, Stroscot verifies everything. The example given is more like a pragma for optimization.</p>
+</section>
+<section id="dead-code">
+<h4>Dead code<a class="headerlink" href="#dead-code" title="Link to this heading"></a></h4>
+<p>Reachability can also find dead (unreachable) code, like unused declarations, unused variables, or unsatisfiable conditions. Code is only dead if it is unreachable on all compilation configurations, so the build configurations must be interfaced. Assertions can exercise code too.</p>
+<p>Many exceptions are unwanted, e.g. “no patterns matched in case”. Reachability can verify these are dead code.</p>
+</section>
+</section>
+<section id="termination">
+<h3>Termination<a class="headerlink" href="#termination" title="Link to this heading"></a></h3>
+<p>Termination checking verifies properties like “A function call must eventually return” or “A program execution that calls malloc() must eventually call free()”. An infinite state transition sequence that doesn’t call free is a counterexample. Termination is a liveness property - it’s different from a safety property “A call to free must be preceded by a call to malloc”. It’s also different from “If the program ends gracefully then all memory has been freed”. A lot of programs look like <code class="docutils literal notranslate"><span class="pre">repeat</span> <span class="pre">{</span> <span class="pre">handleCommand{}</span> <span class="pre">}</span></code> and for those we can prove termination of <code class="docutils literal notranslate"><span class="pre">handleCommand</span></code> but not the loop. But we can prove graceful exit.</p>
+<p>Proving termination is of undecidable complexity, but in practice we can prove termination and nontermination in many cases. We can reduce liveness to fair termination constraints <code class="docutils literal notranslate"><span class="pre">&lt;A,</span> <span class="pre">B&gt;</span></code>, in each trace either <code class="docutils literal notranslate"><span class="pre">A</span></code> is true for only finitely many states or <code class="docutils literal notranslate"><span class="pre">B</span></code> is true for infinitely many states.</p>
+<p>To prove termination we construct an abstract state graph of reachable states and a ranking function mapping states to some well-ordered set such that every cycle in the state graph has a transition that decreases the rank.</p>
+<p>To prove nontermination we need an infinite path of concrete states. If the abstract state graph is finite this can be simplified to an initial path of concrete states leading to a strongly connected component of abstract states with no exits.</p>
+<p>There’s also some interesting <a class="reference external" href="http://mmjb.github.io/T2/">work</a> on termination checking by Microsoft. There’s a representation of terms as sets, which ends up mapping out all the paths through the program, and then identifying termination is fairly easy.</p>
+</section>
+<section id="logic">
+<h3>Logic<a class="headerlink" href="#logic" title="Link to this heading"></a></h3>
+<p>Both reachability and termination can be expressed in CTL*. There is an even more expressive language, the modal μ-calculus.</p>
+</section>
+<section id="equivalence">
+<h3>Equivalence<a class="headerlink" href="#equivalence" title="Link to this heading"></a></h3>
+<p>Since the semantics of method dispatch and concurrency are non-deterministic, we would like to verify that the program is well-defined. This takes the form of checking that all execution paths of a program produce equivalent results. It’s similar to confluence but a little weaker.</p>
+<p>Equivalence of pure programs is based on comparing the return value, and discarding exceptions.</p>
+<p>Equivalence of I/O programs is based on comparing events: we represent all I/O actions in a datatype and then compare as for pure programs.</p>
+<p>In the literature there is a notion of bisimulation. But here our state transition graph includes computation transitions, while the amount of computation is not relevant for equivalence. But of course bisimulation implies equivalence.</p>
+<p>Equivalence gives a stronger notion of dead or redundant code. For example, if the program is equivalent when commenting out an I/O statement, or if all the paths of a conditional statement are the same.</p>
+</section>
+<section id="supercompilation">
+<h3>Supercompilation<a class="headerlink" href="#supercompilation" title="Link to this heading"></a></h3>
+<p>Supercompilation produces an output program with observable behavior equivalent to an input program but faster.  Essentially we are transforming abstract states into pieces of code, creating a term in the output for every intermediate state.</p>
+<p>The algorithm in <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id37" title="Maximilian Bolingbroke and Simon Peyton Jones. Supercompilation by evaluation. In Proceedings of the Third ACM Haskell Symposium on Haskell, Haskell '10, 135–146. New York, NY, USA, September 2010. Association for Computing Machinery. URL: https://www.microsoft.com/en-us/research/publication/supercompilation-by-evaluation/ (visited on 2021-03-24), doi:10.1145/1863523.1863540.">BPJ10</a>]</span> is similar to that of CPAChecker. There is a termination check that takes a list of states and a state and either stops or continues - in particular it stops if any previously examined states are less than the current state by a well-quasi-order. Reduction produces successor states as with the transfer operator; as an optimization they skip merging/termination checking “intermediate” states. Another difference is that they are compiling pure programs so there is a “splitting” operation that transforms a state into a composition of substates. They are evaluating to full normal form rather than WHNF, so there is some nondeterminism in the evaluation order.</p>
+</section>
+<section id="incremental-program-analysis">
+<h3>Incremental program analysis<a class="headerlink" href="#incremental-program-analysis" title="Link to this heading"></a></h3>
+<p>Another issue is incremental analysis. Checking is slow so we would like to re-use most of the analysis when recompiling a file. Looking at a 2019 presentation <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id126" title="Marie-Christine Jakobs. Differential modular software verification. URL: https://www.sosy-lab.org/research/prs/2019-10-01-CPA19-Differntial-Verification.pdf (visited on 2020-07-25).">Jak</a>]</span> there doesn’t seem to be any major breakthrough. Marking the analyzer’s computation steps in the general incremental build framework is probably sufficient.</p>
+<p>since you can check all these conditions it’s a very powerful analysis that can also check buffer overflows and array bounds and resource use <span id="id4">[<a class="reference internal" href="../../zzreferences.html#id7" title="Elvira Albert, Miquel Bofill, Cristina Borralleras, Enrique Martin-Martin, and Albert Rubio. Resource analysis driven by (conditional) termination proofs. Theory and Practice of Logic Programming, 19(5-6):722–739, September 2019. Comment: Paper presented at the 35th International Conference on Logic Programming (ICLP 2019), Las Cruces, New Mexico, USA, 20-25 September 2019, 16 pages. URL: http://arxiv.org/abs/1907.10096 (visited on 2020-06-22), arXiv:1907.10096, doi:10.1017/S1471068419000152.">ABB+19</a>]</span> and things of that nature.</p>
+</section>
+</section>
+<section id="sat-solving">
+<h2>SAT solving<a class="headerlink" href="#sat-solving" title="Link to this heading"></a></h2>
+<p>For SAT, conflict driven clause learning (CDCL) seems to be the most powerful algorithm for solving systems of complex clauses. It is based on assuming specific states for each variable based on each requirement and then, when a conflict is encountered, creating a new requirement from the clause and backtracking. There are extensions of it to nonlinear real systems <span id="id5">[<a class="reference internal" href="../../zzreferences.html#id42" title="Franz Brauße, Konstantin Korovin, Margarita Korovina, and Norbert Th Müller. A CDCL-style calculus for solving non-linear constraints. arXiv:1905.09227 [cs], July 2019. Comment: 17 pages, 3 figures; accepted at FroCoS 2019; software available at $&lt;$http://informatik.uni-trier.de/~brausse/ksmt/$&gt;$. URL: http://arxiv.org/abs/1905.09227 (visited on 2020-07-25), arXiv:1905.09227.">BKKM19</a>]</span>, and one paper/PhD on using CDCL for termination checking <span id="id6">[<a class="reference internal" href="../../zzreferences.html#id78" title="Vijay D’Silva and Caterina Urban. Conflict-driven conditional termination. In Daniel Kroening and Corina S. Păsăreanu, editors, Computer Aided Verification, Lecture Notes in Computer Science, 271–286. Cham, 2015. Springer International Publishing. URL: https://link.springer.com/content/pdf/10.1007%2F978-3-319-21668-3_16.pdf, doi:10.1007/978-3-319-21668-3_16.">DSilvaU15</a>]</span>.</p>
+<p>SAT solving can be recast as proving a sequent <span class="math notranslate nohighlight">\(C_1, \ldots, C_n \vdash \bot\)</span> with clauses <span class="math notranslate nohighlight">\(C_i = (a_1 \land \ldots \land a_n \to b_1 \lor \ldots \lor b_m)\)</span>. Resolution is just the cut rule (although resolution-based solving are different from CDCL).</p>
+<p>The conversion to CNF uses properties of classical reasoning. In the intuitionistic case, every formula can be transformed into an equiprovable sequent <span class="math notranslate nohighlight">\(\Gamma_i, \Gamma_f \vdash d\)</span> with <span class="math notranslate nohighlight">\(d\)</span> an atom, <span class="math notranslate nohighlight">\(\Gamma_f\)</span> made of flat clauses as in the <span class="math notranslate nohighlight">\(C_i\)</span> above, and implication clauses <span class="math notranslate nohighlight">\((a \to b) \to c\)</span>.</p>
+<p>There are definitions of resolution for fragments of linear logic, and linear logic theorem provers.</p>
+</section>
+<section id="thread-safety">
+<h2>Thread safety<a class="headerlink" href="#thread-safety" title="Link to this heading"></a></h2>
+<p>Thread safety means avoiding race conditions and deadlocks. The basic model is to repeatedly execute some amount of steps of each thread in a loop. Executing this model some amount of loops, we get a tree of executions. Going deeper in the tree extends the execution, and the tree branching is due to the nondeterministic choices at the beginning of each iteration of the loop. We can turn this tree into a graph by grouping nodes using an <a class="reference external" href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence relation</a> that determines if the behavior is the same for two executions. This forms the control flow graph that we need for verification. In particular we want to verify a lack of race conditions, i.e. that observable behavior of the program is not affected by the choices of the scheduler.</p>
+<p>Observable behavior is defined by an I/O model that interprets the actions. For example, equivalent executions must write the same files and the same contents to the files, but not necessarily in the same order. But really it is up to the user to decide, maybe writing files in a different order is bad.</p>
+<p>Deadlock is when there is no runnable thread and the program has not exited.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Values.html" class="btn btn-neutral float-left" title="Values" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Implementation/index.html" class="btn btn-neutral float-right" title="Implementation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Build system &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -22,8 +24,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Errors" href="Errors.html" />
-    <link rel="prev" title="Memory" href="Memory.html" /> 
+    <link rel="next" title="Code of conduct" href="Code-of-conduct.html" />
+    <link rel="prev" title="Language Reference" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,14 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Build system</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#tasks">Tasks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scheduling">Scheduling</a></li>
@@ -84,7 +78,16 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -257,7 +260,7 @@
 </section>
 <section id="cached-build">
 <h2>Cached build<a class="headerlink" href="#cached-build" title="Link to this heading"></a></h2>
-<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id115" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache. The cache system can also greatly speed up subsequent builds if not many files are changed.</p>
+<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id1">[<a class="reference internal" href="../zzreferences.html#id184" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache. The cache system can also greatly speed up subsequent builds if not many files are changed.</p>
 <dl class="option-list">
 <dt><kbd><span class="option">--cache-enable <var>PATH</var></span></kbd></dt>
 <dd><p>If present, use and store outputs in the given shared directory (which may already exist or not). Cot will retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for future invocations.</p>
@@ -369,8 +372,8 @@ works well. Use <code class="docutils literal notranslate"><span class="pre">det
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Errors.html" class="btn btn-neutral float-right" title="Errors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Language Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Code-of-conduct.html" class="btn btn-neutral float-right" title="Code of conduct" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

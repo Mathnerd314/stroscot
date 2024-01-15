@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspects &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Assembly" href="Assembly.html" />
+    <link rel="prev" title="Language specification" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Aspects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#costs-and-benefits">Costs and benefits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uses">Uses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#terminology">Terminology</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Aspects</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Aspects.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aspects">
+<h1>Aspects<a class="headerlink" href="#aspects" title="Link to this heading"></a></h1>
+<p>Aspect-Oriented Programming (AOP) is a programming paradigm that allows separating concerns (aspects) that cut across multiple modules or components. Used properly, AOP increases codebase modularity, maintainability, reusability, readability, consistency, and testability. In particular, developers may isolate business logic, and separately manage cross-cutting aspects which would otherwise be spread across different parts of the code. These aspects can even be dynamically managed, providing flexibility to enable or disable certain behaviors at runtime without altering the core application logic.</p>
+<section id="costs-and-benefits">
+<h2>Costs and benefits<a class="headerlink" href="#costs-and-benefits" title="Link to this heading"></a></h2>
+<p>Aspect-oriented programming (AOP) has shown significant benefits and practical applications in software development. It promotes modularity, separation/centralization of concerns, code reusability, readability, maintainability, flexibility, adaptability, consistency. These lead to higher developer productivity.</p>
+<p>However, it has a significant learning curve. First there is the new terminology. Also, AOP introduces a different code organization. This organization is hopefully more maintainable as concerns are placed together and business logic is separated from implementation, but identifying the actual flow of code can be difficult amongst the many “weaved” aspects and advice. A debugger can trace an existing program, but recognizing which parts of a new program are suitable for aspect extraction can be tricky. Similarly error messages and stack traces need to be AOP-aware. There is also a general lack of tooling support for AOP. Specifically testing, unit testing needs to be AOP-aware.</p>
+<p>To help developers overcome these challenges, it’s important to provide comprehensive resources, documentation, tutorials, and examples that explain AOP concepts clearly. Hands-on practice with small, manageable projects can also help developers gain confidence and proficiency in using AOP. Additionally, offering mentoring or training sessions can accelerate the learning process by addressing developers’ questions and concerns directly. Over time, as developers become more familiar with AOP concepts and practices, the learning curve becomes less steep, and the benefits of AOP can become more evident in their development workflows.</p>
+<p>AOP can also introduce some performance overhead, although most studies have actually found a performance increase.</p>
+</section>
+<section id="uses">
+<h2>Uses<a class="headerlink" href="#uses" title="Link to this heading"></a></h2>
+<p>AOP has been successfully applied in various domains: detailed logging. authentication and authorization checks, error-handling logic, caching, proper initiation, commit, or rollback procedures for transactions. and performance monitoring.</p>
+</section>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Join point: A join point is a specific point during the execution of your application. For example, before a method call, after a method call, a field access, an object instantiation. In Stroscot it corresponds to an imperative value (with continuation included). We can also expose non-side-effectful method calls as join points.</p></li>
+<li><p>Pointcut: The pointcut or target is a predicate which specifies a set of join points. Generally limited by some scope, like a class, method, or module.</p></li>
+<li><p>Advice: Advice is code that is executed at the chosen set of join points. It transforms the join point action to a new join point action. For example Stroscot’s destructors are implemented this way, inserting the free call before executing the join point.</p></li>
+<li><p>Aspect: an aspect is the combination of some advice and a pointcut. For example, applying a logger before all the method calls in a particular class constitutes an aspect. An aspect may have stateful variables / identifiers shared among aspect invocations.</p></li>
+<li><p>Weaving: This is the process of integrating aspect together into the application. It can be done compile-time, by generating weaved code, or at runtime, by modifying dispatch behavior.</p></li>
+<li><p>Introduction: introducing new methods, fields, or interfaces in a class at runtime</p></li>
+<li><p>Business concern: the straight-line code which does the simple thing you care about</p></li>
+<li><p>Cross-cutting concern: aspects that interact with the business concern, such as logging, security, transactions, etc.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Language specification" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Assembly.html" class="btn btn-neutral float-right" title="Assembly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

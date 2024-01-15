@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profiling &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Reduction" href="Reduction.html" />
+    <link rel="prev" title="Memory model" href="Memory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Implementation.html">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Profiling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#resources">Resources</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics">Metrics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methods">Methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#action">Action</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#caches">Caches</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Tools.html">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Implementation</a></li>
+      <li class="breadcrumb-item active">Profiling</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Implementation/Profiling.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="profiling">
+<h1>Profiling<a class="headerlink" href="#profiling" title="Link to this heading"></a></h1>
+<p>The goal of the profiler is to measure performance, and allow making optimization decisions based on that.</p>
+<p>Code performance is unpredictable; even simple programs may be optimized in ways that the reader or writer does not expect. Performance often depends on undocumented and obscure details of the program’s environment, making background knowledge or heuristics and guidelines useless. Therefore, profiling must be available from the first time the program is run so as to establish baseline performance.</p>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
+<p>We model a computer using a “functional block diagram”, i.e. blocks and buses. The level of detail varies depending on the application. Buses typically have sufficient capacity for all data so can be trivialized, but for CPU internals, they are a bottleneck, so are left in. Similarly PSU and cooling are not usually a problem, but I left them in.</p>
+<p>Blocks:</p>
+<ul class="simple">
+<li><p>processor - time, caches, I/O bandwidth</p>
+<ul>
+<li><p>8x die - 4x DDR, 8x I/O, L3 cache</p>
+<ul>
+<li><p>8x core</p>
+<ul>
+<li><p>caches - L1I, L1D, L2 I+D, L0/L1/L2 TLB and BTB, L1 Perceptron, L2 TAGE, operation, return stack, indirect target array, micro-tags, microcode ROM</p></li>
+<li><p>decode, dispatch</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>I/O controller die - memory, PCIe, hub, secure processor</p></li>
+</ul>
+</li>
+<li><p>graphics card</p></li>
+<li><p>memory</p>
+<ul>
+<li><p>physical memory used</p></li>
+<li><p>virtual memory allocated/committed</p></li>
+<li><p>virtual memory reserved (windows)</p></li>
+<li><p>private bytes - allocated to process, shared bytes - includes memory-mapped files, shared DLLs</p></li>
+<li><p>working set - set of pages accessed within a given time period (near future, near past)</p></li>
+<li><p>resident set - program memory current in physical memory</p></li>
+<li><p><a class="reference external" href="https://blog.mozilla.org/jseward/2011/01/27/profiling-the-browsers-virtual-memory-behaviour/">profiler</a></p></li>
+<li><p>reported on Linux in /proc/&lt;PID&gt;/status - split: heap, stack, executable code, loaded DLLs</p></li>
+</ul>
+</li>
+<li><p>motherboard</p></li>
+<li><p>storage</p></li>
+<li><p>power supply - typically left out</p></li>
+<li><p>case/cooling - also typically left out</p></li>
+</ul>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">branches</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="w"> </span><span class="n">misses</span><span class="p">)</span>
+<span class="nf">branch</span><span class="o">-</span><span class="n">instructions</span>
+<span class="nf">cache</span><span class="o">-</span><span class="n">references</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="w"> </span><span class="n">misses</span><span class="p">)</span>
+<span class="kt">L1</span><span class="o">-</span><span class="n">dcache</span><span class="o">/</span><span class="n">icache</span><span class="w"> </span><span class="n">prefetches</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">misses</span><span class="p">)</span>
+<span class="kt">LLC</span><span class="o">-</span><span class="n">stores</span>
+<span class="nf">loads</span><span class="kt">:</span><span class="w"> </span><span class="kt">LLC</span><span class="p">,</span><span class="w"> </span><span class="n">dTLB</span><span class="p">,</span><span class="w"> </span><span class="n">iTLB</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="kt">L1</span><span class="o">-</span><span class="n">dcache</span><span class="o">/</span><span class="n">icache</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">misses</span><span class="p">)</span>
+<span class="nf">faults</span><span class="kt">:</span><span class="w"> </span><span class="n">alignment</span><span class="p">,</span><span class="w"> </span><span class="n">emulation</span><span class="p">,</span><span class="w"> </span><span class="n">major</span><span class="p">,</span><span class="w"> </span><span class="n">minor</span><span class="p">,</span><span class="w"> </span><span class="n">page</span>
+<span class="nf">bpf</span><span class="o">-</span><span class="n">output</span>
+<span class="nf">cgroup</span><span class="o">-</span><span class="n">switches</span>
+<span class="nf">context</span><span class="o">-</span><span class="n">switches</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">cs</span>
+<span class="nf">system</span><span class="w"> </span><span class="n">calls</span>
+<span class="nf">cpu</span><span class="o">-</span><span class="n">migrations</span><span class="w"> </span><span class="kt">OR</span><span class="w"> </span><span class="n">migrations</span>
+<span class="nf">dummy</span>
+
+<span class="nf">cpu</span><span class="o">-</span><span class="n">cycles</span>
+<span class="nf">stalled</span><span class="p">(</span><span class="n">idle</span><span class="p">)</span><span class="o">-</span><span class="n">cycle</span><span class="w"> </span><span class="n">backend</span><span class="o">/</span><span class="n">frontend</span>
+
+<span class="nf">instructions</span>
+<span class="nf">cpu</span><span class="o">-</span><span class="n">clock</span>
+<span class="nf">task</span><span class="o">-</span><span class="n">clock</span>
+<span class="nf">duration_time</span>
+<span class="nf">user_time</span>
+<span class="nf">system_time</span>
+
+
+<span class="nf">branch</span><span class="w"> </span><span class="n">prediction</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">L1l</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">cache</span><span class="p">}</span>
+<span class="kt">L1l</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">decode</span>
+<span class="nf">decode</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="n">instructions</span>
+<span class="nf">decode</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="n">cache</span>
+<span class="nf">op</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="n">fused</span><span class="w"> </span><span class="n">instructions</span>
+<span class="nf">micro</span><span class="o">-</span><span class="n">op</span><span class="w"> </span><span class="n">queue</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="n">integer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="p">,</span><span class="w"> </span><span class="n">floating</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="p">}</span><span class="w"> </span><span class="mi">6</span><span class="w"> </span><span class="n">dispatch</span><span class="w"> </span><span class="n">ops</span>
+<span class="nf">integer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">ALU</span><span class="w"> </span><span class="n">scheduler</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">scheduler</span><span class="p">}</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="n">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="p">}</span>
+<span class="nf">reorder</span><span class="w"> </span><span class="n">buffer</span><span class="w"> </span><span class="o">&lt;-&gt;</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span>
+
+<span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">ALU</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">ld</span><span class="w"> </span><span class="n">st</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="kt">AGU</span><span class="w"> </span><span class="n">st</span><span class="p">}</span>
+<span class="kt">FP</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">rename</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">scheduler</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="kt">FMA</span><span class="o">/</span><span class="kt">FMUL</span><span class="w"> </span><span class="n">x2</span><span class="p">,</span><span class="w"> </span><span class="kt">FADD</span><span class="w"> </span><span class="n">x2</span><span class="p">}</span>
+<span class="kt">AGU</span><span class="w"> </span><span class="n">ld</span><span class="w"> </span><span class="n">st</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">store</span><span class="w"> </span><span class="n">queues</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">L1D</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">&lt;-&gt;</span><span class="w"> </span><span class="kt">L2</span><span class="w"> </span><span class="n">cache</span>
+</pre></div>
+</div>
+</section>
+<section id="metrics">
+<h2>Metrics<a class="headerlink" href="#metrics" title="Link to this heading"></a></h2>
+<p>Key metric types:</p>
+<ul class="simple">
+<li><p>throughput: operations per second or similar. E.g. for disks, IOPS is reads and writes per second.</p></li>
+<li><p>response time: time for an operation to complete, from start to finish</p></li>
+<li><p>latency: time waiting for an operation to complete, generally the largest/only component of response time</p></li>
+<li><p>utilization: % time active (non-idle time). Doesn’t necessarily mean saturated. E.g. if a CPU core is always running, even if it’s a multicore system, the system is at 100% CPU utilization. (which is why fine grained resource utilization stats are much more useful)</p></li>
+<li><p>saturation: requested work / capacity. For example, a hard disk may be spinning and have lots of queued requests but still be able to service more, hence utilization 100% but saturation lower than 100%. At 100% saturation the disk cannot perform any more work; if more requests are sent (pressure is applied), the disk’s request queue will simply fill up (oversaturation, &gt;100%). Similarly memory usage, at the 100% saturation mark requests start going to swap or OOM. Measure capacity and hence saturation by graphing load vs latency and finding an inflection point, but a sharp point may not exist, so often simply reported as queue length without dividing by capacity.</p></li>
+<li><p>exceptions: log message or abnormal return code. Can be quantified as % of requests or count per second. The usual exception broadness applies, like “is a cache miss an exception?” (yes). The code can stop on exception, making it obvious, but more often it automatically recovers from exceptions and requires detailed logging to investigate.</p></li>
+</ul>
+<p>Saturation is the catch-all metric, you can use it for almost all resources and anything at or over 100% is definitely a bottleneck. Of course it is also the hardest to measure. And exceptions are also important, and don’t really have a saturation point, just typical ranges.</p>
+</section>
+<section id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
+<p>Throughput / utilization / saturation are all instantaneous measurements. Practically they cannot be recorded every cycle, so instead reporting 1-, 5-, and 15-minute averages is typical. But this can disguise short spikes; use better statistics. Also, for CPU utilization, if it’s just one core in use, but it hops around, the utilization can be misleading. The balance of CPU utilization among all cores must be considered.</p>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>counters: most simply, number of times an operation was performed. They start at 0 and increment.</p></li>
+<li><p>event log: a list of timestamps. Can just count the events, but also you can calculate average rate, spikes, and other statistics.</p></li>
+<li><p>sampling: perform detailed analysis only some of the time, so that performance is not affected as much</p></li>
+<li><p>sensitivity: for each resource, when adding a little bit more of that resource, the amount of performance increase divided by the amount added</p></li>
+<li><p>scalability: throughput as a function of load</p></li>
+<li><p>execution: start time and latency (duration / finish time)</p></li>
+</ul>
+<p>Time can be measured as internal clock, CPU cycles (~0.3 ns),</p>
+<p>A flame graph shows a tree of calls annotated with execution times.</p>
+<p>Measure</p>
+<ul class="simple">
+<li><p>time and memory usage.</p></li>
+<li><p>throughput (calls/second)</p></li>
+<li><p>A/B testing of multiple implementations</p></li>
+</ul>
+<p>for functions, expressions, programs, etc. Profiling can be at different granularities (module, function, instruction). Generally, recording at the finest level is most desirable, and similarly automated optimizations mainly operate at the finest level, but it can be useful to produce summary statistics more understandable to humans.</p>
+<p>Use statistical sampling and hardware performance counters to avoid overhead. Checkout criterion, papers on LLVM hardware sampling.</p>
+<p>Intel VTune, perf, and various profilers available for different programming languages.</p>
+</section>
+<section id="action">
+<h2>Action<a class="headerlink" href="#action" title="Link to this heading"></a></h2>
+<p>Once specific “hot paths” for optimization have been identified, the general strategy is to identify inefficiencies, such as:</p>
+<ul class="simple">
+<li><p>unnecessary operations - remove them</p></li>
+<li><p>bad data access patterns - reorder operations or use a different algorithm/data structure</p></li>
+<li><p>repetitive or redundant computations - cache/memoize operations</p></li>
+<li><p>independent computations - take advantage of hardware parallelism, such as SIMD, multiple cores, or the GPU</p></li>
+</ul>
+<p>It is good to profile the program after each change to ensure it is actually an improvement. Static performance models are pretty accurate, so automated optimizations will generally be improvements, but the static models are only so accurate and there are always exceptions.</p>
+<p>profilers have overhead - e.g. Python profiler slows down by 2x, making measurements inaccurate.</p>
+<blockquote>
+<div><p>grabs a huge amount of memory
+OS drops most of its page cache
+many page misses in rest of program</p>
+</div></blockquote>
+</section>
+<section id="caches">
+<h2>Caches<a class="headerlink" href="#caches" title="Link to this heading"></a></h2>
+<p>For caches there are a few basic metrics: putting stuff in the cache, taking it out, and the miss rate. There are many caches: OS page cache, cpu cache, BTB, TLB, GPU texture cache, disk cache, JITted code cache. It is important to attribute miss costs properly, e.g. one piece of “cold” code might put a lot of stuff in and then cause misses in the important “hot” code.</p>
+<p>For example, using XXHash made an individual function faster, but in a larger program it was slower than using Python’s native hash because Python’s hash was already in L1 instruction cache. Similarly, calling a function 100 times, then pass the results to another function, etc. for a total of 8 functions and 800 calls, is better than interleaving the function calls and doing the 8 functions on one item, then on another item, and so on.</p>
+<p>Hyperthreading</p>
+</section>
+<section id="benchmarking">
+<h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
+<p>A good suite of benchmarks include microbenchmarks like optcarrot, small nontrivial programs like the language shootout tasks, and large applications like a production webserver. All of them are useful for detecting regressions.</p>
+<p>What is the ideal length of a benchmark? <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id249" title="Young-Kyoon Suh, Richard T. Snodgrass, John D. Kececioglu, Peter J. Downey, Robert S. Maier, and Cheng Yi. EMP: execution time measurement protocol for compute-bound programs. Software: Practice and Experience, 47(4):559–597, 2017. URL: https://onlinelibrary.wiley.com/doi/abs/10.1002/spe.2476 (visited on 2023-08-07), doi:10.1002/spe.2476.">SSK+17</a>]</span> measured programs of different runtimes - since the tasks were very similar, it is reasonable to try to fit standard deviation / runtime as a function of runtime. Going through the equations in Google Sheets and EMPv5 data (Table XIX), the linear law has R^2=0.84, overestimates all deviations up to 1000s, and barely fits the few long runs. The quadratic has R^2 = 0.931 and fits the data past 4s pretty well but again overestimates the 1,2,4s point. Also it makes little sense as a function, why would the deviation decrease past 15,000 s? The exponential and log functions are terrible. Finally, the power law has R^2 = 0.861. On a log-log graph it has a decent pattern of over/undershoot - it goes exactly through the 1s point, underestimates the next few, over estimates the next few, and finally underestimates the least few. The graph is mostly flat from 10s to 512s, so perhaps the first few results were unusually good and the last were affected by undiscovered sources of large errors. Plotting max-min as a function of duration (again log-log) we see this is the case - 1s is unusually low, then there is a mostly linear patch up to 1000s, then 2000-16,000s jumps sharply upwards. Again the power series is the best fit, R=0.817, by a long shot, with the next highest being the quadratic with R^2=0.572. Limiting just to 4s-1024s the fit is improved and the residuals look random for a power fit to max-min. For the standard deviation, excluding the outliers, a linear fit actually looks better than a power law. So we conclude that an ideal benchmark is 4s-1024s. And practically, shorter is better, so aiming for 4-8s is probably best. In particular the standard deviation is 23.634 t^0.505 without noise mitigation and 0.589241 t^0.342 with noise mitigation, where t is the runtime in seconds.</p>
+<p>There are several metrics:</p>
+<ul class="simple">
+<li><p>clock cycles, as measured by the rdtsc machine instruction or logic analyzer</p></li>
+<li><p>wall clock time, as measured by stopwatch, the time command, or Java’s System.currentTimeMillis()</p></li>
+<li><p>machine code size</p></li>
+<li><p>one of the above for a specific program part, such as a method (as measured by profiling or sampling)</p></li>
+</ul>
+<p>Different methods have different resolution (reporting capability), granularity (division of report into program parts), precision (variation betwen runs), and accuracy (closeness to “actual value”, a difficult concept to define in benchmarking).</p>
+<p>Many variables affect precision and add noise. Often, we can control the variable to a fixed value, and remove its variance. But this may mean our results are unrealistic; for example frequency scaling is not usually turned off. A more clever approach is to measure the variable or proxies for the variable, and characterize the runtime as a function of the variable. This does generally require more benchmarking runs in order to gather the necessary statistical power. And even with many variables measured or controlled, there will still be noise. Still, it brings up what we want to measure: average? minimum? some theoretical ideal?</p>
+<p>In the initial stages of optimization, no statistical profiling is needed as 10%+ speedups are obvious. But as optimizations become more complex, speedups become smaller and powerful statistical techniques are of great help. Generally the task must be at least 5-10x larger than the measurement precision to get useful results without statistics. Thus, if the task is 10 msec, then the measurement technique must have better than 1 to 2 msec precision. This is only a rule of thumb; more precision is always better, but less precise measurements can be compensated for by doing more of them and analyzing statistics.</p>
+<p>Variables include:</p>
+<ul class="simple">
+<li><p>CPU frequency and voltage scaling (proxy: performance counters <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id237" title="David Snowdon, Godfrey Van Der Linden, Stefan Petters, and Gernot Heiser. Accurate run-time prediction of performance degradation under frequency scaling. In 2007 Workshop on Operating System Platforms for Embedded Real-Time Applications. NICTA, 2007. URL: http://hdl.handle.net/1959.4/39905 (visited on 2023-08-07), doi:10.26190/unsworks/517.">SVDLPH07</a>]</span>)</p></li>
+<li><p>execution of other programs/daemons (load)</p></li>
+<li><p>CPU affinity</p></li>
+<li><p>OS version</p></li>
+<li><p>CPU temperature</p></li>
+<li><p>filesystem cache, swap usage</p></li>
+<li><p>processor-specific optimizations</p></li>
+<li><p>Environment block contents. It contains strings which are generally consistent on one system but vary across systems, such as the username. It can lead to certain locations being aligned or misaligned, causing significant variations at run-time. It is mainly the size of the env block that matters.</p></li>
+<li><p>ASLR - can be disabled globally or per-process basis with <code class="docutils literal notranslate"><span class="pre">setarch</span> <span class="pre">-R</span></code>. But e.g. command-line arguments affect memory layout even when ASLR is disabled. Also the seed cannot be controlled. Most people run with ASLR enabled.</p></li>
+<li><p>stabilizer - this randomizes memory layout, allowing the measurement of a layout-independent performance. Of course, if one is optimizing the memory layout then randomization is counterproductive.</p></li>
+<li><p><a class="reference external" href="https://github.com/andreas-abel/nanoBench">nanoBench</a> - this has a kernel module to allow reading hardware performance counters for microbenchmarks without incurring much overhead</p></li>
+<li><p><a class="reference external" href="https://github.com/sosy-lab/benchexec">benchExec</a> - this is very similar to the tool I remember, but focused on limiting resources rather than getting precise measurements</p></li>
+<li><p><a class="reference external" href="https://github.com/sharkdp/hyperfine">hyperfine</a> - this does some basic warmup and statistics, useful as a baseline for the bare minimum of Benchmarking</p></li>
+<li><p><a class="reference external" href="https://github.com/parttimenerd/temci">temci</a> sets up an environment</p></li>
+</ul>
+<p>profiling:</p>
+<ul class="simple">
+<li><p>generate approximate profile of new/modified code, guessing using heuristics</p></li>
+<li><p>cold functions, functions executed once, loopless functions, min/max/average number of loop iterations, branch probabilities, values of expressions in program, order of first execution of functions</p></li>
+<li><p>AutoFDO profile <a class="reference external" href="https://perf.wiki.kernel.org/">https://perf.wiki.kernel.org/</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Reduction.html" class="btn btn-neutral float-right" title="Reduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

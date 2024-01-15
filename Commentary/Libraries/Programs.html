@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exemplary programs &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Standard library" href="Standard-Library.html" />
+    <link rel="prev" title="Parsing" href="Parsing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Libraries</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Parsing.html">Parsing</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Exemplary programs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#social-network">Social network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#high-performance">High performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#server">Server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cdcl-prolog">CDCL Prolog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-ideas">Other ideas</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Units.html">Units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Libraries</a></li>
+      <li class="breadcrumb-item active">Exemplary programs</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Libraries/Programs.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="exemplary-programs">
+<h1>Exemplary programs<a class="headerlink" href="#exemplary-programs" title="Link to this heading"></a></h1>
+<p>A programming language is no good unless some significant programs have been written in it. This is mainly so that dark corners of the language have been explored and debugged - unit tests don’t work nearly as well as real applications. Such programs also act as a showcase for your language, making it easier for potential users to develop an understanding of what an average project in your language might look like. There is also a “halo effect” of “I like program X, therefore I like programming language L that X is written in”. Also, every popular PL solves a specific set of programming problems really well, in specific domains. So get the set of problems right, and the design for the PL will reveal itself naturally. Or solve all the programming problems and win the game. Once Stroscot gets users it can switch to problem-driven design: work with real-world users who have problems, abstract and implement solutions for them.</p>
+<ul class="simple">
+<li><p>Fibonacci: The Best Benchmark Ever. Every new language announce uses it. Bonus points if recursive is faster than iterative.</p></li>
+</ul>
+<section id="social-network">
+<h2>Social network<a class="headerlink" href="#social-network" title="Link to this heading"></a></h2>
+<p>A social network is a large program for any web development / app development framework to cut its teeth on. For example, the Hack programming language was closely associated with Facebook.</p>
+<p>Basic features (a la Reddit clone)
+* creating a post
+* replying - can reply to multiple posts at once, creates its own post - nested view, falls back to linear view when too deep
+* reacting to a post (emoji, save, remove - hide/report)
+* ranking a post (adjusting rating to be between two other posts)</p>
+<p>Accounts:
+* invite system, one account per person
+* “shells”, multiple usernames per account. Some way to share shells between accounts.</p>
+<p>As far as theme, Goodreads has received a lot of criticism and there might be room to replace it.</p>
+</section>
+<section id="high-performance">
+<h2>High performance<a class="headerlink" href="#high-performance" title="Link to this heading"></a></h2>
+<p>High-performance programming in a systems programming language aims to get the most out of hardware. It tackles large problems on (relatively) slow hardware, such as wind tunnel simulations. Small efficiencies add up.</p>
+<p>Necessities:
+* ahead-of-time compilation to machine code (bare metal)
+* multithreaded execution. (Spawning new processes does not count.)
+* composable (assembly is simply not practical)
+* some amount of users / libraries</p>
+<p>Features:
+* call C functions with minimal overhead
+* manual memory management (reference counting/GC has overhead)
+* good benchmarking/profiling tools
+* SIMD instructions readily available
+* standard, cross-platform way to build programs, run tests and add dependencies.</p>
+</section>
+<section id="server">
+<h2>Server<a class="headerlink" href="#server" title="Link to this heading"></a></h2>
+<p>A benchmark that people seem to pay attention to is network performance, writing web servers to handle as many clients as possible simultaneously.</p>
+<p>Choices:
+blocking I/O and one client per OS thread (read/write) - requires stack for each thread, memory exhaustion
+blocking I/O with userspace fibers (M:N threading model) - complex. A M:N scheduler must have a userspace component. This doubles the icache/dcache footprint. Fairness, nice, SMP balancing, memory allocation, TLS, RT scheduling, preemption, tid, debugging, security in userspace is hard - little control and only indirect access to statistics. Kernel events must trigger upcalls to activate context switches in the userspace component, but e.g. for memory there is no way to do async and a kernel context is blocked. M:N makes userspace&lt;-&gt;userspace context switching faster, but slows down kernel&lt;-&gt;userspace interaction. And kernel interaction is by default cheap on modern systems. For RT scheduling you would have to either set the priority every context switch, eliminating any performance advantage, or fall back to 1:1 scheduling for those threads.</p>
+<p>OTOH as Go shows (Go HTTP servers are reasonably fast), you can have cooperative coroutines with tiny userspace stacks. You start with one thread per processor (possibly bound so there’s no CPU shuffling?) and have this pool of homogeneous threads run through a task queue. This does no context switching of any kind, the only overhead is that the queue is concurrent (Go has per-thread queues too to mitigate this).</p>
+<p>nonblocking I/O and level-triggered readiness notification (select/poll/kqueue) - requires fd for each connection
+nonblocking I/O and readiness change notification (kqueue, epoll, realtime signals)
+asynchronous I/O and completion notification (AIO, io_uring, IOCP)
+server code in kernel (kttpd, TUX Threaded linUX webserver)
+Bring the TCP stack into userspace - netmap, Sandstorm
+Windows UMS - one thread can switch execution to another without stopping (discussed <a class="reference external" href="https://www.youtube.com/watch?v=KXuZi9aeGTw">here</a>).</p>
+</section>
+<section id="cdcl-prolog">
+<h2>CDCL Prolog<a class="headerlink" href="#cdcl-prolog" title="Link to this heading"></a></h2>
+<p>Just a fun experiment, what would Prolog look like if you replaced its backtracking SLD resolution algorithm with the algorithm from a modern SAT solver? CDCL (Conflict-driven clause learning) is the newest and fastest algorithm and seems like the one to use.</p>
+</section>
+<section id="other-ideas">
+<h2>Other ideas<a class="headerlink" href="#other-ideas" title="Link to this heading"></a></h2>
+<p>Trading engine (Stock, options, cryptocurrency…)
+Game engine (based on O3DE, Godot, or Unreal)
+UI toolkit
+Raytracer
+Vector graphics library (bonus points for supporting SVG drawings and OpenType fonts)
+abstract assembly (like High Level Assembly)
+expression problem (compiler)
+inventory tracker for android (like todo-mvc but better)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Parsing.html" class="btn btn-neutral float-left" title="Parsing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Standard-Library.html" class="btn btn-neutral float-right" title="Standard library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

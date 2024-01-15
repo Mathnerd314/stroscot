@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build system &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Compiler library" href="Compiler-Library.html" />
+    <link rel="prev" title="Libraries" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Libraries</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Build system</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#justification">Justification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scale">Scale</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tasks">Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#task-names">Task names</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model">Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#task-state">Task state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#simulation">Simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graph-pruning">Graph pruning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleaning">Cleaning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trace-database">Trace database</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#daemon">Daemon</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filesystem-implementation">Filesystem implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-disk-size">On-disk size</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reproducibility">Reproducibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#daemon-less-mode">Daemon-less mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#creating-a-build-system">Creating a build system</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler-Library.html">Compiler library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PackageManager.html">Package manager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Parsing.html">Parsing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Programs.html">Exemplary programs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Standard-Library.html">Standard library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Symbolic.html">Symbolic computing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Time.html">Time API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Units.html">Units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Libraries</a></li>
+      <li class="breadcrumb-item active">Build system</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Libraries/BuildSystem.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="build-system">
+<h1>Build system<a class="headerlink" href="#build-system" title="Link to this heading"></a></h1>
+<p>The name Cot is unimaginative but suffices for now.</p>
+<section id="justification">
+<h2>Justification<a class="headerlink" href="#justification" title="Link to this heading"></a></h2>
+<p>The compiler needs a build system integrated so that intermediate results such as checked/optimized functions can be stored efficiently and rebuilt only when needed, package dependencies and generated files can be discovered and created while building, and autoconf results can be reused so it only has to be run once per system. A powerful build system is the only way to handle complex builds.</p>
+<p>Also we need a way to do multi-language dependency management and ensure that there is a single version of each significant piece of code.</p>
+</section>
+<section id="scale">
+<h2>Scale<a class="headerlink" href="#scale" title="Link to this heading"></a></h2>
+<p>As of 2016, the Google repo has 1 billion files, of which 9 million are code. The goal is to take at most 3 seconds to build this repo, on a single beefy desktop computer connected to a cloud build farm. Also, it should be able to build a large executable like Firefox (21M lines of code, 10,000-ish files) on an isolated system, in around the same time.</p>
+<p>There are several types of build. If we trust our build system, we never need to do a from-scratch build. But it is good to trust no one and to do from-scratch builds occasionally. Those might take seconds, hours, days, or weeks depending on the scale - it doesn’t really matter because they’re rare. They just have to be possible.</p>
+<p>No-op builds should be “instantaneous” (&lt;100 milliseconds per <a class="reference external" href="https://ux.stackexchange.com/questions/16253/defining-instantaneous-as-part-of-usability-acceptance-criteria">SO</a>), this is easy enough to do with a file change watcher. For incremental builds that do a small change to 1 file, let’s say it rebuilds from 1 - 1000 files depending on where it is in the dependency graph. Presumably you’ve architected the system so “change one file, rebuild a million” is rare. Taking average numbers (500 files, 2100 lines/file), achieving 10 second rebuild times (max acceptable UI lag per <cite>Nielsen &lt;https://www.nngroup.com/articles/response-times-3-important-limits/&gt;`__</cite>) requires 105k/s. Practically I think go’s 100k/s is probably adequate.</p>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<div class="graphviz"><object data="../../_images/graphviz-dd62bb536311aa830b5671952593094997117280.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph foo {
+  rankdir=LR;
+  {
+  rank=same
+  IKey [label=&quot;Input keystate&quot;]
+  IKey2 [label=&quot;Modified keystate&quot;]
+  }
+  IKey -&gt; &quot;Rule engine&quot;
+  &quot;Rule engine&quot; -&gt; OKey
+  {
+  rank=same
+  OKey [label=&quot;Output keystate&quot;]
+  OKey2 [label=&quot;Updated keystate&quot;]
+  }
+
+  &quot;Rule engine&quot; -&gt; &quot;Trace database&quot;
+  &quot;Trace database&quot; -&gt; &quot;Incremental rule engine&quot; [dir=both]
+
+  IKey -&gt; &quot;Changelist&quot;
+  IKey2 -&gt; &quot;Changelist&quot;
+
+  &quot;Changelist&quot; -&gt; &quot;Incremental rule engine&quot;
+  &quot;Incremental rule engine&quot; -&gt; OKey2
+}</p></object></div>
+<p>Broadly, a build system is a set of rules intended to be run by an execution engine (rule engine) that has logic for incremental computing. We use the term “keystate” to refer to an arbitrary dataset consisting of keys and values; it may be files, a Web API, a database, or some observations of the system time or <code class="docutils literal notranslate"><span class="pre">/dev/random</span></code>. A clean build consists of the rule engine using the input keystate to execute to completion to produce the output keystate.</p>
+<p>Logically, there is a clear separation between inputs and outputs. Inputs are consumed by the build system (e.g. system header files or <code class="docutils literal notranslate"><span class="pre">/dev/random</span></code>), while outputs are produced by the build system (e.g. an executable, a private key). A source code formatter tidying up file during the build consists of an input (the original file) and an output (the tidied file) indexed by the same filename. In general the input keystate may not be accessible after the build. Note that a file that is overwritten before any data is read from it is not an input; but the existence of the file might be an input.</p>
+<p>For incremental builds (builds that aren’t clean), we also have reference to the previous runs of the engine, in the form of traces produced by the rule engine. In the simplest case it is only the trace of the previous run that is available, but a caching build system with constructive traces (“build farm”) can maintain many sets of traces in parallel and interpolate between them, a trace database. And the incremental build itself produces a trace.</p>
+<p>To correctly build software, we assume for each task that the recorded read operations uniquely determine the execution behavior of the task, specifically its write and synchronization operations.</p>
+<p>Determining the input keystate for an incremental build is a bit tricky, because the output files from a clean build may become input files for the incremental build. Generally we don’t want to mix in artifacts produced from previous builds. Hence we define the inputs of the incremental build as the inputs of the clean build plus any other files so long as those files are not the outputs of the clean build. But we may include some output files as well, as exceptions.</p>
+<p>Another issue is “time travel”, a task reading a file from the previous build that hasn’t yet been generated in this build. Cot supports a build cache, so this can be prevented by deleting all the build files before the build and then copying them back as needed. But this is more easily detected after-the-fact, particularly in the case of parallel builds.</p>
+</section>
+<section id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h2>
+<p>The design is based on iThreads <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id32" title="Pramod Bhatotia, Pedro Fonseca, Umut A. Acar, Björn B. Brandenburg, and Rodrigo Rodrigues. iThreads: a threading library for parallel incremental computation. In Proceedings of the Twentieth International Conference on Architectural Support for Programming Languages and Operating Systems - ASPLOS '15, 645–659. Istanbul, Turkey, 2015. ACM Press. URL: https://www.cs.purdue.edu/homes/pfonseca/papers/asplos2015-ithreads.pdf (visited on 2020-10-25), doi:10.1145/2694344.2694371.">BFA+15</a>]</span>, which out of a half dozen incremental computation papers seemed the most appealing. The approach supports arbitrary multithreaded shared-memory programs, and hence imposes no requirements on the overall flow of the build.</p>
+<p>They call the units of computation “thunks”, but this term doesn’t have a good intuition. A thunk usually is a delayed value, but here the unit does not return a value and simply modifies the shared keystate. So I’m using the term “task” in the sense of a task queue.</p>
+<p>It is relatively simple to add new synchronization operations; the only constraint is that they are executed on every build and rebuild, so should not be expensive.</p>
+<p>The ideal memory model is causal consistency: a task A should see only the write of a task B only if the synchronization operation that started A ensured that B was finished first. The real model is that the keystate uses a global shared memory for performance. Hence the build can have data races where different execution orders produce different results.</p>
+<p>If an output is modified or deleted, the clean build semantics dictates that it will be regenerated from the inputs. But a lot of the time we don’t care about most of the outputs (intermediate files) so Cot includes damage handling logic to compute the minimal rebuild for the desired outputs.</p>
+</section>
+<section id="task-names">
+<h2>Task names<a class="headerlink" href="#task-names" title="Link to this heading"></a></h2>
+<p>Task naming adds some complexity to the implementation of a build system, as the task names also affect the way computations can be re-used. iThreads uses a simple “thread # task #” scheme, which assumes a fixed number of long-running threads and invalidates all of the tasks in a thread after a modified task. A scheme similar to <code class="docutils literal notranslate"><span class="pre">make</span></code> uses filenames; for each file f there are two tasks “run f” and “exec f”. The “run f” just does <code class="docutils literal notranslate"><span class="pre">Sequence</span> <span class="pre">[subtargets,[&quot;exec</span> <span class="pre">f&quot;]]</span></code> while “exec f” runs the commands that generate f. But with fine-grained dependency tracking we can track each command separately - we could use task names like “exec f step #” but this leads to invalidating later tasks. Using names like “exec f step cmd” requires a lot of boilerplate names to be written out. The ideal solution is probably some form of structural hashing.</p>
+<p>Also, in a dynamic build, a direct file action map like this is not always available, and so the naming scheme must be relaxed to allow dependencies on things that aren’t files. For example, we may have one command that generates two files; so long as we use a consistent task name for this command there is no issue. For another example, we may have include headers that are picked up in a search path directory listing. To deal with this directly, we would need to introduce build logic into the search mechanism and run dependencies when seeing <code class="docutils literal notranslate"><span class="pre">#include</span></code>. But a phase separation handles it fine with minimal changes - we generate the files first and then call the compiler, filling in the build dependencies from an output list of used headers. In this case we would need tasks for each phase.</p>
+</section>
+<section id="model">
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
+<p>To reason about the behavior we need a pencil-and-paper model of how it works. First we have task IDs (<code class="docutils literal notranslate"><span class="pre">tid</span></code> s); these come from the program and are quoted strings “abc”. For key names we use unquoted strings xyz and for key values integers 123; these are only compared for equality (often they are modification times). Then for the traces we use a tabular format to record the reads, writes, and synchronization operations. We might have databases from multiple runs available, so there is also a “machine” column, but this is the same for all rows in a single trace so it is omitted here. An example database based on the example in <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id224" title="Mike Shal. Build system rules and algorithms. 2009. URL: http://gittup.org/tup/build_system_rules_and_algorithms.pdf (visited on 2021-01-22).">Sha09</a>]</span> might be</p>
+<style>
+  .shal-trace-example tr:nth-child(1) td,
+  .shal-trace-example tr:nth-child(2) td,
+  .shal-trace-example tr:nth-child(3) td,
+  .shal-trace-example tr:nth-child(7) td,
+  .shal-trace-example tr:nth-child(11) td,
+  .shal-trace-example tr:nth-child(15) td
+  {
+    border-bottom-color: #b1b4b5;
+  }
+</style><table class="shal-trace-example docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>tid</p></th>
+<th class="head"><p>op</p></th>
+<th class="head"><p>rest</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>“run prog”</p></td>
+<td><p>sync</p></td>
+<td><p>Sequence [[“run main”,”run parse”],[“ld”]]</p></td>
+</tr>
+<tr class="row-odd"><td><p>“run main”</p></td>
+<td><p>sync</p></td>
+<td><p>Sequence [[“yacc”],[“cc main”]]</p></td>
+</tr>
+<tr class="row-even"><td><p>“run parse”</p></td>
+<td><p>sync</p></td>
+<td><p>Sequence [[“yacc”],[“cc parse”]]</p></td>
+</tr>
+<tr class="row-odd"><td><p>“yacc”</p></td>
+<td><p>read</p></td>
+<td><p>parse.y 1</p></td>
+</tr>
+<tr class="row-even"><td><p>“yacc”</p></td>
+<td><p>write</p></td>
+<td><p>parse.h 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>“yacc”</p></td>
+<td><p>write</p></td>
+<td><p>parse.c 2</p></td>
+</tr>
+<tr class="row-even"><td><p>“yacc”</p></td>
+<td><p>sync</p></td>
+<td><p>Die</p></td>
+</tr>
+<tr class="row-odd"><td><p>“cc main”</p></td>
+<td><p>read</p></td>
+<td><p>main.c 1</p></td>
+</tr>
+<tr class="row-even"><td><p>“cc main”</p></td>
+<td><p>read</p></td>
+<td><p>parse.h 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>“cc main”</p></td>
+<td><p>write</p></td>
+<td><p>main.o 3</p></td>
+</tr>
+<tr class="row-even"><td><p>“cc main”</p></td>
+<td><p>sync</p></td>
+<td><p>Die</p></td>
+</tr>
+<tr class="row-odd"><td><p>“cc parse”</p></td>
+<td><p>read</p></td>
+<td><p>parse.c 2</p></td>
+</tr>
+<tr class="row-even"><td><p>“cc parse”</p></td>
+<td><p>read</p></td>
+<td><p>parse.h 2</p></td>
+</tr>
+<tr class="row-odd"><td><p>“cc parse”</p></td>
+<td><p>write</p></td>
+<td><p>parse.o 3</p></td>
+</tr>
+<tr class="row-even"><td><p>“cc parse”</p></td>
+<td><p>sync</p></td>
+<td><p>Die</p></td>
+</tr>
+<tr class="row-odd"><td><p>“ld”</p></td>
+<td><p>read</p></td>
+<td><p>parse.o 3</p></td>
+</tr>
+<tr class="row-even"><td><p>“ld”</p></td>
+<td><p>read</p></td>
+<td><p>main.o 3</p></td>
+</tr>
+<tr class="row-odd"><td><p>“ld”</p></td>
+<td><p>write</p></td>
+<td><p>prog 4</p></td>
+</tr>
+<tr class="row-even"><td><p>“ld”</p></td>
+<td><p>sync</p></td>
+<td><p>Die</p></td>
+</tr>
+</tbody>
+</table>
+<p>One way to understand the database is to draw it in a graph:</p>
+<div class="graphviz"><object data="../../_images/graphviz-386f28598d5cc10a7c8223c854c0c4b201313906.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph multi {
+    rankdir=RL
+    node [shape=&quot;circle&quot;,fontsize=20]
+    &quot;main.c&quot;, &quot;main.o&quot;, &quot;prog&quot;, &quot;parse.o&quot;, &quot;parse.h&quot;, &quot;parse.c&quot;, &quot;parse.y&quot; [shape=&quot;rect&quot;]
+
+    // run prog = ExecAfter [run main,run parse] ld
+    &quot;run prog&quot; -&gt; &quot;run main&quot; [style=dotted, color=grey,penwidth=3]
+    &quot;run prog&quot; -&gt; &quot;run parse&quot; [style=dotted, color=grey,penwidth=3]
+    &quot;run prog&quot; -&gt; ld [color=grey,penwidth=3]
+    // run main = ExecAfter [yacc] &quot;cc main&quot;
+    &quot;run main&quot; -&gt; &quot;yacc&quot; [style=dotted, color=grey,penwidth=3]
+    &quot;run main&quot; -&gt; &quot;cc main&quot; [color=grey,penwidth=3]
+    // run parse = ExecAfter [yacc] &quot;cc parse&quot;
+    &quot;run parse&quot; -&gt; &quot;yacc&quot; [style=dotted, color=grey,penwidth=3]
+    &quot;run parse&quot; -&gt; &quot;cc parse&quot; [color=grey,penwidth=3]
+
+    &quot;cc main&quot; -&gt; &quot;main.c&quot;
+    &quot;cc main&quot; -&gt; &quot;parse.h&quot;
+    &quot;main.o&quot; -&gt; &quot;cc main&quot; [color=blue]
+
+    &quot;ld&quot; -&gt; &quot;main.o&quot;
+    &quot;ld&quot; -&gt; &quot;parse.o&quot;
+    &quot;prog&quot; -&gt; &quot;ld&quot; [color=blue]
+
+    &quot;cc parse&quot; -&gt; &quot;parse.h&quot;
+    &quot;cc parse&quot; -&gt; &quot;parse.c&quot;
+    &quot;parse.o&quot; -&gt; &quot;cc parse&quot; [color=blue]
+
+    &quot;yacc&quot; -&gt; &quot;parse.y&quot;
+    &quot;parse.h&quot; -&gt; &quot;yacc&quot; [color=blue]
+    &quot;parse.c&quot; -&gt; &quot;yacc&quot; [color=blue]
+
+}</p></object></div>
+<p>Circular nodes represent tasks while rectangular nodes are keys (files). Black lines are reads. Blue lines are writes. Dotted gray lines are sequenced to execute before solid gray lines. Overall, the graph structure is very similar to Pluto’s two-level graph, but the control structure is more complex - Pluto simply has build-require, while Cot has various synchronization operations.</p>
+<p>Then during an incremental run we start with a list of changed keys and their values; this is allowed to contain unmodified keys, so generating this list may be as simple as calculating the state of all keys and saying they all might be modified, or it may be a more precise list from a filesystem watcher or similar API. The keys can also include volatile information such as FTP server listings or stdin.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>key</p></th>
+<th class="head"><p>value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>parse.y</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>main.c</p></td>
+<td><p>5</p></td>
+</tr>
+</tbody>
+</table>
+<p>Here main.c’s modification time has been updated. We start from the top and load “run prog”; there are no changed inputs (or indeed any inputs), so we skip execution of the task, perform the record write operations to the key state, and execute the synchronization operation, which loads “run main”. “run main” loads “yacc” which has not changed, so control returns to “run main” and “cc main” is loaded. “cc main“‘s inputs have changed, so we run it, producing an updated main.o. Meanwhile “run parse” and “cc parse” have been loaded with no changes. Control returns to “run prog” and “ld” is executed as its inputs have changed, building the final executable “prog”.</p>
+</section>
+<section id="task-state">
+<h2>Task state<a class="headerlink" href="#task-state" title="Link to this heading"></a></h2>
+<p>Task state is a bit tricky to define precisely. So let’s work it out.</p>
+<p>First we define execution state. A task is enabled once a synchronization operation requests to execute the task. A task is resolved once it is enabled and its synchronization operation has begun execution. So a task starts out disabled, becomes enabled, and then is resolved.</p>
+<p>If a task is never enabled, then in a clean build the task would not be executed at all. There are two possibilities:</p>
+<ul class="simple">
+<li><p>unused: The task is not referenced by any trace or by the current build. Example: almost any arbitrary task id</p></li>
+<li><p>stale: The task is referenced by some trace but is not enabled anytime in the current build. Example: control flow change</p></li>
+</ul>
+<p>Otherwise, the task is enabled. All enabled tasks will eventually be resolved - even if the task errors this is considered resolution. But all resolved tasks have local traces and can be considered in the resolved state. Similarly if it is decided to run the task then it’s just in the running state.</p>
+<ul class="simple">
+<li><p>resolved: The task has been run, substituted, etc. and its synchronization operation was set up. Can be clean or damaged.</p></li>
+<li><p>running: The task is currently in progress</p></li>
+</ul>
+<p>The interesting task state is if the task hasn’t started running yet and we’re thinking about running it. If a task is enabled, then we can consider the available traces and compare them with the keystate at the point the task is enabled. There is one trivial possibility:</p>
+<ul class="simple">
+<li><p>new: The task is not referenced by any trace but has been enabled in the current build. Examples: control flow change, clean build</p></li>
+</ul>
+<p>When we have at least one trace, things get more interesting. A trace is valid if all of its recorded reads match the state of the build. The state on disk also becomes relevant.</p>
+<ul class="simple">
+<li><p>dirty: There are traces but no valid trace. Example: input change</p></li>
+<li><p>clean: There is a valid trace where all recorded writes match the state on disk. Example: A task is always clean immediately after it is executed, since running a task records its trace.</p></li>
+<li><p>damaged: There is at least one valid trace but no valid trace has its recorded writes matching the state on disk. Examples: shallow build, external modification, overwritten output</p></li>
+</ul>
+<p>After resolving the task, it can only be clean or damaged; the clean state may have been achieved by substitution, reuse, or rebuilding, while the damaged state can only be from a damaged task passing the no-future-use check.</p>
+<p>In a cloud build setting we have one more state to handle constructive traces. A constructive trace stores the full value for each key and allows fetching the output files without running the build.</p>
+<ul class="simple">
+<li><p>substitutable: There is a valid constructive trace.</p></li>
+</ul>
+<p>A substitutable task can be clean or damaged but not dirty. So in total we have 8 states: unused, stale, new, dirty, clean-nonsubstitutable, clean-substitutable, damaged-nonsubstitutable, and damaged-substitutable. It’s a lot, but Cot deals with a lot of functionality.</p>
+</section>
+<section id="simulation">
+<h2>Simulation<a class="headerlink" href="#simulation" title="Link to this heading"></a></h2>
+<p>It’s possible for a task to be handled in several ways: leave damaged/clean, rebuild, or substitute with a cloud version. These also have different costs: leaving things alone is free, substituting costs some amount of network bandwidth time / decompression, while rebuilding costs CPU time that can be estimated from other builds. But to figure out the least-cost action overall we need a global view of the build. Damaged tasks can only be left alone if they are not needed during the rest of the build, i.e. no rebuilding task reads the damaged data. Substitutions from different sources may be incompatible (e.g. GHC used to produce <a class="reference external" href="https://gitlab.haskell.org/ghc/ghc/-/issues/4012">randomized symbols names</a>), so picking the version influences the substitutability of other tasks.</p>
+<p>The problem is NP-hard since we can encode 3-SAT in the substitution versions <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id62" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>. Since it’s that hard, we use a SAT solver. In particular we encode it as an instance of partial weighted MaxSAT. First we have a lot of hard constraints:</p>
+<ul class="simple">
+<li><p>each task can be left alone, substituted, or built, and we can only do one: <code class="docutils literal notranslate"><span class="pre">t_leave</span> <span class="pre">+</span> <span class="pre">t_rebuild</span> <span class="pre">+</span> <span class="pre">t_v1</span> <span class="pre">+</span> <span class="pre">...</span> <span class="pre">+</span> <span class="pre">t_vn</span> <span class="pre">=</span> <span class="pre">1</span></code> (this is a pseudo-Boolean constraint that be easily encoded)</p></li>
+<li><p>For substitution, compatibility on the read/write values, <code class="docutils literal notranslate"><span class="pre">t_vj</span> <span class="pre">-&gt;</span> <span class="pre">(s_vx</span> <span class="pre">or</span> <span class="pre">s_vy</span> <span class="pre">or</span> <span class="pre">...)</span></code>, where t reads a value that s writes and vx,vy, etc. are the versions of s that are compatible with version vj of t.</p></li>
+<li><p>For rebuilding, a conservative assumption that all outputs will be changed, <code class="docutils literal notranslate"><span class="pre">s_rebuild</span> <span class="pre">-&gt;</span> <span class="pre">t_rebuild</span></code> where t reads from what s writes, and a requirement that rebuilds not use damaged data, <code class="docutils literal notranslate"><span class="pre">t_rebuild</span> <span class="pre">-&gt;</span> <span class="pre">not</span> <span class="pre">s_leave</span></code>, where s is damaged and t reads from s.</p></li>
+</ul>
+<p>Then we have soft constraints for each variable weighted with the cost of using that option.</p>
+<p>To generate these constraints, Cot walks through the build graph and maintains a multi-valued state. So it would look like <code class="docutils literal notranslate"><span class="pre">Key</span> <span class="pre">i</span> <span class="pre">-&gt;</span> <span class="pre">[Value</span> <span class="pre">1</span> <span class="pre">S_1,</span> <span class="pre">Value</span> <span class="pre">1</span> <span class="pre">S_2,</span> <span class="pre">Value</span> <span class="pre">2</span> <span class="pre">S_3,</span> <span class="pre">Damaged</span> <span class="pre">S_leave]</span></code>. Then for each task (visited in normal traversal order) Cot generates the constraints for each possibility. Then Cot updates the possible values for the keys it writes.</p>
+<p>To deal with these constraints we need a MaxSAT solver - we can write a custom one or interface with an existing one. Using an off-the-shelf solver might save some effort, but there is significant overhead in serializing the constraints to an external solver, and this overhead can be avoided by using a native solver. The native solver will probably be naive and not have the finely tuned optimizations or heuristics of the off-the-shelf solvers, but most package version problems are very simple to solve. It’ll be easier to build the project with a native solver because all of the code will be in the same language (Haskell or Stroscot). In Cox’s list of package managers (at the end of <span id="id4">[<a class="reference internal" href="../../zzreferences.html#id62" title="Russ Cox. Version SAT. December 2016. URL: https://research.swtch.com/version-sat (visited on 2021-01-26).">Cox16</a>]</span>), the split is 9-5 in favor of a native solver (although 3 of the native-solver package managers allow using an external solver with an option, so more like 9-8). Overall it seems writing a native solver is the best course of action. But we don’t have to start from scratch as there is a Haskell MaxSAT solver in toysolver on Hackage.</p>
+<section id="wanted-files">
+<h3>Wanted files<a class="headerlink" href="#wanted-files" title="Link to this heading"></a></h3>
+<p>When using Cot as a package manager rather than a build system, we have lots of produced files that aren’t used by anything. Since Cot doesn’t see any users of the files it’ll leave them as damaged (unmaterialized) and not download them. So at the end of the build process we’d run special tasks that simply read in a bunch of files, to ensure that the files are up-to-date and available for use. These tasks are always out of date, which can be though of as having a special wanted key that always compares unequal. In the end these special tasks are actually the packages.</p>
+<p>We could also add functionality to force realizing specific damaged tasks.</p>
+</section>
+<section id="restarting">
+<h3>Restarting<a class="headerlink" href="#restarting" title="Link to this heading"></a></h3>
+<p>The constraint model is only an approximation of the truth, in particular it doesn’t cover a newly-executed task that adds a dependency on damaged data. The restarting strategy restarts build execution from the damaged task on detection of a read, which allows the build to continue if there is an unexpected dependency on damaged data. It requires traversal of the build graph to reconstruct the keystate at the point of re-execution, and all the work done after the point of re-execution is thrown away, so its efficiency isn’t optimal. In particular it is possible to re-execute a unit several times, in the case where we execute a unit B, then go back and re-execute a unit A due to damage, then have to execute B another time due to A changing C changing input to B.</p>
+</section>
+</section>
+<section id="graph-pruning">
+<h2>Graph pruning<a class="headerlink" href="#graph-pruning" title="Link to this heading"></a></h2>
+<p>Pruning the build graph as pioneered by Tup can result in a big speedup, only having to load/inspect the part of the build graph that’s necessary. But it requires some auxiliary data structures and careful record-keeping in order to look up the pieces efficiently.</p>
+<p>We start with a change list, i.e. things that might have changed since our last build. The prototypical example is a list of changed files from a file-watching daemon. The alternative is scanning all the files for changes on startup. This can take several minutes with a hashing algorithm or a few seconds with modtimes.</p>
+<p>First we process the change list into a list of possibly-changed keys. There are many various options (digest, modtime, etc.), so we need a hash table that maps key writes to all the tasks with key reads, really a filename-&gt;(set of task) table.</p>
+<p>So in our build example, we would go from “main.c” to “cc main”. Next we want load the other tasks “run main”, “run prog”, “ld”. The first two are the ancestors of the task; we have to load the parent to see its synchronization operation and thus the order of execution. But we don’t have to load any children of the parents.  So we just need a task-&gt;(task parents) map to find all the parents.</p>
+<p>We also have to load “ld”; this is done by looking up the writes of “cc main” in the filename-&gt;task table. We need to load tasks that read from the writes during execution, in case they are different from the recorded writes.</p>
+<p>Note that we’ll always load the initial task, because we load the chain of parents. So after everything is loaded, execution can start from the initial task as normal, no need for a topological sort like in Tup. The difference is that we may have unloaded tasks as children; we do not want to execute these. But to keep the keystate consistent we need to be able to modify the keystate as though they were executed. In particular for each task we need the list of all the writes performed by the task and its children. But the task itself already stores the writes in its TaskRecord; so computing the total writes is a matter of combination, <code class="docutils literal notranslate"><span class="pre">Total</span> <span class="pre">=</span> <span class="pre">Task</span> <span class="pre">//</span> <span class="pre">Union(Children)</span></code>, where <code class="docutils literal notranslate"><span class="pre">//</span></code> is record update. These write lists can be precomputed during the initial run. Storing them efficiently with fast access is a little tricky since there is a lot of copying in the lists. For now I’ll store the full write list for each task, compressed, but there is probably a persistent data structure (<a class="reference external" href="https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree">tree</a>?) that can efficiently re-use the data from other tasks while maintaining performance. At the other extreme we can just regenerate all the write lists by walking the task records, so these write lists can be cached and expired using LRU or something.
+We also need to store the list of acquire/release lock operations, but most programs don’t use locks so this will be small.</p>
+<p>The write lists can also be used as an incomplete check for data races; if after executing a task A, A has read a key from the global/shared keystate with a value different from the local keystate passed into the task (state passed into the parent task P // modifications of P // modifications synced in from synchronization operation of P), then a task not in the execution history of A must have modified the key - since this execution could have been delayed by the scheduler, it is a read-write data race. Similarly in the union of the children, if there are differing values among the children then there is a write-write data race.</p>
+<p>Anyway, the recorded state also records if the key is damaged and the task that regenerates it. So we can use this during our damage simulation to load in damaged tasks when referenced and re-run them if necessary.</p>
+</section>
+<section id="cleaning">
+<h2>Cleaning<a class="headerlink" href="#cleaning" title="Link to this heading"></a></h2>
+<p>When we re-execute a task, it is a good idea to restore the state of the outputs of the task to their original state (typically deleting them). Also at the end of the run we should garbage collect any unused tasks from the old run by deleting their outputs. Also in (hopefully rare) cases we want to delete all the outputs regardless of status.</p>
+<dl class="option-list">
+<dt><kbd><span class="option">-c</span>, <span class="option">--clean</span>, <span class="option">--remove</span></kbd></dt>
+<dd><p>Clean up by removing the selected targets, well as any files or directories associated with a selected target through calls to the Clean function. Will not remove any targets which are marked for preservation through calls to the NoClean function.</p>
+</dd>
+<dt><kbd><span class="option">--clean-old</span></kbd></dt>
+<dd><p>clean built files that are no longer produced by the current build. A bad idea if there are multiple configurations that build different subsets. Basically we load all the tasks, then anything not loaded is not needed and its files etc. can be deleted.</p>
+</dd>
+</dl>
+</section>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading"></a></h2>
+<p>Shake tries to be exception-safe, but it’s not clear what to do with exceptions besides passing them along. The top-level build function can throw exceptions, or it can catch them, printing them and exiting with an error code.</p>
+</section>
+<section id="trace-database">
+<h2>Trace database<a class="headerlink" href="#trace-database" title="Link to this heading"></a></h2>
+<p>A robust build system design fundamentally depends on keeping a database of build traces. In particular to rebuild a command like <code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">src/*</span></code> we must store the file list so as to detect deleted/added files.</p>
+<p>For now the database is just a simple SQLite database with a few indexes, as having a working system is 90% of the work. But there are likely ways to speed it up (the other 90% of work).</p>
+<p>We could store this in a file, but an append-only journal is crash-tolerant and less HD-intensive. Since file paths have lots of redundant components, some lightweight streaming compression like lz4 is appropriate.</p>
+<p>We record all of the process/thread semantics, with fork, locks, wait/signal, etc. as well as its I/O. The tasks’s version number / digest of its source code is also relevant. Reading the journal back, we end up with a list of interleaved thread traces.</p>
+<p>Requesting execution of other tasks can be done sequentially or in parallel.</p>
+<p>There are 3 main operations that show up in a task’s trace:</p>
+<ul class="simple">
+<li><p>writing a key</p></li>
+<li><p>reading a key</p></li>
+<li><p>requesting execution of other tasks</p></li>
+</ul>
+<p>To correctly build software, we assume that the task is deterministic besides the operations recorded in its trace - so the task can be skipped if all of its inputs and generated files are the same.</p>
+<p>A key definition consists of:
+* a set of key names, where each name is a sequence of bytes
+* for the write operation:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a recorder, which saves the write to disk during a clean build</p></li>
+<li><p>a replayer, which uses the stored trace to either determine that the</p></li>
+</ul>
+</div></blockquote>
+<section id="in-memory">
+<h3>In-memory<a class="headerlink" href="#in-memory" title="Link to this heading"></a></h3>
+<p>In-memory keys are the simplest to handle, because they’re small and we can simply store the whole value, and also because we don’t have to worry about external modification. We record a write in our journal as “write key xyz = …” and a read as “read key xyz = …”. Then the trace is invalid if we read something different from what was written, or if the key was never written.</p>
+<p>If the key contents are large, we can intern it - journal an association “#5 = x”, then writes as “write key xyz is interned to #5 = …”, and reads as “read key xyz from intern #5”. We can’t use the key itself as #n because there might be multiple writes to the key.</p>
+<p>The simplest example of an in-memory key is the command line arguments; we can store the full initial command line, and then have a task that parses the command line and writes various option keys. Another example is versioning keys. The initial task writes a key for each task with the compiled-in version, <code class="docutils literal notranslate"><span class="pre">write</span> <span class="pre">(Version</span> <span class="pre">abc)</span> <span class="pre">v2.3</span></code>. Then each task reads its version and this read is stored in the task record, causing rebuilds when the version is changed.</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--ignore-rule-versions</span></kbd></dt>
+<dd><p>Ignore versions in the build rules.</p>
+</dd>
+</dl>
+</section>
+<section id="files">
+<h3>Files<a class="headerlink" href="#files" title="Link to this heading"></a></h3>
+<p>Files are a little trickier because storing the whole contents of the file in the journal is infeasible. Instead we journal a proxy of the contents, stored in-memory. So writes look like “write file f with proxy p” and reads are “read file f with proxy p”. We assume that there aren’t any untracked writes during the build so the reads can be recorded using the in-memory value of p calculated from the writes.</p>
+<dl class="simple">
+<dt>trivial proxy</dt><dd><p>Sometimes we want to ignore the file contents and always/never do an action. In such a case we can use a trivial proxy. There are two types, “always rebuild” and “never rebuild”. In the never case, a task’s rebuild can still be triggered by a different file.</p>
+</dd>
+<dt>dirty bit</dt><dd><p>The idea of a dirty bit is to have one piece of information per key, saying whether the key is dirty or clean. In the initial state all keys are clean. If a task executes, all its writes set the keys to dirty. A task that reads a dirty key must also execute. But if all read keys are clean, the task does not need to be rerun.</p>
+</dd>
+<dt>version number/custom detector</dt><dd><p>For toolchains in small projects, the version number from running <code class="docutils literal notranslate"><span class="pre">gcc</span> <span class="pre">-V</span></code> etc. is often sufficient. Although modtime is more robust, it’s worth listing this as an example of a custom file modification detector.</p>
+</dd>
+<dt>file size/permissions/inode number</dt><dd><p>Checking the file size is fast and cheap as it’s stored in every filesystem. This catches most changed files, but is incomplete since a modification may keep the same file size. In most cases it isn’t necessary to track this as modification time alone is sufficient. File permissions can also be relevant, if they are changed from the default.</p>
+</dd>
+<dt>modtime/device/inode number</dt><dd><p>As opposed to make’s simple “is-newer” comparison, storing the full mtime value is pretty accurate. mtime changes at least as often as the content hash changes. There is a small risk that a file archiver or inaccurate clock will set the timestamp to collide with the old one and the change won’t be detected. The device/inode number detects replaced files, e.g. if you <code class="docutils literal notranslate"><span class="pre">mv</span></code> a file onto another one. The real disadvantage is over-rebuilding, due to <code class="docutils literal notranslate"><span class="pre">touch</span></code> and similar. ctime and atime update even more frequently than mtime, so they don’t help. btime / creation time might be useful, in a manner similar to inode number. Simply checking all the modtimes sequentially is very efficient due to filesystem caching and it can be made even more efficient with various tricks (parallel threads, maybe grouping by directory).</p>
+</dd>
+<dt>digest</dt><dd><p>A digest computed from the contents. There is a remote risk that the file will change without its digest changing due to a collision, but otherwise this detects changes accurately. The disadvantage of digests is that they are somewhat slow to compute, requiring a full scan of the file. But various virtual filesystems store precalculated file checksums, in which case those would be better to use than mtime. There are fast hash algorithms like <a class="reference external" href="https://cyan4973.github.io/xxHash/">xxHash</a> that have throughput faster than RAM, so the main bottleneck is the I/O. Looking at the <a class="reference external" href="https://github.com/Cyan4973/xxHash/wiki/Performance-comparison">benchmark</a>, and fruitlessly googling around to find other hashes not listed there (fnv1, murmurhash, siphash), it seems xxHash3 / xxHash128 are the fastest. But, if we are going to share the files over a network then one of the SHA’s or BLAKE3 might be better to prevent file-replacement attacks. There is also the Linux Kernel Crypto API using AF_ALG but it seems to be slower than doing it in user-space.</p>
+</dd>
+<dt>watcher/change journal</dt><dd><p>We can run a filesystem watching service like Watchman, on Windows use the <a class="reference external" href="https://en.wikipedia.org/wiki/USN_Journal">USN journal</a>, strace all running programs, or redirect filesystem operations through a FUSE vfs. In each case, we get a list (journal) of all changes since some arbitrary starting point. If the journal covers all of the time since the last build, we have a full list of changes and don’t need anything else; otherwise we need to supplement it with one of the other methods.</p>
+</dd>
+</dl>
+<p>We can construct modes from the various combinations:</p>
+<ul class="simple">
+<li><p>digest-only: Files change when digest changes. Use if modification times on your file system are missing or don’t update on changes.</p></li>
+<li><p>modtime-only: Files change when modtime changes. Use if your timestamps change mostly in sync with the file content</p></li>
+<li><p>modtime-then-digest: Files change when modtime and digest change. Use if you could use modtimes but want to avoid spurious rebuilds. In particular git touches a lot of files when switching branches, vim copies over the file so its inode changes frequently, and scripts/you can write identical files.</p></li>
+<li><p>modtime-then-digest-for-inputs: modtime-only for generated files and modtime-then-digest for inputs. It skips digests for generated files as they’re large and change with almost every rebuild. Generated file modtimes can be kept constant by writing to a temporary file and only replacing the output if it’s different.</p></li>
+<li><p>watcher-only, if your watcher runs continuously or if you delete all files after every run</p></li>
+<li><p>modtime-then-watcher: if your watcher’s change journal is incomplete, do a modtime scan on startup.</p></li>
+<li><p>modtime-then-watcher-then-digest, to get the fastest file tracking and fewest rebuilds</p></li>
+</ul>
+<section id="symlinks">
+<h4>Symlinks<a class="headerlink" href="#symlinks" title="Link to this heading"></a></h4>
+<dl class="option-list">
+<dt><kbd><span class="option">-L</span>, <span class="option">--check-symlink-times</span></kbd></dt>
+<dd><p>On systems that support symbolic links, this option causes make to consider the timestamps on any symbolic links in addition to the timestamp on the file referenced by those links. When this option is provided, the most recent timestamp among the file and the symbolic links is taken as the modification time for this target file.</p>
+</dd>
+</dl>
+</section>
+<section id="io-uring">
+<h4>io_uring<a class="headerlink" href="#io-uring" title="Link to this heading"></a></h4>
+<p>It’s a little overkill, but the io_uring interface on Linux allows batching up calls asynchronously, which can <a class="reference external" href="https://twitter.com/axboe/status/1205991776474955777">speed up stat()</a> and thus modtime reading . For hashing parallelism is likely counterproductive, as xxHash is I/O bound and parallelism turns sequential reads into random reads.</p>
+</section>
+<section id="access-tracing">
+<h4>Access Tracing<a class="headerlink" href="#access-tracing" title="Link to this heading"></a></h4>
+<p>Specifying a lot of file read/write dependencies manually is tedious and error-prone, although writing a small script from scratch is not too difficult. So instead we want to use automatic tracing. There are various tracing methods:</p>
+<ul class="simple">
+<li><p>library preloading with fsatrace: fails on static linking, Go programs, and Mac system binaries</p></li>
+<li><p>ptrace with BigBro-fsatrace: Linux-only at present, might work on Windows/Mac eventually.</p></li>
+<li><p>chroot with FUSE: mount real system at <code class="docutils literal notranslate"><span class="pre">/real-system/</span></code>, FUSE system with all files <code class="docutils literal notranslate"><span class="pre">/x</span></code> as symlinks to <code class="docutils literal notranslate"><span class="pre">/real-system/x</span></code>. The program shouldn’t access <code class="docutils literal notranslate"><span class="pre">/real-system/</span></code> directly. Handles all programs, even forking/multiprocess programs like make, and gives build system the abilities to hide new files and generate files on-demand. Requires Linux + root.</p></li>
+<li><p>modtime checking: a little slow but useful if none of the other methods work. Doesn’t work multithreaded.</p></li>
+</ul>
+<p>When we get back file paths from these tracers, they are usually absolute paths, or paths relative to the working directory. But we want standardized paths - if the build doesn’t need to be copied/moved, then e.g. the home directory path should be omitted. Rattle’s solution of named relative directories seems reasonable. Basically, if we have <code class="docutils literal notranslate"><span class="pre">NAME=/x/y</span></code> and a path <code class="docutils literal notranslate"><span class="pre">/x/y/z</span></code> then we shorten it to <code class="docutils literal notranslate"><span class="pre">$NAME/z</span></code>, similarly expanding the name, and we sort the list of names to do this efficiently (or maybe use a tree?).</p>
+<p>If the list of files read/written is static and won’t ever change, another idea is to save space in the build journal by skipping writing the trace and instead writing a note that says “compute the trace using the static list”. But a lot of file dependencies are dynamic (e.g. header files), so it’s not clear how often this could be used. Also if the file list changes between build system versions then the database will be subtly corrupted.</p>
+</section>
+</section>
+<section id="network">
+<h3>Network<a class="headerlink" href="#network" title="Link to this heading"></a></h3>
+<p>Often we wish to fetch data from over the network. There are a few common protocols:</p>
+<ul class="simple">
+<li><p>HTTP downloads: we can use wget, curl, aria2, or a custom library. The <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching">caching headers</a> are important for re-using old downloads.</p></li>
+<li><p>FTP: this can be treated similarly to the filesystem</p></li>
+<li><p>Git, Bittorrent, IPFS: these are content-addressed stores so keeping track of the hash is sufficient</p></li>
+</ul>
+<p>A more complex example is deploying a container to AWS. The inputs are: all the configuration details for the host, the container image itself, and secret credential information. The output is a running instance or else a long log file / error message. But the running instance cannot be checksummed, so we must use some proxy criterion - the easiest is to redeploy if any inputs have changed, but we could also use a script to interrogate the running instance over the network.</p>
+<p>If there are multiple containers that depend on each other, we have to encode the restarting behavior somehow. The easiest is probably to write a single script that takes all the configuration and starts up the containers in order, but this duplicates the build system task scheduling logic. So a script for each strongly-connected component.</p>
+</section>
+<section id="damage">
+<h3>Damage<a class="headerlink" href="#damage" title="Link to this heading"></a></h3>
+<p>Cot allows writing to a file more than once, e.g. training a neural net with iterative optimization. The behavior is that changed inputs always rerun all affected tasks, but changed outputs only rerun the tasks if the simulation predicts that the output is needed. If a build cache is not used then tasks that generate files needed for the build will rerun as well.</p>
+</section>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-m,</span> <span class="pre">--metadata</span></code> The directory used for storing metadata files. All metadata files will be named <code class="docutils literal notranslate"><span class="pre">$files/$file-name</span></code>. If the ‘shakeFiles’ directory does not exist it will be created. If set to <code class="docutils literal notranslate"><span class="pre">Nothing</span></code> then no metadata files are read or written (clean build mode). Defaults to <code class="docutils literal notranslate"><span class="pre">.cot</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--flush</span> <span class="pre">N</span></code> How often to flush metadata files in seconds, or <code class="docutils literal notranslate"><span class="pre">--never-flush</span></code> to never flush explicitly. On abnormal termination the completion data that has not been flushed will be lost.</p></li>
+</ul>
+<section id="cached-build">
+<h3>Cached build<a class="headerlink" href="#cached-build" title="Link to this heading"></a></h3>
+<p>A build cache records the outputs of each task in a reproducible manner, i.e. the trace is constructive in the sense of <span id="id5">[<a class="reference internal" href="../../zzreferences.html#id184" title="Andrey Mokhov, Neil Mitchell, and Simon Peyton Jones. Build systems à la carte: theory and practice. Journal of Functional Programming, 30:e11, 2020. URL: https://ndmitchell.com/downloads/paper-build_systems_a_la_carte_theory_and_practice-21_apr_2020.pdf (visited on 2020-06-11), doi:10.1017/S0956796820000088.">MMPJ20</a>]</span>. A build can be made reproducible by forcing every non-reproducible task to be loaded from the cache.</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--cache-create <var>PATH</var></span></kbd></dt>
+<dd><p>Whether to use and store outputs in a shared directory. If present, retrieve files from the cache and copy files to the cache, subject to other options. The cache path is stored in the metadata for further invocations.</p>
+</dd>
+<dt><kbd><span class="option">--cache-disable</span>, <span class="option">--cache-delete</span></kbd></dt>
+<dd><p>The disable option can be used to temporarily disable the cache without modifying the cache, while the delete option deletes it.</p>
+</dd>
+<dt><kbd><span class="option">--cache-links <var>PATHS</var></span></kbd></dt>
+<dd><p>For files matching listed path patterns, make files in the cache read-only to avoid inadvertently poisoning the shared cache. Use hard links or reflinks to replay tasks, instead of copying files.</p>
+</dd>
+<dt><kbd><span class="option">--cache-readonly</span></kbd></dt>
+<dd><p>Use the cache, if enabled, to retrieve files, but do not not update the cache with any files actually built during this invocation.</p>
+</dd>
+<dt><kbd><span class="option">--cache-populate</span></kbd></dt>
+<dd><p>When using CacheDir, populate a derived-file cache by copying any already-existing, up-to-date derived files to the cache, in addition to files built by this invocation. This is useful to populate a new cache with all the current derived files, or to add to the cache any derived files recently built with caching disabled via the –cache-disable option.</p>
+</dd>
+<dt><kbd><span class="option">--cache-check</span></kbd></dt>
+<dd><p>Sanity check the shared cache files.</p>
+</dd>
+<dt><kbd><span class="option">--cache-cloud <var>URL</var></span></kbd></dt>
+<dd><p>HTTP server providing a (read-only) cache in the cloud.</p>
+</dd>
+</dl>
+<p>Dune has the ability to cache built files for later retrieval. This
+can greatly speedup subsequent builds when some dependencies are
+rebuilt in different workspaces, switching branches or iterating on
+code back and forth.</p>
+</section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>The cache is, for now, an opt-in feature. Add <cite>(cache enabled)</cite> to
+your dune configuration file (default <cite>~/.config/dune/config</cite>) to
+activate it. When turned on, built files will automatically be
+promoted to the cache, and subsequent builds will automatically check
+the cache for hits.</p>
+<p>The cached files are stored inside you <cite>XDG_CACHE_HOME</cite> directory on
+*nix systems, and <cite>“HOME\Local Settings\Cache”</cite> on Windows.</p>
+</section>
+<section id="daemon">
+<h2>Daemon<a class="headerlink" href="#daemon" title="Link to this heading"></a></h2>
+<p>By default, most cache operations go through the dune cache daemon, a
+separate process that dune instances connect to. This enables
+promotions to happen asynchronously and not slow the build
+process. The daemon is automatically started if needed when dune needs
+accessing the cache, and lives on for further use.</p>
+<p>Although the daemon concept is totally transparent, one can control it
+via the <cite>dune cache</cite> subcommand.</p>
+<section id="starting-the-daemon">
+<h3>Starting the daemon<a class="headerlink" href="#starting-the-daemon" title="Link to this heading"></a></h3>
+<p>Use <cite>dune cache start</cite> to start the caching daemon if not running and
+print its endpoint, or retrieve the endpoint of the currently running
+daemon otherwise. A notable option is <cite>–foreground</cite> to not detach the
+daemon, which can help inspecting its log output.</p>
+</section>
+<section id="stopping-the-daemon">
+<h3>Stopping the daemon<a class="headerlink" href="#stopping-the-daemon" title="Link to this heading"></a></h3>
+<p>Use <cite>dune cache stop</cite> to stop the caching daemon. Although the daemon,
+when idle, should consume zero resources, you may want to get rid of
+the process. Also useful to restart the daemon with <cite>–foreground</cite>.</p>
+</section>
+</section>
+<section id="filesystem-implementation">
+<h2>Filesystem implementation<a class="headerlink" href="#filesystem-implementation" title="Link to this heading"></a></h2>
+<section id="hardlink-mode">
+<h3>Hardlink mode<a class="headerlink" href="#hardlink-mode" title="Link to this heading"></a></h3>
+<p>By default the cache works by creating hardlinks to built files inside
+the cache directory when promoted, and in other build trees when
+retrieved. This has the great advantage of having zero disk space
+overhead for files still living in a build directory. This has two
+main constraints:</p>
+<ul class="simple">
+<li><p>The cache root must be on the same partition as the build tree.</p></li>
+<li><p>Produced files will be stripped from write permissions, as they are
+shared between build trees. Note that modifying built files is bad
+practice in any case.</p></li>
+</ul>
+</section>
+<section id="copy-mode">
+<h3>Copy mode<a class="headerlink" href="#copy-mode" title="Link to this heading"></a></h3>
+<p>If one specifies <cite>(cache-duplication copy)</cite> in the configuration file,
+dune will copy files to and from the cache instead of using hardlinks.
+This can be useful if the build cache is on a different partition.</p>
+</section>
+</section>
+<section id="on-disk-size">
+<h2>On-disk size<a class="headerlink" href="#on-disk-size" title="Link to this heading"></a></h2>
+<p>The cache daemon will perform periodic trimming to limit the overhead.
+Every 10 minutes, it will purge the least recently used files so the
+cache overhead does not exceed 10G. This is configurable through the
+<cite>(cache-trim-period SECONDS)</cite> and <cite>(cache-trim-size BYTES)</cite>
+configuration entries. Note that this operation will only consider the
+cache overhead, i.e. files not currently hard-linked in a build
+directory, as removing files currently used would not free any disk
+space.</p>
+<p>On can run <cite>dune cache trim –size=BYTES</cite> to manually trigger trimming
+in the cache daemon.</p>
+</section>
+<section id="reproducibility">
+<h2>Reproducibility<a class="headerlink" href="#reproducibility" title="Link to this heading"></a></h2>
+<p>traceability - It should be clear where the binary came from and how it was produced.
+automated reproducibility - Users can run one command to reproduce all binaries to verify that they have not been tampered with.</p>
+<p>Example: “this package was built by running &lt;command&gt; on revision &lt;hash&gt; of the distribution’s package repository.” A user can then easily reproduce the binary by fetching the specified sources and running the specified command. This build will in most cases depend on a previous generation of built binaries. Thus, we get a chain of verifiable binaries stretching back in time.</p>
+<p>Binaries may also come from upstream, with no clear production process. This would typically be the case when a language does not have a clear bootstrap process. The distribution should at least clearly label the provenance of the binary, e.g. “this binary was downloaded from <a class="reference external" href="https://upstream-compiler.example.org/upstream-compiler-20161211-x86_64-linux.tar.xz">https://upstream-compiler.example.org/upstream-compiler-20161211-x86_64-linux.tar.xz</a> at time DDD with hash 123”.</p>
+<section id="reproducibility-check">
+<h3>Reproducibility check<a class="headerlink" href="#reproducibility-check" title="Link to this heading"></a></h3>
+<p>While default mode of operation of the cache is to speedup build times
+by not re-running some rules, it can also be used to check build
+reproducibility. If <cite>(cache-check-probability FLOAT)</cite> or
+<cite>–cache-check-probability=FLOAT</cite> is specified either respectively in
+the configuration file or the command line, in case of a cache hit
+dune will rerun the rule anyway with the given probability and compare
+the resulting files against a potential cache hit. If the files
+differ, the rule is not reproducible and a warning will be emitted.</p>
+</section>
+<section id="non-reproducible-rules">
+<h3>Non-reproducible rules<a class="headerlink" href="#non-reproducible-rules" title="Link to this heading"></a></h3>
+<p>If you know that some rule is not reproducible (e.g. it generates a random signing key) and should be done on each new build, then you can mark it as such by depending on the AlwaysRebuild key. But think about whether you want to do it every build or if there is a configurable policy, e.g. refreshing a file from the internet can be done on a schedule.</p>
+<p>Similarly, some files may not be redistributable (copyright license or similar), these are reproducible but the data cannot be stored in the cloud cache.</p>
+</section>
+<section id="bootstrap">
+<h3>Bootstrap<a class="headerlink" href="#bootstrap" title="Link to this heading"></a></h3>
+<p>So that there is not a chicken-egg problem, it is important that the build system code itself can be boostrap-built with a shell script or other simple executable. Probably there should be a special mode of the build system’s build system that emits the build system instructions as a shell script.</p>
+</section>
+</section>
+<section id="daemon-less-mode">
+<h2>Daemon-less mode<a class="headerlink" href="#daemon-less-mode" title="Link to this heading"></a></h2>
+<p>While the cache daemon provides asynchronous promotions to speedup
+builds and background trimming amongst other things, in some
+situations direct access can be preferable. This can be the case when
+running in an isolated environment like Docker or OPAM sandboxes,
+where only one instance of dune will ever be running at a time, and
+access to external cache is prohibited. Direct filesystem access can
+be obtained by specifying <cite>(cache-transport direct)</cite> in the
+configuration file or passing <cite>–cache-transport=direct</cite> on the
+command line.</p>
+<section id="remote-builds">
+<h3>Remote Builds<a class="headerlink" href="#remote-builds" title="Link to this heading"></a></h3>
+<p>A remote build consists of a local build setup forwarding task invocations to other machines. This allows multiple builds to be performed in parallel and to do multi-platform builds in a semi-transparent way.</p>
+<dl class="simple">
+<dt>cot ping-builders</dt><dd><p>Test whether connecting to each remote instance works. To forward a build to a remote machine, it’s required that the remote machine is accessible via SSH and that it has Cot installed. If you get the error <code class="docutils literal notranslate"><span class="pre">cot:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> then you need to ensure that the PATH of non-interactive login shells contains Cot.</p>
+</dd>
+</dl>
+<p>Each machine specification consists of the following elements, separated by spaces. Only the first element is required. To leave a field at its default, set it to -.</p>
+<blockquote>
+<div><p>The URI of the remote store in the format <a class="reference external" href="ssh://[username&#64;]hostname">ssh://[username&#64;]hostname</a>, e.g. <a class="reference external" href="ssh://nix&#64;mac">ssh://nix&#64;mac</a> or <a class="reference external" href="ssh://mac">ssh://mac</a>. For backward compatibility, <a class="reference external" href="ssh://">ssh://</a> may be omitted. The hostname may be an alias defined in your ~/.ssh/config. It is possible to specify an SSH identity file as part of the remote store URI, e.g. <code class="docutils literal notranslate"><span class="pre">ssh://mac?ssh-key=/home/alice/my-key</span></code>. Since builds should be non-interactive, the key should not have a passphrase. Alternatively, you can load identities ahead of time into ssh-agent or gpg-agent, as SSH will use its regular identities.</p>
+<p>The maximum number of builds to execute in parallel on the machine. Typically this should be equal to the number of CPU cores. For instance, the machine itchy in the example will execute up to 8 builds in parallel.</p>
+<p>The “speed factor”, indicating the relative speed of the machine. If there are multiple machines of the right type, Cot will prefer the fastest, taking load into account.</p>
+<p>A comma-separated list of supported features and platform identifiers, such as <code class="docutils literal notranslate"><span class="pre">i686-linux,x86_64-linux,kvm</span></code>. Cot will only perform the derivation on a machine that has the specified features.</p>
+<p>A comma-separated list of mandatory features. A machine will only be used to build a derivation if all of the machine’s mandatory features appear in the derivation’s features attribute.</p>
+</div></blockquote>
+<p>Remote builders can be configured on the command line with <code class="docutils literal notranslate"><span class="pre">--builders</span></code> or in general conf or in a separate configuration file included in builders via the syntax &#64;file.</p>
+<p>builders-use-cache</p>
+<blockquote>
+<div><p>If set to true, remote hosts will fetch as many build dependencies as possible from a build cache, instead of upload the files from the host. This can drastically reduce build times if the network connection between this computer and the remote build host is slow. Defaults to false.</p>
+</div></blockquote>
+<p>To build only on remote builders and disable building on the local machine, you can use the option –max-jobs 0.</p>
+</section>
+<section id="debugging">
+<h3>Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
+<p>browse dependency graph in a web browser
+show dependencies stored in the deps log
+output graphviz dot file for targets</p>
+<p>profiling information</p>
+<p>list all commands required to rebuild given targets
+list all rules
+show inputs/outputs for a path
+list targets by their rule or depth in the DAG
+dump JSON compilation database to stdout</p>
+<p>recompacts internal data structures
+restats all outputs in the build log</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--version</span></kbd></dt>
+<dd><p>Print the version number and exit.</p>
+</dd>
+<dt><kbd><span class="option">--storage-log</span></kbd></dt>
+<dd><p>Write a message to <code class="docutils literal notranslate"><span class="pre">storage.log</span></code> whenever a storage event happens which may impact on the current stored progress. Examples include database version number changes, database compaction or corrupt files.</p>
+</dd>
+<dt><kbd><span class="option">--no-build</span></kbd></dt>
+<dd><p>Load all the database files but stop before executing the initial task and don’t build anything.</p>
+<blockquote>
+<div><p>“l” [“lint”] (noArg $ s -&gt; s{shakeLint=Just LintBasic}) “Perform limited validation after the run.”
+“”  [“lint-watch”] (reqArg “PATTERN” $ x s -&gt; s{shakeLintWatch=shakeLintWatch s ++ [x]}) “Error if any of the patterns are created (expensive).”
+“”  [“lint-fsatrace”] (optArg “DIR” $ x s -&gt; s{shakeLint=Just LintFSATrace, shakeLintInside=shakeLintInside s ++ [fromMaybe “.” x]}) “Use fsatrace to do validation [in current dir].”
+“”  [“lint-ignore”] (reqArg “PATTERN” $ x s -&gt; s{shakeLintIgnore=shakeLintIgnore s ++ [x]}) “Ignore any lint errors in these patterns.”
+“”  [“no-lint”] (noArg $ s -&gt; s{shakeLint=Nothing}) “Turn off –lint.”
+“”  [“live”] (optArg “FILE” $ x s -&gt; s{shakeLiveFiles=shakeLiveFiles s ++ [fromMaybe “live.txt” x]}) “List the files that are live [to live.txt].”</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Lint :: Maybe Lint</dt><dd><p>^ Defaults to ‘Nothing’. Perform sanity checks during building, see ‘Lint’ for details.</p>
+</dd>
+<dt>LintInside :: [FilePath]</dt><dd><p>^ Directories in which the files will be tracked by the linter.</p>
+</dd>
+<dt>LintIgnore :: [FilePattern]</dt><dd><p>^ File patterns which are ignored from linter tracking, a bit like calling ‘Development.Shake.trackAllow’ in every rule.</p>
+</dd>
+<dt>LintWatch :: [FilePattern]</dt><dd><p>^ File patterns whose modification causes an error. Raises an error even if ‘shakeLint’ is ‘Nothing’.</p>
+</dd>
+<dt>CreationCheck :: Bool</dt><dd><dl class="simple">
+<dt>^ Default to ‘True’. After running a rule to create a file, is it an error if the file does not exist.</dt><dd><p>Provided for compatibility with <code class="docutils literal notranslate"><span class="pre">make</span></code> and <code class="docutils literal notranslate"><span class="pre">ninja</span></code> (which have ugly file creation semantics).</p>
+</dd>
+</dl>
+</dd>
+<dt>NeedDirectory :: Bool</dt><dd><dl class="simple">
+<dt>^ Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Is depending on a directory an error (default), or it is permitted with</dt><dd><p>undefined results. Provided for compatibility with <code class="docutils literal notranslate"><span class="pre">ninja</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>VersionIgnore :: Bool</dt><dd><p>^ Defaults to ‘False’. Ignore any differences in ‘shakeVersion’.</p>
+</dd>
+</dl>
+<p>dupbuild={err,warn}  multiple build lines for one target
+phonycycle={err,warn}  phony build statement references itself</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--cache-show</span></kbd></dt>
+<dd><p>When using a derived-file cache and retrieving a file from it, show the command that would have been executed to build the file. Without this option, scons reports “Retrieved ‘file’ from cache.”. This allows producing consistent output for build logs, regardless of whether a target file was rebuilt or retrieved from the cache.</p>
+</dd>
+<dt><kbd><span class="option">--cache-debug=<var>file</var></span></kbd></dt>
+<dd><p>Write debug information about derived-file caching to the specified file. If file is a hyphen (-), the debug information is printed to the standard output. The printed messages describe what signature-file names are being looked for in, retrieved from, or written to the derived-file cache specified by CacheDir.</p>
+</dd>
+</dl>
+<p>Shake features a built in “lint” features to check the build system is well formed. To run use build –lint. You are likely to catch more lint violations if you first build clean. The lint features are listed in this document. There is a performance penalty for building with –lint, but it is typically small.
+* Detects changing the current directory, typically with setCurrentDirectory. You should never change the current directory within the build system as multiple rules running at the same time share the current directory. You can still run <code class="docutils literal notranslate"><span class="pre">cmd_</span></code> calls in different directories using the Cwd argument.
+* Changing outputs after building. Detects if any files have changed after Shake has built them. There are a couple of causes for seeing this error:</p>
+<blockquote>
+<div><p>If there is a rule producing foo.o, but another rule also modifies foo.o.
+If you are on a file system where files change modification time after a while. A standard example would be an NFS drive where the underlying network file system stores modification times to second-level resolution, but the in-memory cache keeps them precisely.
+If you modify the build sources while running a build.</p>
+</div></blockquote>
+<p>A consequence of this lint triggering would be that a subsequent build would do additional work, as it spots modifications.</p>
+<ul>
+<li><p>trackRead/trackWrite assert various invariants about what files can be written where. Mainly</p>
+<blockquote>
+<div><p>You can only read a file that is either your dependency, or a transitive dependency.</p>
+</div></blockquote>
+</li>
+</ul>
+<p>Additionally, you can ignore certain missing rules with –lint-ignore=PATTERN. In general all files passed to trackRead or trackWrite are expected to be relative to the current directory, so –lint-ignore patterns should match those relative paths.</p>
+<p>Using fsatrace you can augment command line programs (called with cmd or command) to automatically track which files they read and write, which turn into trackRead and trackWrite calls. To enable this feature pass –lint-fsatrace=DIR passing the directories you want to lint. Passing –lint-fsatrace is equivalent to –lint-fsatrace=. - namely only lint the current directory.</p>
+<p>This feature requires fsatrace to be on the $PATH, as documented on the homepage. If you are using Windows, you can download a binary release here.</p>
+<dl>
+<dt>LiveFiles :: [FilePath]</dt><dd><dl class="simple">
+<dt>^ Default to <code class="docutils literal notranslate"><span class="pre">[]</span></code>. After the build system completes, write a list of all files which were /live/ in that run,</dt><dd><p>i.e. those which Shake checked were valid or rebuilt. Produces best answers if nothing rebuilds.</p>
+</dd>
+</dl>
+</dd>
+<dt>Report :: [FilePath]</dt><dd><dl class="simple">
+<dt>^ Defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>. Write a profiling report to a file, showing which rules rebuilt,</dt><dd><p>why, and how much time they took. Useful for improving the speed of your build systems.
+If the file extension is <code class="docutils literal notranslate"><span class="pre">.json</span></code> it will write JSON data; if <code class="docutils literal notranslate"><span class="pre">.js</span></code> it will write Javascript;
+if <code class="docutils literal notranslate"><span class="pre">.trace</span></code> it will write trace events (load into <code class="docutils literal notranslate"><span class="pre">about:\/\/tracing</span></code> in Chrome);
+otherwise it will write HTML.</p>
+</dd>
+</dl>
+</dd>
+<dt>Progress :: IO Progress -&gt; IO ()</dt><dd><dl class="simple">
+<dt>^ Defaults to no action. A function called when the build starts, allowing progress to be reported.</dt><dd><p>The function is called on a separate thread, and that thread is killed when the build completes.
+For applications that want to display progress messages, ‘progressSimple’ is often sufficient, but more advanced
+users should look at the ‘Progress’ data type.</p>
+</dd>
+</dl>
+</dd>
+<dt>Verbosity :: Verbosity</dt><dd><p>^ Defaults to ‘Info’. What level of messages should be printed out.</p>
+</dd>
+<dt>Output :: Verbosity -&gt; String -&gt; IO ()</dt><dd><dl class="simple">
+<dt>^ Defaults to writing using ‘putStrLn’. A function called to output messages from Shake, along with the ‘Verbosity’ at</dt><dd><p>which that message should be printed. This function will be called atomically from all other ‘shakeOutput’ functions.
+The ‘Verbosity’ will always be greater than or higher than ‘shakeVerbosity’.</p>
+</dd>
+</dl>
+</dd>
+<dt>Trace :: String -&gt; String -&gt; Bool -&gt; IO ()</dt><dd><dl>
+<dt>^ Defaults to doing nothing.</dt><dd><p>Called for each call of ‘Development.Shake.traced’, with the key, the command and ‘True’ for starting, ‘False’ for stopping.</p>
+<blockquote>
+<div><p>,extr $ Option “v” [“version”] (noArg [Version]) “Print the version number and exit.”
+,extr $ Option “w” [“print-directory”] (noArg [PrintDirectory True]) “Print the current directory.”
+,extr $ Option “”  [“no-print-directory”] (noArg [PrintDirectory False]) “Turn off -w, even if it was turned on implicitly.”
+“”  [“storage”] (noArg $ s -&gt; s{shakeStorageLog=True}) “Write a storage log.”
+“d” [“debug”] (optArg “FILE” $ x s -&gt; s{shakeVerbosity=Diagnostic, shakeOutput=outputDebug (shakeOutput s) x}) “Print lots of debugging information.”
+“V” [“verbose”,”trace”] (noArg $ s -&gt; s{shakeVerbosity=move (shakeVerbosity s) succ}) “Print more (pass repeatedly for even more).”
+“q” [“quiet”] (noArg $ s -&gt; s{shakeVerbosity=move (shakeVerbosity s) pred}) “Print less (pass repeatedly for even less).”
+,both $ Option “p” [“progress”] (progress $ optArgInt 1 “progress” “N” $ i s -&gt; s{shakeProgress=prog $ fromMaybe 5 i}) “Show progress messages [every N secs, default 5].”
+“”  [“no-progress”] (noArg $ s -&gt; s{shakeProgress=const $ pure ()}) “Don’t show progress messages.”
+,extr $ Option “”  [“no-time”] (noArg [NoTime]) “Don’t print build time.”
+“”  [“timings”] (noArg $ s -&gt; s{shakeTimings=True}) “Print phase timings.”</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>Timings :: Bool</dt><dd><dl class="simple">
+<dt>^ Defaults to ‘False’. Print timing information for each stage at the end.</dt><dd><p>“s” [“silent”] (noArg $ s -&gt; s{shakeVerbosity=Silent}) “Don’t print anything.”</p>
+</dd>
+</dl>
+</dd>
+<dt>Silent</dt><dd><p>Don’t print any messages.</p>
+</dd>
+<dt>Error</dt><dd><p>Only print error messages.</p>
+</dd>
+<dt>Warn</dt><dd><p>Print errors and warnings.</p>
+</dd>
+<dt>Info</dt><dd><p>Print errors, warnings and # command-name (for file-name) when running a traced command.</p>
+</dd>
+<dt>Verbose</dt><dd><p>Print errors, warnings, full command lines when running a command or cmd command and status messages when starting a rule.</p>
+</dd>
+<dt>Diagnostic</dt><dd><p>Print messages for virtually everything (mostly for debugging).</p>
+</dd>
+</dl>
+<p>‘–trace’</p>
+<blockquote>
+<div><p>Show tracing information for make execution. Prints the entire recipe to be executed, even for recipes that are normally silent (due to .SILENT or ‘&#64;’). Also prints the makefile name and line number where the recipe was defined, and information on why the target is being rebuilt.</p>
+</div></blockquote>
+<p>Metrics: work and time. We consider two types of measures,
+work and time. Work refers to the total amount of computation
+performed by all threads and is measured as the sum of the
+total runtime of all threads. Time refers to the end-to-end
+runtime to complete the parallel computation. Time savings
+reflect reduced end user perceived latency, whereas work
+savings reflect improved resource utilization.</p>
+<blockquote>
+<div><p>–debug=type[,type…]</p>
+<blockquote>
+<div><p>Debug the build process. type specifies the kind of debugging info to emit. Multiple types may be specified, separated by commas. The following entries show the recognized types:</p>
+<p>action-timestamps</p>
+<blockquote>
+<div><p>Prints additional time profiling information. For each command, shows the absolute start and end times. This may be useful in debugging parallel builds. Implies the –debug=time option.</p>
+<p>Available since scons 3.1.</p>
+</div></blockquote>
+<p>count</p>
+<blockquote>
+<div><p>Print how many objects are created of the various classes used internally by SCons before and after reading the SConscript files and before and after building targets. This is not supported when SCons is executed with the Python -O (optimized) option or when the SCons modules have been compiled with optimization (that is, when executing from <code class="docutils literal notranslate"><span class="pre">*.pyo</span></code> files).</p>
+</div></blockquote>
+<p>duplicate</p>
+<blockquote>
+<div><p>Print a line for each unlink/relink (or copy) of a variant file from its source file. Includes debugging info for unlinking stale variant files, as well as unlinking old targets before building them.</p>
+</div></blockquote>
+<p>explain</p>
+<blockquote>
+<div><p>Print an explanation of why scons is deciding to (re-)build the targets it selects for building.</p>
+</div></blockquote>
+<p>findlibs</p>
+<blockquote>
+<div><p>Instruct the scanner that searches for libraries to print a message about each potential library name it is searching for, and about the actual libraries it finds.</p>
+</div></blockquote>
+<p>includes</p>
+<blockquote>
+<div><p>Print the include tree after each top-level target is built. This is generally used to find out what files are included by the sources of a given derived file:</p>
+<p>$ scons –debug=includes foo.o</p>
+</div></blockquote>
+<p>memoizer</p>
+<blockquote>
+<div><p>Prints a summary of hits and misses using the Memoizer, an internal subsystem that counts how often SCons uses cached values in memory instead of recomputing them each time they’re needed.</p>
+</div></blockquote>
+<p>memory</p>
+<blockquote>
+<div><p>Prints how much memory SCons uses before and after reading the SConscript files and before and after building targets.</p>
+</div></blockquote>
+<p>objects</p>
+<blockquote>
+<div><p>Prints a list of the various objects of the various classes used internally by SCons.</p>
+</div></blockquote>
+<p>pdb</p>
+<blockquote>
+<div><p>Re-run scons under the control of the pdb Python debugger.</p>
+</div></blockquote>
+<p>prepare</p>
+<blockquote>
+<div><p>Print a line each time any target (internal or external) is prepared for building. scons prints this for each target it considers, even if that target is up to date (see also –debug=explain). This can help debug problems with targets that aren’t being built; it shows whether scons is at least considering them or not.</p>
+</div></blockquote>
+<p>presub</p>
+<blockquote>
+<div><p>Print the raw command line used to build each target before the construction environment variables are substituted. Also shows which targets are being built by this command. Output looks something like this:</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--debug=presub</span>
+<span class="w">    </span><span class="kt">Building</span><span class="w"> </span><span class="n">myprog</span><span class="o">.</span><span class="n">o</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">action</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="kt">:</span>
+<span class="w">      </span><span class="o">$</span><span class="kt">SHCC</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">SHCCFLAGS</span><span class="w"> </span><span class="o">$</span><span class="kt">CPPFLAGS</span><span class="w"> </span><span class="o">$</span><span class="n">_CPPINCFLAGS</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">$</span><span class="kt">TARGET</span><span class="w"> </span><span class="o">$</span><span class="kt">SOURCES</span>
+<span class="w">    </span><span class="o">...</span>
+
+<span class="nf">stacktrace</span>
+
+<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">internal</span><span class="w"> </span><span class="kt">Python</span><span class="w"> </span><span class="n">stack</span><span class="w"> </span><span class="n">trace</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">encountering</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">otherwise</span><span class="w"> </span><span class="n">unexplained</span><span class="w"> </span><span class="ne">error</span><span class="o">.</span>
+
+<span class="nf">time</span>
+
+<span class="w">    </span><span class="kt">Prints</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">profiling</span><span class="w"> </span><span class="n">information</span><span class="kt">:</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">individual</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">command</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="p">(</span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">ran</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">beginning</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">end</span><span class="p">)</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">itself</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="p">(</span><span class="n">that</span><span class="w"> </span><span class="n">is</span><span class="p">,</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">counting</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="p">)</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">those</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span>
+
+<span class="w">        </span><span class="kt">The</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">passed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">function</span>
+
+<span class="w">    </span><span class="p">(</span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">typically</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">slightly</span><span class="w"> </span><span class="n">longer</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">due</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">takes</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">between</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">command</span><span class="o">.</span><span class="w"> </span><span class="kt">When</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">executed</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="o">-</span><span class="n">j</span><span class="w"> </span><span class="n">option</span><span class="p">,</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="n">allows</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="n">parallelization</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">wall</span><span class="o">-</span><span class="n">clock</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">significantly</span><span class="w"> </span><span class="n">smaller</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">spent</span><span class="w"> </span><span class="n">executing</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="p">,</span><span class="w"> </span><span class="n">since</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="n">commands</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">intervening</span><span class="w"> </span><span class="kt">SCons</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">take</span><span class="w"> </span><span class="n">place</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">parallel</span><span class="o">.</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>‘–debug[=options]’</p>
+<blockquote>
+<div><p>Print debugging information in addition to normal processing. Various levels and types of output can be chosen. With no arguments, print the “basic” level of debugging. Possible arguments are below; only the first character is considered, and values must be comma- or space-separated.</p>
+</div></blockquote>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>a (all)
+    All types of debugging output are enabled. This is equivalent to using ‘-d’.
+b (basic)
+    Basic debugging prints each target that was found to be out-of-date, and whether the build was successful or not.
+v (verbose)
+    A level above ‘basic’; includes messages about which makefiles were parsed, prerequisites that did not need to be rebuilt, etc. This option also enables ‘basic’ messages.
+i (implicit)
+    Prints messages describing the implicit rule searches for each target. This option also enables ‘basic’ messages.
+j (jobs)
+    Prints messages giving details on the invocation of specific sub-commands.
+m (makefile)
+    By default, the above messages are not enabled while trying to remake the makefiles. This option enables messages while rebuilding makefiles, too. Note that the ‘all’ option does enable this option. This option also enables ‘basic’ messages.
+stats        print operation counts/timing info
+explain      explain what caused a command to execute
+  n (none)
+    Disable all debugging currently enabled. If additional debugging flags are encountered after this they will still take effect.
+</pre></div>
+</div>
+<dl class="option-list">
+<dt><kbd><span class="option">--taskmastertrace=<var>file</var></span></kbd></dt>
+<dd><p>Prints trace information to the specified file about how the internal Taskmaster object evaluates and controls the order in which Nodes are built. A file name of - may be used to specify the standard output.</p>
+</dd>
+</dl>
+<p>–tree=type[,type…]</p>
+<blockquote>
+<div><p>Prints a tree of the dependencies after each top-level target is built. This prints out some or all of the tree, in various formats, depending on the type specified:</p>
+<p>all</p>
+<blockquote>
+<div><p>Print the entire dependency tree after each top-level target is built. This prints out the complete dependency tree, including implicit dependencies and ignored dependencies.</p>
+</div></blockquote>
+<p>derived</p>
+<blockquote>
+<div><p>Restricts the tree output to only derived (target) files, not source files.</p>
+</div></blockquote>
+<p>linedraw</p>
+<blockquote>
+<div><p>Draw the tree output using Unicode line-drawing characters instead of plain ASCII text. This option acts as a modifier to the selected type(s). If specified alone, without any type, it behaves as if all had been specified.</p>
+<p>Available since scons 4.0.</p>
+</div></blockquote>
+<p>status</p>
+<blockquote>
+<div><p>Prints status information for each displayed node.</p>
+</div></blockquote>
+<p>prune</p>
+<blockquote>
+<div><p>Prunes the tree to avoid repeating dependency information for nodes that have already been displayed. Any node that has already been displayed will have its name printed in [square brackets], as an indication that the dependencies for that node can be found by searching for the relevant output higher up in the tree.</p>
+</div></blockquote>
+<p>Multiple type choices may be specified, separated by commas:</p>
+<p># Prints only derived files, with status information:
+scons –tree=derived,status</p>
+<p># Prints all dependencies of target, with status information
+# and pruning dependencies of already-visited Nodes:
+scons –tree=all,prune,status target</p>
+</div></blockquote>
+<p>‘-h’
+‘–help’</p>
+<blockquote>
+<div><p>Remind you of the options that make understands and then exit.</p>
+</div></blockquote>
+<p>‘-p’
+‘–print-data-base’</p>
+<blockquote>
+<div><p>Print the data base (rules and variable values) that results from reading the makefiles; then execute as usual or as otherwise specified. This also prints the version information given by the ‘-v’ switch (see below). To print the data base without trying to remake any files, use ‘make -qp’. To print the data base of predefined rules and variables, use ‘make -p -f /dev/null’. The data base output contains file name and line number information for recipe and variable definitions, so it can be a useful debugging tool in complex environments.</p>
+</div></blockquote>
+<p>‘-v’
+‘–version’</p>
+<blockquote>
+<div><p>Print the version of the make program plus a copyright, a list of authors, and a notice that there is no warranty; then exit.</p>
+</div></blockquote>
+<p>‘-w’
+‘–print-directory’
+‘–no-print-directory’</p>
+<p>showing each directory as make starts processing it and as make finishes processing it. For example, if ‘make -w’ is run in the directory /u/gnu/make, make will print lines of the form:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Entering</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
+<span class="o">...</span>
+<span class="nf">make</span><span class="kt">:</span><span class="w"> </span><span class="kt">Leaving</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="p">`</span><span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">gnu</span><span class="o">/</span><span class="n">make&#39;</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>In make this option improves the output of several levels of recursive make invocations. In Cot it is only useful for tracking down commands which change the current directory; the current directory should not be changed except with <code class="docutils literal notranslate"><span class="pre">-C</span></code>.</p>
+<p>‘–warn-undefined-variables’</p>
+<blockquote>
+<div><p>Issue a warning message whenever make sees a reference to an undefined variable. This can be helpful when you are trying to debug makefiles which use variables in complex ways.</p>
+</div></blockquote>
+<dl class="option-list">
+<dt><kbd><span class="option">--warn=<var>type</var></span>, <span class="option">--warn=<var>no-type</var></span></kbd></dt>
+<dd><p>Enable or disable (with the no- prefix) warnings. type specifies the type of warnings to be enabled or disabled:</p>
+<p>all</p>
+<blockquote>
+<div><p>All warnings.</p>
+</div></blockquote>
+<p>cache-version</p>
+<blockquote>
+<div><p>Warnings about the derived-file cache directory specified by CacheDir not using the latest configuration information. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>cache-write-error</p>
+<blockquote>
+<div><p>Warnings about errors trying to write a copy of a built file to a specified derived-file cache specified by CacheDir. These warnings are disabled by default.</p>
+</div></blockquote>
+<p>corrupt-sconsign</p>
+<blockquote>
+<div><p>Warnings about unfamiliar signature data in .sconsign files. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>dependency</p>
+<blockquote>
+<div><p>Warnings about dependencies. These warnings are disabled by default.</p>
+</div></blockquote>
+<p>deprecated</p>
+<blockquote>
+<div><p>Warnings about use of currently deprecated features. These warnings are enabled by default. Not all deprecation warnings can be disabled with the –warn=no-deprecated option as some deprecated features which are late in the deprecation cycle may have been designated as mandatory warnings, and these will still display. Warnings for certain deprecated features may also be enabled or disabled individually; see below.</p>
+</div></blockquote>
+<p>duplicate-environment</p>
+<blockquote>
+<div><p>Warnings about attempts to specify a build of a target with two different construction environments that use the same action. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>fortran-cxx-mix</p>
+<blockquote>
+<div><p>Warnings about linking Fortran and C++ object files in a single executable, which can yield unpredictable behavior with some compilers.</p>
+</div></blockquote>
+<p>future-deprecated</p>
+<blockquote>
+<div><p>Warnings about features that will be deprecated in the future. Such warnings are disabled by default. Enabling future deprecation warnings is recommended for projects that redistribute SCons configurations for other users to build, so that the project can be warned as soon as possible about to-be-deprecated features that may require changes to the configuration.</p>
+</div></blockquote>
+<p>link</p>
+<blockquote>
+<div><p>Warnings about link steps.</p>
+</div></blockquote>
+<p>misleading-keywords</p>
+<blockquote>
+<div><p>Warnings about the use of two commonly misspelled keywords targets and sources to Builder calls. The correct spelling is the singular form, even though target and source can themselves refer to lists of names or nodes.</p>
+</div></blockquote>
+<p>missing-sconscript</p>
+<blockquote>
+<div><p>Warnings about missing SConscript files. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>no-object-count</p>
+<blockquote>
+<div><p>Warnings about the –debug=object feature not working when scons is run with the Python -O option or from optimized Python (.pyo) modules.</p>
+</div></blockquote>
+<p>no-parallel-support</p>
+<blockquote>
+<div><p>Warnings about the version of Python not being able to support parallel builds when the -j option is used. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>reserved-variable</p>
+<blockquote>
+<div><p>Warnings about attempts to set the reserved construction variable names $CHANGED_SOURCES, $CHANGED_TARGETS, $TARGET, $TARGETS, $SOURCE, $SOURCES, $UNCHANGED_SOURCES or $UNCHANGED_TARGETS. These warnings are disabled by default.</p>
+</div></blockquote>
+<p>stack-size</p>
+<blockquote>
+<div><p>Warnings about requests to set the stack size that could not be honored. These warnings are enabled by default.</p>
+</div></blockquote>
+<p>target_not_build</p>
+<blockquote>
+<div><p>Warnings about a build rule not building the expected targets. These warnings are disabled by default.</p>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+<section id="parallel-execution">
+<h3>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Link to this heading"></a></h3>
+<dl class="option-list">
+<dt><kbd><span class="option">--random</span>, <span class="option">--random=<var>SEED</var></span>, <span class="option">--no-random</span></kbd></dt>
+<dd><p>Build dependencies in a random order (the default) or a deterministic order. This is useful to prevent various scheduling slowdowns in the build, and can reduce contention in a build farm.</p>
+</dd>
+</dl>
+<p>‘-j [jobs]’
+‘–jobs[=jobs]’</p>
+<blockquote>
+<div><p>Specifies the capacity of the CPU resource, which limits the maximum number of tasks that can run simultaneously. If there is more than one ‘-j’ option, the last one is effective.  Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.
+For many build systems, a number equal to or slightly less than the number of physical processors
+works well. Use <code class="docutils literal notranslate"><span class="pre">auto</span></code> to use the detected number of processors.</p>
+</div></blockquote>
+<p>‘-l [load]’
+‘–load-average[=load]’
+‘–max-load[=load]’</p>
+<blockquote>
+<div><p>Specifies that no new recipes should be started if there are other recipes running and the load average is at least load (a floating-point number). With no argument, removes a previous load limit.</p>
+</div></blockquote>
+<p>Cot can execute several recipes at once. This is implemented using a resource system; by default each task consumes one “thread” resource and there are as many thread resources as there are physical processors. But you can specify the number of threads consumed and also define other resources so in general a task runs with a multiset of resources.</p>
+<p>Numerical priorities with random tie-breaking seems enough to implement things like “schedule this long job first” or “prioritize this set of tasks that’s related to a modified file”. Automatically determining these things when build times are noisy and dependencies change frequently seems hard, and the usual case is lots of cheap tasks where scheduling is easy, so it doesn’t seem worthwhile to implement a more complicated scheduler.</p>
+<p>GNU Make allows defining a load limit instead of a thread limit, basically “pause new executions if the load is above some number”. The hard part is that the load average isn’t instantaneous, so it needs to be mixed with the number of jobs started recently, and also the load can never exceed the number of cores, so load limits above a certain level are invalid. In practice it seems nobody uses the load limit. Builds generally run on unloaded systems and predicting the load by counting threads and resources is more accurate. The useful feature seems to be measuring the system load on startup and subtracting that number from the number of cores to get a lower maximum thread count.</p>
+<p>When finishing a task it wakes up all the pending tasks, this is implemented with callbacks.</p>
+</section>
+<section id="output-control">
+<h3>Output control<a class="headerlink" href="#output-control" title="Link to this heading"></a></h3>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">--interactive</span></kbd></dt>
+<dd><p>Starts SCons in interactive mode. The SConscript files are read once and a scons&gt;&gt;&gt; prompt is printed. Targets may now be rebuilt by typing commands at interactive prompt without having to re-read the SConscript files and re-initialize the dependency graph from scratch.</p>
+<p>SCons interactive mode supports the following commands:</p>
+<p>build [OPTIONS] [TARGETS] …</p>
+<blockquote>
+<div><p>Builds the specified TARGETS (and their dependencies) with the specified SCons command-line OPTIONS. b and scons are synonyms for build.</p>
+<p>The following SCons command-line options affect the build command:</p>
+<p class="attribution">—cache-debug=FILE
+–cache-disable, –no-cache
+–cache-force, –cache-populate
+–cache-readonly
+–cache-show
+–debug=TYPE
+-i, –ignore-errors
+-j N, –jobs=N
+-k, –keep-going
+-n, –no-exec, –just-print, –dry-run, –recon
+-Q
+-s, –silent, –quiet
+–taskmastertrace=FILE
+–tree=OPTIONS</p>
+</div></blockquote>
+<blockquote>
+<div><p>Any other SCons command-line options that are specified do not cause errors but have no effect on the build command (mainly because they affect how the SConscript files are read, which only happens once at the beginning of interactive mode).</p>
+</div></blockquote>
+<p>clean [OPTIONS] [TARGETS] …</p>
+<blockquote>
+<div><p>Cleans the specified TARGETS (and their dependencies) with the specified OPTIONS. c is a synonym. This command is itself a synonym for build –clean</p>
+</div></blockquote>
+<p>exit</p>
+<blockquote>
+<div><p>Exits SCons interactive mode. You can also exit by terminating input (Ctrl+D UNIX or Linux systems, (Ctrl+Z on Windows systems).</p>
+</div></blockquote>
+<p>help [COMMAND]</p>
+<blockquote>
+<div><p>Provides a help message about the commands available in SCons interactive mode. If COMMAND is specified, h and ? are synonyms.</p>
+</div></blockquote>
+<p>shell [COMMANDLINE]</p>
+<blockquote>
+<div><p>Executes the specified COMMANDLINE in a subshell. If no COMMANDLINE is specified, executes the interactive command interpreter specified in the SHELL environment variable (on UNIX and Linux systems) or the COMSPEC environment variable (on Windows systems). sh and ! are synonyms.</p>
+</div></blockquote>
+<p>version</p>
+<blockquote>
+<div><p>Prints SCons version information.</p>
+</div></blockquote>
+<p>An empty line repeats the last typed command. Command-line editing can be used if the readline module is available.</p>
+</dd>
+</dl>
+</div></blockquote>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="o">$</span><span class="w"> </span><span class="n">scons</span><span class="w"> </span><span class="c1">--interactive</span>
+<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="kt">Reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="o">...</span>
+<span class="nf">scons</span><span class="kt">:</span><span class="w"> </span><span class="n">done</span><span class="w"> </span><span class="n">reading</span><span class="w"> </span><span class="kt">SConscript</span><span class="w"> </span><span class="n">files</span><span class="o">.</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">prog</span>
+<span class="nf">scons</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="n">exit</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Abbreviations :: [(String,String)]</dt><dd><dl class="simple">
+<dt>^ Defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>. A list of substrings that should be abbreviated in status messages, and their corresponding abbreviation.</dt><dd><p>Commonly used to replace the long paths (e.g. <code class="docutils literal notranslate"><span class="pre">.make\/i586-linux-gcc\/output</span></code>) with an abbreviation (e.g. <code class="docutils literal notranslate"><span class="pre">$OUT</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt>Color :: Bool</dt><dd><dl class="simple">
+<dt>^ Defaults to ‘False’. Whether to colorize the output.</dt><dd><p>[opts $ Option “a” [“abbrev”] (reqArgPair “abbrev” “FULL=SHORT” $ a s -&gt; s{shakeAbbreviations=shakeAbbreviations s ++ [a]}) “Use abbreviation in status messages.”
+“”  [“color”,”colour”] (noArg $ s -&gt; s{shakeColor=True}) “Colorize the output.”
+“”  [“no-color”,”no-colour”] (noArg $ s -&gt; s{shakeColor=False}) “Don’t colorize the output.”
+,extr $ Option “”  [“compact”] (optArgAuto “auto” “yes|no|auto” $ x -&gt; [Compact x]) “Use a compact Bazel/Buck style output.”</p>
+</dd>
+</dl>
+</dd>
+<dt>LineBuffering :: Bool</dt><dd><p>^ Defaults to ‘True’. Change ‘stdout’ and ‘stderr’ to line buffering while running Shake.</p>
+</dd>
+</dl>
+<p>‘-O[type]’
+‘–output-sync[=type]’</p>
+<blockquote>
+<div><p>Ensure that the complete output from each recipe is printed in one uninterrupted sequence. This option is only useful when using the –jobs option to run multiple recipes simultaneously (see Parallel Execution) Without this option output will be displayed as it is generated by the recipes.</p>
+<p>With no type or the type ‘target’, output from the entire recipe of each target is grouped together. With the type ‘line’, output from each line in the recipe is grouped together. With the type ‘recurse’, the output from an entire recursive make is grouped together. With the type ‘none’, no output synchronization is performed.</p>
+</div></blockquote>
+<p>When running several recipes in parallel the output from each recipe appears as soon as it is generated, with the result that messages from different recipes may be interspersed, sometimes even appearing on the same line. This can make reading the output very difficult.</p>
+<p>To avoid this you can use the ‘–output-sync’ (‘-O’) option. This option instructs make to save the output from the commands it invokes and print it all once the commands are completed. Additionally, if there are multiple recursive make invocations running in parallel, they will communicate so that only one of them is generating output at a time.</p>
+<p>If working directory printing is enabled (see The ‘–print-directory’ Option), the enter/leave messages are printed around each output grouping. If you prefer not to see these messages add the ‘–no-print-directory’ option to MAKEFLAGS.</p>
+<p>There are four levels of granularity when synchronizing output, specified by giving an argument to the option (e.g., ‘-Oline’ or ‘–output-sync=recurse’).</p>
+<p>none</p>
+<blockquote>
+<div><p>This is the default: all output is sent directly as it is generated and no synchronization is performed.</p>
+</div></blockquote>
+<p>line</p>
+<blockquote>
+<div><p>Output from each individual line of the recipe is grouped and printed as soon as that line is complete. If a recipe consists of multiple lines, they may be interspersed with lines from other recipes.</p>
+</div></blockquote>
+<p>target</p>
+<blockquote>
+<div><p>Output from the entire recipe for each target is grouped and printed once the target is complete. This is the default if the –output-sync or -O option is given with no argument.</p>
+</div></blockquote>
+<p>recurse</p>
+<blockquote>
+<div><p>Output from each recursive invocation of make is grouped and printed once the recursive invocation is complete.</p>
+</div></blockquote>
+<p>Regardless of the mode chosen, the total build time will be the same. The only difference is in how the output appears.</p>
+<p>The ‘target’ and ‘recurse’ modes both collect the output of the entire recipe of a target and display it uninterrupted when the recipe completes. The difference between them is in how recipes that contain recursive invocations of make are treated (see Recursive Use of make). For all recipes which have no recursive lines, the ‘target’ and ‘recurse’ modes behave identically.</p>
+<p>If the ‘recurse’ mode is chosen, recipes that contain recursive make invocations are treated the same as other targets: the output from the recipe, including the output from the recursive make, is saved and printed after the entire recipe is complete. This ensures output from all the targets built by a given recursive make instance are grouped together, which may make the output easier to understand. However it also leads to long periods of time during the build where no output is seen, followed by large bursts of output. If you are not watching the build as it proceeds, but instead viewing a log of the build after the fact, this may be the best option for you.</p>
+<p>If you are watching the output, the long gaps of quiet during the build can be frustrating. The ‘target’ output synchronization mode detects when make is going to be invoked recursively, using the standard methods, and it will not synchronize the output of those lines. The recursive make will perform the synchronization for its targets and the output from each will be displayed immediately when it completes. Be aware that output from recursive lines of the recipe are not synchronized (for example if the recursive line prints a message before running make, that message will not be synchronized).</p>
+<p>The ‘line’ mode can be useful for front-ends that are watching the output of make to track when recipes are started and completed.</p>
+<p>Some programs invoked by make may behave differently if they determine they’re writing output to a terminal versus a file (often described as “interactive” vs. “non-interactive” modes). For example, many programs that can display colorized output will not do so if they determine they are not writing to a terminal. If your makefile invokes a program like this then using the output synchronization options will cause the program to believe it’s running in “non-interactive” mode even though the output will ultimately go to the terminal.</p>
+<p>With touch, the name of each modified task is printed, <code class="docutils literal notranslate"><span class="pre">touch</span> <span class="pre">$task</span></code>, unless ‘-s’ is used.</p>
+</section>
+<section id="command-options">
+<h3>Command Options<a class="headerlink" href="#command-options" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CommandOptions :: [CmdOption]</dt><dd><p>^ Defaults to <code class="docutils literal notranslate"><span class="pre">[]</span></code>. Additional options to be passed to all command invocations.</p>
+</dd>
+</dl>
+<p>Cwd FilePath – Change the current directory of the spawned process. By default uses the parent process’s current directory. If multiple options are specified, each is interpreted relative to the previous one: <code class="docutils literal notranslate"><span class="pre">[Cwd</span> <span class="pre">&quot;/&quot;,</span> <span class="pre">Cwd</span> <span class="pre">&quot;etc&quot;]</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">[Cwd</span> <span class="pre">&quot;/etc&quot;]</span></code>.</p>
+<dl class="simple">
+<dt>‘-C dir’ ‘–directory=dir’</dt><dd><p>A global version of Cwd that runs at the beginning. You should never change the current directory of the parent process after the build starts as multiple tasks running at the same time share the current directory.</p>
+</dd>
+</dl>
+<p>Env [(String,String)] – ^ Replace the environment block in the spawned process. By default uses this processes environment.
+AddEnv String String – ^ Add an environment variable in the child process.
+RemEnv String – ^ Remove an environment variable from the child process.
+AddPath [String] [String] – ^ Add some items to the prefix and suffix of the <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> variable.</p>
+<p>Stdin String – ^ Given as the <code class="docutils literal notranslate"><span class="pre">stdin</span></code> of the spawned process. By default the <code class="docutils literal notranslate"><span class="pre">stdin</span></code> is inherited.
+StdinBS LBS.ByteString – ^ Given as the <code class="docutils literal notranslate"><span class="pre">stdin</span></code> of the spawned process.
+FileStdin FilePath – ^ Take the <code class="docutils literal notranslate"><span class="pre">stdin</span></code> from a file.
+InheritStdin – ^ Cause the stdin from the parent to be inherited. Might also require NoProcessGroup on Linux. Ignored if you explicitly pass a stdin.</p>
+<p>Two processes cannot both take input from the same device at the same time. To make sure that only one recipe tries to take input from the terminal at once, make will invalidate the standard input streams of all but one running recipe. If another recipe attempts to read from standard input it will usually incur a fatal error (a ‘Broken pipe’ signal).</p>
+<p>It is unpredictable which recipe will have a valid standard input stream (which will come from the terminal, or wherever you redirect the standard input of make). The first recipe run will always get it first, and the first recipe started after that one finishes will get it next, and so on.</p>
+<p>WithStdout Bool – ^ Should I include the <code class="docutils literal notranslate"><span class="pre">stdout</span></code> in the exception if the command fails? Defaults to ‘False’.
+WithStderr Bool – ^ Should I include the <code class="docutils literal notranslate"><span class="pre">stderr</span></code> in the exception if the command fails? Defaults to ‘True’.
+EchoStdout Bool – ^ Should I echo the <code class="docutils literal notranslate"><span class="pre">stdout</span></code>? Defaults to ‘True’ unless a ‘Stdout’ result is required or you use ‘FileStdout’.
+EchoStderr Bool – ^ Should I echo the <code class="docutils literal notranslate"><span class="pre">stderr</span></code>? Defaults to ‘True’ unless a ‘Stderr’ result is required or you use ‘FileStderr’.
+FileStdout FilePath – ^ Should I put the <code class="docutils literal notranslate"><span class="pre">stdout</span></code> to a file.
+FileStderr FilePath – ^ Should I put the <code class="docutils literal notranslate"><span class="pre">stderr</span></code> to a file.</p>
+<p>BinaryPipes – ^ Treat the <code class="docutils literal notranslate"><span class="pre">stdin</span></code>/<code class="docutils literal notranslate"><span class="pre">stdout</span></code>/<code class="docutils literal notranslate"><span class="pre">stderr</span></code> messages as binary. By default ‘String’ results use text encoding and ‘ByteString’ results use binary encoding.
+CloseFileHandles – ^ Before starting the command in the child process, close all file handles except stdin, stdout, stderr in the child process. Uses <code class="docutils literal notranslate"><span class="pre">close_fds</span></code> from package process and comes with the same caveats, i.e. runtime is linear with the maximum number of open file handles (<code class="docutils literal notranslate"><span class="pre">RLIMIT_NOFILE</span></code>, see <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">2</span> <span class="pre">getrlimit</span></code> on Linux).</p>
+<p>– | Collect the <code class="docutils literal notranslate"><span class="pre">stdout</span></code> of the process.
+–   If used, the <code class="docutils literal notranslate"><span class="pre">stdout</span></code> will not be echoed to the terminal, unless you include ‘EchoStdout’.
+–   The value type may be either ‘String’, or either lazy or strict ‘ByteString’.
+–
+–   Note that most programs end their output with a trailing newline, so calling
+–   <code class="docutils literal notranslate"><span class="pre">ghc</span> <span class="pre">--numeric-version</span></code> will result in ‘Stdout’ of <code class="docutils literal notranslate"><span class="pre">\&quot;6.8.3\\n\&quot;</span></code>. If you want to automatically
+–   trim the resulting string, see ‘StdoutTrim’.
+newtype Stdout a = Stdout {fromStdout :: a}</p>
+<p>– | Like ‘Stdout’ but remove all leading and trailing whitespaces.
+newtype StdoutTrim a = StdoutTrim {fromStdoutTrim :: a}</p>
+<p>– | Collect the <code class="docutils literal notranslate"><span class="pre">stderr</span></code> of the process.
+–   If used, the <code class="docutils literal notranslate"><span class="pre">stderr</span></code> will not be echoed to the terminal, unless you include ‘EchoStderr’.
+newtype Stderr a = Stderr {fromStderr :: a}</p>
+<p>– | Collect the <code class="docutils literal notranslate"><span class="pre">stdout</span></code> and <code class="docutils literal notranslate"><span class="pre">stderr</span></code> of the process.
+–   If used, the <code class="docutils literal notranslate"><span class="pre">stderr</span></code> and <code class="docutils literal notranslate"><span class="pre">stdout</span></code> will not be echoed to the terminal, unless you include ‘EchoStdout’ and ‘EchoStderr’.
+newtype Stdouterr a = Stdouterr {fromStdouterr :: a}</p>
+<p>– | Collect the ‘ExitCode’ of the process.
+newtype Exit = Exit {fromExit :: ExitCode}</p>
+<p>– | Collect the ‘ProcessHandle’ of the process.
+–   If you do collect the process handle, the command will run asyncronously and the call to ‘cmd’ / ‘command’
+–   will return as soon as the process is spawned. Any ‘Stdout’ / ‘Stderr’ captures will return empty strings.
+newtype Process = Process {fromProcess :: ProcessHandle}</p>
+<p>– | Collect the time taken to execute the process. Can be used in conjunction with ‘CmdLine’ to
+–   write helper functions that print out the time of a result.
+–
+– &#64;
+– timer :: (‘CmdResult’ r, MonadIO m) =&gt; (forall r . ‘CmdResult’ r =&gt; m r) -&gt; m r
+– timer act = do
+–     (‘CmdTime’ t, ‘CmdLine’ x, r) &lt;- act
+–     liftIO $ putStrLn $ &quot;Command &quot; ++ x ++ &quot; took &quot; ++ show t ++ &quot; seconds&quot;
+–     pure r
+–
+– run :: IO ()
+– run = timer $ ‘cmd’ &quot;ghc –version&quot;
+– &#64;
+newtype CmdTime = CmdTime {fromCmdTime :: Double}</p>
+<p>– | Collect the command line used for the process. This command line will be approximate -
+–   suitable for user diagnostics, but not for direct execution.
+newtype CmdLine = CmdLine {fromCmdLine :: String}</p>
+<p>Shell – ^ Pass the command to the shell without escaping - any arguments will be joined with spaces. By default arguments are escaped properly.
+Traced String – ^ Name to use with ‘traced’, or <code class="docutils literal notranslate"><span class="pre">\&quot;\&quot;</span></code> for no tracing. By default traces using the name of the executable.
+Timeout Double – ^ Abort the computation after N seconds, will raise a failure exit code. Calls ‘interruptProcessGroupOf’ and ‘terminateProcess’, but may sometimes fail to abort the process and not timeout.
+AutoDeps – ^ Compute dependencies automatically. Only works if ‘shakeLintInside’ has been set to the files where autodeps might live.
+UserCommand String – ^ The command the user thinks about, before any munging. Defaults to the actual command.
+FSAOptions String – ^ Options to <code class="docutils literal notranslate"><span class="pre">fsatrace</span></code>, a list of strings with characters such as <code class="docutils literal notranslate"><span class="pre">\&quot;r\&quot;</span></code> (reads) <code class="docutils literal notranslate"><span class="pre">\&quot;w\&quot;</span></code> (writes). Defaults to <code class="docutils literal notranslate"><span class="pre">\&quot;rwmdqt\&quot;</span></code> if the output of <code class="docutils literal notranslate"><span class="pre">fsatrace</span></code> is required.
+NoProcessGroup – ^ Don’t run the process in its own group. Required when running <code class="docutils literal notranslate"><span class="pre">docker</span></code>. Will mean that process timeouts and asyncronous exceptions may not properly clean up child processes.</p>
+<p>EchoCommand Bool – ^ Print each command to stdout before it is executed. We call this echoing because it gives the appearance that you are typing the lines yourself.</p>
+<dl class="option-list">
+<dt><kbd><span class="option">-v</span>, <span class="option">--verbose</span></kbd></dt>
+<dd><p>show all command lines while building, as if all recipes had EchoCommand True</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>‘-s’ ‘–quiet’</dt><dd><p>Quiet operation; do not print the commands as they are executed, as if all recipes had EchoCommand False.</p>
+</dd>
+</dl>
+<p>IgnoreExitStatus Bool – ^ when false: If there is an error (the exit status is nonzero), throw an error and stop executing the task.when True: print exit status if non-zero and continue execution.</p>
+<dl class="simple">
+<dt>‘-i’ ‘–ignore-errors’</dt><dd><p>Ignore all errors in commands, as if all recipes had IgnoreExitStatus True.</p>
+</dd>
+<dt>–skip-commands, RunCommands :: Bool</dt><dd><p>Default to ‘True’. Set to ‘False’ to skip all command line actions (treat each command as an operation that does nothing, produces no output on stdout/stderr, and returns a 0 exit code). Useful for profiling the non-command portion of the build system.</p>
+</dd>
+</dl>
+</section>
+<section id="querying-the-build-graph">
+<h3>Querying the build graph<a class="headerlink" href="#querying-the-build-graph" title="Link to this heading"></a></h3>
+<p>The build graph defines how to tell whether a task needs recompilation, and the entry point to update the task. But running the task is not always what you want; sometimes you only want to know what would be run.</p>
+<p>‘-n’
+‘–dry-run’</p>
+<blockquote>
+<div><p>“No-exec”. Print the tasks that would normally execute to make the targets up to date, but don’t actually execute them or modify the filesystem. This is implemented by processing the output from the simulation; certain to execute, likely to execute, certain to substitute, likely to execute but possible to substitute, likely to be skipped. This flag is useful for finding out which tasks Cot thinks are necessary without actually doing them.</p>
+</div></blockquote>
+<p>‘-q’
+‘–question’</p>
+<blockquote>
+<div><p>“Question mode”. Silently check whether the targets are up to date. Do not run any recipes, or print anything; just return an exit status code that is zero if the specified targets are already up to date, one if any updating is required, or two if an error is encountered. This is implemented by running as normal but aborting if a task is actually executed.</p>
+</div></blockquote>
+</section>
+<section id="forcing-avoiding-recompilation">
+<h3>Forcing/avoiding recompilation<a class="headerlink" href="#forcing-avoiding-recompilation" title="Link to this heading"></a></h3>
+<p>if your build system is broken then you can’t fix it with the <code class="docutils literal notranslate"><span class="pre">touch</span></code> utility. so a command <code class="docutils literal notranslate"><span class="pre">--touch</span></code> that forces files to be invalid seems necessary, although it wouldn’t be needed normally.</p>
+<p>‘-t’
+‘–touch’</p>
+<blockquote>
+<div><p>Touch files - mark the build as up to date without actually running it, pretending that the build was done but no output files changed, in order to fool future invocations of make. make walks through the build graph and modifies each initial filesystem input recorded in a task record to match the state from the filesystem. The name of the modified task is also printed, <code class="docutils literal notranslate"><span class="pre">touch</span> <span class="pre">$task</span></code>, unless ‘-s’ or .SILENT is used. Note that intermediate or output files are not recorded, so they will still appear as damaged if they are modified and touch is run.</p>
+</div></blockquote>
+<p>Sometimes you may have changed a source file but you do not want to recompile all the files that depend on it. For example, suppose you add a macro or a declaration to a header file that many other files depend on. Being conservative, make assumes that any change in the header file requires recompilation of all dependent files, but you know that they do not need to be recompiled and you would rather not waste the time waiting for them to compile.</p>
+<p>If you anticipate the problem before changing the header file, you can use the ‘-t’ flag. This flag tells make not to run the recipes in the rules, but rather to mark the target up to date by changing its last-modification date. You would follow this procedure:</p>
+<blockquote>
+<div><p>Use the command ‘make’ to recompile the source files that really need recompilation, ensuring that the object files are up-to-date before you begin.
+Make the changes in the header files.
+Use the command ‘make -t’ to mark all the object files as up to date. The next time you run make, the changes in the header files will not cause any recompilation.</p>
+</div></blockquote>
+<p>If you have already changed the header file at a time when some files do need recompilation, it is too late to do this. Instead, you can use the ‘-o file’ flag, which marks a specified file as “old” (see Summary of Options). This means that the file itself will not be remade, and nothing else will be remade on its account. Follow this procedure:</p>
+<blockquote>
+<div><p>Recompile the source files that need compilation for reasons independent of the particular header file, with ‘make -o headerfile’. If several header files are involved, use a separate ‘-o’ option for each header file.
+Touch all the object files with ‘make -t’.</p>
+</div></blockquote>
+<p>“B” [“rebuild”] (optArg “PATTERN” $ x s -&gt; s{shakeRebuild=shakeRebuild s ++ [(RebuildNow, fromMaybe “**” x)]}) “If required, these files will rebuild even if nothing has changed.”
+“”  [“no-rebuild”] (optArg “PATTERN” $ x s -&gt; s{shakeRebuild=shakeRebuild s ++ [(RebuildNormal, fromMaybe “**” x)]}) “If required, these files will rebuild only if things have changed (default).”
+“”  [“skip”] (optArg “PATTERN” $ x s -&gt; s{shakeRebuild=shakeRebuild s ++ [(RebuildLater, fromMaybe “**” x)]}) “Don’t rebuild matching files this run.”
+,yes $ Option “”  [“skip-forever”] (OptArg (x -&gt; Right ([], s -&gt; s{shakeRebuild=shakeRebuild s ++ [(RebuildNever, fromMaybe “**” x)]})) “PATTERN”) “Don’t rebuild matching files until they change.”</p>
+<p>The make tool has a number of features to force rebuilds or skip rebuilds, all fundamentally modelled on file modification times forming an order, which is quite a different model to Shake.</p>
+<p>-B / –always-make considers all targets out-of-date and rebuilds everything. The Shake equivalent is –rebuild.
+-o FILE / –old-file=FILE / –assume-old=FILE does not remake the file FILE even if it is older than its prerequisites. The Shake equivalent is –skip=FILE.
+-t / –touch touches files (marks them up to date without really changing them) instead of building them. The closest equivalent in Shake is –skip, but that only applies to this run. A hypothetical RebuildNever flag would more accurately model this flag.
+-W FILE / –what-if=FILE / –new-file=FILE / –assume-new=FILE pretends that the target file has just been modified. Shake doesn’t really have an equivalent, as –rebuild applies to the rules to rebuild, whereas in Make this applies to the things that depend on it. In addition, Make often uses this flag in conjunction with dry-run, which Shake doesn’t yet have.</p>
+<dl class="simple">
+<dt>Rebuild :: [(Rebuild, FilePattern)]</dt><dd><p>^ What to rebuild</p>
+</dd>
+</dl>
+<p>RebuildNormal is the default setting, rebuild a rule if its dependencies have changed.
+RebuildNow forces a rule to rebuild even if its dependencies haven’t changed. If the rule changes, then that will in turn cause anything depending on that rule to rebuild too. Useful to undo the results of ‘RebuildNever’.
+RebuildLater causes a rule not to rebuild this run even if its dependencies have changed. Note that in future runs, if the RebuildLater is not set, the rule may rebuild.
+RebuildNever permanently marks a file as up-to-date. This assumption is unsafe, and may lead to incorrect build results in this run, and in future runs. Assume and record that these files are clean and do not require rebuilding, provided the file has been built before. Useful if you have modified a file in some inconsequential way, such as only the comments or whitespace, and wish to avoid a rebuild.</p>
+<blockquote>
+<div><dl class="option-list">
+<dt><kbd><span class="option">--config=<var>mode</var></span></kbd></dt>
+<dd><p>Control how the Configure call should use or generate the results of configuration tests. modeshould be specified from among the following choices:</p>
+<p>auto</p>
+<blockquote>
+<div><p>scons will use its normal dependency mechanisms to decide if a test must be rebuilt or not. This saves time by not running the same configuration tests every time you invoke scons, but will overlook changes in system header files or external commands (such as compilers) if you don’t specify those dependecies explicitly. This is the default behavior.</p>
+</div></blockquote>
+<p>force</p>
+<blockquote>
+<div><p>If this option is specified, all configuration tests will be re-run regardless of whether the cached results are out of date. This can be used to explicitly force the configuration tests to be updated in response to an otherwise unconfigured change in a system header file or compiler.</p>
+</div></blockquote>
+<p>cache</p>
+<blockquote>
+<div><p>If this option is specified, no configuration tests will be rerun and all results will be taken from cache. scons will report an error if –config=cache is specified and a necessary test does not have any results in the cache.</p>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+<p>‘-B’
+‘–always-make’</p>
+<blockquote>
+<div><p>Consider all targets out-of-date. GNU make proceeds to consider targets and their prerequisites using the normal algorithms; however, all targets so considered are always remade regardless of the status of their prerequisites. To avoid infinite recursion, if MAKE_RESTARTS (see Other Special Variables) is set to a number greater than 0 this option is disabled when considering whether to remake makefiles (see How Makefiles Are Remade).</p>
+</div></blockquote>
+<p>‘-W file’
+‘–what-if=file’
+‘–assume-new=file’
+‘–new-file=file’</p>
+<blockquote>
+<div><p>Pretend that the target file has just been modified. When used with the dry run flag, this shows you what would happen if you were to modify that file. Without dry run, it is almost the same as running a touch command on the given file before running make, except that the modification time is changed only in the imagination of make. See Instead of Executing Recipes.</p>
+<p>“What if”. Each ‘-W’ flag is followed by a file name. The given files’ modification times are recorded by make as being the present time, although the actual modification times remain the same. You can use the ‘-W’ flag in conjunction with the ‘-n’ flag to see what would happen if you were to modify specific files.</p>
+</div></blockquote>
+<p>The ‘-W’ flag provides two features:</p>
+<blockquote>
+<div><p>If you also use the ‘-n’ or ‘-q’ flag, you can see what make would do if you were to modify some files.
+Without the ‘-n’ or ‘-q’ flag, when make is actually executing recipes, the ‘-W’ flag can direct make to act as if some files had been modified, without actually running the recipes for those files.</p>
+</div></blockquote>
+<p>‘-o file’
+‘–old-file=file’
+‘–assume-old=file’</p>
+<blockquote>
+<div><p>Do not remake the file file even if it is older than its prerequisites, and do not remake anything on account of changes in file. Essentially the file is treated as very old and its rules are ignored. See Avoiding Recompilation of Some Files.</p>
+</div></blockquote>
+</section>
+<section id="error-handling">
+<h3>Error handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<p>“k” [“keep-going”] (noArg $ s -&gt; s{shakeStaunch=True}) “Keep going when some targets can’t be made.”
+“S” [“no-keep-going”,”stop”] (noArg $ s -&gt; s{shakeStaunch=False}) “Turns off -k.”
+shake staunch mode: if an error is encountered during the middle of a build, unless –keep-going is specified we want to stop the build. we can stop all the threads immediately by sending cancel commands, or we can wait until each command finishes to interrupt.</p>
+<p>When an error happens that propagates out of the task, it implies that the current task cannot be correctly remade, and neither can any other task that is chronologically after. No further tasks will be executed after the task, since the preconditions have not been achieved.</p>
+<p>If a recipe fails (is killed by a signal or exits with a nonzero status), and errors are not ignored for that recipe (see Errors in Recipes), the remaining recipe lines to remake the same target will not be run. If a recipe fails and the ‘-k’ or ‘–keep-going’ option was not given (see Summary of Options), make aborts execution. If make terminates for any reason (including a signal) with child processes running, it waits for them to finish before actually exiting.</p>
+<p>‘-k’
+‘–keep-going’
+-k N</p>
+<blockquote>
+<div><p>keep going until N jobs fail (0 means infinity) [default=1]
+Continue as much as possible after an error. While the target that failed, and those that depend on it, cannot be remade, the other prerequisites of these targets can be processed all the same. See Testing the Compilation of a Program.</p>
+</div></blockquote>
+<p>‘-S’
+‘–no-keep-going’
+‘–stop’</p>
+<blockquote>
+<div><p>Cancel the effect of the ‘-k’ option. This is never necessary except in a recursive make where ‘-k’ might be inherited from the top-level make via MAKEFLAGS (see Recursive Use of make) or if you set ‘-k’ in MAKEFLAGS in your environment.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Staunch :: Bool</dt><dd><dl class="simple">
+<dt>^ Defaults to ‘False’. Operate in staunch mode, where building continues even after errors,</dt><dd><p>similar to <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">--keep-going</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Normally make gives up immediately in this circumstance, returning a nonzero status. However, if the ‘-k’ or ‘–keep-going’ flag is specified, make continues to consider the other prerequisites of the pending targets, remaking them if necessary, before it gives up and returns nonzero status.</p>
+<p>Normally, when an error happens in executing a shell command, make gives up immediately, returning a nonzero status. No further recipes are executed for any target. The error implies that the goal cannot be correctly remade, and make reports this as soon as it knows.</p>
+<p>When you are compiling a program that you have just changed, this is not what you want. Instead, you would rather that make try compiling every file that can be tried, to show you as many compilation errors as possible.</p>
+<p>On these occasions, you should use the ‘-k’ or ‘–keep-going’ flag. This tells make to continue to consider the other prerequisites of the pending targets, remaking them if necessary, before it gives up and returns nonzero status. For example, after an error in compiling one object file, ‘make -k’ will continue compiling other object files even though it already knows that linking them will be impossible. In addition to continuing after failed shell commands, ‘make -k’ will continue as much as possible after discovering that it does not know how to make a target or prerequisite file. This will always cause an error message, but without ‘-k’, it is a fatal error (see Summary of Options).</p>
+<p>The usual behavior of make assumes that your purpose is to get the goals up to date; once make learns that this is impossible, it might as well report the failure immediately. The ‘-k’ flag says that the real purpose is to test as much as possible of the changes made in the program, perhaps to find several independent problems so that you can correct them all before the next attempt to compile. This is why Emacs’ M-x compile command passes the ‘-k’ flag by default.</p>
+<p>For example, after an error in compiling one object file, ‘make -k’ will continue compiling other object files even though it already knows that linking them will be impossible.
+The usual behavior assumes that your purpose is to get the specified targets up to date; once make learns that this is impossible, it might as well report the failure immediately. The ‘-k’ option says that the real purpose is to test as many of the changes made in the program as possible, perhaps to find several independent problems so that you can correct them all before the next attempt to compile. This is why Emacs’ compile command passes the ‘-k’ flag by default.</p>
+<p>Usually when a recipe line fails, if it has changed the target file at all, the file is corrupted and cannot be used—or at least it is not completely updated. Yet the file’s time stamp says that it is now up to date, so the next time make runs, it will not try to update that file. The situation is just the same as when the shell is killed by a signal; see Interrupts. So generally the right thing to do is to delete the target file if the recipe fails after beginning to change the file. make will do this if .DELETE_ON_ERROR appears as a target. This is almost always what you want make to do, but it is not historical practice; so for compatibility, you must explicitly request it.</p>
+</section>
+</section>
+<section id="creating-a-build-system">
+<h2>Creating a build system<a class="headerlink" href="#creating-a-build-system" title="Link to this heading"></a></h2>
+<p>Initially a build system starts out as a list of commands. Then when we trace the commands, the list becomes a partially ordered set of commands because we can relax the ordering to write-read constraints. Then we abstract the commands, adding in-memory keys for configuration changes such as the command line, task arguments to share command handling logic, and a nesting relation for which tasks call which other tasks.</p>
+<p>To make using a self-hosting build system installable, there should also be a way to output a list of commands that implement the system.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Libraries" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Compiler-Library.html" class="btn btn-neutral float-right" title="Compiler library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Introduction &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -23,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
-    <link rel="prev" title="About" href="About.html" /> 
+    <link rel="prev" title="Getting started" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,11 +50,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#term-rewriting">Term rewriting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parallel-matching">Parallel matching</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#logic-programming">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sets">Sets</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="FAQ.html">FAQ</a></li>
@@ -177,13 +179,31 @@
 <h2>Logic programming<a class="headerlink" href="#logic-programming" title="Link to this heading"></a></h2>
 <p>Sometimes the requirement that the value is unique is burdensome. Stroscot also allow logic programming, so you can work with relations and nondeterministic functions.</p>
 </section>
+<section id="sets">
+<h2>Sets<a class="headerlink" href="#sets" title="Link to this heading"></a></h2>
+<p>Suppose you wanted to declare an enum:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">enum</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">Red</span><span class="p">,</span><span class="w"> </span><span class="kt">Blue</span><span class="p">,</span><span class="w"> </span><span class="kt">Green</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>In many languages this would be a built-in language construct. In Stroscot, <code class="docutils literal notranslate"><span class="pre">enum</span></code> is a macro, it expands as follows:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">symbol</span><span class="w"> </span><span class="kt">Red</span>
+<span class="nf">symbol</span><span class="w"> </span><span class="kt">Blue</span>
+<span class="nf">symbol</span><span class="w"> </span><span class="kt">Green</span>
+<span class="nf">set</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="n">default_closed</span>
+<span class="nf">elem</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="kt">Red</span>
+<span class="nf">elem</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="kt">Blue</span>
+<span class="nf">elem</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="kt">Green</span>
+</pre></div>
+</div>
+<p>This declares the symbols Red, Blue, and Green, and adds them to the set Color. You can thinks of sets as what languages call types, but Stroscot’s sets correspond closely to mathematical sets so “set” is a more appropriate term (and shorter).</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="About.html" class="btn btn-neutral float-left" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="FAQ.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

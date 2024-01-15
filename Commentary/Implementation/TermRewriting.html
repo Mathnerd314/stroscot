@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Term rewriting &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Tools" href="Tools.html" />
+    <link rel="prev" title="Reduction example" href="Reduction-Example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../Language/index.html">Language specification</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Implementation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Code-Generation.html">Code generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Compiler.html">Compiler design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CompilerOutput.html">Compiler output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CoreSyntax.html">Core syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="IR.html">Intermediate representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Implementation.html">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Profiling.html">Profiling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction.html">Reduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Reduction-Example.html">Reduction example</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Term rewriting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#higher-order-matching">Higher-order matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cycle-detection">Cycle detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nondeterminism">Nondeterminism</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infinitary-rewriting">Infinitary rewriting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluation-strategy">Evaluation strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#verifying-confluence">Verifying confluence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Tools.html">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Implementation</a></li>
+      <li class="breadcrumb-item active">Term rewriting</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Implementation/TermRewriting.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="term-rewriting">
+<h1>Term rewriting<a class="headerlink" href="#term-rewriting" title="Link to this heading"></a></h1>
+<section id="higher-order-matching">
+<h2>Higher-order matching<a class="headerlink" href="#higher-order-matching" title="Link to this heading"></a></h2>
+<p>As a consequence of confluence of the substitution calculus, each rewrite step is composed of an expansion in the substitution calculus, a replacement by applying some rule, and a reduction in the substitution calculus, so it is M &lt;&lt;- C[l] and C[r] -&gt;&gt; N. Handling lambdas in RHSs is fairly straightforward, just treat beta-reduction as a normal reduction step and handle it with the evaluation machinery. But for the lambdas on the left hand side, in the pattern, it is more complex.</p>
+<p>Finding the contexts <code class="docutils literal notranslate"><span class="pre">C</span></code> is fairly straightforward, just enumerate all the subterms of <code class="docutils literal notranslate"><span class="pre">t</span></code>. But solving the equation <code class="docutils literal notranslate"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">lθ</span></code> is an instance of higher-order unification (specifically higher-order matching). The complexity of higher order matching is somewhere around <span class="math notranslate nohighlight">\({\mathcal {E}}^{4}\)</span>, “the minimal solution is of size at most 2^2^2^2…, the number of 2’s proportional to the size of the problem”. <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id245" title="Colin Stirling. Decidability of higher-order matching. Logical Methods in Computer Science, 5(3):2, July 2009. URL: https://lmcs.episciences.org/757 (visited on 2021-11-15), doi:10.2168/LMCS-5(3:2)2009.">Sti09</a>]</span> That proof is for the simply typed lambda calculus but the only properties of the STLC used are strong normalization and that terms have a defined eta long form (canonical form), so it is most likely also applicable to all lambda terms with unique normal forms. Naturally determining the normal form / lack of a normal form is of complexity <span class="math notranslate nohighlight">\(\Sigma_0^1\)</span>, but most lambdas in programs are in normal form already.</p>
+<p>There are two main possibilities for implementing higher-order matching. One is to read Stirling’s paper and extract an algorithm. He says “implicit in the analysis are positive sensible algorithms for dual interpolation problems”, so there is definitely an algorithm to extract. Another is to implement a more general algorithm for solving higher-order unification as opposed to matching, along the lines of Gérard Huet’s preunification. There is a semi-algorithm with good performance, <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id265" title="Petar Vukmirović, Alexander Bentkamp, and Visa Nummelin. Efficient full higher-order unification. Logical Methods in Computer Science, December 2021. URL: https://lmcs.episciences.org/8837/pdf (visited on 2022-06-14), doi:10.46298/lmcs-17(4:18)2021.">VBN21</a>]</span>. The implementation is <a class="reference external" href="https://github.com/sneeuwballen/zipperposition/blob/2889c1f0831f01e8e2f8ffabd5fd12b758ba6a30/src/core/JPFull.ml">open source</a> and only a few hundred lines.</p>
+<p>Stirling’s method, involving dual interpolation. 3 transformations, and reduction to a tiling game, is conceptually complex. Extracting a usable algorithm from the paper seems like it will be challenging and time-consuming. It is also not clear if the resulting algorithm will be any better than Huet’s; it is at least guaranteed to terminate, but perhaps Huet’s algorithm terminates for matching problems as well.</p>
+<p>In contrast, Huet’s algorithm is basically off-the-shelf. I will need unification anyways, for purposes such as determining if rules can overlap. Also the approach in Zipperposition allows plugging in “oracles” - I think Stirling’s method can be plugged in as such an oracle. There is the issue of unification being <span class="math notranslate nohighlight">\(\Sigma_0^1\)</span> and needing to deal with failed unifications but I think Huet’s approach makes more sense to start with.</p>
+<section id="unification">
+<h3>Unification<a class="headerlink" href="#unification" title="Link to this heading"></a></h3>
+<p>Unification is the problem of finding all solutions to a system of equations. First-order unification solves a set of equalities <code class="docutils literal notranslate"><span class="pre">a1=b1,</span> <span class="pre">a2=b2,</span> <span class="pre">...</span></code> over tree terms and variables. This can be extended to the “dual unification” problem that also includes disequations <code class="docutils literal notranslate"><span class="pre">c1</span> <span class="pre">!=</span> <span class="pre">d1</span></code> in the list that must not be satisfied. Constraint logic programming requires solving systems of equations over reals or other sets. The solution takes the form of a complete set of unifiers, where each unifier is a substitution that may have its free variables substituted to obtain a solution, together with constraints over those free variables. A substitution is a set of assignments from variables to expressions.</p>
+<p>Unification isn’t really part of the semantics of logic programming, as the semantics is phrased in terms of satisfiability. But it is a standard technique used in implementing logic programming, and in practice the implementation defines the semantics. Prolog only implements first-order unification. Teyjus / λProlog limit to higher-order “pattern lambdas”. With ZipperPosition <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id265" title="Petar Vukmirović, Alexander Bentkamp, and Visa Nummelin. Efficient full higher-order unification. Logical Methods in Computer Science, December 2021. URL: https://lmcs.episciences.org/8837/pdf (visited on 2022-06-14), doi:10.46298/lmcs-17(4:18)2021.">VBN21</a>]</span> there is outlined a full higher-order unification algorithm extending Huet’s semi-algorithm - the need to support multiple unifiers for a complete set complicates things a bit.</p>
+<p>The outline of every unification algorithm is that it randomly applies simplifying reduction operations to an equation until it results in a substitution, then applies the substitution to the remaining equations (dereferencing). Here we show <span id="id4">[<a class="reference internal" href="../../zzreferences.html#id265" title="Petar Vukmirović, Alexander Bentkamp, and Visa Nummelin. Efficient full higher-order unification. Logical Methods in Computer Science, December 2021. URL: https://lmcs.episciences.org/8837/pdf (visited on 2022-06-14), doi:10.46298/lmcs-17(4:18)2021.">VBN21</a>]</span>’s, adapted to match the presentation on <a class="reference external" href="https://en.wikipedia.org/wiki/Unification_(computer_science)#A_unification_algorithm">Wikipedia</a>:</p>
+<ul class="simple">
+<li><p>delete: <code class="docutils literal notranslate"><span class="pre">s=s</span></code> is removed</p></li>
+<li><p>decompose: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">s1</span> <span class="pre">...</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">t1</span> <span class="pre">...</span> <span class="pre">tm</span></code> to equations <code class="docutils literal notranslate"><span class="pre">{s1</span> <span class="pre">=</span> <span class="pre">t1,</span> <span class="pre">...,</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">tm</span> <span class="pre">}</span></code></p></li>
+<li><p>rigid/rigid conflict: <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">sm</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">tn</span></code> fails if a and b are different rigid heads</p></li>
+<li><p>dereference: <code class="docutils literal notranslate"><span class="pre">F</span> <span class="pre">s1</span> <span class="pre">...</span> <span class="pre">sn</span> <span class="pre">=</span> <span class="pre">t</span></code> to <code class="docutils literal notranslate"><span class="pre">(F</span> <span class="pre">/.</span> <span class="pre">σ)</span> <span class="pre">...</span> <span class="pre">=</span> <span class="pre">t</span></code>, if the substitution σ from another equation maps F</p></li>
+<li><p>empty equation list: trivially soluble</p></li>
+<li><p>alpha/eta normalization: <code class="docutils literal notranslate"><span class="pre">λxm.s</span> <span class="pre">=</span> <span class="pre">λyn.t</span></code> to <code class="docutils literal notranslate"><span class="pre">λxm.s</span> <span class="pre">=</span> <span class="pre">λxm.t'</span> <span class="pre">xn+1</span> <span class="pre">.</span> <span class="pre">.</span> <span class="pre">.</span> <span class="pre">xm</span></code>, where <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">≥</span> <span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">xi</span></code> disjoint from <code class="docutils literal notranslate"><span class="pre">yj</span></code>, and <code class="docutils literal notranslate"><span class="pre">t'</span> <span class="pre">=</span> <span class="pre">t</span> <span class="pre">/.</span> <span class="pre">{y1</span> <span class="pre">→</span> <span class="pre">x1</span> <span class="pre">,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">yn</span> <span class="pre">→</span> <span class="pre">xn</span> <span class="pre">}</span></code></p></li>
+<li><p>beta normalization: reduce left/right to hnf</p></li>
+<li><p>under lambda: apply rule for <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span></code> to <code class="docutils literal notranslate"><span class="pre">λx.</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">b</span></code></p></li>
+</ul>
+<p>ZipperPosition has more complex reductions for hard cases:</p>
+<ul class="simple">
+<li><p>oracle fail: <code class="docutils literal notranslate"><span class="pre">s=t</span></code> fails if oracle determines to be insoluble</p></li>
+<li><p>oracle success: <code class="docutils literal notranslate"><span class="pre">s=t</span></code> has finite CSU, branch to each solution σ_i</p></li>
+<li><p>bind: try projections with the following binding substitutions:</p>
+<ul>
+<li><p>flex-rigid <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">a</span> <span class="pre">t)</span></code>: try an imitation of a for F, if a is constant, and all Huet-style projections for F, if F is not an identification variable.</p></li>
+<li><p>flex-flex with different heads <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">G</span> <span class="pre">t)</span></code>: all identifications and iterations for both F and G, and all JP-style projections for non-identification variables among F and G.</p></li>
+<li><p>flex-flex with identical heads and the head is an elimination variable, <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">t)</span></code>: no bindings.</p></li>
+<li><p>flex-flex with identical heads, <code class="docutils literal notranslate"><span class="pre">P(λx.</span> <span class="pre">F</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">λx.</span> <span class="pre">F</span> <span class="pre">t)</span></code>: all iterations for F at arguments of functional type and all eliminations for F.</p></li>
+</ul>
+</li>
+</ul>
+<p>The flex-binding step is slow, but a good set of oracles makes the algorithm efficient for most practical cases. Of course it would be better to find reduction rules that solve things generally rather than oracles which work on specific cases, but this is hard.</p>
+<p>The unifier search can be integrated with the overall logical search for satisfiable formulas.</p>
+<p>By default Prolog does not use the <a class="reference external" href="https://en.wikipedia.org/wiki/Occurs_check">occurs check</a> in unification. This means for <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">==</span> <span class="pre">f</span> <span class="pre">x</span></code> the substitution <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">-&gt;</span> <span class="pre">f</span> <span class="pre">x</span></code> is obtained. Denotationally this can be accommodated by allowing states to contain infinite rational terms, <span id="id5">[<a class="reference internal" href="../../zzreferences.html#id273" title="W.P. Weijland. Semantics for logic programs without occur check. Theoretical Computer Science, 71(1):155–174, March 1990. URL: https://linkinghub.elsevier.com/retrieve/pii/030439759090194M (visited on 2022-07-15), doi:10.1016/0304-3975(90)90194-M.">Wei90</a>]</span> <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">(f</span> <span class="pre">(f</span> <span class="pre">(...)))</span></code> in this case. In most Prolog programs the occurs check does not make a difference and simply slows down unification. <span id="id6">[<a class="reference internal" href="../../zzreferences.html#id14" title="Krzysztof R. Apt and Alessandro Pellegrini. Why the occur-check is not a problem. In Maurice Bruynooghe and Martin Wirsing, editors, Programming Language Implementation and Logic Programming, volume 631, pages 69–86. Springer-Verlag, Berlin/Heidelberg, 1992. URL: http://link.springer.com/10.1007/3-540-55844-6_128 (visited on 2022-07-14), doi:10.1007/3-540-55844-6_128.">AP92</a>]</span> Prolog defines a <code class="docutils literal notranslate"><span class="pre">unify_with_occurs_check</span></code> predicate, and has an option for doing the occurs check in the implicit unification when dispatching predicates. Meanwhile miniKanren always uses the occurs check. The occurs check is needed in first order logic theorem-proving, where skolemization turns quantifiers into variables and is sound only if the occurs check is used.</p>
+</section>
+</section>
+<section id="cycle-detection">
+<h2>Cycle detection<a class="headerlink" href="#cycle-detection" title="Link to this heading"></a></h2>
+<p>A first strategy for handling cycles is to prove the system is acyclic. Per <span id="id7">[<a class="reference internal" href="../../zzreferences.html#id150" title="Jeroen Ketema, Jan Willem Klop, and Vincent van Oostrom. Vicious circles in rewriting systems. In 5th International Workshop on Reduction Strategies in Rewriting and Programming, 20. Nara, Japan, April 2005. URL: https://www.dicosmo.org/WRS05/proceedings/jeroen.pdf.">KKvanOostrom05</a>]</span> this includes orthogonal weakly head normalizing higher-order TRSs.</p>
+<p>For general-purpose detection there are SCC computation algorithms; Wikipedia has a <a class="reference external" href="https://en.wikipedia.org/wiki/Strongly_connected_component#Algorithms">list</a>. The DFS algorithms seem most appropriate as they can naturally be maintained during the reduction graph search; finding the normal forms of a term essentially already is a DFS. Kosaraju’s algorithm is not appropriate as computing the transpose / converse of the reduction relation is not easy. Comparing Tarjan and the path-based algorithms, Tarjan uses a second index (pointer) while the path-based uses a stack. The stack manipulation of the path-based algorithm is simpler to understand than the invariants of Tarjan; the Wikipedia page for Tarjan is constantly vandalized with people who do not understand it. So I would say the path-based algorithm is better.</p>
+<p>For associativity and commutativity there are special unification algorithms, where we represent terms as lists or bags rather than trees. There are some PhD theses and so on for this, Maude has references. I would say these are optimizations and for now acyclic detection plus general-purpose cycle handling is sufficient.</p>
+</section>
+<section id="nondeterminism">
+<h2>Nondeterminism<a class="headerlink" href="#nondeterminism" title="Link to this heading"></a></h2>
+<p>This sounds a bit tricky to implement but it is not too bad. We can split into two steps:</p>
+<ul class="simple">
+<li><p>Find a value: Evaluate the expression to a value, any value including exceptional values. Because of the meaningless term reduction, every expression will evaluate to some kind of value. The search should be biased towards finding non-exception values but it does not need to be perfect, for example there are reduction strategies such as parallel outermost that are guaranteed to be normalizing for some classes of TRS. This is where cycle detection and infinite value handling come in.</p></li>
+<li><p>Non-determinism check: We can analyze confluence and the reduction sequence of the value to see if the expression can evaluate to anything else. If there are no other values or all other values are exceptions, we are done; otherwise, we handle the non-determinism appropriately, such as replacing an exception with a non-exception, erroring on multiple non-exception values at the top-level, collecting and returning the multiple values if inside a logical combinator such as <code class="docutils literal notranslate"><span class="pre">allOf</span></code>, or skipping the non-determinism check entirely for <code class="docutils literal notranslate"><span class="pre">oneOf</span></code>.</p></li>
+</ul>
+</section>
+<section id="infinitary-rewriting">
+<h2>Infinitary rewriting<a class="headerlink" href="#infinitary-rewriting" title="Link to this heading"></a></h2>
+<p>The common notions of an ARS carry over to infinitary reductions as follows: <span id="id8">[<a class="reference internal" href="../../zzreferences.html#id88" title="Jörg Endrullis, Clemens Grabmayer, Dimitri Hendriks, Jan Willem Klop, and Vincent Oostrom. Infinitary term rewriting for weakly orthogonal systems: properties and counterexamples. Logical Methods in Computer Science, 10(2):7, June 2014. URL: https://lmcs.episciences.org/752 (visited on 2022-07-10), doi:10.2168/LMCS-10(2:7)2014.">EGH+14</a>]</span></p>
+<ul class="simple">
+<li><p>transitive reduction: irreflexive kernel of reduction closure</p></li>
+<li><p>normal form: irreducible term</p></li>
+<li><p>strongly normalizing (terminating): every infinite reduction sequence has a limit</p></li>
+<li><p>nonterminating reduction: infinite reduction sequence with no limit or that does not reduce to its limit</p></li>
+<li><p>weakly normalizing (normalizing): every term has a reduction to a normal form</p></li>
+<li><p>confluence: if t reduces to t1 and t2, then there is a common term s such that t1 and t2 reduce to s.</p></li>
+<li><p>Church-Rosser: if t1 is equivalent via reductions and un-reductions to t2, then there is a common term s such that t1 and t2 reduce to s.</p></li>
+<li><p>normal form property w.r.t. reduction:: if u reduces to t and s, and s is a normal form, then t reduces to s</p></li>
+<li><p>normal form property: if t is equivalent to s and s is a normal form, then t reduces to s</p></li>
+<li><p>unique normalization w.r.t. reduction: if t reduces to t1 and t2, and t1, t2 are normal forms, then t1=t2</p></li>
+<li><p>unique normalization: if t1 is equivalent to t2, and t1, t2 are normal forms, then t1=t2</p></li>
+</ul>
+<p>However, common theorems such as Newman’s lemma do not carry over for the traditional “strong convergence” definition of closure. The examples of non-confluence do have confluent rewrites under T*, so I am not aware of any actual counterexamples, but I would like a proof that Newman’s lemma holds under T* to feel assured.</p>
+<section id="confluence">
+<h3>Confluence<a class="headerlink" href="#confluence" title="Link to this heading"></a></h3>
+<p>Confluence has gotten a lot of attention as well and has automated provers. Confluence implies UN→; it is equivalent if the TRS is weakly normalizing. And there is an extension theorem:  Similarly a system can be shown to be UN= by presenting an extension of it that is confluent. <span id="id9">[<a class="reference internal" href="../../zzreferences.html#id155" title="Jan Willem Klop and Roel de Vrijer. Extended term rewriting systems. In S. Kaplan and M. Okada, editors, Conditional and Typed Rewriting Systems, Lecture Notes in Computer Science, 26–50. Berlin, Heidelberg, 1991. Springer. URL: https://ir.cwi.nl/pub/20015/20015A.pdf, doi:10.1007/3-540-54317-1_79.">KdeVrijer91</a>]</span> So a UN= program is just a partially specified system. UN→ is a little more complex though. And the equivalence classes of terms are uncomputable in general so the extension is as well.</p>
+<p>Confluence avoids situations where a system may branch into two distinct diverging states. It makes finding a normalizing strategy much easier as the strategy only has to avoid getting stuck evaluating a term infinitely (using the same rule infinitely often), as opposed to UN→ where the strategy must avoid using the wrong reduction rule at every step.</p>
+<p>The Knuth-Bendix algorithm produces a confluent system from a set of non-oriented equations, but the rules in programs are oriented, so using this would be confusing. Not to mention that the algorithm fails often. So that’s out.</p>
+<p>A necessary condition for confluence is weak/local confluence, i.e. each critical pair is convergent. But this is not sufficient. Newman’s lemma is that a terminating locally confluent TRS is confluent. But termination is quite strong. A generalization is a critical pair system <span id="id10">[<a class="reference internal" href="../../zzreferences.html#id115" title="Nao Hirokawa and Aart Middeldorp. Decreasing diagrams and relative termination. arXiv:0910.2853 [cs], October 2009. Comment: v3: missing references added. URL: http://arxiv.org/abs/0910.2853 (visited on 2021-09-14), arXiv:0910.2853.">HM09</a>]</span> (also called decreasingly confluent): the system must be left-linear, locally confluent, and its critical pair steps must be <em>relatively terminating</em>, i.e. the relation ‘arbitrary steps followed by a critical pair step followed by arbitrary steps’ is terminating. Trivial critical pair steps can be excluded, hence this includes weakly orthogonal TRSs. For a terminating TRS the TRS syntactic equality notion is equivalent to strict equality, hence the system is left linear in the CTRS sense, hence why this includes Newman’s lemma.</p>
+<p>We say → has random descent (RD), if for each R:a ↔∗b with b in normal form, all maximal reductions from a have length d(R) and end in b. Systems with random descent are confluent.</p>
+</section>
+<section id="normalization">
+<h3>Normalization<a class="headerlink" href="#normalization" title="Link to this heading"></a></h3>
+<p>A hypernormalizing strategy is a strategy that is normalizing even if arbitrary reduction steps are taken before and after steps of the strategy. This allows the compiler to make optimizations without changing the behavior of the program. A hypernormalizing strategy allows aggressive optimizations and program transforms.</p>
+<p>There are also stronger properties than normalization. A Church-Rosser strategy is one with common reducts, i.e. there exist m and n, such that <span class="math notranslate nohighlight">\(F^m(t)=F^n(u)\)</span> for every t and u equal via forward/backward evaluation. A normalizing strategy is Church-Rosser if the system is confluent and weakly normalizing (i.e. all objects have a normal form). In general a many-step CR strategy exists for effective ARS’s, i.e. countable (in a computable fashion) and with a computable reduction relation. But the strategy is quite hard to compute, as it has to synchronize reducing subterms so that all components are reduced the same amount. And it’s not clear that this synchronization offers anything to the programmer.</p>
+<p>Cofinal strategies are weaker than Church-Rosser but stronger than normalizing: for every term a, if a reduces in a finite number of steps to b, then there is an object c obtained by applying the strategy some number of times to a such that b reduces to c. For critical pair TRSs any “fair” strategy that ensures every redex is eventually contracted is cofinal. The cofinal property provides slick proofs - it ensures every redex not part of a cycle is contracted. But at runtime non-normalizing terms have indistinguishable behavior (infinite loop), hence this means the cofinal strategy is doing unnecessary work.</p>
+<p>There are also termination properties like strong convergence that ensure that for every term, there exists some number of reduction steps after which the head cannot be rewritten.
+To ensure that term rewriting halts we probably also want a property like strong convergence, but this is a property of the rewriting strategy, not the TRS proper.</p>
+</section>
+</section>
+<section id="evaluation-strategy">
+<h2>Evaluation strategy<a class="headerlink" href="#evaluation-strategy" title="Link to this heading"></a></h2>
+<p>For convergent (confluent and strongly normalizing) programs, such as the simply typed lambda calculus, all strategies are normalizing and the result is the same no matter how they are reduced. So the focus is on inferring convergence and doing reduction efficiently. “In the small” leftmost innermost ensures “complete development”, i.e. a subterm is reduced completely before the outer term, hence we can compute the subterm fully and only store an optimized representation of the normal form. So we can compile to fast assembly like a state machine. “In the large” optimal reduction ensures the smallest number of steps so we can avoid duplicating work and performing unneeded work.</p>
+<p>But strongly normalizing implies not Turing complete, hence the termination verification will cause problems for complex programs. We need a fallback for these complex programs. Leftmost outermost reduction is the basis of lazy evaluation and is hypernormalizing for the lambda calculus. But for TRSs LO is only normalizing for left-normal TRSs, where variables do not precede function symbols in the left-hand sides of the rewrite rule. A better strategy is outermost fair (ensuring each outermost redex will eventually be evaluated - the simplest example is parallel outermost) - it’s hypernormalizing for critical pair TRSs (decreasingly confluent TRSs), in particular weakly orthogonal TRSs. <span id="id11">[<a class="reference internal" href="../../zzreferences.html#id116" title="Nao Hirokawa and Aart Middeldorp. Strategies for decreasingly confluent rewrite systems. Reduction Strategies in Rewriting and Programming, pages 23, 2011. URL: http://elp.webs.upv.es/workshops/wrs2011/pre-proceedings.pdf#page=31.">HM11</a>]</span> So outermost fair seems a reasonable default, but there are non-orthogonal systems where it fails. The optimal reduction stuff is defined for match sequential TRSs but is a normalizing strategy that computes a result in the smallest number of reduction steps.</p>
+<p>We could do user-specified strategies like Stratego, but then how would we know that they’re normalizing.</p>
+<p>There are is also lenient evaluation which evaluates all redexes in parallel except inside the arms of conditionals and inside lambdas, but it adds extra memory overhead for parameter passing.</p>
+<p>Now, one can argue about which computational strategy is better (time, space, parallelism, …)
+Stroscot: be accepting of programs, ensure a normalizing strategy. But after that aim for most efficient in time/space for strict programs.</p>
+<p>Q: can normalizing be as efficient as strict
+profiling, other optimization tricks</p>
+<p>So The way we handle cycles in the rewrite engine is something like:</p>
+<ul class="simple">
+<li><p>detect cyclic term via rule cycle detection or presence of AC operator</p></li>
+<li><p>use specialized matching (eg AC matching or Tarjan SCC + memo hash table) to identify all reductions out of SCC</p></li>
+<li><p>end with condensed normal form if no reduction out of SCC</p></li>
+<li><p>otherwise, pick a reduction out of the SCC</p></li>
+</ul>
+<p>Then this infinite term is computed in chunks and fed to the surrounding context on demand (laziness), ensuring that a finite normal form is reached if possible and otherwise implementing an infinite stream of commands.</p>
+<p>If the substitution calculus is convergent, then terms can be represented by preterms in normal form.</p>
+<p>If reduction does not end in a condensed normal form, then the sequence of terms must be infinitely expanding in the sense that for every size s there is a point in the reduction where terms are always at least size s. Otherwise, assuming a finite number of term symbols, there are only finitely many terms of size &lt; s, so there would be a cycle in the reduction and reduction would end in a condensed normal form.</p>
+<p>A context is linear if every hole occurs exactly once.</p>
+</section>
+<section id="verifying-confluence">
+<h2>Verifying confluence<a class="headerlink" href="#verifying-confluence" title="Link to this heading"></a></h2>
+<p>We often want to prove confluence. There are some key algorithms:</p>
+<ul>
+<li><p>The decreasing diagrams technique is a complete method for confluence on countable abstract rewrite systems.</p></li>
+<li><p>Computing critical pairs. A non-joinable critical pair means the system is not confluent. If all critical pairs are joinable the system is said to be locally confluent. An orthogonal system is one with no critical pairs, while a weakly orthogonal system is one with critical pairs that are trivially joinable. For an HORS there are more constraints to be orthogonal in addition to no critical pairs (“every set of redexes is pairwise simultaneous”). The substitution calculus must be complete, only needed for gluing, a descendant rewriting system, parametric, have head-defined rules, and be naturally closed under substitution. Parallel rewrite steps must be serializable and left-hand sides of rules must be linear.</p>
+<p>V. van Oostrom. Developing developments. TCS, 175(1):159–181, 1997.
+V. van Oostrom and F. van Raamsdonk. Weak orthogonality implies confluence: The higher order case. In Proc. 3rd LFCS, volume 813 of LNCS, pages 379–392, 1994.</p>
+</li>
+<li><p>Proving termination. The Knuth Bendix Criterion (Newmann’s lemma) says a terminating system is confluent iff it is locally confluent. Termination can be shown by exhibiting a well-ordering, such as recursive path ordering, dependency graph decomposition, and the subterm criterion.</p>
+<p>WANDA has more advanced techniques. Cynthia Kop. Higher Order Termination. PhD thesis, Vrije Universiteit, Amsterdam, 2012</p>
+<p>TTT2 also has some good techniques.</p>
+<p>Gramlich–Ohlebusch’s criterion says for innermost-terminating TRSs R with no innermost critical pairs, R is confluent if and only if all critical pairs are joinable by innermost reduction. There are innermost terminating systems that aren’t terminating so this criterion can prove some systems that Knuth-Bendix can’t.</p>
+</li>
+<li><p>Decomposition: Several properties allow dividing the system into smaller, more tractable systems. First is modularity, that the disjoint union of two systems with the property has the property. We also usually have the converse, the disjoint union has the property only if the subsystems have the property.</p>
+<ul class="simple">
+<li><p>Weak normalization and consistency (w.r.t. equivalence) are modular for first-order systems.</p></li>
+<li><p>Left linearity, confluence, and unique normal forms (w.r.t. equivalence) are modular for semi-equational CTRSs.</p></li>
+<li><p>Confluence is modular for join and semi-equational CTRSs. In fact if the disjoint union is confluent then the component systems must be confluent.</p></li>
+<li><p>Confluence plus left linearity is modular for higher-order TRSs.</p></li>
+<li><p>Weak termination, weak innermost termination, and strong innermost termination are modular for CTRSs in combination with confluence or the property that there are no extra variables in the conditions.</p></li>
+<li><p>NF, unique normal forms with respect to reduction, and consistency with respect to reduction are modular in combination with left linearity. Consistency w.r.t. reduction means that there is no term reducing to two distinct variables; it is implied by the unique normal form property w.r.t. reduction as variables are normal forms.</p></li>
+<li><p>Strong normalization plus consistency w.r.t. reduction plus left linearity is modular. This likely holds for CTRSs without extra variables as well.</p></li>
+</ul>
+<p>Order-sorted decomposition uses persistence of confluence. If sorts can be assigned to all terms and rule variables such that all rules don’t increase the sort, then confluence can be separately considered for each sort and confluence as a whole follows from confluence on well-sorted terms.</p>
+<p>Decreasing diagrams allows decomposing a left-linear TRS into duplicating and non-duplicating rules. The TRS is confluent if all critical peaks are decreasing with respect to a rule labeling and the duplicating rules are terminating relative to the non-terminating rules.</p>
+<p>Layer-preserving decomposition decomposes TRSs into minimal pieces such that taking pieces pairwise they form layer-preserving combinations, i.e. rules in one piece operate only on terms of that piece. It is used in CSI.</p>
+</li>
+<li><ol class="upperalpha simple" start="10">
+<li><p>Nagele, B. Felgenhauer, and A. Middeldorp. Improving automatic confluence analysis of rewrite systems by redundant rules. In Proc. 26th RTA, volume 36 of LIPIcs, pages 257–268, 2015.</p></li>
+</ol>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Reduction-Example.html" class="btn btn-neutral float-left" title="Reduction example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tools.html" class="btn btn-neutral float-right" title="Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

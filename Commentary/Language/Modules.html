@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modules &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Objects" href="Objects.html" />
+    <link rel="prev" title="Memory" href="Memory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#terminology">Terminology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module">Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functors">Functors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lexical-scoping">Lexical scoping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#imports">Imports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#type-piracy">Type piracy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#speed">Speed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#split-definition">Split definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-versioning">Module versioning</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Modules</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Modules.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Link to this heading"></a></h1>
+<p>Developers can add new language features and functionality through libraries and modules.</p>
+<p>3-5A. It shall be possible to encapsulate definitions. An encapsulation may contain declarations of anything (including the data elements and operations comprising a type) that is definable in programs. The language shall permit multiple explicit instantiations of an encapsulation.</p>
+<p>3-5B. An encapsulation may be used to inhibit external access to implementation properties of the definition. In particular, it shall be possible to prevent external reference to any declaration within the encapsulation including automatically defined operations such as type conversions and equality. Definitions that are made within an encapsulation and are externally accessible may be renamed before use outside the encapsulation.</p>
+<p>3-5C. Variables declared within an encapsulation, but not within a function, procedure, or process of the encapsulation, shall remain allocated and retain their values throughout the scope in which the encapsulation is instantiated.</p>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Link to this heading"></a></h2>
+<p>(based on Carbon)</p>
+<ul class="simple">
+<li><p>a <em>name path</em> is a dot-separated list of identifiers or symbols. For example, <code class="docutils literal notranslate"><span class="pre">stdlib.getTime</span></code> is a name path and <code class="docutils literal notranslate"><span class="pre">stdlib</span></code> and <code class="docutils literal notranslate"><span class="pre">getTime</span></code> are identifiers. A bare identifier <code class="docutils literal notranslate"><span class="pre">getTime</span></code> is a trivial name path; generally name paths can be shortened to bare identifiers using imports.</p></li>
+<li><p>an <em>entity</em> is a value, such as a function or constant. It is generally referred to by an associated name path. For example, in <code class="docutils literal notranslate"><span class="pre">stdlib.getTime</span> <span class="pre">stdlib.clocks.SystemClock</span></code>, <code class="docutils literal notranslate"><span class="pre">stdlib.getTime</span></code> is resolved to an entity which is an I/O action and <code class="docutils literal notranslate"><span class="pre">stdlib.clocks.SystemClock</span></code> is resolved to an entity which is a symbol. Multiple name paths may refer to the same entity.</p></li>
+<li><p><em>libraries</em> are considered an output format in Stroscot. Similarly to building an executable, you can build a shared or static library. The nomenclature of “library” is not otherwise used in programming Stroscot as it is ambiguous.</p></li>
+<li><p>a <em>module</em> or namespace is a convenience grouping of entities, more formally a map from names to entities. Modules may be nested, recursively/cyclically, and an entity may appear in multiple modules. The dot-notation and name path syntax is closely associated with accessing a module’s entities.</p></li>
+<li><p>a <em>package</em> is a group of files, and is the standard unit for distribution (i.e., a package is typically downloaded as a zip file or such). A package may contain many modules or none at all (providing only top-level entities). Generally however a package is imported and encapsulated as a module.</p></li>
+</ul>
+</section>
+<section id="module">
+<h2>Module<a class="headerlink" href="#module" title="Link to this heading"></a></h2>
+<p>Modules are reusable components containing code that are themselves first-class objects, replacing more simplistic ways of namespacing and encapsulating units of code such as structs of methods. Modules allow code reuse and abstraction. For example, one can create an “abstract data type” by defining a type in a module <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">C</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">Csym</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">c</span> <span class="pre">|</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Int,</span> <span class="pre">b</span> <span class="pre">:</span> <span class="pre">Float,</span> <span class="pre">c</span> <span class="pre">:</span> <span class="pre">Double</span> <span class="pre">}</span></code> and not exporting its underlying constructor symbol <code class="docutils literal notranslate"><span class="pre">Csym</span></code>. This is not really the mathematical notion of an ADT, where one takes the “free object” defined by the operations and constraints, but since Stroscot supports term rewriting it is possible to define the mathematical model as a series of rewrite rules and then export the symbols, fulfilling the concept of ADT in both theory and practice.</p>
+<p>Stroscot’s module system is based on F#, OCaml, Standard ML, Agda, 1ML, MixML, Backpack, and Newspeak’s module systems. (TODO: reread the systems to see if I missed anything. But they’re mostly type systems, rather than functionality)</p>
+<p>A module is a set of definitions - a set rather than a list because the order is not relevant. These definitions use various symbols. Some symbols are declared “visible” and are exposed/exported in the signature. We write: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> at the top of the module, with <code class="docutils literal notranslate"><span class="pre">a,</span> <span class="pre">b,</span> <span class="pre">c</span></code> a list of exported names. There should be a reasonable definition of the module in the absence of imports/exports, so no module syntax is needed to write simple programs. For example, the Prelude is implicitly imported, and all symbols are exported.</p>
+<p>Symbols not in the signature are considered “internal”. Normally they should not be accessed, but since every rule has an exception Stroscot allows accessing these symbols through the <code class="docutils literal notranslate"><span class="pre">_internal</span></code> pseudo-module, like <code class="docutils literal notranslate"><span class="pre">a._internal.b</span></code>. Thus definitions are always accessible somehow. This avoids Java’s issue of reflection allowing access to “private” data. If you really want to lock an API down then you can clear out <code class="docutils literal notranslate"><span class="pre">_internal</span></code> by defining an immediately invoked function expression that first computes the module as a value and then returns a separate module that only re-exports the public definitions. But it is probably better to make the methods themselves use a secret password, token, crypto, etc. to prevent unauthorized access.</p>
+<p>Modules can be nested within other modules, to an arbitrary depth. Modules can also re-export other modules by importing the modules or by individual copy definitions using the dot syntax, <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">C.a</span></code>.</p>
+</section>
+<section id="functors">
+<h2>Functors<a class="headerlink" href="#functors" title="Link to this heading"></a></h2>
+<p>A function that produces a module is called a functor. Strictly speaking, a functor is not a module, they are distinct types. But the import system can resolve functors to modules - it binds imported modules (functor arguments) to actual modules, and ties recursive knots in the case of recursive imports. With pervasive and automatic import resolution, the distinction between functors and modules becomes blurred because functors with module arguments can be used in places where a module is expected.</p>
+<p>In practical programs most code is contained in functors. For example every package in Nixpkgs is a functor like <code class="docutils literal notranslate"><span class="pre">{pkgs}:</span> <span class="pre">pkgs.mkPackage</span> <span class="pre">{</span> <span class="pre">...</span> <span class="pre">}</span></code>.</p>
+</section>
+<section id="lexical-scoping">
+<h2>Lexical scoping<a class="headerlink" href="#lexical-scoping" title="Link to this heading"></a></h2>
+<p>5C. Everything (including operators) declared in a program shall have a scope (i.e., a portion of the program in which it can be referenced). Scopes shall be determinable during translation. Scopes may be nested (i.e., lexically embedded). A declaration may be made in any scope. Anything other than a variable shall be accessable within any nested scope of its definition.</p>
+<p>7C. A reference to an identifier that is not declared in the most local scope shall refer to a program element that is lexically global, rather than to one that is global through the dynamic calling structure.</p>
+<p>An identifier is visible from the point of its declaration to the end of the immediately surrounding block.
+There is only one effective scope at any point in the code (for instance, variables and types are looked up in the same scope), which pulls in variables from various lexical scopes. Uniform scoping rules make programs easier to read and to understand.</p>
+</section>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading"></a></h2>
+<p>Importing a module, either top-level or within a block scope, imports all visible symbols in the module for that scope. The dot syntax <code class="docutils literal notranslate"><span class="pre">a.b</span></code> allows retrieving a specific symbol <code class="docutils literal notranslate"><span class="pre">b</span></code> within a module <code class="docutils literal notranslate"><span class="pre">a</span></code>, and extends to an expression level import, <code class="docutils literal notranslate"><span class="pre">a.(expr)</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">import</span> <span class="pre">a;</span> <span class="pre">expr</span> <span class="pre">}</span></code>. There is also the <a class="reference external" href="https://2ality.com/2011/06/with-statement.html">dreaded</a> <code class="docutils literal notranslate"><span class="pre">with</span></code> statement.</p>
+<p>Name lookup maps a name to the entities in various modules. Name lookup succeeds when it finds a single entity or multiple; multiple entities are called an overload set. Overload resolution occurs after name lookup and resolves the overload set to a single entity using the context in which the name appears.</p>
+<p>Lookup for a name n from a lexical scope s returns all entities such that there exists a name in the declaration space of s whose stem identifier is equal to the stem identifier of n. Outer scope entities are shadowed by inner scope entities, and later identifiers shadow earlier identifiers with the same name; shadowing generates a warning. Another warning checks for similarly-named identifiers based on <a class="reference external" href="http://www.unicode.org/reports/tr39/#Confusable_Detection">confusables</a>.</p>
+<p>Some ways of importing (based on Python):</p>
+<ul class="simple">
+<li><p>fully qualified: no import, write <code class="docutils literal notranslate"><span class="pre">module_a.module_b.module_c.method()</span></code></p></li>
+<li><p>module import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b.module_c</span></code>, <code class="docutils literal notranslate"><span class="pre">module_c.method()</span></code></p></li>
+<li><p>member import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b.module_c.method</span></code>, <code class="docutils literal notranslate"><span class="pre">method()</span></code>.</p></li>
+<li><p>wildcard import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b.module_c.*</span></code>, <code class="docutils literal notranslate"><span class="pre">method()</span></code>.</p></li>
+<li><p>renamed module import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b.module_c</span> <span class="pre">as</span> <span class="pre">module_d</span></code>, <code class="docutils literal notranslate"><span class="pre">module_d.method()</span></code></p></li>
+<li><p>renamed member import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b.module_c.method</span> <span class="pre">as</span> <span class="pre">method2</span></code>, <code class="docutils literal notranslate"><span class="pre">method2()</span></code>.</p></li>
+<li><p>namespace import: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module_a.module_b</span></code>, <code class="docutils literal notranslate"><span class="pre">module_b.module_c.method()</span></code></p></li>
+</ul>
+<p>Fully qualified names are mainly useful at the REPL, when you just want to access something but don’t want to write two statements. They are also useful conceptually, as a way to talk about and use the global namespace. Indeed Nixpkgs does not expose some values in the global namespace and it is annoying to try to access them. In library code though, they are a bit verbose - it could be usable for a function that is only used in one place, or for a quick hack, but it is better style to list an explicit import. Still though, it seems worth supporting fully qualified names everywhere for consistency.</p>
+<p>The module import is clear about the origin of each function, avoiding name clashes and some modules deliberately use short, ambiguous names such as <code class="docutils literal notranslate"><span class="pre">CSV.read</span></code> so that they can only be used with module imports. It certainly is a common style that should be supported.</p>
+<p>The member import is the most concise, and for unambiguous math function like <code class="docutils literal notranslate"><span class="pre">sin</span></code> it doesn’t make much sense to use the module import. So it also should be supported. Similarly importing all math functions is kind of annoying so the wildcard import makes a lot of sense.</p>
+<p>The renaming imports are useful to solve name clashes. But it is questionable whether name clashes need to be resolved in this way, and whether the renamed version is recognizable. For example, Haskell has gotten to the point where people write <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">Set</span> <span class="pre">as</span> <span class="pre">S</span></code>, a terrible name. It is because the names of functions clash (e.g. <code class="docutils literal notranslate"><span class="pre">map</span></code> in the Prelude and <code class="docutils literal notranslate"><span class="pre">map</span></code> on a <code class="docutils literal notranslate"><span class="pre">Set</span></code>). But Stroscot has overloading so this clash isn’t an issue at all. And a strong standard library committee means that there will be very few name clashes. Still though, I could see it being useful if third-party libraries conflict, or some other rare cases; it doesn’t seem worth excluding renaming import entirely like Java.</p>
+<p>The namespace import is the bastard child of a fully qualified import and a renaming import. It is still pretty verbose, but it is a little clearer than renaming the module to something unrelated. I don’t think it will be used much in practice, but if fully qualified imports are supported it makes sense to also allow partially qualified namespace imports.</p>
+</section>
+<section id="type-piracy">
+<h2>Type piracy<a class="headerlink" href="#type-piracy" title="Link to this heading"></a></h2>
+<p>Julia has “type piracy” where method definitions are visible even if you don’t import that module. For example</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">A</span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span>
+<span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="ow">::</span><span class="kt">Symbol</span><span class="p">)</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="nf">end</span>
+
+<span class="kr">module</span><span class="w"> </span><span class="nn">B</span>
+<span class="kr">import</span><span class="w"> </span><span class="nn">Base.</span><span class="o">*</span>
+<span class="nf">test</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;A&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="kt">Symbol</span><span class="w"> </span><span class="s">&quot;B&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Apparently in Julia B will use A’s definition. This is not wanted, because it means there is a global rule definition space. In Stroscot, only rules that are in the transitive closure of explicitly imported dependencies should apply.</p>
+</section>
+<section id="speed">
+<h2>Speed<a class="headerlink" href="#speed" title="Link to this heading"></a></h2>
+<p>Stroscot has no forward declarations and no header files; everything is declared exactly once. This is in contrast to C++ header includes which are slow because each include must be scanned every time it is included, as much as 30x in bad cases. This explodes code from 2000 files totaling 4.2 MB to 8 GB of disk usage. See for example how Go caches compiled files hence avoiding C++’s issues.</p>
+</section>
+<section id="split-definition">
+<h2>Split definition<a class="headerlink" href="#split-definition" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://github.com/carbon-language/carbon-lang/blob/trunk/docs/design/code_and_name_organization/README.md#small-programs">Carbon</a> mentions the possibility of splitting definitions into interface and implementation, and putting these into separate files, similar to the standard C .h / .c split. They give two reasons for liking this: (1) may help organize code. (2) may let the build system distinguish between the dependencies of the API itself and its underlying implementation.</p>
+<p>Organizing code seems reasonable. It is definitely possible for someone to get enthusiastic with the modules and to end up with a mutually recursive import cycle. Like Carbon’s example:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kr">module</span><span class="w"> </span><span class="nn">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kr">import</span><span class="w"> </span><span class="nn">B</span>
+<span class="w">  </span><span class="n">symbol</span><span class="w"> </span><span class="kt">Red</span><span class="p">,</span><span class="w"> </span><span class="kt">Blue</span><span class="p">,</span><span class="w"> </span><span class="kt">Green</span>
+<span class="w">  </span><span class="n">set</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="p">{</span><span class="kt">Red</span><span class="p">,</span><span class="w"> </span><span class="kt">Blue</span><span class="p">,</span><span class="w"> </span><span class="kt">Green</span><span class="p">}</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="kt">:</span><span class="w"> </span><span class="kt">Color</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">String</span>
+<span class="p">}</span>
+<span class="kr">module</span><span class="w"> </span><span class="nn">B</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kr">import</span><span class="w"> </span><span class="nn">A</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="kt">Red</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Red&quot;</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="kt">Blue</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Blue&quot;</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="kt">Green</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="s">&quot;Green&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Now in practice, I have read many arguments against recursive imports. For example Go prohibits import cycles (<a class="reference external" href="https://github.com/golang/go/issues/30247#issuecomment-463940936">thread</a>). Summary of Pike’s arguments:</p>
+<ul class="simple">
+<li><p>with recursive dependencies, the dependency graph tends towards one huge cyclical blob</p></li>
+<li><p>programmers are less lazy and manage their dependencies better</p></li>
+<li><p>the dependency graph is cleaner and more understandable to developers</p></li>
+<li><p>builds are faster</p></li>
+<li><p>it is simpler to implement</p></li>
+<li><p>it is simpler to trace import chains (“detangle”)</p></li>
+</ul>
+<p>But it is less convenient - programs that “should” compile don’t. One’s brain naturally accepts circular dependencies and so there is a mismatch. One wants a definition at a particular place in the module hierarchy and it is only while implementing that one notices it requires circular imports. Many libraries use circular imports - Go standard library, Haskell standard library, etc. When one want to express a circular import structure in Go, one has to contort it - either by manually condensing the definitions into SCC’s, or by using hacks such as <code class="docutils literal notranslate"><span class="pre">compile:&quot;together&quot;</span></code>, interfaces, or runtime private calls with <code class="docutils literal notranslate"><span class="pre">go:linkname</span></code>. View in the context of these workarounds, Pike’s arguments are less convincing:</p>
+<ul class="simple">
+<li><p>at the conceptual level, the dependency structure is unchanged</p></li>
+<li><p>programmers are actively working against the language to achieve their desired dependency structure</p></li>
+<li><p>the module layout is artificially constrained and end up with huge, bloated, difficult-to-navigate modules</p></li>
+<li><p>the builds are slow anyway, with the hacks included</p></li>
+<li><p>the workarounds waste significantly more developer time than just implementing cyclic imports</p></li>
+<li><p>detangling import chains is more difficult with the hacks than if it was built-in</p></li>
+</ul>
+<p>For Stroscot, we are doing whole-program analysis anyway for optimization purposes, so it is fairly straightforward to allow recursive imports. The incremental build system is designed to handle recursive imports and other such oddities. Pike’s concerns about understandability can be addressed by a lint analysis that finds recursive imports and suggests ways to resolve them.</p>
+<p>Now moving on to Carbon’s second point, letting the build system distinguish between the dependencies of the API itself and its underlying implementation. Steelman 1B similarly says “The language shall require some redundant specifications in programs.” This contradicts the DRY best practice (“Don’t repeat yourself”), because now there are multiple points of truth - first you write the implementation, then you are required to write the specification on top as a duplication of the implementation. These are coupled and now when you change one you have to change the other. In Stroscot, this redundancy is avoided by making the implementation the only source of truth. Type signatures (specifications) do not affect the runtime behavior at all, but rather are compiler-checked assertions about the behavior of the implementation. These assertions are not redundant because it could indeed be the case that the implementation does not satisfy them. But such assertions are not required, because the implementation itself is the sole source of behavior. Because they are not required, there are no restrictions on where they appear - they may appear next to the implementation, or near the site of API use, or anywhere else in the program.</p>
+</section>
+<section id="module-versioning">
+<h2>Module versioning<a class="headerlink" href="#module-versioning" title="Link to this heading"></a></h2>
+<p>With packages, we have not only simple modules in our app like <code class="docutils literal notranslate"><span class="pre">MyModule</span></code> but also versioned modules like <code class="docutils literal notranslate"><span class="pre">packageA-1.2.3.4:SomeModule</span></code>. One may ask how much information is needed in the version. Based on <a class="reference external" href="https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview">MS</a>, the full form of a versioned module identifier should have the following information about its package:</p>
+<ul class="simple">
+<li><p>Package Name: A memorable name chosen by the package developer. Names are not guaranteed to be unique in the general ecosystem, but are unique to a given publisher.</p></li>
+<li><p>Publisher: The real-world author, as identified by their signing certificate’s public key. Pretty much globally unique, the hard part is rather identifying when two certificates represent the same entity.</p></li>
+<li><p>Version: Version number of the package, ordered by some canonical version comparison algorithm. The module developer can choose arbitrary version numbers, or just leave it 0 if the date is sufficient, but usually they will follow guidelines like <a class="reference external" href="https://semver.org/">SemVer</a>, “Major.Minor.Build.Revision” or so.</p>
+<ul>
+<li><p>Version comparison algorithm: Split both strings into parts, <code class="docutils literal notranslate"><span class="pre">[A-Za-z0-9~]</span></code> and complement, and compare starting from left to right. Then if the first character of both parts is a tilde, it is trimmed. Otherwise, the ~ (tilde) character indicates that a given package or version should be considered older (even if it is numerically larger), so if <code class="docutils literal notranslate"><span class="pre">a</span></code> begins with a tilde, <code class="docutils literal notranslate"><span class="pre">b</span></code> is newer, and vice-versa. Numbers and words are popped off as units and compared in the following order: any string not found in this list &lt; dev &lt; alpha = a &lt; beta = b &lt; pre &lt; RC = rc &lt; # &lt; pl = p. If one side runs out of characters, the other side is newer, except that a present release specifier is treated as comparing with an absent number. Otherwise, if the last part compares equal, the versions are equal.</p></li>
+</ul>
+</li>
+<li><p>Date: The date of the module’s release, used for preferring updated versions of package.</p></li>
+<li><p>Hash: Sometimes you want to fork a module rather than update it. As such there is a hash, to specify Git-like fine grained changes while avoiding collisions.</p></li>
+</ul>
+<p>Versioned module identifiers in source code should primarily use name. Publisher and version can be used to disambiguate. Neither publisher keys, dates, nor hashes should appear in actual source code, to avoid the “magic number” antipattern. Instead, they should be centralized in a lock file. Publisher keys should be named by the lockfile and their symbolic name used in the code, to support key expiration and so on. If a module depends on modules with colliding names, the lockfile should specify renamings for the modules so that they can be used together. The lockfile also solves issues like diamond dependencies and import cycles. E.g. suppose we have foo-1:A and bar-1:B depending on each other. If foo-2 is released, do we want foo-2:A -&gt; bar-1:B &lt;-&gt; foo-1:a or else foo-2:A &lt;-&gt; bar-1:B.</p>
+<p>The module identifier specifies the module source, not its built form, so processor architecture as given by MS is not really relevant.</p>
+<p>I wanted a constraint that the dates must monotically increase, but it is hard to express. For example we may release (in chronological order) 1.0, 2.0, 1.0.1, 2.0.1, 1.1.0. It is really a constraint of the package repository that nobody may release back-dated software, always stamped with the current date, but we have no way of verifying this client-side just given the package list.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Objects.html" class="btn btn-neutral float-right" title="Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

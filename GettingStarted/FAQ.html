@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FAQ &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -48,11 +50,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="About.html">About</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">FAQ</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#does-it-run">Does it run?</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#what-language-is-the-compiler-written-in">What language is the compiler written in?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#where-can-i-ask-questions">Where can I ask questions?</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#how-do-i-contribute">How do I contribute?</a></li>
 </ul>
@@ -97,32 +97,13 @@
 <h2>Does it run?<a class="headerlink" href="#does-it-run" title="Link to this heading"></a></h2>
 <p>No, it’s in the design stage. But there are Haskell experiments in the <code class="docutils literal notranslate"><span class="pre">src/</span></code> and <code class="docutils literal notranslate"><span class="pre">test/</span></code> directories that can be run.</p>
 </section>
-<section id="what-language-is-the-compiler-written-in">
-<h2>What language is the compiler written in?<a class="headerlink" href="#what-language-is-the-compiler-written-in" title="Link to this heading"></a></h2>
-<p>A near-term goal is to write Stroscot in itself. However, it has to generate code first. I originally picked JavaScript to start for a number of reasons:</p>
-<ul class="simple">
-<li><p>It’s the fastest interpreted language available</p></li>
-<li><p>It has reasonably up-to-date syntax and features thanks to TC39</p></li>
-<li><p>A lot of the <span class="xref std std-ref">inspiring projects</span> were written in JS</p></li>
-<li><p>LLVM compiles to JS and there are LLVM bindings available for JS</p></li>
-<li><p>TypeScript doesn’t add much besides compilation overhead</p></li>
-</ul>
-<p>Since then, development has shifted to Haskell, for other reasons:</p>
-<ul class="simple">
-<li><p>The compiler/type system prevents a lot of common errors (particularly typos, which JS doesn’t detect until late)</p></li>
-<li><p>A lot of other type-system-heavy projects are written in Haskell</p></li>
-<li><p>I’m most familiar with Haskell.</p></li>
-</ul>
-</section>
 <section id="where-can-i-ask-questions">
 <h2>Where can I ask questions?<a class="headerlink" href="#where-can-i-ask-questions" title="Link to this heading"></a></h2>
 <p>See the <a class="reference internal" href="../index.html#links"><span class="std std-ref">links</span></a></p>
 </section>
 <section id="how-do-i-contribute">
 <h2>How do I contribute?<a class="headerlink" href="#how-do-i-contribute" title="Link to this heading"></a></h2>
-<p>Mainly by reading the documentation and making comments. Stroscot is in “slow-burn” mode while the language is designed so any and all input will be taken into consideration. If you want to write docs yourself commit access is available for anyone with 2 or more accepted pull requests.</p>
-<p>The license isn’t set yet (WTFPL is just a placeholder) so for now please license your contributions under CC0.</p>
-<p>The documentation is supposed to be inviting to people of all skill levels, so documenting items like how to get started, where to find key files, expectations, etc. are all contributions that will be accepted.</p>
+<p>See CONTRIBUTING.rst in the top-level folder of the Git repository.</p>
 </section>
 </section>
 

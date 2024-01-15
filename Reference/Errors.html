@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Errors &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -22,8 +24,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Commentary" href="../Commentary/index.html" />
-    <link rel="prev" title="Build system" href="BuildSystem.html" /> 
+    <link rel="next" title="Metaprogramming" href="Fexprs.html" />
+    <link rel="prev" title="Dispatch" href="Dispatch.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,15 +52,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Errors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ambiguous-identifier">Ambiguous identifier</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#automatic-error-propagation">Automatic error propagation</a></li>
@@ -94,6 +90,13 @@
 <li class="toctree-l3"><a class="reference internal" href="#unused-definition">Unused definition</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -800,38 +803,38 @@ Please remove one import or disambiguate using qualified names.</p>
 <tr class="row-odd"><td><p>Incorrect</p></td>
 <td><p>Correct</p></td>
 </tr>
-<tr class="row-even"><td><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">module1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span><span class="w"> </span><span class="err">{</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x</span><span class="w"> </span><span class="err">:</span><span class="w"> </span><span class="err">i32)</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">1</span>
-<span class="err">}</span>
+<tr class="row-even"><td><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>module1 = module {
+  foo (x : i32) = 1
+}
 
 
-<span class="err">module2</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">module</span><span class="w"> </span><span class="err">{</span>
-<span class="w">  </span><span class="err">import</span><span class="w"> </span><span class="err">module1</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x</span><span class="w"> </span><span class="err">:</span><span class="w"> </span><span class="err">i16)</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">2</span>
-<span class="err">}</span>
+module2 = module {
+  import module1
+  foo (x : i16) = 2
+}
 
-<span class="err">import</span><span class="w"> </span><span class="err">module1,</span><span class="w"> </span><span class="err">module2</span>
+import module1, module2
 
-<span class="err">f</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">force</span><span class="w"> </span><span class="err">foo</span>
-<span class="err">print</span><span class="w"> </span><span class="err">(map</span><span class="w"> </span><span class="err">foo</span><span class="w"> </span><span class="err">[1,2])</span>
+f = force foo
+print (map foo [1,2])
 </pre></div>
 </div>
 </td>
-<td><div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="nf">module1</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span><span class="w"> </span><span class="err">{</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x</span><span class="w"> </span><span class="err">:</span><span class="w"> </span><span class="err">i32)</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">1</span>
-<span class="err">}</span>
+<td><div class="highlight-none notranslate"><div class="highlight"><pre><span></span>module1 = module {
+  foo (x : i32) = 1
+}
 
 
-<span class="err">module2</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">module</span><span class="w"> </span><span class="err">{</span>
-<span class="w">  </span><span class="err">import</span><span class="w"> </span><span class="err">module1</span>
-<span class="w">  </span><span class="err">override</span><span class="w"> </span><span class="err">foo</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x</span><span class="w"> </span><span class="err">:</span><span class="w"> </span><span class="err">i16)</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">2</span>
-<span class="err">}</span>
+module2 = module {
+  import module1
+  override foo
+  foo (x : i16) = 2
+}
 
-<span class="err">import</span><span class="w"> </span><span class="err">module1,</span><span class="w"> </span><span class="err">module2</span>
+import module1, module2
 
-<span class="err">f</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">force</span><span class="w"> </span><span class="err">foo</span>
-<span class="err">print</span><span class="w"> </span><span class="err">(map</span><span class="w"> </span><span class="err">foo</span><span class="w"> </span><span class="err">[1,2])</span>
+f = force foo
+print (map foo [1,2])
 </pre></div>
 </div>
 </td>
@@ -1284,8 +1287,8 @@ Try deleting the extra arguments.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="BuildSystem.html" class="btn btn-neutral float-left" title="Build system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../Commentary/index.html" class="btn btn-neutral float-right" title="Commentary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Dispatch.html" class="btn btn-neutral float-left" title="Dispatch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Fexprs.html" class="btn btn-neutral float-right" title="Metaprogramming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

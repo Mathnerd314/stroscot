@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Modules &mdash; Stroscot  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db2ac877" />
+
+  
     <link rel="shortcut icon" href="../_static/hexagon_favicon.png"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -22,8 +24,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Dispatch" href="Dispatch.html" />
-    <link rel="prev" title="Metaprogramming" href="Fexprs.html" /> 
+    <link rel="next" title="Syntax" href="Syntax.html" />
+    <link rel="prev" title="Memory" href="Memory.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,11 +52,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../GettingStarted/index.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../HowTo/index.html">How to</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Language Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Fexprs.html">Metaprogramming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#access">Access</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#with-statement">With statement</a></li>
@@ -67,10 +72,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#overrides">Overrides</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Memory.html">Memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BuildSystem.html">Build system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Errors.html">Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Syntax.html">Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Values.html">Values</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../Commentary/index.html">Commentary</a></li>
@@ -202,25 +205,25 @@ with D { with C { a } }
 <h2>Overrides<a class="headerlink" href="#overrides" title="Link to this heading"></a></h2>
 <p>By default, methods are scoped to their module. Every definition <code class="docutils literal notranslate"><span class="pre">foo</span> <span class="pre">=</span> <span class="pre">a</span></code> binds the identifier <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code>, and each module creates a new identifier. This means a use <code class="docutils literal notranslate"><span class="pre">Module.foo</span></code> refers to only the declarations within that module.</p>
 <p>Dispatch will resolve bare identifiers to their appropriate modules when it can be determined from context, and nondeterminism even allows some overloading. For example:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">A</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
-<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">B</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>A = module
+  foo (x:{A}) = 1
+B = module
+  foo (x:{B}) = 2
 
-<span class="kr">import</span><span class="w"> </span><span class="nn">A</span><span class="p">,</span><span class="w"> </span><span class="kt">B</span>
-<span class="nf">print</span><span class="w"> </span><span class="p">(</span><span class="n">map</span><span class="w"> </span><span class="n">foo</span><span class="w"> </span><span class="p">[</span><span class="kt">A</span><span class="p">,</span><span class="kt">B</span><span class="p">])</span>
-<span class="o">#</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
-<span class="o">#</span><span class="w"> </span><span class="n">print</span><span class="w"> </span><span class="p">(</span><span class="n">force</span><span class="w"> </span><span class="n">foo</span><span class="p">)</span>
+import A, B
+print (map foo [A,B])
+# [1,2]
+# print (force foo)
 </pre></div>
 </div>
 <p>This defines two symbols <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">A</span> <span class="pre">-&gt;</span> <span class="pre">{1}</span></code> and <code class="docutils literal notranslate"><span class="pre">B.foo</span> <span class="pre">:</span> <span class="pre">B</span> <span class="pre">-&gt;</span> <span class="pre">{2}</span></code>, and resolves <code class="docutils literal notranslate"><span class="pre">map</span> <span class="pre">foo</span> <span class="pre">[A,B]</span></code> to <code class="docutils literal notranslate"><span class="pre">[A.foo</span> <span class="pre">A,</span> <span class="pre">B.foo</span> <span class="pre">B]</span></code>. However, because the bare identifier ends up resolving to different symbols, there are cases where dispatch is not sufficient to resolve the ambiguity. In this example, <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> results in an error because it could be either <code class="docutils literal notranslate"><span class="pre">A.foo</span></code> or <code class="docutils literal notranslate"><span class="pre">B.foo</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">override</span></code> statement allows reusing an identifier defined in a different module, extending a method definition as if the clauses were all defined in the same module. This avoids the nondeterminism issues. For example with the following:</p>
-<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">A</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
-<span class="w">  </span><span class="err">foo</span><span class="w"> </span><span class="err">(x:{</span><span class="nn">A</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">1</span>
-<span class="kt">B</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kr">module</span>
-<span class="w">  </span><span class="err">import</span><span class="w"> </span><span class="nn">A</span>
-<span class="w">  </span><span class="n">override</span><span class="w"> </span><span class="n">foo</span>
-<span class="w">  </span><span class="n">foo</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="kt">:</span><span class="p">{</span><span class="kt">B</span><span class="p">})</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="mi">2</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>A = module
+  foo (x:{A}) = 1
+B = module
+  import A
+  override foo
+  foo (x:{B}) = 2
 </pre></div>
 </div>
 <p>defines one symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span> <span class="pre">:</span> <span class="pre">{A,B}</span> <span class="pre">-&gt;</span> <span class="pre">{1,2}</span></code>. Thus <code class="docutils literal notranslate"><span class="pre">force</span> <span class="pre">foo</span></code> will resolve to the single symbol <code class="docutils literal notranslate"><span class="pre">A.foo</span></code>.</p>
@@ -231,8 +234,8 @@ with D { with C { a } }
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Fexprs.html" class="btn btn-neutral float-left" title="Metaprogramming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Dispatch.html" class="btn btn-neutral float-right" title="Dispatch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Memory.html" class="btn btn-neutral float-left" title="Memory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Syntax.html" class="btn btn-neutral float-right" title="Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

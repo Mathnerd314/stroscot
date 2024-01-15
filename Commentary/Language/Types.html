@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Types &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Values" href="Values.html" />
+    <link rel="prev" title="Term rewriting" href="TermRewriting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Memory.html">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#are-sets-types">Are sets types?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#is-stroscot-typed">Is Stroscot typed?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#is-stroscot-static">Is Stroscot static?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#is-stroscot-dynamic">Is Stroscot dynamic?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#is-stroscot-strong">Is Stroscot strong?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#type-inference">Type inference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#soundness-and-completeness">Soundness and completeness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unityping">Unityping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-checking">Model checking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Types</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Types.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="types">
+<h1>Types<a class="headerlink" href="#types" title="Link to this heading"></a></h1>
+<p>Stroscot has sets and assertions about whether values are in sets. But are sets types? Is Stroscot typed? If so, is Stroscot statically typed or dynamically typed? Is it strongly typed? Weakly typed? Gradually typed? These sound like reasonable questions. Unfortunately, these terms are ambiguous and controversial. This is an attempt to answer these questions by enumerating definitions, considering each definition, and ultimately discussing it to death.</p>
+<p>Short answer: Stroscot lets you to build a prototype/simple script in a short amount of time, without any annotations. So it is dynamically typed. It also lets you add type annotations, so it is statically typed.</p>
+<section id="are-sets-types">
+<h2>Are sets types?<a class="headerlink" href="#are-sets-types" title="Link to this heading"></a></h2>
+<p><span id="id1">[<a class="reference internal" href="../../zzreferences.html#id203" title="D. L. Parnas, John E. Shore, and David Weiss. Abstract types defined as classes of variables. In Proceedings of the 1976 Conference on Data : Abstraction, Definition and Structure, 149–154. New York, NY, USA, March 1976. Association for Computing Machinery. URL: https://dl.acm.org/doi/10.1145/800237.807133 (visited on 2023-08-29), doi:10.1145/800237.807133.">PSW76</a>]</span> identified various definitions of a “type”:</p>
+<ul class="simple">
+<li><p>Syntactic - A type is a purely syntactic label</p></li>
+<li><p>Representation - A type is defined in terms of a composition of machine types.</p></li>
+<li><p>Value space - A type is a set of possible values</p></li>
+<li><p>Syntactic and behavior, representation and behavior, value space and behavior - One of the above plus a set of operators or functions that can be applied to the type</p></li>
+<li><p>Set of modes - A type is a set of modes. A mode is a property of a variable that defines data representation and access. Any value that can be stored in one variable of a given mode can be stored in another variable of the same mode.</p></li>
+</ul>
+<p>Academics seem to have gravitated to the syntactic definition because it’s easier to publish meaningless gibberish. Similarly Haskell, Java, and C++ use a syntactic definition AFAICT. I don’t think there are many languages that use representation as this would imply that all pairs of floats are the same type. The set of modes definition (Parnas et al.’s own) does not seem to have been adopted.</p>
+<p>Steelman 2B I think adopts the “value space and behavior” definition. Stroscot follows Julia in using the “value space without behavior” definition. (At least, Julia’s documentation <a class="reference external" href="https://docs.julialang.org/en/v1/devdocs/types/">says</a> it follows the “set of values” definition) This is because the definition of types as having “operations” breaks down once you have operations that take multiple types, like a <code class="docutils literal notranslate"><span class="pre">`concatenateNCopies</span> <span class="pre">:</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">String</span> <span class="pre">-&gt;</span> <span class="pre">String</span></code> operation. Is this a String operation? an Int operation?</p>
+<p>Then there are subtypes, which Steelman 2B defines as “a subset of the elements of a type, that is characterized by further constraints.” Stroscot follows Castagna’s approach in having “set-theoretic types with semantic subtyping” - you can define any subset of a type (set) and that is also a type (set). A related approach is <span id="id2">[<a class="reference internal" href="../../zzreferences.html#id73" title="Stephen Dolan. Algebraic Subtyping. PhD thesis, University of Cambridge, September 2016. URL: https://www.cs.tufts.edu/~nr/cs257/archive/stephen-dolan/thesis.pdf.">Dol16</a>]</span>, which uses syntactic labels forming a distributive lattice. Although distributive lattices are isomorphic to collections of sets, Dolan’s approach IMO falls on the syntactic side.</p>
+<p>Regarding representation, which Steelman simply defines as “implementation characteristics”, there is a specification of how the memory layout of values works on the Memory Management page.</p>
+<p>Overall, while I would be justified in calling Stroscot’s sets types, as it is one of the listed definitions, it’s not perfectly consistent with the common usage today so it could invite a flamewar. It’s easier to call them sets.</p>
+</section>
+<section id="is-stroscot-typed">
+<h2>Is Stroscot typed?<a class="headerlink" href="#is-stroscot-typed" title="Link to this heading"></a></h2>
+<p>Steelman 3A: “The language shall be strongly typed. The type of each variable, array and record component, expression, function, and parameter shall be determinable during translation.”</p>
+<p>By a “typed” programming language, someone generally means that the language has a type system or type discipline that ensures type safety. Wikipedia defines a type system as “a set of rules that assigns a property called a type to the various constructs of a computer program”. This phrasing assumes each construct has exactly one “principal” type. But more complex type systems don’t have this property. For example with a Haskell GADT <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">R</span> <span class="pre">where</span> <span class="pre">R</span> <span class="pre">:</span> <span class="pre">{</span> <span class="pre">unR</span> <span class="pre">:</span> <span class="pre">Int</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">R</span> <span class="pre">Int</span></code>, <code class="docutils literal notranslate"><span class="pre">unR</span></code> may have the type <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">a.</span> <span class="pre">R</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> or <code class="docutils literal notranslate"><span class="pre">forall</span> <span class="pre">a.</span> <span class="pre">R</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code>, and these have no unifying type. Haskell just picks a type <code class="docutils literal notranslate"><span class="pre">unR</span> <span class="pre">:</span> <span class="pre">R</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code> in this case. Really the mapping from expressions to types is many-to-many. Particularly, with Stroscot’s definition of types as sets, any set containing the value is a valid type. For example, <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">Int</span></code>, but also <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">{1}</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">Any</span></code>. So certainly Stroscot has some ambient notion of “the valid types for a value”, but in Stroscot’s case this is just set membership so it is a little vague in determining whether Stroscot has a type system. ChatGPT lists some features of type systems we can look for: type annotations, type errors, type compatibility, type conversion, type hierarchy, type safety.</p>
+<p>The purpose of type annotations is clear if we consult <a class="reference external" href="https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/">Robert Harper</a>. Per him, a type system should allow “stating and enforcing the invariant that the value at a particular program point must be a certain type”, in the form of a type declaration. Stroscot’s set membership assertions have a specific syntax for type declarations and type restrictions, that accomplish exactly this purpose. There are also annotations for declaring the type of a value, for example <code class="docutils literal notranslate"><span class="pre">int8</span> <span class="pre">1</span></code> is different from <code class="docutils literal notranslate"><span class="pre">int32</span> <span class="pre">1</span></code>.</p>
+<p>Type errors are also clear. Stroscot’s type declarations have an operational semantics as assertions, they check membership in the type and throw an exception if it is not. The overlap with assertions may seem a bit strange but ultimately, they are both expressing program invariants, so in the end they are different syntaxes for the same feature. And assertions can be more natural in some cases than type declarations, e.g. <code class="docutils literal notranslate"><span class="pre">divide</span> <span class="pre">a</span> <span class="pre">b</span> <span class="pre">=</span> <span class="pre">assert</span> <span class="pre">(b</span> <span class="pre">!=</span> <span class="pre">0);</span> <span class="pre">...</span></code> rather than <code class="docutils literal notranslate"><span class="pre">divide</span> <span class="pre">:</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int\{0}</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code>. Although, higher-order types can be somewhat more succinct than writing out logical set membership assertions by hand, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">:</span> <span class="pre">(Int</span> <span class="pre">-&gt;</span> <span class="pre">Int)</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code> vs <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">s</span> <span class="pre">=</span> <span class="pre">arbElem;</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">arbElem;</span> <span class="pre">assume(a</span> <span class="pre">isElemOf</span> <span class="pre">Int);</span> <span class="pre">assume(s</span> <span class="pre">a</span> <span class="pre">isElemOf</span> <span class="pre">Int);</span> <span class="pre">assert(f</span> <span class="pre">s</span> <span class="pre">isElemOf</span> <span class="pre">Int)</span> <span class="pre">}</span></code>.</p>
+<p>Type compatibility follows naturally from type errors, for example assembly instructions can only operate on certain bitwidths. Stroscot has a natural form of type conversion and type hierarchy, subtype inclusion, but this is actually not too powerful and most conversions are explicit. Still though, we can talk about the normal data types like integers, floats, etc., so most programmers will find it natural.</p>
+<p>Type safety prevents data corruption or unexpected behavior due to type mismatches. Stroscot’s dynamic semantics ensures that no strange errors like this occur, so Stroscot is type safe.</p>
+<p>It is also worth looking for “untyped” programming languages - ChatGPT lists assembly language, machine code, and Brainfuck. The particular feature of these languages is that all data is represented as bits, and there are no other types. Stroscot does have a related property of “untyped memory access”, where for example a floating point number can be stored to memory and read back as an integer. But I would say that because Stroscot has types for non-bit data, like structs for example, it is not untyped.</p>
+<p>The conclusion therefore is that Stroscot, like almost every language made these days, is a typed language.</p>
+</section>
+<section id="is-stroscot-static">
+<h2>Is Stroscot static?<a class="headerlink" href="#is-stroscot-static" title="Link to this heading"></a></h2>
+<p>Definition of static typing are complicated by the omnipresent references to compile-time. For example, Cliff Click’s broad definition of a static type system is “something that allows catching errors quickly at compile time”. He gives the example errors of calling a non-function or applying a primitive operation to the wrong type. But Stroscot does not use a traditional compilation model - it has an execution engine with a JIT compiler that runs projects directly from source code, and a language server that provides code feedback during development. As such we have the “writing phase” and the “execution phase”. We can thus redefine a static type system as “something that allows catching errors quickly while writing the code”.</p>
+<p>Now, Stroscot’s static verification system is very powerful. Invariants can be expressed as assertions and type annotations. This includes invariants on function arguments and invariants on variable values. These invariants allow catching the errors Cliff listed, similar to traditional static type systems, and it also allows functionality like unit testing and model checking. This suite of tools allows catching hard bugs quickly and proving the absence of classes of bugs. Since it all happens during the writing phase, as part of the language server, it allows rapid development of quality software.</p>
+<p>The problem is that Stroscot has even more functionality. Whereas a traditional statically typed programming language requires strict and explicit definitions of types, Stroscot allows specifying types, but doesn’t require them. Developers can choose - if they want to specify the type, it will be checked during the writing phase, but even if they don’t specify any types, they can still run the program without types. Stroscot also still checks typeless programs, identifying potential mistakes and errors.</p>
+<p>It’s also worth noting an alternative static property, usually referred to as “early binding”, where a method call is resolved at compile time to a fixed procedure. Here it is clear, from the usage with for example C++’s virtual methods, that “compile time” refers to the actual generation of the machine code. This is an “execution phase” property of the JIT compiler. I have coined the name “direct method resolution” for this property, namely that the JIT compiler is able to optimize method calls to assembly jumps to specific addresses. This is indeed a planned feature for the JIT.</p>
+<p>So is Stroscot static? Yes - it supports all the static features, and more. The problem is that static and dynamic are considered opposites, and Stroscot is also dynamic. So I can’t simply say “Stroscot is a static and dynamic language.” According to ChatGPT, the “dynamic” aspect gets more emphasis, presumably because “static” has a slightly negative connotation. So I have to phrase it like “Stroscot is a dynamic language which supports static typing features”. As such, because Stroscot is dynamic, and has an abundance of functionality, rather than because of any lack of functionality, Stroscot is not a “static language” per se.</p>
+</section>
+<section id="is-stroscot-dynamic">
+<h2>Is Stroscot dynamic?<a class="headerlink" href="#is-stroscot-dynamic" title="Link to this heading"></a></h2>
+<p>Steelman 7D. The type of the result for each function must be specified in its declaration and shall be determinable during translation. The results of functions may be of any type. If a result is of a nonindirect array or record type then the number of its components must be determinable by the time of function call.</p>
+<p>Dynamic programming languages allow flexible and adaptable coding practices. But dynamic languages vary widely in their features. We can identify some common features using ChatGPT:</p>
+<ul class="simple">
+<li><p>Introspection: A mechanism to determine the type of some arbitrary data and retrieve its attributes or representation at runtime. This includes normal values, modules, objects, and functions.</p></li>
+<li><p>Type adaptation: The ability to take data of an unknown type and conditionally use it as a value of a specific type during execution. This creates the ability to determine the type of the data.</p></li>
+<li><p>Late-binding: Choosing methods at the latest possible moment during program execution. For example, method selection may depend on the real-time types of involved objects, the current state of the source code files (hot-reloading), complex dispatch conditions based on properties of the data, and/or values of unrelated variables in the code.</p></li>
+<li><p>Flexible variables: Allowing variables to accommodate any possible data value during program execution.</p></li>
+<li><p>Direct execution: Executing source code with a single command, without the need for an intermediate compilation step</p></li>
+<li><p>Metaprogramming, reflection and runtime modification: Writing macros (code that manipulates other code). Executing code with eval. Viewing, adding, and modifying methods and properties. Monkey patching. Module loading at runtime.</p></li>
+<li><p>Good: As a rule of thumb, dynamic languages are good, all other things being equal.</p></li>
+</ul>
+<p>Stroscot has these features, so can be considered dynamic. The “determinable type” of every function is something like <code class="docutils literal notranslate"><span class="pre">Any</span> <span class="pre">-&gt;</span> <span class="pre">Any</span></code>. Type specifications are separate from the actual “type” as specified by the functions dynamic behavior.</p>
+</section>
+<section id="is-stroscot-strong">
+<h2>Is Stroscot strong?<a class="headerlink" href="#is-stroscot-strong" title="Link to this heading"></a></h2>
+<p>Per <a class="reference external" href="https://perl.plover.com/yak/12views/samples/slide045.html">Plover</a>, strong typing has at least 8 definitions:</p>
+<ol class="arabic simple">
+<li><p>type annotations are associated with variable names, rather than with values.</p></li>
+<li><p>it contains compile-time checks for type constraint violations, rather than deferring checking to run time.</p></li>
+<li><p>it contains compile or run-time checks for type constraint violations, as opposed to no checking.</p></li>
+<li><p>conversions between different types are forbidden, as opposed to allowed.</p></li>
+<li><p>conversions between different types must be indicated explicitly, as opposed to being performed implicitly.</p></li>
+<li><p>there is no language-level way to disable or evade the type system, such as casts.</p></li>
+<li><p>it has a complex, fine-grained type system with compound types, as opposed to only a few types, or only scalar types</p></li>
+<li><p>the type of its data objects is fixed and does not vary over the lifetime of the object, as opposed to being able to change.</p></li>
+</ol>
+<p>Going through these:</p>
+<ol class="arabic simple">
+<li><p>Stroscot allows type annotations on values, and specifying the set of values allowed in a mutable variable. It also allows type annotations on functions (by name). But, types are defined as sets of values, so overall it is more correct to say they are associated with values. Verdict: Not satisfied</p></li>
+<li><p>Stroscot does check at compile-time. Verdict: Satisfied</p></li>
+<li><p>Stroscot also allows deferring checks to run-time. But it always performs checks. Verdict: Satisfied</p></li>
+<li><p>It would make no sense to not allow conversion from float to double or similar. You could always write such a function yourself. Verdict: Not satisfied</p></li>
+<li><p>Stroscot does not do implicit conversions - either a value is a member of a type unmodified, or it is not a member. Verdict: Satisfied</p></li>
+<li><p>Stroscot follows its runtime semantics in all cases. Verdict: Satisfied</p></li>
+<li><p>Stroscot allows unions, intersections, dependent types, and so on. Verdict: Satisfied</p></li>
+<li><p>Values are immutable and do not change. Stroscot does allow stateful types though. If the value of a reference is modified, it may stop being a member of a stateful type. This is solved by not using stateful types. Verdict: Satisfied</p></li>
+</ol>
+<p>Overall, Stroscot meets 6/8 definitions so you could say it is 75% strongly typed.</p>
+</section>
+<section id="type-inference">
+<h2>Type inference<a class="headerlink" href="#type-inference" title="Link to this heading"></a></h2>
+<p>Type inference is often used with the idea that its failure means there is a type error in the program. But static verification finds those errors already and distinguishes between real errors and algorithm failures, whereas type inference failure could be either.</p>
+<p>Type inference means many signatures can be omitted, like unityping with implicitly assigning the universal type. But type-inference algorithms are complex- they can fail, and even if they succeed their results are not obvious to humans. Unityping means the semantics doesn’t depend on types at all, meaning one less thing to think about, hence making programming easier. Type inference allows writing some programs without thinking about types, but there is always the chance the program is untypeable - and there are many examples of untypeable programs, e.g. <code class="docutils literal notranslate"><span class="pre">\z.</span> <span class="pre">(z</span> <span class="pre">1,</span> <span class="pre">z</span> <span class="pre">&quot;x&quot;)</span></code> for H-M. Cliff Click’s system can type this but fails on <a class="reference external" href="https://github.com/cliffclick/aa/issues/28">a more complex program</a> that runs fine in a unityped system. The errors on these untypeable programs will always be verbose (because of the inferred type) and confusing (because the programmer was not thinking about the inference algorithm).</p>
+<p>Types can used to describe the ABI, <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id38" title="Maximilian C. Bolingbroke and Simon L. Peyton Jones. Types are calling conventions. In Proceedings of the 2nd ACM SIGPLAN Symposium on Haskell - Haskell '09, 1. Edinburgh, Scotland, May 2009. ACM Press. URL: https://www.microsoft.com/en-us/research/publication/types-are-calling-conventions/ (visited on 2020-06-15), doi:10.1145/1596638.1596640.">BPJ09</a>]</span> hence type inference is a form of ABI selection. But the ABI selection is based on performance. Furthermore the ABI types can be conditioned on state, and there is a fallback catch-all format for hard cases. So overall ABI selection uses a separate notion of type based on representation, with no principality requirement like for normal type inference.</p>
+<p>At the REPL systems such Haskell provide a command to display the inferred type of an expression, and similarly Haddock can show pretty-printed inferred type signatures. But this doesn’t extend well to complex type systems:</p>
+<ul class="simple">
+<li><p><span id="id4">[<a class="reference internal" href="../../zzreferences.html#id187" title="Mayur Naik and Jens Palsberg. A type system equivalent to a model checker. ACM Transactions on Programming Languages and Systems, 30(5):1–24, August 2008. URL: https://dl.acm.org/doi/10.1145/1387673.1387678 (visited on 2021-07-15), doi:10.1145/1387673.1387678.">NP08</a>]</span> provides a method to interpret the model produced by a model checker as a type derivation using flow, intersection, and union types. Stroscot could similarly be written to output Church-style types reflecting the properties it verifies for every expression. But the types would be complex and precise, e.g. <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">:</span> <span class="pre">(Nil--&gt;0)</span> <span class="pre">&amp;</span> <span class="pre">(Cons</span> <span class="pre">a</span> <span class="pre">b--&gt;1+(length</span> <span class="pre">b))</span></code>, hence hard to interpret.</p></li>
+<li><p>With subtyping the principal type would presumably be the minimal type containing the value, which is not very informative. E.g. instead of <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">Int</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">Nat</span></code> the inferred type would just be <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">:</span> <span class="pre">{1}</span></code>.</p></li>
+<li><p>It is of high complexity to infer <a class="reference external" href="https://github.com/UlfNorell/insane/">dependent</a> and <a class="reference external" href="https://github.com/gelisam/circular-sig">circular</a> types</p></li>
+</ul>
+<p>Maybe these issues can be solved by heuristics for inferring types. But it seems that we can solve it more easily:</p>
+<ul class="simple">
+<li><p>REPL inferred types can be replaced by smarter value printing, e.g. <code class="docutils literal notranslate"><span class="pre">:show</span> <span class="pre">id</span></code> gives <code class="docutils literal notranslate"><span class="pre">Prelude.id</span> <span class="pre">=</span> <span class="pre">\x</span> <span class="pre">-&gt;</span> <span class="pre">x</span></code>, or <code class="docutils literal notranslate"><span class="pre">:show</span> <span class="pre">[1..100]</span></code> gives <code class="docutils literal notranslate"><span class="pre">list</span> <span class="pre">of</span> <span class="pre">100</span> <span class="pre">integers</span></code>.</p></li>
+<li><p>Documentation can simply show the list of developer-defined type signatures (<code class="docutils literal notranslate"><span class="pre">:t</span> <span class="pre">(+)</span></code> giving <code class="docutils literal notranslate"><span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span> <span class="pre">-&gt;</span> <span class="pre">Int</span></code> and the other overloadings). Haddock has been able to use GHC’s inferred type signatures <a class="reference external" href="https://github.com/haskell/haddock/commit/d300632cbc2346f6d95188426e5db5fbeb7c9f34">since 2008</a>, but it still encourages explicit type signatures.</p></li>
+</ul>
+<p>So overall it seems type inference is not necessary with the correct design.</p>
+</section>
+<section id="soundness-and-completeness">
+<h2>Soundness and completeness<a class="headerlink" href="#soundness-and-completeness" title="Link to this heading"></a></h2>
+<p>Type soundness means “type preservation”, i.e. if <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">T</span></code> then evaluating <code class="docutils literal notranslate"><span class="pre">a</span></code> must produce a value in the type’s domain <code class="docutils literal notranslate"><span class="pre">〚T〛</span></code> in every denotational semantics. A sound type system rejects incorrect programs by pointing out their type  with a diagnostic. An example of an unsound type system feature is Java’s covariant arrays. The program <code class="docutils literal notranslate"><span class="pre">String[]</span> <span class="pre">strs</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">&quot;a&quot;</span> <span class="pre">};Object[]</span> <span class="pre">objs</span> <span class="pre">=</span> <span class="pre">strs;objs[0]</span> <span class="pre">=</span> <span class="pre">1;String</span> <span class="pre">one</span> <span class="pre">=</span> <span class="pre">strs[0];</span></code> typechecks but produces an ArrayStoreException at <code class="docutils literal notranslate"><span class="pre">objs[0]</span> <span class="pre">=</span> <span class="pre">1</span></code>. Soundness is qualified to a subset of programs S of a language L. If L is unsound but L/S is sound we say L is sound up to S. Java is sound up to covariant arrays, null pointers, and a few other warts. TypeScript is sound up to first class functions and downcasts from the any type. Most type systems are also unsound with respect to nontermination - an infinite loop is of any type but does not produce a value of that type (modeling nontermination as evaluating to ⊥). Type systems sound with respect to nontermination, such as System F, are called “total”.</p>
+<p>An unsound type system does not prove anything about its programs, so a compiler has to assume the worst and compile with a unityped semantics. Fortunately most “unsound” type systems can be made sound by extending the domains of types to include the missing values. E.g. Haskell is not total but can be made sound with respect to nontermination by including ⊥ in the domain of every type as well as partially defined values like <code class="docutils literal notranslate"><span class="pre">(⊥,2)</span></code>.</p>
+<p>Type completeness is a more vague notion; the common definition is that “all correct programs are accepted, given sufficient type annotations”. Java’s unsound null pointers allows it to accept some uses of null pointers that would be ruled out with a <code class="docutils literal notranslate"><span class="pre">Nullable&lt;T&gt;</span></code> type, making it complete relative to null pointers.</p>
+<p>There is also soundness and completeness in logic, which is different:</p>
+<ul class="simple">
+<li><p>A theory is logically sound (valid) if all of its theorems are tautologies, i.e. every formula that can be proved in the system is valid in every semantic interpretation of the language of the system.</p></li>
+<li><p>A theory is logically satisfiable if it has a model, i.e., there exists an interpretation in ZFC under which all provable formulas in the theory are true.</p></li>
+<li><p>A theory is semantically complete when all its tautologies are theorems, i.e. every formula that is true under every interpretation of the language of the system can be proven using the rules of the system.</p></li>
+<li><p>A theory is syntactically complete if, for each formula φ of the language of the system, either φ or ¬φ is a theorem. Alternately, for all unprovable sentences φ, φ ⊢ ⊥ is a theorem.</p></li>
+<li><p>A theory is logically consistent if there is no formula φ such that both φ and its negation ¬φ are provable.</p></li>
+</ul>
+<p>Via the Curry-Howard correspondence we can interpret formulas as types and provability of a formula as a program term of that type existing. We restrict to the semantic interpretation that maps formulas/types to sets and evaluate terms to values in those sets. So then:</p>
+<ul class="simple">
+<li><p>A TS is logically sound/valid if every inhabited type T in the semantic interpretation of the language has a  nonempty type domain 〚T〛.</p></li>
+<li><p>A TS is logically satisfiable if a semantics exists where all of its inhabited types have elements in their type domains.</p></li>
+<li><p>A TS is semantically complete when all nonempty type domains 〚T〛 have program terms of type T (T inhabited).</p></li>
+<li><p>A TS is syntactically complete if, for each type T, either T or ¬T is inhabited. Alternately, for all empty types T, there is a program of type T -&gt; Void.</p></li>
+<li><p>A TS is logically consistent if there is no type T such that both T and ¬T are inhabited.</p></li>
+</ul>
+<p>Semantic completeness and logical soundness only care about types being inhabited and hence are weaker than type completeness/soundness which care about all specific programs.</p>
+<p>Java does not have a <code class="docutils literal notranslate"><span class="pre">Void</span></code> type (<code class="docutils literal notranslate"><span class="pre">void</span></code> is a unit type), but if it did it would most likely be logically inconsistent because a nonterminating program could inhabit the function type <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">-&gt;</span> <span class="pre">Void</span></code>. In general most type systems are logically inconsistent because a nonterminating loop inhabits all function types. However since all non-Void types are inhabited Java is syntactically complete. Furthermore we can likely formalize the execution model of Java and obtain that Java is logically satisfiable, logically sound, and semantically complete.</p>
+<p>So the difficult property to ensure is logical consistency. By Godel’s first incompleteness theorem there are no consistent, syntactically complete systems with inference rules of complexity at most <span class="math notranslate nohighlight">\(\Delta_{1}^{0}\)</span> that contain integer arithmetic. For example System F is consistent and of complexity <span class="math notranslate nohighlight">\(\Sigma_1^0 &gt; \Delta_{1}^{0}\)</span> but still is incomplete and <a class="reference external" href="https://cstheory.stackexchange.com/questions/48884/are-there-strongly-normalizing-lambda-terms-that-cannot-be-given-a-system-f-type">cannot type some strongly normalizing terms</a>. Intersection type systems extended with negation are complete but inconsistent due to ω. However they are consistent when extended with a complexity <span class="math notranslate nohighlight">\(\Sigma_1^0\)</span> oracle that computes principal types such that the type contains ω iff the term is not strongly normalizing. <span id="id5">[<a class="reference internal" href="../../zzreferences.html#id100" title="Silvia Ghilezan. Strong normalization and typability with intersection types. Notre Dame Journal of Formal Logic, 37(1):44–52, January 1996. URL: https://projecteuclid.org/journals/notre-dame-journal-of-formal-logic/volume-37/issue-1/Strong-Normalization-and-Typability-with-Intersection-Types/10.1305/ndjfl/1040067315.full (visited on 2022-06-23), doi:10.1305/ndjfl/1040067315.">Ghi96</a>]</span></p>
+<p>The simplest complete and consistent system is the unitype system. This consists of a universe type whose domain contains all values and its negation the empty type. To ensure consistency we must ensure that the empty type is uninhabited, so all programs must be of the universe type. This means nonterminating programs must have a value in the semantic domain. If we add termination checking we can put nonterminating programs in the empty type and restrict the universe to terminating programs, but this increases the complexity.</p>
+</section>
+<section id="unityping">
+<h2>Unityping<a class="headerlink" href="#unityping" title="Link to this heading"></a></h2>
+<p>Per <a class="reference external" href="https://existentialtype.wordpress.com/2011/03/19/dynamic-languages-are-static-languages/">Robert Harper</a> all type systems are static, and dynamic languages are simply “unityped” static languages. “[A dynamic language] agglomerates all of the values of the language into a single, gigantic (perhaps even extensible) [static] type”.In Stroscot we follow this description literally, interpreting “unityped” to be short for “universally typed”, i.e. the language has a universal type that contains all values. This definition is slightly different from Harper’s post, where he interprets “unityped” to mean that there is only the single universal type in the language. We will call Harper’s definition “single-typed”. If a language is single-typed it must be unityped, since all values are in the single universal type, but not every uni-typed language is single-typed.</p>
+<p>Consider the notion of Curry-style types, called sorts in <span id="id6">[<a class="reference internal" href="../../zzreferences.html#id207" title="Frank Pfenning. Church and Curry: combining intrinsic and extrinsic typing. In Christoph Benzmüller, Chad E. Brown, Jörg Siekmann, and Richard Statman, editors, Reasoning in Simple Type Theory: Festschrift in Honour of Peter B. Andrews on His 70th Birthday, volume 17 of Studies in Logic: Mathematical Logic and Foundations, pages 288–323. College Publications, London, December 2008. URL: https://www.cs.cmu.edu/~fp/papers/andrews08.pdf.">Pfe08</a>]</span>. Sorts define properties that can be checked or ignored, extrinsic to the terms themselves. A term may satisfy several sorts, or none at all. Since the sorts are optional there must necessarily be an operational semantics that does not refer to any sorts, and hence the language is unityped if it has a trivial sort that checks no properties. But even if the language is unityped, it doesn’t have to be single-typed, because there can still be more than one type (sort) - in fact there can be a whole language of properties/sorts.</p>
+<p>A unityped language means if you write zero type signatures and ignore all warnings the program still compiles and runs and produces a value (although it may be an error). Every non-unityped program has a corresponding unityped program where the values are extended to contain the type information as a tag (reification). Often the operational semantics does not depend on the type and we can simply erase the type. In the specific case of return type overloaded type classes, where type inference is key, the semantics can be made nondeterministic and type annotations can be incorporated explicitly as pruning possibilities.</p>
+<p>Practically, one cannot encode unityping scheme in existing static languages. For example, ML’s type system is incomplete and hence some terms allowed in a dynamic system, such as the Y combinator, are untypeable. Haskell has unsafeCoerce, which solves the typeability problem, and a <a class="reference external" href="https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-Dynamic.html">Dynamic type</a> which allows interacting with the existing type system. Specifically Clean’s Dynamic type (but not GHC’s) can store all types. But even though Dynamic can store all values 1-1 it is not a universal type because <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">:</span> <span class="pre">Int</span></code> and <code class="docutils literal notranslate"><span class="pre">toDyn</span> <span class="pre">a</span> <span class="pre">:</span> <span class="pre">Dynamic</span></code> are distinct values. So unityping also requires subtyping.</p>
+<p>Unityping makes the language more expressive: variables can contain all values, and type tests can dynamically check against some type. It does add some overhead to represent members of diverse types, check the tags/types of specific values, and convert between representations, but there are well-known optimizations (Self, Smalltalk, LuaJIT), and it seems that adding unityping will not necessarily decrease the performance of non-unityped programs.</p>
+<p>Overall, unityping seems good, hence Stroscot is a unityped language.</p>
+<p>Regarding single-typing, Harper gives the example of the complex numbers. Doel extends this: one would like to write a function on the complex numbers, and rule out other forms of input. This can be represented as a runtime check, <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">assert</span> <span class="pre">(x</span> <span class="pre">:</span> <span class="pre">Complex);</span> <span class="pre">...</span></code>, but clearly if the universal type is the only type it becomes very difficult to express it concisely. Many dynamic languages such as Python, Perl, Lua provide concise type test syntax in some way or another (<code class="docutils literal notranslate"><span class="pre">isinstance</span></code>, <code class="docutils literal notranslate"><span class="pre">isa</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code>). So it seems a strawman property. In CCC 6/9/23 it was brought up that since the check is formally at run-time, it will generally require running the program over all inputs, rather than being detected at compile time. But this is where model checking comes in, as it can detect potential runtime errors at compile time.</p>
+<p>There is the benefit of type signatures that many ‘obvious’ pieces of code can be written automatically. For example Lennart Augustsson’s djinn takes a type like <code class="docutils literal notranslate"><span class="pre">fmap</span> <span class="pre">:</span> <span class="pre">(a</span> <span class="pre">-&gt;</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">Maybe</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Maybe</span> <span class="pre">b</span></code>  or <code class="docutils literal notranslate"><span class="pre">callCC</span> <span class="pre">:</span> <span class="pre">((a</span> <span class="pre">-&gt;</span> <span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">b)</span> <span class="pre">-&gt;</span> <span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">a)</span> <span class="pre">-&gt;</span> <span class="pre">Cont</span> <span class="pre">r</span> <span class="pre">a</span></code> and writes code that has that type. These can be non-trivial to write if you’re just thinking about how it should behave, but the type completely determines the implementation. This sort of functionality seems like it can be offered through a macro, completely separate from the type system of the language.</p>
+</section>
+<section id="model-checking">
+<h2>Model checking<a class="headerlink" href="#model-checking" title="Link to this heading"></a></h2>
+<p>Type systems, and model checkers, both aim to catch some types of errors while allowing valid programs. But most practical type systems like those of ML or Haskell have corner cases. For example the “head of list” function errors on the empty list, but this is not reflected in the type <code class="docutils literal notranslate"><span class="pre">[a]</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>. With dependent type signatures we can accurately capture the behavior for specific cases, <code class="docutils literal notranslate"><span class="pre">{x</span> <span class="pre">:</span> <span class="pre">[a]</span> <span class="pre">|</span> <span class="pre">nonempty</span> <span class="pre">x</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">[a]</span> <span class="pre">-&gt;</span> <span class="pre">a|Error</span></code> (and even <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">[a]</span> <span class="pre">|</span> <span class="pre">empty</span> <span class="pre">x</span> <span class="pre">}</span> <span class="pre">-&gt;</span> <span class="pre">Error</span></code>, but these type signatures overlap and there is no best type signature. In practice, in order to be useful, type systems compromise and treat some “type-like” errors as dynamic errors not handled by the type system. Similarly there is a tension between knowing the size of an array (preventing out of bounds errors) and writing code that is independent of array size.</p>
+<p>In contrast, with model checking, we are verifying predicates or sorts. There is no issue with writing multiple overlapping type signatures; simply check them all. We are analyzing the full dynamic behavior of the program, rather than a simplification, so there are no corner cases. Consider <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">4</span> <span class="pre">:</span> <span class="pre">int;</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">x</span> <span class="pre">:</span> <span class="pre">nat</span></code>. We’re assigning an int to a nat here, which could potentially fail. But model checking concludes that 4 is a nat, and therefore that the check will succeed and the program has no errors. In contrast, no type system can soundly allow assignment from a supertype to a subtype, at least without also recording the actual set of values similarly to model checking.</p>
+<p>In general, trying to prove any non-trivial property will find all the bugs in a program. But a type system is simpler than a model checker, hence will find false positives more often. Model checking allows unityping, while there are very few unityped type systems.</p>
+<p>“Soft typing” is similar to model checking, but uses failure of type inference instead of model checking. This means it cannot prove that it actually found an error, and it must stay within the boundaries of type systems, an open research problem. The verification approach is well-explored and its algorithm produces three types of outcomes: hard errors, passing programs, or verification algorithm failure. Similar to Haskell’s “deferred type errors” flag, hard errors can still be ignored, but they will trigger an error at runtime. Similar to soft type checking, verification algorithm failure can be ignored - these may or may not trigger an error.</p>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<p>GHC’s roles are just an optimization for <code class="docutils literal notranslate"><span class="pre">coerce</span></code>. There are better ways to implement optimizations. It seems like a dirty hack to solve a pressing problem. I think Stroscot can get by without them.</p>
+<p><a class="reference external" href="https://wphomes.soic.indiana.edu/jsiek/what-is-gradual-typing/">This post</a> says “a [gradual] type is something that describes a set of values that have a bunch of operations in common”, i.e. value space plus behavior. Stroscot’s sets don’t have behavior so are not gradual types.</p>
+<p>But I would also add that Stroscot is optionally typed, because in Stroscot, the <a class="reference external" href="https://en.wikipedia.org/wiki/Zero_one_infinity_rule">Zero one infinity rule</a> applies. A program can run without any type declarations, with one declaration for the root of the program, or with any amount of type declarations scattered through the program. The no type declarations is an “untyped” setting and ensures there is a complete operational semantics distinct from the type system. The one type declaration enables checking the program for bad behavior, and ruling out common errors such as typos. The unlimited/infinite declarations allows using the power of static verification to its fullest, and may require many iterations of tweaked declarations to get right.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="TermRewriting.html" class="btn btn-neutral float-left" title="Term rewriting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Values.html" class="btn btn-neutral float-right" title="Values" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

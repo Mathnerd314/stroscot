@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory &mdash; Stroscot  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db2ac877" />
+
+  
+    <link rel="shortcut icon" href="../../_static/hexagon_favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Modules" href="Modules.html" />
+    <link rel="prev" title="Macros" href="Macros.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/hexagon_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../GettingStarted/index.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../HowTo/index.html">How to</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Reference/index.html">Language Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Commentary</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Language specification</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Aspects.html">Aspects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Assembly.html">Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Concurrency.html">Concurrency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dispatch.html">Dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Evaluation-Strategy.html">Evaluation strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Exceptions.html">Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Fastest.html">As fast as C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="FunctionalLogic.html">Functional logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Logic.html">Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="LogicProgramming.html">Logic programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Macros.html">Macros</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Memory</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#memory-models">Memory models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pointers">Pointers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#representation">Representation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Objects.html">Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="OpPrims.html">Operational primitives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Posets.html">Posets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Resource-Management.html">Resource management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Security.html">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Sets.html">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="State.html">Stateful programming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TermRewriting.html">Term rewriting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Types.html">Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Values.html">Values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Verification.html">Verification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../Implementation/index.html">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Libraries/index.html">Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../Meta/index.html">Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../zzreferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Stroscot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Commentary</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Language specification</a></li>
+      <li class="breadcrumb-item active">Memory</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/Mathnerd314/stroscot/edit/master/docs/Commentary/Language/Memory.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="memory">
+<h1>Memory<a class="headerlink" href="#memory" title="Link to this heading"></a></h1>
+<p>The language should have automatic memory management. Manual memory management is slow, tedious, and error prone. Automatic memory management is better in all respects, but the implementation has to be flexible enough to be usable for all the things manual memory management is.</p>
+<section id="memory-models">
+<h2>Memory models<a class="headerlink" href="#memory-models" title="Link to this heading"></a></h2>
+<p>3-3I. It shall be possible to define types whose elements are indirectly accessed. Elements of such types may have components of their own type, may have substructure that can be altered during execution, and may be distinct while having identical component values. Such types shall be distinguishable from other composite types in their definitions. An element of an indirect type shall remain allocated as long as it can be referenced by the program. [Note that indirect types require pointers and sometimes heap storage in their implementation.]</p>
+<p>3-3J. Each execution of the constructor operation for an indirect type shall create a distinct element of the type. An operation that distinguishes between different elements, an operation that replaces all of the component values of an element without altering the element’s identity, and an operation that produces a new element having the same component values as its argument, shall be automatically defined for each indirect type.</p>
+<p>Per <span id="id1">[<a class="reference internal" href="../../zzreferences.html#id143" title="Jeehoon Kang, Chung-Kil Hur, William Mansky, Dmitri Garbuzov, Steve Zdancewic, and Viktor Vafeiadis. A formal C memory model supporting integer-pointer casts. In Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation, 326–335. Portland OR USA, June 2015. ACM. URL: https://dl.acm.org/doi/10.1145/2737924.2738005 (visited on 2021-06-14), doi:10.1145/2737924.2738005.">KHM+15</a>]</span> there are pretty much two models of memory, pointers and references. Pointers model memory as an integer-indexed array of 2^32 or 2^64 words, accessed by the OS/hardware APIs. References model memory as an associative array from symbolic “references” (potentially infinite in number) to “cells”, values (stored in some unspecified format, but with lossless storage).</p>
+<p>Kang describes how combinations of these can be made, for example the “quasi-concrete model” which uses a data type that starts out containing a reference, implements various arithmetic operations symbolically, but switches to a pointer once an integer address is requested. You can also imagine the other direction, a pointer that masquerades as a reference but errors when attempting to store a value larger than the allocation. But references and pointers are the fundamental ideas and serve to implement all other possibilities.</p>
+<p><span id="id2">[<a class="reference internal" href="../../zzreferences.html#id43" title="Programming language ideas that work and don't work. June 2022. URL: https://www.youtube.com/watch?v=y7KWGv_t-MU (visited on 2023-07-19).">bri22</a>]</span> brings up the old x86 16-bit pointer model. There were data, code, stack, and extra segment registers. A near pointer simply adds an offset to the appropriate segment register. Far and huge pointers set the segment register first, allowing access to other segments. Far pointers were unnormalized, while huge points were normalized to a canonical segment+offset pair. Nowadays, in x86-64, pointers are just represented as a uniform 64-bit absolute address. The only residue of segment addressing is there are some “load relative” instructions that take offsets instead of absolute pointers.</p>
+<p>Bright suggests that the lesson is to only have one type of pointer. But I disagree. The lesson is really to ensure that a pointer is self-contained, in that it always points to the same location, and unique, in that no other pointer value refers to that location. In the 16-bit pointer model, only far and huge pointers were self-contained. And far and huge pointers had the issue of allowing multiple representations of the same address. The normalization solved this, but there were disagreements on how to normalize and it was often skipped for performance reasons. Comparatively, the 64-bit model has a unique pointer value for every address. Turning now to modern models, the concrete and symbolic models are both fine in this regard; integers and symbols are self-contained and unique.</p>
+<p>Bright also raises the specter that “You will wind up with two versions of every function, one with manually managed pointers and one with garbage collected pointers (references). The two versions will require different implementations. You’ll be sorry.” How worrisome is this?</p>
+<p>Well, first let’s try to use a pointer as a reference. There are many issues to consider:</p>
+<ul class="simple">
+<li><p>Allocation size: Generally it is assumed the pointer points to some fixed-size buffer of bytes. But this means we can’t store arbitrary-sized values; they just don’t fit. Usually this is solved by restricting the possible values to a finite set, then the storage is fixed.</p></li>
+<li><p>Serialization: To mimic the ability of a reference to store heterogeneous types of data, strings, numbers, lists, functions, and so on, we need a universal serialization function, that e.g. stores a type tag. We can probably expose such a serialization function from the compiler, as the compiler needs such a function to implement references. Alternatively, for a restricted type, this is solved by writing a custom serialization function.</p></li>
+<li><p>Ownership - Pointers can just be calculated out of thin air, so some other function could overwrite our buffer. The format could be corrupted, or the memory could be deallocated altogether. Usually this is solved by making a private copy of the buffer at some isolated address that no other part of the program uses, and only writing back changes at the end in one atomic operation.</p></li>
+</ul>
+<p>Is someone really going to work through these issues and write a second version of the function? When they could just make the pointer into a reference with <code class="docutils literal notranslate"><span class="pre">newRef</span> <span class="pre">(deserialize</span> <span class="pre">(readBytes</span> <span class="pre">10</span> <span class="pre">ptr))</span></code> and let the compiler do all the work? References should have decent performance so there will be no reason to try to shoehorn a pointer into a reference-like API. Pointers are really a low-level, byte-based abstraction whose only business is interfacing with C code. As evidence that they are needed I offer <a class="reference external" href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/unsafe-code#pointer-types">C#</a> which has included them since 1.0.</p>
+<p>As far as using a reference as a pointer, as long as we don’t want to do pointer arithmetic, we can just store an array of bytes in the reference. Such a pattern is common in Java, e.g. the ArrayList class. But when we want to materialize some bytes at a given memory address, there is no way to do it with references. References just don’t support interfacing with C code.</p>
+<p>I guess it is possible that someone will have two versions of a function, one that implements it in pure Stroscot via references and one that calls out a C library with pointers. But externally, I think both of them should interact with the rest of the code using references. Using pointers with the C code might avoid a few conversion calls, but references are a lot cleaner to use, e.g. avoiding the use of callbacks, and there is the guaranteed optimization that you can use a reference as a pointer with zero-cost. So I don’t think this poses an issue. Even if the C wrapper did use pointers because it was easier than converting to/from references all the time, that’s a judgement call on the part of the library author and I don’t think there is a solution that would let everyone standardize on one universal type. The best a “pointerOrRef” type can support, even restricted to a small type like <code class="docutils literal notranslate"><span class="pre">int8</span></code>, is get/set like a regular reference.</p>
+<section id="aliasing">
+<h3>Aliasing<a class="headerlink" href="#aliasing" title="Link to this heading"></a></h3>
+<p>Steelman 7I. The language shall attempt to prevent aliasing (l.e., multiple access paths to the same variable or record component) that is not intended, but shall not prohibit all aliasing. […] All aliasing of components of elements of an indirect type shall be considered intentional.</p>
+<p>The language is convoluted and hard to understand, but the way I read this is that anyone who uses an indirection expects aliasing and the language should not do anything to prevent it. Certainly, if you don’t need aliasing, you could just use a constant directly.</p>
+</section>
+</section>
+<section id="pointers">
+<h2>Pointers<a class="headerlink" href="#pointers" title="Link to this heading"></a></h2>
+<p>Pointers are the low-level API, they can interface with the OS or other languages (mainly C). I did a study of Windows/Linux memory APIs and concluded that memory is best modeled as the global mutable array <code class="docutils literal notranslate"><span class="pre">Memory</span> <span class="pre">=</span> <span class="pre">Map</span> <span class="pre">(Word,BitIdx)</span> <span class="pre">Status</span></code>. The status allows storing metadata, it’s <a class="reference external" href="https://github.com/Mathnerd314/stroscot/blob/master/src/model/MemoryStatus.hs">a complex ADT</a> which has various states like unallocated, committed, etc. The array is indexed at the bit level because that’s the granularity <a class="reference external" href="https://valgrind.org/docs/manual/mc-manual.html#mc-manual.machine">Valgrind’s Memcheck</a> uses, but most of the status will be the same for a byte or page as the memory allocators / OS operations work at higher granularity.</p>
+<p>It is simple enough to maintain “extra” status bits, and instrument memory functions to check the status of memory before operating. This is essentially what Valgrind does. With this it is possible to identify many common errors, like double free, use after free, access to undefined memory, and null pointer dereferencing. But there is still the possibility of overflowing a buffer into an adjacent allocation, or more generally <a class="reference external" href="https://en.wikipedia.org/wiki/Type_punning">type punning</a> by reading some memory as a format it was not written with. These sorts of possibilities are intrinsic to the “big array of bits” model, and many low-level hacks rely on such functionality, so I would say to use references if you want to avoid such things. But of course someone can easily add bounds-checking etc. on top of the basic pointer model as a library.</p>
+<p>Most addresses will not be allocated (status Free), hence the array is sparse in some sense. It is in fact possible to implement the typical <a class="reference external" href="https://developer.android.com/reference/android/util/SparseArray">sparse array operations</a>. There are functions to directly allocate memory at an address. Reading and writing are done directly in assembly. The list of currently mapped pages can be had from <code class="docutils literal notranslate"><span class="pre">/proc/self/maps</span></code> and <a class="reference external" href="https://reverseengineering.stackexchange.com/questions/8297/proc-self-maps-equivalent-on-windows/8299">VirtualQueryEx</a>, although this has to be filtered to remove pages reserved by the kernel and internal pages allocated by the runtime, and looks slow - it’s easier to wrap the allocation functions and maintain a separate list of user-level allocations. Clearing mappings, hashing memory, and indexing by mapped pages all work when restricted to the list of user pages. It’s a little more complicated than simple sparsity because there are many different statuses and the operations overlap.</p>
+<section id="storage-vs-memory">
+<h3>Storage vs. memory<a class="headerlink" href="#storage-vs-memory" title="Link to this heading"></a></h3>
+<p>In practice, the path from cloud to CPU is long, and accessible storage is not just RAM. Some latency numbers and the programming API:</p>
+<ul class="simple">
+<li><p>Physical registers (0.3 ns): managed by the CPU</p></li>
+<li><p>Logical registers (0.3 ns): assembly read/write</p></li>
+<li><p>Memory Ordering Buffers (MOB), L1/L2/L3 Cache (0.5-7 ns): Managed by the CPU</p></li>
+<li><p>Main Memory (0.1us-4us): assembly read/write</p></li>
+<li><p>GPU memory (0.2us-0.5us): assembly read/write, driver ioctl’s</p></li>
+<li><p>NVRAM (200us-250us): assembly read/write, special calls</p></li>
+<li><p>SSD (250-500us): kernel file APIs</p></li>
+<li><p>LAN (0.5-500ms): kernel network stack, driver bypass</p></li>
+<li><p>HDD (3 ms): kernel file APIs</p></li>
+<li><p>WAN (150ms): kernel network stack, driver bypass</p></li>
+</ul>
+<p>Not all applications will use all of these, but all will use some and there is an application that uses each. So all of these have to be modeled in order to create a performant application. Ideally the memory management system would be a “storage management system” that combines all of these into a single pointer-like abstraction and allows copying data between locations as appropriate. But it’s a leaky abstraction, I’m not sure it can be pulled off except as a library.</p>
+</section>
+<section id="you-choose-allocation">
+<h3>“You-choose” Allocation<a class="headerlink" href="#you-choose-allocation" title="Link to this heading"></a></h3>
+<p>In practice, fixed-address allocation / assignment is not commonly used. Instead, there are <code class="docutils literal notranslate"><span class="pre">mmap</span> <span class="pre">NULL</span></code>, <code class="docutils literal notranslate"><span class="pre">malloc</span></code>, and the C library API alloc/realloc, which allocate memory with system-chosen / allocator-chosen location. For verifying behavior, the right model for this is adversarial, i.e. the allocator chooses the worst possible location, subject to restrictions such as that the allocation must be suitably aligned and disjoint from all unrevoked allocations. More formally, the behavior of a correct program should not depend on what addresses the system picks, i.e. all choices should be observationally equivalent. (The system can also return an out of memory error, but this doesn’t have to result in equivalent behavior.)</p>
+<p>Of course, the actual allocation strategy should not be the worst, rather it should try to achieve the best performance. For the most part, people do not seem to pay much attention to allocator design, because it is pretty cheap. For example <a class="reference external" href="https://www.forrestthewoods.com/blog/benchmarking-malloc-with-doom3/">in Doom 3</a> the median time for is 31 nanoseconds, ranging from 21 nanoseconds to 201 microseconds, and free is comparable.</p>
+<p>But, speeding up allocation is actually fairly important. Combining operations into a single larger operation (allocate a larger buffer, call <code class="docutils literal notranslate"><span class="pre">close_range</span></code> to close several open FD’s than to iterate over them individually) by pushing allocations forward and delaying frees, as long as there is sufficient memory or resource capacity available, can be a big win. In contrast, reads and writes are always real work, and besides SIMD there is not much way to optimize it.</p>
+<p>There are also a lot of locality and cache effects from the address allocation algorithm. In the trivial case, the memory usage can be predicted in advance and allocations given fixed assignments, giving zero cost memory allocation. In more practical applications, variable allocations will need to be tracked, but there are still tricks for grouping allocations based on access patterns, avoiding fragmentation. Most research has been on runtime allocation optimization, but many of these optimizations can be precomputed at compile time. For example:</p>
+<ul class="simple">
+<li><p>A loop that allocates and deallocates a scratch buffer in the body is much more performant if the buffer is allocated to the same location every time - the allocation/deallocation code can even be pulled out of the loop.</p></li>
+<li><p>Grouping hot variables into a page, so the page is always loaded and ready</p></li>
+<li><p>Grouping things that will be freed together (pools/arenas)</p></li>
+</ul>
+</section>
+<section id="optimizing-access">
+<h3>Optimizing access<a class="headerlink" href="#optimizing-access" title="Link to this heading"></a></h3>
+<p>Generally, optimizations are allowed to eliminate possibilities allowed by the memory model, but there could also be an option to strictly preserve the set of possibilities.</p>
+<p>Eliminating a pointer read amounts to tracking down the matching pointer write and propagating the value directly, which can be accomplished by tracing control flow. There is the issue of data races with concurrent writes, but the memory model dictates which values a read may resolve to, and the verifier already handles nondeterminism, so it is not much harder than normal value propagation. There is also modeling foreign code, specifically determining whether the foreign code can write a pointer (i.e, whether the pointer is shared or not).</p>
+<p>Eliminating a pointer write requires proving that the address is never read before deallocation or another pointer write. Again there are the issues of data races and foreign code.</p>
+</section>
+<section id="cheri">
+<h3>CHERI<a class="headerlink" href="#cheri" title="Link to this heading"></a></h3>
+<p>CHERI pointers are 129-bit, consisting of a 1-bit validity tag, bounds, permissions, object type, and actual pointer. Valid pointers may only be materialized in a register or memory by transforming an initial unbounded pointer obtained from the OS. This means that the simple model of pointers as integers is no longer valid. Instead, a pointer is the combination of an integer address and a capability. The <a class="reference external" href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf">CHERI C/C++ API</a> represents the address+capability value as <code class="docutils literal notranslate"><span class="pre">void*</span></code> and addresses as <code class="docutils literal notranslate"><span class="pre">vaddr_t</span></code>; there doesn’t seem to be a way to refer to a capability without an address.</p>
+<p>I tried to read further, but the model is complicated, essentially implementing a GC to avoid dangling pointers, so I am not sure it will ever become mainstream.</p>
+</section>
+<section id="persistent-memory">
+<h3>Persistent memory<a class="headerlink" href="#persistent-memory" title="Link to this heading"></a></h3>
+<p>The pointer API, assembly wrapping, and OS calls cover using persistent memory via standard file APIs or memory-mapped DAX. Memory is volatile while persistent memory is not, so persistent memory is faster storage, not weird RAM. And storage is complex enough that it seems best handled by libraries. Making the memory management system memkind-aware seems possible, like memory bound to NUMA nodes.</p>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<p>5B. Each variable must be declared explicitly. Variables may be of any type. The type of each variable must be specified as part of its declaration and must be determinable during translation. [Note, “variable” throughout this document refers not only to simple variables but also to composite variables and to components of arrays and records.]
+5E. There shall be no default initial-values for variables.
+5F. Assignment and an implicit value access operation shall be automatically defined for each variable.
+9C. It shall be.possible to mark variables that are shared among parallel processes. An unmarked variable that is assigned on one path and used on another shall cause a warning.</p>
+<p>A reference is a symbolic index into a global associative array of objects, <code class="docutils literal notranslate"><span class="pre">Map</span> <span class="pre">Reference</span> <span class="pre">Object</span></code>. The array allows allocating new references, deleting them, and reading/writing the reference. Reference symbols can be compared for equality, hashed to an integer, and packed/unpacked to/from an integer.</p>
+<p>The packing and hashing requires a little explanation. Packing the same reference always returns the same value during a program execution, and the packed value is distinct from the packed value of any other reference. But the exact value is internal to the memory system - it is an “adversarial” model similar to pointers where if the program’s behavior depends on the choice of packed value it is incorrect. The hashing is similar to packing, it is again the same value for the same reference, it is just that there is no distinctiveness constraint (so the program must have the same behavior even if all references hash to 0), and also no way to unhash the value, so there is no need to worry about resolving unpack invocations.</p>
+<p>There are higher-level types like immutable references and reference wrappers, but those all translate away to normal references or pointer access and don’t need involvement from the compiler. Per <span id="id3">[<a class="reference internal" href="../../zzreferences.html#id124">IHR+79</a>]</span> we should provide a “freeze” operation which recursively removes all reference indirections and turns a reference-containing value into a truly immutable/constant object, as this is “the most useful and should be retained as the unique meaning of constancy”.</p>
+<section id="pointer-conversion">
+<h3>Pointer conversion<a class="headerlink" href="#pointer-conversion" title="Link to this heading"></a></h3>
+<p>The location of the data of a reference is not fixed. If it’s small enough it could just be in a register, or there could be multiple copies of the data in memory. Also GC can move/copy the reference. The data could be produced on-demand and be represented by a thunk. All that can really be said is that the compiler will respect the semantics of storing and retrieving data.</p>
+<p>Foreign operations like OS calls require a pointer to a memory address, because references don’t necessarily exist in memory. The canonical way of doing this is simply reading the reference value and storing it in a buffer represented by a pointer (“materializing” it in memory). Internally, when compiling away the reference, the compiler tries to find a good way to store the reference - if it’s lucky, it can backpropagate the pointer request and store the data there from the beginning, so that the “read and store” operation is actually a no-op that makes zero copies.</p>
+<p>But, in the fallback case of storing a few words, where a memory allocation is appropriate, the reference translates directly to a pointer allocation. The memory is configured to trap on stray user-level access, so that only the compiler-generated code has access. Even in this case, though, the reference’s internal value is not the pointer itself, rather there is a more complex strategy of using a “handle” identifier that allows moving the data around after it is allocated.</p>
+<p>Destructors are inspired by C++ RAII destructors, hence the name. Admittedly the actual API doesn’t bear much resemblance. <a class="reference external" href="https://en.wikipedia.org/wiki/Finalizer">Finalizers</a> can resurrect objects and don’t have deterministic execution, hence would be a bad name. Go’s defer statement and try-finally are related, but they only work locally and have imprecise execution semantics.</p>
+<p>Portable mmap:
+* Yu virtualalloc <a class="reference external" href="https://github.com/alpha123/yu/tree/master/src/platform">https://github.com/alpha123/yu/tree/master/src/platform</a>
+* Go: <a class="reference external" href="https://github.com/edsrzf/mmap-go">https://github.com/edsrzf/mmap-go</a>
+* C: mmap on windows <a class="reference external" href="https://github.com/alitrack/mman-win32">https://github.com/alitrack/mman-win32</a>
+* C++: <a class="reference external" href="https://github.com/mandreyel/mio">https://github.com/mandreyel/mio</a>
+* Rust: <a class="reference external" href="https://github.com/RazrFalcon/memmap2-rs">https://github.com/RazrFalcon/memmap2-rs</a></p>
+</section>
+</section>
+<section id="representation">
+<h2>Representation<a class="headerlink" href="#representation" title="Link to this heading"></a></h2>
+<p>11A. The language shall permit but not require programs to specify a single physical representation for the elements of a type. These specifications shall be separate from the logical descriptions. Physical representation shall include object representation of enumeration elements, order of fields, width of fields, presence of “don’t care” fields, positions of word boundaries, and object machine addresses. In particular, the facility shall be sufficient to specify the physical representation of any record whose format is determined by considerations that are entirely external to the program, translator, and language. The language and its translators shall not guarantee any particular choice for those aspects of physical representation that are unspecified by the program. It shall be possible to specify the association of physical resources (e.g., interrupts) to program elements (e.g., exceptions or signals).</p>
+<p>A lot of languages have a fixed or default memory representation for values, e.g. a C struct, a Haskell ADT, and a Python object are always laid out in pretty much the same way. The more systems-level languages allow controlling the layout with flags, for example Rust has <a class="reference external" href="https://doc.rust-lang.org/reference/type-layout.html">type layout</a> and also C compatibility. Layout is then defined by its size, alignment, padding/stride, and field offsets. Now it’s great to have a compact representation of the memory layout - but only if you can actually write the memory layout you want using these features. But these flags are’t really that powerful. Here’s some examples of what can’t generally be done with the current memory DSL’s:</p>
+<ul class="simple">
+<li><p>specify the in-memory order of fields differently from their logical order</p></li>
+<li><p>specifying how to encode enumeration constants (per struct it appears in)</p></li>
+<li><p>turn array-of-structs into struct-of-arrays</p></li>
+<li><p>flattening a datatype, like <code class="docutils literal notranslate"><span class="pre">Either</span> <span class="pre">Bool</span> <span class="pre">Int</span></code> into <code class="docutils literal notranslate"><span class="pre">(Bool,Int)</span></code>, or representing a linked list as a contiguous series of records.</p></li>
+<li><p>storing some parts via pointer indirections (non-contiguous memory layout)</p></li>
+<li><p>NaN-boxing and NuN-boxing (<a class="reference external" href="https://wingolog.org/archives/2011/05/18/value-representation-in-javascript-implementations">ref</a> <a class="reference external" href="https://searchfox.org/mozilla-central/source/js/public/Value.h#526">2</a>), representing the JS <code class="docutils literal notranslate"><span class="pre">Any</span></code> type as a single 64-bit word.</p></li>
+<li><p>parsing network packets into structured data</p></li>
+</ul>
+<p>Maybe some of these could be addressed by flags, but from the last two, it is clear that we are really looking for a general-purpose memory serialization interface. I looked at <a class="reference external" href="https://hackage.haskell.org/package/binary-0.8.9.1/docs/src/Data.Binary.Get.Internal.html#Decoder">Data.Binary</a>, <a class="reference external" href="https://github.com/mgsloan/store/blob/master/store-core/src/Data/Store/Core.hs">store</a>, and <span id="id4">[<a class="reference internal" href="../../zzreferences.html#id68" title="Benjamin Delaware, Sorawit Suriyakarn, Clément Pit-Claudel, Qianchuan Ye, and Adam Chlipala. Narcissus: correct-by-construction derivation of decoders and encoders from binary formats. Proceedings of the ACM on Programming Languages, 3(ICFP):1–29, July 2019. URL: https://www.cs.purdue.edu/homes/bendy/Narcissus/narcissus.pdf (visited on 2020-07-26), doi:10.1145/3341686.">DSPitClaudel+19</a>]</span>. Narcissus is too complex IMO:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">T</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">St</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">St</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The state parameter can be gotten rid of by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">(S,St),</span> <span class="pre">T</span> <span class="pre">=</span> <span class="pre">(T,St)</span></code>:</p>
+<div class="highlight-haskell notranslate"><div class="highlight"><pre><span></span><span class="kt">Format</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">Set</span><span class="w"> </span><span class="p">(</span><span class="kt">S</span><span class="p">,</span><span class="w"> </span><span class="kt">T</span><span class="p">)</span>
+<span class="kt">Encode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">S</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">T</span>
+<span class="kt">Decode</span><span class="w"> </span><span class="ow">=</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="ow">-&gt;</span><span class="w"> </span><span class="kt">Option</span><span class="w"> </span><span class="kt">S</span>
+</pre></div>
+</div>
+<p>And we can make encode/decode total by defining <code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">{s</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">t.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>, <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">{t</span> <span class="pre">|</span> <span class="pre">exists</span> <span class="pre">s.</span> <span class="pre">(s,t)</span> <span class="pre">in</span> <span class="pre">Format}</span></code>.</p>
+<p>I thought about letting <code class="docutils literal notranslate"><span class="pre">pack</span></code> narrow the range of values, e.g. rounding 1.23 to 1.2, but concluded that it would be surprising if storing a value to memory changed it. The rounding can be defined as a pre-pass over the data to convert it to a <code class="docutils literal notranslate"><span class="pre">Measurement</span></code> type that then has optimized storage.</p>
+<p>One tricky part is that the naive way to specify types interferes with overloading, subtyping and implicit conversions. <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code> can give a byte as expected, but it can also implicitly convert to an <code class="docutils literal notranslate"><span class="pre">Int32</span></code> and give 4 bytes. Since we have dependent types this isn’t a real issue, just make sure the code generated after representation specialization passes the type explicitly: <code class="docutils literal notranslate"><span class="pre">pack</span> <span class="pre">Int32</span> <span class="pre">(Int8</span> <span class="pre">1)</span></code>.</p>
+<p>A few things need to optimize away for reasonable performance.  <code class="docutils literal notranslate"><span class="pre">length</span> <span class="pre">.</span> <span class="pre">pack</span></code> should optimize to something like <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">20</span></code> for most values, or at least something that doesn’t allocate, so that field accesses are independent and values can be allocated sanely. These functions might have to be hacked in, specializing to constant-sized values.</p>
+<p>Since writing these serialization functions all the time would be tedious, we can make a format DSL that specifies the functions in a nicer way. Although one of these DSL’s will be the standard / default, it’ll be some kind of macro / constraint system, so defining new format DSLs for specific purposes shouldn’t be hard.</p>
+<p>The translation to use pack is pretty simple: every value is wrapped in a call to pack, the result is stored as a tuple <code class="docutils literal notranslate"><span class="pre">(cell,unpack)</span></code>, and every usage applies unpack to the cell. The translation uses whatever pack is in scope; pack can be overridden like any other implicit parameters. The unpack functions will end up getting passed around a lot, but function pointers are cheap constants, and constant propagation is a thing, so it shouldn’t be an issue.</p>
+<p>So finally the most general API is <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">=</span> <span class="pre">Alloc</span> <span class="pre">(Size,Align)</span> <span class="pre">(Addr</span> <span class="pre">-&gt;</span> <span class="pre">Write)</span> <span class="pre">|</span> <span class="pre">Store,</span> <span class="pre">Store</span> <span class="pre">=</span> <span class="pre">Map</span> <span class="pre">Addr</span> <span class="pre">MaskedWord</span></code> and <code class="docutils literal notranslate"><span class="pre">Unpack</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">Maybe</span> <span class="pre">Addr</span> <span class="pre">-&gt;</span> <span class="pre">Read</span> <span class="pre">-&gt;</span> <span class="pre">a,</span> <span class="pre">Read</span> <span class="pre">=</span> <span class="pre">Map</span> <span class="pre">Addr</span> <span class="pre">Word</span></code>. This allows masked writes and multiple or fixed allocation addresses, but does not allow failing to read the value back. Also the <code class="docutils literal notranslate"><span class="pre">pack</span></code> function allows passing arbitrary side-band data to the <code class="docutils literal notranslate"><span class="pre">unpack</span></code> function. Maybe though, it is still not general enough, we should just have lens-like functions like <code class="docutils literal notranslate"><span class="pre">write</span> <span class="pre">:</span> <span class="pre">Memory</span> <span class="pre">-&gt;</span> <span class="pre">a</span> <span class="pre">-&gt;</span> <span class="pre">Memory</span></code> and <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">::</span> <span class="pre">Memory</span> <span class="pre">-&gt;</span> <span class="pre">a</span></code>. There still need to be constraints though, like that you get back what you wrote and non-interference of writes.</p>
+<p>Now we also want to allow optimization of the memory representation. Consider some data points - if there is only one possible value, then the compiler should optimize this to a constant and not store it at all. If there are two possible values, the compiler should probably use a boolean flag and again hard-code the values as constants. If the potential values include all values of a given type (and nothing else), then the compiler should use the representation for that type. If the potential values include a given type, and also members of another type, then the compiler should use the most narrowly-defined representation that contains both of those types. And it should consider whether it can choose the representation of the union type so as to minimize the amount of conversion needed for the more commonly used type (as in NaN/NuN-boxing). If the potential values can be anything, then the compiler should use the universal representation.</p>
+<p>The process of fixing the memory representation of a program can be modeled as follows. We start with a program that passes around values. Then we insert conversion operations: on every declaration, we insert a conversion to binary, and on every use, we insert a conversion from binary. As the binary representation is defined so that a read of a write is is the identity, this transformation does not change the meaning of the program. Then we additionally write this binary representation to memory on the declaration, and read this binary representation from memory on use. Again this does not change the semantics due to the non-interference of writes property. Although, in reality it could change the semantics: maybe a cosmic ray or something could change what we have written. But at this point, our program operates purely on memory and does not have any values floating around.</p>
+<p><a class="reference external" href="https://github.com/ollef/sixten">https://github.com/ollef/sixten</a> talks about being able to represent intrusive lists. I experimented with allowing the decision of pointer vs direct storage to be made in pack, but it really simplifies the code a lot to require all pack functions to produce flat blobs of data.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Macros.html" class="btn btn-neutral float-left" title="Macros" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022 Mathnerd314.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
