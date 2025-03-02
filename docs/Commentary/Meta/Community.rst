@@ -106,10 +106,13 @@ Theme
 
 The current theme is just the default RTD theme. I chose the blue/red/orange of the current logo to go OK with the RTD blue. For typography, the RTD theme uses Roboto Slab for headers, Lato for bodies, and Consolas for monospace.
 
-With a new name and logo would naturally come a new theme, probably having no relation to the RTD theme. There are many guides on how to choose color schemes and so on that mesh well with a logo. For now, the RTD theme is generic enough, being used in countless Python projects and so on, that at least for me it evokes no particular associations other than a young project. Patching the RTD theme to customize fonts or colors would add an extra build step, which is not the end of the world, but I would rather convey the absence of a theme identity rather than the wrong theme identity. Let's just say there is an ongoing theme contest running parallel with the name and logo contests.
+With a new name and logo would naturally come a new theme, probably having no relation to the RTD theme. There are many guides on how to choose color schemes that mesh well with a logo. For now, the RTD theme is generic enough, being used in countless Python projects, that at least for me it evokes no particular associations other than a young project. Patching the RTD theme to customize fonts or colors would add an extra build step, which is not the end of the world, but I would rather convey the absence of a theme identity rather than the wrong theme identity. Let's just say there is an ongoing theme contest running parallel with the name and logo contests.
 
 Brand
 -----
+
+.. role:: raw-html(raw)
+   :format: html
 
 Go made a `brand book <https://go.dev/assets/go-brand-book-v1.9.5.pdf>`__. Going through it and free associating with ChatGPT:
 
@@ -127,9 +130,30 @@ Go made a `brand book <https://go.dev/assets/go-brand-book-v1.9.5.pdf>`__. Going
   * Intuitive - Natural and effortless
   * Seamless - Integrate with ease
 
-* Tone of voice: Stroscot values collaborative relationships. Stroscot's communications should be constructive, transparent, inclusive, responsive, perceptive, and dedicated. They should not be condemning, secretive, elitist, unhelpful, ignorant, or defeatist.
+* Tone of voice: Stroscot values open, collaborative relationships. Stroscot's communications should be constructive, transparent, inclusive, responsive, perceptive, and dedicated. They should not be condemning, secretive, elitist, unhelpful, ignorant, or defeatist.
 * Audience: Stroscot aims to be all things to all people. We can list some of the most common groups: professionals, hobbyists, students, academics, sysadmins, entrepreneurs. We can also list some of the larger uncommon groups: females, non-technical people, older adults, non-native speakers, people with learning disabilities, people with no internet access. Just keep all of them in mind and introduce options to specifically support a group when necessary.
-* Messages: The language for you.
+* Messages: The language for you. There are also the `Droid campaigns <https://www.youtube.com/watch?v=EVro7tBpOJU>`__.
+
+Drop commercial: Several stealth jets drop their payload over rural areas. People stare in amazement as they stream through the air. The capsules crash down into the desert, the forest, the ocean. The people approach the alien-appearing capsules and one is shown opening. "What the - What in the world is that?" one fellow asks. A Droid phone is revealed. "Drop date: 12-24-2009."
+
+Fight commercial: Extended action sequence of a woman fighting with several robots in sequence. As the woman fights, she rips parts off the robots. Finally she defeats the last robot and extracts its "4G LTE" power core. Cut to her inserting it as the last component into a podium. The podium sinks out of view. The screen goes black and resumes with an abstract Matrix-style animation of a world constructed of symbols intermixed with phone specifications. "Made from machines to rule all machines. Forget what you thought you knew. Because you've never seen a droid like this. Defies the elements. Mind bending speed. Kevlar fiber durability. Turbo charge for up to 8 hours of battery in just 15 minutes. 48 hour battery. When it matters, Droid does."
+
+Powerful commercial: opens with an extended heist sequence of a steel box. Cut to opening the box, a phone comes out suspended by sharp blades. "This is Droid. The droid that proves thin is no longer frail. Diamond-cut spun aluminum, a face reinforced with Gorilla Glass, and a backplate made Kevlar strong. Inside it's covered with water repellent nano coating. It's the thinnest 4G LTE smartphone. Too powerful to fall into the wrong hands."
+
+World commercial: The commercial starts out in a Geiger-like futuristic world in a dark building. The camera movies forward and doors slide open to reveal a Droid phone held in the air by mechanical arms with a mechanical, robotic finger in front of it. "Does your phone do searches?" The finger selects a search box. 'Does your phone do searches, for example the word "human"?' The finger types in the word "human". "Does your phone do searches for human on the web?" Results are returned from the web. Then Google Maps for places named "human"? Maps results are displayed and a location is selected. "Your contacts for any friends named 'human'? (Which would be weird if you had one.)" The finger goes back and scrolls through contacts. "Even your music for songs you forgot you downloaded?" The finger navigates and starts playing a song "Tokio Hotel - Humanoid" stored on the phone. "does your phone surf the web? does your phone surf the web with the speed and power of a pro surfer at pipeline ? does it bring you the web in all its glory... ...in all its intended pixels... allowing you to reach the farthest expanses of its universe, deepest depths of its oceans, without getting as much as a grain of sand in your shorts?" (similar on-screen navigation) "Droid does. Search all digital creation. wave-shredding web speed. In a world of doesn't... Droid does."
+
+iDon't commercial: The ad starts off with poppy music and plain text against a white background, flipping through sentences: "iDon't have a real keyboard. iDon't run simultaneous apps. iDon't take 5-megapixel pictures. iDon't customize. iDon't run widgets. iDon't allow open development. iDon't take pictures in the dark. iDon't have interchangeable batteries." The ad displays "Everything iDon't,", then the mood changes. The audio breaks apart and black takes over the screen. Then "DROID DOES" is displayed and a robotic voice is heard saying "Droid".
+
+Princess commercial: "Should a phone be pretty? Should it be a tiara-wearing digitally clueless beauty pageant queen? Or should it be fast? Racehorse duct-taped to a Scud missile fast. We say the latter. So we built the phone that does. Does rip through the Web like a circular saw through a ripe banana. Is it a precious porcelain figurine of a phone? In truth? No. It’s not a princess. It's not a toy. It’s a robot, a droid. A phone that trades hair-do for can-do."
+
+Next-gen commercial: Astronauts enter a research complex with hexagonal tunnels. A strange rock floats in midair. A man removes his suit's arm and places his bare arm inside a hole of the rock. "Droid DNA evolution initiated. Now it integrates your work emails so you can be hooked up to everything you need to do. Now it does 1Ghz speed on a more intuitive keyboard." His arm transforms into a robotic arm, then emits a phone into his palm. The man begins typing as both his arms turn robotic. "Turning you into an instrument of efficiency." Cut to the man sitting in a chair being studied in a lab. "Vision expanding to 5-inch 1080p display and camera. With blockbuster on demand, the way you see movies... will never be the same." (animations of user's eyes turning bionic) "Touch acquired. NFC. Hearing evolving with Beats Audio. Wireless charging activated." (similar animation of fingertips and hearing turning bionic, placing phone onto charger) "Part of the next generation of does. It's not an upgrade to your phone - it's an upgrade to yourself."
+
+Apps commercial: "Can a smartphone augment your reality? Can it see through walls? Locate restaurants and shops through your phone's viewfinder? Droid can, with Layar. One of thousands of apps that runs simultaneously with others from the ever-expanding Android market. Can a smartphone see light-years into space? Can it pinpoint your location and find any star above you? Trace constellations? Even identify other planets you're currently not on? Droid can, with Google Sky Map. One of thousands of apps that run with other apps from the ever-expanding Android market. When there's no limit to what Droid gets, there's no limit to what Droid does."
+
+
+
+
+I particularly like the 2:00 campaign from 2009, "In a world of doesn'ts, :raw-html:`<del>Droid</del>` Stroscot does".
 
 Culture
 =======

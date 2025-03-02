@@ -10,19 +10,19 @@ One issue with this denotational semantics view is that most programs these days
 
 Steelman 6B. There shall be a control mechanism for sequencing statements.
 
-Following Haskell, what we need is do-notation. In Haskell, this is by default tied to monads, but with GHC's language extensions such as RebindableSyntax and QualifiedDo, there are really no restrictions on the types. The basic syntax is three productions::
+Following Haskell, what we need is do-notation. In Haskell, this is by default tied to monads, but with GHC's language extensions such as RebindableSyntax and QualifiedDo, there are really no restrictions on the types. The basic syntax of blocks is three productions (all called "statements")::
 
   simple statement {e} = e
-  command {e;stmts} = e >> {stmts}
-  operation {pat <- e; stmts} = e >>= \x -> case x of { pat -> {stmts}; _ -> fail "" }
+  non-returning {e;stmts} = e >> {stmts}
+  returning {pat <- e; stmts} = e >>= \x -> case x of { pat -> {stmts}; _ -> fail "" }
 
-Per :cite:`ichbiahRationaleDesignADA1979` there is the general principle that, in a block, any statement may be replaced with a sequence of commands, operations, and statements. But of course it does not make sense to end a block with an operation, as the assigned value cannot be used.
+Per :cite:`ichbiahRationaleDesignADA1979` there is the general principle that, in a block, any statement may be replaced with a sequence of statements. There is a no-op statement, the empty block ``{}``, that doesn't return a value. I guess someone could define a ``nullBlock`` explicit command for it but that is something for the standard library.
 
-In Haskell, ``e >> m = e >>= \_ -> m``, and the type is ``(>>) : IO a -> IO b -> IO b``. I actually consider this a mistake. First, ``IO a`` makes it too easy to ignore return values - it should at least be a fixed type like ``IO ()``. But even ``()`` has some use, e.g. to allow returning exceptions, so really ``()`` should be replaced with a specialized type like ``FixedReturnValue``. At that point it seems worth defining a separate type synonym. So we can really consider statements to be two disjoint categories, ``Command = IO FixedReturnValue`` and ``Operation a = IO (a \ FixedReturnValue)``. If we hide ``FixedReturnValue`` then we just get two opaque types ``Command`` and ``Operation a`` and a combination ``IO a = Command | Operation a``. At that point there is essentially no linkage and we can just take ``Command`` and ``Operation a`` as two distinct types to begin with. So really ``(>>)`` should not be hardcoded to its monadic definition, for example it is useful to take ``(>>)`` to be function composition or category composition.
+In Haskell, for the non-returning statement, ``e >> m = e >>= \_ -> m``, and the type is ``(>>) : IO a -> IO b -> IO b``. I actually consider this a mistake. First, ``IO a`` makes it too easy to ignore return values - it should at least be a fixed type like ``IO ()``. But even ``()`` has some use, e.g. to allow returning exceptions, so really ``()`` should be replaced with a specialized type like ``FixedReturnValue``. At that point it seems worth defining a separate type synonym. So we can really consider returning and non-returning dtatements to be two disjoint categories, ``NonReturningStatement = IO FixedReturnValue`` and ``ReturningStatement a = IO (a \ FixedReturnValue)``. If we hide ``FixedReturnValue`` then we just get two opaque types ``NonReturningStatement`` and ``ReturningStatement a`` and a combination ``IO a = Simple | NonReturningStatement | ReturningStatement a``. At that point there is essentially no linkage and we can just take ``NonReturningStatement`` and ``ReturningStatement a`` as two distinct types that happen to both be usable as blocks. So really ``(>>)`` should not be hardcoded to its monadic definition, for example it is useful to take ``(>>)`` to be function composition or category composition.
 
-Per :cite:`ichbiahRationaleDesignADA1979` one obvious distinction is that there is a no-op command, the empty block ``{}``, but this command is not an operation. I guess someone could define a ``nullBlock`` explicit command for it but that is something for the standard library.
+So that we have defined returning and non-returning statements there is the problem of giving them more concise names. Ada uses "procedure" for non-returning and "function" for returning, but I don't like how function conflicts with the notion of mathematical function. I have been using "command" for non-returning statements and "operation" for returning statements but it is easy to mix up. ChatGPT suggested using "procedure" for non-returning and "method" for returning statements.
 
-There is also ``return``, which in Haskell is one of the monad operations. There is definitely a difference between writing ``f prompt = getLine prompt`` and ``f prompt = { return (getLine prompt) }``, and it is not clear how one would phrase the second version "return a block that reads a line with this prompt" any other way.
+There is also ``return``, which in Haskell is one of the monad operations. There is definitely a difference between writing ``f prompt = getLine prompt`` and ``f prompt = { return (getLine prompt) }``, and it is not clear how one would phrase the second version "return a suspended block that reads a line with this prompt" any other way.
 
 Ensuring that adding or removing braces on a single statement is a no-op is a useful property; this property is clear based on the translation but may be confusing to some. So for example we would write ``f prompt = { getLine prompt }`` and ``f prompt = return (getLine prompt)``. The "last statement's value is returned" property is somewhat common in newer languages, the naked return less so.
 
@@ -261,7 +261,7 @@ The remaining monad transformer is ContT. ContT is not really a well-behaved mon
 Continuations
 -------------
 
-Typing continuations is a little hard because they allow answer-type modification, e.g. the type of ``reset (3 + shift \k -> k)`` is ``int -> int``. Using prefix syntax ``reset (liftA (+) 3 (shift (\k -> k)))`` this ability to change type is a little more obvious. Since the operators are lambdas, the principal intersection types will be the most general, since intersection types can type all strongly normalizing programs. In this case it turns out we do not need the intersection operator and the Hindley-Milner type signature is sufficient. To express the types it is helpful to define the indexed continuation type ``ICont r s a = (a -> s) -> r``. Then the most general simple types are::
+Typing continuations is a little hard because they allow answer-type modification, e.g. per :cite:`koboriAnswerTypeModificationTears2016` the type of ``reset (3 + shift (\k -> k))`` is ``int -> int`` rather than ``int`` as the ``3 +`` might suggest. Using Haskell's syntax ``reset (fmap (3+) (shift (\k -> k)))`` this ability to change type is a little more obvious. Since the operators are lambdas, the principal intersection types will be the most general, since intersection types can type all strongly normalizing programs. In this case it turns out we do not need the intersection operator and the Hindley-Milner type signature is sufficient. To express the types it is helpful to define the indexed continuation type ``ICont r s a = (a -> s) -> r``. Then the most general simple types are::
 
   return : a -> ICont b b a
   (>>=) : ICont i j a -> (a -> x -> j) -> x -> i
@@ -468,7 +468,7 @@ Actually print isn't a primitive operation, it's more like:
   Data "Hello, world!\n" (\msg ->
     Block "_start" [Sys_write stdout (addr msg) (length msg) (Sys_exit 0)])
 
-with Stroscot's internal assembler language.
+with Stroscot's internal assembler language. See `here <https://drewdevault.com/2020/01/04/Slow.html>`__ for a full assembly program.
 
 Task isn't really a monad, but we can compose operations that return values using the continuation monad's bind operation, as implemented with do-notation.
 
@@ -514,18 +514,25 @@ The only trait here that might be disadvantageous is 4. Nystrom lists the follow
 
 C# async-await solves all but the first, but the await keyword is still painful. Nystrom says the real solution is "multiple independent callstacks that can be switched between." Stroscot goes further than switching and makes I/O callstacks first-class continuations. With continuations as the I/O abstraction, there is no distinction between sync and async, or rather it is all async. In particular all low-level operations are implemented in async style (taking callbacks), and combinators must be written using the callback/continuation model. But simple sequential code can be written in sync style and this interoperates seamlessly with the async code. Thus Stroscot's I/O continuation model solves the distinction pain Nystrom was complaining about.
 
-There is still a pure/impure dichotomy though. Regardless of syntax, impurity cannot be hidden completely. Actions will always have some conceptual overhead compared to pure functions because they are sensitive to execution order. I don't know if this will make anyone "spit in your coffee and/or deposit some even less savory fluids in it" (Nystrom), but I/O is unfortunately awkward in a pure or mathematical world. A program that does no I/O must be an infinite loop (it cannot even exit, because that requires a syscall). :cite:`jonesTacklingAwkwardSquad2001` classifies I/O under the "awkward squad".
+There is still a pure/impure dichotomy though. Regardless of syntax, impurity cannot be hidden completely. Actions will always have some conceptual overhead compared to pure functions because they are sensitive to execution order. I don't know if this will make anyone "spit in your coffee and/or deposit some even less savory fluids in it" (Nystrom), but :cite:`jonesTacklingAwkwardSquad2001` classifies I/O under the "awkward squad" exactly because its semantics are somewhat awkward in a purely functional context. A program that does no I/O must be an infinite loop (it cannot even exit, because that requires a syscall).
 
 "Unsafe" I/O
 ============
 
 Steelman 4C. The language shall attempt to minimize side effects in expressions, but shall not prohibit all side effects. A side effect shall not be allowed if it would alter the value of a variable that can be accessed at the point of the expression. Side effects shall be limited to own variables of encapsulations. The language shall permit side effects that are necessary to instrument functions and to do storage management within functions. The order of side effects within an expression shall not be guaranteed. [Note that the latter implies that any program that depends on the order of side effects is erroneous.]
 
-Haskell has ``runST`` and ``unsafePerformIO`` that allow turning impure computation into pure computations. These can be implemented by throwing a resumable exception that's caught in a top-level handler that does the I/O. ``runST`` scrutinizes its computation for impure behavior such as printing or returning allocated references, while ``unsafePerformIO`` does not and exposes the internal evaluation order.
+Haskell has a spectrum of "backdoors" into the I/O monad that allow turning impure computation into pure computations:
 
-If one wants to understand the evaluation order or is dealing with commutative operations, these functions are quite useful, e.g. Debug.Trace.trace looks like a non-I/O function but actually outputs something on the console, and allocation can be done in any order.
+* ``runST``: this uses the type system to scrutinize its computation for impure behavior. Only mutable references are allowed.
+* ``unsafeDupablePerformIO``. ``accursedUnutterablePerformIO``, ``inlinePerformIO``: this runs its computation with a fresh state token. The compiler may duplicate the block, combine similar blocks, or skip it entirely.
+* ``unsafeDupableInterleaveIO``: this runs in I/O and copies its state token. Used for lazy I/O.
+* ``unsafePerformIO``, ``unsafeInterleaveIO``: these are a layer on top of the dupable variants that attempts to ensure it is executed at most once (i.e. no duplication) - particularly, not across threads. You have to disable inlining, CSE, and let-floating / the full laziness transformation.
 
-The main things to avoid is global variables like ``var = unsafePerformIO (newIORef 1)`` pattern. Implicit parameters initialized in main compose much better. Similarly C's ``static`` variables inlined in functions should be forbidden. Although, optimal reduction should mean an unsafePerformIO is only evaluated once, hence reading a file or something should be fine.
+If one wants to understand the evaluation order or is dealing with commutative operations, these functions are quite useful, e.g. Debug.Trace.trace looks like a non-I/O function but actually outputs something on the console. Similarly, allocation can be done in any order, so using ``unsafePerformIO`` in the memory subsystem has some amount of plausibility. Similarly Ada has a notion of "benign side effects". Now in practice this notion differs from dupable I/O and is somewhat vague - e.g. the Ada reference manual lists incrementing a global variable as a benign side effect (1.1.4.18.d), when Steelman says altering the value of a variable shall not be allowed.
+
+In Stroscot, on account of using the continuation monad, we don't have a state token. I am thinking the dupable I/O can be implemented by throwing a resumable exception. The exception-throwing semantic is very similar to the "stop evaluating this computation and do some I/O" pattern found when evaluating ``unsafeDupablePerformIO``. The semantics of term rewriting clearly allows duplication of expressions, and per the exception semantics the compiler gets to decide the evaluation strategy and hence whether to duplicate.
+
+Now there is also the question of non-duplication. We can implement a run-once requirement using a guard like ``hasRun = mut false; when (not hasRun ) { hasRun := true; ... }``. But note that ``hasRun`` must be declared in an enclosing I/O block, you can't write this in pure code. In some sense this ``hasRun`` variable is the "identity" of the block, duplicating the variable introduces the potential for running the code twice, so we can't get around this. Similarly we can't write a global variable pattern like``var = unsafePerformIO (newIORef 1)`` pattern or C's ``static`` variables. IMO implicit parameters initialized in ``main`` compose much better.
 
 Top-level I/O
 -------------

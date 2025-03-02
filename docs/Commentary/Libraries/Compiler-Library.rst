@@ -125,6 +125,16 @@ Then there are the libraries suggested by ChatGPT, libraries for:
 * applications: automation, analytics, financial computing, data science, scientific computing, virtual and augmented reality
 * real-time data processing and real-time communication
 
+Colors
+======
+
+One common pattern in the library is a value like ``MyAmazingInteger64 1``. This has two parts, the "human-readable" value ``1``, and the "color" or user annotated type ``MyAmazingInteger64``, which is generally a symbol. The human-readable value alone is rather ambiguous - is a number like ``1`` represented as a floating-point? a 32-bit integer? a 64-bit integer? The answer is that the compiler library determines it - most likely it is an arbitrary-precision real number. But such a representation is inefficient so we add a "color" so that the compiler can assume more properties about the value, like that it will generally fit into 64 bits. This does not prevent writing a value like ``MyAmazingInteger64 "string"``, but most likely this will fallback to a generic, inefficient representation, whereas 64-bit integers will generally be represented as packed 64-bit words.
+
+Admittedly, coloring values is somewhat pedantic, because we can generally easily convert between values of different colors, and most of the time this conversion is somewhat automatic. But, for purposes of the language semantics, values of different colors are not "equal", because it is easy to distinguish the color. Colors can represent properties that are difficult to check semantically, such as ``SQLSafeString`` vs. ``String`` where the first has been escaped to avoid SQL injection. In general, escaping a string itself uses escape characters, so checking that a string is escaped is not a trivial check like checking for the absence of escape characters. In contrast checking the color is free and it is the user's fault if they construct a ``SQLSafeString`` that is not escaped properly.
+
+Once we get into optimization, we may start using identical memory representations for values of different colors, erasing checks and conversions and so on, because checking the color at each point is slow. For example, ``SQLSafeString`` and ``String`` will most likely have the same memory representation (it's not like there's an amazingly efficient way of representing sanitized strings that's different from representing normal strings). But during optimization, we are already considering equivalence classes of programs rather than programs - simply by optimizing, we are improving the speed of the program, which is an observable property, and therefore we are changing the behavior of the program by optimizing. The reason this is allowed is because optimization considers programs with the same output value to be equivalent.
+
+
 Booleans
 ========
 
@@ -277,7 +287,11 @@ Text types::
 
 Interpolation and internationalization are two things that have to work together, copy JS i18n and Python interpolation like ``i'{x} {y}'.format(locale_dict)``.
 
-Conversions: https://profpatsch.de/notes/rust-string-conversions
+Rust's string types come up often, there are really only 3 types:
+
+* ``str = Path = OsStr = Slice = CStr = [u8]``
+* ``String = PathBuf = OsString = Buf = Vec<u8> = { ptr : *const T, cap: usize, len: usize, alloc : A }``
+* ``CString = Box<[u8]> = { ptr: *const T, alloc : A }``
 
 Steelman 2H: "There shall be a built-in facility for fixed length string literals. String literals shall be interpreted as one-dimensional character arrays."
 

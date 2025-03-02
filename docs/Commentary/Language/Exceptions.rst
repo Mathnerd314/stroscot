@@ -32,22 +32,37 @@ A superclass ``Exception`` type seems more straightforward than C++'s "throw any
 Domain exception
 ----------------
 
-A domain exception is an "alternate result" returned from a function when its precondition for success is false, e.g. when the operation is called on an "invalid" argument outside of its domain. A domain exception is used when checking the domain via a separate function would be tedious - instead the caller can check the returned value to see if the precondition was satisfied.
+A domain exception is an "alternate result" returned from a function when its precondition for success is false, e.g. when the operation is called on an "invalid" argument outside of its domain. To illustrate why domain exceptions are useful, here is some code with two ways to check for divide by zero (and return 0):
 
-In high-reliability scenarios, it's best to statically prove the nonexistence of domain exceptions or that the domain exception is limited to a small region. For example arithmetic overflows can represent security vulnerabilities and should generally be handled immediately. But otherwise there is a dynamic semantics for domain exceptions which lends itself to containment strategies.
+.. code-block:: python
+
+  def method1(x,y):
+    if y == 0:
+      return 0
+    return x / y
+
+  def method2(x,y):
+    result = x / y
+    if result == DivideByZero:
+      return 0
+    return result
+
+Now here the precondition check is easy - ``y == 0``. But in general the preconditions might be really complex - for example, checking if a string is valid UTF-8. Also the precondition being checked might get out of sync with the actual precondition of the code. In contrast the post-check ``result == DivideByZero`` expresses intent and is always a simple equality or set-membership check.
 
 Examples:
 
+* Divide by zero returns ``DivideByZero``
+* A floating-point exception, when signaling is enabled
+* An arithmetic computation where the result doesn't fit in the specified representation, e.g. ``IntegerOverflow``
 * Converting a (user-input) string to an integer may fail on invalid characters and return ``NotAnInt``.
 * ``if "x" then ... else ...`` returns ``InvalidCondition``
 * A case statement where the scrutinee doesn't match any of the patterns returns ``FailedMatch``
-* Divide by zero returns ``DivideByZero``
-* An arithmetic computation where the result doesn't fit in the specified representation, e.g. ``IntegerOverflow``
-* A floating-point exception, when signaling is enabled
 * A cast of a value to a type that it isn't
 * An assertion or contract failure
 * Looking up a nonexistent key in a dictionary returns ``KeyNotFound``
 * Looking up an out-of-bounds index in an array returns ``IndexOutOfBounds``
+
+In high-reliability scenarios, it's best to statically prove the nonexistence of domain exceptions or that the domain exception is handled quickly and limited to a small region. For example arithmetic overflows can represent security vulnerabilities and should generally be handled immediately. But otherwise there is a dynamic semantics for domain exceptions which lends itself to containment strategies.
 
 System exception
 ----------------
@@ -90,8 +105,6 @@ This covers running out of memory (OOM), stack (stack overflow), sockets, and fi
 
 Threads compete for resources. Any allocation attempt might fail, because the developer doesn't know the total resources available on the target system, and because other threads and other processes are simultaneously competing for that same unknown pool. But OOM locations are predictable to the compiler because it knows exactly where allocations occur and can throw an exception if the allocation fails. Hence OOMs can be localized to the source code that generates the allocation statement.
 
-
-
 OOM isn't reliably reported by the OS because by default page allocation doesn't fail even in a low-memory condition. Instead the pages get swapped to disk and the system just gets really slow. On Linux even without swap the programs gets paused on trying to access the page and the OOM killer just selects a process to kill. Similarly ulimit just segfaults on OOM. To reliably enforce a limit it has to be checked by the allocator. But 32-bit address space exhaustion is reliably reported.
 
 Stack overflow is more tractable than OOM, in the sense that there is no asynchronous competition for the resource, hence a static analysis can show that there is sufficient stack. It is also easy to handle stack overflow by switching to an alternate stack. It is also fairly predictable to determine whether an expression uses the C stack: it must call a C function.
@@ -100,7 +113,7 @@ Stack overflow can leave a Windows critical section in a corrupt state. Windows 
 
 If an application only uses a few pages of memory then the overhead for reserves is significant, so the amount of reserved space should be configurable or calculated to its minimum viable size.
 
-Out of file descriptors is pretty easy to handle, since few operations allocate file descriptors and it is easy to avoid those.
+Out of file descriptors/sockets is pretty easy to handle, since few operations allocate file descriptors and it is easy to mark those as throwing an exception.
 
 Deadlock
 --------
@@ -266,7 +279,7 @@ Unwind: Perform cleanup such as freeing resources, unlocking mutexes, restoring 
 
 Serialize: Unwinding but across a process or thread boundary. Catch action, convert to value, pass value via IPC, convert back to exception and rethrow.
 
-Wrap: As unwind, but change the exception returned. Often this loses fidelity by replacing a very specific exception with a more generic one, making it harder to perform recovery unless the original exception is chained in.
+Wrap: As unwind, but change the exception returned. Often this loses fidelity by replacing a very specific exception with a more generic one. Either the original exception value is lost completely, or else one has to use a chaining mechanism that makes it more difficult to perform recovery. It is better to pass the exception up unmodified and make the catching mechanism more powerful to handle multiple types of errors at once in a clause.
 
 Frequency
 ---------
@@ -318,30 +331,65 @@ There is also safety: whether it is possible to ignore the exception or use it a
 
 I've seen the suggestion that manual exception handling is better for beginners, because the boilerplate is visible and translates into basic language facilities. The sequencing is explicit in the translation so there is no ambiguity. It is easier to identify errors in code using manual propagation because the erroneous cases are often visibly missing or underhandled. Manual code provides a starting point to write down all the cases and reason through their handling so as to obtain robust code. I would say this is accurate; the tutorial should introduce explicit error handling syntax first, without any automatic propagation. Automatic propagation should be introduced second, or maybe later on in the tutorial, and it should be emphasized that automatic error propagation is a shortcut. There should probably even be a warning to disable automatic propagation, for pedagogical purposes. But this consideration is not a reason to remove automatic propagation from the language. For example, inline assembly is also an advanced topic with a complex execution semantics, but it wouldn't make sense to remove inline assembly just because it is not easily introduced within the first few chapters of the tutorial.
 
-There is a good reason for automatic propagation: repetitiveness. Unwinding is the most common handling behavior, and manual unwinding code, even if a single marker such as Swift's ``try`` or Rust's ``?`` , is still repetitive, tedious, ugly, and annoying syntactic noise, making programmers discouraged and code less readable and maintainable. Marking every operation with ``try`` provides the same information content as marking no operations with ``try``: zero. So IMO the only reasonable solution is automatic propagation, zero syntax, avoiding the "you forgot the try!" gotchas.
+There is a good reason for automatic propagation: repetitiveness. Unwinding is the most common handling behavior, and manual unwinding code, even if a single marker such as Swift's ``try`` or Rust's ``?`` , is still repetitive, tedious, ugly, and annoying syntactic noise, making programmers discouraged and code less readable and maintainable. Marking every operation with ``try`` provides the same information content as marking no operations with ``try``: zero. Like look at this Swift example (from an `accepted proposal <https://github.com/apple/swift-evolution/blob/main/proposals/0304-structured-concurrency.md#motivation>`__, given as idiomatic code):
 
-One example is the case where you are in a call chain several levels deep, in a pure non-throwing function, and you realize there is an unhandled case. So you want to throw an exception that is handled a few levels up in the call chain. With manual propagation, you would have to add unwinding code to each intervening function. With automatic propagation, no changes are needed besides adding the throw and the catch.
+.. code-block:: swift
 
-Another example is quick scripting. Let's say you're doing some data analysis: you open the file, read the CSV, add some numbers, and write out another file. Almost every operation here does some OS syscall or invokes some assembly instruction and can fail. Particularly, a syscall can throw tons of different exceptions, so properly handling all exceptions would require more code than the original script. With automatic propagation, you just write the "happy path" and all exceptions propagate implicitly and crash the program. With manual propagation, you would at least have to mark each OS call, and probably mark the addition as assert-non-overflowing too.
+  func chopVegetables() async throws -> [Vegetable] { ... }
+  func marinateMeat() async -> Meat { ... }
+  func preheatOven(temperature: Double) async throws -> Oven { ... }
 
-According to `Joel <https://www.joelonsoftware.com/2003/10/13/13/>`__ automatic propagation sucks because the early returns mean magic gotos are invisibly sprinkled throughout your code. It does take some training to learn to read code as if every line, expression, and subexpression could throw an exception and to use finalizers appropriately. But automatic propagation gives streamlined syntax. With automatic propagation it does not require any changes to a call chain to throw an exception and catch it several layers higher up. Generally, it is easy to quickly write code for the happy path using automatic propagation because you don't mark any error paths.
+  // ...
 
-The correctness of code using automatic propagation is hard to judge. An exception code path may unwind too soon and not restore its state properly, but this may not be obvious. There are a few mutable state strategies that are easy to check:
+  func makeDinner() async throws -> Meal {
+    let veggies = try await chopVegetables()
+    let meat = await marinateMeat()
+    let oven = try await preheatOven(temperature: 350)
 
-* construct pure values, then commit all of them at once with an atomic operation
-* use RAII so that every resource is disposed of properly
-* use type signatures to verify exception safety invariants
+    let dish = Dish(ingredients: [veggies, meat])
+    return try await oven.cook(dish, duration: .hours(3))
+  }
 
-But in general, these cannot guarantee that the returned state is correct. So to satisfy the Joels, Stroscot uses manual handling by default, allows opting into automatic propagation on a per-exception value basis, and out on a per-file/function basis via a warning. Stroscot also allows manual handling all the time, regardless of whether or not automatic propagation is enabled.
+``makeDinner`` is just keyword salad. "try" is randomly sprinkled on some methods but not others. What programmer is going to remember that you "try" to chop the vegetables but marinating the meat will always succeed? Compare without the noise:
+
+.. code-block:: swift
+
+  func makeDinner() async throws -> Meal {
+    let veggies = chopVegetables()
+    let meat = marinateMeat()
+    let oven = preheatOven(temperature: 350)
+
+    let dish = Dish(ingredients: [veggies, meat])
+    return oven.cook(dish, duration: .hours(3))
+  }
+
+Now you can actually type it out without looking up every single type signature to check if it needs ``try``. Thus, IMO, the only reasonable solution is automatic propagation, zero syntax, avoiding the "you forgot the try!" gotchas. (Stroscot gets rid of ``await`` too for similar reasons, discussed in :ref:`Commentary/Language/State:Colored values`)
+
+Another reason to prefer automatic propagation, per C#, is the case where you are in a call chain several levels deep, in a pure non-throwing function, and you realize there is an unhandled case. So you want to throw an exception that is handled a few levels up in the call chain. With manual propagation, you would have to add unwinding code to each intervening function. With automatic propagation, no changes are needed besides adding the throw and the catch.
+
+Another reason is quick scripting. Let's say you're doing some data analysis: you open the file, read the CSV, add some numbers, and write out another file. Almost every operation here does some OS syscall or invokes some assembly instruction and can fail. Particularly, a syscall can throw tons of different exceptions, so properly handling all exceptions would require more code than the original script. With automatic propagation, you just write the "happy path" and all exceptions propagate implicitly and crash the program. With manual propagation, you would at least have to mark each OS call, and probably mark the addition as assert-non-overflowing too. Automatic propagation is a much more streamlined syntax.
+
+According to `Joel <https://www.joelonsoftware.com/2003/10/13/13/>`__ automatic propagation sucks because the early returns mean magic gotos are invisibly sprinkled throughout your code. It does take some training to learn to read code as if every line, expression, and subexpression could throw an exception. Particularly, the correctness of code using automatic propagation is hard to judge. An exception code path may unwind too soon and not restore its state properly, but this may not be obvious. Now Stroscot has tools for addressing these:
+
+* construct pure values, then commit all of them at once with an atomic I/O operation that succeeds or else fails in a consistent state
+* use finalizers so that every resource is disposed of properly / cleaned up
+* use type signatures to verify invariants
+
+Per ChatGPT these tools are pretty comprehensive. The atomic pattern is how most people think about using operations, and then resources and invariants are the main pain points of automatic propagation and come up often in discussion of atomicity. But, maybe there is an obscure case. So to satisfy the Joels, Stroscot allows manual handling all the time. You can warn on automatic propagation on a per-file/function basis, so as to rid your code of it and ensure you are only using manual handling. Also, the whole exception semantic itself is opt-in, if you don't want exception propagation then don't mark any values as exceptions. Now for this last, in practice the standard library marks many values as exceptions, but I am thinking that you will be able to override this categorization on a per-module basis.
 
 Exception order
 ---------------
 
 10E. The order in which exceptions in different parts of an expression are detected shall not be guaranteed by the language or by the translator.
 
-How does automatic propagation work? Well, the closest analogue is that it unwinds the stack similarly to Java's unchecked exceptions. Vaguely, it decorates every expression with an early return of the form ``case expr of (e : Exception) -> return e; x -> x``. For non-exception-aware functions ``foo``, ``foo ... Exception ...`` reduces to ``Exception``. But this definition doesn't specify which exception gets returned, e.g. from ``throw a + throw b``. The more correct (operational) semantics is that as soon as an exception is evaluated (thrown) it is immediately propagated to the nearest applicable exception-catching context and the remaining part of the expression is discarded. This exposes the evaluation strategy of the language implementation. Java says left-to-right, but this prevents many optimizations. Stroscot's answer is that the exception returned is a deterministic function of the expression and compiler version. However the compiler's evaluation strategy is not exposed to the static verification system, so type signatures must be written as if either exception could be returned.
+How does automatic propagation work? Well, the closest analogue is that it unwinds the stack similarly to Java's unchecked exceptions. Vaguely, it decorates every expression with an early return of the form ``case expr of (e : Exception) -> return e; x -> x``. For non-exception-aware functions ``foo``, ``foo ... Exception ...`` reduces to ``Exception``. But this definition doesn't specify which exception gets returned, e.g. from ``throw a + throw b``. The more correct (operational) semantics is that as soon as an exception is evaluated (thrown) it is immediately propagated to the nearest applicable exception-catching context. The remaining part of the expression is discarded or incorporated into the exception trace. This exposes the evaluation strategy of the language implementation - really it is the only place it is exposed.
 
-:cite:`peytonjonesSemanticsImpreciseExceptions1999` says that because automatic propagation is "nondeterministic", ``catch`` should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad. ``getException`` is just ``return`` and pattern matching (section 4.4, page 9). Their approach merely uses the I/O monad as a "sin bin" for nondeterminism. Stroscot's choice to expose the nondeterminism allows more concise and flexible pure exception handling. But since the verification system models the set of exceptions and ``catch`` as randomly picking one, it robustly checks all evaluation strategies, including strange possibilities such as ``let x = throw 1 + throw 2 in try x == try x`` evaluating to false. (CBN expansion duplicates x, then try/catch picks different branches)
+So what is the evaluation strategy of the language? Java says left-to-right call-by-value, but this prevents many optimizations. Ada has this notion of "arbitrary order" which means some sequential order is chosen for each specific execution of the expression, but it still requires evaluating the expression fully before using it. Stroscot's answer is that any reduction sequence not ending in an exception is a valid execution of an expression. For example, ``let x = throw 1 + throw 2 in try x == try x`` can evaluate to false, because CBN expansion duplicates x, then ``try`` can pick different branches. It can also evaluate to true, so the expression is ambiguous.
+
+Now :cite:`peytonjonesSemanticsImpreciseExceptions1999` says that because automatic propagation is "nondeterministic", ``catch`` should be an operation of the I/O monad - but in fact nothing in their semantics makes use of the I/O monad. ``getException`` is just ``return`` and pattern matching (section 4.4, page 9). Their approach merely uses the I/O monad as a "sin bin" for nondeterminism. Stroscot's choice to embrace the nondeterminism allows more concise and flexible pure exception handling. But there are actually two places this choice is visible:
+
+* In the verification system, the full set of evaluation strategies and exceptions must be modeled. ``catch`` may return any exception (nondeterministically) unless there is a non-exception return value, in which case that is chosen. Therefore, type signatures must be written to accommodate all possible exceptions.
+* In the compiler, the compiler chooses an evaluation strategy and can hard-code the returned exception. Stroscot does not place any restrictions on how the compiler chooses an evaluation strategy other than that it is "predictable" in the sense that the exception returned is a deterministic function of the expression and compiler version. This predictability is mainly to aid in debugging the compiler, but as the Ada manual notes, it is reasonable to expect that in most situations the compiler's behavior will follow relatively simple rules and be predictable by a human.
 
 Syntax
 ======
@@ -360,13 +408,15 @@ Syntax
     printf("bad input error occurred: %s\n", badInputErr)
   }
 
-However these duplicate ``return / case``. Exceptions aren't magic and don't need special syntax, so we just use ``return / case``:
+However these duplicate ``return / case``. Exceptions aren't magic and don't need special syntax, so we just use ``return / case``. With a variant type like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword (or no keyword for pure functions) to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:
 
 ::
 
-  case (BadInputError "xyz") of
+  r = return (BadInputError "xyz")
+  case r of
     BadInputError badInputErr -> printf "bad input error occurred: %s\n" badInputErr
-    _ -> return ()
+    x | isException x -> return x
+    _ -> printf "A-OK"
 
 Go introduced panic-recover-defer to replace throw-catch-finally.
 
@@ -384,13 +434,14 @@ Go introduced panic-recover-defer to replace throw-catch-finally.
     panic(fmt.Errorf("validateInput: %w", &BadInputError{input: "xyz"}))
   }
 
-Per `Rob Pike <https://groups.google.com/g/golang-nuts/c/HOXNBQu5c-Q/m/ltQ-QHBrw9gJ>`__ it is deliberately hard to discriminate exceptions with the recover mechanism because "fine-grained exception handling makes code unreadable in practice". try-catch makes the code "inside-out".
+Per `Rob Pike <https://groups.google.com/g/golang-nuts/c/HOXNBQu5c-Q/m/ltQ-QHBrw9gJ>`__ it is deliberately hard to discriminate exceptions with the recover mechanism because "fine-grained exception handling makes code unreadable in practice". try-catch makes the code "inside-out". Now it is true that try catch has a nesting problem (this is much less of an issue with ``return / case``), but I think the panic-recover mechanism is upside-down - Go's mechanism puts the error handling before the possibly-erroring call, which is the reverse of traditional code where control flow goes from top to bottom.
 
 Swift:
-try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
-try X else Y - presubstitute Y on exception
 
-With a variant type like ``a -> b|Exception`` a function returns either a value or an exception. So just use the normal ``return`` keyword to return exceptions. Then to respond to specific exceptions programmatically, returned exception-or-values can be pattern-matched like any other return value:
+* try X else catch - wraps into Either type, an exception value (failure) or a normal value (success)
+* try X else Y - presubstitute Y on exception
+
+We can implement these as little combinators in the standard library.
 
 The case handling syntax seems easy and clear, and it's possible to locally reason about and decide how best to react to exceptions.
 But a Quorum-style study should check on what's clearest to beginners. Limiting ``return`` to normal values and using ``throw`` for ``Exception`` values is also a possibility.
@@ -631,12 +682,12 @@ There are several warnings that check exception lists:
 * unreachable-exception - an exception or exception set is listed, but there is no way to throw it
 * unlisted-exception - an exception may be thrown on a given input, but is not contained in the return type
 * duplicate-exception - for example, supposing the return type is ``A|B|C``, ``A`` is duplicate if ``B|C`` also lists all exceptions
-* overlapping-exception - for ``A|B``, warns if any exception is in both ``A`` and ``B``
+* overlapping-exception - for ``A|B``, warns if any exception is in both ``A`` and ``B``. Subsumes the duplicate exception warning.
 
 Sample signature styles (can be enforced by the compiler with the warnings):
 
-1. ``precise`` - the set of thrown exceptions is listed in the signature. All possible exceptions given the types of the arguments are listed (no unlisted exceptions), and no extraneous exceptions are allowed in the list (no unused or overlapping exceptions).
-2. ``lower`` - a set of definitely thrown exceptions are listed, but other exceptions may be thrown (no unreachable exceptions; duplicate exceptions only if A is a subset of B|C)
+1. ``precise`` - the set of thrown exceptions is listed in the signature. All possible exceptions given the types of the arguments are listed (no unlisted exceptions), and no extraneous exceptions are allowed in the list (no unused, duplicate, or overlapping exceptions).
+2. ``lower`` - a set of definitely thrown exceptions are listed, but other exceptions may be thrown (no unreachable exceptions or duplicate exceptions)
 3. ``upper`` - like precise, all possible exceptions must be listed, but unreachable exceptions may also be listed (no unlisted or duplicate exceptions)
 
 With ``lower`` it is not possible to say that a function doesn't throw, but with the other two it is.
@@ -650,16 +701,13 @@ This is similar to Java's checked exceptions and Swift says they like this requi
 
 But the C# posts says having to change all the type signatures just to throw an exception is a pain. It encourages "swallowing" exceptions by catching and ignoring them, instead of changing the signatures. Swallowing can result in an inconsistent state with no debugging traces. Handling exceptions at the appropriate place is better - e.g. in this case function ``a`` might have more knowledge of the state of the world.
 
-With exception set synonyms the amount of work needed to add an exception can be minimized. Java only allows defining synonyms with superclasses, which isn't really composable if you have different libraries. `This post <https://borretti.me/article/why-checked-exceptions-failed>`__ says that's why Java's checked exceptions failed. But set union and difference are quite useful and mean that the program can adapt to exception behavior without advance planning.
+With exception set synonyms the amount of work needed to add an exception can be minimized. In particular set union and difference are quite useful and mean that the program can adapt to exception behavior without advance planning. We can go through and define synonym styles:
 
-The ``lower`` style of signature doesn't require any synonyms because exceptions can be omitted from the signatures, but uses synonyms for commonly occuring sets of exceptions. This is the most efficient in terms of productivity because the code requires no extra work for exception changes. If a user wants to document that some exceptions are thrown they can add them to the signature. But it isn't required, and it adds extra work later if you want to stop throwing the exception.
+* The ``lower`` style of signature doesn't require any synonyms because exceptions can be omitted from the signatures, but one can voluntarily use synonyms for commonly occuring sets of exceptions. This is the most efficient in terms of productivity because the code requires no extra work for exception changes. If a user wants to document that some exceptions are thrown they can add them to the signature. But it isn't required, and it adds extra work later if you want to stop throwing the exception.
+* With ``upper``, the synonym style is to define one exception set ``LibraryException`` with all the common exceptions your library throws (overflow, divide by zero, out of memory, etc.) and use that in each signature. It is not too hard to maintain a single exception set for a library. It's a little better than Java's ``throws Exception`` because the exception set is finite, but requires almost as little maintenance as ``lower``. Exceptions that people should care about can be documented by adding them redundantly to the signature, ``DivideByZero|LibraryException``. And exceptions that aren't thrown can be asserted by removing them, e.g. ``LibraryException\DivideByZero``. Application code can use set operations to build a combined set, ``AppException=(Library1Exception|Library2Exception)\(HandledException1|HandledException2)``.
+* With ``precise``, the style I came up with is to have a built-in compiler function ``exceptions _`` that computes the exception set of each function. Then for the actual signature you can write a self-referential signature ``a : ... -> Int | exceptions a``, if you don't want to make any guarantees about exception behavior, or ``Int | (exceptions a \ SomeException)``, to say that ``SomeException`` is not thrown, or ``Int | (exceptions a | SomeException)``, to say that ``SomeException`` is definitely thrown. ``exception x`` is somewhat magical is that it knows the rest of the signature and scopes the list of exceptions appropriately, e.g. for the signature ``x : Int -> Int | ExceptionA``, ``exceptions x = ExceptionA``, but for the signature ``x : Bool -> Bool | ExceptionB``, ``exceptions x = ExceptionB``, and similarly in the signature ``x : Int | Bool -> Int | Bool | exceptions x``, ``exceptions x = ExceptionA | ExceptionB``. Or maybe it is simpler to use ``Exception`` which is just the type of all exceptions.
 
-With ``upper`` a synonym style is to define one exception set ``LibraryException`` with all the common exceptions your library throws (overflow, divide by zero, out of memory, etc.) and use that in each signature. It is not too hard to maintain a single exception set for a library. It's a little better than Java's ``throws Exception`` because the exception set is finite, but requires almost as little maintenance as ``lower``. Exceptions that people should care about can be documented by adding them redundantly to the signature, ``DivideByZero|LibraryException``. And exceptions that aren't thrown can be asserted by removing them, e.g. ``LibraryException\DivideByZero``.
-Application code can use set operations to build a combined set, ``AppException=(Library1Exception|Library2Exception)\(HandledException1|HandledException2)``.
-
-With ``precise``, the style I came up with is to have a built-in compiler function ``exceptions _`` that computes the exception set of each function. Then for the actual signature you can write a self-referential signature ``a : ... -> Int | exceptions a``, if you don't want to make any guarantees about exception behavior, or ``Int | (exceptions a \ SomeException)``, to say that ``SomeException`` is not thrown, or ``Int | (exceptions a | SomeException)``, to say that ``SomeException`` is definitely thrown. ``exception x`` is somewhat magical is that it knows the rest of the signature and scopes the list of exceptions appropriately, e.g. for the signature ``x : Int -> Int | ExceptionA``, ``exceptions x = ExceptionA``, but for the signature ``x : Bool -> Bool | ExceptionB``, ``exceptions x = ExceptionB``, and similarly in the signature ``x : Int | Bool -> Int | Bool | exceptions x``, ``exceptions x = ExceptionA | ExceptionB``. Or maybe it is simpler to use ``Exception`` which is just the type of all exceptions.
-
-With ``precise`` you can also write a specification without referencing ``exceptions a``. doing a "full list" of all the component exceptions, or a "computed list" writing the set as a computation of child functions. So if ``a`` returns ``Int`` normally and calls ``b`` and ``c`` and catches ``SomeException`` from ``b``, then the computed list would be ``a : Int | (exceptions b \ SomeException) | exceptions c``. Both types of list cost some thought but ensure reliability as every exception is accounted for. A full list ensures that control flow is local because newly thrown exceptions must be caught or added to the list for every method in the chain. A computed list does not list exceptions that propagate through the function, so is less verbose. To newly throw an exception, it only needs to listed where it is thrown and where it is caught.
+  With ``precise`` you can also write a specification without referencing ``exceptions a``. doing a "full list" of all the component exceptions, or a "computed list" writing the set as a computation of child functions. So if ``a`` returns ``Int`` normally and calls ``b`` and ``c`` and catches ``SomeException`` from ``b``, then the computed list would be ``a : Int | (exceptions b \ SomeException) | exceptions c``. Both types of list cost some thought but ensure reliability as every exception is accounted for. A full list ensures that control flow is local because newly thrown exceptions must be caught or added to the list for every method in the chain. A computed list does not list exceptions that propagate through the function, so is less verbose. To newly throw an exception, it only needs to listed where it is thrown and where it is caught.
 
 Lists are somewhat mindless in that the compiler knows the exceptions thrown better than the developer. The compiler should be able to compute ``exceptions x`` precisely and report it to the user, even if no annotations are used. In fact there should be two ways of reporting it, to follow the two styles of list: listing out all the thrown exceptions as a set (using predefined sets but not referencing any computed ``exceptions x``), or printing how to compute the thrown exceptions based on the thrown exceptions of the child functions (using ``exceptions x`` as closely as possible). Then the developer can read the spec, see that it looks alright, and copy it as a signature, and with an IDE fix signatures in just a few clicks.
 
@@ -667,12 +715,30 @@ So with ``lower`` or the self-referential ``precise`` style, no extra work is re
 
 The full list style is attractive for small projects, but as Gunnerson says, for large projects this requires too much maintenance and thus decreases productivity and code quality. But there are various viable alternatives, with varying levels of precision.
 
-Java checked exceptions
------------------------
+Implicit/common exceptions
+--------------------------
 
-Java uses ``upper`` but with a set of unchecked exceptions (Error and RuntimeException) implicitly included as possibilities. For practical purposes this is basically the same as ``upper``. With the call chain-compatible style it's just defining ``LibraryException=...|RuntimeException`` - it doesn't really affect the style. RuntimeException is overly broad, for example division by zero should be checked.
+Java uses ``upper`` but with a set of unchecked exceptions (Error and RuntimeException) implicitly included as possibilities, like every signature ``a -> b`` is really ``a -> b|Error|RuntimeException``. Arguably, RuntimeException is overly broad, for example division by zero should be checked. What is the minimal set of exception that should be included?
 
-A minimal set of common exceptions is those that pure functions can throw without using an explicit throw statement: async exceptions, OOM, stack overflow, and nontermination. But here it is still arguable that nontermination shouldn't be a common exception because most pure functions terminate and knowing that a function doesn't return is useful. With ``upper`` the problem is resolved definitively because there are no implicitly allowed exceptions.
+Well, say we write masked code that does no allocation or recursion or exceptions. Like a wrapper around the ``add`` assembly intrinsic, ``f a b = a + b; mask (f 1 2)``. Per Godbolt this compiles to ``lea eax, [rdi+rsi];ret``. The ``lea`` instruction does not raise any traps or hardware exceptions if its operand are valid memory locations. The code is masked so we have deferred signals to after the function finishes executing. Therefore, ``f`` cannot raise any exceptions - we can safely say that ``f 1 2`` reduces to 3 inside the mask. Similarly, we can run assertions in a masked environment, and so conclude ``f : Int -> Int -> Int``. Now naturally if we aren't masked, the type is more like ``f : Int -> Int -> Int|AsyncException``. But I would argue that most programmers do not think about async exceptions by default so checking signatures in a masked state makes more sense as the default. This is different from implicitly including async exceptions in the signature because if there was a way to throw async exceptions synchronously, allowing them implicitly in the signature would allow code to throw the exception synchronously, whereas the masking approach would still detect that an exception not in the signature was thrown.
+
+So the minimal set so far is the empty set. What about exceptions like OOM and stack overflow? Certainly it is useful to know whether these are potential errors. But practically, unless you are writing super-high-assurance manually-memory-managed code, these are something you can live with and that are super common. It is really uncommon to do anything with an OOM besides crash. Also, OOM and stack overflow are unpredictable in the sense of it not being obvious if a given function can throw them. So here it does make sense to implicitly include OOM and stack overflow.
+
+Nontermination is where I draw the line. Most functions terminate, it is actually pretty rare to get a function that isn't defined on all of its inputs. With our expanded infinitary cycle-detecting term rewriting, it is almost impossible to get a nontermination exception.
+
+For practical purposes this is basically the same as ``upper``. With the call chain-compatible style it's just defining ``LibraryException=...|RuntimeException`` - it doesn't really affect the style.
+
+
+
+Even nontermination. But here it is still arguable that nontermination shouldn't be a common exception because most pure functions terminate and knowing that a function doesn't return is useful. With ``upper`` the problem is resolved definitively because there are no implicitly allowed exceptions.
+
+
+
+
+
+Java only allows defining synonyms with superclasses, which isn't really composable if you have different libraries. `This post <https://borretti.me/article/why-checked-exceptions-failed>`__ says that's why Java's checked exceptions failed. But
+
+
 
 A reduction in the cost of checked exceptions is to use a single "throws" keyword that allows all checked exceptions (similar to "throws Exception" in Java). The pain of versioning is reduced: either a function fails or it doesn't. The failure code is often irrelevant to handling. Swift, Midori approach. I like the synonym style of ``upper`` better, and using ``|Exception`` with ``upper`` to mimic this style is an option.
 
@@ -732,7 +798,37 @@ Function types which cannot generate exceptions are subtypes of function types w
 
 It is quite useful to know the domain for which a function cannot generate exceptions. So usually a function will have two signatures, a "narrow" type for which the function doesn't throw exceptions and a "wide" type for which it does, e.g. ``(/) : Int -> (Int\{0}) -> Int`` and ``(/) : Int -> Int -> Int|DivisionByZero``. Ideally the compiler can prove that the narrow type is appropriate and specialize code to not use exceptions. This can be ensured by specifying a signature at the usage site that excludes the exceptions.
 
-Stroscot's sets allow unions, e.g. you can express throwing ``MyException`` or ``HisException`` as ``x|MyException|HisException``. This makes combining libraries and their exception types fairly straightforward. This is impossible in many languages. Java's workaround is to instead use superclass catch-all types such as IOException and ReflectiveOperationException. It's not clear how useful these superclasses are - Swift claims reacting to an arbitrary IOException is difficult. IOExceptions can at least use an operation failure path that for example retries the operation a couple times, while Exceptions are so general that retrying may not make sense. But Stroscot's subsets allow fine-grained definition so are much more expressive. Swift has recently added `typed throws <https://forums.swift.org/t/se-0413-typed-throws/68507/>`__ which are similar but only allow specifying a single exception type. From the discussion, it seems unions were requested many times but the authors decided it would be better to propose sum/union types as a separate feature.
+Stroscot's sets allow unions, e.g. you can express throwing ``MyException`` or ``HisException`` as ``x|MyException|HisException``. This makes combining libraries and their exception types fairly straightforward. This is impossible in many languages. Java's workaround is to instead use superclass catch-all types such as IOException and ReflectiveOperationException. It's not clear how useful these superclasses are - Swift claims reacting to an arbitrary IOException is difficult. IOExceptions can at least use an operation failure path that for example retries the operation a couple times, while Exceptions are so general that retrying may not make sense. But Stroscot's subsets allow fine-grained definition so are much more expressive.
+
+Swift has recently added `typed throws <https://forums.swift.org/t/se-0413-typed-throws/68507/>`__ which are similar to exception signatures but only allow specifying a single exception type. From the discussion, it seems unions were requested many times but the authors decided it would be better to propose sum/union types as a separate feature. For example, the implementation is not powerful enough to verify that ``try { throw A; throw B; } catch A {} catch B {}`` has all exceptions handled, because it doesn't represent a union type ``A|B`` and instead generalizes to ``any Error``.  Stroscot of course has union types so it is not an issue. The syntax was debated many times; in Stroscot exceptions are values so it is just normal union syntax. There is also ``rethrows``; the general consensus was that it is ill-defined and to use typed throws and generics instead. In Stroscot, it can be handled by writing two signatures, one for if the closures passed in are non-throwing and the other for closures that throw exceptions. Or maybe just one signature with complex exception-aware dependent types.
+
+The full discussion of typed throws in Swift is tedious to read, and not much is in the discussion that wasn't addressed by the final proposal, but here are the threads:
+
+* Dec 2015: https://forums.swift.org/t/proposal-typed-throws/64
+* Dec 2015: https://forums.swift.org/t/proposal-typed-throws/268
+* Dec 2015: https://forums.swift.org/t/proposal-allow-type-annotations-on-throws/623
+* Dec 2015: https://forums.swift.org/t/type-inferencing-for-error-handling-try-catch-blocks/117
+* Jan 2016: https://forums.swift.org/t/proposal-allow-type-annotations-on-throws/1149
+* Aug 2016: https://forums.swift.org/t/type-annotated-throws/3875
+* Aug 2016: https://forums.swift.org/t/add-ability-to-specify-the-error-type-on-throws/3906
+* Aug 2016: https://forums.swift.org/t/pitch-add-ability-to-specify-error-type-on-throws/3910
+* Feb 2017: https://forums.swift.org/t/pitch-typed-throws/5233
+* Feb 2017: https://forums.swift.org/t/discussion-analysis-of-the-design-of-typed-throws/5301
+* Feb 2017: https://forums.swift.org/t/proposal-typed-throws/5245
+* Jul 2017: https://forums.swift.org/t/is-it-possible-to-specify-error-type-thrown-in-a-protocol-method/6268
+* Aug 2017: https://forums.swift.org/t/typed-throws/6501
+* Oct 2018: https://forums.swift.org/t/why-doesnt-swift-have-explicit-throwables-like-java/16761
+* Jul 2020: https://forums.swift.org/t/typed-throw-functions/38860/1
+* Aug 2020: https://forums.swift.org/t/typed-throws/39660
+* Dec 2020: https://forums.swift.org/t/extended-idea-on-typed-throws-automatic-determination/42588
+* Jul 2021: https://forums.swift.org/t/request-to-amend-asyncsequence/50163
+* Sep 2021: https://forums.swift.org/t/precise-error-typing-in-swift/52045
+* Aug 2023: https://forums.swift.org/t/status-check-typed-throws/66637
+* Sep 2023: https://forums.swift.org/t/pitch-n-1-typed-throws/67496
+* Nov 2023: https://forums.swift.org/t/pitch-typed-throws-in-the-concurrency-module/68210
+* Nov 2023: https://forums.swift.org/t/se-0413-typed-throws/68507
+* Nov 2023: https://forums.swift.org/t/extended-se-0413-typed-throws/68741
+* Dec 2023: https://forums.swift.org/t/accepted-se-0413-typed-throws/69099
 
 Snoyman `discusses <https://www.fpcomplete.com/blog/2016/11/exceptions-best-practices-haskell/>`__ using a ``Text`` type - it avoids the need for a real exception type, but means all exceptions are unstructured and can't be handled appropriately. His preferred approach is the constraint ``MonadThrow m``, but this throws ``Exception`` and isn't fine-grained. We could generalize by adding a type parameter to ``MonadThrow``, ``(MonadThrows m MyException, MonadThrows m HisException) => String -> m Int``, but now it's clear that this is the `existential typeclass antipattern <https://web.archive.org/web/20200510033212/https://lukepalmer.wordpress.com/2010/01/24/haskell-antipattern-existential-typeclass/>`__ and ``String -> Int|MyException|HisException`` is much clearer.
 
@@ -747,7 +843,7 @@ Another note is that Stroscot's signatures are independent - they all are checke
   c : Int
   c = b 3
 
-``a`` can define a broad type for programmer convenience. But ``b`` can defined a precise type, e.g. for an exported interface. ``c`` declares that it throws no exceptions even though it calls exception-throwing functions, because the compiler can rule out those exceptions. With Java's checked exceptions, ``a``'s signature would require ``b`` and ``c`` to declare ``throws Exception`` or write a useless try-catch.
+``a`` can define a broad type for programmer convenience. But ``b`` can defined a precise type, e.g. for an exported interface. ``c`` declares that it throws no exceptions even though it calls exception-throwing functions, because the compiler can rule out those exceptions. With Java's checked exceptions, ``a``'s signature would require ``b`` and ``c`` to declare ``throws Exception`` or write a useless try-catch. This addresses a significant complaint mentioned in `Kotlin's documentation <https://kotlinlang.org/docs/exceptions.html#checked-exceptions>`__.
 
 Implementation
 ==============

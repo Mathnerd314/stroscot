@@ -40,8 +40,11 @@ Overview
     OKey2 [label="Updated keystate"]
     }
 
+    "Trace database" [shape=cylinder]
+
     "Rule engine" -> "Trace database"
-    "Trace database" -> "Incremental rule engine" [dir=both]
+    "Trace database" -> "Incremental rule engine"
+    "Incremental rule engine" -> "Trace database"
 
     IKey -> "Changelist"
     IKey2 -> "Changelist"

@@ -327,6 +327,24 @@ It might be worth having a special keyword ``inout`` for this.
   inc {inout x} =
     x = x+1
 
+The difference compared to Ada's call-by-copy-restore or Fortran's call-by-reference ``in out`` variables is that output arguments are returned by symbol and modify the caller's scope - they are not modifying a variable. So there is no aliasing problem. If we write a procedure like ``modify {inout a, inout b} = {a += 1; b += 2}`` and call it as ``x = 0; modify x x``, then we will end up with ``x = 0; a = 1; b = 2`` - it doesn't actually modify ``x`` at all. The reason ``inc`` works is that ``x`` is the same variable name in the caller and the callee. If we wrote ``y = 1; inc y`` it wouldn't modify ``y``, rather it would create a new binding ``x=2``.
+
+The intent is also different. Traditional output arguments are really just mutable variable references in disguise. I think it is better to manipalate addresses and stores explicitly in that case. In contrast, Stroscot's output arguments are intended to shorten the common purely-functional pattern of returning multiple values wrapped in a tuple. This for example shows up in Go's error handling. Many calls look similar to::
+
+  readFile file = { buf = alloc; errcode = sys_read file buf; return (freeze buf, convert errcode) }
+  main =
+    (config, err) = readFile "config.json"
+    assert (err == NoError)
+
+In the binding of the returned tuple (``(config, err)``), the first name ``config`` changes often between function invocations, but the ``err`` variable is almost always named as such. Therefore, similarly to how one would want to be able to use ``logger`` as an implicit argument, one would want to implicitly return ``err``, shortening the invocation syntax at the expense of a variable naming convention:
+
+  readFile file = { buf = alloc; sys_read file buf; out {err:errcode}; return content }
+  main =
+    config = readFile "config.json"
+    assert (err == NoError)
+
+The allowance of ``out`` anywhere in the function body is somewhat misleading, it should be part of the function's return syntax.
+
 Variadic arguments
 ------------------
 
@@ -370,9 +388,9 @@ A variadic function has no fixed arity. So can currying and variadic functions c
   g == 6
   # true
   g 4 5
-  # 15
+  # 15 -- if currying variadic functions was allowed
 
-So even though ``g == 6``, ``g`` is different from ``6`` - ``g`` is both a function and non-function at the same time. Similarly ``sum`` is both ``0`` and a function. This causes confusion. In particular the issue is there are multiple interpretations of a function call: it could be a partial application waiting for more arguments, or it could be a complete application with the intention to use defaults for default parameters and terminate the varargs list. To avoid this confusion we need to know when the function call is complete. It seems to be a common misconception (e.g. in the Flix principles) that this means currying and variadic functions cannot be in the same language. But there are several approaches:
+In this hypothetical language with unrestricted currying and variadic functions, we have even though ``g == 6``, ``g`` is different from ``6`` - ``g`` is both a function and non-function at the same time. Similarly ``sum`` is both ``0`` and a function. This causes confusion. In particular the issue is there are multiple interpretations of a function call: it could be a partial application waiting for more arguments, or it could be a complete application with the intention to use defaults for default parameters and terminate the varargs list. To avoid this confusion we need to know when the function call is complete. It seems to be a common misconception (e.g. in the Flix principles) that this means currying and variadic functions cannot be in the same language. But there are several approaches:
 
 * nondeterminism: Just accept that the meaning of ``g``` depends on its usage. This is not a good option because it means things that look like values aren't actually values.
 

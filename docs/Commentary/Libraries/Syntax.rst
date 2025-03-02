@@ -228,6 +228,11 @@ Per `Coding Horror <https://blog.codinghorror.com/we-are-typists-first-programme
 
 I have seen pretty much all of these in real-world programs, besides maybe the palindromes. Many programmers have written about how their keyboards screwed up their hands and their livelihoods with RSI and other such conditions.
 
+Variations
+----------
+
+A value may have minor variations in syntax or notation that do not change its meaning. For example, "1/3" and "⅓" represent the same rational number value, but they differ in orthography, or a list (tuple) may be written as ``[1,2]`` or ``(1,2)``, or a regex value may be written as ``new Regex("[0-9]+")`` or ``/[0-9]+/``.
+
 Familiarity
 ===========
 
@@ -915,10 +920,11 @@ Multiline block comments have the issue of forgetting the end terminator and mat
 Linebreaks
 ==========
 
-Steelman 2D has this intruiging requirement "Lexical units (i.e., identifiers, reserved words, single and multicharacter symbols, numeric and string literals, and comments) may not cross line boundaries of a source program." This is in contrast to other languages, where backslashes can be used to continue lines.
+Steelman 2D has this intriguing requirement "Lexical units (i.e., identifiers, reserved words, single and multicharacter symbols, numeric and string literals, and comments) may not cross line boundaries of a source program." This is in contrast to other languages, where backslashes can be used to continue lines.
 
 Certainly the days of 80-character terminals are gone, and most editors support soft wrapping. Also for comments, it seems pretty stupid to not allow multiline comments. Tinman H5 clarifies that the requirement has almost no effect as a lexical unit may be composed from multiple sub-units spanning multiple lines.
 
+The Ada manual specifies lines of at least 200 characters shall be supported.
 
 Indentation
 ===========
@@ -1122,7 +1128,20 @@ This goes directly against Steelman 2D "Programs may not contain unmatched brack
 
 6B. The language shall not impose arbitrary restrictions on programming style, such as the choice between statement terminators and statement separators, unless the restriction makes programming errors less likely.
 
-According to the Green rationale, a study found that terminators were less error-prone than separators.
+This is certainly a point of contention. The distinction is that a *separator* does not have a final delimiter, such as ``a;b;c``, while a terminator does, ``a;b;c;``. Python mostly avoids the issue of statement separators with its indentation-sensitive syntax, but it comes in `expressions <https://docs.python.org/3/reference/expressions.html#expression-lists>`__. "The trailing comma is required only to create a single tuple; it is optional in all other cases." So you can write ``1,`` ``1,2``, or ``1,2,`` for tuples, ``[1]`` or ``[1,]`` for lists, and similarly for sets and dictionaries. In Python the preference is generally to omit the trailing comma, e.g. printing ``[1,]`` outputs ``[1]``, so I would say Python is biased towards expression separators. Similarly OCaml's and Haskell's statement semicolons are separators.
+
+Now :cite:`ichbiahRationaleDesignADA1979` 2.2 cites
+
+Declarations and statements are always terminated by semicolons. This departure from the Pascal
+practice, in which a semicolon is used as a separator , requires justification. Analyses of program-
+mer errors support the use of the semicolon as a terminator LGH 751. Also, inserting another
+declaration or statement is eased by this convention, since normal layout places the semicolon at
+the end of the line (requiring a change to two lines in the case of a separator).
+The additional required semicolon also aids recovery by the compiler after a syntax error. On the
+other hand if semicolon is a terminator, recovery from a missing semicolon may be trivial for the
+parser.
+
+, a study found that terminators were less error-prone than separators.
 
 Function syntax
 ===============

@@ -1,0 +1,13 @@
+x + 0 = x
+
+sum [] = 0
+sum (x:xs) = x + sum xs
+
+MyNumber a + MyNumber b = MyNumber (a + b)
+
+f64 a + f64 b = f64 (f64_add_intrinsic a b)
+
+main =
+  numbers = map f64 [1,2,3]
+  total = sum numbers
+  print "The sum is: {total}"

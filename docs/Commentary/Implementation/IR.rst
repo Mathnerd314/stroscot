@@ -288,6 +288,13 @@ seen whether such a representation could be adapted for high-level
 optimizations in a non-strict regime such as Haskell.
 
 
+Graphs
+======
+
+Now we could use de Brujin numbering, but graphs are faster in practice, and they actually map better to the concrete represention with variables - we just have to enforce that the variables are globally unique via renaming. It is worth preserving variable names for debugging purposes, but really these variables are not part of the expression proper and they should not be accessible anywhere besides compiler diagnostics. The actual graph connections should be done via direct pointers. Haskell does not let us use direct pointers because of GC so for now I will use uniquely-allocated integers.
+
+One question in graph representation is how many pointers - bidirectional or unidirectional links. Bidirectional makes some operations easier and is the most general, but unidirectional is less memory. I think sea-of-nodes gets away with using unidirectional graph links. But, when we are reducing a cut-of-identity, we have a graph like ``A -> Identity <- Cut -> C`` and we have to graft this together like ``A -> C``, and I think this requires bidirectional links. Maybe it is only needed for identity nodes? But when we do cut reductions on other nodes we would also have to update the identity nodes. It seems easier to use bidirectional links for now, for uniformity, and to look at how it can be optimized later.
+
 Operations
 ==========
 

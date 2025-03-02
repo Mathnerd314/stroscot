@@ -156,7 +156,7 @@ PyPL index (top 28)
 
 17. Ada
 
-* Still in use in aviation and DoD applications
+* Still in use in aviation and DoD applications. PyPL even shows an increasing trend in adoption.
 * Considered somewhat legacy, but has many useful features ("C++98 with a design review")
 * SPARK language is a dialect which extends contract support
 * interesting design process (`Wikipedia <https://en.wikipedia.org/wiki/Ada_(programming_language)#History>`__):  committee gathered requirements and revised them several times (resulting in the Steelman report). 4 contractors put forward proposals - after two rounds, one was selected. The reference manual was written, and comments and corrections were received. The specification was then frozen and implementations were designed and validated. So far I have gone through
@@ -165,6 +165,7 @@ PyPL index (top 28)
   * `Tinman report <http://iment.com/maida/computer/requirements/tinman.htm>`__
   * GREEN rationale
   * :cite:`fisherCommonProgrammingLanguage1976`
+  * Annotated `2022 language reference manual <http://www.ada-auth.org/standards/ada22.html>`__
 
   Eventually I would also like to go through:
 
@@ -174,7 +175,6 @@ PyPL index (top 28)
   * 83, 95, 05, 2012 rationales
   * 83/95 style guides
   * Dijkstra's comments on the requirements and designs
-  * Annotated 2012 reference manual
 
 * paradigm: imperative
 
