@@ -79,7 +79,7 @@ pkgs.mkShell {
   buildInputs = [ ghc pkgs.haskellPackages.haskell-language-server pkgs.haskellPackages.llvmPackages.clang jupyterEnv pkgs.gnuplot pkgs.openblas]; # pkgs.pdf2svg pkgs.dot2tex tex ];
   passthru = { inherit pypkgs_to_install pkgs; };
   shellHook = ''
-    export PIP_PREFIX=/home/aerg/projects/fitness/grocery/pip_packages
+    export PIP_PREFIX="/home/aerg/projects/stroscot/pip_packages"
     export PYTHONPATH="$PIP_PREFIX/${python3WithPkgs.sitePackages}:$PYTHONPATH"
     export JUPYTER_PATH="${jupyterPath}"
     export PATH="$PIP_PREFIX/bin:$PATH"

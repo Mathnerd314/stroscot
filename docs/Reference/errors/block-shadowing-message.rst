@@ -1,1 +1,0 @@
-Second declaration of 'a' shadows earlier declaration. I suggest renaming or deleting one of the declarations.
