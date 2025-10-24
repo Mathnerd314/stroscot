@@ -1,0 +1,190 @@
+(* Combined Stroscot EBNF Grammar *)
+
+(* --- Top-Level Structure (from Expressions) --- *)
+
+Program = "program" identifier ":"
+          { Module | GlobalDefinition }
+          "entry" Expression
+          "end" "program" ;
+
+Module = "module" identifier ":"
+         { Module | Definition }
+         "end" "module" ;
+
+GlobalDefinition = Definition ; (* Global definitions can be placed directly within the Program *)
+
+(* --- Definitions (Combined from both, prioritizing Literals for detail) --- *)
+
+Definition = FunctionDefinition
+           | MacroDefinition
+           | SetDeclaration (* From Expressions, assuming this is a top-level declaration type *)
+           | ExceptionDefinition (* From Expressions, assuming this is a top-level declaration type *)
+           | ObjectDefinition (* From Expressions, assuming this is a top-level declaration type *)
+           | class_definition (* From Literals *)
+           | variable_assignment (* From Literals *)
+           | operator_fixity_declaration (* From Literals *)
+           | statement ; (* From Literals - assuming 'statement' is a general top-level construct *)
+
+
+(* Headers, Modules, and Imports (from Literals, replacing similar from Expressions where more detailed) *)
+import_statement = "import" module_name [ "as" identifier ]
+                 | "from" module_name "import" ( "*" | import_list ) ;
+import_list = identifier { "," identifier } ;
+module_name = identifier { "." identifier } ;
+
+(* Definitions, Declarations, and Assignments (from Literals) *)
+class_definition = [ visibility_modifier ] "class" class_name [ "(" class_name { "," class_name } ")" ]
+                   [ docstring ] "{" { class_member } "}" ;
+
+function_definition = [ visibility_modifier ] "func" function_name "(" parameter_list ")"
+                      [ ":" type_annotation ] [ docstring ] block ;
+
+variable_assignment = [ visibility_modifier ] identifier [ ":" type_annotation ] "=" Expression ;
+
+parameter_list = [ parameter { "," parameter } ] ;
+parameter = identifier [ ":" type_annotation ] [ "=" Expression ] ;
+
+class_member = function_definition | variable_assignment | special_method ;
+
+(* Special Identifiers/Magic Methods *)
+special_method = [ visibility_modifier ] "func" magic_method_name "(" parameter_list ")"
+               [ ":" type_annotation ] [ docstring ] block ;
+magic_method_name = identifier ;
+
+(* --- Expressions (from Expressions) --- *)
+
+Expression = BinaryExpression
+           | UnaryExpression
+           | PrimaryExpression ;
+
+BinaryExpression = PrimaryExpression { BinaryOperator PrimaryExpression } ;
+UnaryExpression = UnaryOperator PrimaryExpression ;
+
+PrimaryExpression = Literal
+                  | identifier
+                  | function_call
+                  | ParenthesizedExpression
+                  | MatchExpression
+                  | AllocationExpression
+                  | DereferenceExpression
+                  | MemberAccessExpression
+                  | IndexAccessExpression
+                  | CastExpression
+                  | LambdaExpression ;
+
+ParenthesizedExpression = "(" Expression ")" ;
+
+function_call = function_name "(" [ Expression { "," Expression } ] ")" ;
+
+
+(* --- Type Annotations (from Literals) --- *)
+type_annotation = class_name
+                | generic_type
+                | union_type
+                | tuple_type
+                | function_type ;
+
+generic_type = class_name "<" type_annotation { "," type_annotation } ">" ;
+union_type = type_annotation "|" type_annotation { "|" type_annotation } ;
+tuple_type = "(" [ type_annotation { "," type_annotation } ] ")" ;
+function_type = "(" [ type_annotation { "," type_annotation } ] ")" "=>" type_annotation ;
+
+
+(* --- Operators (from Literals, more comprehensive) --- *)
+BinaryOperator = operator ;
+UnaryOperator = operator ;
+operator = "+" | "-" | "*" | "/" | "//" | "%" | "**"
+         | "==" | "!=" | "<" | ">" | "<=" | ">="
+         | "&&" | "||" | "!" | "&" | "|" | "^" | "~" | "<<" | ">>"
+         | "=" | "+=" | "-=" | "*=" | "/=" | "//=" | "%=" | "**="
+         | "&=" | "|=" | "^=" | "<<=" | ">>="
+         | "." | "->" | "?." | "??" | "..." ;
+
+(* --- Literals (from Literals, more detailed) --- *)
+
+Literal = string_literal
+        | integer_literal
+        | float_literal
+        | boolean_literal
+        | null_literal ;
+
+string_literal = '\"' { ? any character except '\"' ? } '\"'
+               | "\'" { ? any character except "\'" ? } "\'" ;
+
+integer_literal = [ "-" ] digit_excluding_zero { digit }
+                | "0" ;
+
+float_literal = integer_literal "." { digit } [ ( "e" | "E" ) [ "+" | "-" ] { digit } ] ;
+
+boolean_literal = "true" | "false" ;
+
+null_literal = "null" ;
+
+(* --- Identifiers (from Literals, more detailed) --- *)
+identifier = ( letter | "_" ) { letter | digit | "_" } ;
+variable_name = identifier ;
+function_name = identifier ;
+class_name = upper_letter { letter | digit | "_" } ;
+upper_identifier = upper_letter { letter | digit | "_" } ;
+
+(* --- Character Classes (from Literals) --- *)
+letter = "a".."z" | "A".."Z" ;
+upper_letter = "A".."Z" ;
+digit = "0".."9" ;
+digit_excluding_zero = "1".."9" ;
+
+(* --- Comments (from Literals) --- *)
+comments = single_line_comment | multi_line_comment ;
+single_line_comment = "//" { ? any character except newline ? } ;
+multi_line_comment = "/*" { ? any character ? } "*/" ;
+
+(* Docstrings (from Literals) *)
+docstring = triple_quoted_string ;
+triple_quoted_string = "\"\"\"" { ? any character ? } "\"\"\""
+                     | "'''" { ? any character ? } "'''" ;
+
+(* --- Pattern Matching (from Expressions) --- *)
+MatchExpression = "match" Expression "{" { CaseClause } "}" ;
+CaseClause = "case" Pattern "=>" Block ;
+
+Pattern = WildcardPattern
+        | AtomMatchPattern
+        | ListStartEndPattern
+        | AndPattern
+        | OrPattern
+        | IdentifierPattern
+        | TuplePattern
+        | ObjectPattern ;
+
+WildcardPattern = "_" ; (* Matches any single value *)
+
+AtomMatchPattern = Literal ; (* Matches an exact literal value *)
+
+ListStartEndPattern = "[" [ Pattern { "," Pattern } ] "..." [ Pattern { "," Pattern } ] "]" ;
+AndPattern = Pattern "and" Pattern ;
+OrPattern = Pattern "or" Pattern ;
+
+IdentifierPattern = identifier ;
+
+TuplePattern = "(" [ Pattern { "," Pattern } ] ")" ;
+
+ObjectPattern = "object" "{" [ PropertyPattern { "," PropertyPattern } ] "}" ;
+
+PropertyPattern = identifier ":" Pattern ;
+
+(* --- Memory Management / Foreign Function Calls (from Expressions) --- *)
+AllocationExpression = "allocate" type_annotation ;
+DereferenceExpression = "*" Expression ;
+
+(* --- Control Flow / Blocks (from Literals and Expressions) --- *)
+Block = "{" { statement } "}" ;
+statement = "let" variable_assignment
+          | "if" Expression Block [ "else" Block ]
+          | "while" Expression Block
+          | "for" identifier "in" Expression Block
+          | "return" [ Expression ]
+          | "break"
+          | "continue"
+          | Expression ";" ;
+
+visibility_modifier = "public" | "private" | "protected" ;

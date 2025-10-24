@@ -17,6 +17,7 @@ extensions = [
     'sphinxcontrib.bibtex',
     # ,'sphinxcontrib.fulltoc'
     'sphinx_rtd_theme',
+    "myst_parser"
 ]
 
 highlight_language='haskell'

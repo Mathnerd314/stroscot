@@ -1,0 +1,227 @@
+(* Stroscot EBNF Grammar - Expressions *)
+
+(* Built-in functions, treated as standard function calls:
+   "Choice", "OneOf", "AllOf", "Exists", "ForAll", "Not", "And", "Or", "Equal", "Failure",
+   "Allocate", "GetMemory", "SetMemory", "SpawnThread", "JoinThread",
+   "CallForeignFunction", "MarshalData"
+*)
+
+(* --- Top-Level Structure --- *)
+
+Program = "program" Identifier ":"
+          { Module | GlobalDefinition }
+          "entry" Expression
+          "end" "program" ;
+
+Module = "module" Identifier ":"
+         { Module | Definition }
+         "end" "module" ;
+
+GlobalDefinition = Definition ; (* Global definitions can be placed directly within the Program *)
+
+Definition = FunctionDefinition
+           | MacroDefinition
+           | SetDeclaration
+           | ExceptionDefinition
+           | ObjectDefinition ;
+
+(* --- Modules and Naming --- *)
+
+NamePath = Identifier { "::" Identifier } ; (* e.g., 'Core::IO::print' *)
+
+ImportStatement = "import" NamePath [ "as" Identifier ] ";" ;
+
+EncapsulationBlock = "encapsulate" [ "private" | "public" ] "do"
+                     { Definition | Statement }
+                     "end" "encapsulate" ;
+
+Identifier = IDENTIFIER ; (* References the AST IdentifierNode *)
+
+(* --- Expressions --- *)
+
+Expression = BinaryExpression
+           | UnaryExpression
+           | PrimaryExpression ;
+
+BinaryExpression = PrimaryExpression { BinaryOperator PrimaryExpression } ;
+UnaryExpression = UnaryOperator PrimaryExpression ;
+
+BinaryOperator = "+" | "-" | "*" | "/" | "%"
+               | "==" | "!=" | "<" | "<=" | ">" | ">="
+               | "and" | "or" | "xor"
+               | "union" | "intersect" | "difference"
+               | "in" ; (* for MembershipTest *)
+
+UnaryOperator = "-" | "not" | "complement" ; (* Negation, logical NOT, set complement *)
+
+PrimaryExpression = Literal
+                  | Symbol
+                  | Identifier
+                  | Tuple
+                  | Term
+                  | Application
+                  | FunctionCall
+                  | Abstraction
+                  | LetBinding
+                  | SetLiteral
+                  | SetBuilderNotation
+                  | SetOperation
+                  | ObjectInstantiation
+                  | PropertyAccess
+                  | MethodCall
+                  | MonadComprehension
+                  | TypeAnnotationAssertion
+                  | ASTNodeWrapper
+                  | EvaluateNode
+                  | "(" Expression ")" ;
+
+Literal = NUMBER_LITERAL
+        | STRING_LITERAL
+        | BOOLEAN_LITERAL ; (* "true" | "false" *)
+
+Symbol = IDENTIFIER ; (* When an identifier represents a symbolic constant or a term's head *)
+
+Tuple = "(" [ Expression { "," Expression } ] ")" ;
+
+Term = Symbol "(" [ Expression { "," Expression } ] ")" ; (* e.g., `Point(x, y)` *)
+
+Application = Expression "(" Expression ")" ; (* Curried function application, e.g., `f(x)(y)` *)
+
+FunctionCall = Expression "(" [ Argument { "," Argument } ] ")" ; (* Non-curried function call, e.g., `f(x, y)` *)
+
+Argument = Expression [ ":" "partial" ] ; (* A value passed to a function, optionally marked partial *)
+
+Abstraction = "lambda" Identifier "->" Expression ; (* Lambda expression *)
+
+LetBinding = "let" Identifier "=" Expression "in" Expression ; (* `let x = 10 in x + 5` *)
+
+SetLiteral = "{" [ Expression { "," Expression } ] "}" ; (* `{1, 2, "hello"}` *)
+
+SetBuilderNotation = "{" Expression "for" Qualifier { "," Qualifier } [ "where" Expression ] "}" ; (* `{x*2 for x from numbers if x > 0}` *)
+
+SetOperation = Expression ( "union" | "intersect" | "difference" ) Expression ; (* e.g., `SetA union SetB` *)
+
+TypeAnnotationAssertion = Expression ":" Expression ; (* `myVar : MyType` or `myVar : {1,2,3}` *)
+
+ObjectInstantiation = "object" "{"
+                      [ PropertyAssignment { "," PropertyAssignment } ]
+                      [ "methods" ":" "do" { FunctionDefinition } "end" ]
+                      "}" ;
+
+PropertyAssignment = Identifier ":" Expression ;
+
+PropertyAccess = PrimaryExpression "." Identifier ; (* `myObject.myProperty` *)
+
+MethodCall = PrimaryExpression "." Identifier "(" [ Argument { "," Argument } ] ")" ; (* `myObject.myMethod(arg)` *)
+
+MonadComprehension = "[" Expression "for" Qualifier { "," Qualifier } [ "yield" Expression ] "]" ; (* `[x*2 for x from list if x > 0]` *)
+
+Qualifier = Generator
+          | FilterGuard
+          | LetBindingQualifier
+          | ParallelComprehensionQualifier
+          | TransformComprehensionQualifier ;
+
+Generator = Pattern "from" Expression ; (* `x from myList` *)
+
+FilterGuard = "if" Expression ; (* `if condition` *)
+
+LetBindingQualifier = "let" Identifier "=" Expression ; (* `let temp = x * 2` *)
+
+ParallelComprehensionQualifier = "parallel" "do"
+                                 { Qualifier }
+                                 "end" "parallel" ;
+
+TransformComprehensionQualifier = "transform" Expression [ "group by" Expression ] ;
+
+ASTNodeWrapper = "ast" "(" Expression ")" ; (* Wraps code as an AST node `ast(my_code)` *)
+
+EvaluateNode = "eval" "(" Expression ")" ; (* Evaluates an AST node `eval(my_ast_var)` *)
+
+(* --- Statements and Blocks --- *)
+
+Statement = SimpleStatement
+          | NonReturningStatement
+          | ReturningStatement
+          | ReturnStatement
+          | ImportStatement
+          | EncapsulationBlock ; (* Encapsulation can also be a statement in a block *)
+
+Block = "do"
+        { Statement }
+        "end" ;
+
+SimpleStatement = Expression ";" ; (* Any expression evaluated for its side effects *)
+
+NonReturningStatement = Expression ";" ; (* Explicitly for actions that don't produce a value to be used *)
+
+ReturningStatement = Pattern "=" Expression ";" ; (* `myVar = someAction();` *)
+
+ReturnStatement = "return" Expression ";" ;
+
+EmptyBlock = "do" "end" ;
+
+(* --- Definitions --- *)
+
+FunctionDefinition = "def" Identifier "(" [ ParameterList ] ")" ":"
+                     { Clause }
+                     [ "otherwise" "=>" Block ]
+                     "end" "def" ;
+
+ParameterList = Identifier { "," Identifier } ;
+
+MacroDefinition = "macro" Identifier "(" [ ParameterList ] ")" ":"
+                  { Clause }
+                  [ "otherwise" "=>" Block ]
+                  "end" "macro" ;
+
+Clause = "case" Pattern "=>" Block ; (* Defines a pattern matching case *)
+
+SetDeclaration = "set" Identifier [ "extensible" ] [ "=" SetDefinition ] ";" ; (* `set MyNumbers = {1,2,3};` *)
+
+ExceptionDefinition = "exception" Identifier [ "handles" "do" { FunctionDefinition } "end" ] ";" ; (* `exception MyError handles do def handler()... end end;` *)
+
+ObjectDefinition = "object" Identifier "=" ObjectInstantiation ";" ; (* `object MyInstance = object { ... };` *)
+
+(* --- Patterns --- *)
+
+Pattern = WildcardPattern
+        | AtomMatchPattern
+        | ListStartEndPattern
+        | AndPattern
+        | OrPattern
+        | IdentifierPattern
+        | TuplePattern
+        | ObjectPattern ;
+
+WildcardPattern = "_" ; (* Matches any single value *)
+
+AtomMatchPattern = Literal ; (* Matches an exact literal value *)
+
+ListStartEndPattern = "[" [ Pattern { "," Pattern } ] "..." [ Pattern { "," Pattern } ] "]" ; (* e.g., `[head, ..., tail]` *)
+
+AndPattern = Pattern "and" Pattern ; (* Combines patterns with logical AND *)
+
+OrPattern = Pattern "or" Pattern ; (* Combines patterns with logical OR *)
+
+IdentifierPattern = IDENTIFIER ; (* Binds the matched value to a new identifier *)
+
+TuplePattern = "(" [ Pattern { "," Pattern } ] ")" ; (* e.g., `(x, y)` matches a tuple *)
+
+ObjectPattern = "object" "{" [ PropertyPattern { "," PropertyPattern } ] "}" ; (* e.g., `object { name: N, age: A }` *)
+
+PropertyPattern = Identifier ":" Pattern ;
+
+(* --- Terminal Symbols --- *)
+
+IDENTIFIER = ('a'..'z' | 'A'..'Z' | '_') { 'a'..'z' | 'A'..'Z' | '0'..'9' | '_' } ;
+NUMBER_LITERAL = ('0'..'9') { '0'..'9' } [ "." ('0'..'9') { '0'..'9' } ] ; (* Integer or floating-point *)
+STRING_LITERAL = '"' { <any character except '"'> } '"' | "'" { <any character except "'"> } "'" ;
+BOOLEAN_LITERAL = "true" | "false" ;
+
+(* Comments:
+   Multi-line comments are enclosed in `(* ... *)`.
+   Single-line comments start with `//` and go to the end of the line.
+*)
+
+(* Whitespace (spaces, tabs, newlines) and comments are ignored between tokens. *)

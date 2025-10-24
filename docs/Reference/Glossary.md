@@ -1,0 +1,29 @@
+# Glossary and key concepts
+
+- Abstract Syntax Tree (AST): The in-memory representation of the abstract syntactic structure of source code. Typically not actually a tree, but a pointer graph.
+- Backend: The part of a compiler responsible for generating target code (e.g., machine code, bytecode) from an intermediate representation.
+- Binding: The association between identifiers and program entities (such as variables, functions, or types).
+- Code Generation: The process of converting an intermediate representation into target code.
+- Debugging: The process of identifying and fixing errors or bugs in the source code.
+- Frontend: The part of a compiler that analyzes and processes source code, typically including lexical analysis, parsing, and semantic analysis.
+- Grammar: The formal specification of the syntax rules for a programming language.
+- High-Level IR: An intermediate representation that is closer to the source code and retains high-level constructs.
+- Intermediate Representation (IR): A data structure or code used internally by a compiler to represent source code after parsing and before code generation.
+- Lexical Analysis: The process of converting a sequence of characters into a sequence of tokens.
+- Linker: A tool that combines multiple object files into a single executable or library, resolving references between them.
+- Loader: A program that loads an executable file into memory and prepares it for execution.
+- Low-Level IR: An intermediate representation that is closer to machine code and is more suitable for optimization and code generation.
+- Optimization Pass: A phase in the compiler where various optimizations are applied to improve performance or reduce resource usage.
+- Optimization: The process of improving the intermediate or target code to make it more efficient.
+- Parser: A component that processes tokens and produces a parse tree or AST.
+- Parsing: The process of analyzing a sequence of tokens to determine its grammatical structure according to a given grammar.
+- Preprocessor: A tool that processes source code before it is compiled, often handling directives like macros and file inclusion.
+- Runtime: The environment in which a program executes, including libraries and system resources.
+- Scope: The region of the program where a particular identifier is accessible.
+- Semantic Analysis: The phase where the compiler checks for semantic errors and gathers type information.
+- Semantic Error: An error that occurs when the code is syntactically correct but does not make sense semantically, such as type mismatches.
+- Source Code: The original code written by the programmer in a programming language.
+- Symbol Table: A data structure used to store information about identifiers.
+- Syntax Error: An error that occurs when the code does not conform to the syntax rules of the programming language.
+- Target Code: The final output of a compiler, which can be machine code, bytecode, or another form of executable code. 
+- Token: A categorized block of text, such as a keyword, identifier, or operator, produced during lexical analysis.

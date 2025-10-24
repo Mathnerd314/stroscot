@@ -10,21 +10,37 @@ Steelman 1F says "The language shall be composed from features that are understo
 
 ## Format
 
-I chose Sphinx for several reasons, but mainly, GH Pages/Jekyll can't do forward/back links. Checking out various projects, Sphinx is used by Clang, GHC, and Futhark. It has a lot of features like automatic TOC generation, syntax highlighting, Graphviz, Bibtex integration, ... so far it's proving its worth. It's run via a Github actions script and the generated docs are stored in the gh-pages branch. Alternatives include Rust's self-written [mdBook](https://rust-lang.github.io/mdBook/index.html). It is getting there as a competitor to Sphinx - it even has a Graphviz plugin - but so far there is no equivalent to the referencing support of `sphinx-bibtex`. There is also Java's javadoc, but it's not used much for standalone documentation. It is [possible](https://github.com/nidi3/graphviz-java?tab=readme-ov-file#javadoc) to embed Graphviz though.
+Comparison of reStructuredText and Markdown:
 
-Sphinx's native format is reStructuredText, and I used it for a while, but finally I decided to convert to Markdown. Comparison of reStructuredText and Markdown:
-
-- Markdown is natively supported by large language models, whereas it is difficult to generate RST. Similarly most editors (online, VSCode) natively support Markdown but not RST. Markdown is just more popular than RST. Certainly Pandoc converts the majority of documents without issue, but it is inconvenient to run Pandoc just to copy-paste.
+- Markdown is natively supported by large language models, whereas it is difficult to generate RST. Similarly most editors (online, VSCode) natively support Markdown but not RST. Markdown is just more popular than RST.
 - Markdown has uniform prefix-style headings like `##`, RST use an "underlining" style. There is no standard set of characters and you have to pick a mapping from characters to levels. Also RST requires matching the number of underlining characters to the heading exactly. In editing RST, this was a tedious step and a common source of errors for me when building the documentation.
 - Markdown does not require a newline before lists, RST does. (also a common source of errors for me)
-- Markdown supports strikethough natively. Sphinx requires a custom plugin or writing raw HTML.
+- Markdown supports strikethough natively. RST requires a custom plugin or writing raw HTML.
 - Markdown's syntax for code and formatting is a bit simpler.
-- [Markdown](https://daringfireball.net/projects/markdown/syntax) and [CommonMark](https://spec.commonmark.org/0.31.2/) don't provide a mechanism for extension - raw HTML is the main escape hatch. RST provides clear extension points with its roles and directives.
+- [Markdown](https://daringfireball.net/projects/markdown/syntax) and [CommonMark](https://spec.commonmark.org/0.31.2/) don't provide a mechanism for extension - raw HTML is the main escape hatch. RST provides clear extension points with its roles and directives. However there are numerous (somwhat incompatible) extensions to Markdown that provide these features.
 - There are [automatic Markdown formatters](https://pypi.org/project/mdformat/) (even a [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=mervin.markdown-formatter)), but the only obvious RST formatter was [docstrfmt](https://github.com/LilSpazJoekp/docstrfmt) which doesn't support [directives](https://github.com/LilSpazJoekp/docstrfmt/issues/45).
 
-I knew most of this when I started, but the issue was Sphinx support for Markdown. What was [recommended up through April 2021](https://web.archive.org/web/20210410135629/https://www.sphinx-doc.org/en/master/usage/markdown.html) was recommonmark, but the project was dead and it did not support Sphinx markup. This recommendation has since changed to Markedly Structured Text (MyST), a new format/tool based on CommonMark that adds syntax for roles and directives from RST. There is also [sphinx-mdinclude](https://github.com/omnilib/sphinx-mdinclude) which uses RST syntax directly in Markdown documents. Comparing the two in 2024, MyST has an [automated converter](https://github.com/executablebooks/rst-to-myst) and [automated formatter](https://pypi.org/project/mdformat/), while mdinclude does not. MyST has 48 contributors total and 16 commits / PRs in the past month, while mdinclude has 20 contributors total, and 2 unanswered pull requests in the past month. Also the website for MyST was much nicer and more in-depth. The direction the wind was blowing was obvious and switching to MyST was not difficult.
+Overall, Markdown is easier to work with, so we want Markdown.
 
-Besides MyST, there is also the Quarto proejct. This is not based on Sphinx but rather on Pandoc.
+## Documentation generators
+
+General feature list I use:
+- references (Zotero), can be either CSL (preferred) or BibTex (a little janky)
+- Graphviz, I tried Mermaid but it doesn't have the features I need like backedges
+- MathJax, again KaTeX is not suitable because it doesn't support embedding unicode and complex macros
+- forward/back links between pages and a table of contents
+
+Pandoc handles Markdown pretty well, but it doesn't support plugins very well. The Quarto project extends it to support various things. Unfortunately no CSL, Graphviz, or MathJax support at present.
+
+Sphinx - Its native format is RST, but it is widely used and supports the features I need. With the myst-parser plugin it is possible to parse Markdown - it fully supports all features of RST in native markdown format, as opposed to earlier project like recommonmark and sphinx-mdinclude. There is no CSL plugin that I can find but `sphinx-bibtex` supports bibtex. I knew most of this when I started, but the issue was Sphinx support for Markdown. What was [recommended up through April 2021](https://web.archive.org/web/20210410135629/https://www.sphinx-doc.org/en/master/usage/markdown.html) was recommonmark, but the project was dead and it did not support Sphinx markup. This recommendation has since changed to Markedly Structured Text (MyST), a new format/tool based on CommonMark that adds syntax for roles and directives from RST. There is also [sphinx-mdinclude](https://github.com/omnilib/sphinx-mdinclude) which uses RST syntax directly in Markdown documents. Comparing the two in 2024, MyST has an [automated converter](https://github.com/executablebooks/rst-to-myst) and [automated formatter](https://pypi.org/project/mdformat/), while mdinclude does not. MyST has 48 contributors total and 16 commits / PRs in the past month, while mdinclude has 20 contributors total, and 2 unanswered pull requests in the past month. Also the website for MyST was much nicer and more in-depth. The direction the wind was blowing was obvious and switching to MyST was not difficult.
+
+MyST-JS - this is like an offshoot of the myst-parser project, they rewrote everything in JS and replaced Sphinx entirely. It does natively support CSL but there is no graphviz plugin and it just seems too slick. Like to install a theme it has to download a zip file, and this is automatic - it just seems bad. It's great for scientists who want to turn their Jupyter notebooks into documentation but it doesn't currently seem flexible or full-featured enough to use in production. Also their project management is weird, they seem very disorganized. If they got a graphviz plugin and mathjax support it would be worth switching, but I don't see that happening given the style of development they use.
+
+Rust's self-written [mdBook](https://rust-lang.github.io/mdBook/index.html). It is getting there as a competitor to Sphinx - it even has a Graphviz plugin - but so far there is no referencing support. 
+
+There is also Java's javadoc, but it's not used much for standalone documentation. It is [possible](https://github.com/nidi3/graphviz-java?tab=readme-ov-file#javadoc) to embed Graphviz though.
+
+Overall, sphinx is not ideal, but it works. It's run via a Github actions script and the generated docs are stored in the gh-pages branch.
 
 ## Organization
 
