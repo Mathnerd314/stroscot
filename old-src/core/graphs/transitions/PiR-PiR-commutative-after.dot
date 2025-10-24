@@ -1,0 +1,55 @@
+digraph {
+# case (case x of True -> f; False -> g) of True -> h; False -> i
+rankdir="BT"
+"Root" [label="Root"]
+"Root" -> "Cut2"
+"Root" -> "CaseInner" [color=red]
+
+"Cut2" [label="Cut"]
+"Cut2" -> "x"
+"Cut2" -> "x" [color="red"]
+"Cut2" -> "CaseInner"
+"Cut2" -> "CaseInner" [color="blue"]
+
+"CaseInner" [label="SigmaL"]
+"CaseInner" -> "Cut1a" [label="True"]
+"CaseInner" -> "Cut1b" [label="False"]
+"CaseInner" -> "CaseOuter" [color="red"]
+"CaseInner" -> "CaseOuter2" [color="red"]
+
+"Cut1a" [label="Cut"]
+"Cut1a" -> "f"
+"Cut1a" -> "f" [color="red"]
+"Cut1a" -> "CaseOuter"
+"Cut1a" -> "CaseOuter" [color="blue"]
+
+"Cut1b" [label="Cut"]
+"Cut1b" -> "g"
+"Cut1b" -> "g" [color="red"]
+"Cut1b" -> "CaseOuter2"
+"Cut1b" -> "CaseOuter2" [color="blue"]
+
+ subgraph cluster_0 {
+     style="dashed"
+"CaseOuter" [label="SigmaL"]
+"CaseOuter" -> "h" [label="True"]
+"CaseOuter" -> "i" [label="False"]
+"CaseOuter" -> "h" [color=red]
+"CaseOuter" -> "i" [color=red]
+label="block1"
+ }
+
+ subgraph cluster_1 {
+     style="dashed"
+h2 [label="h"]
+i2 [label="i"]
+
+"CaseOuter2" [label="SigmaL"]
+"CaseOuter2" -> "h2" [label="True"]
+"CaseOuter2" -> "i2" [label="False"]
+"CaseOuter2" -> "h2" [color=red]
+"CaseOuter2" -> "i2" [color=red]
+label="block1"
+ }
+
+}

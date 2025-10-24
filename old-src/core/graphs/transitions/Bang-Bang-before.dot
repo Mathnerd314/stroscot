@@ -1,0 +1,34 @@
+digraph {
+rankdir="BT"
+
+"r" [label="Cut",shape=doublecircle]
+"A" -> "r"[color=black,weight=5,label="c_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "breakr"[color=black,weight=5,label="c_rseq",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "breakl"[color=black,weight=5,label="c_lseq",arrowhead=normal,arrowtail=inv,dir=both]
+
+"breakl" [label="X",style=dotted]
+"breakr" [label="Y",style=dotted]
+
+"left_node" [label="Bang"]
+"breakl" -> "left_node"[color=black,weight=5,label="bl_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "left_node"[color=blue,weight=2,taillabel="c_l",label="bl_bl[n]",arrowhead=normal,arrowtail=none,dir=both]
+"B" -> "left_node"[color=red,weight=2,label="bl_bmain",arrowhead=normal,arrowtail=none,dir=both]
+"C" -> "left_node"[color=red,weight=2,label="bl_br[k]",arrowhead=normal,arrowtail=none,dir=both]
+"C'" -> "left_node"[color=blue,weight=2,label="bl_bl[l]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "D"[color=black,weight=5,label="bl_tseq",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "E"[color=red,weight=2,label="bl_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "F"[color=blue,weight=2,label="bl_tl[n]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "G"[color=red,weight=2,label="bl_tr[k]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "G'"[color=blue,weight=2,label="bl_tl[l]",arrowhead=normal,arrowtail=none,dir=both]
+
+"right_node" [label="Bang"]
+"breakr" -> "right_node"[color=black,weight=5,label="br_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"H" -> "right_node"[color=blue,weight=2,label="br_bl[i]",arrowhead=normal,arrowtail=none,dir=both]
+"r" -> "right_node"[color=red,weight=2,taillabel="c_r",headlabel="br_bmain",arrowhead=normal,arrowtail=none,dir=both]
+"I" -> "right_node"[color=red,weight=2,label="br_br[j]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "J"[color=black,weight=5,label="br_tseq",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "K"[color=red,weight=2,label="br_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "L"[color=blue,weight=2,label="br_tl[i]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "M"[color=red,weight=2,label="br_tr[j]",arrowhead=normal,arrowtail=none,dir=both]
+
+}

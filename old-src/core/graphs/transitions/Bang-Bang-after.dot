@@ -1,0 +1,36 @@
+digraph {
+rankdir="BT"
+
+"A" -> "breakr"[color=black,weight=5,headlabel="c_rseq",taillabel="c_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"breakr" -> "breakl"[color=black,weight=5,headlabel="c_lseq",taillabel="br_bseq",arrowhead=normal,arrowtail=none,dir=both]
+
+"breakl" [label="X",style=dotted]
+"breakr" [label="Y",style=dotted]
+"newcut" [label="Cut"]
+
+"left_node" [label="Bang"]
+"breakl" -> "left_node"[color=black,weight=5,label="bl_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "newcut" [color=black,weight=5,label="newcut_bseq",arrowhead=normal,arrowtail=none,dir=both]
+"newcut" -> "D"[color=black,weight=5,label="bl_tseq",arrowhead=normal,arrowtail=inv,dir=both]
+"newcut" -> "F"[color=blue,weight=2,label="bl_tl[n]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "E"[color=red,weight=2,label="bl_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "G"[color=red,weight=2,label="bl_tr[k]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "G'"[color=blue,weight=2,label="bl_tl[l]",arrowhead=normal,arrowtail=none,dir=both]
+"B" -> "left_node"[color=red,weight=2,label="bl_bmain",arrowhead=normal,arrowtail=none,dir=both]
+"C" -> "left_node"[color=red,weight=2,label="bl_br[k]",arrowhead=normal,arrowtail=none,dir=both]
+"C'" -> "left_node"[color=blue,weight=2,label="bl_bl[l]",arrowhead=normal,arrowtail=none,dir=both]
+"H" -> "left_node"[color=blue,weight=2,label="br_bl[i]",arrowhead=normal,arrowtail=none,dir=both]
+"I" -> "left_node"[color=red,weight=2,label="br_br[j]",arrowhead=normal,arrowtail=none,dir=both]
+
+
+"right_node" [label="Bang"]
+"newcut" -> "right_node"[color=black,weight=5,label="newcut_rseq",arrowhead=normal,arrowtail=none,dir=both]
+"newcut" -> "right_node"[color=red,weight=2,label="br_bmain",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "right_node"[color=blue,weight=2,label="brl_bl[i]",arrowhead=normal,arrowtail=none,dir=both]
+"left_node" -> "right_node"[color=red,weight=2,label="brl_br[j]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "J"[color=black,weight=5,label="br_tseq",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "K"[color=red,weight=2,label="br_tmain",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "L"[color=blue,weight=2,label="br_tl[i]",arrowhead=normal,arrowtail=none,dir=both]
+"right_node" -> "M"[color=red,weight=2,label="br_tr[j]",arrowhead=normal,arrowtail=none,dir=both]
+
+}

@@ -1,0 +1,32 @@
+digraph {
+# case (case x of True -> f; False -> g) of True -> h; False -> i
+rankdir="BT"
+"Root" [label="Root"]
+"Root" -> "Cut1"
+"Root" -> "CaseOuter" [color=red]
+
+"Cut1" [label="Cut"]
+"Cut1" -> "Cut2"
+"Cut1" -> "CaseInner" [color="red"]
+"Cut1" -> "CaseOuter"
+"Cut1" -> "CaseOuter" [color="blue"]
+
+"Cut2" [label="Cut"]
+"Cut2" -> "x"
+"Cut2" -> "x" [color="red"]
+"Cut2" -> "CaseInner"
+"Cut2" -> "CaseInner" [color="blue"]
+
+"CaseInner" [label="SigmaL"]
+"CaseInner" -> "f" [label="True"]
+"CaseInner" -> "g" [label="False"]
+"CaseInner" -> "f" [color="red"]
+"CaseInner" -> "g" [color="red"]
+
+"CaseOuter" [label="SigmaL"]
+"CaseOuter" -> "h" [label="True"]
+"CaseOuter" -> "i" [label="False"]
+"CaseOuter" -> "h" [color=red]
+"CaseOuter" -> "i" [color=red]
+
+}
