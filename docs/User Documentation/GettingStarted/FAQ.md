@@ -2,7 +2,7 @@
 
 ## Does it run?
 
-No, it's in the design stage. But there are Haskell experiments in the `src/` and `test/` directories that can be run.
+No, it's in the design stage. But there are experiments in the `src/` and `test/` directories that can be run.
 
 ## Where can I ask questions?
 
