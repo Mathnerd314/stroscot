@@ -90,7 +90,7 @@ The design of VEX is the gold standard for instruction-precise, analysis-friendl
 - Right now, before you've written a single line of pass code, the IR design cost is at its absolute minimum — you have full design freedom, no legacy to carry, and nothing to port. A week from now, after writing one pass, that's no longer true.
 
 **Cons**
-- The x86 lifter (instruction → IR) must be written or borrowed. `guest_x86_toIR.c` is ~16k LOC in the VEX tree; however, a prototype only needs the subset of x86 instructions actually used, with stub/TODO paths for the rest. LLM-assisted translation of the instruction → IR mappings is practical for this subset.
+- The x86 lifter (instruction → IR) must be written or borrowed. `guest_x86_toIR.c` is ~16k LOC in the VEX tree; however, a prototype only needs the subset of x86 instructions actually used, with stub/TODO paths for the rest. LLM-assisted translation of the instruction → IR mappings is practical for this subset. Another option is to use pyvex for lifting and then translate VEX to the new IR.
 - The "anal retentive" flag and side-effect semantics that make VEX valuable must be replicated carefully. The risk is subtle semantic errors in less-common instructions.
 
 **Verdict:** Correct long-term choice. Prototype scope (x86 subset + stubs) makes near-term cost manageable.
