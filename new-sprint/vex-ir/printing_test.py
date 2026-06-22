@@ -24,7 +24,7 @@ tests = [
     ("A^⊗3",          TensorPower(A, 3)),
     ("A^⅋4",          ParPower(A, 4)),
     ("nested",        Lollipop(Tensor(A, B), With(A, C))),
-    ("!A",            Bang(POS, Lollipop(A, B))),
+    ("!(A → B)",      Bang(POS, Lollipop(A, B))),
     ("?(A∨B)",        Bang(NEG, Plus(A, B))),
     ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))),
 ]
