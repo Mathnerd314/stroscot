@@ -224,3 +224,17 @@ else
   else
     memory[a]
 ```
+
+https://raw.githubusercontent.com/chip-red-pill/udbgInstr/main/paper/undocumented_x86_insts_for_uarch_control.pdf
+
+Analysis of assemblers:
+* bddisasm (C) [27] (https://github.com/bitdefender/bddisasm) - disassembly only
+* Capstone (C++) [22] (https://github.com/capstone-engine/capstone) - disassembly only
+* DynamoRIO (C and C++) [2] (https://github.com/DynamoRIO/dynamorio) - pyda bindings
+* fadec (C) [23] (https://github.com/aengelke/fadec) - written in assembly, no Python bindings
+* GNU libopcodes (C) [21] (https://www.gnu.org/software/binutils/) - no Python API
+* Iced (Rust) [28] (https://github.com/icedland/iced) - official Python bindings
+* Intel XED (C) [25] (https://github.com/intelxed/xed) - no Python bindings but has ctypes examples
+* Udis86 (C) [24] (https://github.com/vmt/udis86) - disassembly only, no Python bindings
+* Zydis (C) [26] (https://github.com/zyantific/zydis) - could write ctypes most likely, no examples
+

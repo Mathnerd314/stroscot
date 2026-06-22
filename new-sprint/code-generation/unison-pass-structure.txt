@@ -1,0 +1,9 @@
+input: https://llvm.org/docs/MIRLangRef.html
+uni import: transform the instruction-selected program into Unison IR;
+uni linearize: transform the program to Linear Static Single Assignment form;
+uni extend: extend the program with copies;
+uni augment: augment the program with alternative temporaries;
+    uni model: formulate a combinatorial problem combining global register allocation and instruction scheduling;
+    gecode-presolver: produce an equivalent combinatorial problem that is easier to solve;
+    gecode-solver: solve the combinatorial problem;
+uni export: generate the almost-assembly program with the solution to the combinatorial problem

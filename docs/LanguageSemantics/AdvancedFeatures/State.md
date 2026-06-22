@@ -513,7 +513,7 @@ Now there is also the question of non-duplication. We can implement a run-once r
 
 ### Top-level I/O
 
-In Python we can write a simple script like `print "hello world"`. In Haskell we must have the boilerplate `main =`, which is more verbose. We can address this by allowing modules to be actions that return the actual record. The main issue is we must have an instance of MonadFix in order to tie the recursive knot. But fortunately there are [several implementations](https://github.com/ekmett/kan-extensions/issues/64) of MonadFix for continuations; the only question is which one is correct.
+In Python we can write a simple script like `print "hello world"`. In Haskell we must have the boilerplate `main =`, which is more verbose. We can address this by allowing modules to be actions that return the actual record. The main issue is we must have an instance of MonadFix in order to tie the recursive knot. But fortunately there are [several](https://github.com/ekmett/kan-extensions/issues/64) [plausible implementations](https://stackoverflow.com/questions/25827227/why-cant-there-be-an-instance-of-monadfix-for-the-continuation-monad) of MonadFix for continuations; the only question is which one is correct - the issue is actually that the *type system* constrains the implementation, and in our general state framework we don't have this issue because our IO type is fixed and we are working with specific callbacks rather than generic continuations.
 
 The other option is to restrict I/O outside of main, e.g. to only the main module, which means that e.g. mutable variables cannot exist between calls of a function. This seems too restrictive.
 

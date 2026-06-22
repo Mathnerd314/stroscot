@@ -6,46 +6,99 @@ Stroscot aims to have built-in security features. This means providing security 
 
 At the moment no programming language has a good track record of being secure. [WhiteSource](https://www.mend.io/blog/is-one-programming-language-more-secure/) concluded in 2019 that Ruby had the lowest number of reported vulnerabilities out of popular web languages, but even Ruby had [5 vulnerabilities](https://www.cvedetails.com/vulnerability-list/vendor_id-7252/product_id-12215/Ruby-lang-Ruby.html) in 2022 in the base runtime, and it easy to write security antipatterns that lead to issues such as SQL injection. To improve in this area, there are various security-related features. Some are implemented in new languages, for example, Rust's borrows checker and Rune's "secrets" mechanism, but most are more obscure and live in academic papers and third-party analysis tools.
 
-As [Hare](https://harelang.org/blog/2022-06-21-safety-features/) writes, "how do we evaluate the trade-offs of a particular safety feature?" Hare proposes to evaluate against the language goals. Stroscot's goals are functionality and minimality in that order. For security, functionality means protecting against all types of security risks, both common and uncommon. This is somewhat daunting as for example [CWE](https://cwe.mitre.org/data/index.html) lists 933 weaknesses. Certainly it would be good to go through all these but I don't have much time. Fortunately, there is the OWASP Application Security Verification Standard. It points out that the CWE is quite duplicative and condenses it down to [286 requirements](https://github.com/OWASP/ASVS/blob/d8fde8b6592af2b8022590ec9d9a1765fe920651/4.0/docs_en/OWASP%20Application%20Security%20Verification%20Standard%204.0.3-en.csv). The [bleeding edge version 5](https://github.com/OWASP/ASVS/tree/d8fde8b6592af2b8022590ec9d9a1765fe920651/5.0/en) further condenses it, removing more duplicate and out of scope requirements. The OWASP ASVS is certainly not comprehensive, as it is web-focused and community-developed, but it is definitely one of the leading standards. Implementing support for it in Stroscot is certainly a good first step, and goes above and beyond what any currently-popular language is doing. For now, I will focus only on the ASVS v5 unreleased version, and leave the mitigation of other weaknesses to the future.
+As [Hare](https://harelang.org/blog/2022-06-21-safety-features/) writes, "how do we evaluate the trade-offs of a particular safety feature?" Hare proposes to evaluate against the language goals. Stroscot's goals are functionality and minimality in that order. For security, functionality means protecting against all types of security risks, both common and uncommon. This is somewhat daunting as for example [CWE](https://cwe.mitre.org/data/index.html) lists 933 weaknesses. Certainly it would be good to go through all these but I don't have much time. Fortunately, there is the OWASP Application Security Verification Standard. It points out that the CWE is quite duplicative and condenses it down to [286 requirements](https://github.com/OWASP/ASVS/blob/d8fde8b6592af2b8022590ec9d9a1765fe920651/4.0/docs_en/OWASP%20Application%20Security%20Verification%20Standard%204.0.3-en.csv). The [bleeding edge version 5](https://github.com/OWASP/ASVS/tree/d8fde8b6592af2b8022590ec9d9a1765fe920651/5.0/en) further condenses it, removing more duplicate and out of scope requirements. The OWASP ASVS is certainly not comprehensive, as it is web-focused and community-developed, but it is definitely one of the leading standards.
 
-## Threat modeling
+## Collection of security features
 
-Threat modeling consists of three steps: build an abstraction of the system, identify and quantify threats, and address the most prominent. The abstraction of the application is essentially a graph. ASVS calls it a data-flow diagram, but I've looked at 10 DFDs and seen 10 different styles of graph, so this term seems meaningless. Based on this graph, threats are then identified and quantified.
+So here I went through the CWE, the OWASP ASVS, and other sources, with Perplexity, and gather a voluminous list of security features that can be used to mitigate various security risks. These fall into four main categories: application-level, library-level, tool-level, and language-level. Application-level features are security practices that developers must follow when writing code. Library-level features are secure implementations of cryptographic algorithms, protocols, and parsing libraries. Tool-level features are static analyzers, dynamic testing frameworks, and CI/CD integrations that help detect vulnerabilities. Language-level features are type systems, memory management, and syntax features that are foundational to security. The application-level features are the most numerous, as they cover a wide range of security practices and policies, but do not affect the language or library design. The library-level features are important for the standard library, as it must provide secure implementations of complex algorithms and protocols in order to write secure programs. The tool-level features and language-level features are most relevant for the language design, as they can enforce security properties at compile-time and runtime, and strong integration of the language with tools can help developers write secure code. 
 
-### Application model
+### Language- and Tool-Level Features
 
-The elements of the model are as follows:
+* **Integer Overflow Protection:** Compile-time arithmetic verification, unsigned types for sizes, language-enforced bounds checking. Examples: Rust's checked arithmetic by default; Java's BigInteger for overflow-safe operations.
+* **Fall-Through Prevention:** Explicit `[[fallthrough]]` annotations (C++17) or exhaustive pattern matching (Rust) prevent implicit fall-through bugs in switch statements.
+* **Bounds Checking:** Language features like for-each loops, bounds-checked iterators, no raw pointer arithmetic. Examples: Python's slice notation; Rust's iterator pattern.
+* **Restricted Eval:** Elimination of eval() functions on untrusted input removes entire attack vectors. API for sandboxed compilation and execution with restricted environmental access, if dynamic code generation is required.
+* **Automatic Memory Management:** Automatic garbage collection or Rust-style ownership prevents use-after-free and double-free vulnerabilities that plague manual memory management languages.
+* **Resource Cleanup:** RAII (Resource Acquisition Is Initialization) in C++, defer in Go, or automatic cleanup in managed languages ensures resource release even during exceptions.
+* **Secure Deletion APIs:** Language-level support for secure memory zeroization (e.g., Rust's `zeroize` crate) prevents sensitive data leakage after use.
+* **Algorithm Deprecation:** Built-in deprecation mechanisms (`@Deprecated` in Java, `DeprecationWarning` in Python) enable phased removal of insecure algorithms.
+* **Static Type Checking:** Compile-time type verification, explicit conversions, dependent type support. This prevents entire categories of errors at compilation rather than runtime.
+* **Restricted Undefined Behavior:** Languages like Go and Python eliminate undefined behavior entirely, while Rust tracks it explicitly through the unsafe keyword. This prevents compiler-dependent security properties that vary across platforms and optimization levels.
+* **Comprehensive Exception Handling:** Languages must support catching specific exception types, preventing silent failures from bare `catch(Exception)` blocks. Rust's Result type and Go's explicit error handling represent modern approaches. Ensure that user-visible exceptions do not contain sensitive security information.
+* **Secret Scanning:** Language-level source code analysis rejecting hardcoded credentials patterns prevents accidental secret commits. GitGuardian, TruffleHog scanning for hardcoded credentials. Compiler plugins or linters integrated into CI/CD pipelines. Type system enforcement preventing keys from being serialized, logged, or compared unsafely.
+- **Constant-time coding verification** - Verify that functions for cryptographic operations have execution time independent of secret values. Ensure execution paths, instruction access patterns, and memory access patterns don't depend on secrets. Compiler must analyze execution paths, instruction patterns, and memory access patterns to verify timing independence. Examples: RustCrypto's constant-time implementations; libsodium's constant-time functions.
+* **Secure Boot Support:** TPM integration, hardware attestation, secure enclave support (ARM TrustZone, Intel SGX).
+* **Compiler Warnings:** `-Wall -Wextra -Werror`, `-Wimplicit-fallthrough`, `-fsanitize=address` flags enabling detection at build time.
+* **Advanced Static Analysis:** Coverity, SonarQube, Clang Static Analyzer, Infer for deep program analysis detecting null pointer dereferences, buffer overflows.
+* **Dead Code Detection:** Meta's SCARF, compiler elimination, coverage analysis identifying unreachable code.
+* **Memory Instrumentation:** AddressSanitizer (ASan), MemorySanitizer (MSan), UndefinedBehaviorSanitizer (UBSan), Valgrind detecting memory errors at runtime.
+- **Memory Segmentation:** Separation of code, stack, heap, and data segments with non-executable stack/heap (NX bit), ASLR, and DEP preventing code injection attacks. Separate heaps for sensitive data such as cryptographic keys, with strict access controls.
+* **Fuzzing:** Coverage-guided fuzzing (AFL, libFuzzer), mutation analysis, symbolic execution (KLEE) discovering crash-inducing inputs.
+* **Code Coverage:** Branch and path coverage measurement ensuring test adequacy.
+* **Dependency Vulnerability Scanning:** Snyk, Black Duck, Trivy performing Software Composition Analysis (SCA), SBOM generation, license compliance. Version pinning and lockfiles (Cargo.lock, package-lock.json).
+* **Dynamic Application Security Testing:** OWASP ZAP, Burp Suite detecting web vulnerabilities, SQL injection, XSS.
+* **Binary Analysis:** Ghidra, IDA Pro, Radare2 for reverse engineering detection, debug symbol removal verification, backdoor pattern detection.
+* **Cyclomatic Complexity:** SonarQube, Lizard flagging functions exceeding thresholds.
+* **Automated Formatting:** Black (Python), Prettier (JavaScript), rustfmt enforcing consistent style.
+* **Integrity Monitoring:** Osquery, Wazuh, AIDE detecting tampering with production binaries.
+* **Symbolic Execution:** KLEE, SMT solvers exploring all feasible paths, constraint solving for property verification (LTL, CTL, etc.).
+* **Theorem Proving:** Coq, Isabelle, TLA+ for mathematical correctness proofs of critical algorithms.
+* **Capability-Based Access Control** — Enforces WHAT operations are allowed (CHERI, Capstone, JWT-based tokens)
+* **Taint Tracking and Information Flow Control** — Tracks WHERE data came from and prevents unsafe usage
+* **Threat Modeling Integration** — Tools like ThreatSpec, Microsoft Threat Modeling Tool integrated into the development lifecycle. Specify roles, threats, mitigations, and risk assessments alongside code - mitigates, accepts, transfers, exposes, connects, tests, review relationships. Produce prioritized threat lists, attack trees, and security requirements. Compiler verifies that conflicting roles cannot be held simultaneously.
 
-- Network topology graph: nodes for clients, servers, firewalls, and other networked devices and services, and edges for their possible and expected dataflows (with ports). Devices may be identified by their name and description.
-- Entry points: this is more detailed information on open ports which accept connections, such as for an HTTP port its list of accessible/valid web URLs.
-- Exit points: This is the other direction, ports where data is sent out. XSS and information disclosure vulnerabilities both require an exit point for the attack to complete.
-- Assets: things attackers will target or degrade, such as credentials, session cookies, uptime, personal data, business information, execution privileges, and logs. The costs of leaking, losing and replacing, or tampering with each asset should be quantified.
-- Protection requirements: All assets should be assigned protection levels and associated protection requirements, such as encryption requirements, integrity requirements, retention, privacy and other confidentiality requirements.
-- Security controls: entry points that require a password, cookie, cryptographic secret, or other credential. These credentials should follow key management policies such as NIST SP 800-57 and NIST SP 800-63-3.
-- Trust roles: Actors in the system will have different assets at their disposal. The roles specify what credentials an actor may be assumed to have and not have, as well as the assets that each actor should and should not be able to access (is authorized to access). For example, a casual user will have access to one client node and no credentials, and should not be able to access anything, while an authorized sysadmin will have a full set of credentials and should have full access. Although permissions should be allocated using roles, individual security controls should use feature-based access control.
-- Attacker types: There is a wide variety of attackers - script kiddies, hacktivists, organized crime / financially motivated, nation-states, advanced persistent threats, insiders, competitors. They have different goals and may be able to assume different trust roles depending on the situation.
+### Library-Level Requirements
+* **Secure Hash Functions:** SHA-256, SHA-3, BLAKE2 implementations providing collision and pre-image resistance.
+* **Key Derivation:** Argon2id for passwords (resistant to GPU/ASIC attacks), HKDF for PRF-based key derivation, PBKDF2 with appropriate iterations.
+* **Authenticated Encryption:** AES-GCM, ChaCha20-Poly1305 combining confidentiality and integrity in single operations.
+* **Public Key Cryptography:** RSA with OAEP/PSS padding, elliptic curves (ECDH, ECDSA), post-quantum candidates (Kyber, Dilithium). Examples: libsodium, cryptography.io, RustCrypto, OpenSSL
+* **Parameterized Queries:** Database adapters enforcing prepared statements with placeholders separating logic from data. Examples: SQLAlchemy, JDBC, Diesel.
+* **Output Encoding:** Context-aware encoding libraries (HTML entities, JavaScript escaping, URL encoding) preventing injection attacks.
+* **Template Engines:** Auto-escaping template systems (Jinja2, Django, Tera) by default.
+* **XML/JSON Parsing:** Safe parsers disabling external DTDs, entity expansion, with schema validation support.
+* **TLS/SSL Libraries:** OCSP stapling, CRL checking, certificate transparency integration, Perfect Forward Secrecy support. Examples: OpenSSL, BoringSSL, rustls.
+* **Connection Pooling:** HikariCP (Java), asyncpg (Python), sqlx (Rust) managing connection lifecycles, idle timeouts, resource limits.
+* **Authentication Protocols:** JOSE libraries, OAuth 2.0 SDKs implementing replay prevention, mutual authentication.
+* **Physical Attack Mitigation:** Libraries implementing fault detection, power analysis protections (masking, blinding), side-channel resistance. Example: libsodium's constant-time implementations.
+* **Regular Expression Safety:** RE2 and other non-backtracking engines preventing catastrophic backtracking and ReDoS (Regular Expression Denial of Service) attacks.
+* **Constant-time Cryptography:** Libraries ensuring execution time independent of secret values. Examples: RustCrypto's constant-time implementations; libsodium's constant-time functions.
+* **Logging Frameworks** — Structured audit and logging libraries (Log4j2, Serilog, Zap) with built-in security event types, log levels, and secure storage backends. Detailed enough to identify attacks, including UTC timestamp information. They should avoid sensitive information if possible. Regardless, logs must be considered as assets, as an attacker will often wish to erase their tracks.
 
-This is just a basic outline. The model should be detailed enough to automatically detect and enumerate threats. Basically, for each potential threat, such as enumerated by STRIDE (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege), and each potential weakness, such as enumerated by the CWE list, the model must have sufficient information to identify if that weakness could be exploited to activate that threat and violate the parameters of the trust roles.
-
-[Threatspec](https://github.com/threatspec/threatspec) is one example of how to do modeling, keeping the annotations in the code ensures they are easy to keep in sync. Threats and controls are just identifier strings. Components are identified by a path. There are then various annotations:
-
-```
-@mitigates (?P\<component>.\*?) against (?P\<threat>.\*?) with (?P\<control>.\*)
-@accepts (?P\<threat>.\*?) to (?P\<component>.\*?) with (?P\<details>.\*)
-@transfers (?P\<threat>.\*?) from (?P\<source_component>.\*?) to (?P\<destination_component>.\*?) with (?P\<details>.\*)
-@exposes (?P\<component>.\*?) to (?P\<threat>.\*?) with (?P\<details>.\*)
-@connects (?P\<source_component>.\*?) (?P\<direction>with|to) (?P\<destination_component>.\*?) with (?P\<details>.\*)
-@tests (?P\<control>.\*?) for (?P\<component>.\*)
-@review (?P\<component>.\*?) (?P\<details>.\*)
-```
-
-### Threat quantification
-
-Given the initial list of possible threats, they can be categorized by type and prioritized by risk. The generic definition of risk is the product of two factors: probability that the threat occurs, and cost to the organization. In the DREAD model, probability is split into reproducibility, exploitability and discoverability, while cost is split into damage and affected users/components (extent). The CWE list has statistics on threat incidence. The costs can be entered into and calculated from the model, or simply rated based on vulnerability type as 1-5. Multi-stage attack paths can be aggregated and summarized into attack trees and other reports. Countermeasures that mitigate the threat should also be listed. Based on this prioritized list, the developer can then mark threats as acceptable, or modify the application to eliminate or mitigate the threat.
-
-### Logging
-
-Logging is important for security and a common logging approach should be used across the system. The logs should be detailed enough to identify attacks, including UTC timestamp information. They should avoid sensitive information if possible. Regardless, logs must be considered as assets, as an attacker will often wish to erase their tracks.
+### Application-Level Requirements
+* **Credential Policies:** Forced password changes on first boot, aging enforcement (90-120 days), reuse prevention (5+ previous generations), complexity requirements, account lockout (5 failures, 15+ minute lock).
+* **Multi-Factor Authentication:** TOTP support, hardware security keys, SMS OTP (lower security), out-of-band confirmations.
+* **Session Management:** Cryptographically secure random tokens (not predictable IDs), TTL enforcement (15-30 min sensitive operations, 8 hour maximum), httpOnly/Secure cookie flags, logout invalidation, concurrent session limits.
+* **Default Account Hardening:** Remove generic accounts, mandatory credential change at first boot, strong random initial passwords.
+* **Path Traversal Prevention:** Whitelist-based access, block traversal sequences (`..`, `/`, `./`), symlink resolution validation, mapping tables preventing direct filename use.
+* **Injection Attack Prevention:** Parameterized queries, format validation (type, length, pattern), least-privilege database accounts, schema validation.
+* **Command Execution Safety:** Avoid system() calls, allowlist permitted commands, parameterized execution without shell parsing.
+* **Rate Limiting:** API throttling, brute-force exponential backoff, input size limits, algorithmic complexity bounds, per-operation resource quotas.
+* **Error Messages:** Generic user-facing messages while maintaining detailed server-side logging, no stack traces exposed, debug mode disabled in production, centralized exception handling.
+* **Security Event Logging:** All login attempts, access control decisions, privilege escalations, configuration changes.
+* **Audit Trails:** Log tamper-proofing via digital signatures/HMACs, centralized aggregation, retention (90+ days minimum), immutable storage, real-time alerting.
+* **TLS Configuration:** Enforce TLS 1.2+, AEAD-only cipher suites, HSTS headers, certificate domain matching, certificate pinning for critical endpoints.
+* **Certificate Validation:** Expiration checking, transparency log verification, revocation status checking, extended validation for high-assurance services.
+* **API Security:** Rate limiting, token/API key management, request signing, CORS policies, API gateway filtering.
+* **Encryption:** At-rest encryption for sensitive data, TLS for transit, encrypted backups, key rotation policies, secure HSM/vault storage.
+* **Sensitive Data Handling:** Data classification, purpose limitation, retention with secure deletion, minimization, de-identification when feasible.
+* **Key Management:** Unique salts per user, application-level pepper stored separately, rotation schedules, HSM storage, key splitting for escrow.
+* **Random Generation:** CSPRNG re-seeding, random IVs/nonces per encryption, secure random token generation.
+* **Hash Operations:** SHA-256 minimum, Argon2id for passwords, HMAC for integrity, salting for collision resistance.
+* **Secure Coding Standards:** Naming conventions, code style guides, API documentation with security implications, threat model documentation.
+* **Code Review:** Peer review before merge, multiple reviewers for sensitive code, security-focused checklists, documentation verification.
+* **Testing:** Unit tests for security-critical functions, integration testing, negative testing (invalid inputs), boundary value testing, coverage targets.
+* **Deployment:** Code signing, binary verification, staged rollouts with monitoring, rollback procedures, security release notes.
+* **Build System:** Secure build environment, artifact signing, source access controls, dependency pinning, reproducibility verification.
+* **Supply Chain:** SBOM maintenance, dependency tracking, vulnerability notifications, internal package registries, build access restrictions.
+* **Firmware Updates:** Updateable firmware design, cryptographic verification, OTA capability, end-of-life planning, version deprecation.
+* **Architecture:** Layered security controls, least privilege enforcement, zero-trust models, compartmentalization via containers/VMs, fail-secure defaults.
+* **Monitoring:** Security event monitoring, anomaly detection, incident response procedures, forensic analysis capability, threat intelligence.
+* **User Interface:** Confirmation dialogs for dangerous operations, clear consequence explanation, time-based confirmation, out-of-band confirmation for critical operations.
+* **Compliance:** Security audits, vulnerability disclosure policies, incident response plans, data protection agreements, regulatory compliance tracking.
+* **Security Training:** Developer awareness, secure coding education, OWASP Top 10 familiarity, cryptographic concepts, threat modeling.
+* **Vulnerability Management:** Bug bounty programs, issue disclosure processes, patch development, release coordination, post-incident reviews.
+* **Third-Party Risk:** Vendor security assessment, contract security requirements, SLA clauses, audit rights, data handling agreements.
+* **Risk Management:** Threat modeling, risk assessment documentation, mitigation prioritization, residual risk acceptance, control effectiveness measurement.
 
 ## Cryptography
 

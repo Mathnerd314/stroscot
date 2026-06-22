@@ -1,0 +1,22 @@
+current goal - 3.3.3. Unison-Style Global Code Generator (Compiler Core)
+- overall goal: Get a working code generator round-trip on a representative x86 workload  (up to optimization)
+- real goal: have a robust IR to do machine code analysis with (Stroscot IR design requirement)
+- implement a VEX-like low-level IR from scratch in Python
+- implement Unison-Style Global Code Generator using IR
+- implement lifter from machine code to IR (x86, optionally ARM64)
+- angr analysis pass adaptation: rewrite imports and IR object references; logic unchanged.
+
+- Target machine model (instructions, register classes, pipeline resources, ABI).  
+- Optional profile data and throughput predictions  
+  - edge frequencies, block hotness, branch statistics  
+- Build unified constraint model:  
+  - Instruction selection alternatives, register allocation constraints, scheduling constraints, ABI constraints.  
+- Seed with heuristic solution (pattern matching \+ linear scan \+ list scheduling).  
+- Run combinatorial search (ILP/CP-SAT/branch-and-bound) - NP-hard model
+- Evaluate candidates via the tunable optimization objective engine. build using uiCA - Metrics: estimated runtime, code size, compile time, memory usage, power, latency of key loops - fit statistical discribution e.g. mean/variance/tail. Weight and normalize metrics to common scale or use lexicographic ordering, incorporating performance and resource objectives. Provide Scalar cost for search/heuristics, simple sensitivity analysis: contributions of each metric.
+- Generate machine code, interrupt recovery tables
+
+-  [github](https://github.com/unison-code/unison)
+- implied constraints for the presolver implied constraints and dominance rules as in Unison presolver. [past.date-conference](https://past.date-conference.com/date14/files/file/date14/ubooth/2592.pdf)  
+- [diva-portal](https://www.diva-portal.org/smash/get/diva2:862630/FULLTEXT01.pdf)
+- uiCA/Facile [semanticscholar](https://www.semanticscholar.org/paper/uiCA:-accurate-throughput-prediction-of-basic-on-Abel-Reineke/79a5a38372bee32f6ad6c0d499ef8d9eded9e72f)  
