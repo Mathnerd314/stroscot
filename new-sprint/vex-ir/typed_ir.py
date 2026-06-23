@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Polarity & Side
@@ -37,7 +37,7 @@ class Atom(Formula):
 
 @dataclass(frozen=True)
 class Case:
-    label: str
+    label: Any
     formulas: tuple[SidedFormula, ...]
 
 @dataclass(frozen=True)
@@ -113,11 +113,14 @@ class RuleSchema:
         """Check that the given instantiated rule has the correct shape for this schema."""
         raise NotImplementedError
 
+class CoreRule(RuleSchema):
+    pass
+
 ## Structural rules
 
 # A |- A
 @dataclass(frozen=True)
-class Identity(RuleSchema):
+class Identity(CoreRule):
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert instance.tops == ()
         assert instance.key_slots_bottom == (0, 1)  # the two key slots are the only two formulas in the bottom sequent
@@ -126,7 +129,7 @@ class Identity(RuleSchema):
 
 # Γ ⊢ A, Δ and Θ, A ⊢ Λ  =>  Γ, Θ ⊢ Δ, Λ
 @dataclass(frozen=True)
-class Cut(RuleSchema):
+class Cut(CoreRule):
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 2
         top0, top1 = instance.tops
@@ -144,7 +147,7 @@ class Cut(RuleSchema):
 
 ## Jumbo rules
 @dataclass(frozen=True)
-class Build(RuleSchema):
+class Build(CoreRule):
     """Introduce a JumboFormula on its active side.
     case_index picks the disjunct branch; always 0 for single-case connectives.
     Produces exactly 1 premise."""
@@ -177,7 +180,7 @@ class Build(RuleSchema):
         assert bottom_others == tuple(top_combined)
 
 @dataclass(frozen=True)
-class Break(RuleSchema):
+class Break(CoreRule):
     """Eliminate a JumboFormula from its passive side.
     Produces one premise per case (all branches handled).
     No choice — fully invertible."""
@@ -207,7 +210,7 @@ class Break(RuleSchema):
 ## Exponential rules
 
 @dataclass(frozen=True)
-class Promotion(RuleSchema):
+class Promotion(CoreRule):
     polarity: Polarity
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 1
@@ -237,7 +240,7 @@ class Promotion(RuleSchema):
         
 
 @dataclass(frozen=True)
-class Dereliction(RuleSchema):
+class Dereliction(CoreRule):
     polarity: Polarity
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 1
@@ -261,7 +264,7 @@ class Dereliction(RuleSchema):
         assert bottom_others == top_others
 
 @dataclass(frozen=True)
-class Weakening(RuleSchema):
+class Weakening(CoreRule):
     polarity: Polarity
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 1
@@ -281,7 +284,7 @@ class Weakening(RuleSchema):
         assert bottom_others == top.formulas
 
 @dataclass(frozen=True)
-class Contraction(RuleSchema):
+class Contraction(CoreRule):
     polarity: Polarity
     count: int = 2  # number of copies to contract into (default 2 for binary contraction)
     def check_shape(self, instance: InstantiatedRule) -> None:
