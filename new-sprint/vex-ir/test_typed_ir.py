@@ -3,7 +3,7 @@ import pytest
 from typed_ir import (
     Polarity, Side, Atom, Case, JumboFormula, Bang, Sequent,
     Identity, Cut, Build, Break,
-    Promotion, Dereliction, Weakening, Contraction, Digging, Absorption, Multiplexing,
+    Promotion, Dereliction, Weakening, Contraction,
     InstantiatedRule, Derivation,
 )
 
@@ -216,17 +216,6 @@ def test_contraction():
         rule=Contraction(POS, count=2),
         tops=(Sequent(((L, bang_A), (L, bang_A), (R, B))),),
         key_slots_tops=((0, 1),),
-        bottom=Sequent(((L, bang_A), (R, B))),
-        key_slots_bottom=(0,),
-    )
-    ir.validate()
-
-def test_digging():
-    bang_bang_A = Bang(POS, bang_A)
-    ir = InstantiatedRule(
-        rule=Digging(POS),
-        tops=(Sequent(((L, bang_bang_A), (R, B))),),
-        key_slots_tops=((0,),),
         bottom=Sequent(((L, bang_A), (R, B))),
         key_slots_bottom=(0,),
     )

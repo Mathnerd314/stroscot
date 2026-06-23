@@ -11,6 +11,26 @@ POS, NEG = Polarity.POS, Polarity.NEG
 # Connective constructors
 # ══════════════════════════════════════════════════════════════════════════════
 
+
+# | Operator  | Polarity | Cases                                         |
+# |-----------|----------|-----------------------------------------------|
+# | F (False) | POS      | `[]`                                          |
+# | 1 (One)   | POS      | `[(#s, [])]`                                  |
+# | A ∨ B     | POS      | `[(#l,[(L,A)]), (#r,[(L,B)])]`                |
+# | A ⊗ B     | POS      | `[(#s,[(L,A),(L,B)])]`                        |
+# | A^⊗n      | POS      | `[(#s,[(L,A)×n])]`                            |
+# | +¬A       | POS      | `[(#s,[(R,A)])]`                              |
+# | ↑A        | POS      | `[(#s,[(L,A)])]`                              |
+# | T (Top)   | NEG      | `[]`                                          |
+# | ⊥ (Bot)   | NEG      | `[(#s,[])]`                                   |
+# | A ∧ B     | NEG      | `[(#l,[(R,A)]), (#r,[(R,B)])]`                |
+# | A ⅋ B     | NEG      | `[(#s,[(R,A),(R,B)])]`                        |
+# | A^⅋n      | NEG      | `[(#s,[(R,A)×n])]`                            |
+# | A → B     | NEG      | `[(#f,[(L,A),(R,B)])]`                        |
+# | A ↔ B     | NEG      | `[(#l,[(L,A),(R,B)]), (#r,[(L,B),(R,A)])]`    |
+# | -¬A       | NEG      | `[(#s,[(L,A)])]`                              |
+# | ↓A        | NEG      | `[(#s,[(R,A)])]`                              |
+
 F            = JumboFormula(POS, ())
 One          = JumboFormula(POS, (Case("#s", ()),))
 Top          = JumboFormula(NEG, ())
