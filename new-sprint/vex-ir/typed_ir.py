@@ -80,20 +80,6 @@ class Sequent:
     @property
     def right(self) -> tuple[Formula, ...]: return self.on(Side.RIGHT)
 
-    def with_formula(self, sf: SidedFormula) -> Sequent:
-        return Sequent(self.formulas + (sf,))
-
-    def without_formula(self, sf: SidedFormula) -> Sequent:
-        fs = list(self.formulas)
-        fs.remove(sf)
-        return Sequent(tuple(fs))
-
-    def replace(self, old: SidedFormula, new: tuple[SidedFormula, ...]) -> Sequent:
-        fs = list(self.formulas)
-        i  = fs.index(old)
-        fs[i:i+1] = list(new)
-        return Sequent(tuple(fs))
-
     def __str__(self) -> str:
         left_str  = ", ".join(str(f) for s, f in self.formulas if s == Side.LEFT)
         right_str = ", ".join(str(f) for s, f in self.formulas if s == Side.RIGHT)
@@ -212,6 +198,7 @@ class Break(CoreRule):
 @dataclass(frozen=True)
 class Promotion(CoreRule):
     polarity: Polarity
+    principle_formula_index: int  # index of the principal formula in the top/bottom sequent key slots (which must be all slots)
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 1
         top = instance.tops[0]
@@ -224,20 +211,20 @@ class Promotion(CoreRule):
         # all formulas must be bang-wrapped and with the correct polarity, except for the principal formula
         num_principal_formulas = 0
         for i, (side, f) in enumerate(top.formulas):
-            if isinstance(f, Bang) and (f.polarity == Polarity.POS and side == Side.LEFT or
-                                        f.polarity == Polarity.NEG and side == Side.RIGHT) and (side, f) == instance.bottom.formulas[i]:
-                # passthrough bang formula
-                continue
-            elif isinstance(instance.bottom.formulas[0], Bang) and instance.bottom.formulas[0].sub == f:
-                # principal formula
-                assert instance.bottom.formulas[0].polarity == self.polarity
-                assert side == (Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT)
-                num_principal_formulas += 1
+            if i == self.principle_formula_index:
+                # principal formula must be the subformula of the principal formula in the bottom, with the correct side
+                bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[i]]
+                assert isinstance(bottom_f, Bang)
+                assert bottom_f.polarity == self.polarity
+                assert bottom_f.sub == f
+                expected_bottom_side = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
+                assert bottom_side == expected_bottom_side, f"Principal formula in bottom of Promotion must be on side {expected_bottom_side}, found {bottom_side}"
+                assert bottom_side == side, f"Principal formula in top of Promotion must be on the same side as the principal formula in bottom, found {side} vs {bottom_side}"
             else:
-                raise AssertionError(f"Formula {f} at slot {i} in top does not match expected shape for Promotion")
-        
-        assert num_principal_formulas == 1, f"Expected exactly one principal formula in top for Promotion, found {num_principal_formulas}"
-        
+                # passthrough bang formula
+                assert isinstance(f, Bang)
+                assert (f.polarity == Polarity.POS and side == Side.LEFT or f.polarity == Polarity.NEG and side == Side.RIGHT)
+                assert (side, f) == instance.bottom.formulas[i]
 
 @dataclass(frozen=True)
 class Dereliction(CoreRule):
@@ -257,6 +244,7 @@ class Dereliction(CoreRule):
         assert bottom_f.sub == top_f
         expected_bottom_side = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
         assert bottom_side == expected_bottom_side, f"Principal formula in bottom of Dereliction must be on side {expected_bottom_side}, found {bottom_side}"
+        assert bottom_side == top_side, f"Principal formula in top of Dereliction must be on the same side as the principal formula in bottom, found {top_side} vs {bottom_side}"
         
         # context preservation - all other formulas in the bottom must be present in the top
         top_others = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])

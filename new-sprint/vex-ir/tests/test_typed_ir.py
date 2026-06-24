@@ -20,6 +20,7 @@ plus     = JumboFormula(POS, (Case("#l", ((L, A),)), Case("#r", ((L, B),))))
 with_    = JumboFormula(NEG, (Case("#l", ((R, A),)), Case("#r", ((R, B),))))
 lollipop = JumboFormula(NEG, (Case("#f", ((L, A), (R, B))),))
 bang_A   = Bang(POS, A)
+bang_B   = Bang(POS, B)
 
 def make_identity(f):
     ir = InstantiatedRule(
@@ -179,6 +180,16 @@ def test_break_wrong_side():
         ir.validate()
 
 # ── Exponentials ──────────────────────────────────────────────────────────────
+
+def test_promotion():
+    ir = InstantiatedRule(
+        rule=Promotion(POS, principle_formula_index=1),
+        tops=(Sequent(((L, bang_A), (R, B))),),
+        key_slots_tops=((0, 1),),
+        bottom=Sequent(((L, bang_A), (R, bang_B))),
+        key_slots_bottom=(0, 1),
+    )
+    ir.validate()
 
 def test_weakening():
     ir = InstantiatedRule(

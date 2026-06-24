@@ -231,7 +231,6 @@ class IfBool(AdmissibleRule):
     implement everything using custom opaque types and admissible rules.
     """
     name = "if_bool"
-    branch_type: Formula = field(default_factory=lambda: Int32)
 
     def check_shape(self, instance: InstantiatedRule) -> None:
         # check bottom - Bool on the passive side (left)
@@ -252,6 +251,7 @@ class IfBool(AdmissibleRule):
 @dataclass(frozen=True)
 class WeakPromotion(AdmissibleRule):
     polarity: Polarity
+    principle_formula_index: int  # index of the principal formula in the top/bottom sequent key slots (which must be all slots)
     def check_shape(self, instance: InstantiatedRule) -> None:
         assert len(instance.tops) == 1
         top = instance.tops[0]
@@ -264,19 +264,24 @@ class WeakPromotion(AdmissibleRule):
         # all formulas are promoted to bang-wrapped, but only principal formula is on its active side and the rest are passthrough formulas on the opposite side
         num_principal_formulas = 0
         for i, (side, f) in enumerate(top.formulas):
-            if isinstance(instance.bottom.formulas[0], Bang) and instance.bottom.formulas[0].sub == f:
-                bang = instance.bottom.formulas[0]
-                # check whether passthrough or principal formula
-                if bang.polarity == Polarity.POS and side == Side.LEFT or bang.polarity == Polarity.NEG and side == Side.RIGHT:
-                    # passive bang formula
-                    continue
-                elif bang.polarity == self.polarity and side == (Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT):
-                    # principal formula
-                    num_principal_formulas += 1
+            if i == self.principle_formula_index:
+                # principal formula must be on its active side
+                bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[i]]
+                assert isinstance(bottom_f, Bang)
+                assert bottom_f.polarity == self.polarity
+                assert bottom_f.sub == f
+                expected_bottom_side = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
+                assert bottom_side == expected_bottom_side, f"Principal formula in bottom of Promotion must be on side {expected_bottom_side}, found {bottom_side}"
+                assert bottom_side == side, f"Principal formula in top of Promotion must be on the same side as the principal formula in bottom, found {side} vs {bottom_side}"
             else:
-                raise AssertionError(f"Formula {f} at slot {i} in top does not match expected shape for WeakPromotion")
-        
-        assert num_principal_formulas == 1, f"Expected exactly one principal formula in top for WeakPromotion, found {num_principal_formulas}"
+                # passthrough bang formula must be on its passive side
+                bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[i]]
+                assert isinstance(bottom_f, Bang)
+                assert bottom_f.sub == f
+                expected_bottom_side = (Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT).flip()
+                assert bottom_side == expected_bottom_side, f"Passthrough formula in bottom of Promotion must be on side {expected_bottom_side}, found {bottom_side}"
+                assert bottom_side == side, f"Passthrough formula in top of Promotion must be on the same side as the passthrough formula in bottom, found {side} vs {bottom_side}"
+
 
 @dataclass(frozen=True)
 class Digging(AdmissibleRule):
