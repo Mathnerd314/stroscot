@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Generic, Type, TypeVar, Optional
+from typing import Any, Generic, Literal, Type, TypeVar, Optional
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Polarity & Side
@@ -643,11 +643,6 @@ class InstantiatedRule(Generic[Slot]):
         )
 
 NodeId = int
-_node_id_counter: int = 0
-def _next_node_id() -> NodeId:
-    global _node_id_counter
-    _node_id_counter += 1
-    return _node_id_counter
 
 @dataclass
 class Derivation:
@@ -657,24 +652,28 @@ class Derivation:
     perm_tops         — permutation applied to each top before matching premises
                         (identity by default; filled in __post_init__)
     """
-    premises: list[NodeId]
+    premises: list[Derivation]
     perm_tops: tuple[tuple[int, ...], ...]
     node_id: NodeId
+        
+    def __post_init__(self):
+        self.node_id = id(self)  # Use the built-in id() for uniqueness
 
-    def conclusion(self, node_mapping: dict[NodeId, "Derivation"]) -> Sequent:
+    @property
+    def conclusion(self) -> Sequent:
         raise NotImplementedError("Derivation.conclusion must be implemented in subclasses")
 
     @property
     def is_leaf(self) -> bool:
         return not self.premises
 
-    def depth(self, node_mapping: dict[NodeId, "Derivation"]) -> int:
-        return 0 if self.is_leaf else 1 + max(node_mapping[p].depth(node_mapping) for p in self.premises)
+    def depth(self) -> int:
+        return 0 if self.is_leaf else 1 + max(p.depth() for p in self.premises)
 
-    def size(self, node_mapping: dict[NodeId, "Derivation"]) -> int:
-        return 1 + sum(node_mapping[p].size(node_mapping) for p in self.premises)
+    def size(self) -> int:
+        return 1 + sum(p.size() for p in self.premises)
 
-    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+    def pretty(self, indent: int = 0) -> str:
         raise NotImplementedError("Derivation.pretty must be implemented in subclasses")
 
 @dataclass
@@ -702,10 +701,9 @@ class RuleDerivation(Derivation, Generic[Slot]):
         if len(self.perm_tops) != len(tops):
             raise ValueError(f"Expected {len(tops)} permutations, got {len(self.perm_tops)}")
         
-    def validate(self, node_mapping: dict[NodeId, Derivation]) -> None:
+    def validate(self) -> None:
         tops = self.instantiated_rule.tops
-        for i, (prem_id, top, perm) in enumerate(zip(self.premises, tops, self.perm_tops)):
-            prem = node_mapping[prem_id]
+        for i, (prem, top, perm) in enumerate(zip(self.premises, tops, self.perm_tops)):
             expected = apply_perm(perm, top)
             if prem.conclusion != expected:
                 raise ValueError(
@@ -714,16 +712,17 @@ class RuleDerivation(Derivation, Generic[Slot]):
                     f"(which is {top} after applying permutation {perm})"
                 )
 
-    def conclusion(self, node_mapping: dict[NodeId, Derivation]) -> Sequent:
+    @property
+    def conclusion(self) -> Sequent:
         return self.instantiated_rule.bottom
 
-    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+    def pretty(self, indent: int = 0) -> str:
         pad = "  " * indent
-        lines = [node_mapping[p].pretty(node_mapping, indent + 1) for p in self.premises]
+        lines = [p.pretty(indent + 1) for p in self.premises]
         perms = ""
         if self.perm_tops and any(list(p) != list(range(len(p))) for p in self.perm_tops):
             perms = f" perm={self.perm_tops}"
-        lines.append(f"{pad}[{self.instantiated_rule.rule}]{perms} {self.conclusion(node_mapping)}")
+        lines.append(f"{pad}[{self.instantiated_rule.rule}]{perms} {self.conclusion}")
         return "\n".join(lines)
 
 
@@ -737,15 +736,16 @@ class BasicBlock(Derivation):
         if len(self.perm_tops) != 1:
             raise ValueError(f"Expected 1 permutation, got {len(self.perm_tops)}")
 
-    def conclusion(self, node_mapping: dict[NodeId, Derivation]) -> Sequent:
-        return apply_perm(self.perm_tops[0], node_mapping[self.premises[0]].conclusion(node_mapping))
+    @property
+    def conclusion(self) -> Sequent:
+        return apply_perm(self.perm_tops[0], self.premises[0].conclusion)
 
-    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+    def pretty(self, indent: int = 0) -> str:
         pad = "  " * indent
         perms = ""
         if self.perm_tops and any(list(p) != list(range(len(p))) for p in self.perm_tops):
             perms = f" perm={self.perm_tops}"
-        return f"{pad}[BB {self.label}]{perms} {self.conclusion(node_mapping)}"
+        return f"{pad}[BB {self.label}]{perms} {self.conclusion}"
 
 @dataclass
 class Reference(Derivation):
@@ -760,7 +760,7 @@ class Reference(Derivation):
         if len(self.perm_tops) != 0:
             raise ValueError(f"Expected 0 permutations, got {len(self.perm_tops)}")
 
-    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+    def pretty(self, indent: int = 0) -> str:
         pad = "  " * indent
         return f"{pad}[Ref {self.label}] {self.conclusion}"
 

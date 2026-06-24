@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Generic, Type, TypeVar
 
 from typed_ir import (
-    AdmissibleRule, OpaqueType, Polarity, Side,
+    AdmissibleRule, OpaqueType, FlatType, FlatOperation, Polarity, Side,
     InstantiatedRule, RuleSchema,
     array_minus_key_slots,
     Formula, Bang, SidedFormula,

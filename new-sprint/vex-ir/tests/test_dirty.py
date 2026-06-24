@@ -1,15 +1,12 @@
 import pytest
 from typed_ir import (
     Atom, Bang, Polarity, Side, Sequent,
-    Identity, Cut,
-    InstantiatedRule, Derivation,
+    InstantiatedRule, OpaqueType, FlatType,
 )
 from dirty_ir import (
-    OpaqueType, FlatType, FlatOperation,
     Int32, Int64, Float32, Float64, Bool,
-    AddI32, SubI32, MulI32, NegI32, EqI32, LtI32,
-    Const, IfBool,
-    WeakPromotion, Digging, Absorption, Multiplexing,
+    AddI32, NegI32, EqI32, Const, IfBool,
+    Digging, Absorption, Multiplexing,
     AdmissibleRule,
 )
 

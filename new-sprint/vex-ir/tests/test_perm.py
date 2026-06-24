@@ -1,7 +1,7 @@
 
 import pytest
 from typed_ir import (
-    Polarity, Side, Atom, Case, JumboFormula, Bang, Sequent,
+    Polarity, RuleDerivation, Side, Atom, Case, JumboFormula, Bang, Sequent,
     Identity, Cut, Build, Break, Weakening, Dereliction, Contraction,
     InstantiatedRule, Derivation, apply_perm,
 )
@@ -43,7 +43,7 @@ def make_identity(f):
         bottom=Sequent(((L, f), (R, f))),
         key_slots_bottom=(0, 1),
     )
-    return Derivation(ir)
+    return RuleDerivation(instantiated_rule=ir, premises=[], perm_tops=(), node_id=id(ir))
 
 def test_derivation_default_perm():
     d = make_identity(A)
@@ -90,7 +90,7 @@ def test_derivation_with_perm():
         bottom=Sequent(((L, A), (R, A))),
         key_slots_bottom=(0, 1),
     )
-    leaf_A = Derivation(ir_leaf_A)
+    leaf_A = RuleDerivation(instantiated_rule=ir_leaf_A, premises=[], perm_tops=(), node_id=id(ir_leaf_A))
 
     # Make a premise whose bottom is (L, B) — matches top1 with identity perm
     ir_leaf_B = InstantiatedRule(
@@ -98,7 +98,7 @@ def test_derivation_with_perm():
         bottom=Sequent(((L, B), (R, B))),
         key_slots_bottom=(0, 1),
     )
-    leaf_B = Derivation(ir_leaf_B)
+    leaf_B = RuleDerivation(instantiated_rule=ir_leaf_B, premises=[], perm_tops=(), node_id=id(ir_leaf_B))
 
     # top0 = (L,A) but leaf_A.bottom = (L,A),(R,A) — won't match without perm
     # So: premise whose bottom == apply_perm(perm, top)

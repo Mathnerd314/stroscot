@@ -41,7 +41,7 @@ bang_A = Bang(POS, A)
 bang_B = Bang(POS, B)
 
 
-def mk_rule_derivation(ir, premises: list[Derivation]) -> Derivation:
+def mk_rule_derivation(ir, premises: list[Derivation]) -> RuleDerivation:
     return RuleDerivation(
         instantiated_rule=ir,
         premises=premises,
@@ -50,7 +50,7 @@ def mk_rule_derivation(ir, premises: list[Derivation]) -> Derivation:
     )
 
 
-def make_identity(f):
+def make_identity(f) -> RuleDerivation:
     ir = InstantiatedRule(
         rule=Identity(),
         tops=(),
@@ -66,7 +66,7 @@ def make_identity(f):
 
 def test_identity_atom():
     d = make_identity(A)
-    assert d.conclusion() == Sequent(((L, A), (R, A)))
+    assert d.conclusion == Sequent(((L, A), (R, A)))
     assert d.is_leaf
 
 
@@ -296,8 +296,7 @@ def test_contraction():
 def test_derivation_premise_count_mismatch():
     id_A = make_identity(A)
     with pytest.raises(ValueError):
-        Derivation(id_A.instantiated_rule, premises=[id_A])
-
+        mk_rule_derivation(id_A.instantiated_rule, [id_A]).validate()
 
 def test_derivation_conclusion_mismatch():
     id_B = make_identity(B)
@@ -311,8 +310,7 @@ def test_derivation_conclusion_mismatch():
         key_slots_bottom=(),
     )
     with pytest.raises((AssertionError, ValueError)):
-        Derivation(ir_cut, premises=[id_B, id_B])
-
+        RuleDerivation(instantiated_rule=ir_cut, premises=[id_B, id_B],perm_tops=(),node_id=None).validate()
 
 def test_derivation_depth_and_size():
     id_A = make_identity(A)
