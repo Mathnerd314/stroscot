@@ -16,8 +16,8 @@ from dirty_ir import (
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
 
-A = Atom("A")
-B = Atom("B")
+A = Atom(POS, "A")
+B = Atom(POS, "B")
 bang_A = Bang(POS, A)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ def make_flat_op(rule, *args, result):
         tops=(),
         key_slots_tops=(),
         bottom=bottom,
-        key_slots_bottom=(),
+        key_slots_bottom=tuple(range(len(args)+1)),  # args and result are key slots
     )
     ir.validate()
     return ir
@@ -48,9 +48,9 @@ def test_flat_type_str():
     assert str(Int32) == "Int32^+"
     assert str(Float64) == "Float64^+"
 
-def test_flat_type_get_case_formula():
-    assert Int32.get_case_formula(0) == ()
-    assert Bool.get_case_formula(True) == ()
+def test_flat_type_get_case_type():
+    assert Int32.get_case_type(0) == ()
+    assert Bool.get_case_type(True) == ()
 
 def test_opaque_active_side():
     assert Int32.active_side == R
@@ -128,7 +128,7 @@ def test_const_wrong_formula():
 
 def test_if_bool_basic():
     # cond : Bool ⊢ result : Int32  (two branch tops, context empty)
-    rule = IfBool(branch_type=Int32)
+    rule = IfBool()
     then_top = Sequent(((R, Int32),))
     else_top = Sequent(((R, Int32),))
     bottom   = Sequent(((L, Bool), (R, Int32)))
@@ -142,7 +142,7 @@ def test_if_bool_basic():
     ir.validate()
 
 def test_if_bool_wrong_cond_type():
-    rule = IfBool(branch_type=Int32)
+    rule = IfBool()
     then_top = Sequent(((R, Int32),))
     else_top = Sequent(((R, Int32),))
     bottom   = Sequent(((L, Int32), (R, Int32)))  # Int32 where Bool expected

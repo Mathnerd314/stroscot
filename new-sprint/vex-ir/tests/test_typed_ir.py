@@ -10,9 +10,9 @@ from typed_ir import (
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
 
-A = Atom("A")
-B = Atom("B")
-C = Atom("C")
+A = Atom(POS, "A")
+B = Atom(POS, "B")
+C = Atom(POS, "C")
 
 one      = JumboFormula(POS, (Case("#s", ()),))
 tensor   = JumboFormula(POS, (Case("#s", ((L, A), (L, B))),))
