@@ -3,68 +3,12 @@ from dataclasses import dataclass
 from typing import Any, Generic, Type, TypeVar
 
 from typed_ir import (
-    Polarity, Side,
+    AdmissibleRule, OpaqueType, Polarity, Side,
     InstantiatedRule, RuleSchema,
     array_minus_key_slots,
     Formula, Bang, SidedFormula,
     TypedSequent,
 )
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Typed Opaque Types
-#
-# An OpaqueType is a Formula whose case structure exists in theory but is too
-# large (or infinite) to enumerate explicitly.  The canonical example is Int32:
-# a positive type with 2^32 cases, one per bit-pattern.
-#
-# Invariant (maintained by convention, not enforced in code):
-#   For every OpaqueType T there EXISTS a (possibly infinite / impractical)
-#   JumboFormula J such that T ≅ J in the core logic.  We simply never
-#   materialise J.
-#
-# Consequences:
-#   - Build rules CAN appear on OpaqueType values (we know which case/value).
-#   - Break rules are FORBIDDEN: we cannot enumerate all 2^32 premises.
-#   - Structural rules (Identity, Cut) still apply normally.
-# ══════════════════════════════════════════════════════════════════════════════
-
-@dataclass(frozen=True)
-class OpaqueType(Formula):
-    """Typed opaque primitive type.
-
-    Parameters
-    ----------
-    name:
-        Human-readable type name, e.g. ``"Int32"``, ``"Float64"``.
-    polarity:
-        POS → active on the right (values are produced / returned).
-        NEG → active on the left (values are consumed / demanded).
-    """
-    name: str
-
-    def get_case_type(self, case_label: Any) -> tuple[SidedFormula, ...]:
-        """Return the (Side, Formula) sub-slots for a given case label.
-
-        For an OpaqueType this is theoretical — subclasses override as needed.
-        """
-        raise NotImplementedError
-
-    def __str__(self) -> str:
-        pol = "+" if self.polarity == Polarity.POS else "-"
-        return f"{self.name}^{pol}"
-
-
-T = TypeVar("T")
-
-
-@dataclass(frozen=True)
-class FlatType(OpaqueType, Generic[T]):
-    """Typed flat type: every case produces no sub-slots."""
-    label_type: Type[T]
-
-    def get_case_type(self, case_label: T) -> tuple[SidedFormula, ...]:
-        return ()
-
 
 # ── Pre-defined primitive types ───────────────────────────────────────────────
 
@@ -76,80 +20,8 @@ Float64 = FlatType(label_type=float, name="Float64", polarity=Polarity.POS)
 # two-case JumboFormula when Break is needed.
 Bool    = FlatType(label_type=bool,  name="Bool",    polarity=Polarity.POS)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# Admissible Rules
-#
-# An admissible rule is a RuleSchema derivable from the core rules in
-# principle, but whose derivation is NOT spelled out here.  It is justified
-# by a prose argument and validated by a custom check_shape and check_type.
-#
-# Structural invariant
-# --------------------
-# - CoreRule       : tag for the rules above.  Never subclassed here.
-# - AdmissibleRule : base class for all rules defined in this module or
-#                    downstream (dirty_ir.py, etc.).
-#
-# At runtime, isinstance(r, AdmissibleRule) reliably identifies "dirty" rules,
-# enabling warnings, audits, or future proof-checking passes.
-#
-# Adding a new admissible rule
-# ----------------------------
-# 1. Subclass AdmissibleRule.
-# 2. Write a comment justifying admissibility; add any extra fields needed.
-# 3. Override check_shape and check_type using assert-based checking (same convention as core rules).
-# ══════════════════════════════════════════════════════════════════════════════
-
-class AdmissibleRule(RuleSchema):
-    """Base class for all admissible (derived) rule schemas."""
-
-    def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        raise NotImplementedError(
-            f"AdmissibleRule subclass {type(self).__name__} must implement check_shape."
-        )
-
-    def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        raise NotImplementedError(
-            f"AdmissibleRule subclass {type(self).__name__} must implement check_type."
-        )
-
-def _assert_opaque(f: Formula, t: OpaqueType, label: str) -> None:
-    assert f == t, f"Expected {t} for {label}, got {f}"
-
-
 # ── Typed flat operations ─────────────────────────────────────────────────────
 # Admissible by pure case analysis: Break each arg, then Build the result.
-
-@dataclass(frozen=True)
-class FlatOperation(AdmissibleRule):
-    name: str
-    
-    # these are part of the rule name and not erased
-    args: tuple[FlatType, ...]
-    result: FlatType
-
-    def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 0, "FlatOperation has no premises"
-        assert instance.bottom.count_left  == len(self.args), (
-            f"Expected {len(self.args)} inputs, got {instance.bottom.count_left}"
-        )
-        assert instance.bottom.count_right == 1, (
-            f"Expected 1 output, got {instance.bottom.count_right}"
-        )
-
-    def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 0, "FlatOperation has no premises"
-        lefts  = instance.bottom.left
-        rights = instance.bottom.right
-        assert len(lefts)  == len(self.args), (
-            f"Expected {len(self.args)} inputs, got {len(lefts)}"
-        )
-        assert len(rights) == 1, f"Expected 1 output, got {len(rights)}"
-        for i, arg in enumerate(self.args):
-            _assert_opaque(lefts[i][1], arg, f"input {i}")
-        _assert_opaque(rights[0][1], self.result, "output")
-
-    def __repr__(self) -> str:
-        return f"<FlatOp {self.name}: {self.args} -> {self.result}>"
 
 
 AddI32 = FlatOperation(name="add_i32", args=(Int32, Int32), result=Int32)

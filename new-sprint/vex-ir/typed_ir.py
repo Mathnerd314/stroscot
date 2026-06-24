@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Generic, TypeVar, Optional
+from typing import Any, Generic, Type, TypeVar, Optional
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Polarity & Side
@@ -71,6 +71,11 @@ class Formula:
     def passive_side(self) -> Side:
         return self.active_side.flip()
 
+    def is_cartesian(self) -> bool:
+        return False
+    def is_cocartesian(self) -> bool:
+        return False
+
 SidedFormula = tuple[Side, Formula]
 
 @dataclass(frozen=True)
@@ -82,11 +87,11 @@ class Atom(Formula):
 class Case(Generic[Slot]):
     """One case of a JumboFormula, with formula-annotated sub-slots."""
     label: Any
-    formulas: tuple[Slot, ...]
+    formulas: Sequent[Slot]
     
     def erase(self) -> Case[Side]:
         """Project to the erased version (drop Formula annotations)."""
-        return Case(label=self.label, formulas=tuple(slot_side(s) for s in self.formulas)) # type: ignore
+        return Case(label=self.label, formulas=Sequent(formulas=tuple(slot_side(s) for s in self.formulas.formulas))) # type: ignore
 
 @dataclass(frozen=True)
 class JumboFormula(Formula,Generic[Slot]):
@@ -96,10 +101,17 @@ class JumboFormula(Formula,Generic[Slot]):
     def erase(self) -> JumboFormula[Side]:
         """Project to the erased version (drop Formula annotations)."""
         erased_cases = tuple(
-            Case(label=c.label, formulas=tuple(slot_side(s) for s in c.formulas)) # type: ignore
-            for c in self.cases
+            case.erase() for case in self.cases
         )
         return JumboFormula[Side](polarity=self.polarity, cases=erased_cases)
+
+    def is_cartesian(self: JumboFormula[SidedFormula]) -> bool:
+        return self.polarity == Polarity.POS and \
+            all(f.is_cartesian() if side == Side.LEFT else f.is_cocartesian() for case in self.cases for side, f in case.formulas.formulas)
+
+    def is_cocartesian(self: JumboFormula[SidedFormula]) -> bool:
+        return self.polarity == Polarity.NEG and \
+            all(f.is_cartesian() if side == Side.LEFT else f.is_cocartesian() for case in self.cases for side, f in case.formulas.formulas)
 
 @dataclass(frozen=True)
 class Bang(Formula):
@@ -107,6 +119,73 @@ class Bang(Formula):
     polarity: Polarity
     sub: Formula
     modality: Optional[str] = None  # for distinguishing different flavours of !
+
+    def is_cartesian(self) -> bool:
+        return self.polarity == Polarity.POS
+    
+    def is_cocartesian(self) -> bool:
+        return self.polarity == Polarity.NEG
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Opaque Types
+#
+# An OpaqueType is a Formula whose case structure exists in theory but is too
+# large (or infinite) to enumerate explicitly.  The canonical example is Int32:
+# a positive type with 2^32 cases, one per bit-pattern.
+#
+# Invariant (maintained by convention, not enforced in code):
+#   For every OpaqueType T there EXISTS a (possibly infinite / impractical)
+#   JumboFormula J such that T ≅ J in the core logic.  We simply never
+#   materialise J.
+#
+# Consequences:
+#   - Build rules CAN appear on OpaqueType values (we know which case/value).
+#   - Break rules are FORBIDDEN: we cannot enumerate all 2^32 premises.
+#   - Structural rules (Identity, Cut) still apply normally.
+# ══════════════════════════════════════════════════════════════════════════════
+
+@dataclass(frozen=True)
+class OpaqueType(Formula):
+    """Typed opaque primitive type.
+
+    Parameters
+    ----------
+    name:
+        Human-readable type name, e.g. ``"Int32"``, ``"Float64"``.
+    polarity:
+        POS → active on the right (values are produced / returned).
+        NEG → active on the left (values are consumed / demanded).
+    """
+    name: str
+
+    def get_case_type(self, case_label: Any) -> tuple[SidedFormula, ...]:
+        """Return the (Side, Formula) sub-slots for a given case label.
+
+        For an OpaqueType this is theoretical — subclasses override as needed.
+        """
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        pol = "+" if self.polarity == Polarity.POS else "-"
+        return f"{self.name}^{pol}"
+
+T = TypeVar("T")
+
+@dataclass(frozen=True)
+class FlatType(OpaqueType, Generic[T]):
+    """Typed flat type: every case produces no sub-slots.
+    
+    Positive flat types are cartesian (sums of units); negative flat types are cocartesian (product of bottoms)."""
+    label_type: Type[T]
+
+    def get_case_type(self, case_label: T) -> tuple[SidedFormula, ...]:
+        return ()
+
+    def is_cartesian(self) -> bool:
+        return self.polarity == Polarity.POS
+    
+    def is_cocartesian(self) -> bool:
+        return self.polarity == Polarity.NEG
 
 
 # ══════════════════════════════════════════════════════════════════════════════=
@@ -179,110 +258,6 @@ class RuleSchema:
         self.check_shape(instance.erase())
         self.check_type(instance)
 
-@dataclass(frozen=True)
-class InstantiatedRule(Generic[Slot]):
-    """A rule schema applied to concrete sequent contexts.
-
-    tops              — the premise sequents (in order)
-    bottom            — the conclusion sequent
-    rule              — the rule that generated this instance
-    key_slots_tops    — marks the principal formula(s) in each top sequent
-    key_slots_bottom  — marks the principal formula(s) in the bottom sequent
-
-    Invariant: shape of tops/bottom must be consistent with rule —
-    enforced by rule.check_shape, not the constructor.
-    """
-    rule: RuleSchema
-    tops: tuple[Sequent[Slot], ...]
-    key_slots_tops: tuple[tuple[int, ...], ...]
-    bottom: Sequent[Slot]
-    key_slots_bottom: tuple[int, ...]
-
-    def validate(self) -> None:
-        if isinstance(self.bottom.formulas[0], tuple) and len(self.bottom.formulas[0]) == 2:
-            # Typed IR
-            self.rule.check_shape_and_type(self)  # type: ignore
-        else:
-            # Erased IR
-            self.rule.check_shape(self) # type: ignore
-
-    def erase(self: InstantiatedRule[Any]) -> InstantiatedRule[Side]:
-        """Return a copy of *ir* with all TypedSequents replaced by ErasedSequents."""
-        return InstantiatedRule(
-            rule=self.rule,
-            tops=tuple(t.erase() for t in self.tops),
-            key_slots_tops=self.key_slots_tops,
-            bottom=self.bottom.erase(),
-            key_slots_bottom=self.key_slots_bottom,
-        )
-
-@dataclass
-class Derivation(Generic[Slot]):
-    """A node in the proof tree.
-
-    instantiated_rule — fully concrete rule application at this node
-    premises          — sub-derivations, one per top in instantiated_rule.tops
-    perm_tops         — permutation applied to each top before matching premises
-                        (identity by default; filled in __post_init__)
-
-    Matching invariant (checked in __post_init__):
-        apply_perm(perm_tops[i], instantiated_rule.tops[i])
-            == premises[i].instantiated_rule.bottom
-    """
-    instantiated_rule: InstantiatedRule[Slot]
-    premises: list[Derivation[Slot]] = field(default_factory=list)
-    perm_tops: tuple[tuple[int, ...], ...] = field(default=())
-
-    def __post_init__(self) -> None:
-        self.instantiated_rule.validate()
-        tops = self.instantiated_rule.tops
-        if len(self.premises) != len(tops):
-            raise ValueError(f"Expected {len(tops)} premises, got {len(self.premises)}")
-        if self.perm_tops == ():
-            self.perm_tops = tuple(tuple(range(len(t.formulas))) for t in tops)
-        if len(self.perm_tops) != len(tops):
-            raise ValueError(f"Expected {len(tops)} permutations, got {len(self.perm_tops)}")
-        for i, (prem, top, perm) in enumerate(zip(self.premises, tops, self.perm_tops)):
-            expected = apply_perm(perm, top)
-            if prem.instantiated_rule.bottom != expected:
-                raise ValueError(
-                    f"Premise {i} conclusion {prem.instantiated_rule.bottom} "
-                    f"does not match required top {expected} "
-                    f"(which is {top} after applying permutation {perm})"
-                )
-
-    @property
-    def conclusion(self) -> Sequent:
-        return self.instantiated_rule.bottom
-
-    @property
-    def is_leaf(self) -> bool:
-        return not self.premises
-
-    def depth(self) -> int:
-        return 0 if self.is_leaf else 1 + max(p.depth() for p in self.premises)
-
-    def size(self) -> int:
-        return 1 + sum(p.size() for p in self.premises)
-
-    def pretty(self, indent: int = 0) -> str:
-        pad = "  " * indent
-        lines = [p.pretty(indent + 1) for p in self.premises]
-        perms = ""
-        if self.perm_tops and any(list(p) != list(range(len(p))) for p in self.perm_tops):
-            perms = f" perm={self.perm_tops}"
-        lines.append(f"{pad}[{self.instantiated_rule.rule}]{perms} {self.conclusion}")
-        return "\n".join(lines)
-
-    def erase(self: Derivation[Any]) -> Derivation[Side]:
-        """Recursively erase all TypedSequents in a Derivation tree."""
-        return Derivation(
-            instantiated_rule=self.instantiated_rule.erase(),
-            premises=[p.erase() for p in self.premises],
-            perm_tops=self.perm_tops,
-        )
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # Typed Rule Schemas
 #
@@ -339,7 +314,7 @@ class Build(CoreRule):
     case_index picks the disjunct branch; always 0 for single-case connectives.
     Produces exactly 1 premise per sub-slot of the chosen case.
     """
-    principal: JumboFormula
+    principal: JumboFormula[SidedFormula]
     case_index: int = 0
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
@@ -349,8 +324,8 @@ class Build(CoreRule):
         side = instance.bottom.formulas[instance.key_slots_bottom[0]]
         assert side == self.principal.active_side
 
-        assert len(instance.tops) == len(case.formulas)
-        for i, (expected_side, expected_f) in enumerate(case.formulas):
+        assert len(instance.tops) == len(case.formulas.formulas)
+        for i, (expected_side, expected_f) in enumerate(case.formulas.formulas):
             top = instance.tops[i]
             assert len(instance.key_slots_tops[i]) == 1
             t_side = top.formulas[instance.key_slots_tops[i][0]]
@@ -368,7 +343,7 @@ class Build(CoreRule):
         side, jf = instance.bottom.formulas[instance.key_slots_bottom[0]]
         assert (side, jf) == (self.principal.active_side, self.principal)
 
-        for i, (expected_side, expected_f) in enumerate(case.formulas):
+        for i, (expected_side, expected_f) in enumerate(case.formulas.formulas):
             top = instance.tops[i]
             t_side, t_f = top.formulas[instance.key_slots_tops[i][0]]
             assert (t_side, t_f) == (expected_side, expected_f)
@@ -381,7 +356,7 @@ class Break(CoreRule):
     Produces one premise per case (all branches handled).
     No choice — fully invertible.
     """
-    principal: JumboFormula
+    principal: JumboFormula[SidedFormula]
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
         assert len(instance.key_slots_bottom) == 1
@@ -391,8 +366,8 @@ class Break(CoreRule):
         assert len(instance.tops) == len(self.principal.cases)
         for i, case in enumerate(self.principal.cases):
             top = instance.tops[i]
-            assert len(instance.key_slots_tops[i]) == len(case.formulas)
-            for j, (expected_side, expected_f) in enumerate(case.formulas):
+            assert len(instance.key_slots_tops[i]) == len(case.formulas.formulas)
+            for j, (expected_side, expected_f) in enumerate(case.formulas.formulas):
                 t_side = top.formulas[instance.key_slots_tops[i][j]]
                 assert t_side == expected_side
 
@@ -407,7 +382,7 @@ class Break(CoreRule):
 
         for i, case in enumerate(self.principal.cases):
             top = instance.tops[i]
-            for j, (expected_side, expected_f) in enumerate(case.formulas):
+            for j, (expected_side, expected_f) in enumerate(case.formulas.formulas):
                 t_side, t_f = top.formulas[instance.key_slots_tops[i][j]]
                 assert (t_side, t_f) == (expected_side, expected_f)
 
@@ -558,4 +533,234 @@ class Contraction(CoreRule):
                 f"Principal formula in top of Contraction must equal bottom, "
                 f"expected {bottom_f}, found {top_f}"
             )
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Admissible Rules
+#
+# An admissible rule is a RuleSchema derivable from the core rules in
+# principle, but whose derivation is NOT spelled out here.  It is justified
+# by a prose argument and validated by a custom check_shape and check_type.
+#
+# Structural invariant
+# --------------------
+# - CoreRule       : tag for the rules above.  Never subclassed outside of here.
+# - AdmissibleRule : base class for all rules defined in this module or
+#                    downstream (dirty_ir.py, etc.).
+#
+# At runtime, isinstance(r, AdmissibleRule) reliably identifies "dirty" rules,
+# enabling warnings, audits, or future proof-checking passes.
+#
+# Adding a new admissible rule
+# ----------------------------
+# 1. Subclass AdmissibleRule.
+# 2. Write a comment justifying admissibility; add any extra fields needed.
+# 3. Override check_shape and check_type using assert-based checking (same convention as core rules).
+# ══════════════════════════════════════════════════════════════════════════════
+
+class AdmissibleRule(RuleSchema):
+    """Base class for all admissible (derived) rule schemas."""
+
+    def check_shape(self, instance: InstantiatedRule[Side]) -> None:
+        raise NotImplementedError(
+            f"AdmissibleRule subclass {type(self).__name__} must implement check_shape."
+        )
+
+    def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
+        raise NotImplementedError(
+            f"AdmissibleRule subclass {type(self).__name__} must implement check_type."
+        )
+
+def _assert_opaque(f: Formula, t: OpaqueType, label: str) -> None:
+    assert f == t, f"Expected {t} for {label}, got {f}"
+
+@dataclass(frozen=True)
+class FlatOperation(AdmissibleRule):
+    name: str
+    
+    # these are part of the rule name and not erased
+    args: tuple[FlatType, ...]
+    result: FlatType
+
+    def check_shape(self, instance: InstantiatedRule[Side]) -> None:
+        assert len(instance.tops) == 0, "FlatOperation has no premises"
+        assert instance.bottom.count_left  == len(self.args), (
+            f"Expected {len(self.args)} inputs, got {instance.bottom.count_left}"
+        )
+        assert instance.bottom.count_right == 1, (
+            f"Expected 1 output, got {instance.bottom.count_right}"
+        )
+
+    def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
+        assert len(instance.tops) == 0, "FlatOperation has no premises"
+        lefts  = instance.bottom.left
+        rights = instance.bottom.right
+        assert len(lefts)  == len(self.args), (
+            f"Expected {len(self.args)} inputs, got {len(lefts)}"
+        )
+        assert len(rights) == 1, f"Expected 1 output, got {len(rights)}"
+        for i, arg in enumerate(self.args):
+            _assert_opaque(lefts[i][1], arg, f"input {i}")
+        _assert_opaque(rights[0][1], self.result, "output")
+
+    def __repr__(self) -> str:
+        return f"<FlatOp {self.name}: {self.args} -> {self.result}>"
+
+@dataclass(frozen=True)
+class InstantiatedRule(Generic[Slot]):
+    """A rule schema applied to concrete sequent contexts.
+
+    tops              — the premise sequents (in order)
+    bottom            — the conclusion sequent
+    rule              — the rule that generated this instance
+    key_slots_tops    — marks the principal formula(s) in each top sequent
+    key_slots_bottom  — marks the principal formula(s) in the bottom sequent
+
+    Invariant: shape of tops/bottom must be consistent with rule —
+    enforced by rule.check_shape, not the constructor.
+    """
+    rule: RuleSchema
+    tops: tuple[Sequent[Slot], ...]
+    key_slots_tops: tuple[tuple[int, ...], ...]
+    bottom: Sequent[Slot]
+    key_slots_bottom: tuple[int, ...]
+
+    def validate(self) -> None:
+        if isinstance(self.bottom.formulas[0], tuple) and len(self.bottom.formulas[0]) == 2:
+            # Typed IR
+            self.rule.check_shape_and_type(self)  # type: ignore
+        else:
+            # Erased IR
+            self.rule.check_shape(self) # type: ignore
+
+    def erase(self: InstantiatedRule[Any]) -> InstantiatedRule[Side]:
+        """Return a copy of *ir* with all TypedSequents replaced by ErasedSequents."""
+        return InstantiatedRule(
+            rule=self.rule,
+            tops=tuple(t.erase() for t in self.tops),
+            key_slots_tops=self.key_slots_tops,
+            bottom=self.bottom.erase(),
+            key_slots_bottom=self.key_slots_bottom,
+        )
+
+NodeId = int
+_node_id_counter: int = 0
+def _next_node_id() -> NodeId:
+    global _node_id_counter
+    _node_id_counter += 1
+    return _node_id_counter
+
+@dataclass
+class Derivation:
+    """A node in the proof tree.
+
+    premises          — sub-derivations, one per top in instantiated_rule.tops
+    perm_tops         — permutation applied to each top before matching premises
+                        (identity by default; filled in __post_init__)
+    """
+    premises: list[NodeId]
+    perm_tops: tuple[tuple[int, ...], ...]
+    node_id: NodeId
+
+    def conclusion(self, node_mapping: dict[NodeId, "Derivation"]) -> Sequent:
+        raise NotImplementedError("Derivation.conclusion must be implemented in subclasses")
+
+    @property
+    def is_leaf(self) -> bool:
+        return not self.premises
+
+    def depth(self, node_mapping: dict[NodeId, "Derivation"]) -> int:
+        return 0 if self.is_leaf else 1 + max(node_mapping[p].depth(node_mapping) for p in self.premises)
+
+    def size(self, node_mapping: dict[NodeId, "Derivation"]) -> int:
+        return 1 + sum(node_mapping[p].size(node_mapping) for p in self.premises)
+
+    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+        raise NotImplementedError("Derivation.pretty must be implemented in subclasses")
+
+@dataclass
+class RuleDerivation(Derivation, Generic[Slot]):
+    """A node in the proof tree.
+
+    instantiated_rule — fully concrete rule application at this node
+    premises          — sub-derivations, one per top in instantiated_rule.tops
+    perm_tops         — permutation applied to each top before matching premises
+                        (identity by default; filled in __post_init__)
+
+    Matching invariant (checked in __post_init__):
+        apply_perm(perm_tops[i], instantiated_rule.tops[i])
+            == premises[i].instantiated_rule.bottom
+    """
+    instantiated_rule: InstantiatedRule[Slot]
+
+    def __post_init__(self) -> None:
+        self.instantiated_rule.validate()
+        tops = self.instantiated_rule.tops
+        if len(self.premises) != len(tops):
+            raise ValueError(f"Expected {len(tops)} premises, got {len(self.premises)}")
+        if self.perm_tops == ():
+            self.perm_tops = tuple(tuple(range(len(t.formulas))) for t in tops)
+        if len(self.perm_tops) != len(tops):
+            raise ValueError(f"Expected {len(tops)} permutations, got {len(self.perm_tops)}")
+        
+    def validate(self, node_mapping: dict[NodeId, Derivation]) -> None:
+        tops = self.instantiated_rule.tops
+        for i, (prem_id, top, perm) in enumerate(zip(self.premises, tops, self.perm_tops)):
+            prem = node_mapping[prem_id]
+            expected = apply_perm(perm, top)
+            if prem.conclusion != expected:
+                raise ValueError(
+                    f"Premise {i} conclusion {prem.conclusion} "
+                    f"does not match required top {expected} "
+                    f"(which is {top} after applying permutation {perm})"
+                )
+
+    def conclusion(self, node_mapping: dict[NodeId, Derivation]) -> Sequent:
+        return self.instantiated_rule.bottom
+
+    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+        pad = "  " * indent
+        lines = [node_mapping[p].pretty(node_mapping, indent + 1) for p in self.premises]
+        perms = ""
+        if self.perm_tops and any(list(p) != list(range(len(p))) for p in self.perm_tops):
+            perms = f" perm={self.perm_tops}"
+        lines.append(f"{pad}[{self.instantiated_rule.rule}]{perms} {self.conclusion(node_mapping)}")
+        return "\n".join(lines)
+
+
+@dataclass
+class BasicBlock(Derivation):
+    label: str
+
+    def __post_init__(self) -> None:
+        if len(self.premises) != 1:
+            raise ValueError(f"Expected 1 premise, got {len(self.premises)}")
+        if len(self.perm_tops) != 1:
+            raise ValueError(f"Expected 1 permutation, got {len(self.perm_tops)}")
+
+    def conclusion(self, node_mapping: dict[NodeId, Derivation]) -> Sequent:
+        return apply_perm(self.perm_tops[0], node_mapping[self.premises[0]].conclusion(node_mapping))
+
+    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+        pad = "  " * indent
+        perms = ""
+        if self.perm_tops and any(list(p) != list(range(len(p))) for p in self.perm_tops):
+            perms = f" perm={self.perm_tops}"
+        return f"{pad}[BB {self.label}]{perms} {self.conclusion(node_mapping)}"
+
+@dataclass
+class Reference(Derivation):
+    label: str
+    conclusion: Sequent
+    premises = []
+    perm_tops = ()
+
+    def __post_init__(self) -> None:
+        if len(self.premises) != 0:
+            raise ValueError(f"Expected 0 premises, got {len(self.premises)}")
+        if len(self.perm_tops) != 0:
+            raise ValueError(f"Expected 0 permutations, got {len(self.perm_tops)}")
+
+    def pretty(self, node_mapping: dict[NodeId, Derivation], indent: int = 0) -> str:
+        pad = "  " * indent
+        return f"{pad}[Ref {self.label}] {self.conclusion}"
 
