@@ -3,7 +3,7 @@ import pytest
 from typed_ir import (
     Polarity, RuleDerivation, Side, Atom, Case, JumboFormula, Bang, Sequent,
     Identity, Cut, Build, Break, Weakening, Dereliction, Contraction,
-    InstantiatedRule, Derivation, apply_perm,
+    InstantiatedRule, Node, apply_perm,
 )
 
 L, R = Side.LEFT, Side.RIGHT

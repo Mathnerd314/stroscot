@@ -645,14 +645,14 @@ class InstantiatedRule(Generic[Slot]):
 NodeId = int
 
 @dataclass
-class Derivation:
+class Node:
     """A node in the proof tree.
 
-    premises          — sub-derivations, one per top in instantiated_rule.tops
+    premises          — sub-derivations/nodes, one per top in instantiated_rule.tops
     perm_tops         — permutation applied to each top before matching premises
                         (identity by default; filled in __post_init__)
     """
-    premises: list[Derivation]
+    premises: list[Node]
     perm_tops: tuple[tuple[int, ...], ...]
     node_id: NodeId
         
@@ -661,7 +661,7 @@ class Derivation:
 
     @property
     def conclusion(self) -> Sequent:
-        raise NotImplementedError("Derivation.conclusion must be implemented in subclasses")
+        raise NotImplementedError("Node.conclusion must be implemented in subclasses")
 
     @property
     def is_leaf(self) -> bool:
@@ -674,10 +674,10 @@ class Derivation:
         return 1 + sum(p.size() for p in self.premises)
 
     def pretty(self, indent: int = 0) -> str:
-        raise NotImplementedError("Derivation.pretty must be implemented in subclasses")
+        raise NotImplementedError("Node.pretty must be implemented in subclasses")
 
 @dataclass
-class RuleDerivation(Derivation, Generic[Slot]):
+class RuleDerivation(Node, Generic[Slot]):
     """A node in the proof tree.
 
     instantiated_rule — fully concrete rule application at this node
@@ -727,7 +727,7 @@ class RuleDerivation(Derivation, Generic[Slot]):
 
 
 @dataclass
-class BasicBlock(Derivation):
+class BasicBlock(Node):
     label: str
 
     def __post_init__(self) -> None:
@@ -748,7 +748,7 @@ class BasicBlock(Derivation):
         return f"{pad}[BB {self.label}]{perms} {self.conclusion}"
 
 @dataclass
-class Reference(Derivation):
+class Reference(Node):
     label: str
     conclusion: Sequent
     premises = []
@@ -763,4 +763,186 @@ class Reference(Derivation):
     def pretty(self, indent: int = 0) -> str:
         pad = "  " * indent
         return f"{pad}[Ref {self.label}] {self.conclusion}"
+
+
+@dataclass(frozen=True)
+class SlotRef:
+    """Reference to a key slot on a node boundary.
+
+    top_index is None for bottom slots, otherwise it selects which top sequent.
+    """
+
+    node_id: NodeId
+    formal_slot: int
+    key_slot: int
+    top_index: Optional[int] = None
+
+
+@dataclass(frozen=True)
+class Wire:
+    """Collapsed path from one top key slot to a final bottom key slot."""
+
+    source: SlotRef
+    target: SlotRef
+
+
+WireMap = dict[NodeId, tuple[Wire, ...]]
+
+
+def _invert_perm(perm: tuple[int, ...]) -> tuple[int, ...]:
+    if sorted(perm) != list(range(len(perm))):
+        raise ValueError(f"Not a valid permutation: {perm}")
+    inv = [0] * len(perm)
+    for out_idx, in_idx in enumerate(perm):
+        inv[in_idx] = out_idx
+    return tuple(inv)
+
+
+def _node_top_key_slots(node: Node) -> tuple[tuple[int, ...], ...]:
+    if isinstance(node, RuleDerivation):
+        return node.instantiated_rule.key_slots_tops
+    if isinstance(node, BasicBlock):
+        if not node.perm_tops:
+            return ()
+        return (tuple(range(len(node.perm_tops[0]))),)
+    if isinstance(node, Reference):
+        return ()
+    raise TypeError(f"Unsupported node type: {type(node).__name__}")
+
+
+def _node_bottom_key_slots(node: Node) -> tuple[int, ...]:
+    if isinstance(node, RuleDerivation):
+        return node.instantiated_rule.key_slots_bottom
+    if isinstance(node, (BasicBlock, Reference)):
+        return tuple(range(len(node.conclusion.formulas)))
+    raise TypeError(f"Unsupported node type: {type(node).__name__}")
+
+
+def _node_non_key_bottom_to_top(node: Node) -> dict[int, tuple[int, int]]:
+    """Map bottom non-key slot index -> (top_index, top_slot_index)."""
+    if not isinstance(node, RuleDerivation):
+        return {}
+
+    ir = node.instantiated_rule
+    key_bottom = set(ir.key_slots_bottom)
+    key_tops = tuple(set(ks) for ks in ir.key_slots_tops)
+
+    bottom_non_keys = [
+        i for i in range(len(ir.bottom.formulas)) if i not in key_bottom
+    ]
+    top_non_keys: list[tuple[int, int]] = []
+    for top_index, top in enumerate(ir.tops):
+        top_non_keys.extend(
+            (top_index, slot_index)
+            for slot_index in range(len(top.formulas))
+            if slot_index not in key_tops[top_index]
+        )
+
+    if len(bottom_non_keys) != len(top_non_keys):
+        raise ValueError(
+            f"RuleDerivation {node.node_id} has {len(bottom_non_keys)} bottom non-key slots "
+            f"but {len(top_non_keys)} top non-key slots"
+        )
+
+    return dict(zip(bottom_non_keys, top_non_keys))
+
+
+def _map_top_slot_to_child_bottom_slot(node: Node, top_index: int, top_slot: int) -> int:
+    if top_index >= len(node.perm_tops):
+        raise ValueError(
+            f"Node {node.node_id} has no permutation for top index {top_index}"
+        )
+    inv_perm = _invert_perm(node.perm_tops[top_index])
+    if top_slot >= len(inv_perm):
+        raise ValueError(
+            f"Top slot {top_slot} out of range for top index {top_index} on node {node.node_id}"
+        )
+    return inv_perm[top_slot]
+
+
+def _trace_bottom_slot_to_key_destination(
+    node: Node,
+    bottom_slot: int,
+    path: set[tuple[NodeId, int]],
+) -> SlotRef:
+    marker = (node.node_id, bottom_slot)
+    if marker in path:
+        raise ValueError(f"Cycle detected while tracing slot path at {marker}")
+    path.add(marker)
+
+    bottom_key_slots = _node_bottom_key_slots(node)
+    if bottom_slot in bottom_key_slots:
+        return SlotRef(
+            node_id=node.node_id,
+            formal_slot=bottom_slot,
+            key_slot=bottom_key_slots.index(bottom_slot),
+            top_index=None,
+        )
+
+    non_key_map = _node_non_key_bottom_to_top(node)
+    if bottom_slot not in non_key_map:
+        raise ValueError(
+            f"Bottom slot {bottom_slot} on node {node.node_id} is neither key nor pass-through"
+        )
+
+    top_index, top_slot = non_key_map[bottom_slot]
+    if top_index >= len(node.premises):
+        raise ValueError(
+            f"Node {node.node_id} has no premise for top index {top_index}"
+        )
+    child = node.premises[top_index]
+    child_bottom_slot = _map_top_slot_to_child_bottom_slot(node, top_index, top_slot)
+    return _trace_bottom_slot_to_key_destination(child, child_bottom_slot, path)
+
+
+def _collect_nodes(root: Node) -> dict[NodeId, Node]:
+    nodes: dict[NodeId, Node] = {}
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        if node.node_id in nodes:
+            continue
+        nodes[node.node_id] = node
+        stack.extend(node.premises)
+    return nodes
+
+
+def compute_key_slot_wires(root: Node) -> WireMap:
+    """Compute a collapsed key-slot flow map for every node in a derivation tree.
+
+    For each node, each key slot on each top sequent is traced through edge
+    permutations and pass-through non-key slots until a key slot on some bottom
+    boundary is reached.
+    """
+
+    nodes = _collect_nodes(root)
+    wire_map: WireMap = {}
+
+    for node in nodes.values():
+        top_keys = _node_top_key_slots(node)
+        wires: list[Wire] = []
+
+        for top_index, key_slots in enumerate(top_keys):
+            if top_index >= len(node.premises):
+                raise ValueError(
+                    f"Node {node.node_id} has key slots for missing top index {top_index}"
+                )
+            for key_slot_index, top_slot in enumerate(key_slots):
+                child_bottom_slot = _map_top_slot_to_child_bottom_slot(node, top_index, top_slot)
+                destination = _trace_bottom_slot_to_key_destination(
+                    node.premises[top_index],
+                    child_bottom_slot,
+                    path={(node.node_id, -1)},
+                )
+                source = SlotRef(
+                    node_id=node.node_id,
+                    formal_slot=top_slot,
+                    key_slot=key_slot_index,
+                    top_index=top_index,
+                )
+                wires.append(Wire(source=source, target=destination))
+
+        wire_map[node.node_id] = tuple(wires)
+
+    return wire_map
 

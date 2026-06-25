@@ -18,7 +18,9 @@ from typed_ir import (
     Weakening,
     Contraction,
     InstantiatedRule,
-    Derivation,
+    Node,
+    BasicBlock,
+    compute_key_slot_wires,
 )
 
 L, R = Side.LEFT, Side.RIGHT
@@ -41,7 +43,7 @@ bang_A = Bang(POS, A)
 bang_B = Bang(POS, B)
 
 
-def mk_rule_derivation(ir, premises: list[Derivation]) -> RuleDerivation:
+def mk_rule_derivation(ir, premises: list[Node]) -> RuleDerivation:
     return RuleDerivation(
         instantiated_rule=ir,
         premises=premises,
@@ -324,6 +326,78 @@ def test_derivation_pretty_runs():
     d = make_identity(A)
     out = d.pretty()
     assert "Identity" in out
+
+
+def test_compute_key_slot_wires_identity_leaf_empty():
+    d = make_identity(A)
+    wire_map = compute_key_slot_wires(d)
+    assert d.node_id in wire_map
+    assert wire_map[d.node_id] == ()
+
+
+def test_compute_key_slot_wires_cut_to_identity_destinations():
+    id_A = make_identity(A)
+    id_B = make_identity(B)
+
+    ir_cut = InstantiatedRule(
+        rule=Cut(),
+        tops=(Sequent(((R, A),)), Sequent(((L, A), (R, B)))),
+        key_slots_tops=((0,), (0,)),
+        bottom=Sequent(((R, B),)),
+        key_slots_bottom=(),
+    )
+    cut = RuleDerivation(instantiated_rule=ir_cut, premises=[id_A, id_B], perm_tops=(), node_id=id(ir_cut))
+
+    wire_map = compute_key_slot_wires(cut)
+    cut_wires = wire_map[cut.node_id]
+    assert len(cut_wires) == 2
+
+    # top0 key reaches id_A at structural slot 0.
+    w0 = cut_wires[0]
+    assert w0.source.node_id == cut.node_id
+    assert w0.source.top_index == 0
+    assert w0.source.key_slot == 0
+    assert w0.source.formal_slot == 0
+    assert w0.target.node_id == id_A.node_id
+    assert w0.target.key_slot == 0
+    assert w0.target.formal_slot == 0
+
+    # top1 key (L,A) reaches id_B bottom key index 0 (L,B) by slot position
+    # (the analysis is structural and does not inspect formula equality)
+    w1 = cut_wires[1]
+    assert w1.source.node_id == cut.node_id
+    assert w1.source.top_index == 1
+    assert w1.source.key_slot == 0
+    assert w1.source.formal_slot == 0
+    assert w1.target.node_id == id_B.node_id
+    assert w1.target.key_slot == 0
+    assert w1.target.formal_slot == 0
+
+
+def test_compute_key_slot_wires_basic_block_all_slots_key():
+    id_A = make_identity(A)
+    bb = BasicBlock(
+        label="bb0",
+        premises=[id_A],
+        perm_tops=((1, 0),),
+        node_id=123,
+    )
+
+    wire_map = compute_key_slot_wires(bb)
+    bb_wires = wire_map[bb.node_id]
+    assert len(bb_wires) == 2
+
+    # BasicBlock top formal slot 0 maps to child bottom slot 1 due to perm (1,0)
+    assert bb_wires[0].source.top_index == 0
+    assert bb_wires[0].source.formal_slot == 0
+    assert bb_wires[0].target.node_id == id_A.node_id
+    assert bb_wires[0].target.formal_slot == 1
+
+    # BasicBlock top formal slot 1 maps to child bottom slot 0
+    assert bb_wires[1].source.top_index == 0
+    assert bb_wires[1].source.formal_slot == 1
+    assert bb_wires[1].target.node_id == id_A.node_id
+    assert bb_wires[1].target.formal_slot == 0
 
 
 if __name__ == "__main__":
