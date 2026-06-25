@@ -1,6 +1,6 @@
 from connectives import *
 from pretty import fmt, register, is_jf, cases_match, any_formula
-from typed_ir import Polarity, Side
+from ir_types import Polarity, Side
 from core_ir import Atom, Bang, JumboFormula, Case
 
 L, R = Side.LEFT, Side.RIGHT
@@ -27,7 +27,7 @@ tests = [
     ("nested",        Lollipop(Tensor(A, B), With(A, C))),
     ("!(A → B)",      Bang(POS, Lollipop(A, B))),
     ("?(A∨B)",        Bang(NEG, Plus(A, B))),
-    ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))), # type: ignore
+    ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))),
 ]
 
 for label, f in tests:
@@ -42,7 +42,7 @@ register("Bool",
     lambda f: "Bool",
     prepend=True,
 )
-Bool = JumboFormula(POS, (Case("#t", ()), Case("#f", ()))) # type: ignore
+Bool = JumboFormula(POS, (Case("#t", ()), Case("#f", ())))
 print()
 print(f"  Bool         =>  {fmt(Bool)}")
 print(f"  Bool∨A       =>  {fmt(Plus(Bool, A))}")

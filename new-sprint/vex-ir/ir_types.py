@@ -111,8 +111,9 @@ class Sequent(Generic[Slot]):
         elif isinstance(self.formulas[0], Side):
             return f"{self.left} ⊢ {self.right}"
         elif isinstance(self.formulas[0], tuple) and len(self.formulas[0]) == 2:
-            left_str  = ", ".join(str(f) for s, f in self.formulas if s == Side.LEFT) # type: ignore
-            right_str = ", ".join(str(f) for s, f in self.formulas if s == Side.RIGHT) # type: ignore
+            fs: tuple[SidedFormula, ...] = self.formulas # type: ignore
+            left_str  = ", ".join(str(f) for s, f in fs if s == Side.LEFT)
+            right_str = ", ".join(str(f) for s, f in fs if s == Side.RIGHT)
             return f"{left_str} ⊢ {right_str}"
         else:
             return f"Sequent({self.formulas})"
@@ -166,11 +167,23 @@ class InstantiatedRule(Generic[Slot]):
     key_slots_tops: tuple[tuple[int, ...], ...]
     bottom: Sequent[Slot]
     key_slots_bottom: tuple[int, ...]
+    
+    def __init__(self, rule: RuleSchema, tops: tuple[Sequent[Slot], ...], key_slots_tops: tuple[tuple[int, ...], ...], bottom: Any, key_slots_bottom: tuple[int, ...]):
+        object.__setattr__(self, "rule", rule)
+        object.__setattr__(self, "tops", tops)
+        object.__setattr__(self, "key_slots_tops", key_slots_tops)
+        if isinstance(bottom, Sequent):
+            object.__setattr__(self, "bottom", bottom)
+        elif isinstance(bottom, tuple):
+            object.__setattr__(self, "bottom", Sequent(bottom))
+        else:
+            raise TypeError(f"bottom must be a Sequent or tuple, got {type(bottom)}")
+        object.__setattr__(self, "key_slots_bottom", key_slots_bottom)
 
     def validate(self) -> None:
         if isinstance(self.bottom.formulas[0], tuple) and len(self.bottom.formulas[0]) == 2:
             # Typed IR
-            self.rule.check_shape_and_type(self)  # type: ignore
+            self.rule.check_shape_and_type(self) # type: ignore
         else:
             # Erased IR
             self.rule.check_shape(self) # type: ignore

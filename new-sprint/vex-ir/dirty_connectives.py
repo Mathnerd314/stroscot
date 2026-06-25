@@ -3,7 +3,7 @@
 # the fallback so more-specific matches win.
 from __future__ import annotations
 from pretty import fmt, register
-from typed_ir import Polarity
+from ir_types import Polarity
 from dirty_ir import (
     OpaqueType, FlatType, FlatOperation,
     Const, IfBool,

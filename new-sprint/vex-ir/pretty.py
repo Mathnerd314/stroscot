@@ -2,7 +2,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
-from typed_ir import Polarity, Side, Formula
+from ir_types import Polarity, Side, Formula
 from core_ir import JumboFormula, Case, Atom, Bang
 
 L, R = Side.LEFT, Side.RIGHT

@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Generic, Literal, Type, TypeVar, Optional
-from typed_ir import (
+from ir_types import (
     Formula,
     Polarity,
     Side,
@@ -12,6 +12,7 @@ from typed_ir import (
     Slot,
     RuleSchema,
     array_minus_key_slots,
+    slot_side,
 )
 
 @dataclass(frozen=True)
@@ -25,9 +26,18 @@ class Case(Generic[Slot]):
     label: Any
     formulas: Sequent[Slot]
     
+    def __init__(self, label: Any, formulas: Any) -> None:
+        object.__setattr__(self, "label", label)
+        if isinstance(formulas, Sequent):
+            object.__setattr__(self, "formulas", formulas)
+        elif isinstance(formulas, tuple):
+            object.__setattr__(self, "formulas", Sequent(formulas=formulas))
+        else:
+            raise TypeError(f"Invalid type for formulas: {type(formulas)}")
+    
     def erase(self) -> Case[Side]:
         """Project to the erased version (drop Formula annotations)."""
-        return Case(label=self.label, formulas=Sequent(formulas=tuple(slot_side(s) for s in self.formulas.formulas))) # type: ignore
+        return Case(label=self.label, formulas=Sequent(formulas=tuple(slot_side(s) for s in self.formulas.formulas)))
 
 @dataclass(frozen=True)
 class JumboFormula(Formula,Generic[Slot]):

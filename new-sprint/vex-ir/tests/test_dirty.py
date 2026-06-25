@@ -1,5 +1,5 @@
 import pytest
-from typed_ir import (
+from ir_types import (
     Polarity, Side, Sequent,
     InstantiatedRule,
 )
@@ -136,7 +136,7 @@ def test_if_bool_basic():
         rule=rule,
         tops=(then_top, else_top),
         key_slots_tops=((), ()),
-        bottom=bottom, # type: ignore
+        bottom=bottom,
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -196,7 +196,7 @@ def test_absorption_pos():
         rule=Absorption(POS),
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom, # type: ignore
+        bottom=bottom,
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -208,7 +208,7 @@ def test_absorption_wrong_slots():
         rule=Absorption(POS),
         tops=(top,),
         key_slots_tops=((0,),),   # only one slot instead of two
-        bottom=bottom, # type: ignore
+        bottom=bottom,
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -223,7 +223,7 @@ def test_multiplexing_pos_count2():
         rule=Multiplexing(POS, count=2),
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom, # type: ignore
+        bottom=bottom,
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -235,7 +235,7 @@ def test_multiplexing_count_mismatch():
         rule=Multiplexing(POS, count=3),  # says 3 but only 2 key slots
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom, # type: ignore
+        bottom=bottom,
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):

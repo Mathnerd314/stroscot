@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Generic, Type, TypeVar
 
-from typed_ir import (
+from ir_types import (
     Polarity, Side,
     InstantiatedRule, RuleSchema,
     array_minus_key_slots,

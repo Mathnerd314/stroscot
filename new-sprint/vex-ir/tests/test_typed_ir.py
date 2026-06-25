@@ -1,5 +1,5 @@
 import pytest
-from typed_ir import (
+from ir_types import (
     Polarity,
     RuleDerivation,
     Side,
@@ -136,7 +136,7 @@ def test_build_tensor_no_context():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A),)), Sequent(((L, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor),)), # type: ignore
+        bottom=Sequent(((R, tensor),)),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -147,7 +147,7 @@ def test_build_tensor_with_shared_context():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A), (R, C))), Sequent(((L, B), (R, C)))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor), (R, C), (R, C))), # type: ignore
+        bottom=Sequent(((R, tensor), (R, C), (R, C))),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -158,7 +158,7 @@ def test_build_tensor_wrong_side():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A),)), Sequent(((L, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, tensor),)), # type: ignore
+        bottom=Sequent(((L, tensor),)),
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -170,7 +170,7 @@ def test_build_plus_left():
         rule=Build(principal=plus, case_index=0),
         tops=(Sequent(((L, A),)),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)), # type: ignore
+        bottom=Sequent(((R, plus),)),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -181,7 +181,7 @@ def test_build_plus_right():
         rule=Build(principal=plus, case_index=1),
         tops=(Sequent(((L, B),)),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)), # type: ignore
+        bottom=Sequent(((R, plus),)),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -195,7 +195,7 @@ def test_break_with():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A),)), Sequent(((R, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_),)), # type: ignore
+        bottom=Sequent(((R, with_),)),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -206,7 +206,7 @@ def test_break_with_with_context():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A), (L, C))), Sequent(((R, B), (L, C)))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_), (L, C))), # type: ignore
+        bottom=Sequent(((R, with_), (L, C))),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -217,7 +217,7 @@ def test_break_lollipop():
         rule=Break(principal=lollipop),
         tops=(Sequent(((L, A), (R, B))),),
         key_slots_tops=((0, 1),),
-        bottom=Sequent(((R, lollipop),)), # type: ignore
+        bottom=Sequent(((R, lollipop),)),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -228,7 +228,7 @@ def test_break_wrong_side():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A),)), Sequent(((R, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, with_),)), # type: ignore
+        bottom=Sequent(((L, with_),)),
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -254,7 +254,7 @@ def test_weakening():
         rule=Weakening(POS),
         tops=(Sequent(((R, B),)),),
         key_slots_tops=(),
-        bottom=Sequent(((L, bang_A), (R, B))), # type: ignore
+        bottom=Sequent(((L, bang_A), (R, B))),
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -265,7 +265,7 @@ def test_weakening_wrong_polarity():
         rule=Weakening(POS),
         tops=(Sequent(((R, B),)),),
         key_slots_tops=(),
-        bottom=Sequent(((L, Bang(NEG, A)), (R, B))), # type: ignore
+        bottom=Sequent(((L, Bang(NEG, A)), (R, B))),
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -277,7 +277,7 @@ def test_dereliction():
         rule=Dereliction(POS),
         tops=(Sequent(((L, A), (R, B))),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((L, bang_A), (R, B))), # type: ignore
+        bottom=Sequent(((L, bang_A), (R, B))),
         key_slots_bottom=(0,),
     )
     ir.validate()

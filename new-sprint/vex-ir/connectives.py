@@ -1,6 +1,7 @@
 
 from __future__ import annotations
-from typed_ir import Polarity, Side, JumboFormula, Case, Atom, Formula
+from ir_types import Polarity, Side, Formula
+from core_ir import JumboFormula, Case, Atom, Bang
 from pretty import fmt, register, cases_match, is_jf, any_formula, _fallback
 
 L, R = Side.LEFT, Side.RIGHT
@@ -59,53 +60,53 @@ _ = any_formula   # shorthand wildcard
 
 # Atoms and bangs — lowest priority, caught by fallback anyway but explicit here
 register("Atom", lambda f: isinstance(f, Atom),                  _fallback)
-register("Bang", lambda f: not isinstance(f, (Atom, JumboFormula)), _fallback)
+register("Bang", lambda f: isinstance(f, Bang), _fallback)
 
 # Nullary
-register("F",   lambda f: is_jf(POS)(f) and f.cases == (),       lambda f: "F")
-register("One", lambda f: is_jf(POS)(f) and cases_match(f, (("#s", ()),)),  lambda f: "1")
-register("Top", lambda f: is_jf(NEG)(f) and f.cases == (),       lambda f: "T")
-register("Bot", lambda f: is_jf(NEG)(f) and cases_match(f, (("#s", ()),)),  lambda f: "⊥")
+register("F",   lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and f.cases == (),       lambda f: "F")
+register("One", lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and cases_match(f, (("#s", ()),)),  lambda f: "1")
+register("Top", lambda f: isinstance(f, JumboFormula) and is_jf(NEG)(f) and f.cases == (),       lambda f: "T")
+register("Bot", lambda f: isinstance(f, JumboFormula) and is_jf(NEG)(f) and cases_match(f, (("#s", ()),)),  lambda f: "⊥")
 
 # Unary — registered before binary so the single-subformula patterns don't
 # accidentally shadow; ordering within unary doesn't matter since predicates are disjoint
-register("PosNeg",    lambda f: is_jf(POS)(f) and cases_match(f,(("#s",((R,_),)),)),
-                      lambda f: f"+¬{fmt(f.cases[0].formulas[0][1])}")
-register("UpShift",   lambda f: is_jf(POS)(f) and cases_match(f,(("#s",((L,_),)),)),
-                      lambda f: f"↑{fmt(f.cases[0].formulas[0][1])}")
-register("NegNeg",    lambda f: is_jf(NEG)(f) and cases_match(f,(("#s",((L,_),)),)),
-                      lambda f: f"-¬{fmt(f.cases[0].formulas[0][1])}")
-register("DownShift", lambda f: is_jf(NEG)(f) and cases_match(f,(("#s",((R,_),)),)),
-                      lambda f: f"↓{fmt(f.cases[0].formulas[0][1])}")
+register("PosNeg",    lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and cases_match(f,(("#s",((R,_),)),)),
+                      lambda f: f"+¬{fmt(f.cases[0].formulas.formulas[0][1])}")
+register("UpShift",   lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and cases_match(f,(("#s",((L,_),)),)),
+                      lambda f: f"↑{fmt(f.cases[0].formulas.formulas[0][1])}")
+register("NegNeg",    lambda f: isinstance(f, JumboFormula) and is_jf(NEG)(f) and cases_match(f,(("#s",((L,_),)),)),
+                      lambda f: f"-¬{fmt(f.cases[0].formulas.formulas[0][1])}")
+register("DownShift", lambda f: isinstance(f, JumboFormula) and is_jf(NEG)(f) and cases_match(f,(("#s",((R,_),)),)),
+                      lambda f: f"↓{fmt(f.cases[0].formulas.formulas[0][1])}")
 
 # Powers (n >= 3; n=2 caught by binary rules below)
 def _is_tensor_power(f):
     if not (is_jf(POS)(f) and len(f.cases)==1 and f.cases[0].label=="#s"): return False
-    fmls = f.cases[0].formulas
+    fmls = f.cases[0].formulas.formulas
     return len(fmls)>=3 and all(s==L for s,_ in fmls) and len({x for _,x in fmls})==1
 
 def _is_par_power(f):
     if not (is_jf(NEG)(f) and len(f.cases)==1 and f.cases[0].label=="#s"): return False
-    fmls = f.cases[0].formulas
+    fmls = f.cases[0].formulas.formulas
     return len(fmls)>=3 and all(s==R for s,_ in fmls) and len({x for _,x in fmls})==1
 
 register("TensorPower", _is_tensor_power,
-         lambda f: f"{fmt(f.cases[0].formulas[0][1])}^⊗{len(f.cases[0].formulas)}")
+         lambda f: f"{fmt(f.cases[0].formulas.formulas[0][1])}^⊗{len(f.cases[0].formulas.formulas)}")
 register("ParPower",    _is_par_power,
-         lambda f: f"{fmt(f.cases[0].formulas[0][1])}^⅋{len(f.cases[0].formulas)}")
+         lambda f: f"{fmt(f.cases[0].formulas.formulas[0][1])}^⅋{len(f.cases[0].formulas.formulas)}")
 
 # Binary single-case
 register("Tensor",   lambda f: is_jf(POS)(f) and cases_match(f,(("#s",((L,_),(L,_))),)),
-                     lambda f: f"({fmt(f.cases[0].formulas[0][1])} ⊗ {fmt(f.cases[0].formulas[1][1])})")
+                     lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} ⊗ {fmt(f.cases[0].formulas.formulas[1][1])})")
 register("Par",      lambda f: is_jf(NEG)(f) and cases_match(f,(("#s",((R,_),(R,_))),)),
-                     lambda f: f"({fmt(f.cases[0].formulas[0][1])} ⅋ {fmt(f.cases[0].formulas[1][1])})")
+                     lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} ⅋ {fmt(f.cases[0].formulas.formulas[1][1])})")
 register("Lollipop", lambda f: is_jf(NEG)(f) and cases_match(f,(("#f",((L,_),(R,_))),)),
-                     lambda f: f"({fmt(f.cases[0].formulas[0][1])} → {fmt(f.cases[0].formulas[1][1])})")
+                     lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} → {fmt(f.cases[0].formulas.formulas[1][1])})")
 
 # Binary two-case
 register("Plus",  lambda f: is_jf(POS)(f) and cases_match(f,(("#l",((L,_),)),("#r",((L,_),)))),
-                  lambda f: f"({fmt(f.cases[0].formulas[0][1])} ∨ {fmt(f.cases[1].formulas[0][1])})")
+                  lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} ∨ {fmt(f.cases[1].formulas.formulas[0][1])})")
 register("With",  lambda f: is_jf(NEG)(f) and cases_match(f,(("#l",((R,_),)),("#r",((R,_),)))),
-                  lambda f: f"({fmt(f.cases[0].formulas[0][1])} ∧ {fmt(f.cases[1].formulas[0][1])})")
+                  lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} ∧ {fmt(f.cases[1].formulas.formulas[0][1])})")
 register("Equiv", lambda f: is_jf(NEG)(f) and cases_match(f,(("#l",((L,_),(R,_))),("#r",((L,_),(R,_))))),
-                  lambda f: f"({fmt(f.cases[0].formulas[0][1])} ↔ {fmt(f.cases[1].formulas[0][1])})")
+                  lambda f: f"({fmt(f.cases[0].formulas.formulas[0][1])} ↔ {fmt(f.cases[1].formulas.formulas[0][1])})")

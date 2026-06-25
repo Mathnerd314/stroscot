@@ -1,6 +1,6 @@
 
 import pytest
-from typed_ir import (
+from ir_types import (
     Polarity, RuleDerivation, Side, Sequent,
     InstantiatedRule, Node, apply_perm,
 )
@@ -76,14 +76,14 @@ def test_derivation_cut_default_perm():
 # so apply_perm((1,0), top) = (R,B),(L,A) == premise.bottom  ✓
 
 def test_derivation_with_perm():
-    tensor = JumboFormula(POS, (Case("#s", ((L, A), (L, B))),)) # type: ignore
+    tensor = JumboFormula(POS, (Case("#s", ((L, A), (L, B))),))
 
     # Build tensor: top0=(L,A), top1=(L,B), bottom=(R,tensor)
     ir_build = InstantiatedRule(
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A),)), Sequent(((L, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor),)), # type: ignore
+        bottom=Sequent(((R, tensor),)),
         key_slots_bottom=(0,),
     )
 
@@ -112,7 +112,7 @@ def test_derivation_with_perm():
         rule=Weakening(POS),
         tops=(Sequent(((L, A),)),),
         key_slots_tops=(),
-        bottom=Sequent(((L, bang_A), (L, A))), # type: ignore
+        bottom=Sequent(((L, bang_A), (L, A))),
         key_slots_bottom=(0,),
     )
     # That's getting complicated. Instead just test the perm machinery directly:
