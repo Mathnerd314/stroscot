@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 from ir_types import Polarity, Side, Formula
-from core_ir import JumboFormula, Case, Atom, Bang
+from core_ir import JumboFormula, Case, Atom, Box
 
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
@@ -68,7 +68,7 @@ def _fmt_case(case: Case, polarity: Polarity) -> str:
 def _fallback(f: Formula) -> str:
     if isinstance(f, Atom):
         return f.name
-    if isinstance(f, Bang):
+    if isinstance(f, Box):
         sym = "!" if f.polarity == POS else "?"
         mod = f"[{f.modality}]" if f.modality else ""
         return f"{sym}{mod}{fmt(f.sub)}"

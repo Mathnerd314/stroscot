@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 from ir_types import Polarity, Side, Formula
-from core_ir import JumboFormula, Case, Atom, Bang
+from core_ir import JumboFormula, Case, Atom, Box
 from pretty import fmt, register, cases_match, is_jf, any_formula, _fallback
 
 L, R = Side.LEFT, Side.RIGHT
@@ -60,7 +60,7 @@ _ = any_formula   # shorthand wildcard
 
 # Atoms and bangs — lowest priority, caught by fallback anyway but explicit here
 register("Atom", lambda f: isinstance(f, Atom),                  _fallback)
-register("Bang", lambda f: isinstance(f, Bang), _fallback)
+register("Bang", lambda f: isinstance(f, Box), _fallback)
 
 # Nullary
 register("F",   lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and f.cases == (),       lambda f: "F")

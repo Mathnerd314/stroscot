@@ -60,7 +60,7 @@ class JumboFormula(Formula,Generic[Slot]):
             all(f.is_cartesian() if side == Side.LEFT else f.is_cocartesian() for case in self.cases for side, f in case.formulas.formulas)
 
 @dataclass(frozen=True)
-class Bang(Formula):
+class Box(Formula):
     """!A — exponential modality."""
     polarity: Polarity
     sub: Formula
@@ -75,14 +75,11 @@ class Bang(Formula):
 # ══════════════════════════════════════════════════════════════════════════════
 # Opaque Types
 #
-# An OpaqueType is a Formula whose case structure exists in theory but is too
-# large (or infinite) to enumerate explicitly.  The canonical example is Int32:
-# a positive type with 2^32 cases, one per bit-pattern.
-#
-# Invariant (maintained by convention, not enforced in code):
-#   For every OpaqueType T there EXISTS a (possibly infinite / impractical)
-#   JumboFormula J such that T ≅ J in the core logic.  We simply never
-#   materialise J.
+# An OpaqueType is a Formula corresponding to a (possibly infinite / impractical)
+# JumboFormula whose case structure exists but is too large (or infinite) to
+# enumerate explicitly.  The canonical example is Int32:
+# a positive type with 2^32 cases, one per bit-pattern. We store the case structure
+# in get_case_type, as a function, but we simply never materialise the full JumboFormula.
 #
 # Consequences:
 #   - Build rules CAN appear on OpaqueType values (we know which case/value).
@@ -152,33 +149,33 @@ class CoreRule(RuleSchema):
 @dataclass(frozen=True)
 class Identity(CoreRule):
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert instance.tops == ()
-        assert instance.key_slots_bottom == (0, 1)
-        assert instance.bottom == Sequent((Side.LEFT, Side.RIGHT))
+        assert instance.premises == ()
+        assert instance.key_slots_conclusion == (0, 1)
+        assert instance.conclusion == Sequent((Side.LEFT, Side.RIGHT))
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        f = instance.bottom.formulas[0][1]
-        assert instance.bottom == Sequent(((Side.LEFT, f), (Side.RIGHT, f)))
+        f = instance.conclusion.formulas[0][1]
+        assert instance.conclusion == Sequent(((Side.LEFT, f), (Side.RIGHT, f)))
 
 # Γ ⊢ A, Δ  and  Θ, A ⊢ Λ  =>  Γ, Θ ⊢ Δ, Λ
 @dataclass(frozen=True)
 class Cut(CoreRule):
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 2
-        top0, top1 = instance.tops
-        assert len(instance.key_slots_tops) == 2
-        assert len(instance.key_slots_bottom) == 0
-        assert Side.RIGHT == top0.formulas[instance.key_slots_tops[0][0]]
-        assert Side.LEFT  == top1.formulas[instance.key_slots_tops[1][0]]
-        gamma_delta = array_minus_key_slots(top0.formulas, instance.key_slots_tops[0])
-        theta_lam   = array_minus_key_slots(top1.formulas, instance.key_slots_tops[1])
-        assert instance.bottom.formulas == gamma_delta + theta_lam
+        assert len(instance.premises) == 2
+        premise0, premise1 = instance.premises
+        assert len(instance.key_slots_premises) == 2
+        assert len(instance.key_slots_conclusion) == 0
+        assert Side.RIGHT == premise0.formulas[instance.key_slots_premises[0][0]]
+        assert Side.LEFT  == premise1.formulas[instance.key_slots_premises[1][0]]
+        gamma_delta = array_minus_key_slots(premise0.formulas, instance.key_slots_premises[0])
+        theta_lam   = array_minus_key_slots(premise1.formulas, instance.key_slots_premises[1])
+        assert instance.conclusion.formulas == gamma_delta + theta_lam
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        top0, top1 = instance.tops
-        a = top0.formulas[instance.key_slots_tops[0][0]][1]
-        assert (Side.RIGHT, a) == top0.formulas[instance.key_slots_tops[0][0]]
-        assert (Side.LEFT,  a) == top1.formulas[instance.key_slots_tops[1][0]]
+        premise0, premise1 = instance.premises
+        a = premise0.formulas[instance.key_slots_premises[0][0]][1]
+        assert (Side.RIGHT, a) == premise0.formulas[instance.key_slots_premises[0][0]]
+        assert (Side.LEFT,  a) == premise1.formulas[instance.key_slots_premises[1][0]]
 
 
 # ── Jumbo rules ───────────────────────────────────────────────────────────────
@@ -196,33 +193,33 @@ class Build(CoreRule):
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
         case = self.principal.cases[self.case_index]
 
-        assert len(instance.key_slots_bottom) == 1
-        side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert side == self.principal.active_side
 
-        assert len(instance.tops) == len(case.formulas.formulas)
+        assert len(instance.premises) == len(case.formulas.formulas)
         for i, (expected_side, expected_f) in enumerate(case.formulas.formulas):
-            top = instance.tops[i]
-            assert len(instance.key_slots_tops[i]) == 1
-            t_side = top.formulas[instance.key_slots_tops[i][0]]
-            assert t_side == expected_side
+            premise = instance.premises[i]
+            assert len(instance.key_slots_premises[i]) == 1
+            premise_side = premise.formulas[instance.key_slots_premises[i][0]]
+            assert premise_side == expected_side
 
-        top_combined: list[Side] = []
-        for i, top in enumerate(instance.tops):
-            top_combined.extend(array_minus_key_slots(top.formulas, instance.key_slots_tops[i]))
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == tuple(top_combined)
+        premises_combined: list[Side] = []
+        for i, premise in enumerate(instance.premises):
+            premises_combined.extend(array_minus_key_slots(premise.formulas, instance.key_slots_premises[i]))
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == tuple(premises_combined)
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
         case = self.principal.cases[self.case_index]
 
-        side, jf = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        side, jf = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert (side, jf) == (self.principal.active_side, self.principal)
 
         for i, (expected_side, expected_f) in enumerate(case.formulas.formulas):
-            top = instance.tops[i]
-            t_side, t_f = top.formulas[instance.key_slots_tops[i][0]]
-            assert (t_side, t_f) == (expected_side, expected_f)
+            premise = instance.premises[i]
+            premise_side, premise_f = premise.formulas[instance.key_slots_premises[i][0]]
+            assert (premise_side, premise_f) == (expected_side, expected_f)
 
 
 @dataclass(frozen=True)
@@ -235,32 +232,32 @@ class Break(CoreRule):
     principal: JumboFormula[SidedFormula]
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.key_slots_bottom) == 1
-        side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert side == self.principal.passive_side
 
-        assert len(instance.tops) == len(self.principal.cases)
+        assert len(instance.premises) == len(self.principal.cases)
         for i, case in enumerate(self.principal.cases):
-            top = instance.tops[i]
-            assert len(instance.key_slots_tops[i]) == len(case.formulas.formulas)
-            for j, (expected_side, expected_f) in enumerate(case.formulas.formulas):
-                t_side = top.formulas[instance.key_slots_tops[i][j]]
-                assert t_side == expected_side
+            premise = instance.premises[i]
+            assert len(instance.key_slots_premises[i]) == len(case.formulas.formulas)
+            for j, (expected_side, _expected_f) in enumerate(case.formulas.formulas):
+                premise_side = premise.formulas[instance.key_slots_premises[i][j]]
+                assert premise_side == expected_side
 
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        for i, top in enumerate(instance.tops):
-            top_others = array_minus_key_slots(top.formulas, instance.key_slots_tops[i])
-            assert bottom_others == tuple(top_others)
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        for i, premise in enumerate(instance.premises):
+            premise_others = array_minus_key_slots(premise.formulas, instance.key_slots_premises[i])
+            assert conclusion_others == tuple(premise_others)
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        side, jf = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        side, jf = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert (side, jf) == (self.principal.passive_side, self.principal)
 
         for i, case in enumerate(self.principal.cases):
-            top = instance.tops[i]
+            premise = instance.premises[i]
             for j, (expected_side, expected_f) in enumerate(case.formulas.formulas):
-                t_side, t_f = top.formulas[instance.key_slots_tops[i][j]]
-                assert (t_side, t_f) == (expected_side, expected_f)
+                premise_side, premise_f = premise.formulas[instance.key_slots_premises[i][j]]
+                assert (premise_side, premise_f) == (expected_side, expected_f)
 
 
 # ── Exponential rules ─────────────────────────────────────────────────────────
@@ -271,42 +268,42 @@ class Promotion(CoreRule):
     principle_formula_index: int
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        l = len(top.formulas)
-        assert l == len(instance.key_slots_tops[0])
-        assert l == len(instance.key_slots_bottom)
-        assert l == len(instance.bottom.formulas)
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        l = len(premise.formulas)
+        assert l == len(instance.key_slots_premises[0])
+        assert l == len(instance.key_slots_conclusion)
+        assert l == len(instance.conclusion.formulas)
 
         expected_principal_side = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
-        for i, side in enumerate(top.formulas):
-            bottom_side = instance.bottom.formulas[instance.key_slots_bottom[i]]
+        for i, side in enumerate(premise.formulas):
+            conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[i]]
             if i == self.principle_formula_index:
-                assert bottom_side == expected_principal_side, (
+                assert conclusion_side == expected_principal_side, (
                     f"Principal formula in bottom of Promotion must be on side "
-                    f"{expected_principal_side}, found {bottom_side}"
+                    f"{expected_principal_side}, found {conclusion_side}"
                 )
-                assert bottom_side == side, (
+                assert conclusion_side == side, (
                     f"Principal formula in top of Promotion must be on the same side "
-                    f"as principal in bottom, found {side} vs {bottom_side}"
+                    f"as principal in bottom, found {side} vs {conclusion_side}"
                 )
             else:
-                assert side == bottom_side
+                assert side == conclusion_side
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        top = instance.tops[0]
+        premise = instance.premises[0]
         expected_principal_side = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
-        for i, (side, f) in enumerate(top.formulas):
+        for i, (side, f) in enumerate(premise.formulas):
             if i == self.principle_formula_index:
-                bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[i]]
-                assert isinstance(bottom_f, Bang)
-                assert bottom_f.polarity == self.polarity
-                assert bottom_f.sub == f
-                assert bottom_side == expected_principal_side
+                conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[i]]
+                assert isinstance(conclusion_f, Box)
+                assert conclusion_f.polarity == self.polarity
+                assert conclusion_f.sub == f
+                assert conclusion_side == expected_principal_side
             else:
-                assert isinstance(f, Bang)
+                assert isinstance(f, Box)
                 assert (f.polarity == Polarity.POS and side == Side.LEFT) or (f.polarity == Polarity.NEG and side == Side.RIGHT)
-                assert (side, f) == instance.bottom.formulas[i]
+                assert (side, f) == instance.conclusion.formulas[i]
 
 
 @dataclass(frozen=True)
@@ -314,35 +311,35 @@ class Dereliction(CoreRule):
     polarity: Polarity
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == 1
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == 1
+        assert len(instance.key_slots_conclusion) == 1
 
-        top_side    = top.formulas[instance.key_slots_tops[0][0]]
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        premise_side    = premise.formulas[instance.key_slots_premises[0][0]]
+        conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         expected    = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Dereliction must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Dereliction must be on side {expected}, found {conclusion_side}"
         )
-        assert bottom_side == top_side, (
+        assert conclusion_side == premise_side, (
             f"Principal formula in top of Dereliction must match bottom side, "
-            f"found {top_side} vs {bottom_side}"
+            f"found {premise_side} vs {conclusion_side}"
         )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top_others
+        premise_others    = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == premise_others
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        top = instance.tops[0]
-        top_side,    top_f    = top.formulas[instance.key_slots_tops[0][0]]
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(bottom_f, Bang)
-        assert bottom_f.polarity == self.polarity
-        assert bottom_f.sub == top_f
-        assert bottom_side == top_side
+        premise = instance.premises[0]
+        premise_side,    premise_f    = premise.formulas[instance.key_slots_premises[0][0]]
+        conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(conclusion_f, Box)
+        assert conclusion_f.polarity == self.polarity
+        assert conclusion_f.sub == premise_f
+        assert conclusion_side == premise_side
 
 
 @dataclass(frozen=True)
@@ -350,24 +347,24 @@ class Weakening(CoreRule):
     polarity: Polarity
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 0
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 0
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         expected    = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Weakening must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Weakening must be on side {expected}, found {conclusion_side}"
         )
 
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top.formulas
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == premise.formulas
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(bottom_f, Bang)
-        assert bottom_f.polarity == self.polarity
+        conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(conclusion_f, Box)
+        assert conclusion_f.polarity == self.polarity
 
 
 @dataclass(frozen=True)
@@ -376,38 +373,38 @@ class Contraction(CoreRule):
     count: int = 2
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == self.count
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == self.count
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         expected    = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Contraction must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Contraction must be on side {expected}, found {conclusion_side}"
         )
 
         for i in range(self.count):
-            top_side = top.formulas[instance.key_slots_tops[0][i]]
+            top_side = premise.formulas[instance.key_slots_premises[0][i]]
             assert top_side == expected, (
                 f"Principal formula in top of Contraction must be on side {expected}, found {top_side}"
             )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
+        top_others    = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        bottom_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
         assert bottom_others == top_others
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        top = instance.tops[0]
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(bottom_f, Bang)
-        assert bottom_f.polarity == self.polarity
+        premise = instance.premises[0]
+        conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(conclusion_f, Box)
+        assert conclusion_f.polarity == self.polarity
         for i in range(self.count):
-            top_side, top_f = top.formulas[instance.key_slots_tops[0][i]]
-            assert top_f == bottom_f, (
+            premise_side, premise_formula = premise.formulas[instance.key_slots_premises[0][i]]
+            assert premise_formula == conclusion_f, (
                 f"Principal formula in top of Contraction must equal bottom, "
-                f"expected {bottom_f}, found {top_f}"
+                f"expected {conclusion_f}, found {premise_formula}"
             )
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -458,18 +455,18 @@ class FlatOperation(AdmissibleRule):
     result: FlatType
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 0, "FlatOperation has no premises"
-        assert instance.bottom.count_left  == len(self.args), (
-            f"Expected {len(self.args)} inputs, got {instance.bottom.count_left}"
+        assert len(instance.premises) == 0, "FlatOperation has no premises"
+        assert instance.conclusion.count_antecedents  == len(self.args), (
+            f"Expected {len(self.args)} inputs, got {instance.conclusion.count_antecedents}"
         )
-        assert instance.bottom.count_right == 1, (
-            f"Expected 1 output, got {instance.bottom.count_right}"
+        assert instance.conclusion.count_succedents == 1, (
+            f"Expected 1 output, got {instance.conclusion.count_succedents}"
         )
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 0, "FlatOperation has no premises"
-        lefts  = instance.bottom.left
-        rights = instance.bottom.right
+        assert len(instance.premises) == 0, "FlatOperation has no premises"
+        lefts  = instance.conclusion.antecedents
+        rights = instance.conclusion.succedents
         assert len(lefts)  == len(self.args), (
             f"Expected {len(self.args)} inputs, got {len(lefts)}"
         )

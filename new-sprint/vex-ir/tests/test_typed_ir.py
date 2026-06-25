@@ -15,7 +15,7 @@ from core_ir import (
     Atom,
     Case,
     JumboFormula,
-    Bang,
+    Box,
     Identity,
     Cut,
     Build,
@@ -41,15 +41,15 @@ with_ = JumboFormula[SidedFormula](
     NEG, (Case("#l", Sequent(((R, A),))), Case("#r", Sequent(((R, B),))))
 )
 lollipop = JumboFormula[SidedFormula](NEG, (Case("#f", Sequent(((L, A), (R, B)))),))
-bang_A = Bang(POS, A)
-bang_B = Bang(POS, B)
+bang_A = Box(POS, A)
+bang_B = Box(POS, B)
 
 
 def mk_rule_derivation(ir, premises: list[Node]) -> RuleDerivation:
     return RuleDerivation(
         instantiated_rule=ir,
         premises=premises,
-        perm_tops=tuple(() for _ in premises),
+        perm_premises=tuple(() for _ in premises),
         node_id=id(ir),
     )
 
@@ -57,10 +57,10 @@ def mk_rule_derivation(ir, premises: list[Node]) -> RuleDerivation:
 def make_identity(f) -> RuleDerivation:
     ir = InstantiatedRule(
         rule=Identity(),
-        tops=(),
-        key_slots_tops=(),
-        bottom=Sequent(((L, f), (R, f))),
-        key_slots_bottom=(0, 1),
+        premises=(),
+        key_slots_premises=(),
+        conclusion=Sequent(((L, f), (R, f))),
+        key_slots_conclusion=(0, 1),
     )
     return mk_rule_derivation(ir, [])
 
@@ -81,10 +81,10 @@ def test_identity_jumbo():
 def test_identity_wrong_shape():
     ir = InstantiatedRule(
         rule=Identity(),
-        tops=(),
-        key_slots_tops=(),
-        bottom=Sequent(((L, A), (R, B))),
-        key_slots_bottom=(0, 1),
+        premises=(),
+        key_slots_premises=(),
+        conclusion=Sequent(((L, A), (R, B))),
+        key_slots_conclusion=(0, 1),
     )
     with pytest.raises(AssertionError):
         mk_rule_derivation(ir, [])
@@ -96,10 +96,10 @@ def test_identity_wrong_shape():
 def test_cut_basic():
     ir = InstantiatedRule(
         rule=Cut(),
-        tops=(Sequent(((R, A),)), Sequent(((L, A), (R, B)))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, B),)),
-        key_slots_bottom=(),
+        premises=(Sequent(((R, A),)), Sequent(((L, A), (R, B)))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, B),)),
+        key_slots_conclusion=(),
     )
     ir.validate()
 
@@ -107,10 +107,10 @@ def test_cut_basic():
 def test_cut_wrong_formula():
     ir = InstantiatedRule(
         rule=Cut(),
-        tops=(Sequent(((R, A),)), Sequent(((L, B), (R, B)))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, B),)),
-        key_slots_bottom=(),
+        premises=(Sequent(((R, A),)), Sequent(((L, B), (R, B)))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, B),)),
+        key_slots_conclusion=(),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -123,10 +123,10 @@ def test_build_one():
     # One: 0 subformulas, 0 tops, bottom = (R, one)
     ir = InstantiatedRule(
         rule=Build(principal=one, case_index=0),
-        tops=(),
-        key_slots_tops=(),
-        bottom=Sequent(((R, one),)),
-        key_slots_bottom=(0,),
+        premises=(),
+        key_slots_premises=(),
+        conclusion=Sequent(((R, one),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -134,10 +134,10 @@ def test_build_one():
 def test_build_tensor_no_context():
     ir = InstantiatedRule(
         rule=Build(principal=tensor, case_index=0),
-        tops=(Sequent(((L, A),)), Sequent(((L, B),))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A),)), Sequent(((L, B),))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, tensor),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -145,10 +145,10 @@ def test_build_tensor_no_context():
 def test_build_tensor_with_shared_context():
     ir = InstantiatedRule(
         rule=Build(principal=tensor, case_index=0),
-        tops=(Sequent(((L, A), (R, C))), Sequent(((L, B), (R, C)))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor), (R, C), (R, C))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A), (R, C))), Sequent(((L, B), (R, C)))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, tensor), (R, C), (R, C))),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -156,10 +156,10 @@ def test_build_tensor_with_shared_context():
 def test_build_tensor_wrong_side():
     ir = InstantiatedRule(
         rule=Build(principal=tensor, case_index=0),
-        tops=(Sequent(((L, A),)), Sequent(((L, B),))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, tensor),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A),)), Sequent(((L, B),))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((L, tensor),)),
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -168,10 +168,10 @@ def test_build_tensor_wrong_side():
 def test_build_plus_left():
     ir = InstantiatedRule(
         rule=Build(principal=plus, case_index=0),
-        tops=(Sequent(((L, A),)),),
-        key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A),)),),
+        key_slots_premises=((0,),),
+        conclusion=Sequent(((R, plus),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -179,10 +179,10 @@ def test_build_plus_left():
 def test_build_plus_right():
     ir = InstantiatedRule(
         rule=Build(principal=plus, case_index=1),
-        tops=(Sequent(((L, B),)),),
-        key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, B),)),),
+        key_slots_premises=((0,),),
+        conclusion=Sequent(((R, plus),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -193,10 +193,10 @@ def test_build_plus_right():
 def test_break_with():
     ir = InstantiatedRule(
         rule=Break(principal=with_),
-        tops=(Sequent(((R, A),)), Sequent(((R, B),))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((R, A),)), Sequent(((R, B),))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, with_),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -204,10 +204,10 @@ def test_break_with():
 def test_break_with_with_context():
     ir = InstantiatedRule(
         rule=Break(principal=with_),
-        tops=(Sequent(((R, A), (L, C))), Sequent(((R, B), (L, C)))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_), (L, C))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((R, A), (L, C))), Sequent(((R, B), (L, C)))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, with_), (L, C))),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -215,10 +215,10 @@ def test_break_with_with_context():
 def test_break_lollipop():
     ir = InstantiatedRule(
         rule=Break(principal=lollipop),
-        tops=(Sequent(((L, A), (R, B))),),
-        key_slots_tops=((0, 1),),
-        bottom=Sequent(((R, lollipop),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A), (R, B))),),
+        key_slots_premises=((0, 1),),
+        conclusion=Sequent(((R, lollipop),)),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -226,10 +226,10 @@ def test_break_lollipop():
 def test_break_wrong_side():
     ir = InstantiatedRule(
         rule=Break(principal=with_),
-        tops=(Sequent(((R, A),)), Sequent(((R, B),))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, with_),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((R, A),)), Sequent(((R, B),))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((L, with_),)),
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -241,10 +241,10 @@ def test_break_wrong_side():
 def test_promotion():
     ir = InstantiatedRule(
         rule=Promotion(POS, principle_formula_index=1),
-        tops=(Sequent(((L, bang_A), (R, B))),),
-        key_slots_tops=((0, 1),),
-        bottom=Sequent(((L, bang_A), (R, bang_B))),
-        key_slots_bottom=(0, 1),
+        premises=(Sequent(((L, bang_A), (R, B))),),
+        key_slots_premises=((0, 1),),
+        conclusion=Sequent(((L, bang_A), (R, bang_B))),
+        key_slots_conclusion=(0, 1),
     )
     ir.validate()
 
@@ -252,10 +252,10 @@ def test_promotion():
 def test_weakening():
     ir = InstantiatedRule(
         rule=Weakening(POS),
-        tops=(Sequent(((R, B),)),),
-        key_slots_tops=(),
-        bottom=Sequent(((L, bang_A), (R, B))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((R, B),)),),
+        key_slots_premises=(),
+        conclusion=Sequent(((L, bang_A), (R, B))),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -263,10 +263,10 @@ def test_weakening():
 def test_weakening_wrong_polarity():
     ir = InstantiatedRule(
         rule=Weakening(POS),
-        tops=(Sequent(((R, B),)),),
-        key_slots_tops=(),
-        bottom=Sequent(((L, Bang(NEG, A)), (R, B))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((R, B),)),),
+        key_slots_premises=(),
+        conclusion=Sequent(((L, Box(NEG, A)), (R, B))),
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -275,10 +275,10 @@ def test_weakening_wrong_polarity():
 def test_dereliction():
     ir = InstantiatedRule(
         rule=Dereliction(POS),
-        tops=(Sequent(((L, A), (R, B))),),
-        key_slots_tops=((0,),),
-        bottom=Sequent(((L, bang_A), (R, B))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A), (R, B))),),
+        key_slots_premises=((0,),),
+        conclusion=Sequent(((L, bang_A), (R, B))),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -286,10 +286,10 @@ def test_dereliction():
 def test_contraction():
     ir = InstantiatedRule(
         rule=Contraction(POS, count=2),
-        tops=(Sequent(((L, bang_A), (L, bang_A), (R, B))),),
-        key_slots_tops=((0, 1),),
-        bottom=Sequent(((L, bang_A), (R, B))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, bang_A), (L, bang_A), (R, B))),),
+        key_slots_premises=((0, 1),),
+        conclusion=Sequent(((L, bang_A), (R, B))),
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -308,13 +308,13 @@ def test_derivation_conclusion_mismatch():
     top1 = Sequent(((L, A), (R, B)))
     ir_cut = InstantiatedRule(
         rule=Cut(),
-        tops=(top0, top1),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, B),)),
-        key_slots_bottom=(),
+        premises=(top0, top1),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, B),)),
+        key_slots_conclusion=(),
     )
     with pytest.raises((AssertionError, ValueError)):
-        RuleDerivation(instantiated_rule=ir_cut, premises=[id_B, id_B],perm_tops=(),node_id=id(ir_cut)).validate()
+        RuleDerivation(instantiated_rule=ir_cut, premises=[id_B, id_B],perm_premises=(),node_id=id(ir_cut)).validate()
 
 def test_derivation_depth_and_size():
     id_A = make_identity(A)
@@ -343,12 +343,12 @@ def test_compute_key_slot_wires_cut_to_identity_destinations():
 
     ir_cut = InstantiatedRule(
         rule=Cut(),
-        tops=(Sequent(((R, A),)), Sequent(((L, A), (R, B)))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, B),)),
-        key_slots_bottom=(),
+        premises=(Sequent(((R, A),)), Sequent(((L, A), (R, B)))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, B),)),
+        key_slots_conclusion=(),
     )
-    cut = RuleDerivation(instantiated_rule=ir_cut, premises=[id_A, id_B], perm_tops=(), node_id=id(ir_cut))
+    cut = RuleDerivation(instantiated_rule=ir_cut, premises=[id_A, id_B], perm_premises=(), node_id=id(ir_cut))
 
     wire_map = compute_key_slot_wires(cut)
     cut_wires = wire_map[cut.node_id]
@@ -381,7 +381,7 @@ def test_compute_key_slot_wires_basic_block_all_slots_key():
     bb = BasicBlock(
         label="bb0",
         premises=[id_A],
-        perm_tops=((1, 0),),
+        perm_premises=((1, 0),),
         node_id=123,
     )
 

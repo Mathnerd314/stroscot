@@ -9,7 +9,7 @@ from ir_types import (
     Formula, SidedFormula,
     TypedSequent,
 )
-from core_ir import AdmissibleRule, OpaqueType, FlatType, FlatOperation, Bang
+from core_ir import AdmissibleRule, OpaqueType, FlatType, FlatOperation, Box
 
 # ── Pre-defined primitive types ───────────────────────────────────────────────
 
@@ -57,42 +57,42 @@ class Const(AdmissibleRule):
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
         case_sides = self.principal.get_case_type(self.case_label)
 
-        assert len(instance.key_slots_bottom) == 1
-        side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert side == self.principal.active_side
 
-        assert len(instance.tops) == len(case_sides)
+        assert len(instance.premises) == len(case_sides)
         for i, (expected_side, _) in enumerate(case_sides):
-            top = instance.tops[i]
-            assert len(instance.key_slots_tops[i]) == 1
-            t_side = top.formulas[instance.key_slots_tops[i][0]]
-            assert t_side == expected_side
+            prem_prop = instance.premises[i]
+            assert len(instance.key_slots_premises[i]) == 1
+            prem_prop_side = prem_prop.formulas[instance.key_slots_premises[i][0]]
+            assert prem_prop_side == expected_side
 
-        top_combined: list[Side] = []
-        for i, top in enumerate(instance.tops):
-            top_combined.extend(array_minus_key_slots(top.formulas, instance.key_slots_tops[i]))
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == tuple(top_combined)
+        prem_combined: list[Side] = []
+        for i, prem_prop in enumerate(instance.premises):
+            prem_combined.extend(array_minus_key_slots(prem_prop.formulas, instance.key_slots_premises[i]))
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == tuple(prem_combined)
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
         case_formulas = self.principal.get_case_type(self.case_label)
 
-        assert len(instance.key_slots_bottom) == 1
-        side, jf = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side, jf = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert (side, jf) == (self.principal.active_side, self.principal)
 
-        assert len(instance.tops) == len(case_formulas)
+        assert len(instance.premises) == len(case_formulas)
         for i, (expected_side, expected_f) in enumerate(case_formulas):
-            top = instance.tops[i]
-            assert len(instance.key_slots_tops[i]) == 1
-            t_side, t_f = top.formulas[instance.key_slots_tops[i][0]]
-            assert (t_side, t_f) == (expected_side, expected_f)
+            prem_prop = instance.premises[i]
+            assert len(instance.key_slots_premises[i]) == 1
+            p_side, p_f = prem_prop.formulas[instance.key_slots_premises[i][0]]
+            assert (p_side, p_f) == (expected_side, expected_f)
 
-        top_combined: list[SidedFormula] = []
-        for i, top in enumerate(instance.tops):
-            top_combined.extend(array_minus_key_slots(top.formulas, instance.key_slots_tops[i]))
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == tuple(top_combined)
+        prem_combined: list[SidedFormula] = []
+        for i, prem_prop in enumerate(instance.premises):
+            prem_combined.extend(array_minus_key_slots(prem_prop.formulas, instance.key_slots_premises[i]))
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == tuple(prem_combined)
 
 
 # ── Control flow ──────────────────────────────────────────────────────────────
@@ -111,24 +111,24 @@ class IfBool(AdmissibleRule):
     name = "if_bool"
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.key_slots_bottom) == 1
-        side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert side == Side.LEFT
 
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        for i, top in enumerate(instance.tops):
-            top_others = array_minus_key_slots(top.formulas, instance.key_slots_tops[i])
-            assert bottom_others == tuple(top_others), f"top {i} context mismatch"
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        for i, prem_prop in enumerate(instance.premises):
+            prem_others = array_minus_key_slots(prem_prop.formulas, instance.key_slots_premises[i])
+            assert conclusion_others == tuple(prem_others), f"premise {i} context mismatch"
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.key_slots_bottom) == 1
-        side, jf = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        assert len(instance.key_slots_conclusion) == 1
+        side, jf = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         assert (side, jf) == (Side.LEFT, Bool)
 
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        for i, top in enumerate(instance.tops):
-            top_others = array_minus_key_slots(top.formulas, instance.key_slots_tops[i])
-            assert bottom_others == tuple(top_others), f"top {i} context mismatch"
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        for i, prem_prop in enumerate(instance.premises):
+            prem_others = array_minus_key_slots(prem_prop.formulas, instance.key_slots_premises[i])
+            assert conclusion_others == tuple(prem_others), f"premise {i} context mismatch"
 
 
 # ── Exponential admissible rules ────────────────────────────────────────
@@ -139,59 +139,59 @@ class WeakPromotion(AdmissibleRule):
     principle_formula_index: int
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        l = len(top.formulas)
-        assert l == len(instance.key_slots_tops[0])
-        assert l == len(instance.key_slots_bottom)
-        assert l == len(instance.bottom.formulas)
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        l = len(premise.formulas)
+        assert l == len(instance.key_slots_premises[0])
+        assert l == len(instance.key_slots_conclusion)
+        assert l == len(instance.conclusion.formulas)
 
         active_side  = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
         passive_side = active_side.flip()
-        for i, side in enumerate(top.formulas):
-            bottom_side = instance.bottom.formulas[instance.key_slots_bottom[i]]
+        for i, side in enumerate(premise.formulas):
+            conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[i]]
             if i == self.principle_formula_index:
-                assert bottom_side == active_side, (
+                assert conclusion_side == active_side, (
                     f"Principal formula in bottom of WeakPromotion must be on side "
-                    f"{active_side}, found {bottom_side}"
+                    f"{active_side}, found {conclusion_side}"
                 )
-                assert bottom_side == side
+                assert conclusion_side == side
             else:
-                assert bottom_side == passive_side, (
+                assert conclusion_side == passive_side, (
                     f"Passthrough formula in bottom of WeakPromotion must be on side "
-                    f"{passive_side}, found {bottom_side}"
+                    f"{passive_side}, found {conclusion_side}"
                 )
-                assert bottom_side == side
+                assert conclusion_side == side
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        l = len(top.formulas)
-        assert l == len(instance.key_slots_tops[0])
-        assert l == len(instance.key_slots_bottom)
-        assert l == len(instance.bottom.formulas)
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        l = len(premise.formulas)
+        assert l == len(instance.key_slots_premises[0])
+        assert l == len(instance.key_slots_conclusion)
+        assert l == len(instance.conclusion.formulas)
 
         active_side  = Side.RIGHT if self.polarity == Polarity.POS else Side.LEFT
         passive_side = active_side.flip()
-        for i, (side, f) in enumerate(top.formulas):
-            bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[i]]
+        for i, (side, f) in enumerate(premise.formulas):
+            conc_side, conc_f = instance.conclusion.formulas[instance.key_slots_conclusion[i]]
             if i == self.principle_formula_index:
-                assert isinstance(bottom_f, Bang)
-                assert bottom_f.polarity == self.polarity
-                assert bottom_f.sub == f
-                assert bottom_side == active_side, (
+                assert isinstance(conc_f, Box)
+                assert conc_f.polarity == self.polarity
+                assert conc_f.sub == f
+                assert conc_side == active_side, (
                     f"Principal formula in bottom of WeakPromotion must be on side "
-                    f"{active_side}, found {bottom_side}"
+                    f"{active_side}, found {conc_side}"
                 )
-                assert bottom_side == side
+                assert conc_side == side
             else:
-                assert isinstance(bottom_f, Bang)
-                assert bottom_f.sub == f
-                assert bottom_side == passive_side, (
+                assert isinstance(conc_f, Box)
+                assert conc_f.sub == f
+                assert conc_side == passive_side, (
                     f"Passthrough formula in bottom of WeakPromotion must be on side "
-                    f"{passive_side}, found {bottom_side}"
+                    f"{passive_side}, found {conc_side}"
                 )
-                assert bottom_side == side
+                assert conc_side == side
 
 
 @dataclass(frozen=True)
@@ -199,46 +199,46 @@ class Digging(AdmissibleRule):
     polarity: Polarity
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == 1
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == 1
+        assert len(instance.key_slots_conclusion) == 1
 
-        top_side    = top.formulas[instance.key_slots_tops[0][0]]
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert bottom_side == top_side
+        premise_side    = premise.formulas[instance.key_slots_premises[0][0]]
+        conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert conclusion_side == premise_side
         expected = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Digging must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Digging must be on side {expected}, found {conclusion_side}"
         )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top_others
+        premise_others    = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        conclusion_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conclusion_others == premise_others
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == 1
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == 1
+        assert len(instance.key_slots_conclusion) == 1
 
-        top_side,    top_f    = top.formulas[instance.key_slots_tops[0][0]]
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(top_f, Bang)
-        assert isinstance(bottom_f, Bang)
-        assert top_f.polarity == self.polarity
-        assert bottom_f.sub == top_f
-        assert bottom_side == top_side
+        premise_side, premise_f    = premise.formulas[instance.key_slots_premises[0][0]]
+        conc_side, conc_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(premise_f, Box)
+        assert isinstance(conc_f, Box)
+        assert premise_f.polarity == self.polarity
+        assert conc_f.sub == premise_f
+        assert conc_side == premise_side
         expected = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Digging must be on side {expected}, found {bottom_side}"
+        assert conc_side == expected, (
+            f"Principal formula in bottom of Digging must be on side {expected}, found {conc_side}"
         )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top_others
+        prem_others    = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        conc_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conc_others == prem_others
 
 
 @dataclass(frozen=True)
@@ -246,54 +246,54 @@ class Absorption(AdmissibleRule):
     polarity: Polarity
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == 2
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == 2
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        conc_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         expected    = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Absorption must be on side {expected}, found {bottom_side}"
+        assert conc_side == expected, (
+            f"Principal formula in bottom of Absorption must be on side {expected}, found {conc_side}"
         )
 
-        top_side0 = top.formulas[instance.key_slots_tops[0][0]]
-        assert top_side0 == expected, (
-            f"First principal formula in top of Absorption must be on side {expected}, found {top_side0}"
+        prem_side0 = premise.formulas[instance.key_slots_premises[0][0]]
+        assert prem_side0 == expected, (
+            f"First principal formula in top of Absorption must be on side {expected}, found {prem_side0}"
         )
-        top_side1 = top.formulas[instance.key_slots_tops[0][1]]
-        assert top_side1 == expected, (
-            f"Second principal formula in top of Absorption must be on side {expected}, found {top_side1}"
+        prem_side1 = premise.formulas[instance.key_slots_premises[0][1]]
+        assert prem_side1 == expected, (
+            f"Second principal formula in top of Absorption must be on side {expected}, found {prem_side1}"
         )
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == 2
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == 2
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(bottom_f, Bang)
-        assert bottom_f.polarity == self.polarity
+        conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(conclusion_f, Box)
+        assert conclusion_f.polarity == self.polarity
         expected = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Absorption must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Absorption must be on side {expected}, found {conclusion_side}"
         )
 
-        top_side0, top_f0 = top.formulas[instance.key_slots_tops[0][0]]
-        assert top_side0 == expected
-        assert top_f0 == bottom_f.sub, (
+        premise_side0, premise_f0 = premise.formulas[instance.key_slots_premises[0][0]]
+        assert premise_side0 == expected
+        assert premise_f0 == conclusion_f.sub, (
             f"First principal in top of Absorption must be subformula of bottom, "
-            f"expected {bottom_f.sub}, found {top_f0}"
+            f"expected {conclusion_f.sub}, found {premise_f0}"
         )
 
-        top_side1, top_f1 = top.formulas[instance.key_slots_tops[0][1]]
-        assert top_side1 == expected
-        assert top_f1 == bottom_f, (
+        premise_side1, premise_f1 = premise.formulas[instance.key_slots_premises[0][1]]
+        assert premise_side1 == expected
+        assert premise_f1 == conclusion_f, (
             f"Second principal in top of Absorption must equal bottom formula, "
-            f"expected {bottom_f}, found {top_f1}"
+            f"expected {conclusion_f}, found {premise_f1}"
         )
 
 
@@ -303,51 +303,51 @@ class Multiplexing(AdmissibleRule):
     count: int = 2
 
     def check_shape(self, instance: InstantiatedRule[Side]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == self.count
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == self.count
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side = instance.bottom.formulas[instance.key_slots_bottom[0]]
+        conclusion_side = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
         expected    = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Multiplexing must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Multiplexing must be on side {expected}, found {conclusion_side}"
         )
 
         for i in range(self.count):
-            top_side = top.formulas[instance.key_slots_tops[0][i]]
-            assert top_side == expected, (
-                f"Principal formula in top of Multiplexing must be on side {expected}, found {top_side}"
+            premise_side = premise.formulas[instance.key_slots_premises[0][i]]
+            assert premise_side == expected, (
+                f"Principal formula in top of Multiplexing must be on side {expected}, found {premise_side}"
             )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top_others
+        prem_others = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        conc_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conc_others == prem_others
 
     def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
-        assert len(instance.tops) == 1
-        top = instance.tops[0]
-        assert len(instance.key_slots_tops) == 1
-        assert len(instance.key_slots_tops[0]) == self.count
-        assert len(instance.key_slots_bottom) == 1
+        assert len(instance.premises) == 1
+        premise = instance.premises[0]
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == self.count
+        assert len(instance.key_slots_conclusion) == 1
 
-        bottom_side, bottom_f = instance.bottom.formulas[instance.key_slots_bottom[0]]
-        assert isinstance(bottom_f, Bang)
-        assert bottom_f.polarity == self.polarity
+        conclusion_side, conclusion_f = instance.conclusion.formulas[instance.key_slots_conclusion[0]]
+        assert isinstance(conclusion_f, Box)
+        assert conclusion_f.polarity == self.polarity
         expected = Side.LEFT if self.polarity == Polarity.POS else Side.RIGHT
-        assert bottom_side == expected, (
-            f"Principal formula in bottom of Multiplexing must be on side {expected}, found {bottom_side}"
+        assert conclusion_side == expected, (
+            f"Principal formula in bottom of Multiplexing must be on side {expected}, found {conclusion_side}"
         )
 
         for i in range(self.count):
-            top_side, top_f = top.formulas[instance.key_slots_tops[0][i]]
-            assert top_side == expected
-            assert top_f == bottom_f.sub, (
+            premise_side, premise_f = premise.formulas[instance.key_slots_premises[0][i]]
+            assert premise_side == expected
+            assert premise_f == conclusion_f.sub, (
                 f"Principal formula in top of Multiplexing must be subformula of bottom, "
-                f"expected {bottom_f.sub}, found {top_f}"
+                f"expected {conclusion_f.sub}, found {premise_f}"
             )
 
-        top_others    = array_minus_key_slots(top.formulas, instance.key_slots_tops[0])
-        bottom_others = array_minus_key_slots(instance.bottom.formulas, instance.key_slots_bottom)
-        assert bottom_others == top_others
+        prem_others = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
+        conc_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
+        assert conc_others == prem_others

@@ -5,7 +5,7 @@ from ir_types import (
     InstantiatedRule, Node, apply_perm,
 )
 from core_ir import (
-    Atom, Case, JumboFormula, Bang, Identity, Cut, Build, Break, Weakening, Dereliction, Contraction,
+    Atom, Case, JumboFormula, Box, Identity, Cut, Build, Break, Weakening, Dereliction, Contraction,
 )
 
 
@@ -42,33 +42,33 @@ def test_apply_perm_invalid():
 
 def make_identity(f):
     ir = InstantiatedRule(
-        rule=Identity(), tops=(), key_slots_tops=(),
-        bottom=Sequent(((L, f), (R, f))),
-        key_slots_bottom=(0, 1),
+        rule=Identity(), premises=(), key_slots_premises=(),
+        conclusion=Sequent(((L, f), (R, f))),
+        key_slots_conclusion=(0, 1),
     )
-    return RuleDerivation(instantiated_rule=ir, premises=[], perm_tops=(), node_id=id(ir))
+    return RuleDerivation(instantiated_rule=ir, premises=[], perm_premises=(), node_id=id(ir))
 
 def test_derivation_default_perm():
     d = make_identity(A)
-    assert d.perm_tops == ()  # no tops, empty tuple
+    assert d.perm_premises == ()  # no tops, empty tuple
 
 def test_derivation_cut_default_perm():
     top0 = Sequent(((R, A),))
     top1 = Sequent(((L, A), (R, B)))
     bot  = Sequent(((R, B),))
     ir = InstantiatedRule(
-        rule=Cut(), tops=(top0, top1),
-        key_slots_tops=((0,), (0,)),
-        bottom=bot, key_slots_bottom=(),
+        rule=Cut(), premises=(top0, top1),
+        key_slots_premises=((0,), (0,)),
+        conclusion=bot, key_slots_conclusion=(),
     )
     # premises must have matching bottoms
     ir0 = InstantiatedRule(
-        rule=Identity(), tops=(), key_slots_tops=(),
-        bottom=top0, key_slots_bottom=(0,),  # shape won't pass Identity check — use validate=False workaround
+        rule=Identity(), premises=(), key_slots_premises=(),
+        conclusion=top0, key_slots_conclusion=(0,),  # shape won't pass Identity check — use validate=False workaround
     )
     # Just test that default perm is set correctly without needing valid premises
     # by checking __post_init__ sets perm_tops before validate
-    assert ir.tops == (top0, top1)
+    assert ir.premises == (top0, top1)
 
 # ── Derivation with non-identity perm ─────────────────────────────────────────
 # Scenario: rule expects top = (L,A),(R,B) but premise has bottom = (R,B),(L,A)
@@ -81,39 +81,39 @@ def test_derivation_with_perm():
     # Build tensor: top0=(L,A), top1=(L,B), bottom=(R,tensor)
     ir_build = InstantiatedRule(
         rule=Build(principal=tensor, case_index=0),
-        tops=(Sequent(((L, A),)), Sequent(((L, B),))),
-        key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor),)),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A),)), Sequent(((L, B),))),
+        key_slots_premises=((0,), (0,)),
+        conclusion=Sequent(((R, tensor),)),
+        key_slots_conclusion=(0,),
     )
 
     # Make a premise whose bottom is (L, A) — matches top0 with identity perm
     ir_leaf_A = InstantiatedRule(
-        rule=Identity(), tops=(), key_slots_tops=(),
-        bottom=Sequent(((L, A), (R, A))),
-        key_slots_bottom=(0, 1),
+        rule=Identity(), premises=(), key_slots_premises=(),
+        conclusion=Sequent(((L, A), (R, A))),
+        key_slots_conclusion=(0, 1),
     )
-    leaf_A = RuleDerivation(instantiated_rule=ir_leaf_A, premises=[], perm_tops=(), node_id=id(ir_leaf_A))
+    leaf_A = RuleDerivation(instantiated_rule=ir_leaf_A, premises=[], perm_premises=(), node_id=id(ir_leaf_A))
 
     # Make a premise whose bottom is (L, B) — matches top1 with identity perm
     ir_leaf_B = InstantiatedRule(
-        rule=Identity(), tops=(), key_slots_tops=(),
-        bottom=Sequent(((L, B), (R, B))),
-        key_slots_bottom=(0, 1),
+        rule=Identity(), premises=(), key_slots_premises=(),
+        conclusion=Sequent(((L, B), (R, B))),
+        key_slots_conclusion=(0, 1),
     )
-    leaf_B = RuleDerivation(instantiated_rule=ir_leaf_B, premises=[], perm_tops=(), node_id=id(ir_leaf_B))
+    leaf_B = RuleDerivation(instantiated_rule=ir_leaf_B, premises=[], perm_premises=(), node_id=id(ir_leaf_B))
 
     # top0 = (L,A) but leaf_A.bottom = (L,A),(R,A) — won't match without perm
     # So: premise whose bottom == apply_perm(perm, top)
     # top0 has 1 formula; perm must be (0,) — identity, leaf must have bottom=(L,A)
     # Make a premise with exactly bottom=(L,A) using weakening of leaf_A
-    bang_A = Bang(POS, A)
+    bang_A = Box(POS, A)
     ir_wk = InstantiatedRule(
         rule=Weakening(POS),
-        tops=(Sequent(((L, A),)),),
-        key_slots_tops=(),
-        bottom=Sequent(((L, bang_A), (L, A))),
-        key_slots_bottom=(0,),
+        premises=(Sequent(((L, A),)),),
+        key_slots_premises=(),
+        conclusion=Sequent(((L, bang_A), (L, A))),
+        key_slots_conclusion=(0,),
     )
     # That's getting complicated. Instead just test the perm machinery directly:
     # Build a fake scenario where top=(L,A),(R,B) and premise.bottom=(R,B),(L,A)
@@ -129,16 +129,16 @@ def test_derivation_with_perm():
     top1_cut = top_seq                       # (L,A),(R,B)
     bot_cut  = Sequent(((R, B),))
     ir_cut = InstantiatedRule(
-        rule=Cut(), tops=(top0_cut, top1_cut),
-        key_slots_tops=((0,), (0,)),
-        bottom=bot_cut, key_slots_bottom=(),
+        rule=Cut(), premises=(top0_cut, top1_cut),
+        key_slots_premises=((0,), (0,)),
+        conclusion=bot_cut, key_slots_conclusion=(),
     )
 
     # Premise for top0: needs bottom == (R,A) with identity perm (0,)
     ir_p0 = InstantiatedRule(
-        rule=Identity(), tops=(), key_slots_tops=(),
-        bottom=Sequent(((L, A), (R, A))),
-        key_slots_bottom=(0, 1),
+        rule=Identity(), premises=(), key_slots_premises=(),
+        conclusion=Sequent(((L, A), (R, A))),
+        key_slots_conclusion=(0, 1),
     )
     # apply_perm((1,), top0_cut=(R,A)) must == p0.bottom — but top0 has 1 formula
     # Identity prem bottom is (L,A),(R,A) which has 2 formulas, can't match 1-formula top

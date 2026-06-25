@@ -1,7 +1,7 @@
 from connectives import *
 from pretty import fmt, register, is_jf, cases_match, any_formula
 from ir_types import Polarity, Side
-from core_ir import Atom, Bang, JumboFormula, Case
+from core_ir import Atom, Box, JumboFormula, Case
 
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
@@ -25,8 +25,8 @@ tests = [
     ("A^⊗3",          TensorPower(A, 3)),
     ("A^⅋4",          ParPower(A, 4)),
     ("nested",        Lollipop(Tensor(A, B), With(A, C))),
-    ("!(A → B)",      Bang(POS, Lollipop(A, B))),
-    ("?(A∨B)",        Bang(NEG, Plus(A, B))),
+    ("!(A → B)",      Box(POS, Lollipop(A, B))),
+    ("?(A∨B)",        Box(NEG, Plus(A, B))),
     ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))),
 ]
 

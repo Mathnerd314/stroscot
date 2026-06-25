@@ -4,7 +4,7 @@ from ir_types import (
     InstantiatedRule,
 )
 from core_ir import (
-    Atom, Bang, OpaqueType, FlatType,
+    Atom, Box, OpaqueType, FlatType,
 )
 from dirty_ir import (
     Int32, Int64, Float32, Float64, Bool,
@@ -18,7 +18,7 @@ POS, NEG = Polarity.POS, Polarity.NEG
 
 A = Atom(POS, "A")
 B = Atom(POS, "B")
-bang_A = Bang(POS, A)
+bang_A = Box(POS, A)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -28,10 +28,10 @@ def make_flat_op(rule, *args, result):
     bottom = Sequent(lefts + ((R, result),))
     ir = InstantiatedRule(
         rule=rule,
-        tops=(),
-        key_slots_tops=(),
-        bottom=bottom,
-        key_slots_bottom=tuple(range(len(args)+1)),  # args and result are key slots
+        premises=(),
+        key_slots_premises=(),
+        conclusion=bottom,
+        key_slots_conclusion=tuple(range(len(args)+1)),  # args and result are key slots
     )
     ir.validate()
     return ir
@@ -71,8 +71,8 @@ def test_eq_i32_produces_bool():
 def test_flat_op_wrong_arg_type():
     bottom = Sequent(((L, Int64), (L, Int32), (R, Int32)))
     ir = InstantiatedRule(
-        rule=AddI32, tops=(), key_slots_tops=(),
-        bottom=bottom, key_slots_bottom=(),
+        rule=AddI32, premises=(), key_slots_premises=(),
+        conclusion=bottom, key_slots_conclusion=(),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -80,8 +80,8 @@ def test_flat_op_wrong_arg_type():
 def test_flat_op_wrong_arity():
     bottom = Sequent(((L, Int32), (R, Int32)))
     ir = InstantiatedRule(
-        rule=AddI32, tops=(), key_slots_tops=(),
-        bottom=bottom, key_slots_bottom=(),
+        rule=AddI32, premises=(), key_slots_premises=(),
+        conclusion=bottom, key_slots_conclusion=(),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -90,10 +90,10 @@ def test_flat_op_has_premises():
     bottom = Sequent(((L, Int32), (L, Int32), (R, Int32)))
     ir = InstantiatedRule(
         rule=AddI32,
-        tops=(Sequent(((R, Int32),)),),
-        key_slots_tops=((0,),),
-        bottom=bottom,
-        key_slots_bottom=(),
+        premises=(Sequent(((R, Int32),)),),
+        key_slots_premises=((0,),),
+        conclusion=bottom,
+        key_slots_conclusion=(),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -109,8 +109,8 @@ def test_const_flat_type():
     rule = Const(principal=Int32, case_label=42)
     bottom = Sequent(((R, Int32),))
     ir = InstantiatedRule(
-        rule=rule, tops=(), key_slots_tops=(),
-        bottom=bottom, key_slots_bottom=(0,),
+        rule=rule, premises=(), key_slots_premises=(),
+        conclusion=bottom, key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -118,8 +118,8 @@ def test_const_wrong_formula():
     rule = Const(principal=Int32, case_label=0)
     bottom = Sequent(((R, Float32),))
     ir = InstantiatedRule(
-        rule=rule, tops=(), key_slots_tops=(),
-        bottom=bottom, key_slots_bottom=(0,),
+        rule=rule, premises=(), key_slots_premises=(),
+        conclusion=bottom, key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -134,10 +134,10 @@ def test_if_bool_basic():
     bottom   = Sequent(((L, Bool), (R, Int32)))
     ir = InstantiatedRule(
         rule=rule,
-        tops=(then_top, else_top),
-        key_slots_tops=((), ()),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(then_top, else_top),
+        key_slots_premises=((), ()),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -148,10 +148,10 @@ def test_if_bool_wrong_cond_type():
     bottom   = Sequent(((L, Int32), (R, Int32)))  # Int32 where Bool expected
     ir = InstantiatedRule(
         rule=rule,
-        tops=(then_top, else_top),
-        key_slots_tops=((), ()),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(then_top, else_top),
+        key_slots_premises=((), ()),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -160,28 +160,28 @@ def test_if_bool_wrong_cond_type():
 
 def test_digging_pos():
     # !!A on left  →  !A on left  (POS)
-    bang_bang_A = Bang(POS, bang_A)
+    bang_bang_A = Box(POS, bang_A)
     top    = Sequent(((L, bang_A),))
     bottom = Sequent(((L, bang_bang_A),))
     ir = InstantiatedRule(
         rule=Digging(POS),
-        tops=(top,),
-        key_slots_tops=((0,),),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0,),),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
 def test_digging_wrong_polarity():
-    bang_bang_A = Bang(POS, bang_A)
+    bang_bang_A = Box(POS, bang_A)
     top    = Sequent(((L, bang_A),))
     bottom = Sequent(((L, bang_bang_A),))
     ir = InstantiatedRule(
         rule=Digging(NEG),   # wrong polarity
-        tops=(top,),
-        key_slots_tops=((0,),),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0,),),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -194,10 +194,10 @@ def test_absorption_pos():
     bottom = Sequent(((L, bang_A),))
     ir = InstantiatedRule(
         rule=Absorption(POS),
-        tops=(top,),
-        key_slots_tops=((0, 1),),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0, 1),),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -206,10 +206,10 @@ def test_absorption_wrong_slots():
     bottom = Sequent(((L, bang_A),))
     ir = InstantiatedRule(
         rule=Absorption(POS),
-        tops=(top,),
-        key_slots_tops=((0,),),   # only one slot instead of two
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0,),),   # only one slot instead of two
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
@@ -221,10 +221,10 @@ def test_multiplexing_pos_count2():
     bottom = Sequent(((L, bang_A),))
     ir = InstantiatedRule(
         rule=Multiplexing(POS, count=2),
-        tops=(top,),
-        key_slots_tops=((0, 1),),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0, 1),),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     ir.validate()
 
@@ -233,10 +233,10 @@ def test_multiplexing_count_mismatch():
     bottom = Sequent(((L, bang_A),))
     ir = InstantiatedRule(
         rule=Multiplexing(POS, count=3),  # says 3 but only 2 key slots
-        tops=(top,),
-        key_slots_tops=((0, 1),),
-        bottom=bottom,
-        key_slots_bottom=(0,),
+        premises=(top,),
+        key_slots_premises=((0, 1),),
+        conclusion=bottom,
+        key_slots_conclusion=(0,),
     )
     with pytest.raises(AssertionError):
         ir.validate()
