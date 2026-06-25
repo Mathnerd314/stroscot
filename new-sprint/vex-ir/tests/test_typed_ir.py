@@ -333,9 +333,7 @@ def test_derivation_pretty_runs():
 def test_compute_key_slot_wires_identity_leaf_empty():
     d = make_identity(A)
     wire_map = compute_key_slot_wires(d)
-    assert d.node_id in wire_map
-    assert wire_map[d.node_id] == ()
-
+    assert wire_map.source_to_wire[d.node_id] == []
 
 def test_compute_key_slot_wires_cut_to_identity_destinations():
     id_A = make_identity(A)
@@ -351,13 +349,13 @@ def test_compute_key_slot_wires_cut_to_identity_destinations():
     cut = RuleDerivation(instantiated_rule=ir_cut, premises=[id_A, id_B], perm_premises=(), node_id=id(ir_cut))
 
     wire_map = compute_key_slot_wires(cut)
-    cut_wires = wire_map[cut.node_id]
+    cut_wires = wire_map.source_to_wire[cut.node_id]
     assert len(cut_wires) == 2
 
     # top0 key reaches id_A at structural slot 0.
     w0 = cut_wires[0]
     assert w0.source.node_id == cut.node_id
-    assert w0.source.top_index == 0
+    assert w0.source.premise_index == 0
     assert w0.source.key_slot == 0
     assert w0.source.formal_slot == 0
     assert w0.target.node_id == id_A.node_id
@@ -368,7 +366,7 @@ def test_compute_key_slot_wires_cut_to_identity_destinations():
     # (the analysis is structural and does not inspect formula equality)
     w1 = cut_wires[1]
     assert w1.source.node_id == cut.node_id
-    assert w1.source.top_index == 1
+    assert w1.source.premise_index == 1
     assert w1.source.key_slot == 0
     assert w1.source.formal_slot == 0
     assert w1.target.node_id == id_B.node_id
@@ -386,17 +384,17 @@ def test_compute_key_slot_wires_basic_block_all_slots_key():
     )
 
     wire_map = compute_key_slot_wires(bb)
-    bb_wires = wire_map[bb.node_id]
+    bb_wires = wire_map.source_to_wire[bb.node_id]
     assert len(bb_wires) == 2
 
     # BasicBlock top formal slot 0 maps to child bottom slot 1 due to perm (1,0)
-    assert bb_wires[0].source.top_index == 0
+    assert bb_wires[0].source.premise_index == 0
     assert bb_wires[0].source.formal_slot == 0
     assert bb_wires[0].target.node_id == id_A.node_id
     assert bb_wires[0].target.formal_slot == 1
 
     # BasicBlock top formal slot 1 maps to child bottom slot 0
-    assert bb_wires[1].source.top_index == 0
+    assert bb_wires[1].source.premise_index == 0
     assert bb_wires[1].source.formal_slot == 1
     assert bb_wires[1].target.node_id == id_A.node_id
     assert bb_wires[1].target.formal_slot == 0
