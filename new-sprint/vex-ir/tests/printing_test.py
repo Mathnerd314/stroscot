@@ -1,6 +1,7 @@
 from connectives import *
 from pretty import fmt, register, is_jf, cases_match, any_formula
-from typed_ir import Atom, Bang, Polarity, JumboFormula, Case, Side
+from typed_ir import Polarity, Side
+from core_ir import Atom, Bang, JumboFormula, Case
 
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
@@ -26,7 +27,7 @@ tests = [
     ("nested",        Lollipop(Tensor(A, B), With(A, C))),
     ("!(A → B)",      Bang(POS, Lollipop(A, B))),
     ("?(A∨B)",        Bang(NEG, Plus(A, B))),
-    ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))),
+    ("unknown",       JumboFormula(POS, (Case("#x", ((L, A), (R, B))), Case("#y", ())))), # type: ignore
 ]
 
 for label, f in tests:
@@ -35,13 +36,13 @@ for label, f in tests:
 # Extension example: Bool
 _ = any_formula
 register("Bool",
-    lambda f: is_jf(POS)(f) and len(f.cases)==2
-              and f.cases[0].label=="#t" and len(f.cases[0].formulas)==0
-              and f.cases[1].label=="#f" and len(f.cases[1].formulas)==0,
+    lambda f: isinstance(f, JumboFormula) and is_jf(POS)(f) and len(f.cases)==2
+              and f.cases[0].label=="#t" and len(f.cases[0].formulas.formulas)==0
+              and f.cases[1].label=="#f" and len(f.cases[1].formulas.formulas)==0,
     lambda f: "Bool",
     prepend=True,
 )
-Bool = JumboFormula(POS, (Case("#t", ()), Case("#f", ())))
+Bool = JumboFormula(POS, (Case("#t", ()), Case("#f", ()))) # type: ignore
 print()
 print(f"  Bool         =>  {fmt(Bool)}")
 print(f"  Bool∨A       =>  {fmt(Plus(Bool, A))}")

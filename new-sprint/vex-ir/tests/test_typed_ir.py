@@ -3,26 +3,28 @@ from typed_ir import (
     Polarity,
     RuleDerivation,
     Side,
-    Atom,
-    Case,
-    JumboFormula,
-    Bang,
     Sequent,
-    Identity,
-    Cut,
-    Build,
-    Break,
-    Promotion,
-    Dereliction,
     SidedFormula,
-    Weakening,
-    Contraction,
     InstantiatedRule,
     Node,
     BasicBlock,
     compute_key_slot_wires,
 )
 
+from core_ir import (
+    Atom,
+    Case,
+    JumboFormula,
+    Bang,
+    Identity,
+    Cut,
+    Build,
+    Break,
+    Promotion,
+    Dereliction,
+    Weakening,
+    Contraction,
+)
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
 
@@ -134,7 +136,7 @@ def test_build_tensor_no_context():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A),)), Sequent(((L, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor),)),
+        bottom=Sequent(((R, tensor),)), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -145,7 +147,7 @@ def test_build_tensor_with_shared_context():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A), (R, C))), Sequent(((L, B), (R, C)))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, tensor), (R, C), (R, C))),
+        bottom=Sequent(((R, tensor), (R, C), (R, C))), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -156,7 +158,7 @@ def test_build_tensor_wrong_side():
         rule=Build(principal=tensor, case_index=0),
         tops=(Sequent(((L, A),)), Sequent(((L, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, tensor),)),
+        bottom=Sequent(((L, tensor),)), # type: ignore
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -168,7 +170,7 @@ def test_build_plus_left():
         rule=Build(principal=plus, case_index=0),
         tops=(Sequent(((L, A),)),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)),
+        bottom=Sequent(((R, plus),)), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -179,7 +181,7 @@ def test_build_plus_right():
         rule=Build(principal=plus, case_index=1),
         tops=(Sequent(((L, B),)),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((R, plus),)),
+        bottom=Sequent(((R, plus),)), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -193,7 +195,7 @@ def test_break_with():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A),)), Sequent(((R, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_),)),
+        bottom=Sequent(((R, with_),)), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -204,7 +206,7 @@ def test_break_with_with_context():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A), (L, C))), Sequent(((R, B), (L, C)))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((R, with_), (L, C))),
+        bottom=Sequent(((R, with_), (L, C))), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -215,7 +217,7 @@ def test_break_lollipop():
         rule=Break(principal=lollipop),
         tops=(Sequent(((L, A), (R, B))),),
         key_slots_tops=((0, 1),),
-        bottom=Sequent(((R, lollipop),)),
+        bottom=Sequent(((R, lollipop),)), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -226,7 +228,7 @@ def test_break_wrong_side():
         rule=Break(principal=with_),
         tops=(Sequent(((R, A),)), Sequent(((R, B),))),
         key_slots_tops=((0,), (0,)),
-        bottom=Sequent(((L, with_),)),
+        bottom=Sequent(((L, with_),)), # type: ignore
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -252,7 +254,7 @@ def test_weakening():
         rule=Weakening(POS),
         tops=(Sequent(((R, B),)),),
         key_slots_tops=(),
-        bottom=Sequent(((L, bang_A), (R, B))),
+        bottom=Sequent(((L, bang_A), (R, B))), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -263,7 +265,7 @@ def test_weakening_wrong_polarity():
         rule=Weakening(POS),
         tops=(Sequent(((R, B),)),),
         key_slots_tops=(),
-        bottom=Sequent(((L, Bang(NEG, A)), (R, B))),
+        bottom=Sequent(((L, Bang(NEG, A)), (R, B))), # type: ignore
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -275,7 +277,7 @@ def test_dereliction():
         rule=Dereliction(POS),
         tops=(Sequent(((L, A), (R, B))),),
         key_slots_tops=((0,),),
-        bottom=Sequent(((L, bang_A), (R, B))),
+        bottom=Sequent(((L, bang_A), (R, B))), # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -312,7 +314,7 @@ def test_derivation_conclusion_mismatch():
         key_slots_bottom=(),
     )
     with pytest.raises((AssertionError, ValueError)):
-        RuleDerivation(instantiated_rule=ir_cut, premises=[id_B, id_B],perm_tops=(),node_id=None).validate()
+        RuleDerivation(instantiated_rule=ir_cut, premises=[id_B, id_B],perm_tops=(),node_id=id(ir_cut)).validate()
 
 def test_derivation_depth_and_size():
     id_A = make_identity(A)

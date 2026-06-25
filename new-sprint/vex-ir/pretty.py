@@ -2,7 +2,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
-from typed_ir import Polarity, Side, JumboFormula, Case, Atom, Bang, Formula
+from typed_ir import Polarity, Side, Formula
+from core_ir import JumboFormula, Case, Atom, Bang
 
 L, R = Side.LEFT, Side.RIGHT
 POS, NEG = Polarity.POS, Polarity.NEG
@@ -21,9 +22,9 @@ def cases_match(jf: JumboFormula, pattern: tuple) -> bool:
     if len(jf.cases) != len(pattern):
         return False
     for case, (label, fmls) in zip(jf.cases, pattern):
-        if case.label != label or len(case.formulas) != len(fmls):
+        if case.label != label or len(case.formulas.formulas) != len(fmls):
             return False
-        for (side, f), (exp_side, exp_f) in zip(case.formulas, fmls):
+        for (side, f), (exp_side, exp_f) in zip(case.formulas.formulas, fmls):
             if side != exp_side:
                 return False
             if not (exp_f(f) if callable(exp_f) else f == exp_f):
@@ -60,8 +61,8 @@ def fmt(f: Formula) -> str:
 
 def _fmt_case(case: Case, polarity: Polarity) -> str:
     sep    = " - " if polarity == POS else " ⊸ "
-    inputs  = ", ".join(fmt(x) for s, x in case.formulas if s == L)
-    outputs = ", ".join(fmt(x) for s, x in case.formulas if s == R)
+    inputs  = ", ".join(fmt(x) for s, x in case.formulas.formulas if s == L)
+    outputs = ", ".join(fmt(x) for s, x in case.formulas.formulas if s == R)
     return f"({case.label}, [{inputs}]{sep}[{outputs}])"
 
 def _fallback(f: Formula) -> str:

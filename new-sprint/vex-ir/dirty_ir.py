@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from typing import Any, Generic, Type, TypeVar
 
 from typed_ir import (
-    AdmissibleRule, OpaqueType, FlatType, FlatOperation, Polarity, Side,
+    Polarity, Side,
     InstantiatedRule, RuleSchema,
     array_minus_key_slots,
-    Formula, Bang, SidedFormula,
+    Formula, SidedFormula,
     TypedSequent,
 )
+from core_ir import AdmissibleRule, OpaqueType, FlatType, FlatOperation, Bang
 
 # ── Pre-defined primitive types ───────────────────────────────────────────────
 

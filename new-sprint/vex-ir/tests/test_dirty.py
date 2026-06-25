@@ -1,7 +1,10 @@
 import pytest
 from typed_ir import (
-    Atom, Bang, Polarity, Side, Sequent,
-    InstantiatedRule, OpaqueType, FlatType,
+    Polarity, Side, Sequent,
+    InstantiatedRule,
+)
+from core_ir import (
+    Atom, Bang, OpaqueType, FlatType,
 )
 from dirty_ir import (
     Int32, Int64, Float32, Float64, Bool,
@@ -133,7 +136,7 @@ def test_if_bool_basic():
         rule=rule,
         tops=(then_top, else_top),
         key_slots_tops=((), ()),
-        bottom=bottom,
+        bottom=bottom, # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -193,7 +196,7 @@ def test_absorption_pos():
         rule=Absorption(POS),
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom,
+        bottom=bottom, # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -205,7 +208,7 @@ def test_absorption_wrong_slots():
         rule=Absorption(POS),
         tops=(top,),
         key_slots_tops=((0,),),   # only one slot instead of two
-        bottom=bottom,
+        bottom=bottom, # type: ignore
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
@@ -220,7 +223,7 @@ def test_multiplexing_pos_count2():
         rule=Multiplexing(POS, count=2),
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom,
+        bottom=bottom, # type: ignore
         key_slots_bottom=(0,),
     )
     ir.validate()
@@ -232,7 +235,7 @@ def test_multiplexing_count_mismatch():
         rule=Multiplexing(POS, count=3),  # says 3 but only 2 key slots
         tops=(top,),
         key_slots_tops=((0, 1),),
-        bottom=bottom,
+        bottom=bottom, # type: ignore
         key_slots_bottom=(0,),
     )
     with pytest.raises(AssertionError):
