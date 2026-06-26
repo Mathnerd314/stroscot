@@ -13,13 +13,22 @@ from core_ir import AdmissibleRule, OpaqueType, FlatType, FlatOperation, Box
 
 # ── Pre-defined primitive types ───────────────────────────────────────────────
 
+Bool    = FlatType(label_type=bool,  name="Bool",    polarity=Polarity.POS) # I1/U1 in Valgrind, treated as an opaque type in the IR for uniformity
+Int8   = FlatType(label_type=int,   name="Int8",   polarity=Polarity.POS)
+Int16   = FlatType(label_type=int,   name="Int16",   polarity=Polarity.POS)
 Int32   = FlatType(label_type=int,   name="Int32",   polarity=Polarity.POS)
 Int64   = FlatType(label_type=int,   name="Int64",   polarity=Polarity.POS)
+Int128   = FlatType(label_type=int,   name="Int128",   polarity=Polarity.POS)
+Float16 = FlatType(label_type=float, name="Float16", polarity=Polarity.POS)
 Float32 = FlatType(label_type=float, name="Float32", polarity=Polarity.POS)
 Float64 = FlatType(label_type=float, name="Float64", polarity=Polarity.POS)
-# Bool is treated as opaque for uniformity; an explicit pass converts it to a
-# two-case JumboFormula when Break is needed.
-Bool    = FlatType(label_type=bool,  name="Bool",    polarity=Polarity.POS)
+Float128 = FlatType(label_type=float, name="Float128", polarity=Polarity.POS)
+Int16   = FlatType(label_type=int,   name="Int16",   polarity=Polarity.POS)
+Int32   = FlatType(label_type=int,   name="Int32",   polarity=Polarity.POS)
+Int64   = FlatType(label_type=int,   name="Int64",   polarity=Polarity.POS)
+Vec128 = FlatType(label_type=bytes, name="Vec128", polarity=Polarity.POS) # 128-bit vector type, represented as bytes
+Vec256 = FlatType(label_type=bytes, name="Vec256", polarity=Polarity.POS) # 256-bit vector type, represented as bytes
+Ptr = FlatType(label_type=int,   name="Ptr",     polarity=Polarity.POS) # Opaque pointer type, represented as an integer address
 
 # ── Typed flat operations ─────────────────────────────────────────────────────
 # Admissible by pure case analysis: Break each arg, then Build the result.
