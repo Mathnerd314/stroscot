@@ -23,7 +23,7 @@ The callee, the arguments, and the return value are all baked into a single opco
 ```
 
 - **Producer**: the function value `f`.
-- **Consumer / context**: values `a1`, `a2` to feed as arguments, and a continuation `r` to hand back the result to."
+- **Consumer / context**: values `a1`, `a2` to feed as arguments, and a continuation `r` to hand back the result to.
 
 **Cut is the name for the composition point where a producer and a matching consumer are plugged together.** It is not a new opcode — it is more fundamental. It is what happens whenever one piece of IR's output feeds another piece's input.
 
