@@ -17,13 +17,13 @@ In a conventional IR, a function call is one asymmetric node:
 The callee, the arguments, and the return value are all baked into a single opcode. The sequent-calculus view *decomposes* this into two independent halves that are then plugged together:
 
 ```
-   CALL f -----------------\
-                            >== CUT ==> r
-   call-context(a1,a2,-) --/
+   FUN f --------------------\
+                              >== CUT
+   call-context(a1,a2,-,r) --/
 ```
 
 - **Producer**: the function value `f`.
-- **Consumer / context**: "given a function, feed it `a1`, `a2`, then hand back the result `r`."
+- **Consumer / context**: values `a1`, `a2` to feed as arguments, and a continuation `r` to hand back the result to."
 
 **Cut is the name for the composition point where a producer and a matching consumer are plugged together.** It is not a new opcode — it is more fundamental. It is what happens whenever one piece of IR's output feeds another piece's input.
 
