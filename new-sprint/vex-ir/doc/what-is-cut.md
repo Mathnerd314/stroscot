@@ -17,7 +17,7 @@ In a conventional IR, a function call is one asymmetric node:
 The callee, the arguments, and the return value are all baked into a single opcode. The sequent-calculus view *decomposes* this into two independent halves that are then plugged together:
 
 ```
-   f ----------------------\
+   CALL f -----------------\
                             >== CUT ==> r
    call-context(a1,a2,-) --/
 ```
