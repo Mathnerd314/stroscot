@@ -38,7 +38,7 @@ It is tempting to read this producer/consumer split as "data vs. control flow," 
 | CFG control edge             | reachability — did execution get here at all?         |
 | Cut                          | composition — this producer's output *is* this consumer's input |
 
-In this IR, reachability is already implied by linearity: if a value exists on a wire, its producer necessarily ran. There is no separate reachability token. So "cut" should be read as **typed composition**, not as a rebranding of control flow.
+In this IR, reachability is already implied by linearity: if a value exists on a wire, its producer necessarily ran. There is no separate reachability token. (That's why `discard`/`drop` is necessary) So "cut" should be read as **typed composition**, not as a rebranding of control flow.
 
 ---
 
@@ -72,26 +72,30 @@ This is why optimizations are organized *around cuts* rather than around every n
 
   ```haskell
   DirtyCall :: FnPtr -> [Arg] -> (Result -> Program) -> Program
+  v = DirtyCall fn args k
   ```
 
 - As an IR rule, it is a normal opcode with fixed input slots (`fn`, args, callback `k`) and one output slot (`Program`). It builds a value; it does not execute anything. Execution only happens later, when some external runtime interpreter pattern-matches on the resulting `Program` value.
 
-- Inside the IR, `Program` values flow **upward only** — they are built, not destructed. So a `DirtyCall` node does not normally sit at a live cut the way a pure `add`-then-`use` redex does. It is effectful *data*: a piece of the effect tree describing "what to do," not a computation the optimizer is expected to reduce away.
+- Inside the IR, `Program` values flow **upward only** — they are built, not destructed. So a `DirtyCall` node does not normally sit at a live cut the way a pure `add`-then-`use` redex does. It is *data representing an effect*: a piece of the effect tree describing "what to do," not a computation the optimizer is expected to reduce away.
 
 **In one line:**
 
 > `DirtyCall` is static: a data constructor describing an effectful action.
-> `Cut` is dynamic: the composition point where computation actually reduces. They are different categories, not competing ways to spell "function call."
+> `Cut` is dynamic but pure: the composition point where computation actually reduces.
+
+They are different categories, not competing ways to spell "function call."
 
 ---
 
 ## 5. Why you would not want a "pure call" shaped like `DirtyCall`
 
-If pure function application were encoded the same opaque way as
-`DirtyCall` — as a single black-box constructor swallowing its callee and continuation — the optimizer would lose the producer/consumer boundary that cut elimination depends on. Pure computation benefits from being exposed as an ordinary cut (so it can be normalized, inlined, fused); effectful operations benefit from being explicit, non-reducible data (so their ordering and observability stay intact). Collapsing the two into one opaque shape sacrifices whichever property mattered for that case.
+If pure function application were encoded the same opaque way as `DirtyCall` — as a single black-box constructor swallowing its callee and continuation — the optimizer would lose the producer/consumer boundary that cut elimination depends on. Pure computation benefits from being exposed as an ordinary cut (so it can be normalized, inlined, fused); effectful operations benefit from being explicit, non-reducible data (so their ordering and observability stay intact). Collapsing the two into one opaque shape sacrifices whichever property mattered for that case.
 
 ---
 
 ## 6. The one-paragraph version, if you only get one shot
 
-> "A cut is not an opcode — it's the point where one piece of code's output plugs into another piece's input, the way a `let`-bound value feeds into its use. The rest of the IR — nodes, wires, opcodes — is just the static shape of the program. Cut is where that shape becomes *reducible*: wherever a construct and its matching destruct meet, the optimizer can simplify. `DirtyCall` isn't a cut; it's a plain data constructor describing an effect, built once and left alone until an interpreter runs it. Cut is for computation you want to normalize away; explicit `Program` constructors like `DirtyCall` are for effects you want to keep visible and ordered."
+* Cut is not an opcode — it's the point where one piece of code's output plugs into another piece's input, the way a `let`-bound value feeds into its use.
+* The rest of the IR — nodes, wires, opcodes — is just the static shape of the program. Cut is where that shape becomes *reducible*: wherever a construct and its matching destruct meet, the optimizer can simplify.
+* `DirtyCall` isn't a cut; it's a plain data constructor describing an effect, built once and left alone until an interpreter runs it. Cut is for computation you want to normalize away; explicit `Program` constructors like `DirtyCall` are for effects you want to keep visible and ordered."
