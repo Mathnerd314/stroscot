@@ -1,4 +1,7 @@
-notes:
+ok, so this is the next-in-progress goal: "implement lifter from machine code (x86) to IR - use pyvex library"
+and so implementing this requires two things, it requires using the pyvex lifter, which you have to install and setup and kind of understand what it is doing. And then it also requires understanding my Stroscot IR, and how the VEX IR is encoded in it
+
+so notes:
 
 - the VEX types and how I want them represented in the IR are documented in new-sprint/vex-ir/vex-primops/vex-ir-summary.md
     - there is a JSON file in vex-primops/vex-ops-description.json extracted directly from the C VEX IR files, this may be more useful than trying to figure out PyVex APIs for dealing with the IrOp type
