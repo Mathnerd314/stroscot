@@ -10,7 +10,7 @@ Thank you for your interest in this project. Compilers can be intimidating, and 
 
 ## Finding a Task
 
-1. Go to the [Project Board](https://github.com/Mathnerd314/stroscot/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22ready%20for%20work%22) and look for issues tagged `ready for work` and also `good first issue` or `help wanted`.
+1. Go to the [Ready for Work](https://github.com/Mathnerd314/stroscot/issues/views/3287) view and look for issues tagged `ready for work` and also `good first issue` or `help wanted`.
 2. The compiler is structured as a network of self-contained, "black box" components that use specific algorithms and data structures to solve problems (e.g. "restructure the IR using DFA minimization" or "calculate this dataflow analysis"). Implementing the component itself typically doesn't require understanding the whole compiler - however, integrating it into the compiler does. You can do just the component or also integrate it into the compiler, it's up to you.
 3. Comment on the issue to claim it before starting, so we don't duplicate work.
 
