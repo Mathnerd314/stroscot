@@ -360,3 +360,88 @@ class Multiplexing(AdmissibleRule):
         prem_others = array_minus_key_slots(premise.formulas, instance.key_slots_premises[0])
         conc_others = array_minus_key_slots(instance.conclusion.formulas, instance.key_slots_conclusion)
         assert conc_others == prem_others
+
+
+
+@dataclass(frozen=True)
+class BareMultiplexing(AdmissibleRule):
+    """Admissible contraction for a cartesian or co-cartesian formula.
+
+      A, A |- Gamma
+    ----------------
+      A |- Gamma
+
+    The rule is intentionally separate from dirty_ir.Multiplexing: that rule
+    contracts !+ A, whereas this one contracts A directly when A is
+    cartesian.
+    """
+
+    principal: Formula
+    count: int = 2
+
+    def __post_init__(self) -> None:
+        if self.count < 2:
+            raise ValueError("BareMultiplexing requires at least two copies")
+        if not self.principal.is_cartesian() or self.principal.is_cocartesian():
+            raise TypeError(f"BareMultiplexing requires a cartesian formula: {self.principal}")
+
+    def check_shape(self, instance: InstantiatedRule[Side]) -> None:
+        assert len(instance.premises) == 1
+        assert len(instance.key_slots_premises) == 1
+        assert len(instance.key_slots_premises[0]) == self.count
+        assert len(instance.key_slots_conclusion) == 1
+
+        premise = instance.premises[0]
+        conclusion = instance.conclusion
+        key_premise_slots = instance.key_slots_premises[0]
+        key_conclusion_slot = instance.key_slots_conclusion[0]
+        conclusion_side = instance.conclusion.formulas[key_conclusion_slot]
+
+        if conclusion_side == Side.LEFT:
+            assert self.principal.is_cartesian(), (
+                f"Principal formula in bottom of BareMultiplexing must be cartesian, found {self.principal}"
+            )
+        else:
+            assert self.principal.is_cocartesian(), (
+                f"Principal formula in bottom of BareMultiplexing must be co-cartesian, found {self.principal}"
+            )
+
+        for slot in key_premise_slots:
+            assert premise.formulas[slot] == conclusion_side, (
+                f"Principal formula in top of BareMultiplexing must be on side {conclusion_side}, found {premise.formulas[slot]}"
+            )
+
+        assert array_minus_key_slots(
+            premise.formulas,
+            key_premise_slots,
+        ) == array_minus_key_slots(
+            conclusion.formulas,
+            (key_conclusion_slot,),
+        )
+
+    def check_type(self, instance: InstantiatedRule[SidedFormula]) -> None:
+        assert self.principal.is_cartesian()
+
+        premise = instance.premises[0]
+        conclusion = instance.conclusion
+        key_premise_slots = instance.key_slots_premises[0]
+        key_conclusion_slot = instance.key_slots_conclusion[0]
+
+        conclusion_side, conclusion_f = instance.conclusion.formulas[key_conclusion_slot]
+        assert conclusion_f == self.principal, (
+            f"Principal formula in bottom of BareMultiplexing must equal the rule's principal formula, "
+            f"expected {self.principal}, found {conclusion_f}"
+        )
+        for slot in key_premise_slots:
+            assert premise.formulas[slot][1] == self.principal, (
+                f"Principal formula in top of BareMultiplexing must equal bottom, "
+                f"expected {conclusion_f}, found {premise.formulas[slot][1]}"
+            )
+
+        assert array_minus_key_slots(
+            premise.formulas,
+            key_premise_slots,
+        ) == array_minus_key_slots(
+            conclusion.formulas,
+            (key_conclusion_slot,),
+        )

@@ -688,7 +688,7 @@ For practical purposes this is basically the same as `upper`. With the call chai
 
 Even nontermination. But here it is still arguable that nontermination shouldn't be a common exception because most pure functions terminate and knowing that a function doesn't return is useful. With `upper` the problem is resolved definitively because there are no implicitly allowed exceptions.
 
-Java only allows defining synonyms with superclasses, which isn't really composable if you have different libraries. [This post](https://borretti.me/article/why-checked-exceptions-failed) says that's why Java's checked exceptions failed. But
+Java only allows defining synonyms with superclasses, which isn't really composable if you have different libraries. [This post](https://borretti.me/article/why-checked-exceptions-failed) says that's why Java's checked exceptions failed. But set union and difference are quite useful and mean that the program can adapt to exception behavior without advance planning.
 
 A reduction in the cost of checked exceptions is to use a single "throws" keyword that allows all checked exceptions (similar to "throws Exception" in Java). The pain of versioning is reduced: either a function fails or it doesn't. The failure code is often irrelevant to handling. Swift, Midori approach. I like the synonym style of `upper` better, and using `|Exception` with `upper` to mimic this style is an option.
 

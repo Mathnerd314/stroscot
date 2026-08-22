@@ -376,7 +376,7 @@ if _︴ⁿ𝓪𝑚𝕖__ == "__main__":
   𝒉eℓˡ𝗈()
 ```
 
-If we required the input to be in NFKC it would have to look like:
+If we hard-required the input to be in NFKC normalized form it would have to look like:
 
 ```python
 def hello():
@@ -422,7 +422,7 @@ if __name__ == "__main__":
     𝚑𝓮𝖑𝒍𝑜()
 ```
 
-Python's version where the variables do not have to be visually identical is really confusing. The NFKC input is too restrictive. IMO the NFC wins on both readability and flexibility.
+Python's version where the variables do not have to be visually identical is really confusing. The NFKC normalized input seems too restrictive. IMO the NFC wins on both readability and flexibility.
 
 In the Unicode TRs, NFKC usually is used in conjunction with case folding. In particular, the Unicode standard 3.13 R5 defines the mapping toNFKC_Casefold which case folds, normalizes, and removes default ignorable code points, and this operation is recommended for matching identifiers case-insensitively. Similarly [TR36](https://www.unicode.org/reports/tr36/#Recommendations_General) recommends processing identifiers by applying NFKC_Casefold. So NFKC doesn't make a lot of sense since Stroscot is case-sensitive. Many have [suggested](https://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJhttps://groups.google.com/g/dev-python/c/LkCtik9LyyE/m/ki8XN66iAQAJ) that Python made the wrong choice when it picked NFKC because Python is case-sensitive.
 
@@ -1921,7 +1921,7 @@ Steelman 6E. There shall be an iterative control structure. The iterative contro
 
 Steelman 6G. There shall be a mechanism for control transfer (i.e., the go to). It shall not be possible to transfer out of closed scopes, into narrower scopes, or into control structures. It shall be possible to transfer out of classical control structures. There shall be no control transfer mechanisms in the form of switches, designational expressions, label variables, label parameters, or alter statements.
 
-[Core](https://github.com/core-lang/core/issues/44) proposes to drop break and continue due to implementation complexity and mental complexity. He argues that it is clearer to use an extra boolean variable and only slightly clunkier. Per the [structured program theorem](https://en.wikipedia.org/wiki/Structured_program_theorem#Implications_and_refinements) it is possible to compute any computable function with three control structures, semicolon, if, and while (and no break/continue). There are drawbacks in that the theorem usually must introduce additional local variables and duplicate code. For example consider [this program](https://ecommons.cornell.edu/bitstream/handle/1813/34898/bbang.pdf?sequence=2):
+[Core](https://github.com/core-lang/core/issues/44) proposes to drop break and continue due to implementation complexity and mental complexity. He argues that it is clearer to use an extra boolean variable and only slightly clunkier. Per the [structured program theorem](htztps://en.wikipedia.org/wiki/Structured_program_theorem#Implications_and_refinements) it is possible to compute any computable function with three control structures, semicolon, if, and while (and no break/continue). There are drawbacks in that the theorem usually must introduce additional local variables and duplicate code. For example consider [this program](https://ecommons.cornell.edu/bitstream/handle/1813/34898/bbang.pdf?sequence=2):
 
 ```
 start = state0
@@ -1988,7 +1988,7 @@ Per [this Rust blog post](https://blog.rust-lang.org/2017/03/02/lang-ergonomics.
 
 So what is important is ensuring that the necessary contextual knowledge is easy to find. This can include documentation, but more specifically it means a chain of misbehavior is easy to track down to its source.
 
-In the absence of any cues, a programmer might naturally assume that nothing interesting is going on in a piece of code. But maybe this code is very important - then the programmer will want to annotate the code, making it more verbose and noisy even though it is not necessary. A comment would suffice, but apparently programmers don't read comments, because comments aren't checked by the compiler and are often out-of-date. So what we want is syntactic control - the author can insert details of the code's execution, to explaibn how the code works in the context of the system. More formally we want properties as follows:
+In the absence of any cues, a programmer might naturally assume that nothing interesting is going on in a piece of code. But maybe this code is very important - then the programmer will want to annotate the code, making it more verbose and noisy even though it is not necessary. A comment would suffice, but apparently programmers don't read comments, because comments aren't checked by the compiler and are often out-of-date. So what we want is syntactic control - the author can insert details of the code's execution, to explain how the code works in the context of the system. More formally we want properties as follows:
 
 - All information can be elided, without any heads-up that this is happening
 - The elided information can radically change program behavior

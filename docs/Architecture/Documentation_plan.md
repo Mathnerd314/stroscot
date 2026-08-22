@@ -41,7 +41,7 @@ Rationale: The language's syntax is the most fundamental aspect. Clear definitio
 
 High-Level Compiler Architecture (Corresponds to your Category 1 - Partial)
 
-- [ ] Action 2.1: Write the High-Level Design Overview. Create a block diagram showing the main compiler components (e.g., lexer, parser, semantic analyzer, optimizer, code generator). Briefly explain the responsibility of each and how they interact.
+- [x] Action 2.1: Write the High-Level Design Overview. Create a block diagram showing the main compiler components (e.g., lexer, parser, semantic analyzer, optimizer, code generator). Briefly explain the responsibility of each and how they interact.
     * Note Integration: Any existing architectural sketches or high-level design thoughts.
 - [ ] Action 2.2: Draft the Compiler Pipeline Description. Detail the sequence of stages the code goes through during compilation.
     * Note Integration: Notes on the overall compilation flow or passes.

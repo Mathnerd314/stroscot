@@ -430,7 +430,7 @@ It's better to make the async behavior automatic. Zig has done this but has [ton
 
 ### Futures
 
-According to [Erik Meijer](https://www.youtube.com/watch?v=QNpKYypLAO8) (38:16), futures are kind of like comonads. A comonad has three operations: fmap, extract, and duplicate. Fmap make sense for a future, you can apply a function on the result. Duplicate is a little pointless but also possible, you can make a future that returns a future. There is the question of why not just the monadic `return` but it sort of makes sense, a future is delayed whereas a value is not. Finally you can `extract` the value from a future. This one is really pushing it though because the extract operation blocks, and can throw a deadlock exception, so it's not pure. We have to model extract more carefully as `Future a -> M a` for some monad. {cite}`uustaluComonadicNotionsComputation2008` called this kind of comonad-monad function a "BiKleisli category", i.e. the category `BiKlesli Future M a b = Future a -> M b`. So rather than the comonad structure, we just have the identity and composition operations of the category, and arrow stuff. So really we aren't talking about comonads at all but rather arrows.
+According to [Erik Meijer](https://www.youtube.com/watch?v=QNpKYypLAO8) (38:16), futures are kind of like comonads. A comonad has three operations: fmap, extract, and duplicate. Fmap make sense for a future, you can apply a function on the result. Duplicate is a little pointless but also possible, you can make a future that returns a future. There is the question of why not just the monadic `return` but it sort of makes sense, a future is delayed whereas a value is not. Finally you can `extract` the value from a future. This one is really pushing it though because the extract operation blocks, and can throw a deadlock exception, so it's not pure. We have to model extract more carefully as `Future a -> M a` for some monad. {cite}`uustaluComonadicNotionsComputation2008` called this kind of comonad-monad function a "BiKleisli category", i.e. the category `BiKliesli Future M a b = Future a -> M b`. So rather than the comonad structure, we just have the identity and composition operations of the category, and arrow stuff. So really we aren't talking about comonads at all but rather arrows.
 
 (tasks)=
 
@@ -530,9 +530,9 @@ In Stroscot there are shared non-global states (stores), and a non-shared global
 At present, destructive update is required to implement some algorithms efficiently. In particular consider some languages:
 
 1. PURE: a "pure" CBV Lisp using a small set of primitive Lisp operations, `ATOM EQ READ WRITE CONS CAR CDR` assumed to be of constant cost, and "flow-chart style" control flow, assumed free
-2. IMPURE: the Lisp extended with destructive mutation operators `RPLACA RPLACD` also of constant cost
+2. CYCLE: PURE but with an operation to construct cyclic data structures, CYCLE
 3. HASK: a Haskell with lambdas, case, tuples, and lists
-4. CYCLE: PURE but with an operation to construct cyclic data structures, CYCLE
+4. IMPURE: the Lisp extended with destructive mutation operators `RPLACA RPLACD` also of constant cost
 
 It has been established that PURE ⊆ CYCLE ⊊ HASK ⊆ IMPURE as far as expressing efficient online programs:
 
@@ -594,7 +594,7 @@ Automatic destructive update may or may not work on this example depending on ho
 
 ## Store
 
-We can formalize traditional imperative programming with mutable variables using the notion of a store. A store is a first-class value representing a subset of computer memory. It is basically a map from identifiers to values, a little "bundle of state", but it's more complicated than just a hash table to as to support implicit concurrency in expressions. In particular a store is a per-variable ordered list of reads and writes so that read-write and write-write conflicts may be detected.
+We can formalize traditional imperative programming with mutable variables using the notion of a store. A store is a first-class value representing a subset of computer memory. It is basically a map from identifiers to values, a little "bundle of state", but it's more complicated than just a hash table so as to support implicit concurrency in expressions. In particular a store is a per-variable ordered list of reads and writes so that read-write and write-write conflicts may be detected.
 
 A function that uses the store is a value of the State monad, `s -> (s, a)`, where `s = Store`. For example an assignment statement `a := f b + g c` translates to
 

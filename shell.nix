@@ -15,6 +15,7 @@ let
       pylint
       setuptools
       pip
+      z3-solver
     ];
 
   python3WithPkgs = pkgs.python3.override {

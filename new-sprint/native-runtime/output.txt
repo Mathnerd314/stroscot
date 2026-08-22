@@ -1,0 +1,52 @@
+=== Calling convention summary ===
+CallingConvention: puts_sysv_amd64
+Location Effects:
+  RDI : DEP_CLOBBERED
+  RAX : INDEP_CLOBBERED
+  AL : DEP_PRESERVED
+  DF : DEP_PRESERVED
+  RCX : INDEP_CLOBBERED
+  RDX : INDEP_CLOBBERED
+  RSI : INDEP_CLOBBERED
+  R8 : INDEP_CLOBBERED
+  R9 : INDEP_CLOBBERED
+  R10 : INDEP_CLOBBERED
+  R11 : INDEP_CLOBBERED
+  RBX : DEP_PRESERVED
+  RBP : DEP_PRESERVED
+  R12 : DEP_PRESERVED
+  R13 : DEP_PRESERVED
+  R14 : DEP_PRESERVED
+  R15 : DEP_PRESERVED
+  RSP : DEP_CLOBBERED
+Slots:
+  [ARGUMENT] index=0, locations=[RDI], name=s
+  [CONVENTION] index=0, locations=[AL], name=variadic_al
+  [CONVENTION] index=1, locations=[DF], name=direction_flag
+  [RETURN] index=0, locations=[RAX], name=retval
+  [SCRATCH] index=0, locations=[RCX], name=scratch_RCX
+  [SCRATCH] index=1, locations=[RDX], name=scratch_RDX
+  [SCRATCH] index=2, locations=[RSI], name=scratch_RSI
+  [SCRATCH] index=3, locations=[R8], name=scratch_R8
+  [SCRATCH] index=4, locations=[R9], name=scratch_R9
+  [SCRATCH] index=5, locations=[R10], name=scratch_R10
+  [SCRATCH] index=6, locations=[R11], name=scratch_R11
+Stack Delta: SP location=RSP, fixed_delta=0
+Red Zone: size=128
+CFA: register=RSP, expression=None
+Hardware Control Flow Constraints: has_ibt_endbr=False
+Frame Transfer: enabled=False, tail_callee_id=None
+
+=== Trampoline disassembly ===
+  0000  push rbp
+  0001  mov rbp,rsp
+  0004  mov rdi,7F738903B520h
+  000e  xor eax,eax
+  0010  cld
+  0011  mov r11,7F7389C88D70h
+  001b  call r11
+  001e  mov rsp,rbp
+  0021  pop rbp
+  0022  ret
+
+=== puts output ===
