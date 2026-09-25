@@ -1,0 +1,281 @@
+.
+├── Architecture
+│   ├── Compiler_documentation.md
+│   ├── CompilerOverview.md
+│   ├── CompilerPhases
+│   │   ├── Code-Generation.md
+│   │   └── CompilerOutput.md
+│   ├── Components
+│   │   ├── errors
+│   │   │   ├── ambiguous-identifier-fixed.txt
+│   │   │   ├── ambiguous-identifier-message.md
+│   │   │   ├── ambiguous-identifier.txt
+│   │   │   ├── automatic-propagation-fixed.txt
+│   │   │   ├── automatic-propagation-message.md
+│   │   │   ├── automatic-propagation.txt
+│   │   │   ├── bad-indentation-fixed.txt
+│   │   │   ├── bad-indentation-message.md
+│   │   │   ├── bad-indentation.txt
+│   │   │   ├── block-shadowing-fixed.txt
+│   │   │   ├── block-shadowing-message.md
+│   │   │   ├── block-shadowing.txt
+│   │   │   ├── confusable-fixed.txt
+│   │   │   ├── confusable-message.md
+│   │   │   ├── confusable.txt
+│   │   │   ├── default-arguments-fixed.txt
+│   │   │   ├── default-arguments-message.md
+│   │   │   ├── default-arguments.txt
+│   │   │   ├── depr-default-argument-fixed.txt
+│   │   │   ├── depr-default-argument-message.md
+│   │   │   ├── depr-default-argument.txt
+│   │   │   ├── equal-prio-fixed.txt
+│   │   │   ├── equal-prio-message.md
+│   │   │   ├── equal-prio.txt
+│   │   │   ├── failed-assert-fixed.txt
+│   │   │   ├── failed-assert-message.md
+│   │   │   ├── failed-assert.txt
+│   │   │   ├── implicit-argument-not-passed-fixed.txt
+│   │   │   ├── implicit-argument-not-passed-message.md
+│   │   │   ├── implicit-argument-not-passed.txt
+│   │   │   ├── inapplicable-type-fixed.txt
+│   │   │   ├── inapplicable-type-message.md
+│   │   │   ├── inapplicable-type.txt
+│   │   │   ├── invalid-utf8-fixed.txt
+│   │   │   ├── invalid-utf8-message.md
+│   │   │   ├── invalid-utf8.txt
+│   │   │   ├── map-noncollection-fixed.txt
+│   │   │   ├── map-noncollection-message.md
+│   │   │   ├── map-noncollection.txt
+│   │   │   ├── meaningless-fixed.txt
+│   │   │   ├── meaningless-message.md
+│   │   │   ├── meaningless.txt
+│   │   │   ├── missing-override-fixed.txt
+│   │   │   ├── missing-override-message.md
+│   │   │   ├── missing-override.txt
+│   │   │   ├── nested-shadow-fixed.txt
+│   │   │   ├── nested-shadow-message.md
+│   │   │   ├── nested-shadow.txt
+│   │   │   ├── no-fixed-point-fixed.txt
+│   │   │   ├── no-fixed-point-message.md
+│   │   │   ├── no-fixed-point.txt
+│   │   │   ├── nondet-concurrency-fixed.txt
+│   │   │   ├── nondet-concurrency-message.md
+│   │   │   ├── nondet-concurrency.txt
+│   │   │   ├── nondet-exception-fixed.txt
+│   │   │   ├── nondet-exception-message.md
+│   │   │   ├── nondet-exception.txt
+│   │   │   ├── nondet-toplevel-fixed.txt
+│   │   │   ├── nondet-toplevel-message.md
+│   │   │   ├── nondet-toplevel.txt
+│   │   │   ├── nonfunction-fixed.txt
+│   │   │   ├── nonfunction-message.md
+│   │   │   ├── nonfunction.txt
+│   │   │   ├── non-nfc-fixed.txt
+│   │   │   ├── non-nfc-message.md
+│   │   │   ├── non-nfc.txt
+│   │   │   ├── syntactic-variadic-fixed.txt
+│   │   │   ├── syntactic-variadic-message.md
+│   │   │   ├── syntactic-variadic.txt
+│   │   │   ├── too-many-arguments-fixed.txt
+│   │   │   ├── too-many-arguments-message.md
+│   │   │   ├── too-many-arguments.txt
+│   │   │   ├── typos-fixed.txt
+│   │   │   ├── typos-message.md
+│   │   │   ├── typos.txt
+│   │   │   ├── unhandled-exn-fixed.txt
+│   │   │   ├── unhandled-exn-message.md
+│   │   │   ├── unhandled-exn.txt
+│   │   │   ├── unreachable-case-fixed.txt
+│   │   │   ├── unreachable-case-message.md
+│   │   │   ├── unreachable-case.txt
+│   │   │   ├── unreducible-expr-fixed.txt
+│   │   │   ├── unreducible-expr-message.md
+│   │   │   ├── unreducible-expr.txt
+│   │   │   ├── unused-argument-fixed.txt
+│   │   │   ├── unused-argument-message.md
+│   │   │   ├── unused-argument.txt
+│   │   │   ├── unused-import-fixed.txt
+│   │   │   ├── unused-import-message.md
+│   │   │   ├── unused-import.txt
+│   │   │   ├── unused-result-fixed.txt
+│   │   │   ├── unused-result-message.md
+│   │   │   ├── unused-result.txt
+│   │   │   ├── unused-variable-fixed.txt
+│   │   │   ├── unused-variable-message.md
+│   │   │   └── unused-variable.txt
+│   │   └── Errors.md
+│   ├── DecisionLog
+│   │   └── template.md
+│   ├── Documentation_needed.md
+│   ├── Documentation_plan.md
+│   ├── Errors.md
+│   ├── Glossary.md
+│   ├── hott_notes.md
+│   ├── Implementation.md
+│   ├── IR
+│   │   ├── CoreSyntax.md
+│   │   ├── Overview.md
+│   │   └── Passes
+│   │       ├── Reduction-Example.md
+│   │       └── Reduction.md
+│   ├── Memory.md
+│   ├── Parsing.md
+│   ├── Performance
+│   │   ├── JIT.md
+│   │   └── Profiling.md
+│   ├── PhasePlan.md
+│   ├── plan.txt
+│   ├── production-fexpr-arch.md
+│   ├── Project Structure.md
+│   ├── README.md
+│   ├── references_source_architecture.md
+│   ├── smt_in_ir.md
+│   ├── sources.md
+│   ├── sv.md
+│   ├── testing_notes.md
+│   ├── Tools
+│   │   ├── Profiler.md
+│   │   └── Tools.md
+│   ├── unified-fexpr-analysis.md
+│   └── Verification.md
+├── images
+│   ├── AND_net_expr.svg
+│   ├── AND_net_r_expr.svg
+│   ├── AND_net_r.svg
+│   ├── AND_net.svg
+│   ├── hexagon.svg
+│   ├── matrix-multiply.svg
+│   ├── Method-combination.svg
+│   ├── old_favicon.svg
+│   ├── Stroscot_AND_Proof_Tree.svg
+│   ├── Stroscot_F2G2_Proof_Tree.svg
+│   └── Stroscot_M_Proof_Tree.svg
+├── index.md
+├── INDEX.md
+├── LanguageSemantics
+│   ├── AdvancedFeatures
+│   │   ├── Aspects.md
+│   │   ├── Assembly.md
+│   │   ├── Concurrency.md
+│   │   ├── # Core Concepts of Stroscot Programming 2.md
+│   │   ├── # Core Concepts of Stroscot Programming .md
+│   │   ├── Destructors.md
+│   │   ├── Dispatch.md
+│   │   ├── DynamicOverriding.md
+│   │   ├── Evaluation-Strategy.md
+│   │   ├── Exceptions.md
+│   │   ├── Expressions.md
+│   │   ├── Fastest.md
+│   │   ├── FunctionalLogic.md
+│   │   ├── Logic.md
+│   │   ├── LogicProgramming.md
+│   │   ├── Macros.md
+│   │   ├── Memory.md
+│   │   ├── Modules.md
+│   │   ├── Objects.md
+│   │   ├── OpPrims.md
+│   │   ├── - Pillar Improper Access Control.md
+│   │   ├── Posets.md
+│   │   ├── Resource-Management.md
+│   │   ├── Security.md
+│   │   ├── Sequent-Calculus-Set-Theory.md
+│   │   ├── Sets.md
+│   │   ├── State.md
+│   │   ├── # Stroscot: A Condensed Analysis of an A.md
+│   │   ├── Syntax.md
+│   │   ├── TermRewriting.md
+│   │   ├── Transactions.md
+│   │   ├── Types.md
+│   │   ├── Values.md
+│   │   └── Verification.md
+│   ├── CoreConcepts
+│   ├── notes.md
+│   ├── README.md
+│   ├── References
+│   │   └── Syntax
+│   │       ├── AbstractSyntax.md
+│   │       ├── AbstractSyntaxProse.md
+│   │       ├── EBNF Grammar 2.txt
+│   │       ├── EBNF Grammar 3.txt
+│   │       ├── EBNF Grammar .txt
+│   │       ├── GrammarGuidelines.md
+│   │       ├── Lexical.md
+│   │       ├── Lexical Token Definition.md
+│   │       ├── node_types.txt
+│   │       ├── symbols.md
+│   │       └── Syntax.md
+│   └── StandardLibrary
+│       ├── BuildSystem-2.md
+│       ├── BuildSystem.md
+│       ├── BuildSystemTricks.md
+│       ├── Compiler-Library.md
+│       ├── Library.md
+│       ├── PackageManager.md
+│       ├── Programs.md
+│       ├── Standard-Library.md
+│       ├── Symbolic.md
+│       ├── Time.md
+│       └── Units.md
+├── myst.yml
+├── out.txt
+├── ProjectMeta
+│   ├── Code-of-conduct-Commentary.md
+│   ├── Code-of-conduct.md
+│   ├── Community.md
+│   ├── Documentation
+│   │   ├── Documentation-Classification-Guide.md
+│   │   ├── Documentation.md
+│   │   └── Documentation-Organization.md
+│   ├── FrontPage.md
+│   ├── Funding.md
+│   ├── Guidelines-locbylanguage.csv
+│   ├── Guidelines.md
+│   ├── Learning.md
+│   ├── Meta.md
+│   ├── OtherPL.md
+│   └── README.md
+├── references.bib
+├── requirements.txt
+├── _static
+│   ├── AND_net.dot
+│   ├── AND_net_expr.dot
+│   ├── AND_net_expr.tex
+│   ├── AND_net_r.dot
+│   ├── AND_net_r_expr.dot
+│   ├── AND_net_r_expr.tex
+│   ├── AND_net_r.tex
+│   ├── AND_net_template.tex
+│   ├── AND_net.tex
+│   ├── core_paradigms2.png
+│   ├── core_paradigms.dot
+│   ├── core_paradigms.png
+│   ├── custom.css
+│   ├── finalizer.dot
+│   ├── finalizer.png
+│   ├── hexagon_favicon.png
+│   ├── hexagon_logo_nowords.png
+│   ├── hexagon_logo.png
+│   ├── matrix-multiply.dot
+│   ├── Method-combination.png
+│   ├── old_favicon_big.png
+│   ├── old_favicon.png
+│   ├── paradigms_all.dot
+│   ├── paradigms_all.png
+│   ├── Stroscot_AND_Proof_Tree.tex
+│   ├── Stroscot_F2G2_Proof_Tree.tex
+│   └── Stroscot_M_Proof_Tree.tex
+├── structure.txt
+├── _templates
+└── User Documentation
+    ├── Explanations
+    ├── GettingStarted
+    │   └── FAQ.md
+    ├── HowTo
+    │   └── Install.md
+    ├── README.md
+    ├── Reference
+    │   └── StyleGuide.md
+    └── Tutorials
+        └── Introduction.md
+
+27 directories, 252 files

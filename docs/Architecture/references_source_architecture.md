@@ -492,7 +492,7 @@ These support guard insertion, deoptimization points, and stitching optimized fr
 - http://www.lasid.ufba.br/publicacoes/artigos/Estimating+Execution+Time+Probability+Distributions+in+Component-based+Real-Time+Systems.pdf
 - https://arxiv.org/pdf/2006.09864.pdf
 - https://mjsaldanha.com/sci-projects/3-prob-exec-times-1/
--= Zixian Cai, Stephen M Blackburn, Michael D Bond, and Martin Maas. Distilling the real cost of production garbage collectors. *IEEE International Symposium on Performance Analysis of Systems and Software*, pages 12, 2022. URL: <https://users.cecs.anu.edu.au/~steveb/pubs/papers/lbo-ispass-2022.pdf>.
+- Zixian Cai, Stephen M Blackburn, Michael D Bond, and Martin Maas. Distilling the real cost of production garbage collectors. *IEEE International Symposium on Performance Analysis of Systems and Software*, pages 12, 2022. URL: <https://users.cecs.anu.edu.au/~steveb/pubs/papers/lbo-ispass-2022.pdf>.
 
 ***
 
@@ -734,8 +734,6 @@ These inform cost models and multi‑objective optimization engines.
 **3.3.3 Unison‑Style Global Code Generator (Compiler Core) #29**
 
 - https://dl.acm.org/doi/abs/10.1145/143103.143142
-
-
 - Retargetable peephole optimizer; cross‑compilation docs; calling conventions for system calls; ABI specifications (System V, Swift ABI, x86‑64 ABI).
 - Libffi, `rust-bindgen`, `dragonffi`, foreign‑function tooling.
 
@@ -918,6 +916,8 @@ https://blog.codinghorror.com/we-are-typists-first-programmers-second/
 https://www.stroustrup.com/bs_faq2.html#Hungarian
 Andreas Stefik, Susanna Siebert, Melissa Stefik, and Kim Slattery. An empirical comparison of the accuracy rates of novices using the quorum, perl, and randomo programming languages. In *Proceedings of the 3rd ACM SIGPLAN Workshop on Evaluation and Usability of Programming Languages and Tools - PLATEAU '11*, 3. Portland, Oregon, USA, 2011. ACM Press. URL: <http://dl.acm.org/citation.cfm?doid=2089155.2089159> (visited on 2022-06-18), [doi:10.1145/2089155.2089159](https://doi.org/10.1145/2089155.2089159).
 https://en.wikipedia.org/wiki/Syntactic_sugar
+
+# Unsorted
 
 https://github.com/Mathnerd314/atomo/blob/master/prelude/core.atomo
 https://craftofcoding.wordpress.com/2021/02/19/evolution-of-the-assignment-operator/
