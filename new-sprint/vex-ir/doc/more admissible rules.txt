@@ -1,0 +1,12 @@
+oh, there are more admissible rules, in particular there is a multiplexing rule in here. if a type is cartesian then "bare" multiplexing without any bangs involved is admissible, i.e. a rule that looks like this:
+A, A |- ...
+----------
+A |- ...
+this can be derived from contraction in the core rules and that cartesian means A <-> !A but it is easier to make it as a separate node that asserts its type is cartesian. maybe it will have to be added.
+with this you can take a temporary |- Tmp and cut it with a manipulation derivation Tmp |- Program and then that manipulation derivation can use multiplexing to get Tmp, Tmp |- Program and thus use the temporary multiple times in multiple operations. so again this works for cartesian types but this includes all the flat types
+the multiplexing rules should be pushed down as deep in the tree as possible, i.e. duplicate the argument and then immediately use/pass the additional value, but this is a style thing
+but yeah that is how it works, is explicit duplication using a simplified admissible variation of linear logic-style contraction
+
+as far as the basic block, the single premise has many wires coming out of it for the arguments. and then the premise is the first operation node, and that has as a premise the second operation node, and so it is mostly a linear chain. the way effects work is that the final conclusion is |- Program and then each rule has as a premise the next operation, so you are right that ExitU is the deepest node in the derivation tree of each Program type
+
+as far as Put, Store, PutI, and StoreG - these are pure operations that only operate on GuestState, the intention is that you can do several Put operations interleaved with Program operations that don't modify the guest state. and so they are sort of disconnected from the control flow of Program. but maybe I did not make enough Program operations consume the GuestState / Memory operations, you are probably right that the Exit / ExitU operations should consume a GuestState and Memory value, so that these are threaded through somewhat. Like the intention was to have the top level type be |- Program but then it is not clear where the GuestState and Memory values come from.
